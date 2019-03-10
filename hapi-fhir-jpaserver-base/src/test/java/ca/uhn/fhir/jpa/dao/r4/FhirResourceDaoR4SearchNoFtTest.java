@@ -70,6 +70,40 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testHasConditionAgeCompare() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		Quantity onsetAge = new Age();
+		onsetAge.setValue(23);
+		condition.setOnset(onsetAge);
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+		{
+			String criteria = "_has:Condition:subject:onset-age=gt20";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertEquals(1, ids.size());
+			assertThat(ids, hasItems(patientId));
+		}
+		{
+			String criteria = "_has:Condition:subject:onset-age=lt20";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertEquals(0, ids.size());
+		}
+	}
+
+	@Test
 	public void testHasCondition() {
 		Patient patient = new Patient();
 		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
