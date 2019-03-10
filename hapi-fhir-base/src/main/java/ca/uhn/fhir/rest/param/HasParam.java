@@ -34,8 +34,7 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 
 	private static final long serialVersionUID = 1L;
 
-	// FIXME KHS rename this
-	private String myOwningFieldName;
+	private String myReferenceFieldName;
 	private String myParameterName;
 	private String myParameterValue;
 	private String myTargetResourceType;
@@ -45,10 +44,10 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 	}
 
 
-	public HasParam(String theTargetResourceType, String theOwningFieldName, String theParameterName, String theParameterValue) {
+	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
 		this();
 		myTargetResourceType = theTargetResourceType;
-		myOwningFieldName = theOwningFieldName;
+		myReferenceFieldName = theReferenceFieldName;
 		myParameterName = theParameterName;
 		myParameterValue = theParameterValue;
 	}
@@ -76,13 +75,13 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		validateColon(qualifier, colonIndex1);
 		
 		myTargetResourceType = qualifier.substring(1, colonIndex0);
-		myOwningFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
+		myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
 		myParameterName = qualifier.substring(colonIndex1 + 1);
 		myParameterValue = theValue;
 	}
 
-	public String getOwningFieldName() {
-		return myOwningFieldName;
+	public String getReferenceFieldName() {
+		return myReferenceFieldName;
 	}
 
 	public String getParameterName() {

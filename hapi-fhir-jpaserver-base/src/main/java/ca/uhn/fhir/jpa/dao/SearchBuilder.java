@@ -217,7 +217,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
 			String targetResourceType = null;
-			String owningParameter = null;
+			String paramReference = null;
 			String parameterName = null;
 
 			String paramName = null;
@@ -225,7 +225,7 @@ public class SearchBuilder implements ISearchBuilder {
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
 				targetResourceType = next.getTargetResourceType();
-				owningParameter = next.getOwningFieldName();
+				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
 				paramName = parameterName.replaceAll("\\..*", "");
 				parameters.add(QualifiedParamList.singleton(paramName, next.getValueAsQueryToken(myContext)));
@@ -248,9 +248,9 @@ public class SearchBuilder implements ISearchBuilder {
 				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + parameterName);
 			}
 
-			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, owningParameter);
+			owningParameterDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramReference);
 			if (owningParameterDef == null) {
-				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + owningParameter);
+				throw new InvalidRequestException("Unknown parameter name: " + targetResourceType + ':' + paramReference);
 			}
 
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(targetResourceDefinition, paramName);
@@ -266,7 +266,7 @@ public class SearchBuilder implements ISearchBuilder {
 			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues);
 
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
-			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, owningParameter, join);
+			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, paramReference, join);
 			Predicate pidPredicate = join.get("mySourceResourcePid").in(subQ);
 			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
 			myPredicates.add(andPredicate);
