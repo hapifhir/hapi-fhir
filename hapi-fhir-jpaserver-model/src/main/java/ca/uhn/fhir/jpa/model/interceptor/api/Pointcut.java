@@ -136,7 +136,7 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
-	 * <li>java.lang.Exception - The exception that caused the failure</li>
+	 * <li>java.lang.Exception - The exception that caused the failure.  Note this could be an exception thrown by a SUBSCRIPTION_BEFORE_DELIVERY or SUBSCRIPTION_AFTER_DELIVERY interceptor</li>
 	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage - the message that triggered the exception</li>
 	 * <li>java.lang.Exception</li>
 	 * </ul>
