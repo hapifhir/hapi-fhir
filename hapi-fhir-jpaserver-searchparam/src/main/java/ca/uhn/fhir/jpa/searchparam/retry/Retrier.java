@@ -24,7 +24,11 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.listener.RetryListenerSupport;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -52,6 +56,15 @@ public class Retrier<T> {
 		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
 		retryPolicy.setMaxAttempts(theMaxRetries);
 		myRetryTemplate.setRetryPolicy(retryPolicy);
+
+		RetryListener listener = new RetryListenerSupport() {
+			@Override
+			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+				super.onError(context, callback, throwable);
+				ourLog.error("Retry failure " + context.getRetryCount() + "/" + theMaxRetries, throwable);
+			}
+		};
+		myRetryTemplate.registerListener(listener);
 	}
 
 	public T runWithRetry() {

@@ -137,8 +137,8 @@ public enum Pointcut {
 	 * </p>
 	 * <ul>
 	 * <li>java.lang.Exception - The exception that caused the failure</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription</li>
-	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage - the message that triggered the exception</li>
+	 * <li>java.lang.Exception</li>
 	 * </ul>
 	 * <p>
 	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
@@ -149,7 +149,7 @@ public enum Pointcut {
 	 * taken for the delivery.
 	 * </p>
 	 */
-	SUBSCRIPTION_AFTER_DELIVERY_FAILED("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+	SUBSCRIPTION_AFTER_DELIVERY_FAILED("ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "java.lang.Exception"),
 
 	/**
 	 * Invoked immediately after the delivery of a REST HOOK subscription.
