@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.util;
 
 import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;

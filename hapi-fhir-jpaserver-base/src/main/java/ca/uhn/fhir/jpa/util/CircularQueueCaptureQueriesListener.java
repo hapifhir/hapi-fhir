@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Queues;
@@ -13,47 +13,47 @@ import java.util.stream.Collectors;
 
 /**
  * This is a query listener designed to be plugged into a {@link ProxyDataSourceBuilder proxy DataSource}.
- * This listener keeps the last 100 queries across all threads in a LinkedList, dropping queries off the
+ * This listener keeps the last 1000 queries across all threads in a {@link CircularFifoQueue}, dropping queries off the
  * end of the list as new ones are added.
  * <p>
  * Note that this class is really only designed for use in testing - It adds a non-trivial overhead
  * to each query.
  * </p>
  */
-public class CaptureQueriesListener extends BaseCaptureQueriesListener {
+public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListener {
 
-	private static final int CAPACITY = 100;
-	private static final Queue<Query> LAST_N_QUERIES = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
-	private static final Logger ourLog = LoggerFactory.getLogger(CaptureQueriesListener.class);
+	private static final int CAPACITY = 1000;
+	private static final Logger ourLog = LoggerFactory.getLogger(CircularQueueCaptureQueriesListener.class);
+	private final Queue<Query> myQueries = Queues.synchronizedQueue(new CircularFifoQueue<>(CAPACITY));
 
 	@Override
 	protected Queue<Query> provideQueryList() {
-		return LAST_N_QUERIES;
+		return myQueries;
 	}
 
 	/**
 	 * Clear all stored queries
 	 */
-	public static void clear() {
-		LAST_N_QUERIES.clear();
+	public void clear() {
+		myQueries.clear();
 	}
 
 	/**
 	 * Index 0 is oldest
 	 */
 	@SuppressWarnings("UseBulkOperation")
-	public static List<Query> getCapturedQueries() {
+	public List<Query> getCapturedQueries() {
 		// Make a copy so that we aren't affected by changes to the list outside of the
 		// synchronized block
 		ArrayList<Query> retVal = new ArrayList<>(CAPACITY);
-		LAST_N_QUERIES.forEach(retVal::add);
+		myQueries.forEach(retVal::add);
 		return Collections.unmodifiableList(retVal);
 	}
 
 	/**
 	 * Returns all SELECT queries executed on the current thread - Index 0 is oldest
 	 */
-	public static List<Query> getSelectQueriesForCurrentThread() {
+	public List<Query> getSelectQueriesForCurrentThread() {
 		String currentThreadName = Thread.currentThread().getName();
 		return getCapturedQueries()
 			.stream()
@@ -65,7 +65,7 @@ public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 	/**
 	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
 	 */
-	public static List<Query> getInsertQueriesForCurrentThread() {
+	public List<Query> getInsertQueriesForCurrentThread() {
 		return getCapturedQueries()
 			.stream()
 			.filter(t -> t.getThreadName().equals(Thread.currentThread().getName()))
@@ -76,10 +76,10 @@ public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 	/**
 	 * Log all captured SELECT queries
 	 */
-	public static void logSelectQueriesForCurrentThread() {
+	public void logSelectQueriesForCurrentThread() {
 		List<String> queries = getSelectQueriesForCurrentThread()
 			.stream()
-			.map(CaptureQueriesListener::formatQueryAsSql)
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Select Queries:\n{}", String.join("\n", queries));
 	}
@@ -87,17 +87,17 @@ public class CaptureQueriesListener extends BaseCaptureQueriesListener {
 	/**
 	 * Log all captured INSERT queries
 	 */
-	public static void logInsertQueriesForCurrentThread() {
+	public void logInsertQueriesForCurrentThread() {
 		List<String> queries = getInsertQueriesForCurrentThread()
 			.stream()
-			.map(CaptureQueriesListener::formatQueryAsSql)
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
 	}
 
 	private static String formatQueryAsSql(Query theQuery) {
 		String formattedSql = theQuery.getSql(true, true);
-		return "Query at " + new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString() + " took " + StopWatch.formatMillis(theQuery.getElapsedTime()) + " on Thread: " + theQuery.getThreadName()  + "\nSQL:\n" + formattedSql;
+		return "Query at " + new InstantType(new Date(theQuery.getQueryTimestamp())).getValueAsString() + " took " + StopWatch.formatMillis(theQuery.getElapsedTime()) + " on Thread: " + theQuery.getThreadName() + "\nSQL:\n" + formattedSql;
 	}
 
 }

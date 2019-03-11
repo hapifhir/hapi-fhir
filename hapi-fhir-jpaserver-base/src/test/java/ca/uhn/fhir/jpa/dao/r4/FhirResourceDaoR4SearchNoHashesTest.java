@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -401,14 +401,14 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		p.addIdentifier().setSystem("SYS").setValue("BAZ");
 		myPatientDao.create(p);
 
-		CaptureQueriesListener.clear();
+		myCaptureQueriesListener.clear();
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
 		map.setLoadSynchronous(true);
 		IBundleProvider search = myPatientDao.search(map);
 
-		CaptureQueriesListener.logInsertQueriesForCurrentThread();
-		List<String> queries = CaptureQueriesListener
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		List<String> queries = myCaptureQueriesListener
 			.getSelectQueriesForCurrentThread()
 			.stream()
 			.map(t -> t.getSql(true, false))

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
@@ -11,7 +11,6 @@ import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.subscription.dbmatcher.DaoSubscriptionMatcher;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
@@ -92,11 +91,13 @@ public abstract class BaseJpaTest {
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
 	protected IInterceptorRegistry myInterceptorRegistry;
+	@Autowired
+	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
-		CaptureQueriesListener.clear();
+		myCaptureQueriesListener.clear();
 	}
 
 	@After
