@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
@@ -79,7 +80,9 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 			ourLog.error(errorMsg, e);
 
 			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
-			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, msg, msg.getSubscription(), e)) {
+			HookParams hookParams = new HookParams()
+				.add(ResourceDeliveryMessage.class, msg).add(Exception.class, e);
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, hookParams)) {
 				return;
 			}
 
