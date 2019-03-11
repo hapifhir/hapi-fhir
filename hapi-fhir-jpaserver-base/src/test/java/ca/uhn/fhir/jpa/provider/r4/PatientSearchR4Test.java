@@ -62,7 +62,7 @@ public class PatientSearchR4Test extends BaseResourceProviderR4Test {
 	/**
 	 * See #674
 	 */
-	@Ignore
+
 	@Test
 	public void testSearchPatientNameText() throws Exception {
 
