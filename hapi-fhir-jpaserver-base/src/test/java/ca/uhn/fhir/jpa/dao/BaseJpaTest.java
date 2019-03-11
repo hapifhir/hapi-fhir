@@ -97,7 +97,9 @@ public abstract class BaseJpaTest {
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
-		myCaptureQueriesListener.clear();
+		if (myCaptureQueriesListener != null) {
+			myCaptureQueriesListener.clear();
+		}
 	}
 
 	@After
