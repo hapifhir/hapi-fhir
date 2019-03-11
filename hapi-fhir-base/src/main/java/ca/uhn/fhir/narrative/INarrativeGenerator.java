@@ -20,6 +20,7 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface INarrativeGenerator {
@@ -32,6 +33,6 @@ public interface INarrativeGenerator {
 	 *
 	 * @return Returns <code>true</code> if a narrative was actually generated
 	 */
-	boolean populateResourceNarrative(IBaseResource theResource);
+	boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 
 }

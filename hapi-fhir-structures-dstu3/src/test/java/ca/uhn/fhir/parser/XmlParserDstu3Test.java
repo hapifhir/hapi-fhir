@@ -1943,7 +1943,7 @@ public class XmlParserDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("Smith").addGiven("John");
 
-		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		String output = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(output);

@@ -20,8 +20,6 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +30,8 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	private boolean myUseHapiServerConformanceNarrative;
 
-	public DefaultThymeleafNarrativeGenerator(FhirContext theFhirContext) {
-		super(theFhirContext);
+	public DefaultThymeleafNarrativeGenerator() {
+		super();
 	}
 
 	@Override

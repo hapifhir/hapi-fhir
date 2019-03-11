@@ -9,9 +9,9 @@ package ca.uhn.fhir.narrative2;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,41 +34,37 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	private static final Logger ourLog = LoggerFactory.getLogger(NarrativeTemplateManifest.class);
 
-	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToResourceTypeToTemplate;
-	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToDatatypeToTemplate;
-	private final Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> myStyleToNameToTemplate;
-	private final FhirContext myCtx;
+	private final Map<String, List<NarrativeTemplate>> myStyleToResourceTypeToTemplate;
+	private final Map<String, List<NarrativeTemplate>> myStyleToDatatypeToTemplate;
+	private final Map<String, List<NarrativeTemplate>> myStyleToNameToTemplate;
 	private final int myTemplateCount;
 
-	private NarrativeTemplateManifest(FhirContext theFhirContext, Collection<NarrativeTemplate> theTemplates) {
-		myCtx = theFhirContext;
-		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToResourceTypeToTemplate = new HashMap<>();
-		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToDatatypeToTemplate = new HashMap<>();
-		Map<TemplateTypeEnum, Map<String, NarrativeTemplate>> styleToNameToTemplate = new HashMap<>();
+	private NarrativeTemplateManifest(Collection<NarrativeTemplate> theTemplates) {
+		Map<String, List<NarrativeTemplate>> resourceTypeToTemplate = new HashMap<>();
+		Map<String, List<NarrativeTemplate>> datatypeToTemplate = new HashMap<>();
+		Map<String, List<NarrativeTemplate>> nameToTemplate = new HashMap<>();
 
 		for (NarrativeTemplate nextTemplate : theTemplates) {
-			Map<String, NarrativeTemplate> resourceTypeToTemplate = styleToResourceTypeToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
-			Map<String, NarrativeTemplate> datatypeToTemplate = styleToDatatypeToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
-			Map<String, NarrativeTemplate> nameToTemplate = styleToNameToTemplate.computeIfAbsent(nextTemplate.getTemplateType(), t -> new HashMap<>());
-			nameToTemplate.put(nextTemplate.getTemplateName(), nextTemplate);
+			nameToTemplate.computeIfAbsent(nextTemplate.getTemplateName(), t -> new ArrayList<>()).add(nextTemplate);
 			for (String nextResourceType : nextTemplate.getAppliesToResourceTypes()) {
-				resourceTypeToTemplate.put(nextResourceType.toUpperCase(), nextTemplate);
+				resourceTypeToTemplate.computeIfAbsent(nextResourceType.toUpperCase(), t -> new ArrayList<>()).add(nextTemplate);
 			}
 			for (String nextDataType : nextTemplate.getAppliesToDataTypes()) {
-				datatypeToTemplate.put(nextDataType.toUpperCase(), nextTemplate);
+				datatypeToTemplate.computeIfAbsent(nextDataType.toUpperCase(), t -> new ArrayList<>()).add(nextTemplate);
 			}
 		}
 
 		myTemplateCount = theTemplates.size();
-		myStyleToNameToTemplate = makeImmutable(styleToNameToTemplate);
-		myStyleToResourceTypeToTemplate = makeImmutable(styleToResourceTypeToTemplate);
-		myStyleToDatatypeToTemplate = makeImmutable(styleToDatatypeToTemplate);
+		myStyleToNameToTemplate = makeImmutable(nameToTemplate);
+		myStyleToResourceTypeToTemplate = makeImmutable(resourceTypeToTemplate);
+		myStyleToDatatypeToTemplate = makeImmutable(datatypeToTemplate);
 	}
 
 	public int getNamedTemplateCount() {
@@ -76,31 +72,31 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 	}
 
 	@Override
-	public Optional<INarrativeTemplate> getTemplateByResourceName(TemplateTypeEnum theStyle, String theResourceName) {
-		return getFromMap(theStyle, theResourceName.toUpperCase(), myStyleToResourceTypeToTemplate);
+	public List<INarrativeTemplate> getTemplateByResourceName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theResourceName) {
+		return getFromMap(theStyles, theResourceName.toUpperCase(), myStyleToResourceTypeToTemplate);
 	}
 
 	@Override
-	public Optional<INarrativeTemplate> getTemplateByName(TemplateTypeEnum theStyle, String theName) {
-		return getFromMap(theStyle, theName, myStyleToNameToTemplate);
+	public List<INarrativeTemplate> getTemplateByName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theName) {
+		return getFromMap(theStyles, theName, myStyleToNameToTemplate);
 	}
 
 	@Override
-	public Optional<INarrativeTemplate> getTemplateByElement(TemplateTypeEnum theStyle, IBase theElement) {
+	public List<INarrativeTemplate> getTemplateByElement(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, IBase theElement) {
 		if (theElement instanceof IBaseResource) {
-			String resourceName = myCtx.getResourceDefinition((IBaseResource) theElement).getName();
-			return getTemplateByResourceName(theStyle, resourceName);
+			String resourceName = theFhirContext.getResourceDefinition((IBaseResource) theElement).getName();
+			return getTemplateByResourceName(theFhirContext, theStyles, resourceName);
 		} else {
-			String datatypeName = myCtx.getElementDefinition(theElement.getClass()).getName();
-			return getFromMap(theStyle, datatypeName.toUpperCase(), myStyleToDatatypeToTemplate);
+			String datatypeName = theFhirContext.getElementDefinition(theElement.getClass()).getName();
+			return getFromMap(theStyles, datatypeName.toUpperCase(), myStyleToDatatypeToTemplate);
 		}
 	}
 
 	public static NarrativeTemplateManifest forManifestFileLocation(FhirContext theFhirContext, String... thePropertyFilePaths) throws IOException {
-		return forManifestFileLocation(theFhirContext, Arrays.asList(thePropertyFilePaths));
+		return forManifestFileLocation(Arrays.asList(thePropertyFilePaths));
 	}
 
-	public static NarrativeTemplateManifest forManifestFileLocation(FhirContext theFhirContext, Collection<String> thePropertyFilePaths) throws IOException {
+	public static NarrativeTemplateManifest forManifestFileLocation(Collection<String> thePropertyFilePaths) throws IOException {
 		ourLog.debug("Loading narrative properties file(s): {}", thePropertyFilePaths);
 
 		List<String> manifestFileContents = new ArrayList<>(thePropertyFilePaths.size());
@@ -109,19 +105,19 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 			manifestFileContents.add(resource);
 		}
 
-		return forManifestFileContents(theFhirContext, manifestFileContents);
+		return forManifestFileContents(manifestFileContents);
 	}
 
-	public static NarrativeTemplateManifest forManifestFileContents(FhirContext theFhirContext, String... theResources) throws IOException {
-		return forManifestFileContents(theFhirContext, Arrays.asList(theResources));
+	public static NarrativeTemplateManifest forManifestFileContents(String... theResources) throws IOException {
+		return forManifestFileContents(Arrays.asList(theResources));
 	}
 
-	public static NarrativeTemplateManifest forManifestFileContents(FhirContext theFhirContext, Collection<String> theResources) throws IOException {
+	public static NarrativeTemplateManifest forManifestFileContents(Collection<String> theResources) throws IOException {
 		List<NarrativeTemplate> templates = new ArrayList<>();
 		for (String next : theResources) {
 			templates.addAll(loadProperties(next));
 		}
-		return new NarrativeTemplateManifest(theFhirContext, templates);
+		return new NarrativeTemplateManifest(templates);
 	}
 
 	private static Collection<NarrativeTemplate> loadProperties(String theManifestText) throws IOException {
@@ -222,17 +218,16 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		}
 	}
 
-	private static <T> Optional<INarrativeTemplate> getFromMap(TemplateTypeEnum theStyle, T theResourceName, Map<TemplateTypeEnum, Map<T, NarrativeTemplate>> theMap) {
-		NarrativeTemplate retVal = null;
-		Map<T, NarrativeTemplate> resourceTypeToTemplate = theMap.get(theStyle);
-		if (resourceTypeToTemplate != null) {
-			retVal = resourceTypeToTemplate.get(theResourceName);
-		}
-		return Optional.ofNullable(retVal);
+	private static <T> List<INarrativeTemplate> getFromMap(EnumSet<TemplateTypeEnum> theStyles, T theKey, Map<T, List<NarrativeTemplate>> theMap) {
+		return theMap
+			.getOrDefault(theKey, Collections.emptyList())
+			.stream()
+			.filter(t->theStyles.contains(t.getTemplateType()))
+			.collect(Collectors.toList());
 	}
 
-	private static <T> Map<TemplateTypeEnum, Map<T, NarrativeTemplate>> makeImmutable(Map<TemplateTypeEnum, Map<T, NarrativeTemplate>> theStyleToResourceTypeToTemplate) {
-		theStyleToResourceTypeToTemplate.replaceAll((key, value) -> Collections.unmodifiableMap(value));
+	private static <T> Map<T, List<NarrativeTemplate>> makeImmutable(Map<T, List<NarrativeTemplate>> theStyleToResourceTypeToTemplate) {
+		theStyleToResourceTypeToTemplate.replaceAll((key, value) -> Collections.unmodifiableList(value));
 		return Collections.unmodifiableMap(theStyleToResourceTypeToTemplate);
 	}
 

@@ -45,9 +45,7 @@ import org.thymeleaf.templateresolver.DefaultTemplateResolver;
 import org.thymeleaf.templateresource.ITemplateResource;
 import org.thymeleaf.templateresource.StringTemplateResource;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -58,13 +56,13 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	/**
 	 * Constructor
 	 */
-	public ThymeleafNarrativeGenerator(FhirContext theFhirContext) {
-		super(theFhirContext);
+	public ThymeleafNarrativeGenerator() {
+		super();
 	}
 
-	private TemplateEngine getTemplateEngine() {
+	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
 		TemplateEngine engine = new TemplateEngine();
-		ProfileResourceResolver resolver = new ProfileResourceResolver();
+		ProfileResourceResolver resolver = new ProfileResourceResolver(theFhirContext);
 		engine.setTemplateResolver(resolver);
 		if (myMessageResolver != null) {
 			engine.setMessageResolver(myMessageResolver);
@@ -73,8 +71,8 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 			@Override
 			public Set<IProcessor> getProcessors(String theDialectPrefix) {
 				Set<IProcessor> retVal = super.getProcessors(theDialectPrefix);
-				retVal.add(new NarrativeTagProcessor(theDialectPrefix));
-				retVal.add(new NarrativeAttributeProcessor(theDialectPrefix));
+				retVal.add(new NarrativeTagProcessor(theFhirContext, theDialectPrefix));
+				retVal.add(new NarrativeAttributeProcessor(theDialectPrefix, theFhirContext));
 				return retVal;
 			}
 
@@ -85,25 +83,23 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	}
 
 	@Override
-	protected String applyTemplate(INarrativeTemplate theTemplate, IBase theTargetContext) {
+	protected String applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBase theTargetContext) {
 
 		Context context = new Context();
 		context.setVariable("resource", theTargetContext);
 		context.setVariable("context", theTargetContext);
-		context.setVariable("fhirVersion", getFhirContext().getVersion().getVersion().name());
+		context.setVariable("fhirVersion", theFhirContext.getVersion().getVersion().name());
 
-		String result = getTemplateEngine().process(theTemplate.getTemplateName(), context);
-
-		return result;
+		return getTemplateEngine(theFhirContext).process(theTemplate.getTemplateName(), context);
 	}
 
 
 	@Override
-	protected TemplateTypeEnum getStyle() {
-		return TemplateTypeEnum.THYMELEAF;
+	protected EnumSet<TemplateTypeEnum> getStyle() {
+		return EnumSet.of(TemplateTypeEnum.THYMELEAF);
 	}
 
-	private String applyTemplateWithinTag(ITemplateContext theTemplateContext, String theName, String theElement) {
+	private String applyTemplateWithinTag(FhirContext theFhirContext, ITemplateContext theTemplateContext, String theName, String theElement) {
 		IEngineConfiguration configuration = theTemplateContext.getConfiguration();
 		IStandardExpressionParser expressionParser = StandardExpressions.getExpressionParser(configuration);
 		final IStandardExpression expression = expressionParser.parseExpression(theTemplateContext, theElement);
@@ -113,20 +109,20 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 			return "";
 		}
 
-		Optional<INarrativeTemplate> templateOpt;
+		List<INarrativeTemplate> templateOpt;
 		if (isNotBlank(theName)) {
-			templateOpt = getManifest().getTemplateByName(getStyle(), theName);
-			if (!templateOpt.isPresent()) {
+			templateOpt = getManifest().getTemplateByName(theFhirContext, getStyle(), theName);
+			if (templateOpt.isEmpty()) {
 				throw new InternalErrorException("Unknown template name: " + theName);
 			}
 		} else {
-			templateOpt = getManifest().getTemplateByElement(getStyle(), elementValue);
-			if (!templateOpt.isPresent()) {
+			templateOpt = getManifest().getTemplateByElement(theFhirContext, getStyle(), elementValue);
+			if (templateOpt.isEmpty()) {
 				throw new InternalErrorException("No template for type: " + elementValue.getClass());
 			}
 		}
 
-		return applyTemplate(templateOpt.get(), elementValue);
+		return applyTemplate(theFhirContext, templateOpt.get(0), elementValue);
 	}
 
 	public void setMessageResolver(IMessageResolver theMessageResolver) {
@@ -135,9 +131,15 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 
 	private class ProfileResourceResolver extends DefaultTemplateResolver {
+		private final FhirContext myFhirContext;
+
+		private ProfileResourceResolver(FhirContext theFhirContext) {
+			myFhirContext = theFhirContext;
+		}
+
 		@Override
 		protected boolean computeResolvable(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
-			return getManifest().getTemplateByName(getStyle(), theTemplate).isPresent();
+			return getManifest().getTemplateByName(myFhirContext, getStyle(), theTemplate).size() > 0;
 		}
 
 		@Override
@@ -148,7 +150,9 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 		@Override
 		protected ITemplateResource computeTemplateResource(IEngineConfiguration theConfiguration, String theOwnerTemplate, String theTemplate, Map<String, Object> theTemplateResolutionAttributes) {
 			return getManifest()
-				.getTemplateByName(getStyle(), theTemplate)
+				.getTemplateByName(myFhirContext, getStyle(), theTemplate)
+				.stream()
+				.findFirst()
 				.map(t -> new StringTemplateResource(t.getTemplateText()))
 				.orElseThrow(() -> new IllegalArgumentException("Unknown template: " + theTemplate));
 		}
@@ -161,8 +165,11 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 	private class NarrativeTagProcessor extends AbstractElementTagProcessor {
 
-		public NarrativeTagProcessor(String dialectPrefix) {
+		private final FhirContext myFhirContext;
+
+		NarrativeTagProcessor(FhirContext theFhirContext, String dialectPrefix) {
 			super(TemplateMode.XML, dialectPrefix, "narrative", true, null, true, 0);
+			myFhirContext = theFhirContext;
 		}
 
 		@Override
@@ -170,7 +177,7 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 			String name = theTag.getAttributeValue("th:name");
 			String element = theTag.getAttributeValue("th:element");
 
-			String appliedTemplate = applyTemplateWithinTag(theTemplateContext, name, element);
+			String appliedTemplate = applyTemplateWithinTag(myFhirContext, theTemplateContext, name, element);
 			theStructureHandler.replaceWith(appliedTemplate, false);
 		}
 	}
@@ -181,13 +188,16 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	 */
 	private class NarrativeAttributeProcessor extends AbstractAttributeTagProcessor {
 
-		protected NarrativeAttributeProcessor(String theDialectPrefix) {
+		private final FhirContext myFhirContext;
+
+		NarrativeAttributeProcessor(String theDialectPrefix, FhirContext theFhirContext) {
 			super(TemplateMode.XML, theDialectPrefix, null, false, "narrative", true, 0, true);
+			myFhirContext = theFhirContext;
 		}
 
 		@Override
 		protected void doProcess(ITemplateContext theContext, IProcessableElementTag theTag, AttributeName theAttributeName, String theAttributeValue, IElementTagStructureHandler theStructureHandler) {
-			String text = applyTemplateWithinTag(theContext, null, theAttributeValue);
+			String text = applyTemplateWithinTag(myFhirContext, theContext, null, theAttributeValue);
 			theStructureHandler.setBody(text, false);
 		}
 

@@ -20,12 +20,13 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class NullNarrativeGenerator implements INarrativeGenerator {
 	@Override
-	public boolean populateResourceNarrative(IBaseResource theResource) {
+	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		return false;
 	}
 }

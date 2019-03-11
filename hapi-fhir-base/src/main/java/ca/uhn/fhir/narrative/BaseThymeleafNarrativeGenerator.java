@@ -36,16 +36,16 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 	/**
 	 * Constructor
 	 */
-	public BaseThymeleafNarrativeGenerator(FhirContext theFhirContext) {
-		super(theFhirContext);
+	public BaseThymeleafNarrativeGenerator() {
+		super();
 	}
 
 	@Override
-	public boolean populateResourceNarrative(IBaseResource theResource) {
+	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		if (!myInitialized) {
 			initialize();
 		}
-		super.populateResourceNarrative(theResource);
+		super.populateResourceNarrative(theFhirContext, theResource);
 		return false;
 	}
 
@@ -58,7 +58,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 
 		List<String> propFileName = getPropertyFile();
 		try {
-			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(getFhirContext(), propFileName);
+			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
 			setManifest(manifest);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);

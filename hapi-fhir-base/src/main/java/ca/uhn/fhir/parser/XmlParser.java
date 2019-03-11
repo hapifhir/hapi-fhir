@@ -371,7 +371,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 				}
 				// FIXME potential null access on narr see line 623
 				if (gen != null && narr.isEmpty()) {
-					gen.populateResourceNarrative(theResource);
+					gen.populateResourceNarrative(myContext, theResource);
 				}
 				if (narr != null && narr.isEmpty() == false) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;

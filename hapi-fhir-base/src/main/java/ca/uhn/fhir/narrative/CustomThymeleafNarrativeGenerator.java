@@ -40,8 +40,8 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 *            <li>classpath:/com/package/file.properties</li>
 	 *            </ul>
 	 */
-	public CustomThymeleafNarrativeGenerator(FhirContext theFhirContext, String... thePropertyFile) {
-		super(theFhirContext);
+	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) {
+		super();
 		setPropertyFile(thePropertyFile);
 	}
 
