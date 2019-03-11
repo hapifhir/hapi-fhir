@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -31,6 +32,7 @@ import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -51,6 +53,9 @@ import static org.mockito.Mockito.mock;
 public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchNoFtTest.class);
 
+	@Autowired
+	MatchUrlService myMatchUrlService;
+
 	@After
 	public void afterResetSearchSize() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
@@ -62,6 +67,178 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Before
 	public void beforeDisableCacheReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+	}
+
+	@Test
+	public void testHasConditionAgeCompare() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		Quantity onsetAge = new Age();
+		onsetAge.setValue(23);
+		condition.setOnset(onsetAge);
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+		{
+			String criteria = "_has:Condition:subject:onset-age=gt20";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertEquals(1, ids.size());
+			assertThat(ids, hasItems(patientId));
+		}
+		{
+			String criteria = "_has:Condition:subject:onset-age=lt20";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			assertEquals(0, ids.size());
+		}
+	}
+
+	@Test
+	public void testHasCondition() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionOr() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionAnd() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition conditionS = new Condition();
+		conditionS.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		conditionS.getSubject().setReference(patientId);
+		myConditionDao.create(conditionS);
+
+		Condition conditionA = new Condition();
+		conditionA.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822005");
+		conditionA.getAsserter().setReference(patientId);
+		myConditionDao.create(conditionA);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004&"+
+				 			   "_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionAndBackwards() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition conditionS = new Condition();
+		conditionS.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		conditionS.getSubject().setReference(patientId);
+		myConditionDao.create(conditionS);
+
+		Condition conditionA = new Condition();
+		conditionA.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822005");
+		conditionA.getAsserter().setReference(patientId);
+		myConditionDao.create(conditionA);
+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&"+
+			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(0, ids.size());
+	}
+
+	@Test
+	public void testGenderBirthdateHasCondition() {
+		Patient patient = new Patient();
+		patient.setGender(AdministrativeGender.MALE);
+		patient.setBirthDateElement(new DateType("1955-01-01"));
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "gender=male&birthdate=gt1950-07-01&birthdate=lt1960-07-01&_has:Condition:subject:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(1, ids.size());
+		assertThat(ids, hasItems(patientId));
+	}
+
+	@Test
+	public void testHasConditionWrongLink() {
+		Patient patient = new Patient();
+		String patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless().getValue();
+
+		Condition condition = new Condition();
+		condition.getCode().addCoding().setSystem("http://snomed.info/sct").setCode("55822004");
+		condition.getSubject().setReference(patientId);
+		myConditionDao.create(condition);
+
+		String criteria = "_has:Condition:asserter:code=http://snomed.info/sct|55822004";
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+		map.setLoadSynchronous(true);
+
+		IBundleProvider results = myPatientDao.search(map);
+		List<String> ids = toUnqualifiedVersionlessIdValues(results);
+		assertEquals(0, ids.size());
 	}
 
 	@Test
@@ -458,10 +635,12 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		SearchParameterMap params;
 
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+// KHS JA When we switched _has from two queries to a nested subquery, we broke support for chains within _has
+// We have decided for now to prefer the performance optimization of the subquery over the slower full capability
+//		params = new SearchParameterMap();
+//		params.setLoadSynchronous(true);
+//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
 
 		// No targets exist
 		params = new SearchParameterMap();
