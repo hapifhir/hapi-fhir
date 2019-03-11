@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -62,7 +61,7 @@ public class SearchHasParamDstu3Test {
 		
 		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		assertEquals("Encounter", param.getTargetResourceType());
-		assertEquals("patient", param.getOwningFieldName());
+		assertEquals("patient", param.getReferenceFieldName());
 		assertEquals("type", param.getParameterName());
 		assertEquals("SURG", param.getParameterValue());
 	}
