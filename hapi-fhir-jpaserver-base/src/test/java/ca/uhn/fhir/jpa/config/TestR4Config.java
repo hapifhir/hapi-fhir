@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -39,6 +40,11 @@ public class TestR4Config extends BaseJavaConfigR4 {
 	}
 
 	private Exception myLastStackTrace;
+
+	@Bean
+	public CircularQueueCaptureQueriesListener captureQueriesListener() {
+		return new CircularQueueCaptureQueriesListener();
+	}
 
 	@Bean
 	public DataSource dataSource() {
@@ -100,7 +106,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 //			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.afterQuery(new CaptureQueriesListener())
+			.afterQuery(captureQueriesListener())
 			.countQuery(singleQueryCountHolder())
 			.build();
 

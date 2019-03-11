@@ -68,6 +68,11 @@
 				collapse these into a single operation. This is done as a convenience, since many
 				conversion algorithms can accidentally generate such duplicates.
 			</action>
+			<action type="fix" issue="1223">
+				Searching the JPA server with multiple instances of the same token search parameter
+				(e.g. "Patient?identifier=&amp;identifier=b" returned no results even if resources
+				should have matched. Thanks to @mingdatacom for reporting!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
-import ca.uhn.fhir.util.CoverageIgnore;
+import org.apache.commons.lang3.Validate;
 
 /*
  * #%L
@@ -30,11 +30,15 @@ public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
 		return new TokenOrListParam();
 	}
 	
-	@CoverageIgnore
 	@Override
 	public TokenAndListParam addAnd(TokenOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
 
+	public TokenAndListParam addAnd(TokenParam theValue) {
+		Validate.notNull(theValue, "theValue must not be null");
+		addValue(new TokenOrListParam().add(theValue));
+		return this;
+	}
 }
