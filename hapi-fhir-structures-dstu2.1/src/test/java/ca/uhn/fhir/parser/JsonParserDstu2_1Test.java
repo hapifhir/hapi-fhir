@@ -1020,7 +1020,7 @@ public class JsonParserDstu2_1Test {
 		Patient p = new Patient();
 		p.addName().addFamily("Smith").addGiven("John");
 
-		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
+		ourCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		String output = ourCtx.newJsonParser().encodeResourceToString(p);
 		ourLog.info(output);

@@ -99,12 +99,12 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourRestServer.setResourceProviders((List) myResourceProviders);
 
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(myFhirCtx));
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
 			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
 
-			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);
 
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

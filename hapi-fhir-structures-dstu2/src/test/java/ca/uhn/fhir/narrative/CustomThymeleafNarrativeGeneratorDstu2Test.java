@@ -26,7 +26,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 	public void testGenerator() {
 
 //		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("file:src/test/resources/narrative/customnarrative.properties");
-		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator(ourCtx,"classpath:narrative/customnarrative_dstu2.properties");
+		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customnarrative_dstu2.properties");
 		ourCtx.setNarrativeGenerator(gen);
 
 		Practitioner p = new Practitioner();
@@ -35,7 +35,7 @@ public class CustomThymeleafNarrativeGeneratorDstu2Test {
 		p.addAddress().addLine("line1").addLine("line2");
 		p.getName().addFamily("fam1").addGiven("given");
 
-		gen.populateResourceNarrative(p);
+		gen.populateResourceNarrative(ourCtx, p);
 
 		String actual = p.getText().getDiv().getValueAsString();
 		ourLog.info(actual);

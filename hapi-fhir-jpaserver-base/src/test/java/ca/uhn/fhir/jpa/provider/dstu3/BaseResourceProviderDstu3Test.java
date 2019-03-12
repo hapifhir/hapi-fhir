@@ -92,10 +92,10 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourRestServer.setResourceProviders((List) myResourceProviders);
 
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(myFhirCtx));
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 
 			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);

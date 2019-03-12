@@ -1,32 +1,12 @@
 package ca.uhn.fhir.narrative;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Date;
-
-import org.hamcrest.core.StringContains;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.composite.SimpleQuantityDt;
-import ca.uhn.fhir.model.dstu2.resource.DiagnosticReport;
-import ca.uhn.fhir.model.dstu2.resource.Medication;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Parameters;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.valueset.DiagnosticReportStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.MedicationOrderStatusEnum;
 import ca.uhn.fhir.model.dstu2.valueset.ObservationStatusEnum;
@@ -34,6 +14,18 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hamcrest.core.StringContains;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.util.Date;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static FhirContext ourCtx = FhirContext.forDstu2();
@@ -48,7 +40,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 	@Before
 	public void before() {
-		myGen = new DefaultThymeleafNarrativeGenerator(ourCtx);
+		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
 
 		ourCtx.setNarrativeGenerator(myGen);
@@ -65,7 +57,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		value.setBirthDate(new Date(), TemporalPrecisionEnum.DAY);
 
-		myGen.populateResourceNarrative(value);
+		myGen.populateResourceNarrative(ourCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
@@ -77,7 +69,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Parameters value = new Parameters();
 		value.setId("123");
 
-		myGen.populateResourceNarrative(value);
+		myGen.populateResourceNarrative(ourCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, not(containsString("narrative")));
@@ -99,7 +91,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-		myGen.populateResourceNarrative(oo);
+		myGen.populateResourceNarrative(ourCtx, oo);
 		String output = oo.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -137,7 +129,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.populateResourceNarrative(value);
+		myGen.populateResourceNarrative(ourCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
@@ -162,11 +154,11 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		mp.setStatus(MedicationOrderStatusEnum.ACTIVE);
 		mp.setDateWritten(new DateTimeDt("2014-09-01"));
 
-		myGen.populateResourceNarrative(mp);
+		myGen.populateResourceNarrative(ourCtx, mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
-		assertTrue("Expected medication name of ciprofloaxin within narrative: " + output, output.indexOf("ciprofloaxin") > -1);
-		assertTrue("Expected string status of ACTIVE within narrative: " + output, output.indexOf("ACTIVE") > -1);
+		assertTrue("Expected medication name of ciprofloaxin within narrative: " + output, output.contains("ciprofloaxin"));
+		assertTrue("Expected string status of ACTIVE within narrative: " + output, output.contains("ACTIVE"));
 
 	}
 
@@ -175,7 +167,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.populateResourceNarrative(med);
+		myGen.populateResourceNarrative(ourCtx, med);
 		String output = med.getText().getDiv().getValueAsString();
 		assertThat(output, containsString("ciproflaxin"));
 

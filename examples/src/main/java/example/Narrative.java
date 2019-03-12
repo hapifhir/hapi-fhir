@@ -1,16 +1,15 @@
 package example;
 
-import java.io.IOException;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.valueset.NarrativeStatusEnum;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.DataFormatException;
 
+@SuppressWarnings("unused")
 public class Narrative {
 
-public static void main(String[] args) throws DataFormatException, IOException {
+public static void main(String[] args) throws DataFormatException {
 
 //START SNIPPET: example1
 Patient patient = new Patient();
@@ -21,7 +20,7 @@ patient.addAddress().addLine("742 Evergreen Terrace").setCity("Springfield").set
 FhirContext ctx = FhirContext.forDstu2();
 
 // Use the narrative generator
-ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ctx));
+ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 // Encode the output, including the narrative
 String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);

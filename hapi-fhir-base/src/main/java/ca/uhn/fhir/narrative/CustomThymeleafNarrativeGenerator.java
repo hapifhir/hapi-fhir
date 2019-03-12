@@ -23,7 +23,6 @@ package ca.uhn.fhir.narrative;
 import java.util.Arrays;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.Validate;
 
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {

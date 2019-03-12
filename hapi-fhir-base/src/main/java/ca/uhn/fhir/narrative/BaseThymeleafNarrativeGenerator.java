@@ -36,7 +36,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 	/**
 	 * Constructor
 	 */
-	public BaseThymeleafNarrativeGenerator() {
+	protected BaseThymeleafNarrativeGenerator() {
 		super();
 	}
 
@@ -58,7 +58,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 
 		List<String> propFileName = getPropertyFile();
 		try {
-			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
+			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents(propFileName);
 			setManifest(manifest);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);

@@ -48,7 +48,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 		 * but can be useful as it causes HAPI to generate narratives for
 		 * resources which don't otherwise have one.
 		 */
-		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator(getFhirContext());
+		INarrativeGenerator narrativeGen = new DefaultThymeleafNarrativeGenerator();
 		getFhirContext().setNarrativeGenerator(narrativeGen);
 
 		/*
