@@ -92,6 +92,22 @@ public class NarrativeTemplateManifest implements INarrativeTemplateManifest {
 		}
 	}
 
+	public static NarrativeTemplateManifest forManifestFileLocation(String... thePropertyFilePaths) throws IOException {
+		return forManifestFileLocation(Arrays.asList(thePropertyFilePaths));
+	}
+
+	public static NarrativeTemplateManifest forManifestFileLocation(Collection<String> thePropertyFilePaths) throws IOException {
+		ourLog.debug("Loading narrative properties file(s): {}", thePropertyFilePaths);
+
+		List<String> manifestFileContents = new ArrayList<>(thePropertyFilePaths.size());
+		for (String next : thePropertyFilePaths) {
+			String resource = loadResource(next);
+			manifestFileContents.add(resource);
+		}
+
+		return forManifestFileContents(manifestFileContents);
+	}
+
 	public static NarrativeTemplateManifest forManifestFileContents(String... theResources) throws IOException {
 		return forManifestFileContents(Arrays.asList(theResources));
 	}

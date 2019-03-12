@@ -58,7 +58,7 @@ public abstract class BaseThymeleafNarrativeGenerator extends ThymeleafNarrative
 
 		List<String> propFileName = getPropertyFile();
 		try {
-			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents(propFileName);
+			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
 			setManifest(manifest);
 		} catch (IOException e) {
 			throw new InternalErrorException(e);

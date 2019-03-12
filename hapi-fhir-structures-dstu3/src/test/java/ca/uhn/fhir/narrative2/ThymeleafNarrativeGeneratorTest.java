@@ -58,7 +58,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents("classpath:narrative2/narratives.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
 		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 
@@ -78,7 +78,7 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testTemplateCount() throws IOException {
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileContents("classpath:narrative2/narratives.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
 		assertEquals(4, manifest.getNamedTemplateCount());
 	}
 
