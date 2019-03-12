@@ -1550,15 +1550,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					continue;
 				}
 
-				for (IBase nextChild : values) {
-					IBaseReference nextRef = (IBaseReference) nextChild;
-					IIdType referencedId = nextRef.getReferenceElement();
-					if (!isBlank(referencedId.getResourceType())) {
-						if (!isLogicalReference(referencedId)) {
-							if (!referencedId.getValue().contains("?")) {
-								if (!validTypes.contains(referencedId.getResourceType())) {
-									throw new UnprocessableEntityException(
-										"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+				if (getConfig().isEnforceReferenceTargetTypes()) {
+					for (IBase nextChild : values) {
+						IBaseReference nextRef = (IBaseReference) nextChild;
+						IIdType referencedId = nextRef.getReferenceElement();
+						if (!isBlank(referencedId.getResourceType())) {
+							if (!isLogicalReference(referencedId)) {
+								if (!referencedId.getValue().contains("?")) {
+									if (!validTypes.contains(referencedId.getResourceType())) {
+										throw new UnprocessableEntityException(
+											"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+									}
 								}
 							}
 						}
