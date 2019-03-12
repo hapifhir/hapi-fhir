@@ -60,14 +60,14 @@ public class PatientSearchR4Test extends BaseResourceProviderR4Test {
 	}
 
 	/**
-	 * See #674
+	 * See #1021
 	 */
 
 	@Test
 	public void testSearchPatientNameText() throws Exception {
 
 		Patient patient = new Patient();
-		String nameTextString = "Test123";
+		String nameTextString = "textSearch";
 		patient.getNameFirstRep().setText(nameTextString);
 		String patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
@@ -89,7 +89,7 @@ public class PatientSearchR4Test extends BaseResourceProviderR4Test {
 	public void testSearchPatientNameGiven() throws Exception {
 
 		Patient patient = new Patient();
-		String nameTextString = "Test123";
+		String nameTextString = "givenSearch";
 		patient.getNameFirstRep().addGiven(nameTextString);
 		String patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
@@ -111,7 +111,7 @@ public class PatientSearchR4Test extends BaseResourceProviderR4Test {
 	public void testSearchPatientNameFamily() throws Exception {
 
 		Patient patient = new Patient();
-		String nameTextString = "Test123";
+		String nameTextString = "familySearch";
 		patient.getNameFirstRep().setFamily(nameTextString);
 		String patId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless().getValue();
 
