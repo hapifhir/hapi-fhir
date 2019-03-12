@@ -73,6 +73,10 @@
 				(e.g. "Patient?identifier=&amp;identifier=b" returned no results even if resources
 				should have matched. Thanks to @mingdatacom for reporting!
 			</action>
+			<action type="add">
+				A new config setting has been added to the JPA DaoConfig that disables validation
+				of the resource type for target resources in references.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

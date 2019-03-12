@@ -73,6 +73,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -944,6 +945,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
+
+		// Disable validation
+		myDaoConfig.setEnforceReferenceTargetTypes(false);
+		Patient p = new Patient();
+		p.getManagingOrganization().setReferenceElement(id1);
+		myPatientDao.create(p, mySrd);
+
 
 	}
 
