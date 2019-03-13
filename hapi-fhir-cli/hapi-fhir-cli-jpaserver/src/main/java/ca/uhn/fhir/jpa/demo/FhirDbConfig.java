@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Properties;
-
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -24,13 +22,13 @@ public class FhirDbConfig {
 	 */
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
-		String url = "jdbc:derby:directory:target/jpaserver_derby_files;create=true";
+		String url = "jdbc:h2:mem:db;DB_CLOSE_DELAY=-1";
 		if (isNotBlank(ContextHolder.getDatabaseUrl())) {
 			url = ContextHolder.getDatabaseUrl();
 		}
 
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
+		retVal.setDriverClassName("org.h2.Driver");
 		retVal.setUrl(url);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -40,7 +38,7 @@ public class FhirDbConfig {
 	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+		extraProperties.put("hibernate.dialect", org.hibernate.dialect.H2Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");

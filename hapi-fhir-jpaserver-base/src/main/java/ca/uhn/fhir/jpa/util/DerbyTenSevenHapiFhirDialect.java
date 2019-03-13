@@ -30,7 +30,7 @@ import java.sql.SQLException;
 
 public class DerbyTenSevenHapiFhirDialect extends DerbyTenSevenDialect {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DerbyTenSevenHapiFhirDialect.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(org.hibernate.dialect.H2Dialect.class);
 
 	@Override
 	public ViolatedConstraintNameExtracter getViolatedConstraintNameExtracter() {

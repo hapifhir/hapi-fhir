@@ -534,7 +534,7 @@
 		<commons_text_version>1.6</commons_text_version>
 		<commons_io_version>2.6</commons_io_version>
 		<commons_lang3_version>3.8.1</commons_lang3_version>
-		<derby_version>10.14.2.0</derby_version>
+		<h2_version>1.4.198</h2_version>
 		<error_prone_annotations_version>2.0.18</error_prone_annotations_version>
 		<error_prone_core_version>2.3.2</error_prone_core_version>
 		<guava_version>25.0-jre</guava_version>
@@ -895,19 +895,9 @@
 				<version>${commons_text_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.apache.derby</groupId>
-				<artifactId>derby</artifactId>
-				<version>${derby_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.derby</groupId>
-				<artifactId>derbynet</artifactId>
-				<version>${derby_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.derby</groupId>
-				<artifactId>derbyclient</artifactId>
-				<version>${derby_version}</version>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>${h2_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>

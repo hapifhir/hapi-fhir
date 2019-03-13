@@ -1,26 +1,22 @@
 package ca.uhn.fhir.jpa.demo;
 
-import java.sql.SQLException;
-import java.util.Properties;
-
-import javax.persistence.EntityManagerFactory;
-import javax.sql.DataSource;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
-import org.apache.commons.dbcp2.BasicDataSource;
-import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.core.env.Environment;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
+import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.core.env.Environment;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.Properties;
 
 
 /**
@@ -77,8 +73,8 @@ public class FhirServerConfigCommon {
 				dataSource.setDriver(new com.mysql.jdbc.Driver());
 			} else if(dbUrl.indexOf("postgres") > -1) {
 				dataSource.setDriver(new org.postgresql.Driver()); 
-			} else if(dbUrl.indexOf("derby") > -1) {
-				dataSource.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
+			} else if(dbUrl.indexOf("h2") > -1) {
+				dataSource.setDriverClassName("org.h2.Driver");
 			}
 		} catch (SQLException e) {
 			logger.error("----FhiServerConfigCommon: getDataSource: setting driver error: " + e.getMessage());
@@ -137,7 +133,7 @@ public class FhirServerConfigCommon {
 			extraProperties.put("hibernate.dialect", org.hibernate.dialect.PostgreSQL9Dialect.class.getName());
 		} 
 		else if(dbUrl != null && dbUrl.indexOf("derby") > -1) {
-			extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+			extraProperties.put("hibernate.dialect", org.hibernate.dialect.H2Dialect.class.getName());
 		} 
 		boolean hibernateCreate = new Boolean(env.getProperty(Utils.HIBERNATE_CREATE));
 		logger.info("------DB hibernateCreate: " + hibernateCreate);

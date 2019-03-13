@@ -128,16 +128,8 @@
 							<artifactId>annotations</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbyclient</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbynet</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>org.apache.derby</groupId>
-							<artifactId>derbyclient</artifactId>
+							<groupId>com.h2database</groupId>
+							<artifactId>h2</artifactId>
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
