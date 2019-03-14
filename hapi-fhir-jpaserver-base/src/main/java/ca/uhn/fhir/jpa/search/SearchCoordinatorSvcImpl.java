@@ -169,18 +169,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			search = txTemplate.execute(t -> mySearchDao.findByUuid(theUuid));
 
 			if (search == null) {
-				ourLog.info("Client requested unknown paging ID[{}]", theUuid);
+				ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
 				String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 				throw new ResourceGoneException(msg);
 			}
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
-				ourLog.info("Search entity marked as finished with {} results", search.getNumFound());
+				ourLog.debug("Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
-				ourLog.info("Search entity has {} results so far", search.getNumFound());
+				ourLog.debug("Search entity has {} results so far", search.getNumFound());
 				break;
 			}
 
@@ -358,7 +358,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 					PersistedJpaBundleProvider retVal = null;
 					if (searchToUse != null) {
-						ourLog.info("Reusing search {} from cache", searchToUse.getUuid());
+						ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
 						searchToUse.setSearchLastReturned(new Date());
 						mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
 
@@ -535,7 +535,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 
 				if (keepWaiting) {
-					ourLog.info("Waiting, as we only have {} results", mySyncedPids.size());
+					ourLog.info("Waiting as we only have {} results - Search status: {}", mySyncedPids.size(), mySearch.getStatus());
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException theE) {
@@ -544,7 +544,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			} while (keepWaiting);
 
-			ourLog.info("Proceeding, as we have {} results", mySyncedPids.size());
+			ourLog.debug("Proceeding, as we have {} results", mySyncedPids.size());
 
 			ArrayList<Long> retVal = new ArrayList<>();
 			synchronized (mySyncedPids) {

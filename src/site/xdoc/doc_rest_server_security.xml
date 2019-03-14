@@ -254,7 +254,7 @@
 			
 		</section>
 
-		<section name="Search Narrowind">
+		<section name="Search Narrowing">
 
 			<p>
 				HAPI FHIR 3.7.0 introduced a new interceptor, the
