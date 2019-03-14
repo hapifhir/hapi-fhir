@@ -398,7 +398,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
-				theDao.deleteInBatch(link);
+				theDao.deleteAll(link);
 				return null;
 			});
 

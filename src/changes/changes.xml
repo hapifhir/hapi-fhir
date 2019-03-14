@@ -77,6 +77,10 @@
 				A new config setting has been added to the JPA DaoConfig that disables validation
 				of the resource type for target resources in references.
 			</action>
+			<action type="add">
+				HapiLocalizer can now handle message patterns with braces that aren't a part of a
+				message format expression. E.g. "Here is an {example}".
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
