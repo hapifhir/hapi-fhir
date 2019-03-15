@@ -51,14 +51,14 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	private SubscribableChannel myProcessingChannel;
+	protected SubscribableChannel myProcessingChannel;
 
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	protected SubscriptionChannelFactory mySubscriptionChannelFactory;
 
 	/**
 	 * Constructor
@@ -67,6 +67,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		super();
 	}
 
+	@Override
 	public void start() {
 		if (myProcessingChannel == null) {
 			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
