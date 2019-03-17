@@ -117,6 +117,11 @@ public class PortUtil {
 					continue;
 				}
 
+				// Log who asked for the port, just in case that's useful
+				StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+				StackTraceElement previousElement = stackTraceElements[2];
+				ourLog.info("Returned available port {} for: {}", nextCandidatePort, previousElement.toString());
+
 				/*
 				 * This is an attempt to make sure the port is actually
 				 * free before releasing it. For whatever reason on Linux
@@ -144,11 +149,6 @@ public class PortUtil {
 //				} catch (InterruptedException theE) {
 //					// ignore
 //				}
-
-				// Log who asked for the port, just in case that's useful
-				StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-				StackTraceElement previousElement = stackTraceElements[2];
-//				ourLog.info("Returned available port {} for: {}", nextCandidatePort, previousElement.toString());
 
 				return nextCandidatePort;
 

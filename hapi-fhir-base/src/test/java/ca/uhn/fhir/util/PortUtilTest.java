@@ -55,11 +55,10 @@ public class PortUtilTest {
 				for (int j = 0; j < portsPerTaskCount; j++) {
 					int nextFreePort = portUtil.getNextFreePort();
 
-					try {
-						ServerSocket ss = new ServerSocket();
+					try (ServerSocket ss = new ServerSocket()) {
 						ss.bind(new InetSocketAddress("localhost", nextFreePort));
 					} catch (IOException e) {
-						ourLog.error("Failure binding new port: " + e.toString(), e);
+						ourLog.error("Failure binding new port " + nextFreePort + ": " + e.toString(), e);
 						fail(e.toString());
 					}
 
