@@ -133,8 +133,7 @@ public class PortUtil {
 				 * way to do this, but it seems to help...
 				 */
 				for (int i = 0; i < 10; i++) {
-					try {
-						Socket client = new Socket();
+					try (Socket client = new Socket()) {
 						client.setReuseAddress(true);
 						client.connect(new InetSocketAddress(nextCandidatePort), 1000);
 						ourLog.info("Socket still seems open");
@@ -145,7 +144,7 @@ public class PortUtil {
 				}
 
 				try {
-					Thread.sleep(100);
+					Thread.sleep(250);
 				} catch (InterruptedException theE) {
 					// ignore
 				}
