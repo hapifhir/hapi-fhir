@@ -144,11 +144,11 @@ public class PortUtil {
 					}
 				}
 
-//				try {
-//					Thread.sleep(500);
-//				} catch (InterruptedException theE) {
-//					// ignore
-//				}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException theE) {
+					// ignore
+				}
 
 				return nextCandidatePort;
 

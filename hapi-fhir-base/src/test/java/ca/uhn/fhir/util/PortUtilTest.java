@@ -14,8 +14,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.*;
 
 public class PortUtilTest {
 
@@ -44,10 +44,11 @@ public class PortUtilTest {
 
 		List<Integer> ports = Collections.synchronizedList(new ArrayList<>());
 		List<PortUtil> portUtils = Collections.synchronizedList(new ArrayList<>());
+		List<String> errors = Collections.synchronizedList(new ArrayList<>());
 
 		int tasksCount = 50;
 		ExecutorService pool = Executors.newFixedThreadPool(tasksCount);
-		int portsPerTaskCount = 500;
+		int portsPerTaskCount = 51;
 		for (int i = 0; i < tasksCount; i++) {
 			pool.submit(() -> {
 				PortUtil portUtil = new PortUtil();
@@ -58,8 +59,10 @@ public class PortUtilTest {
 					try (ServerSocket ss = new ServerSocket()) {
 						ss.bind(new InetSocketAddress("localhost", nextFreePort));
 					} catch (IOException e) {
-						ourLog.error("Failure binding new port " + nextFreePort + ": " + e.toString(), e);
-						fail(e.toString());
+						String msg = "Failure binding new port " + nextFreePort + ": " + e.toString();
+						ourLog.error(msg, e);
+						errors.add(msg);
+
 					}
 
 					ports.add(nextFreePort);
@@ -70,6 +73,7 @@ public class PortUtilTest {
 		pool.shutdown();
 		pool.awaitTermination(60, TimeUnit.SECONDS);
 
+		assertThat(errors.toString(), errors, empty());
 		assertEquals(tasksCount * portsPerTaskCount, ports.size());
 
 		while (ports.size() > 0) {
