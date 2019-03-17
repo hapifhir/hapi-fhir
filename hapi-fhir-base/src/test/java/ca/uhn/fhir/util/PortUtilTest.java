@@ -46,7 +46,7 @@ public class PortUtilTest {
 		List<PortUtil> portUtils = Collections.synchronizedList(new ArrayList<>());
 		List<String> errors = Collections.synchronizedList(new ArrayList<>());
 
-		int tasksCount = 50;
+		int tasksCount = 20;
 		ExecutorService pool = Executors.newFixedThreadPool(tasksCount);
 		int portsPerTaskCount = 51;
 		for (int i = 0; i < tasksCount; i++) {
