@@ -93,7 +93,7 @@ public class WebsocketWithCriteriaDstu3Test extends BaseResourceProviderDstu3Tes
 	}
 	
 	@Test
-	public void createObservation() throws Exception {
+	public void createObservation() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);

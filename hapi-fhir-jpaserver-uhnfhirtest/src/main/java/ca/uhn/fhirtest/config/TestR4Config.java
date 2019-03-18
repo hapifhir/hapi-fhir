@@ -52,6 +52,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setSubscriptionEnabled(true);
 		retVal.setSubscriptionPollDelay(5000);
 		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);

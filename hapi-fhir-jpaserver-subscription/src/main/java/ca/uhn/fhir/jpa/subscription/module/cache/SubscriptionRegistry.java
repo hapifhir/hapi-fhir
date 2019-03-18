@@ -60,6 +60,13 @@ public class SubscriptionRegistry {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionRegistry() {
+		super();
+	}
+
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}

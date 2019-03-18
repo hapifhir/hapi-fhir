@@ -457,7 +457,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 		transactionStopWatch.endCurrentTask();
 
-		ourLog.info("Transaction timing:\n{}", transactionStopWatch.formatTaskDurations());
+		ourLog.debug("Transaction timing:\n{}", transactionStopWatch.formatTaskDurations());
 
 		return response;
 	}

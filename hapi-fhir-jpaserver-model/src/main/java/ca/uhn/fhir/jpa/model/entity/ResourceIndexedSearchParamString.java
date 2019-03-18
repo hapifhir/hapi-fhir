@@ -46,7 +46,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 	 * IDX_SP_STRING
 	 */
 
-	// This one us used only for sorting
+	// This is used for sorting, and for :contains queries currently
 	@Index(name = "IDX_SP_STRING_HASH_IDENT", columnList = "HASH_IDENTITY"),
 
 	@Index(name = "IDX_SP_STRING_HASH_NRM", columnList = "HASH_NORM_PREFIX,SP_VALUE_NORMALIZED"),

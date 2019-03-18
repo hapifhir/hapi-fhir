@@ -351,7 +351,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 				.addEntry()
 				.getRequest()
 				.setMethod(HTTPVerb.GET)
-				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+				.setUrl("Patient?_count=5&_sort=family&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
