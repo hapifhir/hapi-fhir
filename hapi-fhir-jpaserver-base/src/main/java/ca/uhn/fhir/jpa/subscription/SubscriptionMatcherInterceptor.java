@@ -51,7 +51,7 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	protected SubscribableChannel myProcessingChannel;
+	protected SubscribableChannel myMatchingChannel;
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -69,11 +69,11 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@Override
 	public void start() {
-		if (myProcessingChannel == null) {
-			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		if (myMatchingChannel == null) {
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}
-		myProcessingChannel.subscribe(mySubscriptionMatchingSubscriber);
-		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myProcessingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		myMatchingChannel.subscribe(mySubscriptionMatchingSubscriber);
+		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 
 	}
 
@@ -81,8 +81,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@PreDestroy
 	public void preDestroy() {
 
-		if (myProcessingChannel != null) {
-			myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+		if (myMatchingChannel != null) {
+			myMatchingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 		}
 	}
 
@@ -116,8 +116,8 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
+		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
 	public void setFhirContext(FhirContext theCtx) {
@@ -153,6 +153,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 
 	@VisibleForTesting
 	LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
-		return (LinkedBlockingQueueSubscribableChannel) myProcessingChannel;
+		return (LinkedBlockingQueueSubscribableChannel) myMatchingChannel;
 	}
 }
