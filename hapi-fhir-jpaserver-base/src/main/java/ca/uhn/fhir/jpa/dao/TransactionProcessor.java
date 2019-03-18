@@ -746,7 +746,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 */
 
 			deleteConflicts.removeIf(next ->
-				deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
+				deletedResources.contains(next.getSourceId().toUnqualifiedVersionless().getValue()));
 			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*
