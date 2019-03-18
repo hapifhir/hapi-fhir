@@ -33,12 +33,49 @@ import java.util.List;
 /**
  * Provides server ports that are free, in order for tests to use them
  *
- * This class is not designed for non-testing usage, as it holds on to server ports
- * for a long time (potentially lots of them!)
+ * <p><b>
+ * This class is ONLY designed for unit-testing usage, as it holds on to server ports
+ * for a long time (potentially lots of them!) and will leave your system low on
+ * ports if you put it into production.
+ * </b></p>
+ *
+ * How it works:
+ *
+ * We have lots of tests that need a free port because they want to open up
+ * a server, and need the port to be unique and unused so that the tests can
+ * run multithreaded. This turns out to just be an awful problem to solve for
+ * lots of reasons:
+ *
+ * 1. You can request a free port from the OS by calling <code>new ServerSocket(0);</code>
+ *    and this seems to work 99% of the time, but occasionally on a heavily loaded
+ *    server if two processes ask at the exact same time they will receive the
+ *    same port assignment, and one will fail.
+ * 2. Tests run in separate processes, so we can't just rely on keeping a collection
+ *    of assigned ports or anything like that.
+ *
+ * So we solve this like this:
+ *
+ * At random, this class will pick a "control port" and bind it. A control port
+ * is just a randomly chosen port that is a multiple of 100. If we can bind
+ * successfully to that port, we now own the range of "n+1 to n+99". If we can't
+ * bind that port, it means some other process has probably taken it so
+ * we'll just try again until we find an available control port.
+ *
+ * Assuming we successfully bind a control port, we'll give out any available
+ * ports in the range "n+1 to n+99" until we've exhausted the whole set, and
+ * then we'll pick another control port (if we actually get asked for over
+ * 100 ports.. this should be a rare event).
+ *
+ * This mechanism has the benefit of (fingers crossed) being bulletproof
+ * in terms of its ability to give out ports that are actually free, thereby
+ * preventing random test failures.
+ *
+ * This mechanism has the drawback of never giving up a control port once
+ * it has assigned one. To be clear, this class is deliberately leaking
+ * resources. Again, no production use!
  */
-@CoverageIgnore
 public class PortUtil {
-	public static final int SPACE_SIZE = 100;
+	private static final int SPACE_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(PortUtil.class);
 	private static final PortUtil INSTANCE = new PortUtil();
 	private List<ServerSocket> myControlSockets = new ArrayList<>();
@@ -46,14 +83,17 @@ public class PortUtil {
 	private int myCurrentOffset = 0;
 
 
-	/*
-	 * Non instantiable
+	/**
+	 * Constructor -
 	 */
-	public PortUtil() {
+	PortUtil() {
 		// nothing
 	}
 
-	public synchronized void clear() {
+	/**
+	 * Clear and release all control sockets
+	 */
+	synchronized void clearInstance() {
 		for (ServerSocket next : myControlSockets) {
 			ourLog.info("Releasing control port: {}", next.getLocalPort());
 			try {
@@ -66,7 +106,10 @@ public class PortUtil {
 		myCurrentControlSocketPort = null;
 	}
 
-	public synchronized int getNextFreePort() {
+	/**
+	 * Clear and release all control sockets
+	 */
+	synchronized int getNextFreePort() {
 
 		while (true) {
 

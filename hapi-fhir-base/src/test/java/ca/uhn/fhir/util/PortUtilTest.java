@@ -84,7 +84,7 @@ public class PortUtilTest {
 		}
 
 		for (PortUtil next : portUtils) {
-			next.clear();
+			next.clearInstance();
 		}
 	}
 }
