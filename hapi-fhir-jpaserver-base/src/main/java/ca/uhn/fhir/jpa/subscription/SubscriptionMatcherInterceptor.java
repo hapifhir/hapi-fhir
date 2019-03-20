@@ -67,7 +67,6 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		super();
 	}
 
-	@Override
 	public void start() {
 		if (myMatchingChannel == null) {
 			myMatchingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);

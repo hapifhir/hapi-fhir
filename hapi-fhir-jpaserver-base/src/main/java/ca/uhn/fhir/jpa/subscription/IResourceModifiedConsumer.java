@@ -25,5 +25,4 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 // FIXME KHS rename this class and method
 public interface IResourceModifiedConsumer {
 	void submitResourceModified(ResourceModifiedMessage theMsg);
-	void start();
 }
