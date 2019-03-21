@@ -676,6 +676,7 @@ public abstract class BaseParser implements IParser {
 			if (entries != null) {
 				for (IBase nextEntry : entries) {
 
+
 					/**
 					 * If Bundle.entry.fullUrl is populated, set the resource ID to that
 					 */
@@ -686,13 +687,19 @@ public abstract class BaseParser implements IParser {
 						List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
 						if (fullUrl != null && !fullUrl.isEmpty()) {
 							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
-							//Only replace ID if URL is not empty and it is not a temporary url (urn:uuid)
-							if (!value.isEmpty() && !value.getValueAsString().startsWith("urn:uuid")) {
+							String urlString = value.getValueAsString();
+							//Don't replace ID with fullURL if fullURL is not a absolute URL
+							if (urlString.startsWith("urn:"))
+							{
+								String[] splittedUrl = urlString.split(":");
+								urlString = splittedUrl[splittedUrl.length - 1];
+							}
+							if (isNotBlank(urlString)) {
 								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
 								if (entryResources != null && entryResources.size() > 0) {
 									IBaseResource res = (IBaseResource) entryResources.get(0);
 									String versionId = res.getIdElement().getVersionIdPart();
-									res.setId(value.getValueAsString());
+									res.setId(urlString);
 									if (isNotBlank(versionId) && res.getIdElement().hasVersionIdPart() == false) {
 										res.setId(res.getIdElement().withVersion(versionId));
 									}
