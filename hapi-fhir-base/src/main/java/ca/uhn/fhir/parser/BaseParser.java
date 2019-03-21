@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,6 +63,7 @@ public abstract class BaseParser implements IParser {
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
+
 	/**
 	 * Constructor
 	 */
@@ -667,7 +668,7 @@ public abstract class BaseParser implements IParser {
 		T retVal = doParseResource(theResourceType, theReader);
 
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(retVal);
-		if ("Bundle".equals(def.getName())) {
+		if (def.getName().equals("Bundle")) {
 
 			BaseRuntimeChildDefinition entryChild = def.getChildByName("entry");
 			BaseRuntimeElementCompositeDefinition<?> entryDef = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
@@ -681,14 +682,12 @@ public abstract class BaseParser implements IParser {
 					// TODO: should emit a warning and maybe notify the error handler if the resource ID doesn't match the
 					// fullUrl idPart
 					BaseRuntimeChildDefinition fullUrlChild = entryDef.getChildByName("fullUrl");
-					if (fullUrlChild == null) {
-						continue; // TODO: remove this once the data model in tinder plugin catches up to 1.2
-					}
 					if (isOverrideResourceIdWithBundleEntryFullUrl()) {
 						List<IBase> fullUrl = fullUrlChild.getAccessor().getValues(nextEntry);
 						if (fullUrl != null && !fullUrl.isEmpty()) {
 							IPrimitiveType<?> value = (IPrimitiveType<?>) fullUrl.get(0);
-							if (value.isEmpty() == false) {
+							//Only replace ID if URL is not empty and it is not a temporary url (urn:uuid)
+							if (!value.isEmpty() && !value.getValueAsString().startsWith("urn:uuid")) {
 								List<IBase> entryResources = entryDef.getChildByName("resource").getAccessor().getValues(nextEntry);
 								if (entryResources != null && entryResources.size() > 0) {
 									IBaseResource res = (IBaseResource) entryResources.get(0);
