@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
@@ -91,7 +90,6 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -158,6 +156,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private int myFetchSize;
 	private Integer myMaxResultsToFetch;
 	private Set<Long> myPidSet;
+	private boolean myHaveIndexJoins = false;
 
 	/**
 	 * Constructor
@@ -213,7 +212,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateHas(List<List<? extends IQueryParameterType>> theHasParameters) {
+	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -274,7 +273,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateLanguage(List<List<? extends IQueryParameterType>> theList) {
+	private void addPredicateLanguage(List<List<IQueryParameterType>> theList) {
 		for (List<? extends IQueryParameterType> nextList : theList) {
 
 			Set<String> values = new HashSet<>();
@@ -286,7 +285,7 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 					values.add(nextValue);
 				} else {
-					throw new InternalErrorException("Lanugage parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
+					throw new InternalErrorException("Language parameter must be of type " + StringParam.class.getCanonicalName() + " - Got " + next.getClass().getCanonicalName());
 				}
 			}
 
@@ -586,7 +585,7 @@ public class SearchBuilder implements ISearchBuilder {
 		Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 		subQ.select(subQfrom.get("myId").as(Long.class));
 
-		List<List<? extends IQueryParameterType>> andOrParams = new ArrayList<>();
+		List<List<IQueryParameterType>> andOrParams = new ArrayList<>();
 		andOrParams.add(theOrValues);
 
 		/*
@@ -641,7 +640,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return chainValue;
 	}
 
-	private void addPredicateResourceId(List<List<? extends IQueryParameterType>> theValues) {
+	private void addPredicateResourceId(List<List<IQueryParameterType>> theValues) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<>();
 			for (IQueryParameterType next : nextValue) {
@@ -701,7 +700,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateTag(List<List<? extends IQueryParameterType>> theList, String theParamName) {
+	private void addPredicateTag(List<List<IQueryParameterType>> theList, String theParamName) {
 		TagTypeEnum tagType;
 		if (Constants.PARAM_TAG.equals(theParamName)) {
 			tagType = TagTypeEnum.TAG;
@@ -1013,13 +1012,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> Join<ResourceTable, T> createOrReuseJoin(JoinEnum theType, String theSearchParameterName) {
-		JoinKey key = new JoinKey(theSearchParameterName, theType);
-		return (Join<ResourceTable, T>) myIndexJoins.computeIfAbsent(key, k -> createJoin(theType, theSearchParameterName));
-	}
-
-	@SuppressWarnings("unchecked")
-	private  <T> Join<ResourceTable, T> createJoin(JoinEnum theType, String theSearchParameterName) {
+	private <T> Join<ResourceTable, T> createJoin(JoinEnum theType, String theSearchParameterName) {
 		Join<ResourceTable, ResourceIndexedSearchParamDate> join = null;
 		switch (theType) {
 			case DATE:
@@ -1044,6 +1037,11 @@ public class SearchBuilder implements ISearchBuilder {
 				join = myResourceTableRoot.join("myParamsToken", JoinType.LEFT);
 				break;
 		}
+
+		JoinKey key = new JoinKey(theSearchParameterName, theType);
+		myIndexJoins.put(key, join);
+		myHaveIndexJoins = true;
+
 		return (Join<ResourceTable, T>) join;
 	}
 
@@ -1531,51 +1529,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchUuid;
 
-		/*
-		 * Check if there is a unique key associated with the set
-		 * of parameters passed in
-		 */
-		ourLog.debug("Checking for unique index for query: {}", theParams.toNormalizedQueryString(myContext));
-		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			if (myParams.getIncludes().isEmpty()) {
-				if (myParams.getRevIncludes().isEmpty()) {
-					if (myParams.getEverythingMode() == null) {
-						if (myParams.isAllParametersHaveNoModifier()) {
-							Set<String> paramNames = theParams.keySet();
-							if (paramNames.isEmpty() == false) {
-								List<JpaRuntimeSearchParam> searchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, paramNames);
-								if (searchParams.size() > 0) {
-									List<List<String>> params = new ArrayList<>();
-									for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamNameToValues : theParams.entrySet()) {
-										String nextParamName = nextParamNameToValues.getKey();
-										nextParamName = UrlUtil.escapeUrlParam(nextParamName);
-										for (List<? extends IQueryParameterType> nextAnd : nextParamNameToValues.getValue()) {
-											ArrayList<String> nextValueList = new ArrayList<>();
-											params.add(nextValueList);
-											for (IQueryParameterType nextOr : nextAnd) {
-												String nextOrValue = nextOr.getValueAsQueryToken(myContext);
-												nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
-												nextValueList.add(nextParamName + "=" + nextOrValue);
-											}
-										}
-									}
-
-									Set<String> uniqueQueryStrings = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(myResourceName, params);
-									if (ourTrackHandlersForUnitTest) {
-										ourLastHandlerParamsForUnitTest = theParams;
-										ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
-										ourLastHandlerThreadForUnitTest = Thread.currentThread().getName();
-									}
-									return new UniqueIndexIterator(uniqueQueryStrings);
-
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
 		if (ourTrackHandlersForUnitTest) {
 			ourLastHandlerParamsForUnitTest = theParams;
 			ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
@@ -1602,31 +1555,6 @@ public class SearchBuilder implements ISearchBuilder {
 		if (sort != null) {
 			assert !theCount;
 
-//			outerQuery = myBuilder.createQuery(Long.class);
-//			Root<ResourceTable> outerQueryFrom = outerQuery.from(ResourceTable.class);
-//
-//			List<Order> orders = Lists.newArrayList();
-//			List<Predicate> predicates = Lists.newArrayList();
-//
-//			createSort(myBuilder, outerQueryFrom, sort, orders, predicates);
-//			if (orders.size() > 0) {
-//				outerQuery.orderBy(orders);
-//			}
-//
-//			Subquery<Long> subQ = outerQuery.subquery(Long.class);
-//			Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
-//
-//			myResourceTableQuery = subQ;
-//			myResourceTableRoot = subQfrom;
-//
-//			Expression<Long> selectExpr = subQfrom.get("myId").as(Long.class);
-//			subQ.select(selectExpr);
-//
-//			predicates.add(0, myBuilder.in(outerQueryFrom.get("myId").as(Long.class)).value(subQ));
-//
-//			outerQuery.multiselect(outerQueryFrom.get("myId").as(Long.class));
-//			outerQuery.where(predicates.toArray(new Predicate[0]));
-
 			outerQuery = myBuilder.createQuery(Long.class);
 			myResourceTableQuery = outerQuery;
 			myResourceTableRoot = myResourceTableQuery.from(ResourceTable.class);
@@ -1643,7 +1571,6 @@ public class SearchBuilder implements ISearchBuilder {
 			if (orders.size() > 0) {
 				outerQuery.orderBy(orders);
 			}
-
 
 		} else {
 
@@ -1713,7 +1640,7 @@ public class SearchBuilder implements ISearchBuilder {
 		 * If we have any joins to index tables, we get this behaviour already guaranteed so we don't
 		 * need an explicit predicate for it.
 		 */
-		if (myIndexJoins.isEmpty()) {
+		if (!myHaveIndexJoins) {
 			if (myParams.getEverythingMode() == null) {
 				myPredicates.add(myBuilder.equal(myResourceTableRoot.get("myResourceType"), myResourceName));
 			}
@@ -2186,17 +2113,111 @@ public class SearchBuilder implements ISearchBuilder {
 	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {
 		myParams = theParams;
 
+		// Remove any empty parameters
 		theParams.clean();
-		for (Entry<String, List<List<? extends IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
-			String nextParamName = nextParamEntry.getKey();
-			List<List<? extends IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams);
 
+		/*
+		 * Check if there is a unique key associated with the set
+		 * of parameters passed in
+		 */
+		boolean couldBeEligibleForCompositeUniqueSpProcessing =
+			myDaoConfig.isUniqueIndexesEnabled() &&
+				myParams.getEverythingMode() == null &&
+				myParams.isAllParametersHaveNoModifier();
+		if (couldBeEligibleForCompositeUniqueSpProcessing) {
+
+			// Since we're going to remove elements below
+			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
+
+			List<JpaRuntimeSearchParam> activeUniqueSearchParams = mySearchParamRegistry.getActiveUniqueSearchParams(myResourceName, theParams.keySet());
+			if (activeUniqueSearchParams.size() > 0) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append(myResourceName);
+				sb.append("?");
+
+				boolean first = true;
+
+				ArrayList<String> keys = new ArrayList<>(theParams.keySet());
+				Collections.sort(keys);
+				for (String nextParamName : keys) {
+					List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+
+					nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+					if (nextValues.get(0).size() != 1) {
+						sb = null;
+						break;
+					}
+
+					// Reference params are only eligible for using a composite index if they
+					// are qualified
+					RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+						ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
+						if (isBlank(param.getResourceType())) {
+							sb = null;
+							break;
+						}
+					}
+
+					List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
+					IQueryParameterType nextOr = nextAnd.remove(0);
+					String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+					nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
+
+					if (first) {
+						first = false;
+					} else {
+						sb.append('&');
+					}
+
+					sb.append(nextParamName).append('=').append(nextOrValue);
+
+				}
+
+				if (sb != null) {
+					String indexString = sb.toString();
+					ourLog.debug("Checking for unique index for query: {}", indexString);
+					if (ourTrackHandlersForUnitTest) {
+						ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
+					}
+					addPredicateCompositeStringUnique(theParams, indexString);
+				}
+			}
+		}
+
+		// Handle each parameter
+		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
+			String nextParamName = nextParamEntry.getKey();
+			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
+			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams);
 		}
 
 	}
 
-	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams) {
+
+	private <T> void ensureSubListsAreWritable(List<List<T>> theListOfLists) {
+		for (int i = 0; i < theListOfLists.size(); i++) {
+			List<T> oldSubList = theListOfLists.get(i);
+			if (!(oldSubList instanceof ArrayList)) {
+				List<T> newSubList = new ArrayList<>(oldSubList);
+				theListOfLists.set(i, newSubList);
+			}
+		}
+	}
+
+	private void addPredicateCompositeStringUnique(@Nonnull SearchParameterMap theParams, String theIndexdString) {
+		myHaveIndexJoins = true;
+
+		Join<ResourceTable, ResourceIndexedCompositeStringUnique> join = myResourceTableRoot.join("myParamsCompositeStringUnique", JoinType.LEFT);
+		Predicate predicate = myBuilder.equal(join.get("myIndexString"), theIndexdString);
+		myPredicates.add(predicate);
+
+		// Remove any empty parameters remaining after this
+		theParams.clean();
+	}
+
+	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
 
 		if (theAndOrParams.isEmpty()) {
 			return;
@@ -2566,47 +2587,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private class UniqueIndexIterator implements IResultIterator {
-		private final Set<String> myUniqueQueryStrings;
-		private Iterator<Long> myWrap = null;
-
-		UniqueIndexIterator(Set<String> theUniqueQueryStrings) {
-			myUniqueQueryStrings = theUniqueQueryStrings;
-		}
-
-		private void ensureHaveQuery() {
-			if (myWrap == null) {
-				ourLog.debug("Searching for unique index matches over {} candidate query strings", myUniqueQueryStrings.size());
-				StopWatch sw = new StopWatch();
-				Collection<Long> resourcePids = myResourceIndexedCompositeStringUniqueDao.findResourcePidsByQueryStrings(myUniqueQueryStrings);
-				ourLog.debug("Found {} unique index matches in {}ms", resourcePids.size(), sw.getMillis());
-				myWrap = resourcePids.iterator();
-			}
-		}
-
-		@Override
-		public boolean hasNext() {
-			ensureHaveQuery();
-			return myWrap.hasNext();
-		}
-
-		@Override
-		public Long next() {
-			ensureHaveQuery();
-			return myWrap.next();
-		}
-
-		@Override
-		public void remove() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public int getSkippedCount() {
-			return 0;
-		}
-
-	}
 
 	private static class CountQueryIterator implements Iterator<Long> {
 		private final TypedQuery<Long> myQuery;

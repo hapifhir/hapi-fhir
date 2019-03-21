@@ -90,6 +90,16 @@
 				HapiLocalizer can now handle message patterns with braces that aren't a part of a
 				message format expression. E.g. "Here is an {example}".
 			</action>
+			<action type="add">
+				JPA searches using a Composite Unique Index will now use that index for faster
+				searching even if the search has _includes and/or _sorts. Previously these two
+				features caused the search builder to skip using the index.
+			</action>
+			<action type="fix">
+				JPA searches using a Composite Unique Index did not return the correct results if
+				a REFERENCE search parameter was used with arguments that consisted of
+				unqualified resource IDs.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
