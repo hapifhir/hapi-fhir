@@ -531,8 +531,9 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
       myResourceType = null;
       myHaveComponentParts = true;
     } else if (theValue.startsWith(URN_PREFIX)) {
+      int idIndex = theValue.lastIndexOf(':');
       myBaseUrl = null;
-      myUnqualifiedId = theValue;
+      myUnqualifiedId = theValue.substring(idIndex + 1);
       myUnqualifiedVersionId = null;
       myResourceType = null;
       myHaveComponentParts = true;
