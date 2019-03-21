@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -18,6 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -2533,6 +2535,34 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
 		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
 	}
+
+	@Ignore
+	@Test
+	public void testSearchWithContext() {
+
+
+		String url = "Procedure?_count=300&_format=json&_include%3Arecurse=*&category=CANN&encounter.identifier=A1057852019&status%3Anot=entered-in-error";
+		RuntimeResourceDefinition def = myFhirCtx.getResourceDefinition("Procedure");
+		SearchParameterMap sp = myMatchUrlService.translateMatchUrl(url, def);
+
+
+		myCaptureQueriesListener.clear();
+		sp.setLoadSynchronous(true);
+		IBundleProvider retrieved = myProcedureDao.search(sp);
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+//		List<String> queries = myCaptureQueriesListener
+//			.getSelectQueriesForCurrentThread()
+//			.stream()
+//			.map(t -> t.getSql(true, true))
+//			.collect(Collectors.toList());
+//
+//		String searchQuery = queries.get(0);
+//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "HFJ_SPIDX_TOKEN"));
+//		assertEquals(searchQuery, 1, StringUtils.countMatches(searchQuery.toUpperCase(), "LEFT OUTER JOIN"));
+//		assertEquals(searchQuery, 2, StringUtils.countMatches(searchQuery.toUpperCase(), "AND RESOURCETA0_.RES_UPDATED"));
+	}
+
 
 
 	@Test
