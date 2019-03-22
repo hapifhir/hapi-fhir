@@ -232,7 +232,9 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		/**
 		 * Constructor
 		 */
-		DateParamDateTimeHolder() {
+		// LEAVE THIS AS PUBLIC!!
+		@SuppressWarnings("WeakerAccess")
+		public DateParamDateTimeHolder() {
 			super();
 		}
 
