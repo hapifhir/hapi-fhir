@@ -373,7 +373,6 @@ public class SearchParameterMap implements Serializable {
 						b.append(',');
 					}
 					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
-//					b.append(ParameterUtil.escapeAndUrlEncode(valueAsQueryToken));
 					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}

@@ -483,6 +483,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			myResourceType = theResourceType;
 			myCompletionLatch = new CountDownLatch(1);
 			mySearchRuntimeDetails = new SearchRuntimeDetails(mySearch.getUuid());
+			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
 		}
 
 		public SearchRuntimeDetails getSearchRuntimeDetails() {
@@ -703,6 +704,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				});
 
+//				FIXME: JA interceptor
 				ourLog.info("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
 
 			} catch (Throwable t) {

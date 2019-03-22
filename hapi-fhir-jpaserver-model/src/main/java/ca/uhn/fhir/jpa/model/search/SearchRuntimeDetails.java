@@ -11,6 +11,7 @@ public class SearchRuntimeDetails {
 	private StopWatch myQueryStopwatch;
 	private int myFoundMatchesCount;
 	private boolean myLoadSynchronous;
+	private String myQueryString;
 
 	public SearchRuntimeDetails(String theSearchUuid) {
 		mySearchUuid = theSearchUuid;
@@ -42,5 +43,13 @@ public class SearchRuntimeDetails {
 
 	public boolean getLoadSynchronous() {
 		return myLoadSynchronous;
+	}
+
+	public void setQueryString(String theQueryString) {
+		myQueryString = theQueryString;
+	}
+
+	public String getQueryString() {
+		return myQueryString;
 	}
 }
