@@ -100,6 +100,12 @@
 				a REFERENCE search parameter was used with arguments that consisted of
 				unqualified resource IDs.
 			</action>
+			<action type="add">
+				When performing a search in the JPA server where one of the parameters is a
+				reference with multiple values (e.g. Patient?organization=A,B) the generated
+				SQL was previously a set of OR clauses and this has been collapsed into a single
+				IN clause for better performance.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
