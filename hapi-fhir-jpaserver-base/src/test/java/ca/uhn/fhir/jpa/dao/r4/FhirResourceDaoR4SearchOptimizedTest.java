@@ -1,19 +1,26 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.ReferenceOrListParam;
+import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,10 +33,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
@@ -493,7 +500,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		waitForSize(20, () -> runInTransaction(()-> mySearchEntityDao.findByUuid(uuid).getNumFound()));
+		waitForSize(20, () -> runInTransaction(() -> mySearchEntityDao.findByUuid(uuid).getNumFound()));
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuid(uuid);
 			assertEquals(20, search.getNumFound());
@@ -567,6 +574,121 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+
+	/**
+	 * A search with a big list of OR clauses for references should use a single SELECT ... WHERE .. IN
+	 * and not a whole bunch of SQL ORs.
+	 */
+	@Test
+	public void testReferenceOrLinksUseInList() {
+
+		List<Long> ids = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			Organization org = new Organization();
+			org.setActive(true);
+			ids.add(myOrganizationDao.create(org).getId().getIdPartAsLong());
+		}
+		for (int i = 0; i < 5; i++) {
+			Patient pt = new Patient();
+			pt.setManagingOrganization(new Reference("Organization/" + ids.get(i)));
+			myPatientDao.create(pt).getId().getIdPartAsLong();
+		}
+
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_ORGANIZATION, new ReferenceOrListParam()
+			.addOr(new ReferenceParam("Organization/" + ids.get(0)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(1)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(2)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(3)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(4)))
+		);
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
+
+		String resultingQueryNotFormatted = queries.get(0);
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"));
+		assertThat(resultingQueryNotFormatted, containsString("TARGET_RESOURCE_ID in ('" + ids.get(0) + "' , '" + ids.get(1) + "' , '" + ids.get(2) + "' , '" + ids.get(3) + "' , '" + ids.get(4) + "')"));
+
+		// Ensure that the search actually worked
+		assertEquals(5, search.size().intValue());
+
+	}
+
+
+	@Test
+	public void testReferenceOrLinksUseInList_ForcedIds() {
+
+		List<String> ids = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			Organization org = new Organization();
+			org.setId("ORG"+i);
+			org.setActive(true);
+			runInTransaction(()->{
+				IIdType id = myOrganizationDao.update(org).getId();
+				ids.add(id.getIdPart());
+			});
+
+//			org = myOrganizationDao.read(id);
+//			assertTrue(org.getActive());
+		}
+
+		runInTransaction(()->{
+			for (ResourceTable next : myResourceTableDao.findAll()) {
+				ourLog.info("Resource pid {} of type {}", next.getId(), next.getResourceType());
+			}
+		});
+
+
+
+		for (int i = 0; i < 5; i++) {
+			Patient pt = new Patient();
+			pt.setManagingOrganization(new Reference("Organization/" + ids.get(i)));
+			myPatientDao.create(pt).getId().getIdPartAsLong();
+		}
+
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_ORGANIZATION, new ReferenceOrListParam()
+			.addOr(new ReferenceParam("Organization/" + ids.get(0)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(1)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(2)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(3)))
+			.addOr(new ReferenceParam("Organization/" + ids.get(4)))
+		);
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
+
+		// Forced ID resolution
+		String resultingQueryNotFormatted = queries.get(0);
+		assertThat(resultingQueryNotFormatted, containsString("RESOURCE_TYPE='Organization'"));
+		assertThat(resultingQueryNotFormatted, containsString("FORCED_ID in ('ORG0' , 'ORG1' , 'ORG2' , 'ORG3' , 'ORG4')"));
+
+		// The search itself
+		resultingQueryNotFormatted = queries.get(1);
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "Patient.managingOrganization"));
+		assertThat(resultingQueryNotFormatted, matchesPattern(".*TARGET_RESOURCE_ID in \\('[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+' , '[0-9]+'\\).*"));
+
+		// Ensure that the search actually worked
+		assertEquals(5, search.size().intValue());
+
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
