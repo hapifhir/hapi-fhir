@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -290,6 +291,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
+			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(searchUuid);
+			searchRuntimeDetails.setLoadSynchronous(true);
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -299,7 +302,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				// Load the results synchronously
 				final List<Long> pids = new ArrayList<>();
 
-				Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
+				Iterator<Long> resultIter = sb.createQuery(theParams, searchRuntimeDetails);
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
@@ -468,6 +471,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private boolean myAdditionalPrefetchThresholdsRemaining;
 		private List<Long> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
+		private SearchRuntimeDetails mySearchRuntimeDetails;
 
 		/**
 		 * Constructor
@@ -478,6 +482,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			myParams = theParams;
 			myResourceType = theResourceType;
 			myCompletionLatch = new CountDownLatch(1);
+			mySearchRuntimeDetails = new SearchRuntimeDetails(mySearch.getUuid());
+		}
+
+		public SearchRuntimeDetails getSearchRuntimeDetails() {
+			return mySearchRuntimeDetails;
 		}
 
 		protected Search getSearch() {
@@ -860,7 +869,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			IResultIterator resultIterator = sb.createQuery(myParams, mySearch.getUuid());
+			IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails);
 			assert (resultIterator != null);
 
 			/*

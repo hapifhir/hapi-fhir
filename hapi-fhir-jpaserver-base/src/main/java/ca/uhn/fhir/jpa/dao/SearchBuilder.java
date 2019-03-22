@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -117,6 +118,8 @@ public class SearchBuilder implements ISearchBuilder {
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
 	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -140,8 +143,6 @@ public class SearchBuilder implements ISearchBuilder {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private IResourceIndexedCompositeStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private List<Long> myAlsoIncludePids;
 	private CriteriaBuilder myBuilder;
 	private BaseHapiFhirDao<?> myCallingDao;
@@ -1524,10 +1525,10 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public IResultIterator createQuery(SearchParameterMap theParams, String theSearchUuid) {
+	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
-		mySearchUuid = theSearchUuid;
+		mySearchUuid = theSearchRuntimeDetails.getSearchUuid();
 
 		if (ourTrackHandlersForUnitTest) {
 			ourLastHandlerParamsForUnitTest = theParams;
@@ -1539,7 +1540,7 @@ public class SearchBuilder implements ISearchBuilder {
 			myPidSet = new HashSet<>();
 		}
 
-		return new QueryIterator();
+		return new QueryIterator(theSearchRuntimeDetails);
 	}
 
 	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount) {
@@ -2458,6 +2459,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	private final class QueryIterator extends BaseIterator<Long> implements IResultIterator {
 
+		private final SearchRuntimeDetails mySearchRuntimeDetails;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -2465,10 +2467,10 @@ public class SearchBuilder implements ISearchBuilder {
 		private Iterator<Long> myResultsIterator;
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
-		private StopWatch myStopwatch = null;
 		private int mySkipCount = 0;
 
-		private QueryIterator() {
+		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails) {
+			mySearchRuntimeDetails = theSearchRuntimeDetails;
 			mySort = myParams.getSort();
 
 			// Includes are processed inline for $everything query
@@ -2479,10 +2481,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		private void fetchNext() {
 
-			if (myFirst) {
-				myStopwatch = new StopWatch();
-			}
-
 			// If we don't have a query yet, create one
 			if (myResultsIterator == null) {
 				if (myMaxResultsToFetch == null) {
@@ -2490,6 +2488,8 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 
 				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
+
+				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
 				Query<Long> hibernateQuery = (Query<Long>) query;
 				hibernateQuery.setFetchSize(myFetchSize);
@@ -2518,13 +2518,14 @@ public class SearchBuilder implements ISearchBuilder {
 				if (myNext == null) {
 					while (myResultsIterator.hasNext()) {
 						Long next = myResultsIterator.next();
-						if (next != null)
+						if (next != null) {
 							if (myPidSet.add(next)) {
 								myNext = next;
 								break;
 							} else {
 								mySkipCount++;
 							}
+						}
 					}
 				}
 
@@ -2552,13 +2553,15 @@ public class SearchBuilder implements ISearchBuilder {
 
 			} // if we need to fetch the next result
 
+			mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+
 			if (myFirst) {
-				ourLog.debug("Initial query result returned in {}ms for query {}", myStopwatch.getMillis(), mySearchUuid);
+				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED, mySearchRuntimeDetails);
 				myFirst = false;
 			}
 
 			if (NO_MORE.equals(myNext)) {
-				ourLog.debug("Query found {} matches in {}ms for query {}", myPidSet.size(), myStopwatch.getMillis(), mySearchUuid);
+				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE, mySearchRuntimeDetails);
 			}
 
 		}

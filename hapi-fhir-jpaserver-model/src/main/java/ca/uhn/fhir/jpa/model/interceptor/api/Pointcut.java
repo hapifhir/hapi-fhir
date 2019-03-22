@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,8 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * limitations under the License.
  * #L%
  */
+
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -360,7 +362,51 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	RESOURCE_MAY_BE_RETURNED("org.hl7.fhir.instance.model.api.IBaseResource");
+	RESOURCE_MAY_BE_RETURNED("org.hl7.fhir.instance.model.api.IBaseResource"),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has returned the very first result
+	 * from the database. The timing on this call can be a good indicator of how
+	 * performant a query is in general.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_FIRST_RESULT_LOADED(SearchRuntimeDetails.class.getName()),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when an individual search query SQL SELECT statement
+	 * has completed and no more results are available from that query. Note that this
+	 * doesn't necessarily mean that no more matching results exist in the database,
+	 * since HAPI FHIR JPA batch loads results in to the query cache in chunks in order
+	 * to provide predicable results without overloading memory or the database.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_SELECT_COMPLETE(SearchRuntimeDetails.class.getName());
 
 	private final List<String> myParameterTypes;
 
