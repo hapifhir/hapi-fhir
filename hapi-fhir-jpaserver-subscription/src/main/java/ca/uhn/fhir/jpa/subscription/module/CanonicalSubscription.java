@@ -308,6 +308,28 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
 		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			EmailDetails that = (EmailDetails) theO;
+
+			return new EqualsBuilder()
+				.append(myFrom, that.myFrom)
+				.append(mySubjectTemplate, that.mySubjectTemplate)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myFrom)
+				.append(mySubjectTemplate)
+				.toHashCode();
+		}
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
