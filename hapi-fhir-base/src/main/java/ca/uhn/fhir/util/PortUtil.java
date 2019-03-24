@@ -118,6 +118,7 @@ public class PortUtil {
 			ds.setReuseAddress(true);
 			return true;
 		} catch (IOException e) {
+			return false;
 		} finally {
 			if (ds != null) {
 				ds.close();
@@ -131,8 +132,6 @@ public class PortUtil {
 				}
 			}
 		}
-
-		return false;
 	}
 
 	/**
