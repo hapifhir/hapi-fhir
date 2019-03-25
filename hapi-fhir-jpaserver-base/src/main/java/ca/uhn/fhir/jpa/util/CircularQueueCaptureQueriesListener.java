@@ -105,6 +105,18 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Log first captured SELECT query
+	 */
+	public void logFirstSelectQueryForCurrentThread() {
+		String firstSelectQuery = getSelectQueriesForCurrentThread()
+			.stream()
+			.findFirst()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.orElse("NONE FOUND");
+		ourLog.info("First select Query:\n{}", firstSelectQuery);
+	}
+
+	/**
 	 * Log all captured INSERT queries
 	 */
 	public void logInsertQueriesForCurrentThread() {

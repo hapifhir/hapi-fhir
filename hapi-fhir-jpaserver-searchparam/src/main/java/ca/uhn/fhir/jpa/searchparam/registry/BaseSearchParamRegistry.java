@@ -169,12 +169,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			}
 
 			if (next.getCompositeOf() != null) {
-				next.getCompositeOf().sort(new Comparator<RuntimeSearchParam>() {
-					@Override
-					public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
-						return StringUtils.compare(theO1.getName(), theO2.getName());
-					}
-				});
+				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
 					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
 						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());

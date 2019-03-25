@@ -100,9 +100,16 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			if (theInlineParams) {
 				List<String> nextParams = new ArrayList<>(myParams);
-				while (retVal.contains("?") && nextParams.size() > 0) {
-					int idx = retVal.indexOf("?");
-					retVal = retVal.substring(0, idx) + "'" + nextParams.remove(0) + "'" + retVal.substring(idx + 1);
+
+				int idx = 0;
+				while (nextParams.size() > 0) {
+					idx = retVal.indexOf("?", idx);
+					if (idx == -1) {
+						break;
+					}
+					String nextSubstitution = "'" + nextParams.remove(0) + "'";
+					retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
+					idx += nextSubstitution.length();
 				}
 			}
 

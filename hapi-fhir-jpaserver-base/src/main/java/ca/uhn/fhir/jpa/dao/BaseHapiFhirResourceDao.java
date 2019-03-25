@@ -1071,7 +1071,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			for (List<List<? extends IQueryParameterType>> nextAnds : theParams.values()) {
+			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
 				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
 					for (IQueryParameterType next : nextOrs) {
 						if (next.getMissing() != null) {

@@ -29,8 +29,8 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 
 public interface IQueryParameterOr<T extends IQueryParameterType> extends Serializable {
 
-	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
+	void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
 
-	public List<T> getValuesAsQueryTokens();
+	List<T> getValuesAsQueryTokens();
 
 }
