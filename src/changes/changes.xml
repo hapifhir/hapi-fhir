@@ -106,6 +106,12 @@
 				SQL was previously a set of OR clauses and this has been collapsed into a single
 				IN clause for better performance.
 			</action>
+			<action type="fix">
+				When returning the results of a history operation from a HAPI FHIR server,
+				any entries with a method of DELETE contained a stub resource in
+				Bundle.entry.resource, even though the FHIR spec states that this field
+				should be empty. This was corrected.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

@@ -81,13 +81,13 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			}
 		}
 		target = myEntityManager.find(ResourceTable.class, valueOf);
-		ourLog.trace("Resource PID {} is of type {}", valueOf, target.getResourceType());
 		RuntimeResourceDefinition targetResourceDef = myContext.getResourceDefinition(theType);
 		if (target == null) {
 			String resName = targetResourceDef.getName();
 			throw new InvalidRequestException("Resource " + resName + "/" + theId + " not found, specified in path: " + theNextPathsUnsplit);
 		}
 
+		ourLog.trace("Resource PID {} is of type {}", valueOf, target.getResourceType());
 		if (!theTypeString.equals(target.getResourceType())) {
 			ourLog.error("Resource {} with PID {} was not of type {}", target.getIdDt().getValue(), target.getId(), theTypeString);
 			throw new UnprocessableEntityException(
