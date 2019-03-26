@@ -1002,6 +1002,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
 

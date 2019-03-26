@@ -62,6 +62,7 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 		Long valueOf;
 		try {
 			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId);
+			ourLog.trace("Translated {}/{} to resource PID {}", theType, theId, valueOf);
 		} catch (ResourceNotFoundException e) {
 			if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 				return null;
@@ -86,7 +87,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			throw new InvalidRequestException("Resource " + resName + "/" + theId + " not found, specified in path: " + theNextPathsUnsplit);
 		}
 
+		ourLog.trace("Resource PID {} is of type {}", valueOf, target.getResourceType());
 		if (!theTypeString.equals(target.getResourceType())) {
+			ourLog.error("Resource {} with PID {} was not of type {}", target.getIdDt().getValue(), target.getId(), theTypeString);
 			throw new UnprocessableEntityException(
 				"Resource contains reference to " + theNextId.getValue() + " but resource with ID " + theNextId.getIdPart() + " is actually of type " + target.getResourceType());
 		}

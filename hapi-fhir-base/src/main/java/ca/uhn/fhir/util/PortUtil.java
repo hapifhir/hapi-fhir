@@ -24,10 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,38 +40,38 @@ import java.util.List;
  * for a long time (potentially lots of them!) and will leave your system low on
  * ports if you put it into production.
  * </b></p>
- *
+ * <p>
  * How it works:
- *
+ * <p>
  * We have lots of tests that need a free port because they want to open up
  * a server, and need the port to be unique and unused so that the tests can
  * run multithreaded. This turns out to just be an awful problem to solve for
  * lots of reasons:
- *
+ * <p>
  * 1. You can request a free port from the OS by calling <code>new ServerSocket(0);</code>
- *    and this seems to work 99% of the time, but occasionally on a heavily loaded
- *    server if two processes ask at the exact same time they will receive the
- *    same port assignment, and one will fail.
+ * and this seems to work 99% of the time, but occasionally on a heavily loaded
+ * server if two processes ask at the exact same time they will receive the
+ * same port assignment, and one will fail.
  * 2. Tests run in separate processes, so we can't just rely on keeping a collection
- *    of assigned ports or anything like that.
- *
+ * of assigned ports or anything like that.
+ * <p>
  * So we solve this like this:
- *
+ * <p>
  * At random, this class will pick a "control port" and bind it. A control port
  * is just a randomly chosen port that is a multiple of 100. If we can bind
  * successfully to that port, we now own the range of "n+1 to n+99". If we can't
  * bind that port, it means some other process has probably taken it so
  * we'll just try again until we find an available control port.
- *
+ * <p>
  * Assuming we successfully bind a control port, we'll give out any available
  * ports in the range "n+1 to n+99" until we've exhausted the whole set, and
  * then we'll pick another control port (if we actually get asked for over
  * 100 ports.. this should be a rare event).
- *
+ * <p>
  * This mechanism has the benefit of (fingers crossed) being bulletproof
  * in terms of its ability to give out ports that are actually free, thereby
  * preventing random test failures.
- *
+ * <p>
  * This mechanism has the drawback of never giving up a control port once
  * it has assigned one. To be clear, this class is deliberately leaking
  * resources. Again, no production use!
@@ -104,6 +106,32 @@ public class PortUtil {
 		}
 		myControlSockets.clear();
 		myCurrentControlSocketPort = null;
+	}
+
+	private static boolean isAvailable(int port) {
+		ServerSocket ss = null;
+		DatagramSocket ds = null;
+		try {
+			ss = new ServerSocket(port);
+			ss.setReuseAddress(true);
+			ds = new DatagramSocket(port);
+			ds.setReuseAddress(true);
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			if (ds != null) {
+				ds.close();
+			}
+
+			if (ss != null) {
+				try {
+					ss.close();
+				} catch (IOException e) {
+					/* should not be thrown */
+				}
+			}
+		}
 	}
 
 	/**
@@ -149,48 +177,54 @@ public class PortUtil {
 				int nextCandidatePort = myCurrentControlSocketPort + myCurrentOffset;
 
 				// Try to open a port on this socket and use it
-				try (ServerSocket server = new ServerSocket()) {
-					server.setReuseAddress(true);
-					server.bind(new InetSocketAddress("localhost", nextCandidatePort));
-					try (Socket client = new Socket()) {
-						client.setReuseAddress(true);
-						client.connect(new InetSocketAddress("localhost", nextCandidatePort));
-					}
-				} catch (IOException e) {
+//				try (ServerSocket server = new ServerSocket()) {
+//					server.setReuseAddress(true);
+//					server.bind(new InetSocketAddress("localhost", nextCandidatePort));
+//					try (Socket client = new Socket()) {
+//						client.setReuseAddress(true);
+//						client.connect(new InetSocketAddress("localhost", nextCandidatePort));
+//					}
+//				} catch (IOException e) {
+//					continue;
+//				}
+				if (!isAvailable(nextCandidatePort)) {
 					continue;
 				}
 
 				// Log who asked for the port, just in case that's useful
 				StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-				StackTraceElement previousElement = stackTraceElements[2];
+				StackTraceElement previousElement = Arrays.stream(stackTraceElements)
+					.filter(t -> !t.toString().contains("PortUtil.") && !t.toString().contains("getStackTrace"))
+					.findFirst()
+					.orElse(stackTraceElements[2]);
 				ourLog.info("Returned available port {} for: {}", nextCandidatePort, previousElement.toString());
 
-				/*
-				 * This is an attempt to make sure the port is actually
-				 * free before releasing it. For whatever reason on Linux
-				 * it seems like even after we close the ServerSocket there
-				 * is a short while where it is not possible to bind the
-				 * port, even though it should be released by then.
-				 *
-				 * I don't have any solid evidence that this is a good
-				 * way to do this, but it seems to help...
-				 */
-				for (int i = 0; i < 10; i++) {
-					try (Socket client = new Socket()) {
-						client.setReuseAddress(true);
-						client.connect(new InetSocketAddress(nextCandidatePort), 1000);
-						ourLog.info("Socket still seems open");
-						Thread.sleep(250);
-					} catch (Exception e) {
-						break;
-					}
-				}
-
-				try {
-					Thread.sleep(250);
-				} catch (InterruptedException theE) {
-					// ignore
-				}
+//				/*
+//				 * This is an attempt to make sure the port is actually
+//				 * free before releasing it. For whatever reason on Linux
+//				 * it seems like even after we close the ServerSocket there
+//				 * is a short while where it is not possible to bind the
+//				 * port, even though it should be released by then.
+//				 *
+//				 * I don't have any solid evidence that this is a good
+//				 * way to do this, but it seems to help...
+//				 */
+//				for (int i = 0; i < 10; i++) {
+//					try (Socket client = new Socket()) {
+//						client.setReuseAddress(true);
+//						client.connect(new InetSocketAddress(nextCandidatePort), 1000);
+//						ourLog.info("Socket still seems open");
+//						Thread.sleep(250);
+//					} catch (Exception e) {
+//						break;
+//					}
+//				}
+//
+//				try {
+//					Thread.sleep(250);
+//				} catch (InterruptedException theE) {
+//					// ignore
+//				}
 
 				return nextCandidatePort;
 

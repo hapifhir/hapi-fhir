@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -391,7 +391,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Join<ResourceTable, ResourceLink> join = createJoin(JoinEnum.REFERENCE, theParamName);
 
-		List<Predicate> codePredicates = new ArrayList<>();
+		List<IIdType> targetIds = new ArrayList<>();
+		List<String> targetQualifiedUrls = new ArrayList<>();
 
 		for (int orIdx = 0; orIdx < theList.size(); orIdx++) {
 			IQueryParameterType nextOr = theList.get(orIdx);
@@ -400,173 +401,31 @@ public class SearchBuilder implements ISearchBuilder {
 				ReferenceParam ref = (ReferenceParam) nextOr;
 
 				if (isBlank(ref.getChain())) {
+
+					/*
+					 * Handle non-chained search, e.g. Patient?organization=Organization/123
+					 */
+
 					IIdType dt = new IdDt(ref.getBaseUrl(), ref.getResourceType(), ref.getIdPart(), null);
 
 					if (dt.hasBaseUrl()) {
 						if (myDaoConfig.getTreatBaseUrlsAsLocal().contains(dt.getBaseUrl())) {
 							dt = dt.toUnqualified();
+							targetIds.add(dt);
 						} else {
-							ourLog.debug("Searching for resource link with target URL: {}", dt.getValue());
-							Predicate eq = myBuilder.equal(join.get("myTargetResourceUrl"), dt.getValue());
-							codePredicates.add(eq);
-							continue;
+							targetQualifiedUrls.add(dt.getValue());
 						}
-					}
-
-					List<Long> targetPid;
-					try {
-						targetPid = myIdHelperService.translateForcedIdToPids(dt);
-					} catch (ResourceNotFoundException e) {
-						// Use a PID that will never exist
-						targetPid = Collections.singletonList(-1L);
-					}
-					for (Long next : targetPid) {
-						ourLog.debug("Searching for resource link with target PID: {}", next);
-
-						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-						Predicate pidPredicate = myBuilder.equal(join.get("myTargetResourcePid"), next);
-						codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
+					} else {
+						targetIds.add(dt);
 					}
 
 				} else {
 
-					final List<Class<? extends IBaseResource>> resourceTypes;
-					String resourceId;
-					if (!ref.getValue().matches("[a-zA-Z]+/.*")) {
+					/*
+					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
+					 */
 
-						RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-						resourceTypes = new ArrayList<>();
-
-						Set<String> targetTypes = param.getTargets();
-
-						if (targetTypes != null && !targetTypes.isEmpty()) {
-							for (String next : targetTypes) {
-								resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
-							}
-						}
-
-						if (resourceTypes.isEmpty()) {
-							RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
-							RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
-							if (searchParamByName == null) {
-								throw new InternalErrorException("Could not find parameter " + theParamName);
-							}
-							String paramPath = searchParamByName.getPath();
-							if (paramPath.endsWith(".as(Reference)")) {
-								paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
-							}
-
-							if (paramPath.contains(".extension(")) {
-								int startIdx = paramPath.indexOf(".extension(");
-								int endIdx = paramPath.indexOf(')', startIdx);
-								if (startIdx != -1 && endIdx != -1) {
-									paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
-								}
-							}
-
-							BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
-							if (def instanceof RuntimeChildChoiceDefinition) {
-								RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
-								resourceTypes.addAll(choiceDef.getResourceTypes());
-							} else if (def instanceof RuntimeChildResourceDefinition) {
-								RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
-								resourceTypes.addAll(resDef.getResourceTypes());
-								if (resourceTypes.size() == 1) {
-									if (resourceTypes.get(0).isInterface()) {
-										throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
-									}
-								}
-							} else {
-								throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
-							}
-						}
-
-						if (resourceTypes.isEmpty()) {
-							for (BaseRuntimeElementDefinition<?> next : myContext.getElementDefinitions()) {
-								if (next instanceof RuntimeResourceDefinition) {
-									RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition) next;
-									resourceTypes.add(nextResDef.getImplementingClass());
-								}
-							}
-						}
-
-						resourceId = ref.getValue();
-
-					} else {
-						try {
-							RuntimeResourceDefinition resDef = myContext.getResourceDefinition(ref.getResourceType());
-							resourceTypes = new ArrayList<>(1);
-							resourceTypes.add(resDef.getImplementingClass());
-							resourceId = ref.getIdPart();
-						} catch (DataFormatException e) {
-							throw new InvalidRequestException("Invalid resource type: " + ref.getResourceType());
-						}
-					}
-
-					boolean foundChainMatch = false;
-
-					for (Class<? extends IBaseResource> nextType : resourceTypes) {
-
-						String chain = ref.getChain();
-						String remainingChain = null;
-						int chainDotIndex = chain.indexOf('.');
-						if (chainDotIndex != -1) {
-							remainingChain = chain.substring(chainDotIndex + 1);
-							chain = chain.substring(0, chainDotIndex);
-						}
-
-						RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
-						String subResourceName = typeDef.getName();
-
-						IFhirResourceDao<?> dao = myCallingDao.getDao(nextType);
-						if (dao == null) {
-							ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName());
-							continue;
-						}
-
-						int qualifierIndex = chain.indexOf(':');
-						String qualifier = null;
-						if (qualifierIndex != -1) {
-							qualifier = chain.substring(qualifierIndex);
-							chain = chain.substring(0, qualifierIndex);
-						}
-
-						boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
-						RuntimeSearchParam param = null;
-						if (!isMeta) {
-							param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
-							if (param == null) {
-								ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
-								continue;
-							}
-						}
-
-						ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
-
-						for (IQueryParameterType next : theList) {
-							String nextValue = next.getValueAsQueryToken(myContext);
-							IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
-							if (chainValue == null) {
-								continue;
-							}
-							foundChainMatch = true;
-							orValues.add(chainValue);
-						}
-
-						Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues);
-
-						Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
-						Predicate pidPredicate = join.get("myTargetResourcePid").in(subQ);
-						Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
-						codePredicates.add(andPredicate);
-
-					}
-
-					if (!foundChainMatch) {
-						throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + ref.getChain()));
-					}
-
-					myPredicates.add(myBuilder.or(toArray(codePredicates)));
+					addPredicateReferenceWithChain(theResourceName, theParamName, theList, join, new ArrayList<>(), ref);
 					return;
 
 				}
@@ -577,7 +436,172 @@ public class SearchBuilder implements ISearchBuilder {
 
 		}
 
-		myPredicates.add(myBuilder.or(toArray(codePredicates)));
+		List<Predicate> codePredicates = new ArrayList<>();
+
+		// Resources by ID
+		List<Long> targetPids = myIdHelperService.translateForcedIdToPids(targetIds);
+		if (!targetPids.isEmpty()) {
+			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
+			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
+			Predicate pidPredicate = join.get("myTargetResourcePid").in(targetPids);
+			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
+		}
+
+		// Resources by fully qualified URL
+		if (!targetQualifiedUrls.isEmpty()) {
+			ourLog.debug("Searching for resource link with target URLs: {}", targetQualifiedUrls);
+			Predicate eq = join.get("myTargetResourceUrl").in(targetQualifiedUrls);
+			codePredicates.add(eq);
+		}
+
+		if (codePredicates.size() > 0) {
+			myPredicates.add(myBuilder.or(toArray(codePredicates)));
+		} else {
+			// Add a predicate that will never match
+			Predicate pidPredicate = join.get("myTargetResourcePid").in(-1L);
+			myPredicates.clear();
+			myPredicates.add(pidPredicate);
+		}
+	}
+
+	private void addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theRef) {
+		final List<Class<? extends IBaseResource>> resourceTypes;
+		String resourceId;
+		if (!theRef.getValue().matches("[a-zA-Z]+/.*")) {
+
+			RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
+			resourceTypes = new ArrayList<>();
+
+			Set<String> targetTypes = param.getTargets();
+
+			if (targetTypes != null && !targetTypes.isEmpty()) {
+				for (String next : targetTypes) {
+					resourceTypes.add(myContext.getResourceDefinition(next).getImplementingClass());
+				}
+			}
+
+			if (resourceTypes.isEmpty()) {
+				RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceName);
+				RuntimeSearchParam searchParamByName = mySearchParamRegistry.getSearchParamByName(resourceDef, theParamName);
+				if (searchParamByName == null) {
+					throw new InternalErrorException("Could not find parameter " + theParamName);
+				}
+				String paramPath = searchParamByName.getPath();
+				if (paramPath.endsWith(".as(Reference)")) {
+					paramPath = paramPath.substring(0, paramPath.length() - ".as(Reference)".length()) + "Reference";
+				}
+
+				if (paramPath.contains(".extension(")) {
+					int startIdx = paramPath.indexOf(".extension(");
+					int endIdx = paramPath.indexOf(')', startIdx);
+					if (startIdx != -1 && endIdx != -1) {
+						paramPath = paramPath.substring(0, startIdx + 10) + paramPath.substring(endIdx + 1);
+					}
+				}
+
+				BaseRuntimeChildDefinition def = myContext.newTerser().getDefinition(myResourceType, paramPath);
+				if (def instanceof RuntimeChildChoiceDefinition) {
+					RuntimeChildChoiceDefinition choiceDef = (RuntimeChildChoiceDefinition) def;
+					resourceTypes.addAll(choiceDef.getResourceTypes());
+				} else if (def instanceof RuntimeChildResourceDefinition) {
+					RuntimeChildResourceDefinition resDef = (RuntimeChildResourceDefinition) def;
+					resourceTypes.addAll(resDef.getResourceTypes());
+					if (resourceTypes.size() == 1) {
+						if (resourceTypes.get(0).isInterface()) {
+							throw new InvalidRequestException("Unable to perform search for unqualified chain '" + theParamName + "' as this SearchParameter does not declare any target types. Add a qualifier of the form '" + theParamName + ":[ResourceType]' to perform this search.");
+						}
+					}
+				} else {
+					throw new ConfigurationException("Property " + paramPath + " of type " + myResourceName + " is not a resource: " + def.getClass());
+				}
+			}
+
+			if (resourceTypes.isEmpty()) {
+				for (BaseRuntimeElementDefinition<?> next : myContext.getElementDefinitions()) {
+					if (next instanceof RuntimeResourceDefinition) {
+						RuntimeResourceDefinition nextResDef = (RuntimeResourceDefinition) next;
+						resourceTypes.add(nextResDef.getImplementingClass());
+					}
+				}
+			}
+
+			resourceId = theRef.getValue();
+
+		} else {
+			try {
+				RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theRef.getResourceType());
+				resourceTypes = new ArrayList<>(1);
+				resourceTypes.add(resDef.getImplementingClass());
+				resourceId = theRef.getIdPart();
+			} catch (DataFormatException e) {
+				throw new InvalidRequestException("Invalid resource type: " + theRef.getResourceType());
+			}
+		}
+
+		boolean foundChainMatch = false;
+
+		for (Class<? extends IBaseResource> nextType : resourceTypes) {
+
+			String chain = theRef.getChain();
+			String remainingChain = null;
+			int chainDotIndex = chain.indexOf('.');
+			if (chainDotIndex != -1) {
+				remainingChain = chain.substring(chainDotIndex + 1);
+				chain = chain.substring(0, chainDotIndex);
+			}
+
+			RuntimeResourceDefinition typeDef = myContext.getResourceDefinition(nextType);
+			String subResourceName = typeDef.getName();
+
+			IFhirResourceDao<?> dao = myCallingDao.getDao(nextType);
+			if (dao == null) {
+				ourLog.debug("Don't have a DAO for type {}", nextType.getSimpleName());
+				continue;
+			}
+
+			int qualifierIndex = chain.indexOf(':');
+			String qualifier = null;
+			if (qualifierIndex != -1) {
+				qualifier = chain.substring(qualifierIndex);
+				chain = chain.substring(0, qualifierIndex);
+			}
+
+			boolean isMeta = ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(chain);
+			RuntimeSearchParam param = null;
+			if (!isMeta) {
+				param = mySearchParamRegistry.getSearchParamByName(typeDef, chain);
+				if (param == null) {
+					ourLog.debug("Type {} doesn't have search param {}", nextType.getSimpleName(), param);
+					continue;
+				}
+			}
+
+			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
+
+			for (IQueryParameterType next : theList) {
+				String nextValue = next.getValueAsQueryToken(myContext);
+				IQueryParameterType chainValue = mapReferenceChainToRawParamType(remainingChain, param, theParamName, qualifier, nextType, chain, isMeta, nextValue);
+				if (chainValue == null) {
+					continue;
+				}
+				foundChainMatch = true;
+				orValues.add(chainValue);
+			}
+
+			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues);
+
+			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
+			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
+			Predicate andPredicate = myBuilder.and(pathPredicate, pidPredicate);
+			theCodePredicates.add(andPredicate);
+
+		}
+
+		if (!foundChainMatch) {
+			throw new InvalidRequestException(myContext.getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidParameterChain", theParamName + '.' + theRef.getChain()));
+		}
+
+		myPredicates.add(myBuilder.or(toArray(theCodePredicates)));
 	}
 
 	private Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues) {

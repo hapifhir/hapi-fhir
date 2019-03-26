@@ -193,8 +193,7 @@ public class SearchParamWithInlineReferencesExtractor {
 
 			for (String nextQueryString : queryStringsToPopulate) {
 				if (isNotBlank(nextQueryString)) {
-					// FIXME: JA change to trace
-					ourLog.info("Adding composite unique SP: {}", nextQueryString);
+					ourLog.trace("Adding composite unique SP: {}", nextQueryString);
 					theParams.myCompositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
 				}
 			}

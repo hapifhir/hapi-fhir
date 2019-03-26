@@ -48,7 +48,7 @@ public class PortUtilTest {
 
 		int tasksCount = 20;
 		ExecutorService pool = Executors.newFixedThreadPool(tasksCount);
-		int portsPerTaskCount = 51;
+		int portsPerTaskCount = 151;
 		for (int i = 0; i < tasksCount; i++) {
 			pool.submit(() -> {
 				PortUtil portUtil = new PortUtil();
