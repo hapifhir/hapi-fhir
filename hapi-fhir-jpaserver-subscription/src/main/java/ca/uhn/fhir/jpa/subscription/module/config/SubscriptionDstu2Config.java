@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-// From BaseDstu3Config
 public class SubscriptionDstu2Config extends BaseSubscriptionConfig {
 	@Override
 	public FhirContext fhirContext() {
