@@ -450,8 +450,9 @@ public class SearchBuilder implements ISearchBuilder {
 		// Resources by fully qualified URL
 		if (!targetQualifiedUrls.isEmpty()) {
 			ourLog.debug("Searching for resource link with target URLs: {}", targetQualifiedUrls);
-			Predicate eq = join.get("myTargetResourceUrl").in(targetQualifiedUrls);
-			codePredicates.add(eq);
+			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
+			Predicate pidPredicate = join.get("myTargetResourceUrl").in(targetQualifiedUrls);
+			codePredicates.add(myBuilder.and(pathPredicate, pidPredicate));
 		}
 
 		if (codePredicates.size() > 0) {

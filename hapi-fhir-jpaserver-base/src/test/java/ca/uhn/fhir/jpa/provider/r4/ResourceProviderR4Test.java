@@ -704,6 +704,41 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchByExternalReference() {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FooName");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
+		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+
+		Media media = new Media();
+		Attachment attachment = new Attachment();
+		attachment.setLanguage("ENG");
+		media.setContent(attachment);
+		media.setSubject(patientReference);
+		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+
+		// Search for wrong type
+		Bundle returnedBundle = ourClient.search()
+			.forResource(Observation.class)
+			.where(Observation.ENCOUNTER.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(0, returnedBundle.getEntry().size());
+
+		// Search for right type
+		returnedBundle = ourClient.search()
+			.forResource(Media.class)
+			.where(Media.SUBJECT.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(mediaId, returnedBundle.getEntryFirstRep().getResource().getIdElement());
+	}
+
+	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
 
