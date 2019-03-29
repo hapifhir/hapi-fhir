@@ -9,9 +9,9 @@ package ca.uhn.fhir.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -80,11 +80,10 @@ public class PortUtil {
 	private static final int SPACE_SIZE = 100;
 	private static final Logger ourLog = LoggerFactory.getLogger(PortUtil.class);
 	private static final PortUtil INSTANCE = new PortUtil();
+	private static int ourPortDelay = 500;
 	private List<ServerSocket> myControlSockets = new ArrayList<>();
 	private Integer myCurrentControlSocketPort = null;
 	private int myCurrentOffset = 0;
-
-
 	/**
 	 * Constructor -
 	 */
@@ -106,32 +105,6 @@ public class PortUtil {
 		}
 		myControlSockets.clear();
 		myCurrentControlSocketPort = null;
-	}
-
-	private static boolean isAvailable(int port) {
-		ServerSocket ss = null;
-		DatagramSocket ds = null;
-		try {
-			ss = new ServerSocket(port);
-			ss.setReuseAddress(true);
-			ds = new DatagramSocket(port);
-			ds.setReuseAddress(true);
-			return true;
-		} catch (IOException e) {
-			return false;
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
-
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException e) {
-					/* should not be thrown */
-				}
-			}
-		}
 	}
 
 	/**
@@ -221,7 +194,7 @@ public class PortUtil {
 //				}
 //
 				try {
-					Thread.sleep(500);
+					Thread.sleep(ourPortDelay);
 				} catch (InterruptedException theE) {
 					// ignore
 				}
@@ -231,6 +204,41 @@ public class PortUtil {
 			}
 
 
+		}
+	}
+
+	@VisibleForTesting
+	public static void setPortDelay(Integer thePortDelay) {
+		if (thePortDelay == null) {
+			thePortDelay = 500;
+		} else {
+			ourPortDelay = thePortDelay;
+		}
+	}
+
+	private static boolean isAvailable(int port) {
+		ServerSocket ss = null;
+		DatagramSocket ds = null;
+		try {
+			ss = new ServerSocket(port);
+			ss.setReuseAddress(true);
+			ds = new DatagramSocket(port);
+			ds.setReuseAddress(true);
+			return true;
+		} catch (IOException e) {
+			return false;
+		} finally {
+			if (ds != null) {
+				ds.close();
+			}
+
+			if (ss != null) {
+				try {
+					ss.close();
+				} catch (IOException e) {
+					/* should not be thrown */
+				}
+			}
 		}
 	}
 
