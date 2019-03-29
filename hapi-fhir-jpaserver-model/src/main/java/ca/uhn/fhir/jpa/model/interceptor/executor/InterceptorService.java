@@ -32,7 +32,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
@@ -41,19 +40,21 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Component
 public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster {
 	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorService.class);
 	private final List<Object> myInterceptors = new ArrayList<>();
 	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
+	private String myName;
 
 	/**
 	 * Constructor
+	 * @param theName
 	 */
-	public InterceptorService() {
+	public InterceptorService(String theName) {
 		super();
+		myName = theName;
 	}
 
 	@VisibleForTesting
@@ -66,6 +67,10 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	@VisibleForTesting
 	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook) {
 		registerAnonymousHookForUnitTest(thePointcut, DEFAULT_ORDER, theHook);
+	}
+
+	public void setName(String theName) {
+		myName = theName;
 	}
 
 	@Override
