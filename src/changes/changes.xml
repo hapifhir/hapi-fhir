@@ -11,9 +11,14 @@
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
-					<ul>
-						<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.5.RELEASE</li>
-					</ul>
+				<ul>
+					<li>Hibernate (JPA): 5.4.1 -&gt; 5.4.2</li>
+					<li>Jackson (JPA): 2.9.7 -&gt; 2.9.8</li>
+					<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.6.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.5.RELEASE</li>
+					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
+					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
+				</ul>
 				]]>
 			</action>
 			<action type="add">
@@ -111,6 +116,11 @@
 				any entries with a method of DELETE contained a stub resource in
 				Bundle.entry.resource, even though the FHIR spec states that this field
 				should be empty. This was corrected.
+			</action>
+			<action type="change">
+				The hapi-fhir-testpage-overlay project no longer includes any library JARs
+				in the built WAR, in order to prevent duplicates and conflicts in implementing
+				projects.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
