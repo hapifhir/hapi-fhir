@@ -24,22 +24,36 @@ import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.trim;
+
 public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution {
+
+	private boolean myCaptureQueryStackTrace;
+
+	/**
+	 * This has an impact on performance! Use with caution.
+	 */
+	public boolean isCaptureQueryStackTrace() {
+		return myCaptureQueryStackTrace;
+	}
+
+	/**
+	 * This has an impact on performance! Use with caution.
+	 */
+	public void setCaptureQueryStackTrace(boolean theCaptureQueryStackTrace) {
+		myCaptureQueryStackTrace = theCaptureQueryStackTrace;
+	}
 
 	@Override
 	public void execute(ExecutionInfo theExecutionInfo, List<QueryInfo> theQueryInfoList) {
 		final Queue<Query> queryList = provideQueryList();
 		for (QueryInfo next : theQueryInfoList) {
-			String sql = StringUtils.trim(next.getQuery());
+			String sql = trim(next.getQuery());
 			List<String> params;
 			if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
 				List<ParameterSetOperation> values = next
@@ -53,9 +67,14 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 				params = Collections.emptyList();
 			}
 
+			StackTraceElement[] stackTraceElements = null;
+			if (isCaptureQueryStackTrace()) {
+				stackTraceElements = Thread.currentThread().getStackTrace();
+			}
+
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			queryList.add(new Query(sql, params, startTime, elapsedTime));
+			queryList.add(new Query(sql, params, startTime, elapsedTime, stackTraceElements));
 		}
 	}
 
@@ -67,12 +86,14 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 		private final List<String> myParams;
 		private final long myQueryTimestamp;
 		private final long myElapsedTime;
+		private final StackTraceElement[] myStackTrace;
 
-		Query(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime) {
+		Query(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements) {
 			mySql = theSql;
 			myParams = Collections.unmodifiableList(theParams);
 			myQueryTimestamp = theQueryTimestamp;
 			myElapsedTime = theElapsedTime;
+			myStackTrace = theStackTraceElements;
 		}
 
 		public long getQueryTimestamp() {
@@ -113,10 +134,13 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 				}
 			}
 
-			return retVal;
+			return trim(retVal);
 
 		}
 
+		public StackTraceElement[] getStackTrace() {
+			return myStackTrace;
+		}
 	}
 
 }

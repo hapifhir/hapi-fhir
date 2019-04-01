@@ -82,8 +82,17 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 	}
 
 	private boolean isSubscription(ResourceModifiedMessage theResourceModifiedMessage) {
+		String resourceType;
 		IIdType id = theResourceModifiedMessage.getId(myFhirContext);
-		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(id.getResourceType());
+		if (id != null) {
+			resourceType = id.getResourceType();
+		} else {
+			resourceType = theResourceModifiedMessage.getNewPayload(myFhirContext).getIdElement().getResourceType();
+		}
+		if (resourceType == null) {
+			return false;
+		}
+		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(resourceType);
 		return resourceDef.getName().equals(ResourceTypeEnum.SUBSCRIPTION.getCode());
 	}
 

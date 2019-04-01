@@ -331,8 +331,10 @@ public class InterceptorServiceTest {
 	@ComponentScan(basePackages = "ca.uhn.fhir.jpa.model")
 	static class InterceptorRegistryTestCtxConfig {
 
-		@Autowired
-		private IInterceptorRegistry myInterceptorRegistry;
+		@Bean
+		public InterceptorService interceptorService() {
+			return new InterceptorService("test");
+		}
 
 		/**
 		 * Note: Orders are deliberately reversed to make sure we get the orders right
@@ -341,7 +343,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorTwo interceptor1() {
 			MyTestInterceptorTwo retVal = new MyTestInterceptorTwo();
-			myInterceptorRegistry.registerInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 
@@ -352,7 +354,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorOne interceptor2() {
 			MyTestInterceptorOne retVal = new MyTestInterceptorOne();
-			myInterceptorRegistry.registerInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 
