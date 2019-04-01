@@ -1,7 +1,15 @@
 package ca.uhn.fhir.util;
 
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
+/**
+ * Utility to fill a glaring gap in SLF4j's API - The fact that you can't
+ * specify a log level at runtime.
+ *
+ * See here for a discussion:
+ * https://jira.qos.ch/browse/SLF4J-124
+ */
 public class LogUtil {
 
 	public static void log(Logger theLogger, Level theLevel, String theMessage, Object... theArgs) {
@@ -22,10 +30,6 @@ public class LogUtil {
 				theLogger.error(theMessage, theArgs);
 				break;
 		}
-	}
-
-	public enum Level {
-		TRACE, DEBUG, INFO, WARN, ERROR
 	}
 
 }
