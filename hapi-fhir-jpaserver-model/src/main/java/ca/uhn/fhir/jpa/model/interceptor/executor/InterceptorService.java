@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.executor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,15 +25,14 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -41,20 +40,43 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class InterceptorService implements IInterceptorRegistry, IInterceptorBroadcaster {
-	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorService.class);
 	private final List<Object> myInterceptors = new ArrayList<>();
-	private final ListMultimap<Pointcut, BaseInvoker> myInvokers = ArrayListMultimap.create();
+	private final ListMultimap<Pointcut, BaseInvoker> myGlobalInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
+	private final ThreadLocal<ListMultimap<Pointcut, BaseInvoker>> myThreadlocalInvokers = new ThreadLocal<>();
 	private String myName;
+	private boolean myThreadlocalInvokersEnabled = true;
+
+	/**
+	 * Constructor which uses a default name of "default"
+	 */
+	public InterceptorService() {
+		this("default");
+	}
 
 	/**
 	 * Constructor
-	 * @param theName
+	 *
+	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
 	public InterceptorService(String theName) {
 		super();
 		myName = theName;
+	}
+
+	/**
+	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 */
+	public boolean isThreadlocalInvokersEnabled() {
+		return myThreadlocalInvokersEnabled;
+	}
+
+	/**
+	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 */
+	public void setThreadlocalInvokersEnabled(boolean theThreadlocalInvokersEnabled) {
+		myThreadlocalInvokersEnabled = theThreadlocalInvokersEnabled;
 	}
 
 	@VisibleForTesting
@@ -65,8 +87,8 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 	@Override
 	@VisibleForTesting
-	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook) {
-		registerAnonymousHookForUnitTest(thePointcut, DEFAULT_ORDER, theHook);
+	public void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
+		registerAnonymousInterceptor(thePointcut, DEFAULT_ORDER, theInterceptor);
 	}
 
 	public void setName(String theName) {
@@ -74,92 +96,79 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	}
 
 	@Override
-	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook) {
+	public void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
 		Validate.notNull(thePointcut);
-		Validate.notNull(theHook);
-
-		myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(theHook, theOrder));
+		Validate.notNull(theInterceptor);
+		synchronized (myRegistryMutex) {
+			myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder));
+		}
 	}
 
 	@Override
 	@VisibleForTesting
 	public void clearAnonymousHookForUnitTest() {
-		myAnonymousInvokers.clear();
+		synchronized (myRegistryMutex) {
+			myAnonymousInvokers.clear();
+		}
 	}
 
 	@Override
-	public boolean registerInterceptor(Object theInterceptor) {
+	public void unregisterInterceptors(@Nullable Collection<?> theInterceptors) {
+		if (theInterceptors != null) {
+			theInterceptors.forEach(t -> unregisterInterceptor(t));
+		}
+	}
+
+	@Override
+	public boolean registerThreadLocalInterceptor(Object theInterceptor) {
+		if (!myThreadlocalInvokersEnabled) {
+			return false;
+		}
+		ListMultimap<Pointcut, BaseInvoker> invokers = getThreadLocalInvokerMultimap();
+		scanInterceptorAndAddToInvokerMultimap(theInterceptor, invokers);
+		return !invokers.isEmpty();
+
+	}
+
+	@Override
+	public void unregisterThreadLocalInterceptor(Object theInterceptor) {
+		if (myThreadlocalInvokersEnabled) {
+			ListMultimap<Pointcut, BaseInvoker> invokers = getThreadLocalInvokerMultimap();
+			invokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			if (invokers.isEmpty()) {
+				myThreadlocalInvokers.remove();
+			}
+		}
+	}
+
+	private ListMultimap<Pointcut, BaseInvoker> getThreadLocalInvokerMultimap() {
+		ListMultimap<Pointcut, BaseInvoker> invokers = myThreadlocalInvokers.get();
+		if (invokers == null) {
+			invokers = Multimaps.synchronizedListMultimap(ArrayListMultimap.create());
+			myThreadlocalInvokers.set(invokers);
+		}
+		return invokers;
+	}
+
+	@Override
+	public boolean registerAnonymousInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 
 			if (isInterceptorAlreadyRegistered(theInterceptor)) {
 				return false;
 			}
 
-			Class<?> interceptorClass = theInterceptor.getClass();
-			int typeOrder = determineOrder(interceptorClass);
-
-			List<HookInvoker> addedInvokers = scanInterceptorForHookMethods(theInterceptor, typeOrder);
+			List<HookInvoker> addedInvokers = scanInterceptorAndAddToInvokerMultimap(theInterceptor, myGlobalInvokers);
 			if (addedInvokers.isEmpty()) {
 				return false;
 			}
 
-			// Invoke the REGISTERED pointcut for any added hooks
-			addedInvokers.stream()
-				.filter(t -> t.getPointcuts().contains(Pointcut.REGISTERED))
-				.forEach(t -> t.invoke(new HookParams()));
-
-			// Register the interceptor and its various hooks
+			// Add to the global list
 			myInterceptors.add(theInterceptor);
-			for (HookInvoker nextAddedHook : addedInvokers) {
-				for (Pointcut nextPointcut : nextAddedHook.getPointcuts()) {
-					if (nextPointcut.equals(Pointcut.REGISTERED)) {
-						continue;
-					}
-					myInvokers.put(nextPointcut, nextAddedHook);
-				}
-			}
-
-			// Make sure we're always sorted according to the order declared in
-			// @Order
 			sortByOrderAnnotation(myInterceptors);
-			for (Pointcut nextPointcut : myInvokers.keys()) {
-				List<BaseInvoker> nextInvokerList = myInvokers.get(nextPointcut);
-				nextInvokerList.sort(Comparator.naturalOrder());
-			}
 
 			return true;
 		}
-	}
-
-	/**
-	 * @return Returns a list of any added invokers
-	 */
-	private List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
-		ArrayList<HookInvoker> retVal = new ArrayList<>();
-		for (Method nextMethod : theInterceptor.getClass().getMethods()) {
-			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
-
-			if (hook != null) {
-				int methodOrder = theTypeOrder;
-				Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
-				if (methodOrderAnnotation != null) {
-					methodOrder = methodOrderAnnotation.value();
-				}
-
-				retVal.add(new HookInvoker(hook, theInterceptor, nextMethod, methodOrder));
-			}
-		}
-
-		return retVal;
-	}
-
-	private int determineOrder(Class<?> theInterceptorClass) {
-		int typeOrder = DEFAULT_ORDER;
-		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theInterceptorClass, Order.class);
-		if (typeOrderAnnotation != null) {
-			typeOrder = typeOrderAnnotation.value();
-		}
-		return typeOrder;
 	}
 
 	private boolean isInterceptorAlreadyRegistered(Object theInterceptor) {
@@ -175,13 +184,14 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	public void unregisterInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 			myInterceptors.removeIf(t -> t == theInterceptor);
-			myInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
 		}
 	}
 
 	@Override
 	public boolean registerGlobalInterceptor(Object theInterceptor) {
-		return registerInterceptor(theInterceptor);
+		return registerAnonymousInterceptor(theInterceptor);
 	}
 
 	@Override
@@ -242,18 +252,70 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	 */
 	private List<BaseInvoker> getInvokersForPointcut(Pointcut thePointcut) {
 		List<BaseInvoker> invokers;
-		boolean haveAnonymousInvokers;
+
 		synchronized (myRegistryMutex) {
-			List<BaseInvoker> globalInvokers = myInvokers.get(thePointcut);
+			List<BaseInvoker> globalInvokers = myGlobalInvokers.get(thePointcut);
 			List<BaseInvoker> anonymousInvokers = myAnonymousInvokers.get(thePointcut);
-			invokers = ListUtils.union(anonymousInvokers, globalInvokers);
-			haveAnonymousInvokers = anonymousInvokers.isEmpty() == false;
+			List<BaseInvoker> threadLocalInvokers = null;
+			if (myThreadlocalInvokersEnabled) {
+				ListMultimap<Pointcut, BaseInvoker> pointcutToInvokers = myThreadlocalInvokers.get();
+				if (pointcutToInvokers != null) {
+					threadLocalInvokers = pointcutToInvokers.get(thePointcut);
+				}
+			}
+			invokers = union(globalInvokers, anonymousInvokers, threadLocalInvokers);
 		}
 
-		if (haveAnonymousInvokers) {
-			invokers.sort(Comparator.naturalOrder());
-		}
 		return invokers;
+	}
+
+	/**
+	 * First argument must be the global invoker list!!
+	 */
+	private List<BaseInvoker> union(List<BaseInvoker>... theInvokersLists) {
+		List<BaseInvoker> haveOne = null;
+		boolean haveMultiple = false;
+		for (List<BaseInvoker> nextInvokerList : theInvokersLists) {
+			if (nextInvokerList == null || nextInvokerList.isEmpty()) {
+				continue;
+			}
+
+			if (haveOne == null) {
+				haveOne = nextInvokerList;
+			} else {
+				haveMultiple = true;
+			}
+		}
+
+		if (haveOne == null) {
+			return Collections.emptyList();
+		}
+
+		List<BaseInvoker> retVal;
+
+		if (haveMultiple == false) {
+
+			// The global list doesn't need to be sorted every time since it's sorted on
+			// insertion each time. Doing so is a waste of cycles..
+			if (haveOne == theInvokersLists[0]) {
+				retVal = haveOne;
+			} else {
+				retVal = new ArrayList<>(haveOne);
+				retVal.sort(Comparator.naturalOrder());
+			}
+
+		} else {
+
+			retVal = Arrays
+				.stream(theInvokersLists)
+				.filter(t -> t != null)
+				.flatMap(t -> t.stream())
+				.sorted()
+				.collect(Collectors.toList());
+
+		}
+
+		return retVal;
 	}
 
 	/**
@@ -276,7 +338,24 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		return true;
 	}
 
-	private abstract class BaseInvoker implements Comparable<BaseInvoker> {
+	private class AnonymousLambdaInvoker extends BaseInvoker {
+		private final IAnonymousInterceptor myHook;
+		private final Pointcut myPointcut;
+
+		public AnonymousLambdaInvoker(Pointcut thePointcut, IAnonymousInterceptor theHook, int theOrder) {
+			super(theHook, theOrder);
+			myHook = theHook;
+			myPointcut = thePointcut;
+		}
+
+		@Override
+		boolean invoke(HookParams theParams) {
+			myHook.invoke(myPointcut, theParams);
+			return true;
+		}
+	}
+
+	private abstract static class BaseInvoker implements Comparable<BaseInvoker> {
 
 		private final int myOrder;
 		private final Object myInterceptor;
@@ -293,27 +372,12 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		abstract boolean invoke(HookParams theParams);
 
 		@Override
-		public int compareTo(BaseInvoker o) {
-			return myOrder - o.myOrder;
+		public int compareTo(BaseInvoker theInvoker) {
+			return myOrder - theInvoker.myOrder;
 		}
 	}
 
-	private class AnonymousLambdaInvoker extends BaseInvoker {
-		private final IAnonymousLambdaHook myHook;
-
-		public AnonymousLambdaInvoker(IAnonymousLambdaHook theHook, int theOrder) {
-			super(theHook, theOrder);
-			myHook = theHook;
-		}
-
-		@Override
-		boolean invoke(HookParams theParams) {
-			myHook.invoke(theParams);
-			return true;
-		}
-	}
-
-	private class HookInvoker extends BaseInvoker {
+	private static class HookInvoker extends BaseInvoker {
 
 		private final boolean myReturnsBoolean;
 		private final Method myMethod;
@@ -385,6 +449,68 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 		}
 
+	}
+
+	private static List<HookInvoker> scanInterceptorAndAddToInvokerMultimap(Object theInterceptor, ListMultimap<Pointcut, BaseInvoker> theInvokers) {
+		Class<?> interceptorClass = theInterceptor.getClass();
+		int typeOrder = determineOrder(interceptorClass);
+
+		List<HookInvoker> addedInvokers = scanInterceptorForHookMethods(theInterceptor, typeOrder);
+
+		// Invoke the REGISTERED pointcut for any added hooks
+		addedInvokers.stream()
+			.filter(t -> t.getPointcuts().contains(Pointcut.REGISTERED))
+			.forEach(t -> t.invoke(new HookParams()));
+
+		// Register the interceptor and its various hooks
+		for (HookInvoker nextAddedHook : addedInvokers) {
+			for (Pointcut nextPointcut : nextAddedHook.getPointcuts()) {
+				if (nextPointcut.equals(Pointcut.REGISTERED)) {
+					continue;
+				}
+				theInvokers.put(nextPointcut, nextAddedHook);
+			}
+		}
+
+		// Make sure we're always sorted according to the order declared in
+		// @Order
+		for (Pointcut nextPointcut : theInvokers.keys()) {
+			List<BaseInvoker> nextInvokerList = theInvokers.get(nextPointcut);
+			nextInvokerList.sort(Comparator.naturalOrder());
+		}
+
+		return addedInvokers;
+	}
+
+	/**
+	 * @return Returns a list of any added invokers
+	 */
+	private static List<HookInvoker> scanInterceptorForHookMethods(Object theInterceptor, int theTypeOrder) {
+		ArrayList<HookInvoker> retVal = new ArrayList<>();
+		for (Method nextMethod : theInterceptor.getClass().getMethods()) {
+			Hook hook = AnnotationUtils.findAnnotation(nextMethod, Hook.class);
+
+			if (hook != null) {
+				int methodOrder = theTypeOrder;
+				Order methodOrderAnnotation = AnnotationUtils.findAnnotation(nextMethod, Order.class);
+				if (methodOrderAnnotation != null) {
+					methodOrder = methodOrderAnnotation.value();
+				}
+
+				retVal.add(new HookInvoker(hook, theInterceptor, nextMethod, methodOrder));
+			}
+		}
+
+		return retVal;
+	}
+
+	private static int determineOrder(Class<?> theInterceptorClass) {
+		int typeOrder = DEFAULT_ORDER;
+		Order typeOrderAnnotation = AnnotationUtils.findAnnotation(theInterceptorClass, Order.class);
+		if (typeOrderAnnotation != null) {
+			typeOrder = typeOrderAnnotation.value();
+		}
+		return typeOrder;
 	}
 
 	private static String toErrorString(List<String> theParameterTypes) {

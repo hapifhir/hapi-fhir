@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,10 +23,13 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class HookParams {
 
@@ -54,18 +57,45 @@ public class HookParams {
 	}
 
 	public <T> HookParams add(Class<T> theType, T theParam) {
+		return doAdd(theType, theParam);
+	}
+
+	/**
+	 * This is useful for providing a lazy-loaded (generally expensive to create)
+	 * parameters
+	 */
+	public <T> HookParams addSupplier(Class<T> theType, Supplier<T> theParam) {
+		return doAdd(theType, theParam);
+	}
+
+	private <T> HookParams doAdd(Class<T> theType, Object theParam) {
+		Validate.isTrue(theType.equals(Supplier.class) == false, "Can not add parameters of type Supplier");
 		myParams.put(theType, theParam);
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
+	public <T> T get(Class<T> theParamType) {
+		return get(theParamType, 0);
+	}
+
+		@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> theParamType, int theIndex) {
-		List<T> objects = (List<T>) myParams.get(theParamType);
-		T retVal = null;
+		List<Object> objects = myParams.get(theParamType);
+		Object retVal = null;
 		if (objects.size() > theIndex) {
 			retVal = objects.get(theIndex);
 		}
-		return retVal;
+
+		retVal = unwrapValue(retVal);
+
+		return (T) retVal;
+	}
+
+	private Object unwrapValue(Object theValue) {
+		if (theValue instanceof Supplier) {
+			theValue = ((Supplier) theValue).get();
+		}
+		return theValue;
 	}
 
 	/**
@@ -73,10 +103,16 @@ public class HookParams {
 	 * key is the param type and the value is the actual instance
 	 */
 	public ListMultimap<Class<?>, Object> getParamsForType() {
-		return Multimaps.unmodifiableListMultimap(myParams);
+		ArrayListMultimap<Class<?>, Object> retVal = ArrayListMultimap.create();
+		myParams.entries().forEach(entry -> retVal.put(entry.getKey(), unwrapValue(entry.getValue())));
+		return Multimaps.unmodifiableListMultimap(retVal);
 	}
 
 	public Collection<Object> values() {
-		return Collections.unmodifiableCollection(myParams.values());
+		return
+			Collections.unmodifiableCollection(myParams.values())
+				.stream()
+				.map(t -> unwrapValue(t))
+				.collect(Collectors.toList());
 	}
 }

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -19,7 +18,6 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.NameValuePair;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -163,8 +161,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		conditionA.getAsserter().setReference(patientId);
 		myConditionDao.create(conditionA);
 
-		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004&"+
-				 			   "_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005";
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004&" +
+			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005";
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
 
 		map.setLoadSynchronous(true);
@@ -190,7 +188,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		conditionA.getAsserter().setReference(patientId);
 		myConditionDao.create(conditionA);
 
-		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&"+
+		String criteria = "_has:Condition:subject:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822005&" +
 			"_has:Condition:asserter:code=http://snomed.info/sct|55822003,http://snomed.info/sct|55822004";
 		SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
 
@@ -1346,7 +1344,9 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			IBundleProvider found = myPatientDao.search(map);
 			Set<String> dates = new HashSet<>();
 			for (int i = 0; i < 9; i++) {
-				Patient nextResource = (Patient) found.getResources(i, i + 1).get(0);
+				List<IBaseResource> resources = found.getResources(i, i + 1);
+				assertThat("Failed to load range " + i + " - " + (i + 1), resources, hasSize(1));
+				Patient nextResource = (Patient) resources.get(0);
 				dates.add(nextResource.getBirthDateElement().getValueAsString());
 			}
 
@@ -2177,7 +2177,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"))));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(result.toString(),0, result.size());
+		assertEquals(result.toString(), 0, result.size());
 
 		// And with a numeric ID that doesn't exist
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("999999999999999"))));
@@ -2570,7 +2570,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 
-
 	@Test
 	public void testSearchTokenParam() {
 		Patient patient = new Patient();
@@ -2704,7 +2703,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			map.setLoadSynchronous(true);
 			map.add(Patient.SP_FAMILY, new StringAndListParam()
 				.addAnd(new StringParam("STRINGA"))
-				.addAnd(new StringParam( "STRINGB"))
+				.addAnd(new StringParam("STRINGB"))
 			);
 			myCaptureQueriesListener.clear();
 			IBundleProvider retrieved = myPatientDao.search(map);

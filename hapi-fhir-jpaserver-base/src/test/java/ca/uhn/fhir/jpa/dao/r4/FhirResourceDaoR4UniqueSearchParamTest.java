@@ -460,6 +460,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 			.setValue(new BooleanType(true));
 		mySearchParameterDao.create(sp);
 		mySearchParamRegistry.forceRefresh();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 
 		// Now create matching/non-matching resources
 		Patient pt = new Patient();

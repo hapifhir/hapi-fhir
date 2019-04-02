@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -1132,7 +1133,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HashSet<Long> retVal = new HashSet<Long>();
 
 		String uuid = UUID.randomUUID().toString();
-		Iterator<Long> iter = builder.createQuery(theParams, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
+
+		Iterator<Long> iter = builder.createQuery(theParams, searchRuntimeDetails);
 		while (iter.hasNext()) {
 			retVal.add(iter.next());
 		}

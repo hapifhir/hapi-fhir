@@ -82,7 +82,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	@Before
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
-		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(ourSubscriptionDebugLogInterceptor);
 	}
 
 	@Before

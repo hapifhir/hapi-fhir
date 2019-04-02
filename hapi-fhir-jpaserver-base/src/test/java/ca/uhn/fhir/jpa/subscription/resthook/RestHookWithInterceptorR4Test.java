@@ -132,7 +132,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testAttributesAreCopiedAlongPipeline() throws Exception {
 		AttributeCarryingInterceptor interceptor = new AttributeCarryingInterceptor();
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(interceptor);
 		try {
 
 			// Create a subscription
@@ -191,7 +191,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		registerLatch.await(10, TimeUnit.SECONDS);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, params -> {
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, (thePointcut, params) -> {
 			latch.countDown();
 		});
 
@@ -222,9 +222,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
 
 		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(interceptor);
 		SubscriptionDebugLogInterceptor interceptor2 = new SubscriptionDebugLogInterceptor(t -> loggerMock, Level.DEBUG);
-		myInterceptorRegistry.registerInterceptor(interceptor2);
+		myInterceptorRegistry.registerAnonymousInterceptor(interceptor2);
 		try {
 
 			String payload = "application/json";
@@ -310,7 +310,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		@Bean
 		public MyTestInterceptor interceptor() {
 			MyTestInterceptor retVal = new MyTestInterceptor();
-			myInterceptorRegistry.registerInterceptor(retVal);
+			myInterceptorRegistry.registerAnonymousInterceptor(retVal);
 			return retVal;
 		}
 

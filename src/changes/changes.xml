@@ -105,6 +105,9 @@
 				a REFERENCE search parameter was used with arguments that consisted of
 				unqualified resource IDs.
 			</action>
+			<action type="fix">
+				A non-threadsafe use of DateFormat was cleaned up in the StopWatch class.
+			</action>
 			<action type="add">
 				When performing a search in the JPA server where one of the parameters is a
 				reference with multiple values (e.g. Patient?organization=A,B) the generated

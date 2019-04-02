@@ -23,7 +23,9 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.model.dstu2.resource.Specimen;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.PerformanceMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ListMultimap;
@@ -43,6 +45,8 @@ public class IdHelperService {
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired(required = true)
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.delete(forcedId);
@@ -51,7 +55,7 @@ public class IdHelperService {
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceName, theResourceId);
-		List<Long> matches = translateForcedIdToPids(myDaoConfig, myForcedIdDao, Collections.singletonList(id));
+		List<Long> matches = translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, Collections.singletonList(id));
 		assert matches.size() <= 1;
 		if (matches.isEmpty()) {
 			throw new ResourceNotFoundException(id);
@@ -60,10 +64,10 @@ public class IdHelperService {
 	}
 
 	public List<Long> translateForcedIdToPids(Collection<IIdType> theId) {
-		return IdHelperService.translateForcedIdToPids(myDaoConfig, myForcedIdDao, theId);
+		return IdHelperService.translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, theId);
 	}
 
-	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IForcedIdDao theForcedIdDao, Collection<IIdType> theId) {
+	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IInterceptorBroadcaster theInterceptorBroadcaster, IForcedIdDao theForcedIdDao, Collection<IIdType> theId) {
 		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
 		if (theId.isEmpty()) {
@@ -89,7 +93,13 @@ public class IdHelperService {
 			String nextResourceType = nextEntry.getKey();
 			Collection<String> nextIds = nextEntry.getValue();
 			if (isBlank(nextResourceType)) {
+
+				PerformanceMessage msg = new PerformanceMessage()
+					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
+				theInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_MESSAGE, msg);
+
 				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
+
 			} else {
 				retVal.addAll(theForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds));
 			}

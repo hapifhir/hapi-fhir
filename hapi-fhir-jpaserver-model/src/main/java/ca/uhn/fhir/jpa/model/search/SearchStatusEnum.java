@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.jpa.model.search;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,17 +20,25 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
+public enum SearchStatusEnum {
 
-/**
- * This is currently only here for unit tests!
- *
- * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
- */
-@FunctionalInterface
-@VisibleForTesting
-public interface IAnonymousLambdaHook {
-
-	void invoke(HookParams theArgs);
+	/**
+	 * The search is currently actively working
+	 */
+	LOADING,
+	/**
+	 * The search has loaded a set of results and has stopped searching because it
+	 * reached an appropriate threshold
+	 */
+	PASSCMPLET,
+	/**
+	 * The search completed normally and loaded all of the results it as permitted to
+	 * load
+	 */
+	FINISHED,
+	/**
+	 * The search failed and will not continue
+	 */
+	FAILED
 
 }
