@@ -2266,7 +2266,6 @@
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
 				<module>hapi-fhir-jpaserver-elasticsearch</module>
-				<module>hapi-fhir-jpaserver-example</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>restful-server-example-test</module>
