@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.model.interceptor.executor;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -14,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.ContextConfiguration;
@@ -50,7 +52,7 @@ public class InterceptorServiceTest {
 		int initialSize = myInterceptorRegistry.getGlobalInterceptorsForUnitTest().size();
 
 		try {
-			myInterceptorRegistry.registerInterceptor(new InterceptorThatFailsOnRegister());
+			myInterceptorRegistry.registerAnonymousInterceptor(new InterceptorThatFailsOnRegister());
 			fail();
 		} catch (InternalErrorException e) {
 			// good
@@ -72,7 +74,7 @@ public class InterceptorServiceTest {
 	public void testManuallyRegisterGlobalInterceptor() {
 
 		// Register the manual interceptor (has @Order right in the middle)
-		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerAnonymousInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -80,7 +82,7 @@ public class InterceptorServiceTest {
 		assertTrue(globalInterceptors.get(2).getClass().toString(), globalInterceptors.get(2) instanceof MyTestInterceptorTwo);
 
 		// Try to register again (should have no effect
-		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerAnonymousInterceptor(myInterceptorManual);
 		globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -263,7 +265,7 @@ public class InterceptorServiceTest {
 	 * </pre>
 	 */
 	@Test
-	@Ignore
+	@Ignore("Performance test - Not needed normally")
 	public void testThreadLocalHookInterceptorMicroBenchmark() {
 		threadLocalMicroBenchmark(true, 500000);
 		threadLocalMicroBenchmark(false, 500000);
@@ -328,7 +330,6 @@ public class InterceptorServiceTest {
 	}
 
 	@Configuration
-	@ComponentScan(basePackages = "ca.uhn.fhir.jpa.model")
 	static class InterceptorRegistryTestCtxConfig {
 
 		@Bean
@@ -343,7 +344,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorTwo interceptor1() {
 			MyTestInterceptorTwo retVal = new MyTestInterceptorTwo();
-			interceptorService().registerInterceptor(retVal);
+			interceptorService().registerAnonymousInterceptor(retVal);
 			return retVal;
 		}
 
@@ -354,7 +355,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorOne interceptor2() {
 			MyTestInterceptorOne retVal = new MyTestInterceptorOne();
-			interceptorService().registerInterceptor(retVal);
+			interceptorService().registerAnonymousInterceptor(retVal);
 			return retVal;
 		}
 

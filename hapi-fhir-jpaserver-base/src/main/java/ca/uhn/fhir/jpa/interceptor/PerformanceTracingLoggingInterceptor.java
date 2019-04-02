@@ -7,24 +7,25 @@ import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 
 @Interceptor(manualRegistration = true)
 public class PerformanceTracingLoggingInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(PerformanceTracingLoggingInterceptor.class);
 	private final Logger myLog;
-	private final LogUtil.Level myLevel;
+	private final Level myLevel;
 
 	/**
 	 * Constructor that logs to this class with a level of INFO
 	 */
 	public PerformanceTracingLoggingInterceptor() {
-		this(ourLog, LogUtil.Level.INFO);
+		this(ourLog, Level.INFO);
 	}
 
 	/**
 	 * Constructor that logs to a custom logger and level
 	 */
-	public PerformanceTracingLoggingInterceptor(Logger theLog, LogUtil.Level theLevel) {
+	public PerformanceTracingLoggingInterceptor(Logger theLog, Level theLevel) {
 		myLog = theLog;
 		myLevel = theLevel;
 	}
@@ -37,6 +38,21 @@ public class PerformanceTracingLoggingInterceptor {
 	@Hook(value = Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE)
 	public void searchSelectComplete(SearchRuntimeDetails theOutcome) {
 		log("Query found {} matches in {} for query {}", theOutcome.getFoundMatchesCount(), theOutcome.getQueryStopwatch(), theOutcome.getSearchUuid());
+	}
+
+	@Hook(value = Pointcut.PERFTRACE_SEARCH_COMPLETE)
+	public void searchComplete(SearchRuntimeDetails theOutcome) {
+		log("Query {} is complete in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+	}
+
+	@Hook(value = Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE)
+	public void searchPassComplete(SearchRuntimeDetails theOutcome) {
+		log("Query {} pass complete and set to status {} in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getSearchStatus(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+	}
+
+	@Hook(value = Pointcut.PERFTRACE_SEARCH_FAILED)
+	public void searchFailed(SearchRuntimeDetails theOutcome) {
+		log("Query {} failed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
 	}
 
 	private void log(String theMessage, Object... theArgs) {

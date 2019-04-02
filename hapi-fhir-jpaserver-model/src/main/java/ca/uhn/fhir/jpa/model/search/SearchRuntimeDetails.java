@@ -12,6 +12,7 @@ public class SearchRuntimeDetails {
 	private int myFoundMatchesCount;
 	private boolean myLoadSynchronous;
 	private String myQueryString;
+	private SearchStatusEnum mySearchStatus;
 
 	public SearchRuntimeDetails(String theSearchUuid) {
 		mySearchUuid = theSearchUuid;
@@ -51,5 +52,13 @@ public class SearchRuntimeDetails {
 
 	public String getQueryString() {
 		return myQueryString;
+	}
+
+	public SearchStatusEnum getSearchStatus() {
+		return mySearchStatus;
+	}
+
+	public void setSearchStatus(SearchStatusEnum theSearchStatus) {
+		mySearchStatus = theSearchStatus;
 	}
 }

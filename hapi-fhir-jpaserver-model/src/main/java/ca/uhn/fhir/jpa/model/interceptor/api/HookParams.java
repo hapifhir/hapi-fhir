@@ -74,7 +74,11 @@ public class HookParams {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
+	public <T> T get(Class<T> theParamType) {
+		return get(theParamType, 0);
+	}
+
+		@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> theParamType, int theIndex) {
 		List<Object> objects = myParams.get(theParamType);
 		Object retVal = null;

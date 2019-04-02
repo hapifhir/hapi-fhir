@@ -26,6 +26,9 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -70,6 +73,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -96,6 +100,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private ISearchIncludeDao mySearchIncludeDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
 	@Autowired
@@ -704,7 +710,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				});
 
-//				FIXME: JA interceptor
+				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
+				if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
+					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_COMPLETE, mySearchRuntimeDetails);
+				} else {
+					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE, mySearchRuntimeDetails);
+				}
+
 				ourLog.info("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
 
 			} catch (Throwable t) {
@@ -741,6 +753,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				mySearch.setFailureMessage(failureMessage);
 				mySearch.setFailureCode(failureCode);
 				mySearch.setStatus(SearchStatusEnum.FAILED);
+
+				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
+				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_FAILED, mySearchRuntimeDetails);
 
 				saveSearch();
 

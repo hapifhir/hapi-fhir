@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousLambdaHook;
+import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-public class PointcutLatch implements IAnonymousLambdaHook {
+public class PointcutLatch implements IAnonymousInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
@@ -25,9 +25,11 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 	private CountDownLatch myCountdownLatch;
 	private AtomicReference<String> myFailure;
 	private AtomicReference<List<HookParams>> myCalledWith;
+	private Pointcut myPointcut;
 
 	public PointcutLatch(Pointcut thePointcut) {
 		this.name = thePointcut.name();
+		myPointcut = thePointcut;
 	}
 
 	public PointcutLatch(String theName) {
@@ -105,7 +107,7 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 
 
 	@Override
-	public void invoke(HookParams theArgs) {
+	public void invoke(Pointcut thePointcut, HookParams theArgs) {
 		if (myCountdownLatch == null) {
 			throw new PointcutLatchException("invoke() called before setExpectedCount() called.", theArgs);
 		} else if (myCountdownLatch.getCount() <= 0) {
@@ -121,7 +123,7 @@ public class PointcutLatch implements IAnonymousLambdaHook {
 	}
 
 	public void call(Object arg) {
-		this.invoke(new HookParams(arg));
+		this.invoke(myPointcut, new HookParams(arg));
 	}
 
 	private class PointcutLatchException extends IllegalStateException {

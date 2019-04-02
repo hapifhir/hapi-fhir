@@ -32,6 +32,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -43,22 +44,37 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	private final ListMultimap<Pointcut, BaseInvoker> myGlobalInvokers = ArrayListMultimap.create();
 	private final ListMultimap<Pointcut, BaseInvoker> myAnonymousInvokers = ArrayListMultimap.create();
 	private final Object myRegistryMutex = new Object();
-	private String myName;
 	private final ThreadLocal<ListMultimap<Pointcut, BaseInvoker>> myThreadlocalInvokers = new ThreadLocal<>();
-	private boolean myThreadlocalInvokersEnabled;
+	private String myName;
+	private boolean myThreadlocalInvokersEnabled = true;
+
+	/**
+	 * Constructor which uses a default name of "default"
+	 */
+	public InterceptorService() {
+		this("default");
+	}
 
 	/**
 	 * Constructor
+	 *
+	 * @param theName The name for this registry (useful for troubleshooting)
 	 */
 	public InterceptorService(String theName) {
 		super();
 		myName = theName;
 	}
 
+	/**
+	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 */
 	public boolean isThreadlocalInvokersEnabled() {
 		return myThreadlocalInvokersEnabled;
 	}
 
+	/**
+	 * Are threadlocal interceptors enabled on this registry (defaults to true)
+	 */
 	public void setThreadlocalInvokersEnabled(boolean theThreadlocalInvokersEnabled) {
 		myThreadlocalInvokersEnabled = theThreadlocalInvokersEnabled;
 	}
@@ -71,8 +87,8 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 	@Override
 	@VisibleForTesting
-	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook) {
-		registerAnonymousHookForUnitTest(thePointcut, DEFAULT_ORDER, theHook);
+	public void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor) {
+		registerAnonymousInterceptor(thePointcut, DEFAULT_ORDER, theInterceptor);
 	}
 
 	public void setName(String theName) {
@@ -80,17 +96,27 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	}
 
 	@Override
-	public void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook) {
+	public void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor) {
 		Validate.notNull(thePointcut);
-		Validate.notNull(theHook);
-
-		myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(theHook, theOrder));
+		Validate.notNull(theInterceptor);
+		synchronized (myRegistryMutex) {
+			myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder));
+		}
 	}
 
 	@Override
 	@VisibleForTesting
 	public void clearAnonymousHookForUnitTest() {
-		myAnonymousInvokers.clear();
+		synchronized (myRegistryMutex) {
+			myAnonymousInvokers.clear();
+		}
+	}
+
+	@Override
+	public void unregisterInterceptors(@Nullable Collection<?> theInterceptors) {
+		if (theInterceptors != null) {
+			theInterceptors.forEach(t -> unregisterInterceptor(t));
+		}
 	}
 
 	@Override
@@ -125,7 +151,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	}
 
 	@Override
-	public boolean registerInterceptor(Object theInterceptor) {
+	public boolean registerAnonymousInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 
 			if (isInterceptorAlreadyRegistered(theInterceptor)) {
@@ -159,12 +185,13 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 		synchronized (myRegistryMutex) {
 			myInterceptors.removeIf(t -> t == theInterceptor);
 			myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
 		}
 	}
 
 	@Override
 	public boolean registerGlobalInterceptor(Object theInterceptor) {
-		return registerInterceptor(theInterceptor);
+		return registerAnonymousInterceptor(theInterceptor);
 	}
 
 	@Override
@@ -281,8 +308,8 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 			retVal = Arrays
 				.stream(theInvokersLists)
-				.filter(t->t!= null)
-				.flatMap(t->t.stream())
+				.filter(t -> t != null)
+				.flatMap(t -> t.stream())
 				.sorted()
 				.collect(Collectors.toList());
 
@@ -312,16 +339,18 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	}
 
 	private class AnonymousLambdaInvoker extends BaseInvoker {
-		private final IAnonymousLambdaHook myHook;
+		private final IAnonymousInterceptor myHook;
+		private final Pointcut myPointcut;
 
-		public AnonymousLambdaInvoker(IAnonymousLambdaHook theHook, int theOrder) {
+		public AnonymousLambdaInvoker(Pointcut thePointcut, IAnonymousInterceptor theHook, int theOrder) {
 			super(theHook, theOrder);
 			myHook = theHook;
+			myPointcut = thePointcut;
 		}
 
 		@Override
 		boolean invoke(HookParams theParams) {
-			myHook.invoke(theParams);
+			myHook.invoke(myPointcut, theParams);
 			return true;
 		}
 	}

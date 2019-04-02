@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+
 public interface IInterceptorRegistry {
 
 	int DEFAULT_ORDER = 0;
@@ -56,7 +59,7 @@ public interface IInterceptorRegistry {
 	 * @param theInterceptor The interceptor to register
 	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
 	 */
-	boolean registerInterceptor(Object theInterceptor);
+	boolean registerAnonymousInterceptor(Object theInterceptor);
 
 	/**
 	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.
@@ -77,12 +80,12 @@ public interface IInterceptorRegistry {
 	@Deprecated
 	void unregisterGlobalInterceptor(Object theInterceptor);
 
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
+	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook);
+	void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
 
 	@VisibleForTesting
 	void clearAnonymousHookForUnitTest();
+
+	void unregisterInterceptors(@Nullable Collection<?> theInterceptors);
 }
