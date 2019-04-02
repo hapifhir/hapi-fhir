@@ -323,7 +323,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setInterceptors(myInterceptor);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
-		myInterceptorRegistry.registerAnonymousInterceptor(myPerformanceTracingLoggingInterceptor);
+		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@Before

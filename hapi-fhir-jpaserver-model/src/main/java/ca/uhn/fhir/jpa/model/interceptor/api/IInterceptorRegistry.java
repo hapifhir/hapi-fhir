@@ -59,7 +59,7 @@ public interface IInterceptorRegistry {
 	 * @param theInterceptor The interceptor to register
 	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
 	 */
-	boolean registerAnonymousInterceptor(Object theInterceptor);
+	boolean registerInterceptor(Object theInterceptor);
 
 	/**
 	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.

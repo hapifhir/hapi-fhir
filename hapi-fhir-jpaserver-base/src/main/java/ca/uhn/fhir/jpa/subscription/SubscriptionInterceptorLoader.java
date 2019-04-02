@@ -57,12 +57,12 @@ public class SubscriptionInterceptorLoader {
 		if (!supportedSubscriptionTypes.isEmpty()) {
 			loadSubscriptions();
 			ourLog.info("Registering subscription activating interceptor");
-			myInterceptorRegistry.registerAnonymousInterceptor(mySubscriptionActivatingInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionActivatingInterceptor);
 		}
 		if (myDaoConfig.isSubscriptionMatchingEnabled()) {
 			mySubscriptionMatcherInterceptor.start();
 			ourLog.info("Registering subscription matcher interceptor");
-			myInterceptorRegistry.registerAnonymousInterceptor(mySubscriptionMatcherInterceptor);
+			myInterceptorRegistry.registerInterceptor(mySubscriptionMatcherInterceptor);
 		}
 	}
 

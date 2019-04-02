@@ -151,7 +151,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 	}
 
 	@Override
-	public boolean registerAnonymousInterceptor(Object theInterceptor) {
+	public boolean registerInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
 
 			if (isInterceptorAlreadyRegistered(theInterceptor)) {
@@ -191,7 +191,7 @@ public class InterceptorService implements IInterceptorRegistry, IInterceptorBro
 
 	@Override
 	public boolean registerGlobalInterceptor(Object theInterceptor) {
-		return registerAnonymousInterceptor(theInterceptor);
+		return registerInterceptor(theInterceptor);
 	}
 
 	@Override

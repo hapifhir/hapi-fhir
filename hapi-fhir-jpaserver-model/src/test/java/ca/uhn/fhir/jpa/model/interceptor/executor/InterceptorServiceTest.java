@@ -52,7 +52,7 @@ public class InterceptorServiceTest {
 		int initialSize = myInterceptorRegistry.getGlobalInterceptorsForUnitTest().size();
 
 		try {
-			myInterceptorRegistry.registerAnonymousInterceptor(new InterceptorThatFailsOnRegister());
+			myInterceptorRegistry.registerInterceptor(new InterceptorThatFailsOnRegister());
 			fail();
 		} catch (InternalErrorException e) {
 			// good
@@ -74,7 +74,7 @@ public class InterceptorServiceTest {
 	public void testManuallyRegisterGlobalInterceptor() {
 
 		// Register the manual interceptor (has @Order right in the middle)
-		myInterceptorRegistry.registerAnonymousInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -82,7 +82,7 @@ public class InterceptorServiceTest {
 		assertTrue(globalInterceptors.get(2).getClass().toString(), globalInterceptors.get(2) instanceof MyTestInterceptorTwo);
 
 		// Try to register again (should have no effect
-		myInterceptorRegistry.registerAnonymousInterceptor(myInterceptorManual);
+		myInterceptorRegistry.registerInterceptor(myInterceptorManual);
 		globalInterceptors = myInterceptorRegistry.getGlobalInterceptorsForUnitTest();
 		assertEquals(3, globalInterceptors.size());
 		assertTrue(globalInterceptors.get(0).getClass().toString(), globalInterceptors.get(0) instanceof MyTestInterceptorOne);
@@ -344,7 +344,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorTwo interceptor1() {
 			MyTestInterceptorTwo retVal = new MyTestInterceptorTwo();
-			interceptorService().registerAnonymousInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 
@@ -355,7 +355,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorOne interceptor2() {
 			MyTestInterceptorOne retVal = new MyTestInterceptorOne();
-			interceptorService().registerAnonymousInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 

@@ -132,7 +132,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testAttributesAreCopiedAlongPipeline() throws Exception {
 		AttributeCarryingInterceptor interceptor = new AttributeCarryingInterceptor();
-		myInterceptorRegistry.registerAnonymousInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 		try {
 
 			// Create a subscription
@@ -222,9 +222,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}).when(loggerMock).debug(any(), ArgumentMatchers.<Object[]>any());
 
 		SubscriptionDebugLogInterceptor interceptor = new SubscriptionDebugLogInterceptor();
-		myInterceptorRegistry.registerAnonymousInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 		SubscriptionDebugLogInterceptor interceptor2 = new SubscriptionDebugLogInterceptor(t -> loggerMock, Level.DEBUG);
-		myInterceptorRegistry.registerAnonymousInterceptor(interceptor2);
+		myInterceptorRegistry.registerInterceptor(interceptor2);
 		try {
 
 			String payload = "application/json";
@@ -310,7 +310,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		@Bean
 		public MyTestInterceptor interceptor() {
 			MyTestInterceptor retVal = new MyTestInterceptor();
-			myInterceptorRegistry.registerAnonymousInterceptor(retVal);
+			myInterceptorRegistry.registerInterceptor(retVal);
 			return retVal;
 		}
 
