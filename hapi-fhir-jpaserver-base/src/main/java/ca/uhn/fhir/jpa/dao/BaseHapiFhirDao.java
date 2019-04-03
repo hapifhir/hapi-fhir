@@ -224,6 +224,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			throw new MethodNotAllowedException("$expunge is not enabled on this server");
 		}
 
+		if (theExpungeOptions.getLimit() < 1) {
+			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+theExpungeOptions.getLimit() + ".");
+		}
+
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -282,6 +283,41 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
 		assertStillThere(myTwoVersionPatientId.withVersion("2"));
 		assertExpunged(myDeletedPatientId);
+
+		// No observations deleted
+		assertStillThere(myOneVersionObservationId);
+		assertStillThere(myTwoVersionObservationId.withVersion("1"));
+		assertStillThere(myTwoVersionObservationId.withVersion("2"));
+		assertGone(myDeletedObservationId);
+	}
+
+	@Test
+	public void testExpungeLimitZero() {
+		try {
+			myPatientDao.expunge(new ExpungeOptions()
+				.setExpungeDeletedResources(true)
+				.setExpungeOldVersions(true)
+				.setLimit(0));
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpungeInstanceOldVersionsAndDeletedBoundaryLimit() {
+		myPatientDao.delete(myTwoVersionPatientId);
+
+		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true)
+			.setLimit(2));
+
+		// Patients
+		assertStillThere(myOneVersionPatientId);
+		assertExpunged(myTwoVersionPatientId.withVersion("1"));
+		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertGone(myDeletedPatientId);
 
 		// No observations deleted
 		assertStillThere(myOneVersionObservationId);
