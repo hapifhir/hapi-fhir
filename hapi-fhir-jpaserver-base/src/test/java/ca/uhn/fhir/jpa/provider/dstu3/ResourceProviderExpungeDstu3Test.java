@@ -18,7 +18,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -317,6 +318,26 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		assertStillThere(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
 		assertExpunged(myTwoVersionPatientId.withVersion("2"));
+		assertGone(myDeletedPatientId);
+
+		// No observations deleted
+		assertStillThere(myOneVersionObservationId);
+		assertStillThere(myTwoVersionObservationId.withVersion("1"));
+		assertStillThere(myTwoVersionObservationId.withVersion("2"));
+		assertGone(myDeletedObservationId);
+	}
+
+	@Test
+	public void testExpungeNothing() {
+
+		myPatientDao.expunge(myOneVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
+			.setExpungeDeletedResources(true)
+			.setExpungeOldVersions(true));
+
+		// Patients
+		assertStillThere(myOneVersionPatientId);
+		assertStillThere(myTwoVersionPatientId.withVersion("1"));
+		assertStillThere(myTwoVersionPatientId.withVersion("2"));
 		assertGone(myDeletedPatientId);
 
 		// No observations deleted

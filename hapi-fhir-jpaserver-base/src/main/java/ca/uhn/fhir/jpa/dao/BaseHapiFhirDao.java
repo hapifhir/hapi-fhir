@@ -310,8 +310,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			 */
 			Pageable page = PageRequest.of(0, remainingCount.get());
 			Slice<Long> historicalIds = txTemplate.execute(t -> {
-				if (theResourceId != null && theVersion != null) {
-					return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+				if (theResourceId != null) {
+					if (theVersion != null) {
+						return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+					} else {
+						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+					}
 				} else {
 					if (theResourceName != null) {
 						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
