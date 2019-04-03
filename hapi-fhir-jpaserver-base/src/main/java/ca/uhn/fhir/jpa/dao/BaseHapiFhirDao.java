@@ -279,12 +279,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersionsOfId(next, remainingCount);
-					if (remainingCount.get() <= 0) {
-						ourLog.debug("Expunge limit has been hit - Stopping operation");
-						return toExpungeOutcome(theExpungeOptions, remainingCount);
-					}
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 			/*
@@ -295,6 +295,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					expungeCurrentVersionOfResource(next, remainingCount);
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 		}
