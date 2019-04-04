@@ -299,6 +299,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
 		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@After
@@ -351,8 +353,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setHardTagListLimit(1000);
 		myDaoConfig.setIncludeLimit(2000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
-
-		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@Override
