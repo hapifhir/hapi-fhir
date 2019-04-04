@@ -119,6 +119,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		for (int i = 0; i < 30; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM"+i);
+			ourLog.info("About to create patient");
 			myPatientDao.create(p);
 		}
 
@@ -129,6 +130,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
 		myInterceptors.add(interceptor);
+
+		ourLog.info("About to perform search...");
 
 		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
