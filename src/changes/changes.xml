@@ -125,6 +125,13 @@
 				in the built WAR, in order to prevent duplicates and conflicts in implementing
 				projects.
 			</action>
+			<action type="fix">
+				Two expunge bug fixes:
+				The first bug is that the expunge operation wasn't bailing once it hit its limit.  This resulted in a
+				"Page size must not be less than one!" error.
+				The second bug is that one case wasn't properly handled: when a resourceId with no version is provided.
+				This executed the case where only resource type is provided.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

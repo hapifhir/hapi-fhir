@@ -49,8 +49,9 @@ public class ExpungeOptions {
 	/**
 	 * The maximum number of resource versions to expunge
 	 */
-	public void setLimit(int theLimit) {
+	public ExpungeOptions setLimit(int theLimit) {
 		myLimit = theLimit;
+		return this;
 	}
 
 	public boolean isExpungeEverything() {
