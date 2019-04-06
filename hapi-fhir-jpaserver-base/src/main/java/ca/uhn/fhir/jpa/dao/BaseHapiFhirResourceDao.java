@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -91,6 +92,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -572,10 +575,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
-		BaseHasResource entity = txTemplate.execute(t->readEntity(theId));
+		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId));
 		if (theId.hasVersionIdPart()) {
 			BaseHasResource currentVersion;
-			currentVersion = txTemplate.execute(t->readEntity(theId.toVersionless()));
+			currentVersion = txTemplate.execute(t -> readEntity(theId.toVersionless()));
 			if (entity.getVersion() == currentVersion.getVersion()) {
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
@@ -682,7 +685,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 				TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 				txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-				txTemplate.execute(t->{
+				txTemplate.execute(t -> {
 					myResourceReindexingSvc.markAllResourcesForReindexing(resourceType);
 					return null;
 				});
@@ -693,9 +696,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		mySearchParamRegistry.requestRefresh();
 	}
-
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public <MT extends IBaseMetaType> MT metaAddOperation(IIdType theResourceId, MT theMetaAdd, RequestDetails theRequestDetails) {
@@ -722,7 +722,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, history);
 		}
 
-		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[] {theResourceId, w.getMillisAndRestart()});
+		ourLog.debug("Processed metaAddOperation on {} in {}ms", new Object[]{theResourceId, w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaAdd.getClass(), theResourceId, theRequestDetails);
@@ -756,7 +756,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		myEntityManager.flush();
 
-		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[] {theResourceId.getValue(), w.getMillisAndRestart()});
+		ourLog.debug("Processed metaDeleteOperation on {} in {}ms", new Object[]{theResourceId.getValue(), w.getMillisAndRestart()});
 
 		@SuppressWarnings("unchecked")
 		MT retVal = (MT) metaGetOperation(theMetaDel.getClass(), theResourceId, theRequestDetails);
@@ -918,9 +918,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return read(theId, theRequestDetails, false);
 	}
 
-		@Override
+	@Override
 	public T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk) {
-		validateResourceTypeAndThrowIllegalArgumentException(theId);
+		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		// Notify interceptors
 		if (theRequestDetails != null) {
@@ -941,6 +941,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+		HookParams params = new HookParams().add(IBaseResource.class, retVal);
+		myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -954,7 +957,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId) {
-		validateResourceTypeAndThrowIllegalArgumentException(theId);
+		validateResourceTypeAndThrowInvalidRequestException(theId);
 
 		Long pid = myIdHelperService.translateForcedIdToPid(getResourceName(), theId.getIdPart());
 		BaseHasResource entity = myEntityManager.find(ResourceTable.class, pid);
@@ -1000,6 +1003,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
 
@@ -1069,7 +1073,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			for (List<List<? extends IQueryParameterType>> nextAnds : theParams.values()) {
+			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
 				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
 					for (IQueryParameterType next : nextOrs) {
 						if (next.getMissing() != null) {
@@ -1129,7 +1133,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HashSet<Long> retVal = new HashSet<Long>();
 
 		String uuid = UUID.randomUUID().toString();
-		Iterator<Long> iter = builder.createQuery(theParams, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
+
+		Iterator<Long> iter = builder.createQuery(theParams, searchRuntimeDetails);
 		while (iter.hasNext()) {
 			retVal.add(iter.next());
 		}
@@ -1189,6 +1195,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setId(id);
 		outcome.setResource(theResource);
 		outcome.setEntity(theEntity);
+
+		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
+		HookParams params = new HookParams().add(IBaseResource.class, theResource);
+		myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
+
 		return outcome;
 	}
 
@@ -1341,7 +1352,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		ourLog.debug(msg);
@@ -1420,9 +1431,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validateResourceType(entity, myResourceName);
 	}
 
-	private void validateResourceTypeAndThrowIllegalArgumentException(IIdType theId) {
+	private void validateResourceTypeAndThrowInvalidRequestException(IIdType theId) {
 		if (theId.hasResourceType() && !theId.getResourceType().equals(myResourceName)) {
-			throw new IllegalArgumentException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
+			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
+			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
 	}
 

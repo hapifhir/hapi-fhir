@@ -29,22 +29,20 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
 import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +74,6 @@ public class SubscriptionActivatingInterceptor {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
 
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
-	private static final String REQUESTED_STATUS = Subscription.SubscriptionStatus.REQUESTED.toCode();
-	private static final String ACTIVE_STATUS = Subscription.SubscriptionStatus.ACTIVE.toCode();
 
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
@@ -93,8 +89,6 @@ public class SubscriptionActivatingInterceptor {
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -104,7 +98,7 @@ public class SubscriptionActivatingInterceptor {
 		// subscriber applies..
 		String subscriptionChannelTypeCode = myFhirContext
 			.newTerser()
-			.getSingleValueOrNull(theSubscription, SubscriptionMatcherInterceptor.SUBSCRIPTION_TYPE, IPrimitiveType.class)
+			.getSingleValueOrNull(theSubscription, SubscriptionConstants.SUBSCRIPTION_TYPE, IPrimitiveType.class)
 			.getValueAsString();
 
 		Subscription.SubscriptionChannelType subscriptionChannelType = Subscription.SubscriptionChannelType.fromCode(subscriptionChannelTypeCode);
@@ -113,10 +107,9 @@ public class SubscriptionActivatingInterceptor {
 			return false;
 		}
 
-		final IPrimitiveType<?> status = myFhirContext.newTerser().getSingleValueOrNull(theSubscription, SubscriptionMatcherInterceptor.SUBSCRIPTION_STATUS, IPrimitiveType.class);
-		String statusString = status.getValueAsString();
+		String statusString = mySubscriptionCanonicalizer.getSubscriptionStatus(theSubscription);
 
-		if (REQUESTED_STATUS.equals(statusString)) {
+		if (SubscriptionConstants.REQUESTED_STATUS.equals(statusString)) {
 			if (TransactionSynchronizationManager.isSynchronizationActive()) {
 				/*
 				 * If we're in a transaction, we don't want to try and change the status from
@@ -133,7 +126,7 @@ public class SubscriptionActivatingInterceptor {
 						Future<?> activationFuture = myTaskExecutor.submit(new Runnable() {
 							@Override
 							public void run() {
-								activateSubscription(ACTIVE_STATUS, theSubscription, REQUESTED_STATUS);
+								activateSubscription(SubscriptionConstants.ACTIVE_STATUS, theSubscription, SubscriptionConstants.REQUESTED_STATUS);
 							}
 						});
 
@@ -152,9 +145,9 @@ public class SubscriptionActivatingInterceptor {
 				});
 				return true;
 			} else {
-				return activateSubscription(ACTIVE_STATUS, theSubscription, REQUESTED_STATUS);
+				return activateSubscription(SubscriptionConstants.ACTIVE_STATUS, theSubscription, SubscriptionConstants.REQUESTED_STATUS);
 			}
-		} else if (ACTIVE_STATUS.equals(statusString)) {
+		} else if (SubscriptionConstants.ACTIVE_STATUS.equals(statusString)) {
 			return mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(theSubscription);
 		} else {
 			// Status isn't "active" or "requested"
@@ -205,7 +198,7 @@ public class SubscriptionActivatingInterceptor {
 		String criteria = mySubscriptionCanonicalizer.getCriteria(theResource);
 		try {
 			SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(criteria);
-			mySubscriptionCanonicalizer.setMatchingStrategyTag(myFhirContext, theResource, strategy);
+			mySubscriptionCanonicalizer.setMatchingStrategyTag(theResource, strategy);
 		} catch (InvalidRequestException | DataFormatException e) {
 			throw new UnprocessableEntityException("Invalid subscription criteria submitted: " + criteria + " " + e.getMessage());
 		}

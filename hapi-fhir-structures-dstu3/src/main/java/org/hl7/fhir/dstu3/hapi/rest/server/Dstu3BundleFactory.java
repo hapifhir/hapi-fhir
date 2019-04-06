@@ -121,6 +121,10 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         entry.getRequest().getUrlElement().setValue(next.getId());
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
+
     }
 
 		/*
@@ -211,6 +215,9 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
         if (id != null) {
           entry.getRequest().setUrl(id.getValue());
         }
+      }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
       }
 
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);

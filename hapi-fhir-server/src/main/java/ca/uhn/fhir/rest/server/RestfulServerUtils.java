@@ -46,6 +46,7 @@ import java.io.Writer;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -54,7 +55,7 @@ public class RestfulServerUtils {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
-	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<String>(Arrays.asList("Bundle", "*.text", "*.(mandatory)"));
+	private static final HashSet<String> TEXT_ENCODE_ELEMENTS = new HashSet<>(Arrays.asList("*.text", "*.id", "*.meta", "*.(mandatory)"));
 	private static Map<FhirVersionEnum, FhirContext> myFhirContextMap = Collections.synchronizedMap(new HashMap<FhirVersionEnum, FhirContext>());
 
 	private enum NarrativeModeEnum {
@@ -125,13 +126,15 @@ public class RestfulServerUtils {
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequestDetails);
 
 		// _elements
-		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails);
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
 		if (elements != null && summaryMode != null && !summaryMode.equals(Collections.singleton(SummaryEnum.FALSE))) {
 			throw new InvalidRequestException("Cannot combine the " + Constants.PARAM_SUMMARY + " and " + Constants.PARAM_ELEMENTS + " parameters");
 		}
-		Set<String> elementsAppliesTo = null;
-		if (elements != null && isNotBlank(theRequestDetails.getResourceName())) {
-			elementsAppliesTo = Collections.singleton(theRequestDetails.getResourceName());
+
+		// _elements:exclude
+		Set<String> elementsExclude = ElementsParameter.getElementsValueOrNull(theRequestDetails, true);
+		if (elementsExclude != null) {
+			parser.setDontEncodeElements(elementsExclude);
 		}
 
 		if (summaryMode != null) {
@@ -139,15 +142,27 @@ public class RestfulServerUtils {
 				parser.setEncodeElements(Collections.singleton("Bundle.total"));
 			} else if (summaryMode.contains(SummaryEnum.TEXT) && summaryMode.size() == 1) {
 				parser.setEncodeElements(TEXT_ENCODE_ELEMENTS);
+				parser.setEncodeElementsAppliesToChildResourcesOnly(true);
 			} else {
 				parser.setSuppressNarratives(summaryMode.contains(SummaryEnum.DATA));
 				parser.setSummaryMode(summaryMode.contains(SummaryEnum.TRUE));
 			}
 		}
 		if (elements != null && elements.size() > 0) {
+			String elementsAppliesTo = "*";
+			if (isNotBlank(theRequestDetails.getResourceName())) {
+				elementsAppliesTo = theRequestDetails.getResourceName();
+			}
+
 			Set<String> newElements = new HashSet<>();
 			for (String next : elements) {
-				newElements.add("*." + next);
+				if (isNotBlank(next)) {
+					if (Character.isUpperCase(next.charAt(0))) {
+						newElements.add(next);
+					} else {
+						newElements.add(elementsAppliesTo + "." + next);
+					}
+				}
 			}
 
 			/*
@@ -158,6 +173,13 @@ public class RestfulServerUtils {
 			 * the client has explicitly scoped the Bundle
 			 * (i.e. with Bundle.total or something like that)
 			 */
+			boolean haveExplicitBundleElement = false;
+			for (String next : newElements) {
+				if (next.startsWith("Bundle.")) {
+					haveExplicitBundleElement = true;
+					break;
+				}
+			}
 			switch (theRequestDetails.getRestOperationType()) {
 				case SEARCH_SYSTEM:
 				case SEARCH_TYPE:
@@ -165,13 +187,6 @@ public class RestfulServerUtils {
 				case HISTORY_TYPE:
 				case HISTORY_INSTANCE:
 				case GET_PAGE:
-					boolean haveExplicitBundleElement = false;
-					for (String next : newElements) {
-						if (next.startsWith("Bundle.")) {
-							haveExplicitBundleElement = true;
-							break;
-						}
-					}
 					if (!haveExplicitBundleElement) {
 						parser.setEncodeElementsAppliesToChildResourcesOnly(true);
 					}
@@ -181,26 +196,28 @@ public class RestfulServerUtils {
 			}
 
 			parser.setEncodeElements(newElements);
-			parser.setEncodeElementsAppliesToResourceTypes(elementsAppliesTo);
 		}
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, int theOffset, int theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theServerBase, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
+		return createPagingLink(theIncludes, theRequestDetails, theSearchId, theOffset, theCount, theRequestParameters, thePrettyPrint,
 			theBundleType, null);
 	}
 
-	public static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	public static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, String thePageId, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 													  BundleTypeEnum theBundleType) {
-		return createPagingLink(theIncludes, theServerBase, theSearchId, null, null, theRequestParameters, thePrettyPrint,
+		return createPagingLink(theIncludes, theRequestDetails, theSearchId, null, null, theRequestParameters, thePrettyPrint,
 			theBundleType, thePageId);
 	}
 
-	private static String createPagingLink(Set<Include> theIncludes, String theServerBase, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
+	private static String createPagingLink(Set<Include> theIncludes, RequestDetails theRequestDetails, String theSearchId, Integer theOffset, Integer theCount, Map<String, String[]> theRequestParameters, boolean thePrettyPrint,
 														BundleTypeEnum theBundleType, String thePageId) {
+
+		String serverBase = theRequestDetails.getFhirServerBase();
+
 		StringBuilder b = new StringBuilder();
-		b.append(theServerBase);
+		b.append(serverBase);
 		b.append('?');
 		b.append(Constants.PARAM_PAGINGACTION);
 		b.append('=');
@@ -258,16 +275,33 @@ public class RestfulServerUtils {
 			b.append(theBundleType.getCode());
 		}
 
-		String paramName = Constants.PARAM_ELEMENTS;
-		String[] params = theRequestParameters.get(paramName);
-		if (params != null) {
-			for (String nextValue : params) {
-				if (isNotBlank(nextValue)) {
-					b.append('&');
-					b.append(paramName);
-					b.append('=');
-					b.append(UrlUtil.escapeUrlParam(nextValue));
-				}
+		// _elements
+		Set<String> elements = ElementsParameter.getElementsValueOrNull(theRequestDetails, false);
+		if (elements != null) {
+			b.append('&');
+			b.append(Constants.PARAM_ELEMENTS);
+			b.append('=');
+			String nextValue = elements
+				.stream()
+				.sorted()
+				.map(UrlUtil::escapeUrlParam)
+				.collect(Collectors.joining(","));
+			b.append(nextValue);
+		}
+
+		// _elements:exclude
+		if (theRequestDetails.getServer().getElementsSupport() == ElementsSupportEnum.EXTENDED) {
+			Set<String> elementsExclude = ElementsParameter.getElementsValueOrNull(theRequestDetails, true);
+			if (elementsExclude != null) {
+				b.append('&');
+				b.append(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+				b.append('=');
+				String nextValue = elementsExclude
+					.stream()
+					.sorted()
+					.map(UrlUtil::escapeUrlParam)
+					.collect(Collectors.joining(","));
+				b.append(nextValue);
 			}
 		}
 

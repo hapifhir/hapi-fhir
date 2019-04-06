@@ -688,6 +688,55 @@
 			</subsection>
 
 		</section>
+
+		<section name="Extended Elements Support" id="extended_elements_support">
+
+			<p>
+				The HAPI FHIR server may be configured using the
+				<code>RestfulServer#setElementsSupport</code> to enable extended
+				support for the <code>_elements</code> filter.
+			</p>
+			<p>
+				In standard mode, elements are supported exactly as described in the
+				<a href="http://hl7.org/fhir/search.html#elements">Elements Documentation</a>
+				in the FHIR specification.
+			</p>
+			<p>
+				In extended mode, HAPI FHIR provides the same behaviour as described in the
+				FHIR specification, but also enabled the following additional options:
+			</p>
+			<ul>
+				<li>
+					Values may be prepended using Resource names in order to apply the
+					elements filter to multiple resources. For example, the following
+					parameter could be used to apply elements filtering to both the
+					DiagnosticReport and Observation resource in a search result:<br/>
+					<code>_elements=DiagnosticReport.subject,DiagnosticReport.result,Observation.value</code>
+				</li>
+				<li>
+					Values may be prepended with a wildcard star in order to apply them
+					to all resource types. For example, the following parameter could
+					be used to include the <code>subject</code> field in all resource
+					types:<br/>
+					<code>_elements=*.subject</code>
+				</li>
+				<li>
+					Values may include complex paths. For example, the following parameter could
+					be used to include only the code on a coded element:<br/>
+					<code>_elements=Procedure.reasonCode.coding.code</code>
+				</li>
+				<li>
+					Elements may be excluded using the <code>:exclude</code> modifier
+					on the elements parameter. For example, the following parameter
+					could be used to remove the resource metadata (meta) element from
+					all resources in the response:<br/>
+					<code>_elements:exclude=*.meta</code><br/>
+					Note that this can be used to suppress the <code>SUBSETTED</code> tag
+					which is automatically added to resources when an <code>_elements</code>
+					parameter is applied.
+				</li>
+			</ul>
+		</section>
 		
 	</body>
 

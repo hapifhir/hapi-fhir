@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /*
@@ -25,7 +23,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 
 public interface IFhirResourceDaoMessageHeader<T extends IBaseResource> extends IFhirResourceDao<T> {
-
-	IBaseBundle messageHeaderProcessMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
-
+	// nothing right now
 }

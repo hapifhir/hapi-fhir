@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	private String myPkColumn;
 
 	public void addAddColumnTask(AddColumnTask theTask) {
+		Validate.notNull(theTask);
 		myAddColumnTasks.add(theTask);
 	}
 

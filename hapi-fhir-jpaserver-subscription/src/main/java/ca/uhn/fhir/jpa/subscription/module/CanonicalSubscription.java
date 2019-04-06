@@ -26,8 +26,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
@@ -63,7 +65,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 	@JsonProperty("restHookDetails")
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
-	private Map<String, String> myChannelExtensions;
+	private Map<String, List<String>> myChannelExtensions;
 
 	/**
 	 * Constructor
@@ -133,15 +135,32 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
-	public String getChannelExtension(String url) {
-		return myChannelExtensions.get(url);
+	public String getChannelExtension(String theUrl) {
+		String retVal = null;
+		List<String> strings = myChannelExtensions.get(theUrl);
+		if (strings != null && strings.isEmpty()==false) {
+			retVal = strings.get(0);
+		}
+		return retVal;
 	}
 
-	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
+	@Nonnull
+	public List<String> getChannelExtensions(String theUrl) {
+		List<String> retVal = myChannelExtensions.get(theUrl);
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		} else {
+			retVal = Collections.unmodifiableList(retVal);
+		}
+		return retVal;
+	}
+
+	public void setChannelExtensions(Map<String, List<String>> theChannelExtensions) {
 		myChannelExtensions = new HashMap<>();
 		for (String url : theChannelExtensions.keySet()) {
-			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
-				myChannelExtensions.put(url, theChannelExtensions.get(url));
+			List<String> values = theChannelExtensions.get(url);
+			if (isNotBlank(url) && values != null) {
+				myChannelExtensions.put(url, values);
 			}
 		}
 	}
@@ -152,6 +171,10 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			retVal = theContext.getVersion().newIdType().setValue(myIdElement);
 		}
 		return retVal;
+	}
+
+	public String getIdPart() {
+		return new IdType(getIdElementString()).getIdPart();
 	}
 
 	public String getIdElementString() {
@@ -285,6 +308,28 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
 		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			EmailDetails that = (EmailDetails) theO;
+
+			return new EqualsBuilder()
+				.append(myFrom, that.myFrom)
+				.append(mySubjectTemplate, that.mySubjectTemplate)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myFrom)
+				.append(mySubjectTemplate)
+				.toHashCode();
+		}
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -357,4 +402,20 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 
 	}
 
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myIdElement", myIdElement)
+			.append("myStatus", myStatus)
+			.append("myCriteriaString", myCriteriaString)
+			.append("myEndpointUrl", myEndpointUrl)
+			.append("myPayloadString", myPayloadString)
+//			.append("myHeaders", myHeaders)
+			.append("myChannelType", myChannelType)
+//			.append("myTrigger", myTrigger)
+//			.append("myEmailDetails", myEmailDetails)
+//			.append("myRestHookDetails", myRestHookDetails)
+//			.append("myChannelExtensions", myChannelExtensions)
+			.toString();
+	}
 }

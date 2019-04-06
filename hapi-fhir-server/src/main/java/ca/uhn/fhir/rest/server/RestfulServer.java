@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -94,13 +93,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * context, in order to avoid a dependency on Servlet-API 3.0+
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
-	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
-	private static final long serialVersionUID = 1L;
 	/**
 	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
 	 */
 	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
+	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
+	private static final long serialVersionUID = 1L;
 	private final List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
@@ -126,10 +125,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
 	private boolean myUncompressIncomingContents = true;
-	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
 	private Date myConformanceDate;
 	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
+	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -511,6 +510,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			throw new NullPointerException("theETagSupport can not be null");
 		}
 		myETagSupport = theETagSupport;
+	}
+
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return myElementsSupport;
+	}
+
+	/**
+	 * Sets the elements support mode.
+	 *
+	 * @see <a href="http://hapifhir.io/doc_rest_server.html#extended_elements_support">Extended Elements Support</a>
+	 */
+	public void setElementsSupport(ElementsSupportEnum theElementsSupport) {
+		Validate.notNull(theElementsSupport, "theElementsSupport must not be null");
+		myElementsSupport = theElementsSupport;
 	}
 
 	/**
@@ -919,21 +933,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
-			// String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
-			// if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-			// requestDetails.setRestOperationType(RestOperationTypeEnum.GET_PAGE);
-			// if (theRequestType != RequestTypeEnum.GET) {
-			// /*
-			// * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came
-			// in using a POST. We could probably work around that but why bother unless
-			// * someone comes up with a reason for needing it.
-			// */
-			// throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(RestfulServer.class,
-			// "getPagesNonHttpGet"));
-			// }
-			// handlePagingRequest(requestDetails, theResponse, pagingAction);
-			// return;
-			// }
+			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
@@ -1025,12 +1025,33 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
 			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
+			requestDetails.removeParameter(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
 
 			/*
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
+		}
+	}
+
+	protected void validateRequest(ServletRequestDetails theRequestDetails) {
+		String[] elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
+		}
+
+		elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
 		}
 	}
 
@@ -1183,6 +1204,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * <p>
 	 * The default is <code>false</code>
 	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
+	 * </p>
 	 *
 	 * @return Returns the default pretty print setting
 	 */
@@ -1197,6 +1223,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * parameter in the request URL.
 	 * <p>
 	 * The default is <code>false</code>
+	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
 	 * </p>
 	 *
 	 * @param theDefaultPrettyPrint The default pretty print setting
@@ -1251,26 +1282,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return myUseBrowserFriendlyContentTypes;
-	}
-
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
 
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
 		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);

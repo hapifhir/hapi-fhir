@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -100,6 +101,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myCommunicationDaoR4")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
 	@Autowired
+	@Qualifier("myCommunicationRequestDaoR4")
+	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
+	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
 	@Autowired
@@ -167,6 +171,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myMedicationRequestDaoR4")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
+	@Autowired
+	@Qualifier("myProcedureDaoR4")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
 	@Autowired
 	@Qualifier("myNamingSystemDaoR4")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
@@ -280,6 +287,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
 
+	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+
 	@After()
 	public void afterCleanupDao() {
 		myDaoConfig.setExpireSearchResults(new DaoConfig().isExpireSearchResults());
@@ -290,6 +299,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
 		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+
+		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@After
@@ -312,6 +323,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
 		myDaoConfig.setInterceptors(myInterceptor);
+
+		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@Before
@@ -329,8 +343,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	@Transactional()
-	public void beforePurgeDatabase() throws InterruptedException {
-		final EntityManager entityManager = this.myEntityManager;
+	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 

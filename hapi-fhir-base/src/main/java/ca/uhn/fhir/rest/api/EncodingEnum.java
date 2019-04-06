@@ -106,6 +106,9 @@ public enum EncodingEnum {
 		myFormatContentType = theFormatContentType;
 	}
 
+	/**
+	 * Returns <code>xml</code> or <code>json</code> as used on the <code>_format</code> search parameter
+	 */
 	public String getFormatContentType() {
 		return myFormatContentType;
 	}

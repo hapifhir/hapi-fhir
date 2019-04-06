@@ -76,7 +76,7 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 				toDelete.add(nextEntry.getValue());
 			}
 		}
-		mySearchParamPresentDao.deleteInBatch(toDelete);
+		mySearchParamPresentDao.deleteAll(toDelete);
 
 		// Add any that should be added
 		List<SearchParamPresent> toAdd = new ArrayList<>();

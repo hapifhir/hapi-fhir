@@ -15,10 +15,7 @@ import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -174,7 +171,7 @@ public class TestRestfulServer extends RestfulServer {
 		}
 		setResourceProviders(beans);
 
-		setPlainProviders(plainProviders);
+		registerProviders(plainProviders);
 
 		/*
 		 * Enable CORS
@@ -203,6 +200,11 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		setDefaultPrettyPrint(true);
 		setDefaultResponseEncoding(EncodingEnum.JSON);
+
+		/*
+		 * Use extended support for the _elements parameter
+		 */
+		setElementsSupport(ElementsSupportEnum.EXTENDED);
 
 		/*
 		 * The server's base URL (e.g. http://fhirtest.uhn.ca/baseDstu2) is

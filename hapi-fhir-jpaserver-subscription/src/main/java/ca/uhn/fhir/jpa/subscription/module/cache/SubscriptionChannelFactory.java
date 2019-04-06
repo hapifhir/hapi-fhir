@@ -39,10 +39,10 @@ public class SubscriptionChannelFactory {
 			theChannelType +
 			"-" +
 			theSubscriptionId;
-		return mySubscribableChannelFactory.createSubscribableChannel(channelName);
+		return mySubscribableChannelFactory.createSubscribableChannel(channelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
 	public SubscribableChannel newMatchingChannel(String theChannelName) {
-		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName);
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
 	}
 }

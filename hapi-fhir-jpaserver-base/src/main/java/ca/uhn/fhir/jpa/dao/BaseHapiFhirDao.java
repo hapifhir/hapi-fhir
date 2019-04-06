@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -223,6 +224,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			throw new MethodNotAllowedException("$expunge is not enabled on this server");
 		}
 
+		if (theExpungeOptions.getLimit() < 1) {
+			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+theExpungeOptions.getLimit() + ".");
+		}
+
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {
@@ -274,12 +279,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersionsOfId(next, remainingCount);
-					if (remainingCount.get() <= 0) {
-						ourLog.debug("Expunge limit has been hit - Stopping operation");
-						return toExpungeOutcome(theExpungeOptions, remainingCount);
-					}
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 			/*
@@ -290,6 +295,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					expungeCurrentVersionOfResource(next, remainingCount);
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 		}
@@ -301,8 +310,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			 */
 			Pageable page = PageRequest.of(0, remainingCount.get());
 			Slice<Long> historicalIds = txTemplate.execute(t -> {
-				if (theResourceId != null && theVersion != null) {
-					return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+				if (theResourceId != null) {
+					if (theVersion != null) {
+						return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+					} else {
+						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+					}
 				} else {
 					if (theResourceName != null) {
 						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
@@ -395,11 +408,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private int doExpungeEverythingQuery(String theQuery) {
 		StopWatch sw = new StopWatch();
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		if (outcome > 0) {
-			ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
-		} else {
-			ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
-		}
+		ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 		return outcome;
 	}
 
@@ -1554,15 +1563,17 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					continue;
 				}
 
-				for (IBase nextChild : values) {
-					IBaseReference nextRef = (IBaseReference) nextChild;
-					IIdType referencedId = nextRef.getReferenceElement();
-					if (!isBlank(referencedId.getResourceType())) {
-						if (!isLogicalReference(referencedId)) {
-							if (!referencedId.getValue().contains("?")) {
-								if (!validTypes.contains(referencedId.getResourceType())) {
-									throw new UnprocessableEntityException(
-										"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+				if (getConfig().isEnforceReferenceTargetTypes()) {
+					for (IBase nextChild : values) {
+						IBaseReference nextRef = (IBaseReference) nextChild;
+						IIdType referencedId = nextRef.getReferenceElement();
+						if (!isBlank(referencedId.getResourceType())) {
+							if (!isLogicalReference(referencedId)) {
+								if (!referencedId.getValue().contains("?")) {
+									if (!validTypes.contains(referencedId.getResourceType())) {
+										throw new UnprocessableEntityException(
+											"Invalid reference found at path '" + newPath + "'. Resource type '" + referencedId.getResourceType() + "' is not valid for this path");
+									}
 								}
 							}
 						}

@@ -27,7 +27,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class LinkedBlockingQueueSubscribableChannelFactory implements ISubscribableChannelFactory {
 	@Override
-	public SubscribableChannel createSubscribableChannel(String theChannelName) {
-		return new LinkedBlockingQueueSubscribableChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d");
+	public SubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers) {
+		return new LinkedBlockingQueueSubscribableChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d", theConcurrentConsumers);
+	}
+
+	@Override
+	public int getDeliveryChannelConcurrentConsumers() {
+		return SubscriptionConstants.DELIVERY_CHANNEL_CONCURRENT_CONSUMERS;
+	}
+
+	@Override
+	public int getMatchingChannelConcurrentConsumers() {
+		return SubscriptionConstants.MATCHING_CHANNEL_CONCURRENT_CONSUMERS;
 	}
 }

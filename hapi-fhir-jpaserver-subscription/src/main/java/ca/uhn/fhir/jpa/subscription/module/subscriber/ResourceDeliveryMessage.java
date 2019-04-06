@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.Gson;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -36,12 +36,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @SuppressWarnings("WeakerAccess")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(creatorVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ResourceDeliveryMessage implements IResourceMessage {
+public class ResourceDeliveryMessage extends BaseResourceMessage implements IResourceMessage {
 
-	@JsonIgnore
-	private transient CanonicalSubscription mySubscription;
-	@JsonProperty("subscription")
-	private String mySubscriptionString;
+	@JsonProperty("canonicalSubscription")
+	private CanonicalSubscription mySubscription;
 	@JsonProperty("payload")
 	private String myPayloadString;
 	@JsonIgnore
@@ -84,17 +82,11 @@ public class ResourceDeliveryMessage implements IResourceMessage {
 	}
 
 	public CanonicalSubscription getSubscription() {
-		if (mySubscription == null && mySubscriptionString != null) {
-			mySubscription = new Gson().fromJson(mySubscriptionString, CanonicalSubscription.class);
-		}
 		return mySubscription;
 	}
 
 	public void setSubscription(CanonicalSubscription theSubscription) {
 		mySubscription = theSubscription;
-		if (mySubscription != null) {
-			mySubscriptionString = new Gson().toJson(mySubscription);
-		}
 	}
 
 	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
@@ -113,5 +105,28 @@ public class ResourceDeliveryMessage implements IResourceMessage {
 		if (thePayloadId != null) {
 			myPayloadId = thePayloadId.getValue();
 		}
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("mySubscription", mySubscription)
+//			.append("mySubscriptionString", mySubscriptionString)
+			.append("myPayloadString", myPayloadString)
+			.append("myPayload", myPayload)
+			.append("myPayloadId", myPayloadId)
+			.append("myOperationType", myOperationType)
+			.toString();
+	}
+
+	/**
+	 * Helper method to fetch the subscription ID
+	 */
+	public String getSubscriptionId(FhirContext theFhirContext) {
+		String retVal = null;
+		if (getSubscription() != null) {
+			retVal = getSubscription().getIdElement(theFhirContext).getValue();
+		}
+		return retVal;
 	}
 }

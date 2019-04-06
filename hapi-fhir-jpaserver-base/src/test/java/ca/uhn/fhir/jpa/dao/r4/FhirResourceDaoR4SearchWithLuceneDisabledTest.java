@@ -8,9 +8,13 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
@@ -27,7 +31,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4WithoutLuceneConfig.class})
@@ -61,6 +69,12 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	@Autowired
+	@Qualifier("myValueSetDaoR4")
+	private IFhirResourceDao<ValueSet> myValueSetDao;
+	@Autowired
+	@Qualifier("myObservationDaoR4")
+	private IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	private IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
@@ -167,6 +181,42 @@ public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 			assertEquals("Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testSearchByCodeIn() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://fooCS");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CODEA");
+		cs.addConcept().setCode("CODEB");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://fooVS");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://fooCS")
+			.addConcept(new ValueSet.ConceptReferenceComponent().setCode("CODEA"));
+		myValueSetDao.create(vs);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEA");
+		String obs1id = myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
+
+		obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEB");
+		myObservationDao.create(obs).getId().toUnqualifiedVersionless().getValue();
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("code", new TokenParam("http://fooVS").setModifier(TokenParamModifier.IN));
+		IBundleProvider results = myObservationDao.search(map);
+		List<IBaseResource> resultsList = results.getResources(0, 10);
+		assertEquals(1, resultsList.size());
+		assertEquals(obs1id, resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue());
+
+	}
+
 
 
 	@AfterClass

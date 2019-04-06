@@ -19,20 +19,24 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
+import ca.uhn.fhir.rest.server.ElementsSupportEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ElementsParameter implements IParameter {
 
@@ -40,9 +44,9 @@ public class ElementsParameter implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		Set<String> value = getElementsValueOrNull(theRequest);
+		Set<String> value = getElementsValueOrNull(theRequest, false);
 		if (value == null || value.isEmpty()) {
 			return null;
 		}
@@ -62,16 +66,40 @@ public class ElementsParameter implements IParameter {
 		}
 	}
 
-	public static Set<String> getElementsValueOrNull(RequestDetails theRequest) {
-		String[] summary = theRequest.getParameters().get(Constants.PARAM_ELEMENTS);
+	@Override
+	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
+		if (theOuterCollectionType != null) {
+			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
+				+ " but can not be a collection of collections");
+		}
+		if (theInnerCollectionType != null) {
+			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, SummaryEnum.class.getSimpleName());
+		}
+	}
 
-		if (summary != null && summary.length > 0) {
-			Set<String> retVal = new HashSet<String>();
-			for (String next : summary) {
+	public static Set<String> getElementsValueOrNull(RequestDetails theRequest, boolean theExclude) {
+		boolean standardMode = theRequest.getServer().getElementsSupport() != ElementsSupportEnum.EXTENDED;
+		if (theExclude && standardMode) {
+			return null;
+		}
+
+		String paramName = Constants.PARAM_ELEMENTS;
+		if (theExclude) {
+			paramName = Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER;
+		}
+		String[] elementsValues = theRequest.getParameters().get(paramName);
+
+		if (elementsValues != null && elementsValues.length > 0) {
+			Set<String> retVal = new HashSet<>();
+			for (String next : elementsValues) {
 				StringTokenizer tok = new StringTokenizer(next, ",");
 				while (tok.hasMoreTokens()) {
 					String token = tok.nextToken();
 					if (isNotBlank(token)) {
+						if (token.contains("."))
+							if (standardMode) {
+								continue;
+							}
 						retVal.add(token);
 					}
 				}
@@ -80,23 +108,9 @@ public class ElementsParameter implements IParameter {
 				return null;
 			}
 
-			// Always include the meta element even for subsetted values
-			retVal.add("meta");
-
 			return retVal;
 		}
 		return null;
-	}
-
-	@Override
-	public void initializeTypes(Method theMethod, Class<? extends Collection<?>> theOuterCollectionType, Class<? extends Collection<?>> theInnerCollectionType, Class<?> theParameterType) {
-		if (theOuterCollectionType != null) {
-			throw new ConfigurationException("Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName() + "' is of type " + SummaryEnum.class
-					+ " but can not be a collection of collections");
-		}
-		if (theInnerCollectionType != null) {
-			myInnerCollectionType = CollectionBinder.getInstantiableCollectionType(theInnerCollectionType, SummaryEnum.class.getSimpleName());
-		}
 	}
 
 }

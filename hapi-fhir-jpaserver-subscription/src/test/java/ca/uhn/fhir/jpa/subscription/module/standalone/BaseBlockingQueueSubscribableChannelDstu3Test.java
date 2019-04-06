@@ -25,7 +25,6 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,7 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends BaseSubscriptionDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionMatchingSubscriberTest.class);
@@ -67,8 +65,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static SubscribableChannel ourSubscribableChannel;
-	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-	protected static AtomicLong idCounter = new AtomicLong();
 	protected PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
@@ -77,18 +73,21 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
-		mySubscriptionRegistry.clearForUnitTests();
+		mySubscriptionRegistry.unregisterAllSubscriptions();
 		if (ourSubscribableChannel == null) {
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
 	}
 
 	@After
 	public void cleanup() {
 		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		mySubscriptionMatchingPost.clear();
+		mySubscriptionActivatedPost.clear();
+		ourObservationListener.clear();
 	}
 
 	public <T extends IBaseResource> T sendResource(T theResource) throws InterruptedException {
@@ -101,32 +100,16 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	}
 
 	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
-		Subscription subscription = returnedActiveSubscription(theCriteria, thePayload, theEndpoint);
+		Subscription subscription = makeActiveSubscription(theCriteria, thePayload, theEndpoint);
 		mySubscriptionActivatedPost.setExpectedCount(1);
 		Subscription retval = sendResource(subscription);
 		mySubscriptionActivatedPost.awaitExpected();
 		return retval;
 	}
 
-	protected Subscription returnedActiveSubscription(String theCriteria, String thePayload, String theEndpoint) {
-		Subscription subscription = new Subscription();
-		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
-		subscription.setStatus(Subscription.SubscriptionStatus.ACTIVE);
-		subscription.setCriteria(theCriteria);
-		IdType id = new IdType("Subscription", idCounter.incrementAndGet());
-		subscription.setId(id);
-
-		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
-		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setPayload(thePayload);
-		channel.setEndpoint(theEndpoint);
-		subscription.setChannel(channel);
-		return subscription;
-	}
-
 	protected Observation sendObservation(String code, String system) throws InterruptedException {
 		Observation observation = new Observation();
-		IdType id = new IdType("Observation", idCounter.incrementAndGet());
+		IdType id = new IdType("Observation", nextId());
 		observation.setId(id);
 
 		CodeableConcept codeableConcept = new CodeableConcept();
@@ -188,7 +171,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
-			updateLatch.invoke(new HookParams().add(Observation.class, theObservation));
+			updateLatch.invoke(null, new HookParams().add(Observation.class, theObservation));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
@@ -204,5 +187,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public void expectNothing() {
 			updateLatch.expectNothing();
 		}
+
+		public void clear() { updateLatch.clear();}
 	}
 }

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.CaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
@@ -91,11 +91,15 @@ public abstract class BaseJpaTest {
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
 	@Autowired
 	protected IInterceptorRegistry myInterceptorRegistry;
+	@Autowired
+	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
-		CaptureQueriesListener.clear();
+		if (myCaptureQueriesListener != null) {
+			myCaptureQueriesListener.clear();
+		}
 	}
 
 	@After
@@ -138,7 +142,7 @@ public abstract class BaseJpaTest {
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(theLatchPointcut, Integer.MAX_VALUE, t -> deliveryLatch.countDown());
+		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
 		return deliveryLatch;
 	}
 
@@ -312,6 +316,14 @@ public abstract class BaseJpaTest {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
+		}
+		return retVal;
+	}
+
+	protected List<String> toUnqualifiedVersionlessIdValues(List<? extends IBaseResource> theFound) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theFound) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
 		}
 		return retVal;
 	}

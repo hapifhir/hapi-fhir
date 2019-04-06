@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.validation;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

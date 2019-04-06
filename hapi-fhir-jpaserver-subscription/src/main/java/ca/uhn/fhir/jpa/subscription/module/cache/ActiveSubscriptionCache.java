@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 
 import java.util.ArrayList;
@@ -29,7 +28,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ActiveSubscriptionCache {
+class ActiveSubscriptionCache {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
 	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
@@ -69,10 +68,5 @@ public class ActiveSubscriptionCache {
 				remove(next);
 			}
 		}
-	}
-
-	@VisibleForTesting
-	public void clearForUnitTests() {
-		myCache.clear();
 	}
 }

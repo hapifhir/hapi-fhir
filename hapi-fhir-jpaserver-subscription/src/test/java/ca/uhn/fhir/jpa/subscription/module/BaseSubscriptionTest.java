@@ -44,5 +44,4 @@ public abstract class BaseSubscriptionTest {
 		myMockFhirClientSubscriptionProvider.setBundleProvider(theBundleProvider);
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
-
 }

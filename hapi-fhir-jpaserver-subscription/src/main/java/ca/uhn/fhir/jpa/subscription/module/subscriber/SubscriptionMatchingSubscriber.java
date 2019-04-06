@@ -72,14 +72,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		try {
-			doMatchActiveSubscriptionsAndDeliver(theMsg);
-		} finally {
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, theMsg);
-		}
-	}
-
-	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -92,11 +84,26 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				return;
 		}
 
+		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, theMsg)) {
+			return;
+		}
+
+		try {
+			doMatchActiveSubscriptionsAndDeliver(theMsg);
+		} finally {
+			// Interceptor call: SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, theMsg);
+		}
+	}
+
+	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
 		ourLog.trace("Testing {} subscriptions for applicability", subscriptions.size());
+		boolean resourceMatched = false;
 
 		for (ActiveSubscription nextActiveSubscription : subscriptions) {
 
@@ -128,17 +135,29 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			deliveryMsg.setPayload(myFhirContext, payload);
 			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
 			deliveryMsg.setOperationType(theMsg.getOperationType());
+			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 			if (payload == null) {
 				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
+			}
+
+			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, deliveryMsg, nextActiveSubscription.getSubscription(), matchResult)) {
+				return;
 			}
 
 			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
 			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
 			if (deliveryChannel != null) {
+				resourceMatched = true;
 				deliveryChannel.send(wrappedMsg);
 			} else {
 				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
 			}
+		}
+
+		if (!resourceMatched) {
+			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, theMsg);
 		}
 	}
 

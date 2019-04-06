@@ -61,6 +61,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(500);
 
 		for (Argument nextArgument : theSearchParams) {
 

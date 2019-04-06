@@ -20,9 +20,17 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.RetryListener;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.listener.RetryListenerSupport;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 import java.util.function.Supplier;
 
@@ -30,34 +38,36 @@ public class Retrier<T> {
 	private static final Logger ourLog = LoggerFactory.getLogger(Retrier.class);
 
 	private final Supplier<T> mySupplier;
-	private final int myMaxRetries;
-	private final int mySecondsBetweenRetries;
-	private final String myDescription;
 
-	public Retrier(Supplier<T> theSupplier, int theMaxRetries, int theSecondsBetweenRetries, String theDescription) {
+	private final RetryTemplate myRetryTemplate;
+
+	public Retrier(Supplier<T> theSupplier, int theMaxRetries) {
+		Validate.isTrue(theMaxRetries > 0, "maxRetries must be above zero.");
 		mySupplier = theSupplier;
-		myMaxRetries = theMaxRetries;
-		mySecondsBetweenRetries = theSecondsBetweenRetries;
-		myDescription = theDescription;
+
+		myRetryTemplate = new RetryTemplate();
+
+		ExponentialBackOffPolicy backOff = new ExponentialBackOffPolicy();
+		backOff.setInitialInterval(500);
+		backOff.setMaxInterval(DateUtils.MILLIS_PER_MINUTE);
+		backOff.setMultiplier(2);
+		myRetryTemplate.setBackOffPolicy(backOff);
+
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		retryPolicy.setMaxAttempts(theMaxRetries);
+		myRetryTemplate.setRetryPolicy(retryPolicy);
+
+		RetryListener listener = new RetryListenerSupport() {
+			@Override
+			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+				super.onError(context, callback, throwable);
+				ourLog.error("Retry failure " + context.getRetryCount() + "/" + theMaxRetries, throwable);
+			}
+		};
+		myRetryTemplate.registerListener(listener);
 	}
 
 	public T runWithRetry() {
-		RuntimeException lastException = new IllegalStateException("maxRetries must be above zero.");
-		for (int retryCount = 1; retryCount <= myMaxRetries; ++retryCount) {
-			try {
-				return mySupplier.get();
-			} catch(RuntimeException e) {
-				ourLog.trace("Failure during retry: {}", e.getMessage(), e); // with stacktrace if it's ever needed
-				ourLog.info("Failed to {}.  Attempt {} / {}: {}", myDescription, retryCount, myMaxRetries, e.getMessage());
-				lastException = e;
-				try {
-					Thread.sleep(mySecondsBetweenRetries * DateUtils.MILLIS_PER_SECOND);
-				} catch (InterruptedException ie) {
-					Thread.currentThread().interrupt();
-					throw lastException;
-				}
-			}
-		}
-		throw lastException;
+		return myRetryTemplate.execute(retryContext -> mySupplier.get());
 	}
 }

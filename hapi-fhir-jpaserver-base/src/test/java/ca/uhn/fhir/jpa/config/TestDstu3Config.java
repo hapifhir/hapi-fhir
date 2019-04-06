@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -26,6 +27,11 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestDstu3Config.class);
 	private Exception myLastStackTrace;
+
+	@Bean
+	public CircularQueueCaptureQueriesListener captureQueriesListener() {
+		return new CircularQueueCaptureQueriesListener();
+	}
 
 	@Bean
 	public BasicDataSource basicDataSource() {
@@ -100,6 +106,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 			.create(basicDataSource())
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
+			.afterQuery(captureQueriesListener())
 			.countQuery()
 			.build();
 

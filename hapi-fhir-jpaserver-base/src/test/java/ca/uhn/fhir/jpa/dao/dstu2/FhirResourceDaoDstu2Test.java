@@ -1380,7 +1380,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		try {
 			myEncounterDao.read(outcome.getId(), mySrd);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (InvalidRequestException e) {
 			// expected
 		}
 		try {

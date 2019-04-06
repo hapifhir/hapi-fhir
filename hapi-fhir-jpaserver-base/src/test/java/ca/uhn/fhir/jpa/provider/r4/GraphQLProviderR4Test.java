@@ -56,7 +56,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripReturns("{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -69,7 +69,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}"));
+				"}"), TestUtil.stripReturns(resp));
 		} finally {
 			IOUtils.closeQuietly(response);
 		}

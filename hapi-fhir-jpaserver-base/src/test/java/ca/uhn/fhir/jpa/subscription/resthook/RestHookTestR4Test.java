@@ -6,13 +6,11 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +110,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
 
-
 	@Test
 	public void testPlaceholderReferencesInTransactionAreResolvedCorrectly() throws Exception {
 
@@ -194,7 +191,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().setResource(observation).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(obs.getIdElement().toUnqualifiedVersionless().getValue());
-		mySystemDao.transaction(null,bundle);
+		mySystemDao.transaction(null, bundle);
 		obs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
 
 		// Should see 1 subscription notification
@@ -208,7 +205,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(obs.getMeta().getLastUpdatedElement().getValueAsString(), ourUpdatedObservations.get(idx).getMeta().getLastUpdatedElement().getValueAsString());
 		assertEquals("2", ourUpdatedObservations.get(idx).getIdentifierFirstRep().getValue());
 	}
-
 
 	@Test
 	public void testRepeatedDeliveries() throws Exception {
@@ -230,7 +226,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		waitForSize(100, ourUpdatedObservations);
 	}
-
 
 	@Test
 	public void testActiveSubscriptionShouldntReActivate() throws Exception {
@@ -767,9 +762,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
-	// TODO: reenable
 	@Test
-	@Ignore
 	public void testRestHookSubscriptionInvalidCriteria() throws Exception {
 		String payload = "application/xml";
 
@@ -778,8 +771,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		try {
 			createSubscription(criteria1, payload);
 			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Invalid criteria: Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+		} catch (UnprocessableEntityException e) {
+			assertEquals("HTTP 422 Unprocessable Entity: Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -869,22 +862,22 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testGoodSubscriptionPersists() {
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 		String payload = "application/fhir+json";
 		String criteriaGood = "Patient?gender=male";
 		Subscription subscription = newSubscription(criteriaGood, payload);
 		ourClient.create().resource(subscription).execute();
-		assertEquals(1, subsciptionCount());
+		assertEquals(1, subscriptionCount());
 	}
 
-	private int subsciptionCount() {
+	private int subscriptionCount() {
 		IBaseBundle found = ourClient.search().forResource(Subscription.class).cacheControl(new CacheControlDirective().setNoCache(true)).execute();
 		return toUnqualifiedVersionlessIdValues(found).size();
 	}
 
 	@Test
 	public void testBadSubscriptionDoesntPersist() {
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 		String payload = "application/fhir+json";
 		String criteriaBad = "BodySite?accessType=Catheter";
 		Subscription subscription = newSubscription(criteriaBad, payload);
@@ -893,7 +886,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		} catch (UnprocessableEntityException e) {
 			ourLog.info("Expected exception", e);
 		}
-		assertEquals(0, subsciptionCount());
+		assertEquals(0, subscriptionCount());
 	}
 
 	@Test
@@ -945,7 +938,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		}
 
 	}
-
 
 
 }
