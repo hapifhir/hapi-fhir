@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -61,6 +62,22 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
+	/**
+	 * This is stored as an optimization to avoid neeind to query for this
+	 * after an update
+	 */
+	@Transient
+	private transient String myTransientForcedId;
+
+	public String getTransientForcedId() {
+		return myTransientForcedId;
+	}
+
+	public void setTransientForcedId(String theTransientForcedId) {
+		myTransientForcedId = theTransientForcedId;
+	}
+
+
 	public abstract BaseTag addTag(TagDefinition theDef);
 
 	@Override
@@ -94,7 +111,16 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 	public abstract Long getId();
 
 	@Override
-	public abstract IdDt getIdDt();
+	public IdDt getIdDt() {
+		if (getForcedId() == null) {
+			Long id = getResourceId();
+			return new IdDt(getResourceType() + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		} else {
+			// Avoid a join query if possible
+			String forcedId = getTransientForcedId() != null ? getTransientForcedId() : getForcedId().getForcedId();
+			return new IdDt(getResourceType() + '/' + forcedId + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
+		}
+	}
 
 	@Override
 	public InstantDt getPublished() {
@@ -107,6 +133,10 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setPublished(Date thePublished) {
 		myPublished = thePublished;
+	}
+
+	public void setPublished(InstantDt thePublished) {
+		myPublished = thePublished.getValue();
 	}
 
 	@Override
@@ -126,6 +156,10 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 		myUpdated = theUpdated;
 	}
 
+	public void setUpdated(InstantDt theUpdated) {
+		myUpdated = theUpdated.getValue();
+	}
+
 	@Override
 	public Date getUpdatedDate() {
 		return myUpdated;
@@ -141,14 +175,6 @@ public abstract class BaseHasResource implements IBaseResourceEntity {
 
 	public void setHasTags(boolean theHasTags) {
 		myHasTags = theHasTags;
-	}
-
-	public void setPublished(InstantDt thePublished) {
-		myPublished = thePublished.getValue();
-	}
-
-	public void setUpdated(InstantDt theUpdated) {
-		myUpdated = theUpdated.getValue();
 	}
 
 }

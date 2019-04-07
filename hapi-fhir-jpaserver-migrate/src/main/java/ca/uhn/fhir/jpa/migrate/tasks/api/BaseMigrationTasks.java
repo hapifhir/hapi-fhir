@@ -60,7 +60,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retVal;
 	}
 
-	protected Builder forVersion(T theVersion) {
+	public Builder forVersion(T theVersion) {
 		IAcceptsTasks sink = theTask -> {
 			theTask.validate();
 			myTasks.put(theVersion, theTask);
@@ -72,7 +72,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		void addTask(BaseTask<?> theTask);
 	}
 
-	protected static class Builder {
+	public static class Builder {
 
 		private final IAcceptsTasks mySink;
 
@@ -90,6 +90,16 @@ public class BaseMigrationTasks<T extends Enum> {
 
 		public BuilderAddTableRawSql addTableRawSql(String theTableName) {
 			return new BuilderAddTableRawSql(theTableName);
+		}
+
+		public Builder executeRawSql(@Language("SQL") String theSql) {
+			mySink.addTask(new ExecuteRawSqlTask().addSql(theSql));
+			return this;
+		}
+
+		public Builder executeRawSql(DriverTypeEnum theDriver, @Language("SQL") String theSql) {
+			mySink.addTask(new ExecuteRawSqlTask().addSql(theDriver, theSql));
+			return this;
 		}
 
 		public Builder startSectionWithMessage(String theMessage) {

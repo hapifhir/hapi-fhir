@@ -1,10 +1,8 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.jpa.model.search;
 
-import java.io.Serializable;
-
-/*
+/*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -22,15 +20,25 @@ import java.io.Serializable;
  * #L%
  */
 
-import java.util.List;
+public enum SearchStatusEnum {
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.QualifiedParamList;
-
-public interface IQueryParameterOr<T extends IQueryParameterType> extends Serializable {
-
-	void setValuesAsQueryTokens(FhirContext theContext, String theParamName, QualifiedParamList theParameters);
-
-	List<T> getValuesAsQueryTokens();
+	/**
+	 * The search is currently actively working
+	 */
+	LOADING,
+	/**
+	 * The search has loaded a set of results and has stopped searching because it
+	 * reached an appropriate threshold
+	 */
+	PASSCMPLET,
+	/**
+	 * The search completed normally and loaded all of the results it as permitted to
+	 * load
+	 */
+	FINISHED,
+	/**
+	 * The search failed and will not continue
+	 */
+	FAILED
 
 }

@@ -704,6 +704,41 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchByExternalReference() {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FooName");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
+		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+
+		Media media = new Media();
+		Attachment attachment = new Attachment();
+		attachment.setLanguage("ENG");
+		media.setContent(attachment);
+		media.setSubject(patientReference);
+		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+
+		// Search for wrong type
+		Bundle returnedBundle = ourClient.search()
+			.forResource(Observation.class)
+			.where(Observation.ENCOUNTER.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(0, returnedBundle.getEntry().size());
+
+		// Search for right type
+		returnedBundle = ourClient.search()
+			.forResource(Media.class)
+			.where(Media.SUBJECT.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(mediaId, returnedBundle.getEntryFirstRep().getResource().getIdElement());
+	}
+
+	@Test
 	public void testCreateResourceConditional() throws IOException {
 		String methodName = "testCreateResourceConditional";
 
@@ -2161,15 +2196,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.setId(id);
 		ourClient.update().resource(patient).execute();
 
+		ourLog.info("Res ID: {}", id);
+
 		Bundle history = ourClient.history().onInstance(id).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
 		assertEquals(3, history.getEntry().size());
 		assertEquals(id.withVersion("3").getValue(), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
 
-		assertEquals(id.withVersion("2").getValue(), history.getEntry().get(1).getResource().getId());
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
-		assertEquals(0, ((Patient) history.getEntry().get(1).getResource()).getName().size());
+		assertEquals(null, history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());

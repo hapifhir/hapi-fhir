@@ -339,7 +339,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
 		assertEquals(2, search.size().intValue());
-		search.getResources(0, 2);
+		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
 			assertEquals(2, mySearchResultDao.count());

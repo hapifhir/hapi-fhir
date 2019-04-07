@@ -1,15 +1,22 @@
 package ca.uhn.fhir.jpa.model.interceptor.executor;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.*;
+import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
+import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,15 +32,14 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = {InterceptorServiceTest.InterceptorRegistryTestCtxConfig.class})
 public class InterceptorServiceTest {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(InterceptorServiceTest.class);
 	private static boolean ourNext_beforeRestHookDelivery_Return1;
 	private static List<String> ourInvocations = new ArrayList<>();
 	private static IBaseResource ourLastResourceOne;
 	private static IBaseResource ourLastResourceTwoA;
 	private static IBaseResource ourLastResourceTwoB;
-
 	@Autowired
 	private InterceptorService myInterceptorRegistry;
-
 	@Autowired
 	private MyTestInterceptorOne myInterceptorOne;
 	@Autowired
@@ -103,6 +109,20 @@ public class InterceptorServiceTest {
 		Patient patient = new Patient();
 		HookParams params = new HookParams()
 			.add(IBaseResource.class, patient);
+		boolean outcome = myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		assertTrue(outcome);
+
+		assertThat(ourInvocations, contains("MyTestInterceptorOne.beforeRestHookDelivery", "MyTestInterceptorTwo.beforeRestHookDelivery"));
+		assertSame(patient, ourLastResourceTwoA);
+		assertNull(ourLastResourceTwoB);
+		assertSame(patient, ourLastResourceOne);
+	}
+
+	@Test
+	public void testInvokeUsingSupplierArg() {
+		Patient patient = new Patient();
+		HookParams params = new HookParams()
+			.addSupplier(IBaseResource.class, () -> patient);
 		boolean outcome = myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
 		assertTrue(outcome);
 
@@ -188,6 +208,113 @@ public class InterceptorServiceTest {
 		}
 	}
 
+	@Test
+	public void testThreadLocalHookInterceptor() {
+		myInterceptorRegistry.setThreadlocalInvokersEnabled(true);
+
+		Patient patient = new Patient();
+		HookParams params = new HookParams().add(IBaseResource.class, patient);
+
+		@Interceptor
+		@Order(100)
+		class LocalInterceptor {
+
+			private int myCount = 0;
+
+			@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+			public boolean beforeRestHookDelivery(IBaseResource theResource) {
+				myCount++;
+				return true;
+			}
+
+		}
+		LocalInterceptor interceptor = new LocalInterceptor();
+		myInterceptorRegistry.registerThreadLocalInterceptor(interceptor);
+		try {
+
+			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			assertEquals(5, interceptor.myCount);
+
+		} finally {
+			myInterceptorRegistry.unregisterThreadLocalInterceptor(interceptor);
+		}
+
+		// Call some more - The interceptor is removed so the count shouldn't change
+		myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+		assertEquals(5, interceptor.myCount);
+
+	}
+
+	/**
+	 * <pre>
+	 * JA 20190321 On my MBP 2018
+	 *    ThreadLocalEnabled=true - Performed 500000 loops in 8383.0ms - 0.017ms / loop
+	 *    ThreadLocalEnabled=false - Performed 500000 loops in 3743.0ms - 0.007ms / loop
+	 *    ThreadLocalEnabled=true - Performed 500000 loops in 6163.0ms - 0.012ms / loop
+	 *    ThreadLocalEnabled=false - Performed 500000 loops in 3487.0ms - 0.007ms / loop
+	 *    ThreadLocalEnabled=true - Performed 1000000 loops in 00:00:12.458 - 0.012ms / loop
+	 *    ThreadLocalEnabled=false - Performed 1000000 loops in 7046.0ms - 0.007ms / loop
+	 * </pre>
+	 */
+	@Test
+	@Ignore("Performance test - Not needed normally")
+	public void testThreadLocalHookInterceptorMicroBenchmark() {
+		threadLocalMicroBenchmark(true, 500000);
+		threadLocalMicroBenchmark(false, 500000);
+		threadLocalMicroBenchmark(true, 500000);
+		threadLocalMicroBenchmark(false, 500000);
+		threadLocalMicroBenchmark(true, 1000000);
+		threadLocalMicroBenchmark(false, 1000000);
+	}
+
+	private void threadLocalMicroBenchmark(boolean theThreadlocalInvokersEnabled, int theCount) {
+		myInterceptorRegistry.setThreadlocalInvokersEnabled(theThreadlocalInvokersEnabled);
+
+		Patient patient = new Patient();
+		HookParams params = new HookParams().add(IBaseResource.class, patient);
+
+		@Interceptor
+		@Order(100)
+		class LocalInterceptor {
+
+			private int myCount = 0;
+
+			@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+			public boolean beforeRestHookDelivery(IBaseResource theResource) {
+				myCount++;
+				return true;
+			}
+
+		}
+
+		StopWatch sw = new StopWatch();
+		for (int i = 0; i < theCount; i++) {
+
+			LocalInterceptor interceptor = new LocalInterceptor();
+			myInterceptorRegistry.registerThreadLocalInterceptor(interceptor);
+			try {
+				myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+				myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+				myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+				myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+				myInterceptorRegistry.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, params);
+			} finally {
+				myInterceptorRegistry.unregisterThreadLocalInterceptor(interceptor);
+			}
+
+		}
+
+		ourLog.info("ThreadLocalEnabled={} - Performed {} loops in {} - {} / loop", theThreadlocalInvokersEnabled, theCount, sw.toString(), sw.formatMillisPerOperation(theCount));
+	}
+
 	@Before
 	public void before() {
 		ourNext_beforeRestHookDelivery_Return1 = true;
@@ -197,12 +324,18 @@ public class InterceptorServiceTest {
 		ourInvocations.clear();
 	}
 
+	@After
+	public void after() {
+		myInterceptorRegistry.setThreadlocalInvokersEnabled(new InterceptorService().isThreadlocalInvokersEnabled());
+	}
+
 	@Configuration
-	@ComponentScan(basePackages = "ca.uhn.fhir.jpa.model")
 	static class InterceptorRegistryTestCtxConfig {
 
-		@Autowired
-		private IInterceptorRegistry myInterceptorRegistry;
+		@Bean
+		public InterceptorService interceptorService() {
+			return new InterceptorService("test");
+		}
 
 		/**
 		 * Note: Orders are deliberately reversed to make sure we get the orders right
@@ -211,7 +344,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorTwo interceptor1() {
 			MyTestInterceptorTwo retVal = new MyTestInterceptorTwo();
-			myInterceptorRegistry.registerInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 
@@ -222,7 +355,7 @@ public class InterceptorServiceTest {
 		@Bean
 		public MyTestInterceptorOne interceptor2() {
 			MyTestInterceptorOne retVal = new MyTestInterceptorOne();
-			myInterceptorRegistry.registerInterceptor(retVal);
+			interceptorService().registerInterceptor(retVal);
 			return retVal;
 		}
 

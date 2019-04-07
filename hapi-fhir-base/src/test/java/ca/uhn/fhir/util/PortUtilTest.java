@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,14 @@ public class PortUtilTest {
 		}
 	}
 
+	@After
+	public void after() {
+		PortUtil.setPortDelay(null);
+	}
+
 	@Test
 	public void testPortsAreNotReused() throws InterruptedException {
+		PortUtil.setPortDelay(0);
 
 		List<Integer> ports = Collections.synchronizedList(new ArrayList<>());
 		List<PortUtil> portUtils = Collections.synchronizedList(new ArrayList<>());
@@ -48,7 +55,7 @@ public class PortUtilTest {
 
 		int tasksCount = 20;
 		ExecutorService pool = Executors.newFixedThreadPool(tasksCount);
-		int portsPerTaskCount = 51;
+		int portsPerTaskCount = 151;
 		for (int i = 0; i < tasksCount; i++) {
 			pool.submit(() -> {
 				PortUtil portUtil = new PortUtil();

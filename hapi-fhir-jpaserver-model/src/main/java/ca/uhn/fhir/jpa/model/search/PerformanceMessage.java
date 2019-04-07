@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.jpa.model.search;
 
 /*-
  * #%L
@@ -20,17 +20,17 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
+public class PerformanceMessage {
 
-/**
- * This is currently only here for unit tests!
- *
- * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
- */
-@FunctionalInterface
-@VisibleForTesting
-public interface IAnonymousLambdaHook {
+	private String myMessage;
 
-	void invoke(HookParams theArgs);
+	public String getMessage() {
+		return myMessage;
+	}
+
+	public PerformanceMessage setMessage(String theMessage) {
+		myMessage = theMessage;
+		return this;
+	}
 
 }

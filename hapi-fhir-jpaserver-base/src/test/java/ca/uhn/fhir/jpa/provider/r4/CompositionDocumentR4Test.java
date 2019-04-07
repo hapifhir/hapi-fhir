@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousLambdaHook;
+import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -32,6 +32,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
@@ -137,13 +138,13 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testInterceptorHookIsCalledForAllContents_RESOURCE_MAY_BE_RETURNED() throws IOException {
 
-		IAnonymousLambdaHook pointcut = mock(IAnonymousLambdaHook.class);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.RESOURCE_MAY_BE_RETURNED, pointcut);
+		IAnonymousInterceptor pointcut = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.RESOURCE_MAY_BE_RETURNED, pointcut);
 
 		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 		fetchBundle(theUrl, EncodingEnum.JSON);
 
-		Mockito.verify(pointcut, times(10)).invoke(myHookParamsCaptor.capture());
+		Mockito.verify(pointcut, times(10)).invoke(eq(Pointcut.RESOURCE_MAY_BE_RETURNED), myHookParamsCaptor.capture());
 
 		List<String> returnedClasses = myHookParamsCaptor
 			.getAllValues()

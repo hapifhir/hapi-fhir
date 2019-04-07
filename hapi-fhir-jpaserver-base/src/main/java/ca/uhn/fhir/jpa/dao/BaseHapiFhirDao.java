@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
@@ -223,6 +224,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			throw new MethodNotAllowedException("$expunge is not enabled on this server");
 		}
 
+		if (theExpungeOptions.getLimit() < 1) {
+			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+theExpungeOptions.getLimit() + ".");
+		}
+
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {
@@ -274,12 +279,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			for (Long next : resourceIds) {
 				txTemplate.execute(t -> {
 					expungeHistoricalVersionsOfId(next, remainingCount);
-					if (remainingCount.get() <= 0) {
-						ourLog.debug("Expunge limit has been hit - Stopping operation");
-						return toExpungeOutcome(theExpungeOptions, remainingCount);
-					}
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 			/*
@@ -290,6 +295,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					expungeCurrentVersionOfResource(next, remainingCount);
 					return null;
 				});
+				if (remainingCount.get() <= 0) {
+					ourLog.debug("Expunge limit has been hit - Stopping operation");
+					return toExpungeOutcome(theExpungeOptions, remainingCount);
+				}
 			}
 
 		}
@@ -301,8 +310,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			 */
 			Pageable page = PageRequest.of(0, remainingCount.get());
 			Slice<Long> historicalIds = txTemplate.execute(t -> {
-				if (theResourceId != null && theVersion != null) {
-					return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+				if (theResourceId != null) {
+					if (theVersion != null) {
+						return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+					} else {
+						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
+					}
 				} else {
 					if (theResourceName != null) {
 						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
@@ -1306,17 +1319,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
+				if (changed.isChanged()) {
+					theEntity.setUpdated(theUpdateTime);
+					if (theResource instanceof IResource) {
+						theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
+					} else {
+						theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
+					}
 
-				theEntity.setUpdated(theUpdateTime);
-				if (theResource instanceof IResource) {
-					theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
-				} else {
-					theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
+					newParams.setParamsOn(theEntity);
+					theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
+					populateFullTextFields(myContext, theResource, theEntity);
 				}
-
-				newParams.setParamsOn(theEntity);
-				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-				populateFullTextFields(myContext, theResource, theEntity);
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);

@@ -26,6 +26,10 @@ import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
@@ -69,6 +73,7 @@ import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
@@ -95,6 +100,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private ISearchIncludeDao mySearchIncludeDao;
 	@Autowired
 	private ISearchResultDao mySearchResultDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
 	@Autowired
@@ -290,6 +297,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
+			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(searchUuid);
+			searchRuntimeDetails.setLoadSynchronous(true);
 
 			// Execute the query and make sure we return distinct results
 			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
@@ -299,7 +308,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				// Load the results synchronously
 				final List<Long> pids = new ArrayList<>();
 
-				Iterator<Long> resultIter = sb.createQuery(theParams, searchUuid);
+				Iterator<Long> resultIter = sb.createQuery(theParams, searchRuntimeDetails);
 				while (resultIter.hasNext()) {
 					pids.add(resultIter.next());
 					if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
@@ -449,8 +458,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	public void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
+	void setDaoRegistryForUnitTest(DaoRegistry theDaoRegistry) {
 		myDaoRegistry = theDaoRegistry;
+	}
+
+	@VisibleForTesting
+	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
 	public abstract class BaseTask implements Callable<Void> {
@@ -468,6 +482,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		private boolean myAdditionalPrefetchThresholdsRemaining;
 		private List<Long> myPreviouslyAddedResourcePids;
 		private Integer myMaxResultsToFetch;
+		private SearchRuntimeDetails mySearchRuntimeDetails;
 
 		/**
 		 * Constructor
@@ -478,6 +493,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			myParams = theParams;
 			myResourceType = theResourceType;
 			myCompletionLatch = new CountDownLatch(1);
+			mySearchRuntimeDetails = new SearchRuntimeDetails(mySearch.getUuid());
+			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
+		}
+
+		public SearchRuntimeDetails getSearchRuntimeDetails() {
+			return mySearchRuntimeDetails;
 		}
 
 		protected Search getSearch() {
@@ -694,6 +715,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				});
 
+				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
+				if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
+					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_COMPLETE, mySearchRuntimeDetails);
+				} else {
+					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE, mySearchRuntimeDetails);
+				}
+
 				ourLog.info("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
 
 			} catch (Throwable t) {
@@ -730,6 +758,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				mySearch.setFailureMessage(failureMessage);
 				mySearch.setFailureCode(failureCode);
 				mySearch.setStatus(SearchStatusEnum.FAILED);
+
+				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
+				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_FAILED, mySearchRuntimeDetails);
 
 				saveSearch();
 
@@ -860,7 +891,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			IResultIterator resultIterator = sb.createQuery(myParams, mySearch.getUuid());
+			IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails);
 			assert (resultIterator != null);
 
 			/*

@@ -32,10 +32,10 @@ public class ExpungeOptions {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("myLimit", myLimit)
-			.append("myExpungeOldVersions", myExpungeOldVersions)
-			.append("myExpungeDeletedResources", myExpungeDeletedResources)
-			.append("myExpungeEverything", myExpungeEverything)
+			.append("limit", myLimit)
+			.append("oldVersions", myExpungeOldVersions)
+			.append("deletedResources", myExpungeDeletedResources)
+			.append("everything", myExpungeEverything)
 			.toString();
 	}
 
@@ -49,8 +49,9 @@ public class ExpungeOptions {
 	/**
 	 * The maximum number of resource versions to expunge
 	 */
-	public void setLimit(int theLimit) {
+	public ExpungeOptions setLimit(int theLimit) {
 		myLimit = theLimit;
+		return this;
 	}
 
 	public boolean isExpungeEverything() {

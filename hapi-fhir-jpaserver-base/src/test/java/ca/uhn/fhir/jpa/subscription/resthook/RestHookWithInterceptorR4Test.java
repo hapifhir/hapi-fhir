@@ -191,7 +191,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		registerLatch.await(10, TimeUnit.SECONDS);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, params -> {
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, (thePointcut, params) -> {
 			latch.countDown();
 		});
 

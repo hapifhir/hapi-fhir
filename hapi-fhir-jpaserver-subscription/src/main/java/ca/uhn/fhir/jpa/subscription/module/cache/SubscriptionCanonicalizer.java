@@ -51,8 +51,12 @@ import static java.util.stream.Collectors.toList;
 public class SubscriptionCanonicalizer<S extends IBaseResource> {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
+	final FhirContext myFhirContext;
+
 	@Autowired
-	FhirContext myFhirContext;
+	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	public CanonicalSubscription canonicalize(S theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {

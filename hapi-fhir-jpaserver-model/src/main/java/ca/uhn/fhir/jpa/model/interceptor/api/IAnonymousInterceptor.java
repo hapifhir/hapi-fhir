@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.jpa.model.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,25 +20,17 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-public enum SearchStatusEnum {
+import com.google.common.annotations.VisibleForTesting;
 
-	/**
-	 * The search is currently actively working
-	 */
-	LOADING,
-	/**
-	 * The search has loaded a set of results and has stopped searching because it
-	 * reached an appropriate threshold
-	 */
-	PASSCMPLET,
-	/**
-	 * The search completed normally and loaded all of the results it as permitted to
-	 * load
-	 */
-	FINISHED,
-	/**
-	 * The search failed and will not continue
-	 */
-	FAILED
+/**
+ * This is currently only here for unit tests!
+ *
+ * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ */
+@FunctionalInterface
+@VisibleForTesting
+public interface IAnonymousInterceptor {
+
+	void invoke(Pointcut thePointcut, HookParams theArgs);
 
 }

@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -1002,6 +1003,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
+		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
 
@@ -1071,7 +1073,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public IBundleProvider search(final SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse) {
 
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.DISABLED) {
-			for (List<List<? extends IQueryParameterType>> nextAnds : theParams.values()) {
+			for (List<List<IQueryParameterType>> nextAnds : theParams.values()) {
 				for (List<? extends IQueryParameterType> nextOrs : nextAnds) {
 					for (IQueryParameterType next : nextOrs) {
 						if (next.getMissing() != null) {
@@ -1131,7 +1133,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HashSet<Long> retVal = new HashSet<Long>();
 
 		String uuid = UUID.randomUUID().toString();
-		Iterator<Long> iter = builder.createQuery(theParams, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
+
+		Iterator<Long> iter = builder.createQuery(theParams, searchRuntimeDetails);
 		while (iter.hasNext()) {
 			retVal.add(iter.next());
 		}

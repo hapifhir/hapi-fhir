@@ -142,7 +142,7 @@ public abstract class BaseJpaTest {
 
 	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
 		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(theLatchPointcut, Integer.MAX_VALUE, t -> deliveryLatch.countDown());
+		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
 		return deliveryLatch;
 	}
 

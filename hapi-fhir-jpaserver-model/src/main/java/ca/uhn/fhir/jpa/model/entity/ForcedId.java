@@ -51,7 +51,7 @@ public class ForcedId {
 	private Long myId;
 
 	@JoinColumn(name = "RESOURCE_PID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_FORCEDID_RESOURCE"))
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	private ResourceTable myResource;
 
 	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable = false)
