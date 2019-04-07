@@ -145,6 +145,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Log all captured UPDATE queries
+	 */
+	public void logUpdateQueriesForCurrentThread() {
+		List<String> queries = getUpdateQueriesForCurrentThread()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Select Queries:\n{}", String.join("\n", queries));
+	}
+
+	/**
 	 * Log all captured SELECT queries
 	 */
 	public void logSelectQueriesForCurrentThread() {

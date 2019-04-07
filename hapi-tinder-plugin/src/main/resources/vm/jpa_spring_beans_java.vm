@@ -26,13 +26,6 @@ import ca.uhn.fhir.jpa.dao.*;
 @Configuration
 public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
 
-	/**
-	 * Subclasses may override
-	 */
-	protected boolean isSupported(String theResourceType) {
-		return true;
-	}
-
 	@Bean(name="myResourceProviders${versionCapitalized}")
 	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
 		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();

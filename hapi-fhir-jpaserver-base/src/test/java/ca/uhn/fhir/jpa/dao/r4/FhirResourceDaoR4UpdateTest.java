@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -82,6 +84,58 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// nothing
 		}
+
+	}
+
+
+	@Test
+	public void testUpdateNotModifiedDoesNotAffectDates() {
+		IIdType id = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		String createTime = runInTransaction(()->{
+			List<ResourceTable> allResources = myResourceTableDao.findAll();
+			assertEquals(1, allResources.size());
+			ResourceTable resourceTable = allResources.get(0);
+
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertEquals(1, allHistory.size());
+			ResourceHistoryTable historyTable = allHistory.get(0);
+
+			assertEquals(resourceTable.getUpdated().getValueAsString(), historyTable.getUpdated().getValueAsString());
+			return resourceTable.getUpdated().getValueAsString();
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(()->{
+			Patient p = new Patient();
+			p.setId(id.getIdPart());
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.update(p);
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// TODO: it'd be nice if this was lower
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
+		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
+
+		runInTransaction(()->{
+			List<ResourceTable> allResources = myResourceTableDao.findAll();
+			assertEquals(1, allResources.size());
+			ResourceTable resourceTable = allResources.get(0);
+
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertEquals(1, allHistory.size());
+			ResourceHistoryTable historyTable = allHistory.get(0);
+
+			assertEquals(createTime, historyTable.getUpdated().getValueAsString());
+			assertEquals(createTime, resourceTable.getUpdated().getValueAsString());
+		});
 
 	}
 

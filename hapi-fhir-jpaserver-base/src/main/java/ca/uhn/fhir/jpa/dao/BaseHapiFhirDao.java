@@ -1319,17 +1319,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				mySearchParamWithInlineReferencesExtractor.populateFromResource(newParams, this, theUpdateTime, theEntity, theResource, existingParams);
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
+				if (changed.isChanged()) {
+					theEntity.setUpdated(theUpdateTime);
+					if (theResource instanceof IResource) {
+						theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
+					} else {
+						theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
+					}
 
-				theEntity.setUpdated(theUpdateTime);
-				if (theResource instanceof IResource) {
-					theEntity.setLanguage(((IResource) theResource).getLanguage().getValue());
-				} else {
-					theEntity.setLanguage(((IAnyResource) theResource).getLanguageElement().getValue());
+					newParams.setParamsOn(theEntity);
+					theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
+					populateFullTextFields(myContext, theResource, theEntity);
 				}
-
-				newParams.setParamsOn(theEntity);
-				theEntity.setIndexStatus(INDEX_STATUS_INDEXED);
-				populateFullTextFields(myContext, theResource, theEntity);
 			} else {
 
 				changed = populateResourceIntoEntity(theRequest, theResource, theEntity, false);

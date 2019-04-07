@@ -64,7 +64,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
-	private static Server ourServer;
+	protected static Server ourServer;
 	protected IGenericClient ourClient;
 	ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
