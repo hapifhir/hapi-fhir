@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -71,6 +72,9 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Autowired
 	protected Environment myEnv;
+
+	@Autowired
+	protected DaoRegistry myDaoRegistry;
 
 	@Override
 	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
@@ -172,6 +176,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public InterceptorService interceptorRegistry() {
 		return new InterceptorService("hapi-fhir-jpa");
+	}
+
+	/**
+	 * Subclasses may override
+	 */
+	protected boolean isSupported(String theResourceType) {
+		return myDaoRegistry.getResourceDao(theResourceType) != null;
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
