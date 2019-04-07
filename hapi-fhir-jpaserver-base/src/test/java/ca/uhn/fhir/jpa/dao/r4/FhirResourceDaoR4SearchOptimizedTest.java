@@ -148,7 +148,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchTotalAccurateForSlowLoading() {
+	public void testFetchTotalAccurateForSlowLoading() throws InterruptedException {
 		create200Patients();
 
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
@@ -170,6 +170,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00004", ids.get(4));
+
+		Thread.sleep(1000);
 
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
 		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(uuid);
