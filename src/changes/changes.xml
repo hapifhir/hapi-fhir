@@ -132,6 +132,11 @@
 				The second bug is that one case wasn't properly handled: when a resourceId with no version is provided.
 				This executed the case where only resource type is provided.
 			</action>
+			<action type="fix">
+				When updating a resource in the JPA server, if the contents have not actually changed
+				the resource version is not updated and no new version is created. In this situation,
+				the update time was modified however. It will no longer be updated.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
