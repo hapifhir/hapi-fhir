@@ -19,6 +19,7 @@ import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -196,7 +197,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	@Qualifier("myResourceProvidersDstu3")
-	protected Object myResourceProviders;
+	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired

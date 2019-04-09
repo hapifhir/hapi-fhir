@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -61,8 +62,8 @@ public class JpaServerDemo extends RestfulServer {
 		} else {
 			throw new IllegalStateException();
 		}
-		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
-		setResourceProviders(beans);
+		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
+		setResourceProviders(beans.createProviders());
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as

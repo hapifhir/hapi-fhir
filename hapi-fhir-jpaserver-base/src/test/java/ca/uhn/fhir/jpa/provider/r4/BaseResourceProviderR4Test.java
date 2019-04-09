@@ -97,7 +97,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourRestServer.setResourceProviders((List) myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 

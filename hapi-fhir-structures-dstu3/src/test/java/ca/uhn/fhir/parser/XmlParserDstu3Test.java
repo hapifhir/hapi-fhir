@@ -70,6 +70,16 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeInvalidMetaTime() {
+
+		Patient p = new Patient();
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(output, containsString("\"lastUpdated\":\"2019-01-01\""));
+
+	}
+
+	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 

@@ -90,7 +90,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourRestServer.setResourceProviders((List) myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 

@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -217,7 +218,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
-	protected Object myResourceProviders;
+	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
