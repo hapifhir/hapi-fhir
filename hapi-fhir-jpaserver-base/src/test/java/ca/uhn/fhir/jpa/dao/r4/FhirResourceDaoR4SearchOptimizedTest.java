@@ -51,6 +51,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) AopProxyUtils.getSingletonTarget(mySearchCoordinatorSvc);
+		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
+		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 	}
 
@@ -121,7 +123,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
 
-		// Seach with total expicitly requested
+		// Seach with total explicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
@@ -133,7 +135,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, hasSize(10));
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
 
-		// Seach with count only
+		// Search with count only
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam().setMissing(false));
 		params.setSummaryMode(SummaryEnum.COUNT);
@@ -171,7 +173,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00004", ids.get(4));
 
-		Thread.sleep(1000);
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 5000, false);
+		assertEquals(200, ids.size());
 
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
 		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(uuid);
