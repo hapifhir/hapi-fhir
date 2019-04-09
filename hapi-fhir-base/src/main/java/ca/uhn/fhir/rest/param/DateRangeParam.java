@@ -167,6 +167,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			switch (theParsed.getPrefix()) {
 				case GREATERTHAN:
 				case GREATERTHAN_OR_EQUALS:
+				case STARTS_AFTER:
 					if (myLowerBound != null) {
 						throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify a lower bound");
 					}
@@ -174,6 +175,7 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 					break;
 				case LESSTHAN:
 				case LESSTHAN_OR_EQUALS:
+				case ENDS_BEFORE:
 					if (myUpperBound != null) {
 						throw new InvalidRequestException("Can not have multiple date range parameters for the same param that specify an upper bound");
 					}
@@ -327,12 +329,10 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 			switch (myUpperBound.getPrefix()) {
 				case LESSTHAN:
 				case ENDS_BEFORE:
-					retVal = new Date(retVal.getTime() - 1L);
+					retVal = myUpperBound.getPrecision().add(retVal, -1);
 					break;
 				case EQUAL:
 				case LESSTHAN_OR_EQUALS:
-					retVal = myUpperBound.getPrecision().add(retVal, 1);
-					retVal = new Date(retVal.getTime() - 1L);
 					break;
 				case GREATERTHAN_OR_EQUALS:
 				case GREATERTHAN:
