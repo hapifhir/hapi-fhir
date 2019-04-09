@@ -11864,6 +11864,329 @@ public class VersionConvertor_30_40 {
     return tgt;
   }
   
+  private static final String URN_DICOM_UID = "urn:dicom:uid";
+
+  public static org.hl7.fhir.r4.model.ImagingStudy convertImagingStudy(org.hl7.fhir.dstu3.model.ImagingStudy src) throws FHIRException {
+    if (src == null)
+      return null;
+    org.hl7.fhir.r4.model.ImagingStudy tgt = new org.hl7.fhir.r4.model.ImagingStudy();
+    copyDomainResource(src, tgt);
+
+    if (src.hasUid()) {
+      org.hl7.fhir.r4.model.Identifier i = new org.hl7.fhir.r4.model.Identifier();
+      i.setSystem(URN_DICOM_UID);
+      i.setValue(src.getUid());
+      tgt.addIdentifier(i);
+    }
+    for (org.hl7.fhir.dstu3.model.Identifier t : src.getIdentifier()) {
+      tgt.addIdentifier(convertIdentifier(t));
+    }
+
+    if (src.hasAccession())
+      tgt.addIdentifier(convertIdentifier(src.getAccession()));
+
+    if (src.hasAvailability()) {
+      org.hl7.fhir.dstu3.model.ImagingStudy.InstanceAvailability availability = src.getAvailability();
+      switch (availability) {
+      case OFFLINE:
+        tgt.setStatus(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudyStatus.REGISTERED);
+        break;
+      case UNAVAILABLE:
+        tgt.setStatus(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudyStatus.CANCELLED);
+        break;
+      case ONLINE:
+      case NEARLINE:
+        tgt.setStatus(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudyStatus.AVAILABLE);
+        break;
+      default:
+        break;
+      }
+    } else {
+      tgt.setStatus(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudyStatus.UNKNOWN);
+    }
+
+    for (org.hl7.fhir.dstu3.model.Coding t : src.getModalityList()) {
+      tgt.addModality(convertCoding(t));
+    }
+
+    if (src.hasPatient())
+      tgt.setSubject(convertReference(src.getPatient()));
+    if (src.hasContext()) {
+      tgt.setEncounter(convertReference(src.getContext()));
+    }
+    if (src.hasStarted()) {
+
+      tgt.setStartedElement(convertDateTime(src.getStartedElement()));
+    }
+    for (org.hl7.fhir.dstu3.model.Reference t : src.getBasedOn()) {
+      tgt.addBasedOn(convertReference(t));
+    }
+    if (src.hasReferrer()) {
+      tgt.setReferrer(convertReference(src.getReferrer()));
+    }
+    for (org.hl7.fhir.dstu3.model.Reference t : src.getInterpreter()) {
+      tgt.addInterpreter(convertReference(t));
+    }
+    for (org.hl7.fhir.dstu3.model.Reference t : src.getEndpoint()) {
+      tgt.addEndpoint(convertReference(t));
+    }
+    if (src.hasNumberOfSeries()) {
+      tgt.setNumberOfSeries(src.getNumberOfSeries());
+    }
+    if (src.hasNumberOfInstances()) {
+      tgt.setNumberOfInstances(src.getNumberOfInstances());
+    }
+    List<org.hl7.fhir.dstu3.model.Reference> procedureReferences = src.getProcedureReference();
+    if (procedureReferences.size() > 0) {
+      tgt.setProcedureReference(convertReference(procedureReferences.get(0)));
+
+      if (procedureReferences.size() > 1) {
+        // TODO print a warning that only one procedure reference could be converted
+      }
+    }
+    for (org.hl7.fhir.dstu3.model.CodeableConcept t : src.getProcedureCode()) {
+      tgt.addProcedureCode(convertCodeableConcept(t));
+    }
+    if (src.hasReason()) {
+      tgt.addReasonCode(convertCodeableConcept(src.getReason()));
+    }
+    if (src.hasDescription()) {
+      tgt.setDescription(src.getDescription());
+    }
+
+    for (org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesComponent t : src.getSeries()) {
+      tgt.addSeries(convertImagingStudySeriesComponent(t));
+    }
+
+    return tgt;
+  }
+
+  public static org.hl7.fhir.dstu3.model.ImagingStudy convertImagingStudy(org.hl7.fhir.r4.model.ImagingStudy src) throws FHIRException {
+    if (src == null)
+      return null;
+    org.hl7.fhir.dstu3.model.ImagingStudy tgt = new org.hl7.fhir.dstu3.model.ImagingStudy();
+    copyDomainResource(src, tgt);
+    for (org.hl7.fhir.r4.model.Identifier t : src.getIdentifier()) {
+
+      // assuming that there is only one urn:dicom:uid identifier
+      if (URN_DICOM_UID.equals(t.getSystem())) {
+        tgt.setUid(t.getValue());
+      } else {
+        tgt.addIdentifier(convertIdentifier(t));
+      }
+    }
+    if (src.hasStatus()) {
+      org.hl7.fhir.r4.model.ImagingStudy.ImagingStudyStatus s = src.getStatus();
+      switch (s) {
+      case REGISTERED:
+        tgt.setAvailability(org.hl7.fhir.dstu3.model.ImagingStudy.InstanceAvailability.OFFLINE);
+        break;
+      case AVAILABLE:
+        tgt.setAvailability(org.hl7.fhir.dstu3.model.ImagingStudy.InstanceAvailability.ONLINE);
+        break;
+      case CANCELLED:
+        tgt.setAvailability(org.hl7.fhir.dstu3.model.ImagingStudy.InstanceAvailability.UNAVAILABLE);
+        break;
+      default:
+        break;
+      }
+    }
+    for (org.hl7.fhir.r4.model.Coding t : src.getModality()) {
+      tgt.addModalityList(convertCoding(t));
+    }
+    if (src.hasSubject()) {
+      tgt.setPatient(convertReference(src.getSubject()));
+    }
+    if (src.hasEncounter()) {
+      tgt.setContext(convertReference(src.getEncounter()));
+    }
+    if (src.hasStarted()) {
+
+      tgt.setStartedElement(convertDateTime(src.getStartedElement()));
+    }
+    for (org.hl7.fhir.r4.model.Reference t : src.getBasedOn()) {
+      tgt.addBasedOn(convertReference(t));
+    }
+    if (src.hasReferrer()) {
+      tgt.setReferrer(convertReference(src.getReferrer()));
+    }
+    for (org.hl7.fhir.r4.model.Reference t : src.getInterpreter()) {
+      tgt.addInterpreter(convertReference(t));
+    }
+    for (org.hl7.fhir.r4.model.Reference t : src.getEndpoint()) {
+      tgt.addEndpoint(convertReference(t));
+    }
+    if (src.hasNumberOfSeries()) {
+      tgt.setNumberOfSeries(src.getNumberOfSeries());
+    }
+    if (src.hasNumberOfInstances()) {
+      tgt.setNumberOfInstances(src.getNumberOfInstances());
+    }
+    if (src.hasProcedureReference()) {
+      tgt.addProcedureReference(convertReference(src.getProcedureReference()));
+    }
+    for (org.hl7.fhir.r4.model.CodeableConcept t : src.getProcedureCode()) {
+      tgt.addProcedureCode(convertCodeableConcept(t));
+    }
+    // location was added in R4 and does not exist in DSTU3
+    List<org.hl7.fhir.r4.model.CodeableConcept> reasonCodes = src.getReasonCode();
+    if (reasonCodes.size() > 0) {
+      tgt.setReason(convertCodeableConcept(reasonCodes.get(0)));
+
+      if (reasonCodes.size() > 1) {
+        // TODO print a warning that only one reason could be converted
+      }
+    }
+    // reasonReference was added in R4 and does not exist in DSTU3
+    // node was added in R4 and does not exist in DSTU3
+    if (src.hasDescription()) {
+      tgt.setDescription(src.getDescription());
+    }
+
+    for (org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesComponent t : src.getSeries()) {
+      tgt.addSeries(convertImagingStudySeriesComponent(t));
+    }
+
+    return tgt;
+  }
+
+  public static org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesComponent convertImagingStudySeriesComponent(org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesComponent src) throws FHIRException {
+    if (src == null)
+      return null;
+    org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesComponent tgt = new org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesComponent();
+    copyElement(src, tgt);
+
+    if (src.hasUid()) {
+      tgt.setUid(src.getUid());
+    }
+    if (src.hasNumber()) {
+      tgt.setNumber(src.getNumber());
+    }
+    if (src.hasModality()) {
+      tgt.setModality(convertCoding(src.getModality()));
+    }
+    if (src.hasDescription()) {
+      tgt.setDescription(src.getDescription());
+    }
+    if (src.hasNumberOfInstances()) {
+      tgt.setNumberOfInstances(src.getNumberOfInstances());
+    }
+    for (org.hl7.fhir.dstu3.model.Reference t : src.getEndpoint()) {
+      tgt.addEndpoint(convertReference(t));
+    }
+    if (src.hasBodySite()) {
+      tgt.setBodySite(convertCoding(src.getBodySite()));
+    }
+    if (src.hasLaterality()) {
+      tgt.setLaterality(convertCoding(src.getLaterality()));
+    }
+    // the specimen element was added in R4 and does not exist in DSTU3
+    if (src.hasStarted()) {
+      tgt.setStartedElement(convertDateTime(src.getStartedElement()));
+    }
+
+    for (org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesInstanceComponent t : src.getInstance()) {
+      tgt.addInstance(convertImagingStudySeriesInstanceComponent(t));
+    }
+
+    return tgt;
+  }
+
+  public static org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesComponent convertImagingStudySeriesComponent(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesComponent src) throws FHIRException {
+    if (src == null)
+      return null;
+    org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesComponent tgt = new org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesComponent();
+    copyElement(src, tgt);
+
+    if (src.hasUid()) {
+      tgt.setUid(src.getUid());
+    }
+    if (src.hasNumber()) {
+      tgt.setNumber(src.getNumber());
+    }
+    if (src.hasModality()) {
+      tgt.setModality(convertCoding(src.getModality()));
+    }
+    if (src.hasDescription()) {
+      tgt.setDescription(src.getDescription());
+    }
+    if (src.hasNumberOfInstances()) {
+      tgt.setNumberOfInstances(src.getNumberOfInstances());
+    }
+    for (org.hl7.fhir.r4.model.Reference t : src.getEndpoint()) {
+      tgt.addEndpoint(convertReference(t));
+    }
+    if (src.hasBodySite()) {
+      tgt.setBodySite(convertCoding(src.getBodySite()));
+    }
+    if (src.hasLaterality()) {
+      tgt.setLaterality(convertCoding(src.getLaterality()));
+    }
+    if (src.hasStarted()) {
+
+      tgt.setStartedElement(convertDateTime(src.getStartedElement()));
+    }
+    // the specimen element was added in R4 and does not exist in DSTU3
+    // TODO our ETL process does not set the performer element -> skipping it for
+    // now
+
+    for (org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesInstanceComponent t : src.getInstance()) {
+      tgt.addInstance(convertImagingStudySeriesInstanceComponent(t));
+    }
+
+    return tgt;
+  }
+
+  private static final String URN_IETF_RFC_3986 = "urn:ietf:rfc:3986";
+
+  private static org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesInstanceComponent convertImagingStudySeriesInstanceComponent(org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesInstanceComponent src) {
+    if (src == null)
+      return null;
+    org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesInstanceComponent tgt = new org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesInstanceComponent();
+    copyElement(src, tgt);
+
+    if (src.hasUid()) {
+      tgt.setUid(src.getUid());
+    }
+    if (src.hasSopClass()) {
+      org.hl7.fhir.r4.model.Coding c = new org.hl7.fhir.r4.model.Coding();
+      c.setSystem(URN_IETF_RFC_3986);
+      c.setCode(src.getSopClass());
+      tgt.setSopClass(c);
+    }
+    if (src.hasNumber()) {
+      tgt.setNumber(src.getNumber());
+    }
+    if (src.hasTitle()) {
+      tgt.setTitle(src.getTitle());
+    }
+
+    return tgt;
+  }
+
+  private static org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesInstanceComponent convertImagingStudySeriesInstanceComponent(org.hl7.fhir.r4.model.ImagingStudy.ImagingStudySeriesInstanceComponent src) {
+    if (src == null)
+      return null;
+    org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesInstanceComponent tgt = new org.hl7.fhir.dstu3.model.ImagingStudy.ImagingStudySeriesInstanceComponent();
+    copyElement(src, tgt);
+
+    if (src.hasUid()) {
+      tgt.setUid(src.getUid());
+    }
+    org.hl7.fhir.r4.model.Coding sop = src.getSopClass();
+    if (URN_IETF_RFC_3986.equals(sop.getSystem())) {
+      tgt.setSopClass(sop.getCode());
+    }
+    if (src.hasNumber()) {
+      tgt.setNumber(src.getNumber());
+    }
+    if (src.hasTitle()) {
+      tgt.setTitle(src.getTitle());
+    }
+
+    return tgt;
+  }
+  
   public static org.hl7.fhir.r4.model.Immunization convertImmunization(org.hl7.fhir.dstu3.model.Immunization src) throws FHIRException {
     if (src == null)
       return null;
@@ -21254,6 +21577,8 @@ public class VersionConvertor_30_40 {
       return convertGroup((org.hl7.fhir.dstu3.model.Group) src);
     if (src instanceof org.hl7.fhir.dstu3.model.HealthcareService)
       return convertHealthcareService((org.hl7.fhir.dstu3.model.HealthcareService) src);
+    if (src instanceof org.hl7.fhir.dstu3.model.ImagingStudy)
+      return convertImagingStudy((org.hl7.fhir.dstu3.model.ImagingStudy)src);
     if (src instanceof org.hl7.fhir.dstu3.model.Immunization)
       return convertImmunization((org.hl7.fhir.dstu3.model.Immunization) src);
     if (src instanceof org.hl7.fhir.dstu3.model.ImplementationGuide)
@@ -21431,6 +21756,8 @@ public class VersionConvertor_30_40 {
       return convertGroup((org.hl7.fhir.r4.model.Group) src);
     if (src instanceof org.hl7.fhir.r4.model.HealthcareService)
       return convertHealthcareService((org.hl7.fhir.r4.model.HealthcareService) src);
+    if (src instanceof org.hl7.fhir.r4.model.ImagingStudy)
+      return convertImagingStudy((org.hl7.fhir.r4.model.ImagingStudy)src);
     if (src instanceof org.hl7.fhir.r4.model.Immunization)
       return convertImmunization((org.hl7.fhir.r4.model.Immunization) src);
     if (src instanceof org.hl7.fhir.r4.model.ImplementationGuide)
