@@ -101,6 +101,7 @@ public class SubscriptionRegistry {
 			deliveryHandler = Optional.empty();
 		}
 
+		ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
 		deliveryHandler.ifPresent(activeSubscription::register);
 
@@ -115,11 +116,16 @@ public class SubscriptionRegistry {
 	public void unregisterSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
+
+		ourLog.info("Unregistering active subscription {}", theId.toUnqualified().getValue());
 		myActiveSubscriptionCache.remove(subscriptionId);
 	}
 
 	@PreDestroy
 	public void unregisterAllSubscriptions() {
+		// Once to set flag
+		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
+		// Twice to delete
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
@@ -143,8 +149,6 @@ public class SubscriptionRegistry {
 				return true;
 			}
 			unregisterSubscription(theSubscription.getIdElement());
-		} else {
-			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
 			registerSubscription(theSubscription.getIdElement(), theSubscription);

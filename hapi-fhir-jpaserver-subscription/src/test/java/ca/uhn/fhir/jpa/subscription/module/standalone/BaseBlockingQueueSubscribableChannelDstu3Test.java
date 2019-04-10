@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
+import ca.uhn.fhir.jpa.subscription.module.IPointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
@@ -150,7 +151,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerServer.stop();
 	}
 
-	public static class ObservationListener implements IResourceProvider {
+	public static class ObservationListener implements IResourceProvider, IPointcutLatch {
 
 		private PointcutLatch updateLatch = new PointcutLatch("Observation Update");
 
@@ -176,18 +177,17 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
-		public void setExpectedCount(int count) throws InterruptedException {
+		@Override
+		public void setExpectedCount(int count) {
 			updateLatch.setExpectedCount(count);
 		}
 
-		public void awaitExpected() throws InterruptedException {
-			updateLatch.awaitExpected();
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return updateLatch.awaitExpected();
 		}
 
-		public void expectNothing() {
-			updateLatch.expectNothing();
-		}
-
+		@Override
 		public void clear() { updateLatch.clear();}
 	}
 }

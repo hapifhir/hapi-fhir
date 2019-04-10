@@ -39,6 +39,7 @@ public class ActiveSubscription {
 	private CanonicalSubscription mySubscription;
 	private final SubscribableChannel mySubscribableChannel;
 	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
+	private boolean flagForDeletion;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, SubscribableChannel theSubscribableChannel) {
 		mySubscription = theSubscription;
@@ -93,5 +94,13 @@ public class ActiveSubscription {
 
 	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
 		mySubscription = theCanonicalizedSubscription;
+	}
+
+	public boolean isFlagForDeletion() {
+		return flagForDeletion;
+	}
+
+	public void setFlagForDeletion(boolean theFlagForDeletion) {
+		flagForDeletion = theFlagForDeletion;
 	}
 }
