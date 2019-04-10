@@ -374,7 +374,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-				values = super.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+				values = preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 
 				if (values == null || values.isEmpty()) {
 					continue;

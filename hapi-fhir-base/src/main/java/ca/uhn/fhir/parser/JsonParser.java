@@ -378,7 +378,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-			values = super.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+			values = preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -1439,7 +1439,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				 * Pre-process value - This is called in case the value is a reference
 				 * since we might modify the text
 				 */
-				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
+				value = preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
 
 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 				String childName = extDef.getChildNameByDatatype(value.getClass());
