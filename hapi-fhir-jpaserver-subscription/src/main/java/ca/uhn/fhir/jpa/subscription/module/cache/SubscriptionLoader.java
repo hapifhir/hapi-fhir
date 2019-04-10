@@ -87,8 +87,7 @@ public class SubscriptionLoader {
 
 	private int doSyncSubscriptions() {
 		synchronized (mySyncSubscriptionsLock) {
-			// FIXME KHS debug
-			ourLog.info("Starting sync subscriptions");
+			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Subscription.SP_STATUS, new TokenOrListParam()
 				// TODO KHS Ideally we should only be pulling ACTIVE subscriptions here, but this class is overloaded so that
@@ -119,8 +118,7 @@ public class SubscriptionLoader {
 			}
 
 			mySubscriptionRegistry.unregisterAllSubscriptionsNotInCollection(allIds);
-			// FIXME KHS debug
-			ourLog.info("Finished sync subscriptions - found {}", resourceList.size());
+			ourLog.debug("Finished sync subscriptions - found {}", resourceList.size());
 
 			return changesCount;
 		}

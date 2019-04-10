@@ -125,7 +125,7 @@ public class SubscriptionRegistry {
 	public void unregisterAllSubscriptions() {
 		// Once to set flag
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
-		// Twice to delete
+		// Twice to remove
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
