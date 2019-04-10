@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.websocket;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import com.sun.istack.NotNull;
 import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,12 @@ public class WebsocketConnectionValidator {
 	SubscriptionRegistry mySubscriptionRegistry;
 
 
-	public WebsocketValidationResponse validate(IdType id) {
+	public WebsocketValidationResponse validate(@NotNull IdType id) {
 		if (!id.hasIdPart() || !id.isIdPartValid()) {
 			return WebsocketValidationResponse.INVALID_RESPONSE("Invalid bind request - No ID included: " + id.getValue());
 		}
 
-		if (id.hasResourceType() == false) {
+		if (!id.hasResourceType()) {
 			id = id.withResourceType("Subscription");
 		}
 
