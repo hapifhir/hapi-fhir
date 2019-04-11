@@ -1027,6 +1027,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 	}
 
 
+
 	@Test
 	public void testUniqueValuesAreIndexed_DateAndToken() {
 		createUniqueBirthdateAndGenderSps();
