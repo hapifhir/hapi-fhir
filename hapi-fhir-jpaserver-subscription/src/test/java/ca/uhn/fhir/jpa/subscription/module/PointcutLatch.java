@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,9 +15,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
-public class PointcutLatch implements IAnonymousInterceptor {
+// TODO KHS copy this version over to hapi-fhir
+public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
 	private static final FhirObjectPrinter ourFhirObjectToStringMapper = new FhirObjectPrinter();
@@ -23,8 +27,9 @@ public class PointcutLatch implements IAnonymousInterceptor {
 	private final String name;
 
 	private CountDownLatch myCountdownLatch;
-	private AtomicReference<String> myFailure;
+	private AtomicReference<List<String>> myFailures;
 	private AtomicReference<List<HookParams>> myCalledWith;
+	private int myInitialCount;
 	private Pointcut myPointcut;
 
 	public PointcutLatch(Pointcut thePointcut) {
@@ -36,6 +41,7 @@ public class PointcutLatch implements IAnonymousInterceptor {
 		this.name = theName;
 	}
 
+	@Override
 	public void setExpectedCount(int count) {
 		if (myCountdownLatch != null) {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
@@ -45,14 +51,15 @@ public class PointcutLatch implements IAnonymousInterceptor {
 	}
 
 	private void createLatch(int count) {
-		myFailure = new AtomicReference<>();
+		myFailures = new AtomicReference<>(new ArrayList<>());
 		myCalledWith = new AtomicReference<>(new ArrayList<>());
 		myCountdownLatch = new CountDownLatch(count);
+		myInitialCount = count;
 	}
 
-	private void setFailure(String failure) {
-		if (myFailure != null) {
-			myFailure.set(failure);
+	private void addFailure(String failure) {
+		if (myFailures != null) {
+			myFailures.get().add(failure);
 		} else {
 			throw new PointcutLatchException("trying to set failure on latch that hasn't been created: " + failure);
 		}
@@ -62,6 +69,7 @@ public class PointcutLatch implements IAnonymousInterceptor {
 		return name + " " + this.getClass().getSimpleName();
 	}
 
+	@Override
 	public List<HookParams> awaitExpected() throws InterruptedException {
 		return awaitExpectedWithTimeout(DEFAULT_TIMEOUT_SECONDS);
 	}
@@ -70,10 +78,19 @@ public class PointcutLatch implements IAnonymousInterceptor {
 		List<HookParams> retval = myCalledWith.get();
 		try {
 			assertNotNull(getName() + " awaitExpected() called before setExpected() called.", myCountdownLatch);
-			assertTrue(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to be triggered.", myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS));
+			if (!myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS)) {
+				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + myCountdownLatch.getCount() + ".");
+			}
 
-			if (myFailure.get() != null) {
-				String error = getName() + ": " + myFailure.get();
+			List<String> failures = myFailures.get();
+			String error = getName();
+			if (failures != null && failures.size() > 0) {
+				if (failures.size() > 1) {
+					error += " ERRORS: \n";
+				} else {
+					error += " ERROR: ";
+				}
+				error += failures.stream().collect(Collectors.joining("\n"));
 				error += "\nLatch called with values: " + myCalledWithString();
 				throw new AssertionError(error);
 			}
@@ -84,10 +101,7 @@ public class PointcutLatch implements IAnonymousInterceptor {
 		return retval;
 	}
 
-	public void expectNothing() {
-		clear();
-	}
-
+	@Override
 	public void clear() {
 		myCountdownLatch = null;
 	}
@@ -109,9 +123,9 @@ public class PointcutLatch implements IAnonymousInterceptor {
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
 		if (myCountdownLatch == null) {
-			throw new PointcutLatchException("invoke() called before setExpectedCount() called.", theArgs);
+			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
 		} else if (myCountdownLatch.getCount() <= 0) {
-			setFailure("invoke() called " + (1 - myCountdownLatch.getCount()) + " more times than expected.");
+			addFailure("invoke() called when countdown was zero.");
 		}
 
 		if (myCalledWith.get() != null) {
@@ -119,6 +133,9 @@ public class PointcutLatch implements IAnonymousInterceptor {
 		}
 		ourLog.info("Called {} {} with {}", name, myCountdownLatch, hookParamsToString(theArgs));
 
+		if (myCountdownLatch == null) {
+			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
+		}
 		myCountdownLatch.countDown();
 	}
 
@@ -138,5 +155,28 @@ public class PointcutLatch implements IAnonymousInterceptor {
 
 	private static String hookParamsToString(HookParams hookParams) {
 		return hookParams.values().stream().map(ourFhirObjectToStringMapper).collect(Collectors.joining(", "));
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("name", name)
+			.append("myCountdownLatch", myCountdownLatch)
+//			.append("myFailures", myFailures)
+//			.append("myCalledWith", myCalledWith)
+			.append("myInitialCount", myInitialCount)
+			.toString();
+	}
+
+	public Object getLatchInvocationParameter() {
+		return getLatchInvocationParameter(myCalledWith.get());
+	}
+
+	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {
+		assertNotNull(theHookParams);
+		assertEquals("Expected Pointcut to be invoked 1 time", 1, theHookParams.size());
+		HookParams arg = theHookParams.get(0);
+		assertEquals("Expected pointcut to be invoked with 1 argument", 1, arg.values().size());
+		return arg.values().iterator().next();
 	}
 }

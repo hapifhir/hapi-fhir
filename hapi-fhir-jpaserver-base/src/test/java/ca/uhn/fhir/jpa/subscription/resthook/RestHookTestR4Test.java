@@ -35,6 +35,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@After
 	public void cleanupStoppableSubscriptionDeliveringRestHookSubscriber() {
+		ourLog.info("@After");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 	}
