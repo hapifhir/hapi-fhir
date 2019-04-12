@@ -59,7 +59,8 @@ class ActiveSubscriptionCache {
 			return;
 		}
 
-		activeSubscription.unregisterAll();
+		activeSubscription.close();
+
 		myCache.remove(theSubscriptionId);
 	}
 
