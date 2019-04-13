@@ -446,6 +446,8 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 				AtomicInteger counter = typeToCount.computeIfAbsent(myParameterTypes[i], t -> new AtomicInteger(0));
 				myParameterIndexes[i] = counter.getAndIncrement();
 			}
+
+			myMethod.setAccessible(true);
 		}
 
 		public Pointcut getPointcut() {
@@ -471,6 +473,11 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 				return myMethod.invoke(getInterceptor(), args);
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
+				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
+					ourLog.error("Exception thrown by interceptor: " + targetException.toString(), targetException);
+					return null;
+				}
+
 				if (targetException instanceof RuntimeException) {
 					throw ((RuntimeException) targetException);
 				} else {

@@ -219,17 +219,101 @@ public class InterceptorServiceTest {
 				myValue1 = theValue1;
 			}
 		}
-		NullParameterInterceptor interceptor = new NullParameterInterceptor();
+
+		NullParameterInterceptor interceptor;
+		HookParams params;
+
+		// Both null
+		interceptor = new NullParameterInterceptor();
 		svc.registerInterceptor(interceptor);
+		params = new HookParams()
+			.add(String.class, null)
+			.add(String.class, null);
+		svc.callHooks(Pointcut.TEST_RB, params);
+		assertEquals(null, interceptor.myValue0);
+		assertEquals(null, interceptor.myValue1);
+		svc.unregisterAllInterceptors();
+
+		// First null
+		interceptor = new NullParameterInterceptor();
+		svc.registerInterceptor(interceptor);
+		params = new HookParams()
+			.add(String.class, null)
+			.add(String.class, "A");
+		svc.callHooks(Pointcut.TEST_RB, params);
+		assertEquals(null, interceptor.myValue0);
+		assertEquals("A", interceptor.myValue1);
+		svc.unregisterAllInterceptors();
+
+		// Second null
+		interceptor = new NullParameterInterceptor();
+		svc.registerInterceptor(interceptor);
+		params = new HookParams()
+			.add(String.class, "A")
+			.add(String.class, null);
+		svc.callHooks(Pointcut.TEST_RB, params);
+		assertEquals("A", interceptor.myValue0);
+		assertEquals(null, interceptor.myValue1);
+		svc.unregisterAllInterceptors();
+
+	}
+
+	@Test
+	public void testCallHooksLogAndSwallowException() {
+		InterceptorService svc = new InterceptorService();
+
+		class LogAndSwallowInterceptor0 {
+			private boolean myHit;
+
+			@Hook(Pointcut.TEST_RB)
+			public void hook(String theValue0, String theValue1) {
+				myHit = true;
+				throw new IllegalStateException();
+			}
+		}
+		LogAndSwallowInterceptor0 interceptor0 = new LogAndSwallowInterceptor0();
+		svc.registerInterceptor(interceptor0);
+
+		class LogAndSwallowInterceptor1 {
+			private boolean myHit;
+
+			@Hook(Pointcut.TEST_RB)
+			public void hook(String theValue0, String theValue1) {
+				myHit = true;
+				throw new IllegalStateException();
+			}
+		}
+		LogAndSwallowInterceptor1 interceptor1 = new LogAndSwallowInterceptor1();
+		svc.registerInterceptor(interceptor1);
+
+		class LogAndSwallowInterceptor2 {
+			private boolean myHit;
+
+			@Hook(Pointcut.TEST_RB)
+			public void hook(String theValue0, String theValue1) {
+				myHit = true;
+				throw new NullPointerException("AAA");
+			}
+		}
+		LogAndSwallowInterceptor2 interceptor2 = new LogAndSwallowInterceptor2();
+		svc.registerInterceptor(interceptor2);
 
 		HookParams params = new HookParams()
 			.add(String.class, null)
 			.add(String.class, null);
-		svc.callHooks(Pointcut.TEST_RB, params);
 
-		assertEquals(null, interceptor.myValue0);
-		assertEquals(null, interceptor.myValue1);
+		try {
+			svc.callHooks(Pointcut.TEST_RB, params);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("AAA", e.getMessage());
+		}
+
+		assertEquals(true, interceptor0.myHit);
+		assertEquals(true, interceptor1.myHit);
+		assertEquals(true, interceptor2.myHit);
 	}
+
 
 	@Test
 	public void testCallHooksInvokedWithWrongParameters() {

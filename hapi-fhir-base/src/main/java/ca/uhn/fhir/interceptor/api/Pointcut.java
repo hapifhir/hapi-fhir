@@ -27,9 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 
 import javax.annotation.Nonnull;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Value for {@link Hook#value()}
@@ -386,7 +384,10 @@ public enum Pointcut {
 	 * method will be logged, but otherwise not acted upon.
 	 * </p>
 	 */
-	SERVER_PROCESSING_COMPLETED_NORMALLY(void.class,
+	SERVER_PROCESSING_COMPLETED_NORMALLY(
+		void.class,
+		new ExceptionHandlingSpec()
+			.addLogAndSwallow(Throwable.class),
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
@@ -868,7 +869,11 @@ public enum Pointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
-	TEST_RB(boolean.class, String.class.getName(), String.class.getName()),
+	TEST_RB(
+		boolean.class,
+		new ExceptionHandlingSpec().addLogAndSwallow(IllegalStateException.class),
+		String.class.getName(),
+		String.class.getName()),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
@@ -878,10 +883,25 @@ public enum Pointcut {
 
 	private final List<String> myParameterTypes;
 	private final Class<?> myReturnType;
+	private final ExceptionHandlingSpec myExceptionHandlingSpec;
 
 	Pointcut(@Nonnull Class<?> theReturnType, String... theParameterTypes) {
+		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
+	}
+
+	Pointcut(@Nonnull Class<?> theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
 		myReturnType = theReturnType;
+		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
+	}
+
+	public boolean isShouldLogAndSwallowException(@Nonnull Throwable theException) {
+		for (Class<? extends Throwable> next : myExceptionHandlingSpec.myTypesToLogAndSwallow) {
+			if (next.isAssignableFrom(theException.getClass())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Nonnull
@@ -893,4 +913,16 @@ public enum Pointcut {
 	public List<String> getParameterTypes() {
 		return myParameterTypes;
 	}
+
+	private static class ExceptionHandlingSpec {
+
+		private final Set<Class<? extends Throwable>> myTypesToLogAndSwallow = new HashSet<>();
+
+		ExceptionHandlingSpec addLogAndSwallow(@Nonnull Class<? extends Throwable> theType) {
+			myTypesToLogAndSwallow.add(theType);
+			return this;
+		}
+
+	}
+
 }

@@ -379,7 +379,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseDetails.setResponseResource(response);
 		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
 
-		if (callOutgoingResponseHook(theRequest, responseDetails)) {
+		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
 			return null;
 		}
 
@@ -428,9 +428,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseParams.add(HttpServletRequest.class, servletRequest);
 		responseParams.add(HttpServletResponse.class, servletResponse);
 		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
-			return true;
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 }
