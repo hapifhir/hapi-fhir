@@ -217,7 +217,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		responseDetails.setResponseResource(outcome);
 		responseDetails.setResponseCode(operationStatus);
 
-		if (BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
+		if (!BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
 			return null;
 		}
 
