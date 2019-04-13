@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
@@ -305,7 +305,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 	static class MyTestCtxConfig {
 
 		@Autowired
-		private IInterceptorRegistry myInterceptorRegistry;
+		private IInterceptorService myInterceptorRegistry;
 
 		@Bean
 		public MyTestInterceptor interceptor() {

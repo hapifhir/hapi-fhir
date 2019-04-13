@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

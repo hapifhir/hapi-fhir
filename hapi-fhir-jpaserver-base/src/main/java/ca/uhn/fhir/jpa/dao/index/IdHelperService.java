@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.search.PerformanceMessage;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.google.common.collect.ListMultimap;
@@ -94,9 +94,9 @@ public class IdHelperService {
 			Collection<String> nextIds = nextEntry.getValue();
 			if (isBlank(nextResourceType)) {
 
-				PerformanceMessage msg = new PerformanceMessage()
+				StorageProcessingMessage msg = new StorageProcessingMessage()
 					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-				theInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_MESSAGE, msg);
+				theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, msg);
 
 				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
 

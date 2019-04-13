@@ -27,8 +27,8 @@ import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
@@ -717,9 +717,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 				if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
-					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_COMPLETE, mySearchRuntimeDetails);
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, mySearchRuntimeDetails);
 				} else {
-					myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE, mySearchRuntimeDetails);
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, mySearchRuntimeDetails);
 				}
 
 				ourLog.info("Have completed search for [{}{}] and found {} resources in {}ms - Status is {}", mySearch.getResourceType(), mySearch.getSearchQueryString(), mySyncedPids.size(), sw.getMillis(), mySearch.getStatus());
@@ -760,7 +760,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				mySearch.setStatus(SearchStatusEnum.FAILED);
 
 				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
-				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_FAILED, mySearchRuntimeDetails);
+				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, mySearchRuntimeDetails);
 
 				saveSearch();
 

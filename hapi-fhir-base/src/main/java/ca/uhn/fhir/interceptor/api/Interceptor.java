@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
@@ -20,17 +20,26 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-public class PerformanceMessage {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	private String myMessage;
+/**
+ * This annotation declares a bean as a subscription interceptor
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Interceptor {
 
-	public String getMessage() {
-		return myMessage;
-	}
+	/**
+	 * @see #order() 
+	 */
+	int DEFAULT_ORDER = 0;
 
-	public PerformanceMessage setMessage(String theMessage) {
-		myMessage = theMessage;
-		return this;
-	}
-
+	/**
+	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
+	 * and allowable values can be positive or negative or 0.
+	 */
+	int order() default DEFAULT_ORDER;
 }

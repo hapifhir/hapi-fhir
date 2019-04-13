@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -247,11 +249,14 @@ public abstract class BaseMethodBinding<T> {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
-			for (IServerInterceptor next : theServer.getInterceptors()) {
-				ActionRequestDetails details = new ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-				next.incomingRequestPreHandled(operationType, details);
-			}
+			ActionRequestDetails details = new ActionRequestDetails(theRequest);
+			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+			HookParams preHandledParams = new HookParams();
+			preHandledParams.add(RestOperationTypeEnum.class, operationType);
+			preHandledParams.add(ActionRequestDetails.class, details);
+			theRequest
+				.getInterceptorBroadcaster()
+				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 		}
 
 		// Actually invoke the method

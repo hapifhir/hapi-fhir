@@ -32,7 +32,7 @@
 			</action>
 			<action type="add">
 				The hapi-fhir-jpaserver-starter project has been updated to use a properties
-				file for configuration, making it much easier to get started with this 
+				file for configuration, making it much easier to get started with this
 				project. Thanks to Sean McIlvenna for the pull request!
 			</action>
 			<action type="fix">
@@ -68,10 +68,10 @@
 				a page calculation error. This has been corrected.
 			</action>
 			<action type="add">
-				In the JPA server, a much more readable error message is now returned returned when 
-				two client threads collide while trying to simultaneously create a resource with the
-				same client-assigned ID. In addition, better error messages are now returned
-				when conflicts such as this one are hit within a FHIR transaction operation.
+			In the JPA server, a much more readable error message is now returned returned when
+			two client threads collide while trying to simultaneously create a resource with the
+			same client-assigned ID. In addition, better error messages are now returned
+			when conflicts such as this one are hit within a FHIR transaction operation.
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
@@ -127,7 +127,7 @@
 			</action>
 			<action type="fix">
 				Two expunge bug fixes:
-				The first bug is that the expunge operation wasn't bailing once it hit its limit.  This resulted in a
+				The first bug is that the expunge operation wasn't bailing once it hit its limit. This resulted in a
 				"Page size must not be less than one!" error.
 				The second bug is that one case wasn't properly handled: when a resourceId with no version is provided.
 				This executed the case where only resource type is provided.
@@ -136,6 +136,11 @@
 				When updating a resource in the JPA server, if the contents have not actually changed
 				the resource version is not updated and no new version is created. In this situation,
 				the update time was modified however. It will no longer be updated.
+			</action>
+			<action type="fix">
+				When running the JPA server in Resource Client ID strategy mode of "ANY", using the
+				<![CDATA[<code>_id</code>]]> search parameter could return incorrect results. This
+				has been corrected.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
@@ -175,11 +180,11 @@
 				by two new interceptors: SubscriptionActivatingInterceptor that is responsible for activating subscriptions
 				and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated
 				subscriptions. Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types
-				are supported in your environment.  If you are processing subscriptions on a separate server and only want
+				are supported in your environment. If you are processing subscriptions on a separate server and only want
 				to activate subscriptions on this server, you should set DaoConfig.setSubscriptionMatchingEnabled to false.
 				The helper method SubscriptionInterceptorLoader.registerInterceptors()
 				will check if any subscription types are supported, and if so then load active subscriptions into the
-				SubscriptionRegistry and register the subscription activating interceptor.  This method also registers
+				SubscriptionRegistry and register the subscription activating interceptor. This method also registers
 				the subscription matching interceptor (that matches incoming resources and sends matches to subscription
 				channels) only if DaoConfig.isSubscriptionMatchingEnabled is true.
 				See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
@@ -386,7 +391,7 @@
 			</action>
 			<action type="add">
 				AuthorizationInterceptor now rejects transactions with an invalid or unset request
-				using an HTTP 422 response	Bundle type instead of silently refusing to authorize them.
+				using an HTTP 422 response Bundle type instead of silently refusing to authorize them.
 			</action>
 			<action type="add">
 				AuthorizationInterceptor is now able to authorize DELETE operations performed via a
@@ -404,7 +409,7 @@
 			</action>
 			<action type="add">
 				In a DSTU2 server, if search parameters are expressed with chains directly in the
-				parameter name (e.g. 
+				parameter name (e.g.
 				<![CDATA[<code>@RequiredParam(name="subject.name.family")</code>]]>) the second
 				part of the chain was lost when the chain was described in the server
 				CapabilityStatement. This has been corrected.
@@ -462,7 +467,7 @@
 			<action type="add">
 				Add a "subscription-matching-strategy" meta tag to incoming subscriptions with value of IN_MEMORY
 				or DATABASE indicating whether the subscription can be matched against new resources in-memory or
-				whether a call out to the database may be required.  I say "may" because subscription matches fail fast
+				whether a call out to the database may be required. I say "may" because subscription matches fail fast
 				so a negative match may be performed in-memory, but a positive match will require a database call.
 			</action>
 			<action type="fix">

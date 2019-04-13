@@ -58,9 +58,7 @@ public class InterceptorDstu3Test {
 
 	@After
 	public void after() {
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@Before

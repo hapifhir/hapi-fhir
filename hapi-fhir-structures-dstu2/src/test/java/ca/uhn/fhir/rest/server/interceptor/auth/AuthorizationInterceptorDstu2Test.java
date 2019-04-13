@@ -15,6 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -42,7 +44,6 @@ import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
@@ -66,9 +67,7 @@ public class AuthorizationInterceptorDstu2Test {
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 		ourReturn = null;
 		ourHitMethod = false;
 		ourConditionalCreateId = "1123";
@@ -2057,10 +2056,10 @@ public class AuthorizationInterceptorDstu2Test {
 		}
 
 		@Delete()
-		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+		public MethodOutcome delete(IInterceptorBroadcaster theRequestOperationCallback, @IdParam IdDt theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
-				theRequestOperationCallback.resourceDeleted(next);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, next);
 			}
 			MethodOutcome retVal = new MethodOutcome();
 			return retVal;

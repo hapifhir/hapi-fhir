@@ -59,9 +59,7 @@ public class InterceptorThrowingExceptionR4Test {
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
 		ourHitMethod = false;

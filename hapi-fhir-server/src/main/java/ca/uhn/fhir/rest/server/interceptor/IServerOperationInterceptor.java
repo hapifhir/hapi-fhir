@@ -20,6 +20,8 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -40,6 +42,7 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 * the transaction will be rolled back.
 	 * </p>
 	 */
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	void resourceCreated(RequestDetails theRequest, IBaseResource theResource);
 
 	/**
@@ -50,6 +53,7 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 * the transaction will be rolled back.
 	 * </p>
 	 */
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	void resourceDeleted(RequestDetails theRequest, IBaseResource theResource);
 
 	/**
@@ -67,6 +71,7 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 *                    to create. Interceptors may modify this
 	 *                    resource, and modifications will affect what is saved in the database.
 	 */
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
 	void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource);
 
 	/**
@@ -79,6 +84,7 @@ public interface IServerOperationInterceptor extends IServerInterceptor {
 	 *
 	 * @param theResource The resource which is about to be deleted
 	 */
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
 	void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource);
 
 	/**

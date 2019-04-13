@@ -2,11 +2,12 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -69,9 +70,7 @@ public class AuthorizationInterceptorDstu3Test {
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
 		ourDeleted = null;
@@ -3478,10 +3477,10 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Delete()
-		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+		public MethodOutcome delete(IInterceptorBroadcaster theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
-				theRequestOperationCallback.resourceDeleted(next);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, next);
 			}
 			return new MethodOutcome();
 		}
@@ -3626,11 +3625,11 @@ public class AuthorizationInterceptorDstu3Test {
 
 
 		@Transaction()
-		public Bundle search(IRequestOperationCallback theRequestOperationCallback, @TransactionParam Bundle theInput) {
+		public Bundle search(IInterceptorBroadcaster theRequestOperationCallback, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
-					theRequestOperationCallback.resourceDeleted(next);
+					theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, next);
 				}
 			}
 			return (Bundle) ourReturn.get(0);

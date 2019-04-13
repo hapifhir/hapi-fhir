@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
@@ -16,18 +15,13 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Observation;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
-import org.hl7.fhir.dstu3.model.Reference;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -352,11 +346,7 @@ public class AuthorizationInterceptorResourceProviderDstu3Test extends BaseResou
 	}
 
 	private void unregisterInterceptors() {
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourRestServer.getInterceptors())) {
-			if (next instanceof AuthorizationInterceptor) {
-				ourRestServer.unregisterInterceptor(next);
-			}
-		}
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@AfterClass

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -124,21 +124,21 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		}
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_COMPLETE, interceptor);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_FAILED, interceptor);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_FAILED, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
 		myInterceptors.add(interceptor);
 
 		ourLog.info("About to perform search...");
 
 		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(0)).invoke(eq(Pointcut.PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(0)).invoke(eq(Pointcut.PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
 
 		SearchRuntimeDetails details = myParamsCaptor.getAllValues().get(0).get(SearchRuntimeDetails.class);
 		assertEquals(SearchStatusEnum.PASSCMPLET, details.getSearchStatus());
@@ -146,11 +146,11 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		// Load the next (and final) page
 		reset(interceptor);
 		results = ourClient.loadPage().next(results).execute();
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(1)).invoke(eq(Pointcut.PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(0)).invoke(eq(Pointcut.PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
-		verify(interceptor, times(0)).invoke(eq(Pointcut.PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE), myParamsCaptor.capture());
+		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
 
 	}
 

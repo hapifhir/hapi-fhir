@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;

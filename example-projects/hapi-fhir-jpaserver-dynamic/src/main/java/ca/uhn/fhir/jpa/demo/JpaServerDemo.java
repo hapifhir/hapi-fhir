@@ -63,7 +63,7 @@ public class JpaServerDemo extends RestfulServer {
 			throw new IllegalStateException();
 		}
 		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
-		setResourceProviders(beans.createProviders());
+		registerProviders(beans.createProviders());
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
@@ -77,7 +77,7 @@ public class JpaServerDemo extends RestfulServer {
 		} else {
 			throw new IllegalStateException();
 		}
-		setPlainProviders(systemProvider);
+		registerProviders(systemProvider);
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for

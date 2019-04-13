@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,16 +26,28 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation declares a bean as a subscription interceptor
+ * This annotation should be placed on
+ * {@link Interceptor}
+ * bean methods.
+ *
+ * @see Interceptor
  */
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Interceptor {
+public @interface Hook {
 
 	/**
-	 * @return Declares that an interceptor should be manually registered with the registry,
-	 * and should not auto-register using Spring autowiring.
+	 * Provides the specific point where this method should be invoked
 	 */
-	boolean manualRegistration() default false;
+	Pointcut value();
 
+	/**
+	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
+	 * and allowable values can be positive or negative or 0.
+	 * <p>
+	 * If no order is specified, or the order is set to <code>0</code> (the default order),
+	 * the order specified at the interceptor type level will take precedence.
+	 * </p>
+	 */
+	int order() default Interceptor.DEFAULT_ORDER;
 }

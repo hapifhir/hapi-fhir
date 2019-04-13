@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
@@ -46,7 +46,7 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-@Interceptor(manualRegistration = true)
+@Interceptor()
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 
@@ -85,17 +85,17 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		}
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void resourceCreated(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
 	public void resourceDeleted(IBaseResource theResource) {
 		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
 	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
 		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
 	}

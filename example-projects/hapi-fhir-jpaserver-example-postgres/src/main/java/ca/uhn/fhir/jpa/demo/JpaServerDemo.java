@@ -49,13 +49,13 @@ public class JpaServerDemo extends RestfulServer {
 		 * contains bean definitions for a resource provider for each resource type
 		 */
 		ResourceProviderFactory beans = myAppCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
-		setResourceProviders(beans.createProviders());
+		registerProviders(beans.createProviders());
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
 		 * transaction, and global history.
 		 */
-		setPlainProviders(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
+		registerProviders(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for

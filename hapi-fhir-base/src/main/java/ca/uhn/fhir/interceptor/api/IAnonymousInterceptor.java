@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
@@ -20,16 +20,17 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-public interface IInterceptorBroadcaster {
+import com.google.common.annotations.VisibleForTesting;
 
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, HookParams theParams);
+/**
+ * This is currently only here for unit tests!
+ *
+ * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ */
+@FunctionalInterface
+@VisibleForTesting
+public interface IAnonymousInterceptor {
 
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, Object... theParams);
+	void invoke(Pointcut thePointcut, HookParams theArgs);
 
 }

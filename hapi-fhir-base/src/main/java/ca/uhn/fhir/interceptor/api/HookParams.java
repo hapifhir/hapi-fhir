@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -51,9 +52,10 @@ public class HookParams {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> void add(T theNext) {
+	public <T> HookParams add(@Nonnull T theNext) {
 		Class<T> nextClass = (Class<T>) theNext.getClass();
 		add(nextClass, theNext);
+		return this;
 	}
 
 	public <T> HookParams add(Class<T> theType, T theParam) {
@@ -78,7 +80,7 @@ public class HookParams {
 		return get(theParamType, 0);
 	}
 
-		@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> theParamType, int theIndex) {
 		List<Object> objects = myParams.get(theParamType);
 		Object retVal = null;
@@ -114,5 +116,19 @@ public class HookParams {
 				.stream()
 				.map(t -> unwrapValue(t))
 				.collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> void addIfMatchesType(Class<T> theType, Object theParam) {
+		if (theParam == null) {
+			add(theType, null);
+		} else {
+			if (theType.isAssignableFrom(theParam.getClass())) {
+				T param = (T) theParam;
+				add(theType, param);
+			} else {
+				add(theType, null);
+			}
+		}
 	}
 }

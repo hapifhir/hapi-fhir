@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
@@ -215,24 +217,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		responseDetails.setResponseResource(outcome);
 		responseDetails.setResponseCode(operationStatus);
 
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, outcome);
-			if (!continueProcessing) {
-				return null;
-			}
-
-			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
-			if (!continueProcessing) {
-				return null;
-			}
+		if (BaseResourceReturningMethodBinding.callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
 
 		IRestfulResponse restfulResponse = theRequest.getResponse();

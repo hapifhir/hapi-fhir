@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -49,7 +49,7 @@ public class SubscriptionInterceptorLoader {
 	@Autowired
 	private ApplicationContext myAppicationContext;
 	@Autowired
-	private IInterceptorRegistry myInterceptorRegistry;
+	private IInterceptorService myInterceptorRegistry;
 
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();

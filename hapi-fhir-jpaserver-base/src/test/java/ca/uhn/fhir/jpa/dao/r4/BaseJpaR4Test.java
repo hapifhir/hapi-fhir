@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -156,7 +156,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
 	protected IServerInterceptor myInterceptor;
 	@Autowired
-	protected IInterceptorRegistry myInterceptorRegistry;
+	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -299,7 +299,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myInterceptorRegistry.unregisterAllInterceptors();
 
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 	}

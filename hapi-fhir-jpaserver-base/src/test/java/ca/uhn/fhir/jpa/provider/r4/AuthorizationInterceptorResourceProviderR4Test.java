@@ -674,11 +674,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	}
 
 	private void unregisterInterceptors() {
-		for (IServerInterceptor next : new ArrayList<>(ourRestServer.getInterceptors())) {
-			if (next instanceof AuthorizationInterceptor) {
-				ourRestServer.unregisterInterceptor(next);
-			}
-		}
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@AfterClass
