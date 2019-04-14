@@ -2,7 +2,7 @@ package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
