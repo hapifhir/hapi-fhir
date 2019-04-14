@@ -319,6 +319,38 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testUpdateWithNoBody() throws IOException {
+
+		HttpPut httpPost = new HttpPut(ourServerBase + "/Patient/AAA");
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("No body was supplied in request"));
+		}
+
+	}
+
+
+	@Test
+	public void testCreateWithNoBody() throws IOException {
+
+		HttpPost httpPost = new HttpPost(ourServerBase + "/Patient");
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPost)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("No body was supplied in request"));
+		}
+
+	}
+
+
 
 	@Before
 	public void beforeDisableResultReuse() {

@@ -73,12 +73,15 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Autowired
 	protected Environment myEnv;
 
-	@Autowired
-	protected DaoRegistry myDaoRegistry;
 
 	@Override
 	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
 		theTaskRegistrar.setTaskScheduler(taskScheduler());
+	}
+
+	@Bean("myDaoRegistry")
+	public DaoRegistry daoRegistry() {
+		return new DaoRegistry();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
@@ -182,7 +185,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return myDaoRegistry.getResourceDao(theResourceType) != null;
+		return daoRegistry().getResourceDao(theResourceType) != null;
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

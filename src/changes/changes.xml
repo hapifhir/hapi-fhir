@@ -137,6 +137,11 @@
 				the resource version is not updated and no new version is created. In this situation,
 				the update time was modified however. It will no longer be updated.
 			</action>
+			<action type="fix">
+				Performing a PUT or POST against a HAPI FHIR Server with no request body caused an
+				HTTP 500 to be returned instead of a more appropriate HTTP 400. This has been
+				corrected.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
