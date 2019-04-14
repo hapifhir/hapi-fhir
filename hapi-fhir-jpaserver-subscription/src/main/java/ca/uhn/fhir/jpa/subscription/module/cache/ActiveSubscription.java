@@ -96,13 +96,18 @@ public class ActiveSubscription implements Closeable {
 		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
 			unregister(messageHandler);
 		}
-
 		if (mySubscribableChannel instanceof DisposableBean) {
 			try {
 				((DisposableBean) mySubscribableChannel).destroy();
 			} catch (Exception e) {
 				ourLog.error("Failed to destroy channel bean", e);
 			}
+		}
+	}
+
+	public void removeChannel() {
+		if (mySubscribableChannel instanceof IRemovableChannel) {
+			((IRemovableChannel)mySubscribableChannel).removeChannel();
 		}
 	}
 }

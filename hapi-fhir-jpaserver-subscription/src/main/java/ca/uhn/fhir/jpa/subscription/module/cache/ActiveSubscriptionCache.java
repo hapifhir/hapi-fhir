@@ -51,7 +51,7 @@ class ActiveSubscriptionCache {
 		myCache.put(theSubscriptionId, theValue);
 	}
 
-	public void remove(String theSubscriptionId) {
+	public synchronized void remove(String theSubscriptionId) {
 		Validate.notBlank(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
@@ -60,7 +60,7 @@ class ActiveSubscriptionCache {
 		}
 
 		activeSubscription.close();
-
+		activeSubscription.removeChannel();
 		myCache.remove(theSubscriptionId);
 	}
 
