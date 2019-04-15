@@ -139,8 +139,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return provideStructureDefinitionMap(theContext).get(theUrl);
 	}
 
-	ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
 	}
 
 	public void flush() {

@@ -41,8 +41,13 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return myWrap.fetchCodeSystem(theContext, theSystem);
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String uri) {
+		return myWrap.fetchCodeSystem(theContext, uri);
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return myWrap.fetchValueSet(theContext, uri);
 	}
 
 	@Override
