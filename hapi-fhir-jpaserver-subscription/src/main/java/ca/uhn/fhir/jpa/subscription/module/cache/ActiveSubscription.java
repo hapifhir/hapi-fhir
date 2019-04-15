@@ -110,4 +110,13 @@ public class ActiveSubscription implements Closeable {
 			((IRemovableChannel)mySubscribableChannel).removeChannel();
 		}
 	}
+
+	/**
+	 * Use close() instead
+	 * KHS 15 Apr 2019
+	 */
+	@Deprecated
+	public void unregisterAll() {
+		close();
+	}
 }
