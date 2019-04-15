@@ -1581,19 +1581,19 @@ public class DaoConfig {
 	}
 
 	/**
-	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
 	 */
 
-	public String getWebsocketEndpoint() {
-		return myModelConfig.getWebsocketEndpoint();
+	public String getWebsocketContextPath() {
+		return myModelConfig.getWebsocketContextPath();
 	}
 
 	/**
-	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
 	 */
 
-	public void setWebsocketEndpoint(String theWebsocketEndpoint) {
-		myModelConfig.setWebsocketEndpoint(theWebsocketEndpoint);
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
 	}
 
 	public enum IndexEnabledEnum {

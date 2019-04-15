@@ -42,7 +42,7 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
-		theRegistry.addHandler(subscriptionWebSocketHandler(), myModelConfig.getWebsocketEndpoint()).setAllowedOrigins("*");
+		theRegistry.addHandler(subscriptionWebSocketHandler(), myModelConfig.getWebsocketContextPath()).setAllowedOrigins("*");
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)

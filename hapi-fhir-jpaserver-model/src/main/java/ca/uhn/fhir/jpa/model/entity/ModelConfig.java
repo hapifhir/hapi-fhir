@@ -58,7 +58,7 @@ public class ModelConfig {
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private boolean mySubscriptionMatchingEnabled = true;
-	private String myWebsocketEndpoint = "/websocket";
+	private String myWebsocketContextPath = "/websocket";
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -365,19 +365,19 @@ public class ModelConfig {
 	}
 
 	/**
-	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
 
-	public String getWebsocketEndpoint() {
-		return myWebsocketEndpoint;
+	public String getWebsocketContextPath() {
+		return myWebsocketContextPath;
 	}
 
 	/**
-	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
 
-	public void setWebsocketEndpoint(String theWebsocketEndpoint) {
-		myWebsocketEndpoint = theWebsocketEndpoint;
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myWebsocketContextPath = theWebsocketContextPath;
 	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
