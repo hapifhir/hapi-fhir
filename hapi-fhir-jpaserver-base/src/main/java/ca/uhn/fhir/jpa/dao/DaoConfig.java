@@ -1580,6 +1580,21 @@ public class DaoConfig {
 		myModelConfig.setEmailFromAddress(theEmailFromAddress);
 	}
 
+	/**
+	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketEndpoint() {
+		return myModelConfig.getWebsocketEndpoint();
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this defines the endpoint that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketEndpoint(String theWebsocketEndpoint) {
+		myModelConfig.setWebsocketEndpoint(theWebsocketEndpoint);
+	}
 
 	public enum IndexEnabledEnum {
 		ENABLED,
