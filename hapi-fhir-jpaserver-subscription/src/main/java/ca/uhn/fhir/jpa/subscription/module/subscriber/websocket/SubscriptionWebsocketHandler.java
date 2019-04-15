@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.subscriber;
+package ca.uhn.fhir.jpa.subscription.module.subscriber.websocket;
 
 /*
  * #%L
@@ -22,10 +22,11 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
@@ -41,9 +42,9 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
 	@Autowired
-	protected SubscriptionRegistry mySubscriptionRegistry;
+	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
 
 	@Autowired
 	private FhirContext myCtx;
@@ -160,34 +161,18 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		private IIdType bindSimple(WebSocketSession theSession, String theBindString) {
 			IdType id = new IdType(theBindString);
 
-			if (!id.hasIdPart() || !id.isIdPartValid()) {
+			WebsocketValidationResponse response = myWebsocketConnectionValidator.validate(id);
+			if (!response.isValid()) {
 				try {
-					String message = "Invalid bind request - No ID included";
-					ourLog.warn(message);
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), message));
+					ourLog.warn(response.getMessage());
+					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), response.getMessage()));
 				} catch (IOException e) {
 					handleFailure(e);
 				}
 				return null;
 			}
 
-			if (id.hasResourceType() == false) {
-				id = id.withResourceType("Subscription");
-			}
-
-			try {
-				ActiveSubscription activeSubscription = mySubscriptionRegistry.get(id.getIdPart());
-				myState = new BoundStaticSubscipriptionState( theSession, activeSubscription);
-			} catch (ResourceNotFoundException e) {
-				try {
-					String message = "Invalid bind request - Unknown subscription: " + id.getValue();
-					ourLog.warn(message);
-					theSession.close(new CloseStatus(CloseStatus.PROTOCOL_ERROR.getCode(), message));
-				} catch (IOException e1) {
-					handleFailure(e);
-				}
-				return null;
-			}
+			myState = new BoundStaticSubscipriptionState(theSession, response.getActiveSubscription());
 
 			return id;
 		}

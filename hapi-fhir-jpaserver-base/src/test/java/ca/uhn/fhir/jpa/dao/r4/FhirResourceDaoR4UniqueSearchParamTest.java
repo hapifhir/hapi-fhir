@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -33,7 +35,9 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -503,7 +507,7 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder(srId));
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(unformattedSql, stringContainsInOrder(
-			"IDX_STRING='ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F"+ practId.getIdPart() +"'",
+			"IDX_STRING='ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
 			"HASH_SYS_AND_VALUE in ('6795110643554413877')"
 		));
 		assertThat(unformattedSql, not(containsString(("RES_DELETED_AT"))));
@@ -773,11 +777,23 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		// The third pass has a low of (Coverage.lastUpdated + 1ms)
 		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
-		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
-		ourLog.info("** Uniques: {}", uniques);
-		assertEquals(uniques.toString(), 1, uniques.size());
-		assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
-		assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
+		runInTransaction(() -> {
+			List<ResourceTable> tables = myResourceTableDao.findAll();
+			String resourceIds = tables.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
+			// 1 patient, 1 coverage, 3 search parameters
+			assertEquals(resourceIds, 5, tables.size());
+			for (int i = 0; i < tables.size(); i++) {
+				assertEquals(INDEX_STATUS_INDEXED, tables.get(i).getIndexStatus().intValue());
+			}
+		});
+
+		runInTransaction(() -> {
+			List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			ourLog.info("** Uniques: {}", uniques);
+			assertEquals(uniques.toString(), 1, uniques.size());
+			assertEquals("Coverage/" + id3.getIdPart(), uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue());
+			assertEquals("Coverage?beneficiary=Patient%2F" + id2.getIdPart() + "&identifier=urn%3Afoo%3Abar%7C123", uniques.get(0).getIndexString());
+		});
 
 
 	}

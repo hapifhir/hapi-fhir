@@ -68,10 +68,10 @@
 				a page calculation error. This has been corrected.
 			</action>
 			<action type="add">
-			In the JPA server, a much more readable error message is now returned returned when
-			two client threads collide while trying to simultaneously create a resource with the
-			same client-assigned ID. In addition, better error messages are now returned
-			when conflicts such as this one are hit within a FHIR transaction operation.
+				In the JPA server, a much more readable error message is now returned returned when 
+				two client threads collide while trying to simultaneously create a resource with the
+				same client-assigned ID. In addition, better error messages are now returned
+				when conflicts such as this one are hit within a FHIR transaction operation.
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
@@ -141,6 +141,15 @@
 				When running the JPA server in Resource Client ID strategy mode of "ANY", using the
 				<![CDATA[<code>_id</code>]]> search parameter could return incorrect results. This
 				has been corrected.
+			</action>
+			<action type="fix">
+				Performing a PUT or POST against a HAPI FHIR Server with no request body caused an
+				HTTP 500 to be returned instead of a more appropriate HTTP 400. This has been
+				corrected.
+			</action>
+			<action type="fix" issue="1255">
+				The fetchValueSet method on IValidationSupport implementation was not visible and could
+				not be overridden. Thanks to Patrick Werner for the pull reuqest!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

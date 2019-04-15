@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ActiveSubscriptionCache {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ActiveSubscriptionCache.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
 	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
 
@@ -63,9 +65,17 @@ class ActiveSubscriptionCache {
 
 	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 		for (String next : new ArrayList<>(myCache.keySet())) {
-			if (!theAllIds.contains(next)) {
-				ourLog.info("Unregistering Subscription/{}", next);
-				remove(next);
+			ActiveSubscription activeSubscription = myCache.get(next);
+			if (theAllIds.contains(next)) {
+				// In case we got a false positive from a race condition on a previous sync, unset the flag.
+				activeSubscription.setFlagForDeletion(false);
+			} else {
+				if (activeSubscription.isFlagForDeletion()) {
+					ourLog.info("Unregistering Subscription/{}", next);
+					remove(next);
+				} else {
+					activeSubscription.setFlagForDeletion(true);
+				}
 			}
 		}
 	}

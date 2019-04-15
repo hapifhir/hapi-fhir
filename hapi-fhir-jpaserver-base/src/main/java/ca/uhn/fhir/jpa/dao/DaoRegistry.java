@@ -35,12 +35,19 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component("myDaoRegistry")
 public class DaoRegistry implements ApplicationContextAware {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
 	private FhirContext myContext;
+
+	/**
+	 * Constructor
+	 */
+	public DaoRegistry() {
+		super();
+	}
+
 
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;

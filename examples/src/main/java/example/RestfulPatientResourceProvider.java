@@ -56,7 +56,7 @@ public class RestfulPatientResourceProvider implements IResourceProvider {
 
 	/**
 	 * The "@Search" annotation indicates that this method supports the 
-	 * search operation. You may have many different method annotated with 
+	 * search operation. You may have many different methods annotated with
 	 * this annotation, to support many different search criteria. This
 	 * example searches by family name.
 	 * 
