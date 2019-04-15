@@ -5,6 +5,7 @@ import java.util.List;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,15 +33,24 @@ public interface IValidationSupport
 	@Override
 	List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext);
 
-	/**
-	 * Fetch a code system by ID
-	 * 
-	 * @param theSystem
-	 *           The code system
-	 * @return The valueset (must not be null, but can be an empty ValueSet)
-	 */
-	@Override
-	CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem);
+  /**
+   * Fetch a code system by Uri
+   *
+   * @param uri
+   *           Canonical Uri of the code system
+   * @return The valueset (must not be null, but can be an empty ValueSet)
+   */
+  @Override
+  CodeSystem fetchCodeSystem(FhirContext theContext, String uri);
+
+  /**
+   * Fetch a valueset by Uri
+   *
+   * @param uri
+   *           Canonical Uri of the ValueSet
+   * @return The valueset (must not be null, but can be an empty ValueSet)
+   */
+  ValueSet fetchValueSet(FhirContext theContext, String uri);
 
 	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
