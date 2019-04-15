@@ -217,28 +217,20 @@ public class PortUtil {
 	}
 
 	private static boolean isAvailable(int port) {
-		ServerSocket ss = null;
-		DatagramSocket ds = null;
-		try {
-			ss = new ServerSocket(port);
+		ourLog.info("Testing a bind on port {}", port);
+		try (ServerSocket ss = new ServerSocket(port)) {
 			ss.setReuseAddress(true);
-			ds = new DatagramSocket(port);
-			ds.setReuseAddress(true);
-			return true;
+			try (DatagramSocket ds = new DatagramSocket(port)) {
+				ds.setReuseAddress(true);
+				ourLog.info("Successfully bound port {}", port);
+				return true;
+			} catch (IOException e) {
+				ourLog.info("Failed to bind port {}: {}", port, e.toString());
+				return false;
+			}
 		} catch (IOException e) {
+			ourLog.info("Failed to bind port {}: {}", port, e.toString());
 			return false;
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
-
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException e) {
-					/* should not be thrown */
-				}
-			}
 		}
 	}
 
