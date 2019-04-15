@@ -276,7 +276,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				myEntityManager.persist(next);
 				haveNewParams = true;
 			}
-			if (theEntity.getParamsCompositeStringUnique().size() > 0 || haveNewParams) {
+			if (theParams.myCompositeStringUniques.size() > 0 || haveNewParams) {
 				theEntity.setParamsCompositeStringUniquePresent(true);
 			} else {
 				theEntity.setParamsCompositeStringUniquePresent(false);
