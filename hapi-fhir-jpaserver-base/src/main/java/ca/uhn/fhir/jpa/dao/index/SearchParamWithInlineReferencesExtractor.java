@@ -87,7 +87,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
+	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams) {
 		mySearchParamExtractorService.extractFromResource(theParams, theEntity, theResource);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
@@ -104,7 +104,7 @@ public class SearchParamWithInlineReferencesExtractor {
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
-		for (Iterator<ResourceLink> existingLinkIter = existingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
+		for (Iterator<ResourceLink> existingLinkIter = theExistingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
 			ResourceLink nextExisting = existingLinkIter.next();
 			if (theParams.myLinks.remove(nextExisting)) {
 				existingLinkIter.remove();
@@ -263,6 +263,7 @@ public class SearchParamWithInlineReferencesExtractor {
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
+			boolean haveNewParams = false;
 			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myCompositeStringUniques, existingParams.myCompositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
@@ -273,6 +274,12 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 				ourLog.debug("Persisting unique index: {}", next);
 				myEntityManager.persist(next);
+				haveNewParams = true;
+			}
+			if (theEntity.getParamsCompositeStringUnique().size() > 0 || haveNewParams) {
+				theEntity.setParamsCompositeStringUniquePresent(true);
+			} else {
+				theEntity.setParamsCompositeStringUniquePresent(false);
 			}
 		}
 	}
