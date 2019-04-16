@@ -86,6 +86,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		return fetchResource(theCtx, ValueSet.class, theSystem);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {

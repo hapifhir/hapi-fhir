@@ -5,6 +5,7 @@ import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.UriType;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -94,6 +95,17 @@ public class ValidationSupportChain implements IValidationSupport {
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		for (IValidationSupport next : myChain) {
 			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String uri) {
+		for (IValidationSupport next : myChain) {
+			ValueSet retVal = next.fetchValueSet(theCtx, uri);
 			if (retVal != null) {
 				return retVal;
 			}

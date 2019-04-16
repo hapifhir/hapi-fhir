@@ -204,6 +204,12 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return null;
 	}
 
+	@CoverageIgnore
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+		return null;
+	}
+
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		return null;
