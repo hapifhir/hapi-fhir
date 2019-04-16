@@ -72,6 +72,7 @@
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
+			</action>
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
