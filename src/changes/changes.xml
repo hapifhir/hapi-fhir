@@ -147,6 +147,10 @@
 				The fetchValueSet method on IValidationSupport implementation was not visible and could
 				not be overridden. Thanks to Patrick Werner for the pull reuqest!
 			</action>
+			<action type="fix" issue="1280">
+				The JPA server failed to index R4 reources with search parameters pointing to the Money data type.
+				Thanks to GitHub user @navyflower for reporting!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
