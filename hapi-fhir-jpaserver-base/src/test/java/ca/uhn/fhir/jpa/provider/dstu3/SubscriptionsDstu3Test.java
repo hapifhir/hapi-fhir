@@ -27,8 +27,6 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu3Test.class);
 
-	private static final String WEBSOCKET_PATH = "/websocket/dstu3";
-
 	@Override
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();

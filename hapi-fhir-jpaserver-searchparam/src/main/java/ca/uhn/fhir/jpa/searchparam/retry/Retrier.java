@@ -61,7 +61,7 @@ public class Retrier<T> {
 			@Override
 			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 				super.onError(context, callback, throwable);
-				ourLog.error("Retry failure " + context.getRetryCount() + "/" + theMaxRetries, throwable);
+				ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage());
 			}
 		};
 		myRetryTemplate.registerListener(listener);

@@ -155,6 +155,15 @@
 				When validating DSTU3 QuestionnaireResponses that leverage the "enableWhen" functionality available
 				in Questionnaire resources, the validation could sometimes fail incorrectly.
 			</action>
+			<action type="add">
+				Added new configuration parameter to DaoConfig and ModelConfig to specify the websocket context path.
+				(Before it was hardcoded to "/websocket").
+			</action>
+			<action type="add">
+				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
+				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
+				channel.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
