@@ -151,6 +151,10 @@
 				The JPA server failed to index R4 reources with search parameters pointing to the Money data type.
 				Thanks to GitHub user @navyflower for reporting!
 			</action>
+			<action type="fix">
+				When validating DSTU3 QuestionnaireResponses that leverage the "enableWhen" functionality available
+				in Questionnaire resources, the validation could sometimes fail incorrectly.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

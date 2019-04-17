@@ -27,38 +27,18 @@ import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Goal;
-import org.hl7.fhir.dstu3.model.ImagingStudy;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Procedure;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -103,6 +83,7 @@ public class FhirInstanceValidatorDstu3Test {
 	private HashMap<String, StructureDefinition> myStructureDefinitions;
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
+	private HashMap<String, Questionnaire> myQuestionnaires;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -153,7 +134,7 @@ public class FhirInstanceValidatorDstu3Test {
 				Class<?> type = (Class<?>) theInvocation.getArguments()[1];
 				String id = (String) theInvocation.getArguments()[2];
 				if ("Questionnaire/q_jon".equals(id)) {
-					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/q_jon.json")));
+					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/q_jon.json"), Charsets.UTF_8));
 				} else {
 
 					if (StructureDefinition.class.equals(type)) {
@@ -164,6 +145,9 @@ public class FhirInstanceValidatorDstu3Test {
 					}
 					if (CodeSystem.class.equals(type)) {
 						retVal = myCodeSystems.get(id);
+					}
+					if (Questionnaire.class.equals(type)) {
+						retVal = myQuestionnaires.get(id);
 					}
 
 					if (retVal == null) {
@@ -213,6 +197,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myStructureDefinitions = new HashMap<>();
 		myValueSets = new HashMap<>();
 		myCodeSystems = new HashMap<>();
+		myQuestionnaires = new HashMap<>();
 		when(myMockSupport.fetchStructureDefinition(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
@@ -241,7 +226,11 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	private String loadResource(String theFileName) throws IOException {
-		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName));
+		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName), Charsets.UTF_8);
+	}
+
+	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {
+		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
@@ -328,6 +317,28 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
+
+	}
+
+	@Test
+	public void testValidateQuestionnaire() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc01-cs-binderrecommended.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc01-vs-binderrecommended.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc01-vs-yesnounk.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc01-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc01-questionnaireresponse.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
+		assertThat(errors, empty());
 
 	}
 

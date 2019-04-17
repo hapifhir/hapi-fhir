@@ -193,8 +193,16 @@ private Map<String, Object> userData;
   
 	public boolean equalsShallow(Base other) {
 	  return other != null;
-  }  
-  
+  }
+
+  public boolean isDateTime() {
+    return false;
+  }
+
+  public BaseDateTimeType dateTimeValue() {
+    return null;
+  }
+
   public static boolean compareDeep(String s1, String s2, boolean allowNull) {
     if (allowNull) {
       boolean noLeft = s1 == null || Utilities.noString(s1);
