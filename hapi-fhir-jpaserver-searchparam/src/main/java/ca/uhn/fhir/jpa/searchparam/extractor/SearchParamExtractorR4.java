@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,6 +80,17 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
 			String nextValueString = nextValue.getSystemElement().getValueAsString();
 			String nextValueCode = nextValue.getCode();
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
+			nextEntity.setResource(theEntity);
+			retVal.add(nextEntity);
+		}
+	}
+
+	private void addMoney(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Money nextValue) {
+		if (!nextValue.getValueElement().isEmpty()) {
+			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
+			String nextValueString = "urn:iso:std:iso:4217";
+			String nextValueCode = nextValue.getCurrency();
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
@@ -352,6 +363,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				if (nextObject instanceof Quantity) {
 					Quantity nextValue = (Quantity) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue);
+				} else if (nextObject instanceof Money) {
+					Money nextValue = (Money) nextObject;
+					addMoney(theEntity, retVal, resourceName, nextValue);
 				} else if (nextObject instanceof Range) {
 					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
@@ -747,15 +761,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		myValidationSupport = theValidationSupport;
 	}
 
-	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
-		if (theBoundCode.getValue() != null) {
-			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
-		}
-		return null;
-	}
-
-
 	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+
+		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
@@ -787,8 +795,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			return null;
 		}
 
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
-
 		@Override
 		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
 
@@ -810,7 +816,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
 				if (resourceType != null) {
-					retVal = new Resource(){
+					retVal = new Resource() {
 						@Override
 						public Resource copy() {
 							return this;
@@ -837,6 +843,13 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
 			return false;
 		}
+	}
+
+	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
+		if (theBoundCode.getValue() != null) {
+			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
+		}
+		return null;
 	}
 
 }
