@@ -72,6 +72,7 @@
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
+			</action>
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
@@ -150,6 +151,23 @@
 			<action type="fix" issue="1255">
 				The fetchValueSet method on IValidationSupport implementation was not visible and could
 				not be overridden. Thanks to Patrick Werner for the pull reuqest!
+			</action>
+			<action type="fix" issue="1280">
+				The JPA server failed to index R4 reources with search parameters pointing to the Money data type.
+				Thanks to GitHub user @navyflower for reporting!
+			</action>
+			<action type="fix">
+				When validating DSTU3 QuestionnaireResponses that leverage the "enableWhen" functionality available
+				in Questionnaire resources, the validation could sometimes fail incorrectly.
+			</action>
+			<action type="add">
+				Added new configuration parameter to DaoConfig and ModelConfig to specify the websocket context path.
+				(Before it was hardcoded to "/websocket").
+			</action>
+			<action type="add">
+				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
+				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
+				channel.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

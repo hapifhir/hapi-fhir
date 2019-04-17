@@ -27,8 +27,6 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsR4Test.class);
 
-	private static final String WEBSOCKET_PATH = "/websocket/r4";
-
 	@Override
 	public void beforeCreateInterceptor() {
 		super.beforeCreateInterceptor();

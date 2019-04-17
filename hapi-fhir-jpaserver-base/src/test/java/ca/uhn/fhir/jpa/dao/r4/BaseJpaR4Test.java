@@ -179,6 +179,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myNamingSystemDaoR4")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
 	@Autowired
+	@Qualifier("myChargeItemDaoR4")
+	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
+	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
 	@Autowired

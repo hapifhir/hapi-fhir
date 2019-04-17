@@ -213,7 +213,16 @@
 						<td style="background: #EEB;">3.6.0-1202b2eed0f</td>
 					</tr>
 					<tr>
-						<td>HAPI FHIR 3.7.0-SNAPSHOT</td>
+						<td>HAPI FHIR 3.7.0</td>
+						<td>JDK8</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #CEC;">4.0.0</td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 3.8.0-SNAPSHOT</td>
 						<td>JDK8</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
