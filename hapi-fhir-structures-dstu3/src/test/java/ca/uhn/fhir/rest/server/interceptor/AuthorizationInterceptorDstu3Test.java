@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -3480,7 +3482,11 @@ public class AuthorizationInterceptorDstu3Test {
 		public MethodOutcome delete(IInterceptorBroadcaster theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
-				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, next);
+				HookParams params = new HookParams()
+					.add(IBaseResource.class, next)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
 		}
@@ -3625,11 +3631,15 @@ public class AuthorizationInterceptorDstu3Test {
 
 
 		@Transaction()
-		public Bundle search(IInterceptorBroadcaster theRequestOperationCallback, @TransactionParam Bundle theInput) {
+		public Bundle search(RequestDetails theRequestDetails, IInterceptorBroadcaster theRequestOperationCallback, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
-					theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, next);
+					HookParams params = new HookParams()
+						.add(IBaseResource.class, next)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, params);
 				}
 			}
 			return (Bundle) ourReturn.get(0);

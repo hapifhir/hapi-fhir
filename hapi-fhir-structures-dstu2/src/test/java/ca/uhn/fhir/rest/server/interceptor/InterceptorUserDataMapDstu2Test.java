@@ -11,8 +11,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -49,7 +54,6 @@ public class InterceptorUserDataMapDstu2Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
-	private IServerInterceptor myInterceptor;
 	private final Object myKey = "KEY";
 	private Map<Object, Object> myMap;
 	private Set<String> myMapCheckMethods;
@@ -57,24 +61,20 @@ public class InterceptorUserDataMapDstu2Test {
 
 	@Before
 	public void before() {
-		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		servlet.getInterceptorService().unregisterAllInterceptors();
+		servlet.getInterceptorService().registerInterceptor(new MyInterceptor());
 	}
 
 
 	@Before
 	public void beforePurgeMap() {
 		myMap = null;
-		myMapCheckMethods= new LinkedHashSet<String>();
+		myMapCheckMethods= new LinkedHashSet<>();
 	}
 
 	
 	@Test
 	public void testException() throws Exception {
-
-		IServerInterceptor interceptor = mock(IServerInterceptor.class, new MyInterceptorAnswer());
-		
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=foo");
 		HttpResponse status = ourClient.execute(httpGet);
@@ -87,25 +87,22 @@ public class InterceptorUserDataMapDstu2Test {
 	@Test
 	public void testRead() throws Exception {
 
-		IServerInterceptor interceptor = mock(IServerInterceptor.class, new MyInterceptorAnswer());
-		
-		servlet.setInterceptors(Collections.singletonList((IServerInterceptor) interceptor));
-
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
-		for (int i = 0; i < 10; i++) {
-			if (!myMapCheckMethods.contains("processingCompletedNormally")) {
-				Thread.sleep(100);
+			for (int i = 0; i < 10; i++) {
+				if (!myMapCheckMethods.contains("processingCompletedNormally")) {
+					Thread.sleep(100);
+				}
 			}
+
 		}
 		
 		ourLog.info(myMapCheckMethods.toString());
 		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
 	}
 
-	protected void updateMapUsing(Map<Object, Object> theUserData, Method theMethod) {
+	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
 		assertNotNull(theUserData);
 		if (myMap == null) {
 			myMap = theUserData;
@@ -114,7 +111,7 @@ public class InterceptorUserDataMapDstu2Test {
 			assertSame(myMap, theUserData);
 			assertEquals(myValue, myMap.get(myKey));
 		}
-		myMapCheckMethods.add(theMethod.getName());
+		myMapCheckMethods.add(theMethod);
 	}
 
 	@AfterClass
@@ -236,24 +233,44 @@ public class InterceptorUserDataMapDstu2Test {
 
 	}
 
-	private final class MyInterceptorAnswer implements Answer<Object> {
-		@Override
-		public Object answer(InvocationOnMock theInvocation) throws Throwable {
-			int index = 0;
-			for (Class<?> next : theInvocation.getMethod().getParameterTypes()) {
-				if (RequestDetails.class.isAssignableFrom(next)) {
-					updateMapUsing(((RequestDetails)theInvocation.getArguments()[index]).getUserData(), theInvocation.getMethod());
-				}
-				if (ActionRequestDetails.class.isAssignableFrom(next)) {
-					updateMapUsing(((ActionRequestDetails)theInvocation.getArguments()[index]).getUserData(), theInvocation.getMethod());
-				}
-				index++;
-			}
-			if (theInvocation.getMethod().getReturnType().equals(boolean.class)) {
-				return true;
-			}
-			return null;
+	@Interceptor
+	public class MyInterceptor {
+
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+		public void incomingRequestPostProcessed(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
+			updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
 		}
+
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+		public void incomingRequestPreHandled(ActionRequestDetails theRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
+		}
+
+		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+		public void outgoingResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "outgoingResponse");
+			updateMapUsing(theServletRequestDetails.getUserData(), "outgoingResponse");
+		}
+
+		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
+		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
+			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
+		}
+
+		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
+		public void preProcessOutgoingException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
+			updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
+		}
+
+		@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+		public void handleException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "handleException");
+			updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
+		}
+
 	}
 
 	public static class PlainProvider {

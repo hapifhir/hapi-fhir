@@ -990,6 +990,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 				// Invoke interceptors
 				HookParams hookParams = new HookParams();
+				hookParams.add(RequestDetails.class, requestDetails);
 				hookParams.add(ServletRequestDetails.class, requestDetails);
 				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
 

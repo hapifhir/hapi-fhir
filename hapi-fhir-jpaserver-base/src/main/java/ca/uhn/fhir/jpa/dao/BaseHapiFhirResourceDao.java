@@ -52,6 +52,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
@@ -941,7 +942,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
-		HookParams params = new HookParams().add(IBaseResource.class, retVal);
+		HookParams params = new HookParams()
+			.add(IBaseResource.class, retVal)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		if (theRequestDetails != null) {
 			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 		}
@@ -1197,8 +1201,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setResource(theResource);
 		outcome.setEntity(theEntity);
 
-		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
-		HookParams params = new HookParams().add(IBaseResource.class, theResource);
+		// Interceptor broadcast
+		HookParams params = new HookParams()
+			.add(IBaseResource.class, theResource)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
 		if (theRequest != null) {
 			theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 		}

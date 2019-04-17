@@ -52,11 +52,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -1882,7 +1884,10 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
-			HookParams params = new HookParams().add(IBaseResource.class, resource);
+			HookParams params = new HookParams()
+				.add(IBaseResource.class, resource)
+				.add(RequestDetails.class, null)
+				.add(ServletRequestDetails.class, null);
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 
 			theResourceListToPopulate.set(index, resource);

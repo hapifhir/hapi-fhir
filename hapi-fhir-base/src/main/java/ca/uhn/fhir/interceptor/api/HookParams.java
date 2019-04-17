@@ -119,7 +119,7 @@ public class HookParams {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> void addIfMatchesType(Class<T> theType, Object theParam) {
+	public <T> HookParams addIfMatchesType(Class<T> theType, Object theParam) {
 		if (theParam == null) {
 			add(theType, null);
 		} else {
@@ -130,5 +130,6 @@ public class HookParams {
 				add(theType, null);
 			}
 		}
+		return this;
 	}
 }
