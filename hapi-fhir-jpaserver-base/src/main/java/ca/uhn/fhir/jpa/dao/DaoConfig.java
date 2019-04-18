@@ -136,6 +136,7 @@ public class DaoConfig {
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
 	private int myReindexThreadCount;
+	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
@@ -154,6 +155,7 @@ public class DaoConfig {
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
+		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
 
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
@@ -641,6 +643,31 @@ public class DaoConfig {
 	public void setReindexThreadCount(int theReindexThreadCount) {
 		myReindexThreadCount = theReindexThreadCount;
 		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getExpungeThreadCount() {
+		return myExpungeThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setExpungeThreadCount(int theExpungeThreadCount) {
+		myExpungeThreadCount = theExpungeThreadCount;
+		myExpungeThreadCount = Math.max(myExpungeThreadCount, 1); // Minimum of 1
 	}
 
 	public ResourceEncodingEnum getResourceEncoding() {
