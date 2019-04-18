@@ -156,11 +156,15 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private void expungeOldVersions() {
 		Slice<Long> historicalIds = deleteHistoricalVersionsOfNonDeletedResources();
 
-		for (Long next : historicalIds) {
-			myTxTemplate.execute(t -> {
-				expungeHistoricalVersion(next);
-				return null;
-			});
+		myTxTemplate.execute(t -> {
+			expungeHistoricalVersions(historicalIds);
+			return null;
+		});
+	}
+
+	private void expungeHistoricalVersions(Slice<Long> theHistoricalIds) {
+		for (Long next : theHistoricalIds) {
+			expungeHistoricalVersion(next);
 			if (myRemainingCount.decrementAndGet() <= 0) {
 				return;
 			}
@@ -187,11 +191,15 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
+		myTxTemplate.execute(t -> {
+			expungeCurrentVersionOfResources(theResourceIds);
+			return null;
+		});
+	}
+
+	private void expungeCurrentVersionOfResources(Slice<Long> theResourceIds) {
 		for (Long next : theResourceIds) {
-			myTxTemplate.execute(t -> {
-				expungeCurrentVersionOfResource(next);
-				return null;
-			});
+			expungeCurrentVersionOfResource(next);
 			if (myRemainingCount.get() <= 0) {
 				return;
 			}
@@ -199,11 +207,15 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
+		myTxTemplate.execute(t -> {
+			expungeHistoricalVersionsOfIds(theResourceIds);
+			return null;
+		});
+	}
+
+	private void expungeHistoricalVersionsOfIds(Slice<Long> theResourceIds) {
 		for (Long next : theResourceIds) {
-			myTxTemplate.execute(t -> {
-				expungeHistoricalVersionsOfId(next);
-				return null;
-			});
+			expungeHistoricalVersionsOfId(next);
 			if (myRemainingCount.get() <= 0) {
 				return;
 			}
@@ -216,12 +228,16 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	 */
 	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
 		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), 800);
-		for (List<Long> nextPartition : partitions) {
+		myTxTemplate.execute(t -> {
+			deleteByResourceIdPartitions(partitions);
+			return null;
+		});
+	}
+
+	private void deleteByResourceIdPartitions(List<List<Long>> thePartitions) {
+		for (List<Long> nextPartition : thePartitions) {
 			ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
-			myTxTemplate.execute(t -> {
-				mySearchResultDao.deleteByResourceIds(nextPartition);
-				return null;
-			});
+			mySearchResultDao.deleteByResourceIds(nextPartition);
 		}
 	}
 
