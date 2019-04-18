@@ -23,11 +23,16 @@ import java.util.function.Consumer;
 public class PartitionRunner {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 	private static final int MAX_POOL_SIZE = 1000;
-	@Autowired
-	private DaoConfig myDaoConfig;
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
+
+	private final DaoConfig myDaoConfig;
+	private final PlatformTransactionManager myPlatformTransactionManager;
 	private TransactionTemplate myTxTemplate;
+
+	@Autowired
+	public PartitionRunner(DaoConfig theDaoConfig, PlatformTransactionManager thePlatformTransactionManager) {
+		myDaoConfig = theDaoConfig;
+		myPlatformTransactionManager = thePlatformTransactionManager;
+	}
 
 	@PostConstruct
 	private void setTxTemplate() {
@@ -86,7 +91,7 @@ public class PartitionRunner {
 		ourLog.info("Expunging with {} threads", threadCount);
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(MAX_POOL_SIZE);
 		BasicThreadFactory threadFactory = new BasicThreadFactory.Builder()
-			.namingPattern("expunge-" + "-%d")
+			.namingPattern("expunge-%d")
 			.daemon(false)
 			.priority(Thread.NORM_PRIORITY)
 			.build();
