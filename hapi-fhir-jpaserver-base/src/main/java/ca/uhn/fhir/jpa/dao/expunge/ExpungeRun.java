@@ -1,9 +1,7 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
-import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -28,7 +25,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	@Autowired
 	private ExpungeDaoService myExpungeDaoService;
 	@Autowired
-	private DaoConfig myDaoConfig;
+	private PartitionRunner myPartitionRunner;
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -86,6 +83,14 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		deleteCurrentVersionsOfDeletedResources(resourceIds);
 	}
 
+	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
+		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get()));
+	}
+
+	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {
+		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(myResourceName, myResourceId, myVersion, myRemainingCount.get()));
+	}
+
 	private boolean expungeLimitReached() {
 		boolean expungeLimitReached = myRemainingCount.get() <= 0;
 		if (expungeLimitReached) {
@@ -97,45 +102,19 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private void expungeOldVersions() {
 		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
-		myTxTemplate.execute(t -> {
-			myExpungeDaoService.expungeHistoricalVersions(historicalIds, myRemainingCount);
-			return null;
-		});
-	}
-
-	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {
-		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(myResourceName, myResourceId, myVersion, myRemainingCount.get()));
+		myPartitionRunner.runInPartitionedTransactionThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(partition, myRemainingCount));
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
-		myTxTemplate.execute(t -> {
-			myExpungeDaoService.expungeCurrentVersionOfResources(theResourceIds, myRemainingCount);
-			return null;
-		});
+		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(partition, myRemainingCount));
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
-		myTxTemplate.execute(t -> {
-			myExpungeDaoService.expungeHistoricalVersionsOfIds(theResourceIds, myRemainingCount);
-			return null;
-		});
+		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(partition, myRemainingCount));
 	}
-
 
 	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
-		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myDaoConfig.getExpungeBatchSize());
-		for (List<Long> nextPartition : partitions) {
-			ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
-
-			myTxTemplate.execute(t -> {
-				myExpungeDaoService.deleteByResourceIdPartitions(nextPartition);
-				return null;
-			});
-		}
-	}
-
-	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
-		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get()));
+		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.deleteByResourceIdPartitions(partition));
 	}
 
 	private ExpungeOutcome expungeOutcome() {

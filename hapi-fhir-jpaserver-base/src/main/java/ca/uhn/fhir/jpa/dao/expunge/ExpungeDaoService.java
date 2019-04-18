@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-public class ExpungeDaoService {
+class ExpungeDaoService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeDaoService.class);
 
 	@Autowired
@@ -51,14 +51,6 @@ public class ExpungeDaoService {
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
-
-	void expungeHistoricalVersion(Long theNextVersionId) {
-		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
-		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
-
-		myResourceHistoryTagDao.deleteAll(version.getTags());
-		myResourceHistoryTableDao.delete(version);
-	}
 
 	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
@@ -96,7 +88,42 @@ public class ExpungeDaoService {
 		}
 	}
 
-	void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
+	void expungeCurrentVersionOfResources(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+		for (Long next : theResourceIds) {
+			expungeCurrentVersionOfResource(next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
+				return;
+			}
+		}
+	}
+
+	private void expungeHistoricalVersion(Long theNextVersionId) {
+		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
+		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
+
+		myResourceHistoryTagDao.deleteAll(version.getTags());
+		myResourceHistoryTableDao.delete(version);
+	}
+
+	void expungeHistoricalVersionsOfIds(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+		for (Long next : theResourceIds) {
+			expungeHistoricalVersionsOfId(next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
+				return;
+			}
+		}
+	}
+
+	void expungeHistoricalVersions(List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
+		for (Long next : theHistoricalIds) {
+			expungeHistoricalVersion(next);
+			if (theRemainingCount.decrementAndGet() <= 0) {
+				return;
+			}
+		}
+	}
+
+	private void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
@@ -132,7 +159,7 @@ public class ExpungeDaoService {
 	}
 
 
-	void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
+	private void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
 		Pageable page = PageRequest.of(0, theRemainingCount.get());
@@ -151,36 +178,8 @@ public class ExpungeDaoService {
 		mySearchResultDao.deleteByResourceIds(theResourceIds);
 	}
 
-	void expungeHistoricalVersionsOfIds(Slice<Long> theResourceIds, AtomicInteger theRemainingCount) {
-		for (Long next : theResourceIds) {
-			expungeHistoricalVersionsOfId(next, theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
-		}
-	}
-
-	void expungeHistoricalVersions(Slice<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
-		for (Long next : theHistoricalIds) {
-			expungeHistoricalVersion(next);
-			if (theRemainingCount.decrementAndGet() <= 0) {
-				return;
-			}
-		}
-	}
-
-
 	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {
 		Validate.notNull(myVersion);
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
-	}
-
-	void expungeCurrentVersionOfResources(Slice<Long> theResourceIds, AtomicInteger theRemainingCount) {
-		for (Long next : theResourceIds) {
-			expungeCurrentVersionOfResource(next, theRemainingCount);
-			if (theRemainingCount.get() <= 0) {
-				return;
-			}
-		}
 	}
 }
