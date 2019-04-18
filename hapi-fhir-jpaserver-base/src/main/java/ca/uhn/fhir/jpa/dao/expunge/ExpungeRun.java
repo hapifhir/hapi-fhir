@@ -25,6 +25,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -77,19 +78,25 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private final Long myResourceId;
 	private final Long myVersion;
 	private final ExpungeOptions myExpungeOptions;
+	private final AtomicInteger myRemainingCount;
+	private TransactionTemplate myTxTemplate;
 
 	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
 		myResourceName = theResourceName;
 		myResourceId = theResourceId;
 		myVersion = theVersion;
 		myExpungeOptions = theExpungeOptions;
+		myRemainingCount = new AtomicInteger(myExpungeOptions.getLimit());
+	}
+
+	@PostConstruct
+	private void setTxTemplate() {
+		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
+		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 	}
 
 	@Override
 	public ExpungeOutcome call() {
-
-		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", myResourceName, myResourceId, myVersion, myExpungeOptions);
 
 		if (!myConfig.isExpungeEnabled()) {
@@ -100,7 +107,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+myExpungeOptions.getLimit() + ".");
 		}
 
-		AtomicInteger remainingCount = new AtomicInteger(myExpungeOptions.getLimit());
+
 
 		if (myResourceName == null && myResourceId == null && myVersion == null) {
 			if (myExpungeOptions.isExpungeEverything()) {
@@ -110,105 +117,119 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
 
-			/*
-			 * Delete historical versions of deleted resources
-			 */
-			Pageable page = PageRequest.of(0, remainingCount.get());
-			Slice<Long> resourceIds = txTemplate.execute(t -> {
-				if (myResourceId != null) {
-					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, myResourceId, myResourceName);
-					ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), myResourceName, myResourceId);
-					return ids;
-				} else {
-					if (myResourceName != null) {
-						Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, myResourceName);
-						ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), myResourceName);
-						return ids;
-					} else {
-						Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
-						ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements(), myResourceName);
-						return ids;
-					}
-				}
-			});
+			Slice<Long> resourceIds = deleteHistoricalVersionsOfDeletedResources();
 
-			/*
-			 * Delete any search result cache entries pointing to the given resource. We do
-			 * this in batches to avoid sending giant batches of parameters to the DB
-			 */
-			List<List<Long>> partitions = Lists.partition(resourceIds.getContent(), 800);
-			for (List<Long> nextPartition : partitions) {
-				ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
-				txTemplate.execute(t -> {
-					mySearchResultDao.deleteByResourceIds(nextPartition);
-					return null;
-				});
-			}
+			deleteSearchResultCacheEntries(resourceIds);
 
-			/*
-			 * Delete historical versions
-			 */
-			for (Long next : resourceIds) {
-				txTemplate.execute(t -> {
-					expungeHistoricalVersionsOfId(next, remainingCount);
-					return null;
-				});
-				if (remainingCount.get() <= 0) {
-					ourLog.debug("Expunge limit has been hit - Stopping operation");
-					return toExpungeOutcome(myExpungeOptions, remainingCount);
-				}
-			}
+			if (deleteHistoricalVersions(resourceIds))
+				return toExpungeOutcome();
 
-			/*
-			 * Delete current versions of deleted resources
-			 */
-			for (Long next : resourceIds) {
-				txTemplate.execute(t -> {
-					expungeCurrentVersionOfResource(next, remainingCount);
-					return null;
-				});
-				if (remainingCount.get() <= 0) {
-					ourLog.debug("Expunge limit has been hit - Stopping operation");
-					return toExpungeOutcome(myExpungeOptions, remainingCount);
-				}
-			}
+			if (deleteCurrentVersionsOfDeletedResources(resourceIds))
+				return toExpungeOutcome();
 
 		}
 
 		if (myExpungeOptions.isExpungeOldVersions()) {
-
-			/*
-			 * Delete historical versions of non-deleted resources
-			 */
-			Pageable page = PageRequest.of(0, remainingCount.get());
-			Slice<Long> historicalIds = txTemplate.execute(t -> {
-				if (myResourceId != null) {
-					if (myVersion != null) {
-						return toSlice(myResourceHistoryTableDao.findForIdAndVersion(myResourceId, myVersion));
-					} else {
-						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, myResourceId);
-					}
-				} else {
-					if (myResourceName != null) {
-						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, myResourceName);
-					} else {
-						return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
-					}
-				}
-			});
-
-			for (Long next : historicalIds) {
-				txTemplate.execute(t -> {
-					expungeHistoricalVersion(next);
-					if (remainingCount.decrementAndGet() <= 0) {
-						return toExpungeOutcome(myExpungeOptions, remainingCount);
-					}
-					return null;
-				});
-			}
-
+			expungeOldVersions();
 		}
-		return toExpungeOutcome(myExpungeOptions, remainingCount);
+		return toExpungeOutcome();
+	}
+
+	private void expungeOldVersions() {
+		Slice<Long> historicalIds = deleteHistoricalVersionsOfNonDeletedResources();
+
+		for (Long next : historicalIds) {
+			myTxTemplate.execute(t -> {
+				expungeHistoricalVersion(next);
+				if (myRemainingCount.decrementAndGet() <= 0) {
+					return toExpungeOutcome();
+				}
+				return null;
+			});
+		}
+	}
+
+	private Slice<Long> deleteHistoricalVersionsOfNonDeletedResources() {
+		Pageable page = PageRequest.of(0, myRemainingCount.get());
+		return myTxTemplate.execute(t -> {
+			if (myResourceId != null) {
+				if (myVersion != null) {
+					return toSlice(myResourceHistoryTableDao.findForIdAndVersion(myResourceId, myVersion));
+				} else {
+					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, myResourceId);
+				}
+			} else {
+				if (myResourceName != null) {
+					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, myResourceName);
+				} else {
+					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+				}
+			}
+		});
+	}
+
+	private boolean deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
+		for (Long next : theResourceIds) {
+			myTxTemplate.execute(t -> {
+				expungeCurrentVersionOfResource(next);
+				return null;
+			});
+			if (myRemainingCount.get() <= 0) {
+				ourLog.debug("Expunge limit has been hit - Stopping operation");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private boolean deleteHistoricalVersions(Slice<Long> theResourceIds) {
+		for (Long next : theResourceIds) {
+			myTxTemplate.execute(t -> {
+				expungeHistoricalVersionsOfId(next);
+				return null;
+			});
+			if (myRemainingCount.get() <= 0) {
+				ourLog.debug("Expunge limit has been hit - Stopping operation");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*
+	 * Delete any search result cache entries pointing to the given resource. We do
+	 * this in batches to avoid sending giant batches of parameters to the DB
+	 */
+	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
+		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), 800);
+		for (List<Long> nextPartition : partitions) {
+			ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
+			myTxTemplate.execute(t -> {
+				mySearchResultDao.deleteByResourceIds(nextPartition);
+				return null;
+			});
+		}
+	}
+
+	private Slice<Long> deleteHistoricalVersionsOfDeletedResources() {
+		Pageable page = PageRequest.of(0, myRemainingCount.get());
+		return myTxTemplate.execute(t -> {
+			if (myResourceId != null) {
+				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, myResourceId, myResourceName);
+				ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), myResourceName, myResourceId);
+				return ids;
+			} else {
+				if (myResourceName != null) {
+					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, myResourceName);
+					ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), myResourceName);
+					return ids;
+				} else {
+					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
+					ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
+					return ids;
+				}
+			}
+		});
 	}
 
 	private void doExpungeEverything() {
@@ -284,7 +305,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		return outcome;
 	}
 
-	private void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
+	private void expungeCurrentVersionOfResource(Long myResourceId) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
@@ -316,10 +337,10 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 		myResourceTableDao.delete(resource);
 
-		theRemainingCount.decrementAndGet();
+		myRemainingCount.decrementAndGet();
 	}
 
-	protected void expungeHistoricalVersion(Long theNextVersionId) {
+	private void expungeHistoricalVersion(Long theNextVersionId) {
 		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
 
@@ -327,24 +348,24 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		myResourceHistoryTableDao.delete(version);
 	}
 
-	protected void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
+	private void expungeHistoricalVersionsOfId(Long myResourceId) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
-		Pageable page = PageRequest.of(0, theRemainingCount.get());
+		Pageable page = PageRequest.of(0, myRemainingCount.get());
 
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
 			expungeHistoricalVersion(nextVersionId);
-			if (theRemainingCount.decrementAndGet() <= 0) {
+			if (myRemainingCount.decrementAndGet() <= 0) {
 				return;
 			}
 		}
 	}
 
-	private ExpungeOutcome toExpungeOutcome(ExpungeOptions myExpungeOptions, AtomicInteger theRemainingCount) {
+	private ExpungeOutcome toExpungeOutcome() {
 		return new ExpungeOutcome()
-			.setDeletedCount(myExpungeOptions.getLimit() - theRemainingCount.get());
+			.setDeletedCount(myExpungeOptions.getLimit() - myRemainingCount.get());
 	}
 
 	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {
