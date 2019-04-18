@@ -47,7 +47,7 @@
 					"answer": [
 						{
 							"valueCoding": {
-								"system": "binder_recommended_fkc",
+								"system": "http://binder_recommended_fkc",
 								"code": "AURYXIA",
 								"display": "Auryxia"
 							}
