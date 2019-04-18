@@ -2164,7 +2164,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       sdTime = sdTime + (System.nanoTime() - t);
 		 boolean haveSd = sd != null;
 		 boolean typeIsCorrect = sd.getType().equals(type);
-		 boolean urlIsCorrect = sd.getUrl().equals(url);
+		 boolean urlIsCorrect = sd.getUrl().equals("http://hl7.org/fhir/StructureDefinition/" + type);
 		 boolean hasSnapshot = sd.hasSnapshot();
 		 if (haveSd && (typeIsCorrect || urlIsCorrect) && hasSnapshot)
         return sd;
