@@ -23,8 +23,6 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
-import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -168,7 +166,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
-	private ExpungeService myExpungeService;
+	ExpungeService myExpungeService;
 
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
@@ -209,10 +207,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		return null;
-	}
-
-	protected ExpungeOutcome doExpunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
-		return myExpungeService.expunge(theResourceName, theResourceId, theVersion, theExpungeOptions);
 	}
 
 	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {

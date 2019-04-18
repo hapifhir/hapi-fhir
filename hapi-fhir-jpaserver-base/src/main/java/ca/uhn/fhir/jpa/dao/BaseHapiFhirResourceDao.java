@@ -88,12 +88,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -588,10 +588,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return doExpunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
+			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
 		}
 
-		return doExpunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
 	}
 
 	@Override
@@ -599,7 +599,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
-		return doExpunge(getResourceName(), null, null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions);
 	}
 
 	@Override
