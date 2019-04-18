@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import com.google.common.collect.Lists;
@@ -24,10 +25,10 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
-
-
 	@Autowired
 	private ExpungeDaoService myExpungeDaoService;
+	@Autowired
+	private DaoConfig myDaoConfig;
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -97,18 +98,9 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
 		myTxTemplate.execute(t -> {
-			expungeHistoricalVersions(historicalIds);
+			myExpungeDaoService.expungeHistoricalVersions(historicalIds, myRemainingCount);
 			return null;
 		});
-	}
-
-	private void expungeHistoricalVersions(Slice<Long> theHistoricalIds) {
-		for (Long next : theHistoricalIds) {
-			myExpungeDaoService.expungeHistoricalVersion(next);
-			if (myRemainingCount.decrementAndGet() <= 0) {
-				return;
-			}
-		}
 	}
 
 	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {
@@ -117,46 +109,29 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
 		myTxTemplate.execute(t -> {
-			expungeCurrentVersionOfResources(theResourceIds);
+			myExpungeDaoService.expungeCurrentVersionOfResources(theResourceIds, myRemainingCount);
 			return null;
 		});
-	}
-
-	private void expungeCurrentVersionOfResources(Slice<Long> theResourceIds) {
-		for (Long next : theResourceIds) {
-			myExpungeDaoService.expungeCurrentVersionOfResource(next, myRemainingCount);
-			if (myRemainingCount.get() <= 0) {
-				return;
-			}
-		}
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
 		myTxTemplate.execute(t -> {
-			expungeHistoricalVersionsOfIds(theResourceIds, myRemainingCount);
+			myExpungeDaoService.expungeHistoricalVersionsOfIds(theResourceIds, myRemainingCount);
 			return null;
 		});
 	}
 
-	private void expungeHistoricalVersionsOfIds(Slice<Long> theResourceIds, AtomicInteger theRemainingCount) {
-		for (Long next : theResourceIds) {
-			myExpungeDaoService.expungeHistoricalVersionsOfId(next, theRemainingCount);
-			if (myRemainingCount.get() <= 0) {
-				return;
-			}
-		}
-	}
 
-	/*
-	 * Delete any search result cache entries pointing to the given resource. We do
-	 * this in batches to avoid sending giant batches of parameters to the DB
-	 */
 	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
-		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), 800);
-		myTxTemplate.execute(t -> {
-			myExpungeDaoService.deleteByResourceIdPartitions(partitions);
-			return null;
-		});
+		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myDaoConfig.getExpungeBatchSize());
+		for (List<Long> nextPartition : partitions) {
+			ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
+
+			myTxTemplate.execute(t -> {
+				myExpungeDaoService.deleteByResourceIdPartitions(nextPartition);
+				return null;
+			});
+		}
 	}
 
 	private Slice<Long> findHistoricalVersionsOfDeletedResources() {

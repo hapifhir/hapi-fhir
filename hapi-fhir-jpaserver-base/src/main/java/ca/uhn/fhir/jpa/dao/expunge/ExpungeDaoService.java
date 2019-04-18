@@ -61,39 +61,39 @@ public class ExpungeDaoService {
 	}
 
 	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
-			Pageable page = PageRequest.of(0, theRemainingCount);
-			if (theResourceId != null) {
-				if (theVersion != null) {
-					return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
-				} else {
-					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
-				}
+		Pageable page = PageRequest.of(0, theRemainingCount);
+		if (theResourceId != null) {
+			if (theVersion != null) {
+				return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
 			} else {
-				if (theResourceName != null) {
-					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
-				} else {
-					return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
-				}
+				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
 			}
+		} else {
+			if (theResourceName != null) {
+				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page, theResourceName);
+			} else {
+				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResources(page);
+			}
+		}
 	}
 
 	Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
-			Pageable page = PageRequest.of(0, theRemainingCount);
-			if (theResourceId != null) {
-				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
-				ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
+		Pageable page = PageRequest.of(0, theRemainingCount);
+		if (theResourceId != null) {
+			Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
+			ourLog.info("Expunging {} deleted resources of type[{}] and ID[{}]", ids.getNumberOfElements(), theResourceName, theResourceId);
+			return ids;
+		} else {
+			if (theResourceName != null) {
+				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
+				ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), theResourceName);
 				return ids;
 			} else {
-				if (theResourceName != null) {
-					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceName);
-					ourLog.info("Expunging {} deleted resources of type[{}]", ids.getNumberOfElements(), theResourceName);
-					return ids;
-				} else {
-					Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
-					ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
-					return ids;
-				}
+				Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResources(page);
+				ourLog.info("Expunging {} deleted resources (all types)", ids.getNumberOfElements());
+				return ids;
 			}
+		}
 	}
 
 	void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
@@ -147,10 +147,25 @@ public class ExpungeDaoService {
 		}
 	}
 
-	void deleteByResourceIdPartitions(List<List<Long>> thePartitions) {
-		for (List<Long> nextPartition : thePartitions) {
-			ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
-			mySearchResultDao.deleteByResourceIds(nextPartition);
+	void deleteByResourceIdPartitions(List<Long> theResourceIds) {
+		mySearchResultDao.deleteByResourceIds(theResourceIds);
+	}
+
+	void expungeHistoricalVersionsOfIds(Slice<Long> theResourceIds, AtomicInteger theRemainingCount) {
+		for (Long next : theResourceIds) {
+			expungeHistoricalVersionsOfId(next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
+				return;
+			}
+		}
+	}
+
+	void expungeHistoricalVersions(Slice<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
+		for (Long next : theHistoricalIds) {
+			expungeHistoricalVersion(next);
+			if (theRemainingCount.decrementAndGet() <= 0) {
+				return;
+			}
 		}
 	}
 
@@ -158,5 +173,14 @@ public class ExpungeDaoService {
 	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {
 		Validate.notNull(myVersion);
 		return new SliceImpl<>(Collections.singletonList(myVersion.getId()));
+	}
+
+	void expungeCurrentVersionOfResources(Slice<Long> theResourceIds, AtomicInteger theRemainingCount) {
+		for (Long next : theResourceIds) {
+			expungeCurrentVersionOfResource(next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
+				return;
+			}
+		}
 	}
 }

@@ -73,6 +73,7 @@ public class DaoConfig {
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -135,6 +136,7 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -1115,6 +1117,22 @@ public class DaoConfig {
 	 */
 	public void setExpungeEnabled(boolean theExpungeEnabled) {
 		myExpungeEnabled = theExpungeEnabled;
+	}
+
+	/**
+	 * the expunge batch size (default 800) determines the number of records deleted at a time by the
+	 * expunge operation.
+	 */
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * the expunge batch size (default 800) determines the number of records deleted at a time by the
+	 * expunge operation.
+	 */
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
 	}
 
 	/**
