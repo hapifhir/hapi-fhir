@@ -104,35 +104,53 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		}
 
 		if (myExpungeOptions.getLimit() < 1) {
-			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+myExpungeOptions.getLimit() + ".");
+			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit " + myExpungeOptions.getLimit() + ".");
 		}
-
-
 
 		if (myResourceName == null && myResourceId == null && myVersion == null) {
 			if (myExpungeOptions.isExpungeEverything()) {
-				doExpungeEverything();
+				expungeEverything();
 			}
 		}
 
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
 
-			Slice<Long> resourceIds = deleteHistoricalVersionsOfDeletedResources();
-
-			deleteSearchResultCacheEntries(resourceIds);
-
-			if (deleteHistoricalVersions(resourceIds))
-				return toExpungeOutcome();
-
-			if (deleteCurrentVersionsOfDeletedResources(resourceIds))
-				return toExpungeOutcome();
-
+			expungeDeletedResources();
+			if (expungeLimitReached()) {
+				return expungeOutcome();
+			}
 		}
 
 		if (myExpungeOptions.isExpungeOldVersions()) {
+
 			expungeOldVersions();
+			if (expungeLimitReached()) {
+				return expungeOutcome();
+			}
 		}
-		return toExpungeOutcome();
+
+		return expungeOutcome();
+	}
+
+	private void expungeDeletedResources() {
+		Slice<Long> resourceIds = deleteHistoricalVersionsOfDeletedResources();
+
+		deleteSearchResultCacheEntries(resourceIds);
+
+		deleteHistoricalVersions(resourceIds);
+		if (expungeLimitReached()) {
+			return;
+		}
+
+		deleteCurrentVersionsOfDeletedResources(resourceIds);
+	}
+
+	private boolean expungeLimitReached() {
+		boolean expungeLimitReached = myRemainingCount.get() <= 0;
+		if (expungeLimitReached) {
+			ourLog.debug("Expunge limit has been hit - Stopping operation");
+		}
+		return expungeLimitReached;
 	}
 
 	private void expungeOldVersions() {
@@ -141,11 +159,11 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		for (Long next : historicalIds) {
 			myTxTemplate.execute(t -> {
 				expungeHistoricalVersion(next);
-				if (myRemainingCount.decrementAndGet() <= 0) {
-					return toExpungeOutcome();
-				}
 				return null;
 			});
+			if (myRemainingCount.decrementAndGet() <= 0) {
+				return;
+			}
 		}
 	}
 
@@ -168,32 +186,28 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		});
 	}
 
-	private boolean deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
+	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
 		for (Long next : theResourceIds) {
 			myTxTemplate.execute(t -> {
 				expungeCurrentVersionOfResource(next);
 				return null;
 			});
 			if (myRemainingCount.get() <= 0) {
-				ourLog.debug("Expunge limit has been hit - Stopping operation");
-				return true;
+				return;
 			}
 		}
-		return false;
 	}
 
-	private boolean deleteHistoricalVersions(Slice<Long> theResourceIds) {
+	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
 		for (Long next : theResourceIds) {
 			myTxTemplate.execute(t -> {
 				expungeHistoricalVersionsOfId(next);
 				return null;
 			});
 			if (myRemainingCount.get() <= 0) {
-				ourLog.debug("Expunge limit has been hit - Stopping operation");
-				return true;
+				return;
 			}
 		}
-		return false;
 	}
 
 	/*
@@ -232,7 +246,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		});
 	}
 
-	private void doExpungeEverything() {
+	private void expungeEverything() {
 
 		final AtomicInteger counter = new AtomicInteger();
 
@@ -363,7 +377,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		}
 	}
 
-	private ExpungeOutcome toExpungeOutcome() {
+	private ExpungeOutcome expungeOutcome() {
 		return new ExpungeOutcome()
 			.setDeletedCount(myExpungeOptions.getLimit() - myRemainingCount.get());
 	}
