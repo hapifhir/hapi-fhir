@@ -1,15 +1,12 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.entity.*;
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -22,13 +19,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -41,38 +34,36 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+
 	@Autowired
-	private DaoConfig myConfig;
+	private IResourceTableDao myResourceTableDao;
 	@Autowired
-	protected IResourceTableDao myResourceTableDao;
+	private ISearchResultDao mySearchResultDao;
 	@Autowired
-	protected ISearchResultDao mySearchResultDao;
+	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
-	protected IResourceHistoryTableDao myResourceHistoryTableDao;
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
+	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
 	@Autowired
-	protected IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
+	private IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
 	@Autowired
-	protected IResourceIndexedSearchParamStringDao myResourceIndexedSearchParamStringDao;
+	private IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
 	@Autowired
-	protected IResourceIndexedSearchParamTokenDao myResourceIndexedSearchParamTokenDao;
+	private IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
 	@Autowired
-	protected IResourceIndexedSearchParamDateDao myResourceIndexedSearchParamDateDao;
+	private IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
 	@Autowired
-	protected IResourceIndexedSearchParamQuantityDao myResourceIndexedSearchParamQuantityDao;
+	private IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
 	@Autowired
-	protected IResourceIndexedSearchParamCoordsDao myResourceIndexedSearchParamCoordsDao;
+	private IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
 	@Autowired
-	protected IResourceIndexedSearchParamNumberDao myResourceIndexedSearchParamNumberDao;
+	private IResourceLinkDao myResourceLinkDao;
 	@Autowired
-	protected IResourceLinkDao myResourceLinkDao;
+	private IResourceTagDao myResourceTagDao;
 	@Autowired
-	protected IResourceTagDao myResourceTagDao;
+	private IdHelperService myIdHelperService;
 	@Autowired
-	protected IdHelperService myIdHelperService;
-	@Autowired
-	protected IResourceHistoryTagDao myResourceHistoryTagDao;
+	private IResourceHistoryTagDao myResourceHistoryTagDao;
+
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -97,21 +88,6 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	@Override
 	public ExpungeOutcome call() {
-		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", myResourceName, myResourceId, myVersion, myExpungeOptions);
-
-		if (!myConfig.isExpungeEnabled()) {
-			throw new MethodNotAllowedException("$expunge is not enabled on this server");
-		}
-
-		if (myExpungeOptions.getLimit() < 1) {
-			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit " + myExpungeOptions.getLimit() + ".");
-		}
-
-		if (myResourceName == null && myResourceId == null && myVersion == null) {
-			if (myExpungeOptions.isExpungeEverything()) {
-				expungeEverything();
-			}
-		}
 
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
 
@@ -262,78 +238,8 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		});
 	}
 
-	private void expungeEverything() {
 
-		final AtomicInteger counter = new AtomicInteger();
 
-		ourLog.info("BEGINNING GLOBAL $expunge");
-		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + ResourceHistoryTable.class.getSimpleName() + " d SET d.myForcedId = null"));
-			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + ResourceTable.class.getSimpleName() + " d SET d.myForcedId = null"));
-			counter.addAndGet(doExpungeEverythingQuery("UPDATE " + TermCodeSystem.class.getSimpleName() + " d SET d.myCurrentVersion = null"));
-			return null;
-		});
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchParamPresent.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ForcedId.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamDate.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamNumber.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamQuantity.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamString.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamToken.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamUri.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedSearchParamCoords.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceIndexedCompositeStringUnique.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceLink.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchResult.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SearchInclude.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptParentChildLink.class.getSimpleName() + " d"));
-			return null;
-		});
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElementTarget.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroupElement.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMapGroup.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptMap.class.getSimpleName() + " d"));
-			return null;
-		});
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptProperty.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConceptDesignation.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermConcept.class.getSimpleName() + " d"));
-			for (TermCodeSystem next : myEntityManager.createQuery("SELECT c FROM " + TermCodeSystem.class.getName() + " c", TermCodeSystem.class).getResultList()) {
-				next.setCurrentVersion(null);
-				myEntityManager.merge(next);
-			}
-			return null;
-		});
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermCodeSystemVersion.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TermCodeSystem.class.getSimpleName() + " d"));
-			return null;
-		});
-		txTemplate.execute(t -> {
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + SubscriptionTable.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceHistoryTag.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceTag.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + TagDefinition.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceHistoryTable.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + ResourceTable.class.getSimpleName() + " d"));
-			counter.addAndGet(doExpungeEverythingQuery("DELETE from " + org.hibernate.search.jpa.Search.class.getSimpleName() + " d"));
-			return null;
-		});
-
-		ourLog.info("COMPLETED GLOBAL $expunge - Deleted {} rows", counter.get());
-	}
-
-	private int doExpungeEverythingQuery(String theQuery) {
-		StopWatch sw = new StopWatch();
-		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
-		return outcome;
-	}
 
 	private void expungeCurrentVersionOfResource(Long myResourceId) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
