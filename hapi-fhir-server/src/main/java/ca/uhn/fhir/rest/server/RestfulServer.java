@@ -604,7 +604,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@Deprecated
 	public void setInterceptors(@Nonnull List<?> theList) {
 		myInterceptorService.unregisterAllInterceptors();
-		myInterceptorService.unregisterInterceptors(theList);
+		myInterceptorService.registerInterceptors(theList);
 	}
 
 	/**

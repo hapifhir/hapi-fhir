@@ -133,6 +133,13 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	}
 
 	@Override
+	public void registerInterceptors(@Nullable Collection<?> theInterceptors) {
+		if (theInterceptors != null) {
+			theInterceptors.forEach(t -> registerInterceptor(t));
+		}
+	}
+
+	@Override
 	public boolean registerThreadLocalInterceptor(Object theInterceptor) {
 		if (!myThreadlocalInvokersEnabled) {
 			return false;

@@ -75,7 +75,7 @@ public class XmlParserDstu3Test {
 		Patient p = new Patient();
 		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
 		String output = ourCtx.newXmlParser().encodeResourceToString(p);
-		assertThat(output, containsString("\"lastUpdated\":\"2019-01-01\""));
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
 
 	}
 
