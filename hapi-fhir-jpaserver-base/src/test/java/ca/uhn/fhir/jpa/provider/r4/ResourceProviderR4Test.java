@@ -1935,12 +1935,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	 * Per message from David Hay on Skype
 	 */
 	@Test
-	public void testCrazy() {
-		for (int i = 0; i < 20; ++i) {
-			testEverythingWithLargeSet2();
-		}
-	}
-
 	public void testEverythingWithLargeSet2() {
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(15, 30, -1));
 

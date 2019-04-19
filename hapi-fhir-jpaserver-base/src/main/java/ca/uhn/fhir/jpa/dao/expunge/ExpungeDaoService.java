@@ -158,7 +158,6 @@ class ExpungeDaoService {
 		theRemainingCount.decrementAndGet();
 	}
 
-
 	private void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 

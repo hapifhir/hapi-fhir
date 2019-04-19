@@ -50,9 +50,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	@Override
 	public ExpungeOutcome call() {
-
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
-
 			expungeDeletedResources();
 			if (expungeLimitReached()) {
 				return expungeOutcome();
@@ -60,7 +58,6 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		}
 
 		if (myExpungeOptions.isExpungeOldVersions()) {
-
 			expungeOldVersions();
 			if (expungeLimitReached()) {
 				return expungeOutcome();
@@ -74,7 +71,6 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		Slice<Long> resourceIds = findHistoricalVersionsOfDeletedResources();
 
 		deleteSearchResultCacheEntries(resourceIds);
-
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
 			return;
@@ -118,8 +114,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	}
 
 	private ExpungeOutcome expungeOutcome() {
-		return new ExpungeOutcome()
-			.setDeletedCount(myExpungeOptions.getLimit() - myRemainingCount.get());
+		return new ExpungeOutcome().setDeletedCount(myExpungeOptions.getLimit() - myRemainingCount.get());
 	}
 
 }

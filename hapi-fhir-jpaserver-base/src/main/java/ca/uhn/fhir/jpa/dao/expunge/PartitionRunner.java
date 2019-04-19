@@ -41,6 +41,7 @@ public class PartitionRunner {
 	}
 
 	void runInPartitionedTransactionThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {
 			return;
@@ -68,6 +69,7 @@ public class PartitionRunner {
 		List<Callable<Void>> retval = new ArrayList<>();
 
 		List<List<Long>> partitions = Lists.partition(theResourceIds.getContent(), myDaoConfig.getExpungeBatchSize());
+
 		for (List<Long> nextPartition : partitions) {
 			Callable<Void> callableTask = () -> {
 				ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
