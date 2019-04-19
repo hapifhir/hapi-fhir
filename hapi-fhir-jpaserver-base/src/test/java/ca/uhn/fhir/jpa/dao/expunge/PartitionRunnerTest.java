@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
 import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.After;
@@ -41,6 +42,7 @@ public class PartitionRunnerTest {
 	public void before() {
 		myDaoConfig.setExpungeThreadCount(new DaoConfig().getExpungeThreadCount());
 		myDaoConfig.setExpungeBatchSize(new DaoConfig().getExpungeBatchSize());
+		myLatch.clear();
 	}
 
 	@Test
