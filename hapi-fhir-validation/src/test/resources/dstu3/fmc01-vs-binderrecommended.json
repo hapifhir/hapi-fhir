@@ -19,7 +19,7 @@
 	"compose": {
 		"include": [
 			{
-				"system": "binder_recommended_fkc",
+				"system": "http://binder_recommended_fkc",
 				"concept": [
 					{
 						"code": "VELPHORO",
