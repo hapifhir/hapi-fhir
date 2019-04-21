@@ -138,7 +138,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myImmunizationRecommendationDaoDstu3")
 	protected IFhirResourceDao<ImmunizationRecommendation> myImmunizationRecommendationDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	@Qualifier("myLocationDaoDstu3")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -264,7 +263,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 		myDaoConfig.setExpireSearchResultsAfterMillis(new DaoConfig().getExpireSearchResultsAfterMillis());
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
-		myDaoConfig.getInterceptors().clear();
 	}
 
 	@After
@@ -281,12 +279,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	public void afterGrabCaches() {
 		ourValueSetDao = myValueSetDao;
 		ourJpaValidationSupportChainDstu3 = myJpaValidationSupportChainDstu3;
-	}
-
-	@Before
-	public void beforeCreateInterceptor() {
-		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.getInterceptors().add(myInterceptor);
 	}
 
 	@Before

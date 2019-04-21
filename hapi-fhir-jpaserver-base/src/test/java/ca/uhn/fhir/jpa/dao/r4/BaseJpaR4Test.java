@@ -326,7 +326,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Before
 	public void beforeCreateInterceptor() {
 		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);

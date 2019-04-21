@@ -27,13 +27,11 @@ public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu3Test.class);
 
-	@Override
+	@Before
 	public void beforeCreateInterceptor() {
-		super.beforeCreateInterceptor();
-
 		SubscriptionsRequireManualActivationInterceptorDstu3 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu3();
 		interceptor.setDao(mySubscriptionDao);
-		myDaoConfig.getInterceptors().add(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 	}
 
 	@Before

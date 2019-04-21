@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
@@ -35,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -52,6 +54,10 @@ public class IdHelperService {
 		myForcedIdDao.delete(forcedId);
 	}
 
+	/**
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceName, theResourceId);
@@ -96,7 +102,9 @@ public class IdHelperService {
 
 				StorageProcessingMessage msg = new StorageProcessingMessage()
 					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
-				theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, msg);
+				HookParams params = new HookParams()
+					.add(StorageProcessingMessage.class, msg);
+				theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
 
 				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
 

@@ -21,41 +21,37 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 	@Test
 	public void testInterceptorPreservesAttribute() throws Exception {
 		CentralAttributesPreservationInterceptor interceptor = new CentralAttributesPreservationInterceptor();
-		myDaoConfig.getInterceptors().add(interceptor);
-		try {
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
-			// Create the patient with no additional identifier
-			Patient p = new Patient();
-			p.setActive(true);
-			p.addIdentifier().setSystem("http://foo").setValue("bar");
-			IIdType id = myPatientDao.create(p).getId().toUnqualified();
-			assertEquals("1", id.getVersionIdPart());
+		// Create the patient with no additional identifier
+		Patient p = new Patient();
+		p.setActive(true);
+		p.addIdentifier().setSystem("http://foo").setValue("bar");
+		IIdType id = myPatientDao.create(p).getId().toUnqualified();
+		assertEquals("1", id.getVersionIdPart());
 
-			// Update to add a preserved identifier
-			p = new Patient();
-			p.setId(id.toVersionless());
-			p.setActive(true);
-			p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
-			p.addIdentifier(new Identifier().setSystem(EUID_SYSTEM).setValue("123"));
-			id = myPatientDao.update(p).getId().toUnqualified();
-			assertEquals("2", id.getVersionIdPart());
+		// Update to add a preserved identifier
+		p = new Patient();
+		p.setId(id.toVersionless());
+		p.setActive(true);
+		p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
+		p.addIdentifier(new Identifier().setSystem(EUID_SYSTEM).setValue("123"));
+		id = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("2", id.getVersionIdPart());
 
-			// Update to change something but include the preserved attribute
-			p = new Patient();
-			p.setId(id.toVersionless());
-			p.setActive(false);
-			p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
-			id = myPatientDao.update(p).getId().toUnqualified();
-			assertEquals("3", id.getVersionIdPart());
+		// Update to change something but include the preserved attribute
+		p = new Patient();
+		p.setId(id.toVersionless());
+		p.setActive(false);
+		p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
+		id = myPatientDao.update(p).getId().toUnqualified();
+		assertEquals("3", id.getVersionIdPart());
 
-			// Read it back
-			p = myPatientDao.read(id);
-			assertEquals(false, p.getActive());
-			assertEquals(2, p.getIdentifier().size());
+		// Read it back
+		p = myPatientDao.read(id);
+		assertEquals(false, p.getActive());
+		assertEquals(2, p.getIdentifier().size());
 
-		} finally {
-			myDaoConfig.getInterceptors().remove(interceptor);
-		}
 	}
 
 	public class CentralAttributesPreservationInterceptor extends ServerOperationInterceptorAdapter {

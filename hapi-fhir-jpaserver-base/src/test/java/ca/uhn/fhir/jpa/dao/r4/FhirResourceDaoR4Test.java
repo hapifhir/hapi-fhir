@@ -76,6 +76,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
 
+	@Before
+	public void before() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
+	}
+
+
 	private void assertGone(IIdType theId) {
 		try {
 			assertNotGone(theId);

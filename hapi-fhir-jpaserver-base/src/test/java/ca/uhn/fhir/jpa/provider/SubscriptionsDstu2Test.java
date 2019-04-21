@@ -21,19 +21,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.*;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
 
-	@Override
+	@Before
 	public void beforeCreateInterceptor() {
-		super.beforeCreateInterceptor();
-
 		SubscriptionsRequireManualActivationInterceptorDstu2 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
 		interceptor.setDao(mySubscriptionDao);
-		myDaoConfig.getInterceptors().add(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 	}
 
 	@Before

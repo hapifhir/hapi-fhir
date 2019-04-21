@@ -58,6 +58,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Before
 	public void beforeDisableResultReuse() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 

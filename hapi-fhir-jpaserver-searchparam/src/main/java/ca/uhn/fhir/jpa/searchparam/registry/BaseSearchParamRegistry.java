@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -186,7 +187,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 						.collect(Collectors.joining(", "));
 					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
 					ourLog.warn(message);
-					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, new StorageProcessingMessage().setMessage(message));
+					StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
+					HookParams params = new HookParams(msg);
+					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
 				}
 			}
 

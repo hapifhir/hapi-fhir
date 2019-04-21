@@ -362,17 +362,17 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	}
 
 	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.CREATE);
 	}
 
 	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.DELETE);
 	}
 
 	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE);
 		}

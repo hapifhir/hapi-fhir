@@ -226,22 +226,12 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	}
 
 	@Override
-	public boolean callHooks(Pointcut thePointcut, Object... theParams) {
-		return callHooks(thePointcut, new HookParams(theParams));
-	}
-
-	@Override
 	public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
 		assert thePointcut.getReturnType() != void.class && thePointcut.getReturnType() != boolean.class;
 
 		Object retVal = doCallHooks(thePointcut, theParams, null);
 		return retVal;
-	}
-
-	@Override
-	public Object callHooksAndReturnObject(Pointcut thePointcut, Object... theParams) {
-		return callHooksAndReturnObject(thePointcut, new HookParams(theParams));
 	}
 
 	@Override

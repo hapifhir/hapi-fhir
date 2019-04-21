@@ -67,7 +67,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	public void after() throws Exception {
 		super.after();
 
-		myDaoConfig.getInterceptors().remove(myDaoInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 		ourRestServer.unregisterInterceptor(myServerInterceptor);
 
@@ -84,7 +83,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		resetServerInterceptor();
 
-		myDaoConfig.getInterceptors().add(myDaoInterceptor);
 		ourRestServer.registerInterceptor(myServerInterceptor);
 
 		ourRestServer.registerInterceptor(new InterceptorAdapter() {

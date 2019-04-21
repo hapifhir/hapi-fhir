@@ -71,7 +71,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myDaoConfig.getInterceptors().clear();
 		myResourceCountsCache.clear();
 	}
 

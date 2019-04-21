@@ -13,6 +13,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -438,7 +439,7 @@ public abstract class RequestDetails {
 	 * is called.
 	 */
 	public void startDeferredOperationCallback() {
-		myDeferredInterceptorBroadcaster = new DeferredOperationCallback(myDeferredInterceptorBroadcaster);
+		myDeferredInterceptorBroadcaster = new DeferredOperationCallback(myInterceptorBroadcaster);
 	}
 
 	/**
@@ -456,7 +457,8 @@ public abstract class RequestDetails {
 		private final IInterceptorBroadcaster myWrap;
 		private final List<Runnable> myDeferredTasks = new ArrayList<>();
 
-		private DeferredOperationCallback(IInterceptorBroadcaster theWrap) {
+		private DeferredOperationCallback(@Nonnull IInterceptorBroadcaster theWrap) {
+			Validate.notNull(theWrap);
 			myWrap = theWrap;
 		}
 
@@ -476,22 +478,11 @@ public abstract class RequestDetails {
 		}
 
 		@Override
-		public boolean callHooks(Pointcut thePointcut, Object... theParams) {
-			myDeferredTasks.add(() -> myWrap.callHooks(thePointcut, theParams));
-			return true;
-		}
-
-		@Override
 		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
 			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
 			return null;
 		}
 
-		@Override
-		public Object callHooksAndReturnObject(Pointcut thePointcut, Object... theParams) {
-			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
-			return null;
-		}
 	}
 
 

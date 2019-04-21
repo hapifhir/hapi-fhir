@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,10 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -219,14 +219,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		T resourceToDelete = toResource(myResourceType, entity, null, false);
 
 		// Notify IServerOperationInterceptors about pre-action call
-		if (theRequest != null) {
-			theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, resourceToDelete);
-		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreDelete(theRequest, resourceToDelete);
-			}
-		}
+		HookParams hook = new HookParams()
+			.add(IBaseResource.class, resourceToDelete)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
 
 		validateOkToDelete(theDeleteConflicts, entity, false);
 
@@ -243,21 +240,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
-		if (theRequest != null) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-				@Override
-				public void beforeCommit(boolean readOnly) {
-					HookParams hookParams = new HookParams()
-						.add(IBaseResource.class, resourceToDelete);
-					theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
-				}
-			});
-		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourceDeleted(theRequest, resourceToDelete);
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+			@Override
+			public void beforeCommit(boolean readOnly) {
+				HookParams hookParams = new HookParams()
+					.add(IBaseResource.class, resourceToDelete)
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 			}
-		}
+		});
 
 		DaoMethodOutcome outcome = toMethodOutcome(theRequest, savedEntity, resourceToDelete).setCreated(true);
 
@@ -307,14 +299,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			T resourceToDelete = toResource(myResourceType, entity, null, false);
 
 			// Notify IServerOperationInterceptors about pre-action call
-			if (theRequest != null) {
-				theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, resourceToDelete);
-			}
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourcePreDelete(theRequest, resourceToDelete);
-				}
-			}
+			HookParams hooks = new HookParams()
+				.add(IBaseResource.class, resourceToDelete)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
 			validateOkToDelete(deleteConflicts, entity, false);
 
@@ -331,21 +320,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(theRequest, resourceToDelete);
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public void beforeCommit(boolean readOnly) {
+					HookParams hookParams = new HookParams()
+						.add(IBaseResource.class, resourceToDelete)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
 				}
-			}
-			if (theRequest != null) {
-				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-					@Override
-					public void beforeCommit(boolean readOnly) {
-						HookParams hookParams = new HookParams()
-							.add(IBaseResource.class, resourceToDelete);
-						theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, hookParams);
-					}
-				});
-			}
+			});
 		}
 
 		IBaseOperationOutcome oo;
@@ -440,16 +424,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Notify JPA interceptors
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreCreate(theRequest, theResource);
-			}
-		}
-		if (theRequest != null) {
-			HookParams hookParams = new HookParams()
-				.add(IBaseResource.class, theResource);
-			theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
-		}
+		HookParams hookParams = new HookParams()
+			.add(IBaseResource.class, theResource)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
 		// Perform actual DB update
 		ResourceTable updatedEntity = updateEntity(theRequest, theResource, entity, null, thePerformIndexing, thePerformIndexing, theUpdateTime, false, thePerformIndexing);
@@ -484,19 +463,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceCreated(theRequest, theResource);
-				}
-			}
-		}
-		if (theRequest != null) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
-						.add(IBaseResource.class, theResource);
-					theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
+						.add(IBaseResource.class, theResource)
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest);
+					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, hookParams);
 				}
 			});
 		}
@@ -946,9 +920,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(IBaseResource.class, retVal)
 			.add(RequestDetails.class, theRequestDetails)
 			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		if (theRequestDetails != null) {
-			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
-		}
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -1206,9 +1178,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.add(IBaseResource.class, theResource)
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		if (theRequest != null) {
-			theRequest.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
-		}
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 
 		return outcome;
 	}

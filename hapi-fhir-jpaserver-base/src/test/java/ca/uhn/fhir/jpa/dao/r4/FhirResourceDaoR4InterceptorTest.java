@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DeleteMethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -7,7 +10,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
-import com.sun.mail.imap.protocol.INTERNALDATE;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -40,7 +42,6 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 	@After
 	public void after() {
-		myDaoConfig.getInterceptors().clear();
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 		myInterceptorRegistry.unregisterAllInterceptors();
 	}
@@ -177,14 +178,11 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IServerOperationInterceptor interceptor = mock(IServerOperationInterceptor.class);
 		myInterceptorRegistry.registerInterceptor(interceptor);
 
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
-				Long id = res.getIdElement().getIdPartAsLong();
-				assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
-				return null;
-			}
+		doAnswer(t -> {
+			IBaseResource res = (IBaseResource) t.getArguments()[1];
+			Long id = res.getIdElement().getIdPartAsLong();
+			assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
+			return null;
 		}).when(interceptor).resourceCreated(any(), any());
 
 		Patient p = new Patient();
@@ -194,7 +192,6 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 
 		verify(interceptor, times(1)).resourcePreCreate(any(), any());
 		verify(interceptor, times(1)).resourceCreated(any(), any());
-		verifyNoMoreInteractions(myRequestOperationCallback);
 	}
 
 	@Test
@@ -206,23 +203,20 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.addName().setFamily("PATIENT");
 		Long id = myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 
-		doAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
-				Long id = res.getIdElement().getIdPartAsLong();
-				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
-				return null;
-			}
-		}).when(interceptor).resourceDeleted(any(),any());
+		doAnswer(t -> {
+			IBaseResource res = (IBaseResource) t.getArguments()[1];
+			Long id1 = res.getIdElement().getIdPartAsLong();
+			assertEquals("Patient/" + id1 + "/_history/2", res.getIdElement().getValue());
+			return null;
+		}).when(interceptor).resourceDeleted(any(), any());
 
 		IIdType newId = myPatientDao.delete(new IdType("Patient/" + id), mySrd).getId();
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourcePreDelete(any(),any());
-		verify(interceptor, times(1)).resourcePreCreate(any(),any());
-		verify(interceptor, times(1)).resourceDeleted(any(),any());
-		verify(interceptor, times(1)).resourceCreated(any(),any());
+		verify(interceptor, times(1)).resourcePreDelete(any(), any());
+		verify(interceptor, times(1)).resourcePreCreate(any(), any());
+		verify(interceptor, times(1)).resourceDeleted(any(), any());
+		verify(interceptor, times(1)).resourceCreated(any(), any());
 		verifyNoMoreInteractions(interceptor);
 	}
 
@@ -244,22 +238,22 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				Long id = res.getIdElement().getIdPartAsLong();
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
 			}
-		}).when(interceptor).resourceDeleted(any(),any());
+		}).when(interceptor).resourceDeleted(any(), any());
 
 		DeleteMethodOutcome outcome = myPatientDao.deleteByUrl("Patient?name=PATIENT", mySrd);
 		String oo = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
 
-		verify(interceptor, times(2)).resourceDeleted(any(),any());
-		verify(interceptor, times(2)).resourceCreated(any(),any());
-		verify(interceptor, times(2)).resourcePreDelete(any(),any());
-		verify(interceptor, times(2)).resourcePreCreate(any(),any());
+		verify(interceptor, times(2)).resourceDeleted(any(), any());
+		verify(interceptor, times(2)).resourceCreated(any(), any());
+		verify(interceptor, times(2)).resourcePreDelete(any(), any());
+		verify(interceptor, times(2)).resourcePreCreate(any(), any());
 		verifyNoMoreInteractions(interceptor);
 	}
 
@@ -274,12 +268,12 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				Long id = res.getIdElement().getIdPartAsLong();
 				assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
 				return null;
 			}
-		}).when(interceptor).resourceCreated(any(),any());
+		}).when(interceptor).resourceCreated(any(), any());
 
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
@@ -294,8 +288,8 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(1L, newId.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourceCreated(any(),any());
-		verify(interceptor, times(1)).resourcePreCreate(any(),any());
+		verify(interceptor, times(1)).resourceCreated(any(), any());
+		verify(interceptor, times(1)).resourcePreCreate(any(), any());
 		verifyNoMoreInteractions(interceptor);
 	}
 
@@ -311,12 +305,12 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				Long id = res.getIdElement().getIdPartAsLong();
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
 			}
-		}).when(interceptor).resourceDeleted(any(),any());
+		}).when(interceptor).resourceDeleted(any(), any());
 
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
@@ -330,10 +324,10 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourcePreDelete(any(),any());
-		verify(interceptor, times(1)).resourcePreCreate(any(),any());
-		verify(interceptor, times(1)).resourceDeleted(any(),any());
-		verify(interceptor, times(1)).resourceCreated(any(),any());
+		verify(interceptor, times(1)).resourcePreDelete(any(), any());
+		verify(interceptor, times(1)).resourcePreCreate(any(), any());
+		verify(interceptor, times(1)).resourceDeleted(any(), any());
+		verify(interceptor, times(1)).resourceCreated(any(), any());
 		verifyNoMoreInteractions(interceptor);
 	}
 
@@ -355,12 +349,12 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				Long id = res.getIdElement().getIdPartAsLong();
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
 			}
-		}).when(interceptor).resourceDeleted(any(),any());
+		}).when(interceptor).resourceDeleted(any(), any());
 
 		Bundle xactBundle = new Bundle();
 		xactBundle.setType(BundleType.TRANSACTION);
@@ -375,10 +369,10 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		ourLog.info(oo);
 		assertThat(oo, containsString("deleted 2 resource(s)"));
 
-		verify(interceptor, times(2)).resourceDeleted(any(),any());
-		verify(interceptor, times(2)).resourceCreated(any(),any());
-		verify(interceptor, times(2)).resourcePreDelete(any(),any());
-		verify(interceptor, times(2)).resourcePreCreate(any(),any());
+		verify(interceptor, times(2)).resourceDeleted(any(), any());
+		verify(interceptor, times(2)).resourceCreated(any(), any());
+		verify(interceptor, times(2)).resourcePreDelete(any(), any());
+		verify(interceptor, times(2)).resourcePreCreate(any(), any());
 		verifyNoMoreInteractions(interceptor);
 	}
 
@@ -398,8 +392,14 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
+				// Old contents
 				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
+				assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
+
+				// New contents
+				res = (IBaseResource) theInvocation.getArguments()[2];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
+
 				return null;
 			}
 		}).when(interceptor).resourceUpdated(any(), any(), any());
@@ -417,11 +417,10 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourceUpdated(any(),any(), any());
+		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
 		verify(interceptor, times(1)).resourceCreated(any(), any());
-		verify(interceptor, times(1)).resourcePreCreate(any(),any());
+		verify(interceptor, times(1)).resourcePreCreate(any(), any());
 		verify(interceptor, times(1)).resourcePreUpdate(any(), any(), any());
-		verifyNoMoreInteractions(interceptor);
 	}
 
 	@Test
@@ -436,13 +435,13 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		doAnswer(new Answer<Void>() {
 			@Override
 			public Void answer(InvocationOnMock theInvocation) {
-				IBaseResource res = (IBaseResource) theInvocation.getArguments()[0];
+				IBaseResource res = (IBaseResource) theInvocation.getArguments()[1];
 				assertEquals("Patient/" + id + "/_history/1", res.getIdElement().getValue());
-				res = (IBaseResource) theInvocation.getArguments()[1];
+				res = (IBaseResource) theInvocation.getArguments()[2];
 				assertEquals("Patient/" + id + "/_history/2", res.getIdElement().getValue());
 				return null;
 			}
-		}).when(interceptor).resourceUpdated(any(), any(),any());
+		}).when(interceptor).resourceUpdated(any(), any(), any());
 
 		p = new Patient();
 		p.setId(new IdType("Patient/" + id));
@@ -450,11 +449,10 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IIdType newId = myPatientDao.update(p, mySrd).getId();
 		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
-		verify(interceptor, times(1)).resourceUpdated(any(), any(),any());
-		verify(interceptor, times(1)).resourceCreated(any(),any());
-		verify(interceptor, times(1)).resourcePreCreate(any(),any());
-		verify(interceptor, times(1)).resourcePreUpdate(any(), any(),any());
-		verifyNoMoreInteractions(interceptor);
+		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
+		verify(interceptor, times(1)).resourceCreated(any(), any());
+		verify(interceptor, times(1)).resourcePreCreate(any(), any());
+		verify(interceptor, times(1)).resourcePreUpdate(any(), any(), any());
 	}
 
 	@Test
@@ -492,64 +490,69 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		verify(interceptor, times(1)).resourceDeleted(Mockito.isNull(RequestDetails.class), any());
 	}
 
+	/**
+	 * Make sure that both JPA interceptors and RestfulServer interceptors can
+	 * get called
+	 */
 	@Test
-	public void testServerOperationInterceptorCanModifyOnCreate() {
+	public void testServerOperationInterceptorCanModifyOnCreateForJpaInterceptor() {
 
-		ServerOperationInterceptorAdapter interceptor = new ServerOperationInterceptorAdapter() {
-			@Override
-			public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+			public void resourcePreCreate(IBaseResource theResource) {
+				((Patient) theResource).setActive(true);
+			}
+		};
+		myRequestOperationCallback.registerInterceptor(interceptor);
+
+		Patient p = new Patient();
+		p.setActive(false);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+
+		p = myPatientDao.read(id);
+		assertEquals(true, p.getActive());
+
+	}
+
+	/**
+	 * Make sure that both JPA interceptors and RestfulServer interceptors can
+	 * get called
+	 */
+	@Test
+	public void testServerOperationInterceptorCanModifyOnCreateForServerInterceptor() {
+
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+			public void resourcePreCreate(IBaseResource theResource) {
 				((Patient) theResource).setActive(true);
 			}
 		};
 
-		myDaoConfig.getInterceptors().add(interceptor);
-		try {
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
-			doAnswer(new MyOneResourceAnswer()).when(interceptor).resourcePreCreate(any(), any());
-			doAnswer(new MyOneResourceAnswer()).when(interceptor).resourceCreated(any(), any());
+		Patient p = new Patient();
+		p.setActive(false);
+		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
-			Patient p = new Patient();
-			p.setActive(false);
-			IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+		p = myPatientDao.read(id);
+		assertEquals(true, p.getActive());
 
-			InOrder inorder = inOrder(interceptor, myRequestOperationCallback);
-			inorder.verify(interceptor, times(1)).resourcePreCreate(any(),any());
-			inorder.verify(interceptor, times(1)).resourcePreCreate(any(), any());
-			inorder.verify(interceptor, times(1)).resourceCreated(any(),any());
-			inorder.verify(interceptor, times(1)).resourceCreated(any(), any());
-
-			assertNull(myIds.get(0).getIdPart());
-			assertNull(myIds.get(0).getVersionIdPart());
-			assertNotNull(myIds.get(1).getIdPart());
-			assertEquals("1", myIds.get(1).getVersionIdPart());
-
-			p = myPatientDao.read(id);
-			assertEquals(true, p.getActive());
-
-		} finally {
-			myDaoConfig.getInterceptors().remove(interceptor);
-		}
 	}
 
 	@Test
 	public void testServerOperationInterceptorCanModifyOnUpdate() {
 
-		ServerOperationInterceptorAdapter interceptor = new ServerOperationInterceptorAdapter() {
-			@Override
+		Object interceptor = new Object() {
+			@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
 			public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 				((Patient) theNewResource).setActive(true);
 			}
 		};
-		myDaoConfig.getInterceptors().add(interceptor);
-		try {
-
-			doAnswer(new MyTwoResourceAnswer()).when(interceptor).resourcePreUpdate(any(), any(), any());
-			doAnswer(new MyTwoResourceAnswer()).when(interceptor).resourceUpdated(any(), any(), any());
+		myInterceptorRegistry.registerInterceptor(interceptor);
 
 			Patient p = new Patient();
 			p.setActive(false);
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
-			String idPart = id.getIdPart();
 
 			p = myPatientDao.read(id);
 			assertEquals(false, p.getActive());
@@ -558,27 +561,9 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 			p.addAddress().setCity("CITY");
 			myPatientDao.update(p, mySrd);
 
-			InOrder inorder = inOrder(interceptor, myRequestOperationCallback);
-			inorder.verify(interceptor, times(1)).resourcePreUpdate(any(), any(), any());
-			inorder.verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
-
-			// resourcePreUpdate
-			assertEquals(idPart, myIds.get(0).getIdPart());
-			assertEquals("1", myIds.get(0).getVersionIdPart());
-			assertEquals(idPart, myIds.get(1).getIdPart());
-			assertEquals(null, myIds.get(1).getVersionIdPart());
-			// resourceUpdated
-			assertEquals(idPart, myIds.get(2).getIdPart());
-			assertEquals("1", myIds.get(2).getVersionIdPart());
-			assertEquals(idPart, myIds.get(3).getIdPart());
-			assertEquals("2", myIds.get(3).getVersionIdPart());
-
 			p = myPatientDao.read(id);
 			assertEquals(true, p.getActive());
 
-		} finally {
-			myDaoConfig.getInterceptors().remove(interceptor);
-		}
 	}
 
 	@Test
@@ -631,11 +616,6 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		verify(interceptor, times(1)).resourceUpdated(Mockito.isNull(RequestDetails.class), any(), any());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 	private class MyOneResourceAnswer implements Answer {
 		@Override
 		public Object answer(InvocationOnMock invocation) {
@@ -654,5 +634,10 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 			myIds.add(new IdType(id.getValue()));
 			return null;
 		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 }

@@ -680,9 +680,12 @@ public class SearchBuilder implements ISearchBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
-					Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart());
-					if (pid != null) {
+					try {
+						Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart());
 						orPids.add(pid);
+					} catch (ResourceNotFoundException e) {
+						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
+						ourLog.debug("Resource ID {} was requested but does not exist", valueAsId.getIdPart());
 					}
 				}
 			}
@@ -2576,12 +2579,16 @@ public class SearchBuilder implements ISearchBuilder {
 			mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			if (myFirst) {
-				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, mySearchRuntimeDetails);
+				HookParams params = new HookParams();
+				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
 			if (NO_MORE.equals(myNext)) {
-				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, mySearchRuntimeDetails);
+				HookParams params = new HookParams();
+				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 
 		}

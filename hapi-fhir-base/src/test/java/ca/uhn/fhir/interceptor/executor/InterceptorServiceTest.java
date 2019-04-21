@@ -51,7 +51,7 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(new InterceptorThrowingException());
 
 		try {
-			svc.callHooks(Pointcut.TEST_RB, "A MESSAGE", "B");
+			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
 			fail();
 		} catch (AuthenticationException e) {
 			assertEquals("A MESSAGE", e.getMessage());
@@ -82,11 +82,11 @@ public class InterceptorServiceTest {
 
 		interceptor0.myNextResponse = new InvalidRequestException("0");
 		interceptor1.myNextResponse = new InvalidRequestException("1");
-		Object response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, "", "");
+		Object response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, new HookParams("", ""));
 		assertEquals("0", ((InvalidRequestException) response).getMessage());
 
 		interceptor0.myNextResponse = null;
-		response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, "", "");
+		response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, new HookParams("", ""));
 		assertEquals("1", ((InvalidRequestException) response).getMessage());
 	}
 
@@ -158,7 +158,7 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(interceptor1);
 		svc.registerInterceptor(interceptor0);
 
-		boolean outcome = svc.callHooks(Pointcut.TEST_RB, "A", "B");
+		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertTrue(outcome);
 
 		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
@@ -176,7 +176,7 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(interceptor0);
 		svc.registerInterceptor(interceptor1);
 
-		boolean outcome = svc.callHooks(Pointcut.TEST_RB, "A", "B");
+		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertTrue(outcome);
 
 		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb"));
@@ -196,7 +196,7 @@ public class InterceptorServiceTest {
 
 		interceptor0.myNextReturn = false;
 
-		boolean outcome = svc.callHooks(Pointcut.TEST_RB, "A", "B");
+		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
 		assertFalse(outcome);
 
 		assertThat(myInvocations, contains("MyTestInterceptorOne.testRb"));
