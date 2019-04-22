@@ -73,6 +73,7 @@ public class DaoConfig {
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -135,7 +136,9 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
 	private int myReindexThreadCount;
+	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
@@ -154,6 +157,7 @@ public class DaoConfig {
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
+		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
 
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
@@ -643,6 +647,31 @@ public class DaoConfig {
 		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
 	}
 
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getExpungeThreadCount() {
+		return myExpungeThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setExpungeThreadCount(int theExpungeThreadCount) {
+		myExpungeThreadCount = theExpungeThreadCount;
+		myExpungeThreadCount = Math.max(myExpungeThreadCount, 1); // Minimum of 1
+	}
+
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
@@ -1088,6 +1117,22 @@ public class DaoConfig {
 	 */
 	public void setExpungeEnabled(boolean theExpungeEnabled) {
 		myExpungeEnabled = theExpungeEnabled;
+	}
+
+	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
 	}
 
 	/**

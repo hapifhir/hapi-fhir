@@ -164,6 +164,10 @@
 				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
 				channel.
 			</action>
+			<action type="add">
+				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				in DaoConfig.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
