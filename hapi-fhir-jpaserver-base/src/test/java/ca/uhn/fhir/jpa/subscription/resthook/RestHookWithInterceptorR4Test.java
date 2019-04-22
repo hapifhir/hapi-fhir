@@ -82,6 +82,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextAfterRestHookDeliveryReturn = true;
 		ourHitBeforeRestHookDelivery = false;
 		ourHitAfterRestHookDelivery = false;
+
+		myInterceptorRegistry.registerInterceptor(myTestInterceptor);
 	}
 
 	@Test
@@ -300,18 +302,19 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 	}
 
+	@Autowired
+	private IInterceptorService myInterceptorRegistry;
+
+	@Autowired
+	private MyTestInterceptor myTestInterceptor;
 
 	@Configuration
 	static class MyTestCtxConfig {
 
-		@Autowired
-		private IInterceptorService myInterceptorRegistry;
 
 		@Bean
 		public MyTestInterceptor interceptor() {
-			MyTestInterceptor retVal = new MyTestInterceptor();
-			myInterceptorRegistry.registerInterceptor(retVal);
-			return retVal;
+			return new MyTestInterceptor();
 		}
 
 	}
@@ -343,9 +346,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 
 		@Hook(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY)
-		public boolean afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+		public void afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			ourHitAfterRestHookDelivery = true;
-			return ourNextAfterRestHookDeliveryReturn;
 		}
 
 	}

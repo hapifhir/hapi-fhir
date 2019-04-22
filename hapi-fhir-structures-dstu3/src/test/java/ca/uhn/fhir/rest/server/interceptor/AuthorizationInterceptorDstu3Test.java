@@ -3486,7 +3486,7 @@ public class AuthorizationInterceptorDstu3Test {
 					.add(IBaseResource.class, next)
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, params);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
 		}
@@ -3631,15 +3631,15 @@ public class AuthorizationInterceptorDstu3Test {
 
 
 		@Transaction()
-		public Bundle search(RequestDetails theRequestDetails, IInterceptorBroadcaster theRequestOperationCallback, @TransactionParam Bundle theInput) {
+		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
 					HookParams params = new HookParams()
 						.add(IBaseResource.class, next)
 						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED, params);
+						.add(ServletRequestDetails.class, theRequestDetails);
+					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 				}
 			}
 			return (Bundle) ourReturn.get(0);

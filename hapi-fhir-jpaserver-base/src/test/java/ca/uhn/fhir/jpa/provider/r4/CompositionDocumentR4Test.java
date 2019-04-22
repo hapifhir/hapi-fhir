@@ -58,7 +58,6 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 
-		myInterceptorRegistry.unregisterAllInterceptors();
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 	}
 

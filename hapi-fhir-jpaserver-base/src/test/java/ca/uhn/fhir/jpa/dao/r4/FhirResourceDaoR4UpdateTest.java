@@ -205,7 +205,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		{
 			Patient patient = new Patient();
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.setActive(true);
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
@@ -385,14 +385,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
 		assertEquals("2", outcome2.getId().getVersionIdPart());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
 
 		TestUtil.sleepOneClick();
 		Date now2 = new Date();
@@ -629,7 +621,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().setFamily(methodName);
 
 			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
@@ -647,7 +639,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			}
 			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
 			List<Coding> secList = p1.getMeta().getSecurity();
-			secListValues = new HashSet<String>();
+			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}

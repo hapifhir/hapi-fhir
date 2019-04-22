@@ -1,10 +1,10 @@
-
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
@@ -50,14 +50,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static String ourListenerServerBase;
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
-	@Autowired
-	private SubscriptionTestUtil mySubscriptionTestUtil;
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
 	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	@Autowired
+	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -509,39 +508,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
 	}
 
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
-
-		ObservationListener obsListener = new ObservationListener();
-		CommunicationRequestListener crListener = new CommunicationRequestListener();
-		ourListenerRestServer.setResourceProviders(obsListener, crListener);
-
-		ourListenerServer = new Server(ourListenerPort);
-		ourNotificationServlet = new NotificationServlet();
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-		servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourNotificationServlet);
-		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
-	}
-
-	@AfterClass
-	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
-	}
-
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
@@ -586,5 +552,38 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			communicationRequestListenerLatch.countDown();
 			return new MethodOutcome(new IdType("CommunicationRequest/1"), false);
 		}
+	}
+
+	@BeforeClass
+	public static void startListenerServer() throws Exception {
+		ourListenerPort = PortUtil.findFreePort();
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
+
+		ObservationListener obsListener = new ObservationListener();
+		CommunicationRequestListener crListener = new CommunicationRequestListener();
+		ourListenerRestServer.setResourceProviders(obsListener, crListener);
+
+		ourListenerServer = new Server(ourListenerPort);
+		ourNotificationServlet = new NotificationServlet();
+
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
+
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourListenerRestServer);
+		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+		servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourNotificationServlet);
+		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
+
+		ourListenerServer.setHandler(proxyHandler);
+		ourListenerServer.start();
+	}
+
+	@AfterClass
+	public static void stopListenerServer() throws Exception {
+		ourListenerServer.stop();
 	}
 }

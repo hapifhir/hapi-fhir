@@ -186,7 +186,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDao(theResourceType) != null;
+		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

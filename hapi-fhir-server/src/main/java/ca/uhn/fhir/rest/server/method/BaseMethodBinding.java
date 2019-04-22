@@ -254,9 +254,11 @@ public abstract class BaseMethodBinding<T> {
 			HookParams preHandledParams = new HookParams();
 			preHandledParams.add(RestOperationTypeEnum.class, operationType);
 			preHandledParams.add(ActionRequestDetails.class, details);
-			theRequest
-				.getInterceptorBroadcaster()
-				.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+			if (theRequest.getInterceptorBroadcaster() != null) {
+				theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+			}
 		}
 
 		// Actually invoke the method

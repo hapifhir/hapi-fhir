@@ -113,7 +113,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().addFamily(methodName);
 
 			TagList tagList = new TagList();

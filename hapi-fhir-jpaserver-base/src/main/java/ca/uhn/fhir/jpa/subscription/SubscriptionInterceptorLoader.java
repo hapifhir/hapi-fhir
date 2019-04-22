@@ -47,7 +47,7 @@ public class SubscriptionInterceptorLoader {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
-	private ApplicationContext myAppicationContext;
+	private ApplicationContext myApplicationContext;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
 
@@ -69,7 +69,7 @@ public class SubscriptionInterceptorLoader {
 	private void loadSubscriptions() {
 		ourLog.info("Loading subscriptions into the SubscriptionRegistry...");
 		// Activate scheduled subscription loads into the SubscriptionRegistry
-		myAppicationContext.getBean(SubscriptionLoader.class);
+		myApplicationContext.getBean(SubscriptionLoader.class);
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
 	}
 

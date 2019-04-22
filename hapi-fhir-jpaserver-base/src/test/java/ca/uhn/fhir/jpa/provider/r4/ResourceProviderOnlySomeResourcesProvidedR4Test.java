@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.junit.AfterClass;
@@ -13,7 +14,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import javax.annotation.PostConstruct;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 @SuppressWarnings("Duplicates")
 @ContextConfiguration(classes = {ResourceProviderOnlySomeResourcesProvidedR4Test.OnlySomeResourcesProvidedCtxConfig.class})
@@ -29,8 +32,8 @@ public class ResourceProviderOnlySomeResourcesProvidedR4Test extends BaseResourc
 		pract.setActive(true);
 		try {
 			ourClient.create().resource(pract).execute();
-		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			assertThat(e.getMessage(), containsString("Unknown resource type 'Practitioner' - Server knows how to handle:"));
 		}
 	}
 

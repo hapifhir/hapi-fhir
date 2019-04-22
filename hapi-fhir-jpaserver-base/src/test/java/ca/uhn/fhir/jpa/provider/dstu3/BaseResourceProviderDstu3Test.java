@@ -72,6 +72,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		myResourceCountsCache.clear();
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

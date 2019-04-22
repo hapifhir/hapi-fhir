@@ -624,10 +624,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return myDaoRegistry.getResourceDaoIfExists(theType);
 	}
 
-	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		return myDaoRegistry.getDaoOrThrowException(theClass);
-	}
-
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
@@ -1435,6 +1431,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
+
+		// We'll update the resource ID with the correct version later but for
+		// now at least set it to something useful for the interceptors
+		theResource.setId(theEntity.getIdDt());
+
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
 		if (theRequestDetails != null) {

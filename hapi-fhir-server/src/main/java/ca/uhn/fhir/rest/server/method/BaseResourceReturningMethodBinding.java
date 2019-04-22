@@ -427,8 +427,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseParams.add(ResponseDetails.class, theResponseDetails);
 		responseParams.add(HttpServletRequest.class, servletRequest);
 		responseParams.add(HttpServletResponse.class, servletResponse);
-		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
-			return false;
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
+				return false;
+			}
 		}
 		return true;
 	}

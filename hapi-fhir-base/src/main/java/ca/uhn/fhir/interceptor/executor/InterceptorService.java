@@ -9,9 +9,9 @@ package ca.uhn.fhir.interceptor.executor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,8 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -239,8 +241,8 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 		assert haveAppropriateParams(thePointcut, theParams);
 		assert thePointcut.getReturnType() == void.class || thePointcut.getReturnType() == boolean.class;
 
-		Object retVal = doCallHooks(thePointcut, theParams, true);
-		return (Boolean) retVal;
+		Object retValObj = doCallHooks(thePointcut, theParams, true);
+		return (Boolean) retValObj;
 	}
 
 	private Object doCallHooks(Pointcut thePointcut, HookParams theParams, Object theRetVal) {
@@ -254,6 +256,7 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 			if (thePointcut.getReturnType() == boolean.class) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
+					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
 				}
@@ -410,7 +413,6 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 
 	private static class HookInvoker extends BaseInvoker {
 
-		private final boolean myReturnsBoolean;
 		private final Method myMethod;
 		private final Class<?>[] myParameterTypes;
 		private final int[] myParameterIndexes;
@@ -427,14 +429,11 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 
 			Class<?> returnType = theHookMethod.getReturnType();
 			if (myPointcut.getReturnType().equals(boolean.class)) {
-				myReturnsBoolean = true;
 				Validate.isTrue(boolean.class.equals(returnType) || void.class.equals(returnType), "Method does not return boolean or void: %s", theHookMethod);
 			} else if (myPointcut.getReturnType().equals(void.class)) {
 				Validate.isTrue(void.class.equals(returnType), "Method does not return void: %s", theHookMethod);
-				myReturnsBoolean = false;
 			} else {
 				Validate.isTrue(myPointcut.getReturnType().isAssignableFrom(returnType) || void.class.equals(returnType), "Method does not return %s or void: %s", myPointcut.getReturnType(), theHookMethod);
-				myReturnsBoolean = false;
 			}
 
 			myParameterIndexes = new int[myParameterTypes.length];
@@ -445,6 +444,13 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 			}
 
 			myMethod.setAccessible(true);
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("method", myMethod)
+				.toString();
 		}
 
 		public Pointcut getPointcut() {

@@ -100,7 +100,9 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		when(myServerInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
+		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class))).thenReturn(true);
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class))).thenReturn(true);
+		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(IBaseResource.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 	}
@@ -193,11 +195,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		 * DAO Interceptor
 		 */
 
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, times(1)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
-
 		verify(myDaoInterceptor, times(0)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 		verify(myDaoInterceptor, times(0)).resourceCreated(any(RequestDetails.class), any(IBaseResource.class));
 		verify(myDaoInterceptor, times(0)).resourceUpdated(any(RequestDetails.class), any(IBaseResource.class), any(IBaseResource.class));
@@ -232,7 +229,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		assertEquals("Patient", ardCaptor.getValue().getResourceType());
 		assertNotNull(ardCaptor.getValue().getResource());
 
-		ResourceProviderInterceptorR4Test.verifyDaoInterceptor(myDaoInterceptor);
 	}
 
 	@Test
@@ -270,27 +266,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		ArgumentCaptor<HttpServletRequest> srCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
 		ArgumentCaptor<HttpServletResponse> sRespCaptor = ArgumentCaptor.forClass(HttpServletResponse.class);
 		verify(myServerInterceptor, times(1)).incomingRequestPostProcessed(rdCaptor.capture(), srCaptor.capture(), sRespCaptor.capture());
-
-		/*
-		 * DAO Interceptor
-		 */
-
-		/*
-		 * Sometimes we get more than 2 hits of the  incomingRequestPreHandled
-		 * method. My working theory is that it's a scheduled background job,
-		 * such as the subscription interceptor or the search parameter cache
-		 * updating.
-		 */
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, atLeast(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertThat(ardCaptor.getAllValues().stream().map(ActionRequestDetails::getResourceType).collect(Collectors.toList()), Matchers.contains("Bundle", "Patient"));
-		assertThat(opTypeCaptor.getAllValues(), Matchers.contains(RestOperationTypeEnum.TRANSACTION, RestOperationTypeEnum.CREATE));
-
-		rdCaptor = ArgumentCaptor.forClass(RequestDetails.class);
-		srCaptor = ArgumentCaptor.forClass(HttpServletRequest.class);
-		sRespCaptor = ArgumentCaptor.forClass(HttpServletResponse.class);
-		verify(myDaoInterceptor, times(0)).incomingRequestPostProcessed(rdCaptor.capture(), srCaptor.capture(), sRespCaptor.capture());
 
 	}
 
@@ -410,12 +385,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		/*
 		 * DAO Interceptor
 		 */
-
-		ardCaptor = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		opTypeCaptor = ArgumentCaptor.forClass(RestOperationTypeEnum.class);
-		verify(myDaoInterceptor, times(2)).incomingRequestPreHandled(opTypeCaptor.capture(), ardCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, opTypeCaptor.getAllValues().get(0));
-		assertEquals(RestOperationTypeEnum.UPDATE, opTypeCaptor.getAllValues().get(1));
 
 		verify(myDaoInterceptor, times(0)).incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class));
 		verify(myDaoInterceptor, times(0)).resourceCreated(any(RequestDetails.class), any(IBaseResource.class));

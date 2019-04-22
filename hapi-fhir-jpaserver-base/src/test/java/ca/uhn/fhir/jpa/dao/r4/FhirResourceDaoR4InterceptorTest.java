@@ -43,7 +43,6 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
-		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@Before

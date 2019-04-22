@@ -131,7 +131,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private boolean myStarted;
 	private boolean myUncompressIncomingContents = true;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
-	private Date myConformanceDate;
 	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
 	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 
@@ -1392,7 +1391,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @param theInterceptor The interceptor
 	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
 	 */
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
+	public void registerInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		getInterceptorService().registerInterceptor(theInterceptor);
 	}
@@ -1464,7 +1463,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					if (resourceType == null) {
 						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
 					}
-					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
 					}
@@ -1673,7 +1671,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					myResourceProviders.remove(provider);
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
-					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					providedResourceScanner.removeProvidedResources(rsrcProvider);
 				} else {
 					myPlainProviders.remove(provider);

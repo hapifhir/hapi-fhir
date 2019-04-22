@@ -6,6 +6,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -14,6 +15,14 @@ import static org.junit.Assert.assertEquals;
 public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HookInterceptorR4Test.class);
+
+//	@Override
+//	@After
+//	public void after( ) throws Exception {
+//		super.after();
+//
+//		myInterceptorRegistry.unregisterAllInterceptors();
+//	}
 
 	@Test
 	public void testOP_PRESTORAGE_RESOURCE_CREATED_ModifyResource() {

@@ -17,6 +17,7 @@ import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -56,6 +57,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
@@ -292,6 +294,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected SubscriptionRegistry mySubscriptionRegistry;
 
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	private List<Object> mySystemInterceptors;
 
 	@After()
 	public void afterCleanupDao() {
@@ -303,8 +306,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
 		myInterceptorRegistry.unregisterAllInterceptors();
-
-		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+		myInterceptorRegistry.registerInterceptors(mySystemInterceptors);
 	}
 
 	@After
@@ -325,6 +327,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	public void beforeCreateInterceptor() {
+		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
+
 		myInterceptor = mock(IServerInterceptor.class);
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();

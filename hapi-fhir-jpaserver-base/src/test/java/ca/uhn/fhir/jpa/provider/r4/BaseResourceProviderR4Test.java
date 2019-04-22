@@ -81,6 +81,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
