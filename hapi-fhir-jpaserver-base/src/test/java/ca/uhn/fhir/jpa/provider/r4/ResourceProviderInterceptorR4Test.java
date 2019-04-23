@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -109,7 +110,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testPerfInterceptors() {
+	public void testPerfInterceptors() throws InterruptedException {
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
 		for (int i = 0; i < 30; i++) {
 			Patient p = new Patient();
@@ -126,9 +127,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, interceptor);
 		myInterceptors.add(interceptor);
 
+		myInterceptors.add(new PerformanceTracingLoggingInterceptor());
+
 		ourLog.info("About to perform search...");
 
 		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
+
+		ourLog.info("*** About to sleep");
+		Thread.sleep(1000L);
+		ourLog.info("*** Done sleep");
+
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
