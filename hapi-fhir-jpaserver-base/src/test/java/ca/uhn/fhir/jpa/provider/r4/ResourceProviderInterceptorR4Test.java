@@ -133,10 +133,6 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		Bundle results = ourClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		ourLog.info("*** About to sleep");
-		Thread.sleep(1000L);
-		ourLog.info("*** Done sleep");
-
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());

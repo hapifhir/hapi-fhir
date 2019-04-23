@@ -1990,6 +1990,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testEverythingWithLargeSet2() {
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(15, 30, -1));
+		myPagingProvider.setDefaultPageSize(500);
+		myPagingProvider.setMaximumPageSize(1000);
 
 		Patient p = new Patient();
 		p.setActive(true);

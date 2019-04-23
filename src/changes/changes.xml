@@ -12,12 +12,14 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 				<ul>
+					<li>Guava (base): 25-jre -&gt; 27.1-jre</li>
 					<li>Hibernate (JPA): 5.4.1 -&gt; 5.4.2</li>
 					<li>Jackson (JPA): 2.9.7 -&gt; 2.9.8</li>
 					<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.6.RELEASE</li>
-					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.5.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.6.RELEASE</li>
 					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
 					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
+					<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>
 				</ul>
 				]]>
 			</action>
