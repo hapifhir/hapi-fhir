@@ -13,9 +13,10 @@ public class CommonConfig {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
 	@Bean
-	public IServerInterceptor accessLoggingInterceptor() {
+	public LoggingInterceptor accessLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
