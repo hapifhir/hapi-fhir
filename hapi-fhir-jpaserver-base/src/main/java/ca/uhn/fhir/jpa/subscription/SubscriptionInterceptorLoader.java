@@ -77,5 +77,6 @@ public class SubscriptionInterceptorLoader {
 	void unregisterInterceptorsForUnitTest() {
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+		mySubscriptionMatcherInterceptor.preDestroy();
 	}
 }

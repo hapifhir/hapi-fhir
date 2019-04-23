@@ -104,7 +104,11 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 		Validate.notNull(thePointcut);
 		Validate.notNull(theInterceptor);
 		synchronized (myRegistryMutex) {
-			myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder));
+
+			if (!isInterceptorAlreadyRegistered(theInterceptor)) {
+				myAnonymousInvokers.put(thePointcut, new AnonymousLambdaInvoker(thePointcut, theInterceptor, theOrder));
+				myInterceptors.add(theInterceptor);
+			}
 		}
 	}
 

@@ -88,4 +88,5 @@ public interface IInterceptorService extends IInterceptorBroadcaster {
 	void unregisterInterceptors(@Nullable Collection<?> theInterceptors);
 
 	void registerInterceptors(@Nullable Collection<?> theInterceptors);
+
 }

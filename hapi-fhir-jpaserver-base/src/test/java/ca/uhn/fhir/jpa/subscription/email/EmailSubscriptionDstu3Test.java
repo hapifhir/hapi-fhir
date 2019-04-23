@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,7 +61,14 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
+
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
+
 		mySubscriptionTestUtil.registerEmailInterceptor();
+
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 

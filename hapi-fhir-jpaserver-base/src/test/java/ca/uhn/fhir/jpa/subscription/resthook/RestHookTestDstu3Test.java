@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
-import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -80,8 +81,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Before
 	public void beforeRegisterRestHookListener() {
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 	}
 
 	@Before
@@ -552,6 +557,16 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			communicationRequestListenerLatch.countDown();
 			return new MethodOutcome(new IdType("CommunicationRequest/1"), false);
 		}
+	}
+
+	public static void logAllInterceptors(IInterceptorService theInterceptorRegistry) {
+		List<Object> allInterceptors = theInterceptorRegistry.getAllRegisteredInterceptors();
+		String interceptorList = allInterceptors
+			.stream()
+			.map(t -> t.getClass().toString())
+			.sorted()
+			.collect(Collectors.joining("\n * "));
+		ourLog.info("Registered interceptors:\n * {}", interceptorList);
 	}
 
 	@BeforeClass
