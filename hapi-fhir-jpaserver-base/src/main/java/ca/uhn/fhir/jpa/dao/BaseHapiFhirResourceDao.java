@@ -72,6 +72,7 @@ import javax.annotation.PostConstruct;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -1112,9 +1113,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String uuid = UUID.randomUUID().toString();
 		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 
-		Iterator<Long> iter = builder.createQuery(theParams, searchRuntimeDetails);
-		while (iter.hasNext()) {
-			retVal.add(iter.next());
+		try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails)) {
+			while (iter.hasNext()) {
+				retVal.add(iter.next());
+			}
+		} catch (IOException e) {
+			ourLog.error("IO failure during database access", e);
 		}
 
 		return retVal;

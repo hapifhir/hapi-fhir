@@ -2589,7 +2589,6 @@ public class SearchBuilder implements ISearchBuilder {
 				HookParams params = new HookParams();
 				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
-				myResultsIterator.close();
 			}
 
 		}
@@ -2616,6 +2615,12 @@ public class SearchBuilder implements ISearchBuilder {
 			return mySkipCount;
 		}
 
+		@Override
+		public void close() {
+			if (myResultsIterator != null) {
+				myResultsIterator.close();
+			}
+		}
 	}
 
 

@@ -73,6 +73,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
@@ -309,15 +310,19 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				// Load the results synchronously
 				final List<Long> pids = new ArrayList<>();
 
-				Iterator<Long> resultIter = sb.createQuery(theParams, searchRuntimeDetails);
-				while (resultIter.hasNext()) {
-					pids.add(resultIter.next());
-					if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
-						break;
+				try (IResultIterator resultIter = sb.createQuery(theParams, searchRuntimeDetails)) {
+					while (resultIter.hasNext()) {
+						pids.add(resultIter.next());
+						if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
+							break;
+						}
+						if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
+							break;
+						}
 					}
-					if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
-						break;
-					}
+				} catch (IOException e) {
+					ourLog.error("IO failure during database access", e);
+					throw new InternalErrorException(e);
 				}
 
 				/*
@@ -895,51 +900,56 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			/*
 			 * Construct the SQL query we'll be sending to the database
 			 */
-			IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails);
-			assert (resultIterator != null);
+			try (IResultIterator resultIterator = sb.createQuery(myParams, mySearchRuntimeDetails)) {
+				assert (resultIterator != null);
 
-			/*
-			 * The following loop actually loads the PIDs of the resources
-			 * matching the search off of the disk and into memory. After
-			 * every X results, we commit to the HFJ_SEARCH table.
-			 */
-			int syncSize = mySyncSize;
-			while (resultIterator.hasNext()) {
-				myUnsyncedPids.add(resultIterator.next());
+				/*
+				 * The following loop actually loads the PIDs of the resources
+				 * matching the search off of the disk and into memory. After
+				 * every X results, we commit to the HFJ_SEARCH table.
+				 */
+				int syncSize = mySyncSize;
+				while (resultIterator.hasNext()) {
+					myUnsyncedPids.add(resultIterator.next());
 
-				boolean shouldSync = myUnsyncedPids.size() >= syncSize;
+					boolean shouldSync = myUnsyncedPids.size() >= syncSize;
 
-				if (myDaoConfig.getCountSearchResultsUpTo() != null &&
-					myDaoConfig.getCountSearchResultsUpTo() > 0 &&
-					myDaoConfig.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
-					shouldSync = false;
-				}
+					if (myDaoConfig.getCountSearchResultsUpTo() != null &&
+						myDaoConfig.getCountSearchResultsUpTo() > 0 &&
+						myDaoConfig.getCountSearchResultsUpTo() < myUnsyncedPids.size()) {
+						shouldSync = false;
+					}
 
-				if (myUnsyncedPids.size() > 50000) {
-					shouldSync = true;
+					if (myUnsyncedPids.size() > 50000) {
+						shouldSync = true;
+					}
+
+					// If no abort was requested, bail out
+					Validate.isTrue(isNotAborted(), "Abort has been requested");
+
+					if (shouldSync) {
+						saveUnsynced(resultIterator);
+					}
+
+					if (myLoadingThrottleForUnitTests != null) {
+						try {
+							Thread.sleep(myLoadingThrottleForUnitTests);
+						} catch (InterruptedException e) {
+							// ignore
+						}
+					}
+
 				}
 
 				// If no abort was requested, bail out
 				Validate.isTrue(isNotAborted(), "Abort has been requested");
 
-				if (shouldSync) {
-					saveUnsynced(resultIterator);
-				}
+				saveUnsynced(resultIterator);
 
-				if (myLoadingThrottleForUnitTests != null) {
-					try {
-						Thread.sleep(myLoadingThrottleForUnitTests);
-					} catch (InterruptedException e) {
-						// ignore
-					}
-				}
-
+			} catch (IOException e) {
+				ourLog.error("IO failure during database access", e);
+				throw new InternalErrorException(e);
 			}
-
-			// If no abort was requested, bail out
-			Validate.isTrue(isNotAborted(), "Abort has been requested");
-
-			saveUnsynced(resultIterator);
 		}
 	}
 
