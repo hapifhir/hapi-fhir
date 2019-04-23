@@ -304,9 +304,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
+	}
 
+	@After
+	public void afterResetInterceptors() {
 		myInterceptorRegistry.unregisterAllInterceptors();
-		myInterceptorRegistry.registerInterceptors(mySystemInterceptors);
 	}
 
 	@After
