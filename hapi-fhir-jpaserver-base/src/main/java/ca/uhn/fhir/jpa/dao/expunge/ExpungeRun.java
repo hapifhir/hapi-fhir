@@ -23,7 +23,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
-	private ExpungeDaoService myExpungeDaoService;
+	private IExpungeDaoService myExpungeDaoService;
 	@Autowired
 	private PartitionRunner myPartitionRunner;
 
@@ -32,7 +32,6 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private final Long myVersion;
 	private final ExpungeOptions myExpungeOptions;
 	private final AtomicInteger myRemainingCount;
-	private TransactionTemplate myTxTemplate;
 
 	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
 		myResourceName = theResourceName;
@@ -40,12 +39,6 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		myVersion = theVersion;
 		myExpungeOptions = theExpungeOptions;
 		myRemainingCount = new AtomicInteger(myExpungeOptions.getLimit());
-	}
-
-	@PostConstruct
-	private void setTxTemplate() {
-		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 	}
 
 	@Override
@@ -80,11 +73,11 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	}
 
 	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
-		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get()));
+		return myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
 	}
 
 	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {
-		return myTxTemplate.execute(t -> myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(myResourceName, myResourceId, myVersion, myRemainingCount.get()));
+		return myExpungeDaoService.findHistoricalVersionsOfNonDeletedResources(myResourceName, myResourceId, myVersion, myRemainingCount.get());
 	}
 
 	private boolean expungeLimitReached() {

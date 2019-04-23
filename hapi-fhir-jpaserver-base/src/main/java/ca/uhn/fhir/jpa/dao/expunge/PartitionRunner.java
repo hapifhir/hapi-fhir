@@ -26,18 +26,11 @@ public class PartitionRunner {
 
 	private final DaoConfig myDaoConfig;
 	private final PlatformTransactionManager myPlatformTransactionManager;
-	private TransactionTemplate myTxTemplate;
 
 	@Autowired
 	public PartitionRunner(DaoConfig theDaoConfig, PlatformTransactionManager thePlatformTransactionManager) {
 		myDaoConfig = theDaoConfig;
 		myPlatformTransactionManager = thePlatformTransactionManager;
-	}
-
-	@PostConstruct
-	private void setTxTemplate() {
-		myTxTemplate = new TransactionTemplate(myPlatformTransactionManager);
-		myTxTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 	}
 
 	void runInPartitionedTransactionThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
@@ -73,10 +66,7 @@ public class PartitionRunner {
 		for (List<Long> nextPartition : partitions) {
 			Callable<Void> callableTask = () -> {
 				ourLog.info("Expunging any search results pointing to {} resources", nextPartition.size());
-				myTxTemplate.execute(t -> {
-					partitionConsumer.accept(nextPartition);
-					return null;
-				});
+				partitionConsumer.accept(nextPartition);
 				return null;
 			};
 			retval.add(callableTask);
@@ -88,7 +78,7 @@ public class PartitionRunner {
 
 	private ExecutorService buildExecutor(int numberOfTasks) {
 		int threadCount = Math.min(numberOfTasks, myDaoConfig.getExpungeThreadCount());
-		assert(threadCount > 0);
+		assert (threadCount > 0);
 
 		ourLog.info("Expunging with {} threads", threadCount);
 		LinkedBlockingQueue<Runnable> executorQueue = new LinkedBlockingQueue<>(MAX_POOL_SIZE);

@@ -19,6 +19,8 @@ public abstract class ExpungeService {
 	private DaoConfig myConfig;
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
+	@Autowired
+	private IExpungeDaoService myExpungeDaoService;
 
 	@Lookup
 	protected abstract ExpungeRun getExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions);
@@ -42,5 +44,9 @@ public abstract class ExpungeService {
 
 		ExpungeRun expungeRun = getExpungeRun(theResourceName, theResourceId, theVersion, theExpungeOptions);
 		return expungeRun.call();
+	}
+
+	public void deleteAllSearchParams(Long theResourceId) {
+		myExpungeDaoService.deleteAllSearchParams(theResourceId);
 	}
 }

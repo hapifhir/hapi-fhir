@@ -97,9 +97,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -973,6 +973,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return myContext.getResourceDefinition(theResource).getName();
 	}
 
+	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, ResourceTable entity) {
+		Date updateTime = new Date();
+		return updateEntity(theRequest, null, entity, updateTime, true, true, updateTime, false, true);
+	}
 
 	@SuppressWarnings("unchecked")
 	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
@@ -1005,14 +1009,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			theEntity.setPublished(theUpdateTime);
 		}
 
-		ResourceIndexedSearchParams existingParams = new ResourceIndexedSearchParams(theEntity);
+		ResourceIndexedSearchParams existingParams = null;
 
 		ResourceIndexedSearchParams newParams = null;
 
 		EncodedResource changed;
 		if (theDeletedTimestampOrNull != null) {
-
-			newParams = new ResourceIndexedSearchParams();
+			// DELETE
 
 			theEntity.setDeleted(theDeletedTimestampOrNull);
 			theEntity.setUpdated(theDeletedTimestampOrNull);
@@ -1023,7 +1026,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			changed = populateResourceIntoEntity(theRequest, theResource, theEntity, true);
 
 		} else {
-
+			// CREATE or UPDATE
+			existingParams = new ResourceIndexedSearchParams(theEntity);
 			theEntity.setDeleted(null);
 
 			if (thePerformIndexing) {
@@ -1113,7 +1117,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * index table for resource links (reference indexes) because we index
 		 * those by path and not by parameter name.
 		 */
-		if (thePerformIndexing) {
+		if (thePerformIndexing && newParams != null) {
 			Map<String, Boolean> presentSearchParams = new HashMap<>();
 			for (String nextKey : newParams.getPopulatedResourceLinkParameters()) {
 				presentSearchParams.put(nextKey, Boolean.TRUE);
@@ -1133,8 +1137,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		 * Indexing
 		 */
 		if (thePerformIndexing) {
-			myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
-			mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
+			if (newParams == null) {
+				myExpungeService.deleteAllSearchParams(theEntity.getId());
+			} else {
+				myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
+				mySearchParamWithInlineReferencesExtractor.storeCompositeStringUniques(newParams, theEntity, existingParams);
+			}
 		}
 
 		if (theResource != null) {
@@ -1143,11 +1151,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 
 		return theEntity;
-	}
-
-	protected ResourceTable updateEntity(RequestDetails theRequest, IBaseResource theResource, ResourceTable
-		entity, Date theDeletedTimestampOrNull, Date theUpdateTime) {
-		return updateEntity(theRequest, theResource, entity, theDeletedTimestampOrNull, true, true, theUpdateTime, false, true);
 	}
 
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,

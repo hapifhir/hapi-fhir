@@ -14,13 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-class ExpungeDaoService {
+class ExpungeDaoService implements IExpungeDaoService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeDaoService.class);
 
 	@Autowired
@@ -52,7 +53,9 @@ class ExpungeDaoService {
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
 
-	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
+	@Override
+	@Transactional
+	public Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		if (theResourceId != null) {
 			if (theVersion != null) {
@@ -69,7 +72,9 @@ class ExpungeDaoService {
 		}
 	}
 
-	Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
+	@Override
+	@Transactional
+	public Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theRemainingCount) {
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		if (theResourceId != null) {
 			Slice<Long> ids = myResourceTableDao.findIdsOfDeletedResourcesOfType(page, theResourceId, theResourceName);
@@ -88,7 +93,9 @@ class ExpungeDaoService {
 		}
 	}
 
-	void expungeCurrentVersionOfResources(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+	@Override
+	@Transactional
+	public void expungeCurrentVersionOfResources(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
 		for (Long next : theResourceIds) {
 			expungeCurrentVersionOfResource(next, theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
@@ -105,7 +112,9 @@ class ExpungeDaoService {
 		myResourceHistoryTableDao.delete(version);
 	}
 
-	void expungeHistoricalVersionsOfIds(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+	@Override
+	@Transactional
+	public void expungeHistoricalVersionsOfIds(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
 		for (Long next : theResourceIds) {
 			expungeHistoricalVersionsOfId(next, theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
@@ -114,7 +123,9 @@ class ExpungeDaoService {
 		}
 	}
 
-	void expungeHistoricalVersions(List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
+	@Override
+	@Transactional
+	public void expungeHistoricalVersions(List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
 		for (Long next : theHistoricalIds) {
 			expungeHistoricalVersion(next);
 			if (theRemainingCount.decrementAndGet() <= 0) {
@@ -133,17 +144,7 @@ class ExpungeDaoService {
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
 
-		myResourceIndexedSearchParamUriDao.deleteAll(resource.getParamsUri());
-		myResourceIndexedSearchParamCoordsDao.deleteAll(resource.getParamsCoords());
-		myResourceIndexedSearchParamDateDao.deleteAll(resource.getParamsDate());
-		myResourceIndexedSearchParamNumberDao.deleteAll(resource.getParamsNumber());
-		myResourceIndexedSearchParamQuantityDao.deleteAll(resource.getParamsQuantity());
-		myResourceIndexedSearchParamStringDao.deleteAll(resource.getParamsString());
-		myResourceIndexedSearchParamTokenDao.deleteAll(resource.getParamsToken());
-		myResourceLinkDao.deleteAll(resource.getResourceLinks());
-		myResourceLinkDao.deleteAll(resource.getResourceLinksAsTarget());
-
-		myResourceTagDao.deleteAll(resource.getTags());
+		deleteAllSearchParams(resource.getResourceId());
 		resource.getTags().clear();
 
 		if (resource.getForcedId() != null) {
@@ -156,6 +157,21 @@ class ExpungeDaoService {
 		myResourceTableDao.delete(resource);
 
 		theRemainingCount.decrementAndGet();
+	}
+
+	@Override
+	@Transactional
+	public void deleteAllSearchParams(Long theResourceId) {
+		myResourceIndexedSearchParamUriDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamCoordsDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamDateDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamNumberDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
+		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		myResourceLinkDao.deleteByResourceId(theResourceId);
+
+		myResourceTagDao.deleteByResourceId(theResourceId);
 	}
 
 	private void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
@@ -173,7 +189,9 @@ class ExpungeDaoService {
 		}
 	}
 
-	void deleteByResourceIdPartitions(List<Long> theResourceIds) {
+	@Override
+	@Transactional
+	public void deleteByResourceIdPartitions(List<Long> theResourceIds) {
 		mySearchResultDao.deleteByResourceIds(theResourceIds);
 	}
 

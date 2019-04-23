@@ -31,7 +31,6 @@ public interface IResourceIndexedSearchParamTokenDao extends JpaRepository<Resou
 	@Query("select count(*) from ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :resid")
 	int countForResourceId(@Param("resid") Long theResourcePid);
 
-
 	@Modifying
 	@Query("delete from ResourceIndexedSearchParamToken t WHERE t.myResourcePid = :resid")
 	void deleteByResourceId(@Param("resid") Long theResourcePid);

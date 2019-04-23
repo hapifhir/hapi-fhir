@@ -22,7 +22,7 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	@Test
-	public void testDeleteOneHundredTokens() {
+	public void testDeleteFortyTokensWithOneCommand() {
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		for (int i = 0; i < 40; ++i) {
@@ -40,7 +40,6 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 			.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
 			.collect(Collectors.summarizingInt(BaseCaptureQueriesListener.Query::getSize))
 			.getSum();
-		// there are 14 tokens in an Observation without the codes we add above.  +1 for the delete by resourceId we expect = 15.
-		assertEquals(15, deleteCount);
+		assertEquals(1, deleteCount);
 	}
 }
