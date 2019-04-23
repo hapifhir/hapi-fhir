@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -25,7 +25,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
@@ -46,9 +45,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -61,6 +58,10 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	private IServerOperationInterceptor myServerInterceptor;
 	private List<Object> myInterceptors = new ArrayList<>();
+	@Mock
+	private IAnonymousInterceptor myHook;
+	@Captor
+	private ArgumentCaptor<HookParams> myParamsCaptor;
 
 	@Override
 	@After
@@ -107,18 +108,12 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		when(myServerInterceptor.outgoingResponse(any(RequestDetails.class), any(ResponseDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 	}
 
-	@Mock
-	private IAnonymousInterceptor myHook;
-
-	@Captor
-	private ArgumentCaptor<HookParams> myParamsCaptor;
-
 	@Test
 	public void testPerfInterceptors() {
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(15, 100));
 		for (int i = 0; i < 30; i++) {
 			Patient p = new Patient();
-			p.addName().setFamily("FAM"+i);
+			p.addName().setFamily("FAM" + i);
 			ourLog.info("About to create patient");
 			myPatientDao.create(p);
 		}
