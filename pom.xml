@@ -2276,8 +2276,8 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>osgi/hapi-fhir-karaf-features</module>
-				<module>osgi/hapi-fhir-karaf-integration-tests</module>
+				<!--<module>osgi/hapi-fhir-karaf-features</module>
+				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
 				<module>example-projects/hapi-fhir-standalone-overlay-example</module>
 				<module>example-projects/hapi-fhir-jpaserver-cds-example</module>
