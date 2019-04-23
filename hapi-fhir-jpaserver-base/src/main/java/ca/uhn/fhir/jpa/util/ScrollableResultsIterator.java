@@ -60,4 +60,13 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 		myNext = null;
 		return next;
 	}
+
+
+	public void close() {
+		if (myScroll != null) {
+			myScroll.close();
+			myScroll = null;
+		}
+	}
+
 }

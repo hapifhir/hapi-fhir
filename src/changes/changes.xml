@@ -171,6 +171,9 @@
 				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
 				channel.
 			</action>
+			<action type="fix">
+				Ensure that database cursors are closed immediately after performing a FHIR search.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

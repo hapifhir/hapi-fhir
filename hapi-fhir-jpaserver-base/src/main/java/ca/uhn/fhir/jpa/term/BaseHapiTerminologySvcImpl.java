@@ -1405,6 +1405,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					targets.add(scrollableResultsIterator.next());
 				}
 
+				scrollableResults.close();
+
 				ourLastResultsFromTranslationCache = false; // For testing.
 				myTranslationCache.get(translationQuery, k -> targets);
 				retVal.addAll(targets);
@@ -1506,6 +1508,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 					elements.add(nextElement);
 				}
+
+				scrollableResults.close();
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
 				myTranslationWithReverseCache.get(translationQuery, k -> elements);

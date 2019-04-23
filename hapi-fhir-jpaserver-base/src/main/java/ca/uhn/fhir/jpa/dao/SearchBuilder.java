@@ -2487,7 +2487,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
 		private Iterator<Long> myPreResultsIterator;
-		private Iterator<Long> myResultsIterator;
+		private ScrollableResultsIterator<Long> myResultsIterator;
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
@@ -2589,6 +2589,7 @@ public class SearchBuilder implements ISearchBuilder {
 				HookParams params = new HookParams();
 				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+				myResultsIterator.close();
 			}
 
 		}
