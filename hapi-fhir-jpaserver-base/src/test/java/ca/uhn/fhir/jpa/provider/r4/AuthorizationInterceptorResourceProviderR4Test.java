@@ -590,7 +590,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		});
 
 		String patchBody = "[\n" +
-			"     { \"op\": \"replace\", \"path\": \"Observation/status\", \"value\": \"amended\" }\n" +
+			"     { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"amended\" }\n" +
 			"     ]";
 
 		// Allowed
