@@ -656,6 +656,11 @@
 				<version>0.3.0</version>
 			</dependency>
 			<dependency>
+				<groupId>com.github.java-json-tools</groupId>
+				<artifactId>json-patch</artifactId>
+				<version>1.10</version>
+			</dependency>
+			<dependency>
 				<groupId>com.google.errorprone</groupId>
 				<artifactId>error_prone_core</artifactId>
 				<version>${error_prone_core_version}</version>
@@ -839,11 +844,6 @@
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
 				<version>8.0.12</version>
-			</dependency>
-			<dependency>
-				<groupId>net.riotopsys</groupId>
-				<artifactId>json_patch</artifactId>
-				<version>0.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
