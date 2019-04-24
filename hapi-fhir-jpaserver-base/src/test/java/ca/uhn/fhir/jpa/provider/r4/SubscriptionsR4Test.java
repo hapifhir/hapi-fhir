@@ -33,7 +33,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 
 		SubscriptionsRequireManualActivationInterceptorR4 interceptor = new SubscriptionsRequireManualActivationInterceptorR4();
 		interceptor.setDao(mySubscriptionDao);
-		myDaoConfig.getInterceptors().add(interceptor);
+		myInterceptorRegistry.registerInterceptor(interceptor);
 	}
 
 	@Before

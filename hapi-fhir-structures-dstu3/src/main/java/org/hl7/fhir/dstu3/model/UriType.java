@@ -35,6 +35,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /**
  * Primitive type "uri" in FHIR: any valid URI. Sometimes constrained to be only an absolute URI, and sometimes constrained to be a literal reference
  */
@@ -113,7 +115,7 @@ public class UriType extends PrimitiveType<String> {
 
 	@Override
 	protected String parse(String theValue) {
-		return theValue;
+     return theValue;
 	}
 
 	/**

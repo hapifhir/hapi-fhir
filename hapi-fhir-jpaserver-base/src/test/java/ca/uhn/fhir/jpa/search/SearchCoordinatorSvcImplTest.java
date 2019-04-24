@@ -7,7 +7,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -40,6 +40,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.persistence.EntityManager;
+import java.io.IOException;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -454,6 +455,10 @@ public class SearchCoordinatorSvcImplTest {
 			return myWrap.getSkippedCount();
 		}
 
+		@Override
+		public void close() throws IOException {
+			// nothing
+		}
 	}
 
 	public static class ResultIterator extends BaseIterator<Long> implements IResultIterator {
@@ -477,6 +482,11 @@ public class SearchCoordinatorSvcImplTest {
 		@Override
 		public int getSkippedCount() {
 			return 0;
+		}
+
+		@Override
+		public void close() throws IOException {
+			// nothing
 		}
 	}
 
@@ -540,6 +550,10 @@ public class SearchCoordinatorSvcImplTest {
 			}
 		}
 
+		@Override
+		public void close() {
+			// nothing
+		}
 	}
 
 	@AfterClass

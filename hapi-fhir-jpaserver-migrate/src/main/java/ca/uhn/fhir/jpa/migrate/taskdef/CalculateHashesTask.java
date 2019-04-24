@@ -24,7 +24,6 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ForwardingMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -237,7 +236,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		}
 
 		@Override
-		public V get(@NullableDecl Object theKey) {
+		public V get(Object theKey) {
 			if (!containsKey(theKey)) {
 				throw new IllegalArgumentException("No key: " + theKey);
 			}

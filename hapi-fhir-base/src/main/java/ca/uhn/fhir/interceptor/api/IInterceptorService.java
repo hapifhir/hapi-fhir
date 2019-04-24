@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,14 +20,11 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
-
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 
-public interface IInterceptorRegistry {
-
-	int DEFAULT_ORDER = 0;
+public interface IInterceptorService extends IInterceptorBroadcaster {
 
 	/**
 	 * Register an interceptor that will be used in a {@link ThreadLocal} context.
@@ -35,9 +32,14 @@ public interface IInterceptorRegistry {
 	 * they were fired from the current thread.
 	 * <p>
 	 * Note that it is almost always desirable to call this method with a
-	 * try-finally statment that removes the interceptor afterwards, since
+	 * try-finally statement that removes the interceptor afterwards, since
 	 * this can lead to memory leakage, poor performance due to ever-increasing
 	 * numbers of interceptors, etc.
+	 * </p>
+	 * <p>
+	 * Note that most methods such as {@link #getAllRegisteredInterceptors()} and
+	 * {@link #unregisterAllInterceptors()} do not affect thread local interceptors
+	 * as they are kept in a separate list.
 	 * </p>
 	 *
 	 * @param theInterceptor The interceptor
@@ -68,24 +70,23 @@ public interface IInterceptorRegistry {
 	 */
 	void unregisterInterceptor(Object theInterceptor);
 
-	/**
-	 * @deprecated to be removed
-	 */
-	@Deprecated
-	boolean registerGlobalInterceptor(Object theInterceptor);
-
-	/**
-	 * @deprecated to be removed
-	 */
-	@Deprecated
-	void unregisterGlobalInterceptor(Object theInterceptor);
-
 	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 
 	void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
 
-	@VisibleForTesting
-	void clearAnonymousHookForUnitTest();
+	/**
+	 * Returns all currently registered interceptors (excluding any thread local interceptors).
+	 */
+	List<Object> getAllRegisteredInterceptors();
+
+	/**
+	 * Unregisters all registered interceptors. Note that this method does not unregister
+	 * any {@link #registerThreadLocalInterceptor(Object) thread local interceptors}.
+	 */
+	void unregisterAllInterceptors();
 
 	void unregisterInterceptors(@Nullable Collection<?> theInterceptors);
+
+	void registerInterceptors(@Nullable Collection<?> theInterceptors);
+
 }

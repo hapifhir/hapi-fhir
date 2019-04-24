@@ -220,11 +220,11 @@ public final class IdType extends UriType implements IPrimitiveType<String>, IId
     setValue(theUrl.getValueAsString());
   }
 
-  public void applyTo(IBaseResource theResouce) {
-    if (theResouce == null) {
+  public void applyTo(IBaseResource theResource) {
+    if (theResource == null) {
       throw new NullPointerException("theResource can not be null");
     } else {
-      theResouce.setId(new IdType(getValue()));
+      theResource.setId(new IdType(getValue()));
     }
   }
 

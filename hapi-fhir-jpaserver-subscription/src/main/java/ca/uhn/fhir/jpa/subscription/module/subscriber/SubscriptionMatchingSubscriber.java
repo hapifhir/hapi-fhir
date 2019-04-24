@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
@@ -33,9 +35,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -85,7 +87,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		}
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, theMsg)) {
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, theMsg);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
 			return;
 		}
 
@@ -93,7 +97,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			doMatchActiveSubscriptionsAndDeliver(theMsg);
 		} finally {
 			// Interceptor call: SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, theMsg);
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, params);
 		}
 	}
 
@@ -141,7 +145,11 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, deliveryMsg, nextActiveSubscription.getSubscription(), matchResult)) {
+			HookParams params = new HookParams()
+				.add(CanonicalSubscription.class, nextActiveSubscription.getSubscription())
+				.add(ResourceDeliveryMessage.class, deliveryMsg)
+				.add(SubscriptionMatchResult.class, matchResult);
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
 				return;
 			}
 
@@ -157,7 +165,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		if (!resourceMatched) {
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, theMsg);
+			HookParams params = new HookParams()
+				.add(ResourceModifiedMessage.class, theMsg);
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);
 		}
 	}
 

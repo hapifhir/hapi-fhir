@@ -1,15 +1,15 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
@@ -99,9 +99,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -130,8 +130,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected EntityManager myEntityManager;
 	@Autowired
 	protected IdHelperService myIdHelperService;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
@@ -193,6 +191,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 
 	private ApplicationContext myApplicationContext;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Returns the newly created forced ID. If the entity already had a forced ID, or if
@@ -225,7 +225,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		if (theExpungeOptions.getLimit() < 1) {
-			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit "+theExpungeOptions.getLimit() + ".");
+			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
 		}
 
 		AtomicInteger remainingCount = new AtomicInteger(theExpungeOptions.getLimit());
@@ -624,10 +624,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return myDaoRegistry.getResourceDaoIfExists(theType);
 	}
 
-	protected IFhirResourceDao<?> getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
-		return myDaoRegistry.getDaoOrThrowException(theClass);
-	}
-
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
 		if (isBlank(theScheme) && isBlank(theTerm) && isBlank(theLabel)) {
 			return null;
@@ -783,10 +779,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		if (theRequestDetails.getUserData().get(PROCESSING_SUB_REQUEST) == Boolean.TRUE) {
 			theRequestDetails.notifyIncomingRequestPreHandled(theOperationType);
-		}
-		List<IServerInterceptor> interceptors = getConfig().getInterceptors();
-		for (IServerInterceptor next : interceptors) {
-			next.incomingRequestPreHandled(theOperationType, theRequestDetails);
 		}
 	}
 
@@ -1439,6 +1431,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
+
+		// We'll update the resource ID with the correct version later but for
+		// now at least set it to something useful for the interceptors
+		theResource.setId(theEntity.getIdDt());
+
 		// Notify interceptors
 		ActionRequestDetails requestDetails;
 		if (theRequestDetails != null) {
@@ -1447,18 +1444,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		// Notify IServerOperationInterceptors about pre-action call
-		if (theRequestDetails != null) {
-			theRequestDetails.getRequestOperationCallback().resourcePreUpdate(theOldResource, theResource);
-		}
-		for (IServerInterceptor next : getConfig().getInterceptors()) {
-			if (next instanceof IServerOperationInterceptor) {
-				((IServerOperationInterceptor) next).resourcePreUpdate(theRequestDetails, theOldResource, theResource);
-			}
-		}
 		HookParams hookParams = new HookParams()
 			.add(IBaseResource.class, theOldResource)
-			.add(IBaseResource.class, theResource);
-		myInterceptorBroadcaster.callHooks(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, hookParams);
+			.add(IBaseResource.class, theResource)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, hookParams);
 
 		// Perform update
 		ResourceTable savedEntity = updateEntity(theRequestDetails, theResource, theEntity, null, thePerformIndexing, thePerformIndexing, new Date(), theForceUpdateVersion, thePerformIndexing);
@@ -1480,23 +1471,15 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
-			if (theRequestDetails != null) {
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(theResource);
-				theRequestDetails.getRequestOperationCallback().resourceUpdated(theOldResource, theResource);
-			}
-			for (IServerInterceptor next : getConfig().getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theResource);
-					((IServerOperationInterceptor) next).resourceUpdated(theRequestDetails, theOldResource, theResource);
-				}
-			}
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void beforeCommit(boolean readOnly) {
 					HookParams hookParams = new HookParams()
 						.add(IBaseResource.class, theOldResource)
-						.add(IBaseResource.class, theResource);
-					myInterceptorBroadcaster.callHooks(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, hookParams);
+						.add(IBaseResource.class, theResource)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, hookParams);
 				}
 			});
 		}

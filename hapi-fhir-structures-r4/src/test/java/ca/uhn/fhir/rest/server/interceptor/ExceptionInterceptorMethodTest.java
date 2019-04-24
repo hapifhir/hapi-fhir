@@ -1,18 +1,17 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -23,18 +22,15 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class ExceptionInterceptorMethodTest {
 
@@ -49,9 +45,13 @@ public class ExceptionInterceptorMethodTest {
 	@Before
 	public void before() {
 		myInterceptor = mock(IServerInterceptor.class);
-		servlet.setInterceptors(Collections.singletonList(myInterceptor));
+		servlet.getInterceptorService().registerInterceptor(myInterceptor);
 	}
-	
+
+	@After
+	public void after() {
+		servlet.getInterceptorService().unregisterInterceptor(myInterceptor);
+	}
 	
 	@Test
 	public void testThrowUnprocessableEntityException() throws Exception {
@@ -61,10 +61,10 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
-		HttpResponse status = ourClient.execute(httpGet);
-		ourLog.info(IOUtils.toString(status.getEntity().getContent()));
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
+			assertEquals(422, status.getStatusLine().getStatusCode());
+		}
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
@@ -78,27 +78,23 @@ public class ExceptionInterceptorMethodTest {
 		when(myInterceptor.incomingRequestPreProcessed(any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor.incomingRequestPostProcessed(any(RequestDetails.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenReturn(true);
 		
-		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock theInvocation) throws Throwable {
-				HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[3];
-				resp.setStatus(405);
-				resp.setContentType("text/plain");
-				resp.getWriter().write("HELP IM A BUG");
-				resp.getWriter().close();
-				return false;
-			}
+		when(myInterceptor.handleException(any(RequestDetails.class), any(BaseServerResponseException.class), any(HttpServletRequest.class), any(HttpServletResponse.class))).thenAnswer(theInvocation -> {
+			HttpServletResponse resp = (HttpServletResponse) theInvocation.getArguments()[3];
+			resp.setStatus(405);
+			resp.setContentType("text/plain");
+			resp.getWriter().write("HELP IM A BUG");
+			resp.getWriter().close();
+			return false;
 		});
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=throwUnprocessableEntityException");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		ourLog.info(responseContent);
-		assertEquals(405, status.getStatusLine().getStatusCode());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		
-		assertEquals("HELP IM A BUG", responseContent);
-		
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(405, status.getStatusLine().getStatusCode());
+			assertEquals("HELP IM A BUG", responseContent);
+		}
+
 	}
 
 	@AfterClass
@@ -129,9 +125,6 @@ public class ExceptionInterceptorMethodTest {
 
 	}
 
-	/**
-	 * Created by dsotnikov on 2/25/2014.
-	 */
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -142,8 +135,6 @@ public class ExceptionInterceptorMethodTest {
 		/**
 		 * Retrieve the resource by its identifier
 		 * 
-		 * @param theId
-		 *            The resource identity
 		 * @return The resource
 		 */
 		@Search(queryName = "throwUnprocessableEntityException")

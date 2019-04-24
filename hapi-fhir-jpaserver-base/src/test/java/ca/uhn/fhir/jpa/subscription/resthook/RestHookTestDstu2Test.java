@@ -32,7 +32,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -73,7 +75,11 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Before
 	public void beforeRegisterRestHookListener() {
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 	}
 
 	@Before
@@ -145,6 +151,14 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		Subscription subscription2 = createSubscription(criteria2, payload, ourListenerServerBase);
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
+
+		String allInterceptors = myInterceptorRegistry
+			.getAllRegisteredInterceptors()
+			.stream()
+			.map(t->t.getClass().toString())
+			.sorted()
+			.collect(Collectors.joining("\n * "));
+		ourLog.info("Current interceptors:\n * {}", allInterceptors);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();

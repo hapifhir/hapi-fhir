@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
@@ -26,11 +25,9 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
@@ -40,7 +37,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	public void before() throws Exception {
 		super.before();
 		myDaoConfig.setAllowMultipleDelete(true);
-		unregisterInterceptors();
 	}
 
 	/**
@@ -56,23 +52,23 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		pt2.setActive(false);
 		final IIdType pid2 = ourClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow().write().allResources().inCompartment("Patient", pid1).andThen()
 					.build();
 			}
-		});
+		};
+		ourRestServer.getInterceptorService().registerInterceptor(authInterceptor);
 
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setSubject(new Reference(pid1));
 		IIdType oid = ourClient.create().resource(obs).execute().getId().toUnqualified();
 
-
-		unregisterInterceptors();
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourRestServer.getInterceptorService().unregisterInterceptor(authInterceptor);
+		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -108,15 +104,13 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				//@formatter:off
 				return new RuleBuilder()
-					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdType("Patient/" + output1.getId().getIdPart())).andThen()
 					.allow().updateConditional().allResources()
 					.build();
-				//@formatter:on
 			}
 		});
 
@@ -670,14 +664,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
-		}
-	}
-
-	private void unregisterInterceptors() {
-		for (IServerInterceptor next : new ArrayList<>(ourRestServer.getInterceptors())) {
-			if (next instanceof AuthorizationInterceptor) {
-				ourRestServer.unregisterInterceptor(next);
-			}
 		}
 	}
 
