@@ -50,7 +50,7 @@ public class PartitionRunnerTest {
 		Slice<Long> resourceIds = buildSlice(0);
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(0);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		myLatch.clear();
 	}
 
@@ -68,7 +68,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
@@ -81,7 +81,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(1);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
 		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
@@ -94,7 +94,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		{
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
@@ -115,7 +115,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		{
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
@@ -137,7 +137,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		{
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
@@ -159,7 +159,7 @@ public class PartitionRunnerTest {
 
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(3);
-		myPartitionRunner.runInPartitionedTransactionThreads(resourceIds, partitionConsumer);
+		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		{
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);

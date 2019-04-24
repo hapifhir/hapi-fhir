@@ -9,9 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -91,19 +89,19 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private void expungeOldVersions() {
 		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
-		myPartitionRunner.runInPartitionedTransactionThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(partition, myRemainingCount));
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(partition, myRemainingCount));
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(partition, myRemainingCount));
 	}
 
 	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedTransactionThreads(theResourceIds, partition -> myExpungeDaoService.deleteByResourceIdPartitions(partition));
+		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.deleteByResourceIdPartitions(partition));
 	}
 
 	private ExpungeOutcome expungeOutcome() {

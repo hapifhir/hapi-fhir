@@ -10,10 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -25,15 +22,13 @@ public class PartitionRunner {
 	private static final int MAX_POOL_SIZE = 1000;
 
 	private final DaoConfig myDaoConfig;
-	private final PlatformTransactionManager myPlatformTransactionManager;
 
 	@Autowired
-	public PartitionRunner(DaoConfig theDaoConfig, PlatformTransactionManager thePlatformTransactionManager) {
+	public PartitionRunner(DaoConfig theDaoConfig) {
 		myDaoConfig = theDaoConfig;
-		myPlatformTransactionManager = thePlatformTransactionManager;
 	}
 
-	void runInPartitionedTransactionThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
+	void runInPartitionedThreads(Slice<Long> theResourceIds, Consumer<List<Long>> partitionConsumer) {
 
 		List<Callable<Void>> callableTasks = buildCallableTasks(theResourceIds, partitionConsumer);
 		if (callableTasks.size() == 0) {
