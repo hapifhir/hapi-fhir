@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isOneOf;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {TestDstu3Config.class})
@@ -96,16 +97,13 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(2);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
-			assertEquals(5, partitionCall.size);
-		}
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-			assertEquals(EXPUNGE_THREADNAME_2, partitionCall.threadName);
-			assertEquals(5, partitionCall.size);
-		}
+		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
+		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
+		assertEquals(5, partitionCall1.size);
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
+		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
+		assertEquals(5, partitionCall2.size);
+		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
 	}
 
 	@Test
@@ -117,16 +115,13 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(2);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
-			assertEquals(5, partitionCall.size);
-		}
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-			assertEquals(EXPUNGE_THREADNAME_2, partitionCall.threadName);
-			assertEquals(4, partitionCall.size);
-		}
+		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
+		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
+		assertEquals(5, partitionCall1.size);
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
+		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
+		assertEquals(4, partitionCall2.size);
+		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
 	}
 
 	@Test
@@ -148,33 +143,6 @@ public class PartitionRunnerTest {
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
 			assertEquals(5, partitionCall.size);
-		}
-	}
-
-	@Test
-	public void elevenItemsTwoThreads() throws InterruptedException {
-		Slice<Long> resourceIds = buildSlice(11);
-		myDaoConfig.setExpungeBatchSize(4);
-		myDaoConfig.setExpungeThreadCount(2);
-
-		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
-		myLatch.setExpectedCount(3);
-		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
-		List<HookParams> calls = myLatch.awaitExpected();
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-			assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
-			assertEquals(4, partitionCall.size);
-		}
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-			assertEquals(EXPUNGE_THREADNAME_2, partitionCall.threadName);
-			assertEquals(4, partitionCall.size);
-		}
-		{
-			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 2);
-			assertThat( partitionCall.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-			assertEquals(3, partitionCall.size);
 		}
 	}
 
