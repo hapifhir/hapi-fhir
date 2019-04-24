@@ -29,9 +29,9 @@ import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -52,11 +52,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -76,6 +78,7 @@ import org.hibernate.query.criteria.internal.predicate.BooleanStaticAssertionPre
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -675,22 +678,14 @@ public class SearchBuilder implements ISearchBuilder {
 					value = value.substring(1);
 				}
 
-				IdDt valueAsId = new IdDt(value);
+				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
-					if (valueAsId.isIdPartValidLong()) {
-						orPids.add(valueAsId.getIdPartAsLong());
-					} else {
-						try {
-							BaseHasResource entity = myCallingDao.readEntity(valueAsId);
-							if (entity.getDeleted() == null) {
-								orPids.add(entity.getId());
-							}
-						} catch (ResourceNotFoundException e) {
-							/*
-							 * This isn't an error, just means no result found
-							 * that matches the ID the client provided
-							 */
-						}
+					try {
+						Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart());
+						orPids.add(pid);
+					} catch (ResourceNotFoundException e) {
+						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
+						ourLog.debug("Resource ID {} was requested but does not exist", valueAsId.getIdPart());
 					}
 				}
 			}
@@ -1892,8 +1887,11 @@ public class SearchBuilder implements ISearchBuilder {
 			}
 
 			// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
-			HookParams params = new HookParams().add(IBaseResource.class, resource);
-			myInterceptorBroadcaster.callHooks(Pointcut.RESOURCE_MAY_BE_RETURNED, params);
+			HookParams params = new HookParams()
+				.add(IBaseResource.class, resource)
+				.add(RequestDetails.class, null)
+				.add(ServletRequestDetails.class, null);
+			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
 
 			theResourceListToPopulate.set(index, resource);
 		}
@@ -2489,7 +2487,7 @@ public class SearchBuilder implements ISearchBuilder {
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
 		private Iterator<Long> myPreResultsIterator;
-		private Iterator<Long> myResultsIterator;
+		private ScrollableResultsIterator<Long> myResultsIterator;
 		private SortSpec mySort;
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
@@ -2581,12 +2579,16 @@ public class SearchBuilder implements ISearchBuilder {
 			mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			if (myFirst) {
-				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_FIRST_RESULT_LOADED, mySearchRuntimeDetails);
+				HookParams params = new HookParams();
+				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
 			if (NO_MORE.equals(myNext)) {
-				myInterceptorBroadcaster.callHooks(Pointcut.PERFTRACE_SEARCH_SELECT_COMPLETE, mySearchRuntimeDetails);
+				HookParams params = new HookParams();
+				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 
 		}
@@ -2613,6 +2615,12 @@ public class SearchBuilder implements ISearchBuilder {
 			return mySkipCount;
 		}
 
+		@Override
+		public void close() {
+			if (myResultsIterator != null) {
+				myResultsIterator.close();
+			}
+		}
 	}
 
 

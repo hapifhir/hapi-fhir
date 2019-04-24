@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.IPointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.PointcutLatch;
@@ -51,7 +51,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
-	IInterceptorRegistry myInterceptorRegistry;
+	IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
 
@@ -85,7 +85,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	@After
 	public void cleanup() {
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myInterceptorRegistry.unregisterAllInterceptors();
 		mySubscriptionMatchingPost.clear();
 		mySubscriptionActivatedPost.clear();
 		ourObservationListener.clear();

@@ -662,8 +662,9 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 		assertEquals(3, uniqueSearchParams.get(0).getComponents().size());
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		assertEquals(6, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 		List<ResourceIndexedCompositeStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());

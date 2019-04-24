@@ -1,6 +1,5 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,9 +13,10 @@ public class CommonConfig {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
 	@Bean
-	public IServerInterceptor accessLoggingInterceptor() {
+	public LoggingInterceptor accessLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -50,7 +50,7 @@ public class CommonConfig {
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
 	 */
 	@Bean
-	public IServerInterceptor requestLoggingInterceptor() {
+	public LoggingInterceptor requestLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.request");
 		retVal.setMessageFormat("${requestVerb} ${servletPath} -\n${requestBodyFhir}");

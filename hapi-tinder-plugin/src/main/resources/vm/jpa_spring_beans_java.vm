@@ -22,20 +22,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 
 @Configuration
 public abstract class BaseJavaConfig${versionCapitalized} extends ca.uhn.fhir.jpa.config${package_suffix}.Base${versionCapitalized}Config {
 
 	@Bean(name="myResourceProviders${versionCapitalized}")
-	public List<IResourceProvider> resourceProviders${versionCapitalized}() {
-		List<IResourceProvider> retVal = new ArrayList<IResourceProvider>();
+	public ResourceProviderFactory resourceProviders${versionCapitalized}() {
+		ResourceProviderFactory retVal = new ResourceProviderFactory();
 #foreach ( $res in $resources )
-		if (isSupported("${res.name}")) {
-			retVal.add(rp${res.declaringClassNameComplete}${versionCapitalized}());
-		}
+		retVal.addSupplier(() -> isSupported("${res.name}") ? rp${res.declaringClassNameComplete}${versionCapitalized}() : null);
 #end
 		return retVal;
 	}
+
 
 	@Bean(name="myResourceDaos${versionCapitalized}")
 	public List<IFhirResourceDao<?>> resourceDaos${versionCapitalized}() {

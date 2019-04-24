@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,22 +20,28 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
-/**
- * This annotation declares a bean as a subscription interceptor
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-public @interface Interceptor {
+public class ResourceProviderFactory {
 
-	/**
-	 * @return Declares that an interceptor should be manually registered with the registry,
-	 * and should not auto-register using Spring autowiring.
-	 */
-	boolean manualRegistration() default false;
+	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
+
+	public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
+		mySuppliers.add(theSupplier);
+	}
+
+	public List<Object> createProviders() {
+		List<Object> retVal = new ArrayList<>();
+		for (Supplier<Object> next : mySuppliers) {
+			Object nextRp = next.get();
+			if (nextRp != null) {
+				retVal.add(nextRp);
+			}
+		}
+		return retVal;
+	}
 
 }

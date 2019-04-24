@@ -21,6 +21,10 @@ package ca.uhn.fhir.rest.client.impl;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
@@ -43,7 +47,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 
-import java.io.*;
+import javax.annotation.Nonnull;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -65,13 +73,13 @@ public abstract class BaseClient implements IRestfulClient {
 	private final String myUrlBase;
 	private boolean myDontValidateConformance;
 	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
-	private List<IClientInterceptor> myInterceptors = new ArrayList<IClientInterceptor>();
 	private boolean myKeepResponses = false;
 	private IHttpResponse myLastResponse;
 	private String myLastResponseBody;
 	private Boolean myPrettyPrint = false;
 	private SummaryEnum mySummary;
 	private RequestFormatParamStyleEnum myRequestFormatParamStyle = RequestFormatParamStyleEnum.SHORT;
+	private IInterceptorService myInterceptorService;
 
 	BaseClient(IHttpClient theClient, String theUrlBase, RestfulClientFactory theFactory) {
 		super();
@@ -92,6 +100,18 @@ public abstract class BaseClient implements IRestfulClient {
 			myEncoding = EncodingEnum.JSON;
 		}
 
+		setInterceptorService(new InterceptorService());
+	}
+
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return myInterceptorService;
+	}
+
+	@Override
+	public void setInterceptorService(@Nonnull IInterceptorService theInterceptorService) {
+		Validate.notNull(theInterceptorService, "theInterceptorService must not be null");
+		myInterceptorService = theInterceptorService;
 	}
 
 	protected Map<String, List<String>> createExtraParams(String theCustomAcceptHeader) {
@@ -147,14 +167,6 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public IHttpClient getHttpClient() {
 		return myClient;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public List<IClientInterceptor> getInterceptors() {
-		return Collections.unmodifiableList(myInterceptors);
 	}
 
 	/**
@@ -276,15 +288,16 @@ public abstract class BaseClient implements IRestfulClient {
 				}
 			}
 
-			for (IClientInterceptor nextInterceptor : myInterceptors) {
-				nextInterceptor.interceptRequest(httpRequest);
-			}
+			HookParams requestParams = new HookParams();
+			requestParams.add(IHttpRequest.class, httpRequest);
+			getInterceptorService().callHooks(Pointcut.CLIENT_REQUEST, requestParams);
 
 			response = httpRequest.execute();
 
-			for (IClientInterceptor nextInterceptor : myInterceptors) {
-				nextInterceptor.interceptResponse(response);
-			}
+			HookParams responseParams = new HookParams();
+			responseParams.add(IHttpRequest.class, httpRequest);
+			responseParams.add(IHttpResponse.class, response);
+			getInterceptorService().callHooks(Pointcut.CLIENT_RESPONSE, responseParams);
 
 			String mimeType;
 			if (Constants.STATUS_HTTP_204_NO_CONTENT == response.getStatus()) {
@@ -446,7 +459,7 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public void registerInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.add(theInterceptor);
+		getInterceptorService().registerInterceptor(theInterceptor);
 	}
 
 	/**
@@ -461,7 +474,7 @@ public abstract class BaseClient implements IRestfulClient {
 	@Override
 	public void unregisterInterceptor(IClientInterceptor theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
+		getInterceptorService().unregisterInterceptor(theInterceptor);
 	}
 
 	protected final class ResourceOrBinaryResponseHandler extends ResourceResponseHandler<IBaseResource> {

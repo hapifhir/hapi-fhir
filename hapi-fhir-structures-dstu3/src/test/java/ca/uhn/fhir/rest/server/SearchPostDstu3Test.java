@@ -66,10 +66,7 @@ public class SearchPostDstu3Test {
 		ourLastMethod = null;
 		ourLastSortSpec = null;
 		ourLastName = null;
-		
-		for (IServerInterceptor next : new ArrayList<IServerInterceptor>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	/**

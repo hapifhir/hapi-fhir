@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -27,12 +27,8 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation should be placed on
- * {@link Interceptor Subscription Interceptor}
+ * {@link Interceptor}
  * bean methods.
- * <p>
- * Methods with this annotation are invoked immediately before a REST HOOK
- * subscription delivery
- * </p>
  *
  * @see Interceptor
  */
@@ -43,6 +39,15 @@ public @interface Hook {
 	/**
 	 * Provides the specific point where this method should be invoked
 	 */
-	Pointcut[] value();
+	Pointcut value();
 
+	/**
+	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
+	 * and allowable values can be positive or negative or 0.
+	 * <p>
+	 * If no order is specified, or the order is set to <code>0</code> (the default order),
+	 * the order specified at the interceptor type level will take precedence.
+	 * </p>
+	 */
+	int order() default Interceptor.DEFAULT_ORDER;
 }

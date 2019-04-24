@@ -37,6 +37,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	 * @param theRequestDetails The parent request details
 	 */
 	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
+		super(theRequestDetails.getInterceptorBroadcaster());
 		if (theRequestDetails != null) {
 			Map<String, List<String>> headers = theRequestDetails.getHeaders();
 			for (Map.Entry<String, List<String>> next : headers.entrySet()) {

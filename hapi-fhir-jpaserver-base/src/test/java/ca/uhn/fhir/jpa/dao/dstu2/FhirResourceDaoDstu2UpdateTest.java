@@ -39,77 +39,6 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 
 	@Test
-	public void testUpdateAndGetHistoryResource() throws InterruptedException {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().addFamily("Tester").addGiven("Joe");
-
-		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertNotNull(outcome.getId());
-		assertFalse(outcome.getId().isEmpty());
-
-		assertEquals("1", outcome.getId().getVersionIdPart());
-
-		Date now = new Date();
-		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
-		InstantDt published = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated = (InstantDt) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published.before(now));
-		assertTrue(updated.before(now));
-
-		Thread.sleep(1000);
-
-		reset(myInterceptor);
-		retrieved.getIdentifierFirstRep().setValue("002");
-		MethodOutcome outcome2 = myPatientDao.update(retrieved, mySrd);
-		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
-		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
-		assertEquals("2", outcome2.getId().getVersionIdPart());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		Date now2 = new Date();
-
-		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), mySrd);
-
-		assertEquals("2", retrieved2.getId().getVersionIdPart());
-		assertEquals("002", retrieved2.getIdentifierFirstRep().getValue());
-		InstantDt published2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.PUBLISHED);
-		InstantDt updated2 = (InstantDt) retrieved2.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
-		assertTrue(published2.before(now));
-		assertTrue(updated2.after(now));
-		assertTrue(updated2.before(now2));
-
-		Thread.sleep(2000);
-
-		/*
-		 * Get history
-		 */
-
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
-
-		assertEquals(2, historyBundle.size().intValue());
-
-		List<IBaseResource> history = historyBundle.getResources(0, 2);
-		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
-		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(published, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(1)));
-		assertEquals(updated, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(1)));
-		assertEquals("001", ((Patient) history.get(1)).getIdentifierFirstRep().getValue());
-		assertEquals(published2, ResourceMetadataKeyEnum.PUBLISHED.get((IResource) history.get(0)));
-		assertEquals(updated2, ResourceMetadataKeyEnum.UPDATED.get((IResource) history.get(0)));
-		assertEquals("002", ((Patient) history.get(0)).getIdentifierFirstRep().getValue());
-
-	}
-
-	@Test
 	public void testUpdateByUrl() {
 		String methodName = "testUpdateByUrl";
 
@@ -184,7 +113,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().addFamily(methodName);
 
 			TagList tagList = new TagList();

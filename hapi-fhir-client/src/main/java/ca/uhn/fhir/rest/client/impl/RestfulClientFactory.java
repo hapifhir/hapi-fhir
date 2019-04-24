@@ -272,10 +272,9 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
+
+		client.setInterceptorService(theClient.getInterceptorService());
 		client.setEncoding(theClient.getEncoding());
-		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
-			client.registerInterceptor(interceptor);
-		}
 		client.setDontValidateConformance(true);
 
 		IBaseResource conformance;
