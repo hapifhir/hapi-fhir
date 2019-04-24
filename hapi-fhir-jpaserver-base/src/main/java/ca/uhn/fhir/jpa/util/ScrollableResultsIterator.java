@@ -23,9 +23,10 @@ package ca.uhn.fhir.jpa.util;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollableResults;
 
+import java.io.Closeable;
 import java.util.Iterator;
 
-public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T> implements Iterator<T> {
+public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T> implements Iterator<T>, Closeable {
 	private boolean hasNext;
 	private T myNext;
 	private ScrollableResults myScroll;
@@ -62,6 +63,7 @@ public class ScrollableResultsIterator<T extends Object> extends BaseIterator<T>
 	}
 
 
+	@Override
 	public void close() {
 		if (myScroll != null) {
 			myScroll.close();

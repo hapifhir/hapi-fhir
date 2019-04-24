@@ -62,13 +62,13 @@ public class HookParams {
 		return doAdd(theType, theParam);
 	}
 
-	/**
-	 * This is useful for providing a lazy-loaded (generally expensive to create)
-	 * parameters
-	 */
-	public <T> HookParams addSupplier(Class<T> theType, Supplier<T> theParam) {
-		return doAdd(theType, theParam);
-	}
+//	/**
+//	 * This is useful for providing a lazy-loaded (generally expensive to create)
+//	 * parameters
+//	 */
+//	public <T> HookParams addSupplier(Class<T> theType, Supplier<T> theParam) {
+//		return doAdd(theType, theParam);
+//	}
 
 	private <T> HookParams doAdd(Class<T> theType, Object theParam) {
 		Validate.isTrue(theType.equals(Supplier.class) == false, "Can not add parameters of type Supplier");
