@@ -158,8 +158,8 @@
 	<reporting>
 		<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<groupid>org.apache.maven.plugins</groupid>
+				<artifactid>maven-project-info-reports-plugin</artifactid>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
