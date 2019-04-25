@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.After;
 import org.junit.Test;
