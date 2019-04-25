@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.rest.server.interceptor;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR - Server Framework
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,6 +20,14 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-public interface IRemovableChannel {
-	void removeChannel();
+public class InterceptorOrders {
+
+	public static final int SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR = 1000;
+	public static final int RESPONSE_HIGHLIGHTER_INTERCEPTOR = 10000;
+
+	/** Non instantiable */
+	private InterceptorOrders() {
+		// nothing
+	}
+
 }

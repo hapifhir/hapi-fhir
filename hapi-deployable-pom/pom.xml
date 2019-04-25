@@ -202,7 +202,6 @@
 							<linksource>true</linksource>
 							<verbose>false</verbose>
 							<debug>false</debug>
-							<additionalparam>-Xdoclint:none</additionalparam>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
 						</configuration>
 						<executions>
