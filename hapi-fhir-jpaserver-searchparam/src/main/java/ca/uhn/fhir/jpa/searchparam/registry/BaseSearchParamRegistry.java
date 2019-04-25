@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -215,24 +215,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	@PostConstruct
 	public void postConstruct() {
-		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
-
-		Set<String> resourceNames = myFhirContext.getResourceNames();
-
-		for (String resourceName : resourceNames) {
-			RuntimeResourceDefinition nextResDef = myFhirContext.getResourceDefinition(resourceName);
-			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			resourceNameToSearchParams.put(nextResourceName, nameToParam);
-
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.put(nextSp.getName(), nextSp);
-			}
-		}
-
-		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
+		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
 	}
-
 
 	public int doRefresh(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval > myLastRefresh) {
@@ -379,5 +363,23 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
+	}
+
+	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
+		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
+
+		Set<String> resourceNames = theFhirContext.getResourceNames();
+
+		for (String resourceName : resourceNames) {
+			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
+			String nextResourceName = nextResDef.getName();
+			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
+			resourceNameToSearchParams.put(nextResourceName, nameToParam);
+
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				nameToParam.put(nextSp.getName(), nextSp);
+			}
+		}
+		return Collections.unmodifiableMap(resourceNameToSearchParams);
 	}
 }
