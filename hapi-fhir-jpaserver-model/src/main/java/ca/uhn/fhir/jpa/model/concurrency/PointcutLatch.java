@@ -1,9 +1,10 @@
-package ca.uhn.fhir.jpa.subscription.module;
+package ca.uhn.fhir.jpa.model.concurrency;
 
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-// TODO KHS copy this version over to hapi-fhir
+// This class is primarily used for testing.
 public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	private static final Logger ourLog = LoggerFactory.getLogger(PointcutLatch.class);
 	private static final int DEFAULT_TIMEOUT_SECONDS = 10;
@@ -77,7 +75,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public List<HookParams> awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
 		List<HookParams> retval = myCalledWith.get();
 		try {
-			assertNotNull(getName() + " awaitExpected() called before setExpected() called.", myCountdownLatch);
+			Validate.notNull(myCountdownLatch, getName() + " awaitExpected() called before setExpected() called.");
 			if (!myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS)) {
 				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + myCountdownLatch.getCount() + ".");
 			}
@@ -97,7 +95,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		} finally {
 			clear();
 		}
-		assertEquals("Concurrency error: Latch switched while waiting.", retval, myCalledWith.get());
+		Validate.isTrue(retval.equals(myCalledWith.get()), "Concurrency error: Latch switched while waiting.");
 		return retval;
 	}
 
@@ -173,10 +171,15 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	public static Object getLatchInvocationParameter(List<HookParams> theHookParams) {
-		assertNotNull(theHookParams);
-		assertEquals("Expected Pointcut to be invoked 1 time", 1, theHookParams.size());
-		HookParams arg = theHookParams.get(0);
-		assertEquals("Expected pointcut to be invoked with 1 argument", 1, arg.values().size());
+		Validate.notNull(theHookParams);
+		Validate.isTrue(theHookParams.size() == 1, "Expected Pointcut to be invoked 1 time");
+		return getLatchInvocationParameter(theHookParams, 0);
+	}
+
+	public static Object getLatchInvocationParameter(List<HookParams> theHookParams, int index) {
+		Validate.notNull(theHookParams);
+		HookParams arg = theHookParams.get(index);
+		Validate.isTrue(arg.values().size() == 1, "Expected pointcut to be invoked with 1 argument");
 		return arg.values().iterator().next();
 	}
 }

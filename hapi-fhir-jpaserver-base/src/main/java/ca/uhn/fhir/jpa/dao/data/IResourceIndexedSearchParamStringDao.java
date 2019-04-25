@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -31,4 +32,7 @@ public interface IResourceIndexedSearchParamStringDao extends JpaRepository<Reso
 	@Query("select count(*) from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")
 	int countForResourceId(@Param("resid") Long theResourcePid);
 
+	@Modifying
+	@Query("delete from ResourceIndexedSearchParamString t WHERE t.myResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }
