@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
-class ExpungeResourceService implements IExpungeResourceService {
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeResourceService.class);
+class ResourceExpungeService implements IResourceExpungeService {
+	private static final Logger ourLog = LoggerFactory.getLogger(ResourceExpungeService.class);
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;

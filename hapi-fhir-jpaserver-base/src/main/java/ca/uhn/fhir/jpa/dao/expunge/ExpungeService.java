@@ -20,7 +20,7 @@ public abstract class ExpungeService {
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 	@Autowired
-	private IExpungeResourceService myExpungeDaoService;
+	private IResourceExpungeService myExpungeDaoService;
 
 	@Lookup
 	protected abstract ExpungeRun getExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions);

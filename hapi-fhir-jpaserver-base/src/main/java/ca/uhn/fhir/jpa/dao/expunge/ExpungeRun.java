@@ -21,7 +21,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
-	private IExpungeResourceService myExpungeDaoService;
+	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
 	private PartitionRunner myPartitionRunner;
 
