@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.model.concurrency;
  */
 
 
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.HookParams;
 
 import java.util.List;
 

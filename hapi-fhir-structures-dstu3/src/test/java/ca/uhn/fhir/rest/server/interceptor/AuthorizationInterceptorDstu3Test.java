@@ -2,11 +2,13 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
@@ -16,6 +18,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -69,9 +72,7 @@ public class AuthorizationInterceptorDstu3Test {
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
 		ourDeleted = null;
@@ -3478,10 +3479,14 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Delete()
-		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+		public MethodOutcome delete(IInterceptorBroadcaster theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
-				theRequestOperationCallback.resourceDeleted(next);
+				HookParams params = new HookParams()
+					.add(IBaseResource.class, next)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
 		}
@@ -3626,11 +3631,15 @@ public class AuthorizationInterceptorDstu3Test {
 
 
 		@Transaction()
-		public Bundle search(IRequestOperationCallback theRequestOperationCallback, @TransactionParam Bundle theInput) {
+		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
 			ourHitMethod = true;
 			if (ourDeleted != null) {
 				for (IBaseResource next : ourDeleted) {
-					theRequestOperationCallback.resourceDeleted(next);
+					HookParams params = new HookParams()
+						.add(IBaseResource.class, next)
+						.add(RequestDetails.class, theRequestDetails)
+						.add(ServletRequestDetails.class, theRequestDetails);
+					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 				}
 			}
 			return (Bundle) ourReturn.get(0);

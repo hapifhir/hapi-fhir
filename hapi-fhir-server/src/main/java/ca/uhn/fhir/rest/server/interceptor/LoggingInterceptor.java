@@ -1,8 +1,32 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.UrlUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.commons.text.lookup.StringLookup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Date;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -13,9 +37,9 @@ import java.io.IOException;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,29 +47,6 @@ import java.io.IOException;
  * limitations under the License.
  * #L%
  */
-
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
-import java.util.Map.Entry;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.text.StrLookup;
-import org.apache.commons.lang3.text.StrSubstitutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 /**
  * Server interceptor which logs each request using a defined format
@@ -119,8 +120,8 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
  * </tr>
  * </table>
  */
-
-public class LoggingInterceptor extends InterceptorAdapter {
+@Interceptor
+public class LoggingInterceptor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
@@ -143,12 +144,12 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		return myErrorMessageFormat;
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
 	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws ServletException, IOException {
 		if (myLogExceptions) {
 			// Perform any string substitutions from the message format
-			StrLookup<?> lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
-			StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
+			StringLookup lookup = new MyLookup(theServletRequest, theException, theRequestDetails);
+			StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
 			// Actuall log the line
 			String line = subs.replace(myErrorMessageFormat);
@@ -159,11 +160,11 @@ public class LoggingInterceptor extends InterceptorAdapter {
 	}
 
 
-	@Override
+	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	public void processingCompletedNormally(ServletRequestDetails theRequestDetails) {
 		// Perform any string substitutions from the message format
-		StrLookup<?> lookup = new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
-		StrSubstitutor subs = new StrSubstitutor(lookup, "${", "}", '\\');
+		StringLookup lookup = new MyLookup(theRequestDetails.getServletRequest(), theRequestDetails);
+		StringSubstitutor subs = new StringSubstitutor(lookup, "${", "}", '\\');
 
 		// Actually log the line
 		String line = subs.replace(myMessageFormat);
@@ -212,7 +213,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 		myMessageFormat = theMessageFormat;
 	}
 
-	private static final class MyLookup extends StrLookup<String> {
+	private static final class MyLookup implements StringLookup {
 		private final Throwable myException;
 		private final HttpServletRequest myRequest;
 		private final RequestDetails myRequestDetails;
@@ -223,7 +224,7 @@ public class LoggingInterceptor extends InterceptorAdapter {
 			myException = null;
 		}
 
-		public MyLookup(HttpServletRequest theServletRequest, BaseServerResponseException theException, RequestDetails theRequestDetails) {
+		MyLookup(HttpServletRequest theServletRequest, BaseServerResponseException theException, RequestDetails theRequestDetails) {
 			myException = theException;
 			myRequestDetails = theRequestDetails;
 			myRequest = theServletRequest;

@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
+import ca.uhn.fhir.jpa.util.JpaInterceptorService;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -177,15 +178,15 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	}
 
 	@Bean
-	public InterceptorService interceptorRegistry() {
-		return new InterceptorService("hapi-fhir-jpa");
+	public IInterceptorService jpaInterceptorService() {
+		return new JpaInterceptorService();
 	}
 
 	/**
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDao(theResourceType) != null;
+		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.core.*;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -72,6 +73,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	protected AbstractJaxRsProvider(final FhirContext ctx) {
 		CTX = ctx;
+	}
+
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return null;
 	}
 
 	/**
@@ -145,10 +151,10 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * Default: an empty list of interceptors (Interceptors are not yet supported
 	 * in the JAX-RS server). Please get in touch if you'd like to help!
 	 * 
-	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
 	 */
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 

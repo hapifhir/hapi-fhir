@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
@@ -51,13 +52,20 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
 
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
+
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
 		mySubscriptionTestUtil.registerEmailInterceptor();
+
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {

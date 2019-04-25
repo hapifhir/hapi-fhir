@@ -115,7 +115,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -529,47 +528,6 @@ public class DaoConfig {
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
 		myIndexMissingFieldsEnabled = theIndexMissingFields;
-	}
-
-	/**
-	 * Returns the interceptors which will be notified of operations.
-	 *
-	 * @see #setInterceptors(List)
-	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} or {@link #unregisterInterceptor}instead.
-	 */
-
-	@Deprecated
-	public List<IServerInterceptor> getInterceptors() {
-		return myInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
-	}
-
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		if (!myInterceptors.contains(theInterceptor)) {
-			myInterceptors.add(theInterceptor);
-		}
-	}
-
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
 	}
 
 	/**

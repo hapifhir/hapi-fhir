@@ -18,10 +18,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.springframework.test.context.TestPropertySource;
 
@@ -43,6 +40,11 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+	}
+
+	@Before
+	public void before() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
 	@Test
@@ -96,7 +98,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			return myPatientDao.create(p).getId().toUnqualified();
 		});
 
-		String createTime = runInTransaction(()->{
+		String createTime = runInTransaction(() -> {
 			List<ResourceTable> allResources = myResourceTableDao.findAll();
 			assertEquals(1, allResources.size());
 			ResourceTable resourceTable = allResources.get(0);
@@ -110,7 +112,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		});
 
 		myCaptureQueriesListener.clear();
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("2");
@@ -124,7 +126,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			List<ResourceTable> allResources = myResourceTableDao.findAll();
 			assertEquals(1, allResources.size());
 			ResourceTable resourceTable = allResources.get(0);
@@ -191,7 +193,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testDuplicateTagsOnUpdateIgnored() {
 		IIdType id;
@@ -203,7 +205,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		{
 			Patient patient = new Patient();
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.setActive(true);
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
@@ -275,7 +277,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			patient.setActive(true);
 			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		{
 			Meta meta = new Meta();
 			meta.addTag().setSystem("http://foo").setCode("1");
@@ -291,7 +293,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		}
 	}
-	
+
 	@Test
 	public void testMultipleUpdatesWithNoChangesDoesNotResultInAnUpdateForDiscreteUpdates() {
 
@@ -383,14 +385,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
 		assertEquals("2", outcome2.getId().getVersionIdPart());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
 
 		TestUtil.sleepOneClick();
 		Date now2 = new Date();
@@ -627,7 +621,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().setFamily(methodName);
 
 			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
@@ -645,7 +639,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			}
 			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
 			List<Coding> secList = p1.getMeta().getSecurity();
-			secListValues = new HashSet<String>();
+			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}

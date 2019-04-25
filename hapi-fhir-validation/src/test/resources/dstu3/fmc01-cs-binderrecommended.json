@@ -1,11 +1,11 @@
 {
 	"resourceType": "CodeSystem",
-	"id": "FMCYesNoUnk",
+	"id": "FMCBinderRecommended",
 	"meta": {
 		"versionId": "1",
 		"lastUpdated": "2019-04-17T12:50:19.996+00:00"
 	},
-	"url": "binder_recommended_fkc",
+	"url": "http://binder_recommended_fkc",
 	"identifier": {
 		"value": "FMCYesNoUnk"
 	},

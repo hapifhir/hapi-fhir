@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,17 +20,26 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * This is currently only here for unit tests!
- *
- * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ * This annotation declares a bean as a subscription interceptor
  */
-@FunctionalInterface
-@VisibleForTesting
-public interface IAnonymousInterceptor {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Interceptor {
 
-	void invoke(Pointcut thePointcut, HookParams theArgs);
+	/**
+	 * @see #order() 
+	 */
+	int DEFAULT_ORDER = 0;
 
+	/**
+	 * The order that interceptors should be called in. Lower numbers happen before higher numbers. Default is 0
+	 * and allowable values can be positive or negative or 0.
+	 */
+	int order() default DEFAULT_ORDER;
 }

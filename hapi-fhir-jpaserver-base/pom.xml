@@ -147,6 +147,10 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -182,14 +186,8 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>net.riotopsys</groupId>
-			<artifactId>json_patch</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>com.google.code.gson</artifactId>
-					<groupId>gson</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.github.java-json-tools</groupId>
+			<artifactId>json-patch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>

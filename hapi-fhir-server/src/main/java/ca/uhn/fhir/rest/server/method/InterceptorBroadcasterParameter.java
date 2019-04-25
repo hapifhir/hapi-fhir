@@ -27,11 +27,11 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
-class RequestOperationCallbackParameter implements IParameter {
+class InterceptorBroadcasterParameter implements IParameter {
 
 	@Override
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
-		return theRequest.getRequestOperationCallback();
+		return theRequest.getInterceptorBroadcaster();
 	}
 
 	@Override

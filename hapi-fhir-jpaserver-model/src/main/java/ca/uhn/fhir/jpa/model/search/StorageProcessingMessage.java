@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.jpa.model.search;
 
 /*-
  * #%L
@@ -20,16 +20,17 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-public interface IInterceptorBroadcaster {
+public class StorageProcessingMessage {
 
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, HookParams theParams);
+	private String myMessage;
 
-	/**
-	 * Invoke the interceptor methods
-	 */
-	boolean callHooks(Pointcut thePointcut, Object... theParams);
+	public String getMessage() {
+		return myMessage;
+	}
+
+	public StorageProcessingMessage setMessage(String theMessage) {
+		myMessage = theMessage;
+		return this;
+	}
 
 }

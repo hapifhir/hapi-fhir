@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.interceptor.api;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,17 +20,17 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-public class PerformanceMessage {
+import com.google.common.annotations.VisibleForTesting;
 
-	private String myMessage;
+/**
+ * This is currently only here for unit tests!
+ *
+ * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
+ */
+@FunctionalInterface
+@VisibleForTesting
+public interface IAnonymousInterceptor {
 
-	public String getMessage() {
-		return myMessage;
-	}
-
-	public PerformanceMessage setMessage(String theMessage) {
-		myMessage = theMessage;
-		return this;
-	}
+	void invoke(Pointcut thePointcut, HookParams theArgs);
 
 }
