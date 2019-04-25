@@ -114,7 +114,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -142,6 +141,7 @@ public class DaoConfig {
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 
 	/**
@@ -159,6 +159,26 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public boolean isEnforceReferenceTargetTypes() {
+		return myEnforceReferenceTargetTypes;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public void setEnforceReferenceTargetTypes(boolean theEnforceReferenceTargetTypes) {
+		myEnforceReferenceTargetTypes = theEnforceReferenceTargetTypes;
 	}
 
 	/**
@@ -504,47 +524,6 @@ public class DaoConfig {
 	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
 		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
 		myIndexMissingFieldsEnabled = theIndexMissingFields;
-	}
-
-	/**
-	 * Returns the interceptors which will be notified of operations.
-	 *
-	 * @see #setInterceptors(List)
-	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} or {@link #unregisterInterceptor}instead.
-	 */
-
-	@Deprecated
-	public List<IServerInterceptor> getInterceptors() {
-		return myInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
-	}
-
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		if (!myInterceptors.contains(theInterceptor)) {
-			myInterceptors.add(theInterceptor);
-		}
-	}
-
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
 	}
 
 	/**
@@ -1392,6 +1371,7 @@ public class DaoConfig {
 	/**
 	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
 	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
 	 * @since 3.7.0
 	 */
 
@@ -1402,6 +1382,7 @@ public class DaoConfig {
 	/**
 	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
 	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
 	 * @since 3.7.0
 	 */
 
@@ -1557,6 +1538,21 @@ public class DaoConfig {
 		myModelConfig.setEmailFromAddress(theEmailFromAddress);
 	}
 
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myModelConfig.getWebsocketContextPath();
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
 
 	public enum IndexEnabledEnum {
 		ENABLED,

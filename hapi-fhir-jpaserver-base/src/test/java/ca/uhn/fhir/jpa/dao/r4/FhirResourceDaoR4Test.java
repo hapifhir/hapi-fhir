@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -73,7 +73,14 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
+
+	@Before
+	public void before() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
+	}
+
 
 	private void assertGone(IIdType theId) {
 		try {
@@ -834,24 +841,12 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId();
 		ourLog.info("Created patient, got it: {}", id);
 
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		reset(myInterceptor);
-
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(methodName);
 		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 		assertEquals(id.getIdPart(), results.getId().getIdPart());
-		assertFalse(results.getCreated().booleanValue());
-
-		verifyNoMoreInteractions(myInterceptor);
+		assertFalse(results.getCreated());
 
 		// Now create a second one
 
@@ -944,6 +939,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
+
+		// Disable validation
+		myDaoConfig.setEnforceReferenceTargetTypes(false);
+		Patient p = new Patient();
+		p.getManagingOrganization().setReferenceElement(id1);
+		myPatientDao.create(p, mySrd);
+
 
 	}
 
@@ -1683,7 +1685,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				middleDate = new Date();
 				Thread.sleep(fullSize);
 			}
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			myPatientDao.update(patient, mySrd);
 		}
@@ -1913,7 +1915,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Thread.sleep(100);
 			preDates.add(new Date());
 			Thread.sleep(100);
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
 		}
@@ -2003,7 +2005,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		try {
 			myEncounterDao.read(outcome.getId(), mySrd);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (InvalidRequestException e) {
 			// expected
 		}
 		try {
@@ -2501,16 +2503,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		 * READ
 		 */
 
-		reset(myInterceptor);
 		Observation obs = myObservationDao.read(id1.toUnqualifiedVersionless(), mySrd);
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualifiedVersionless().getValue(), details.getId().toUnqualifiedVersionless().getValue());
-		assertEquals("Observation", details.getResourceType());
 
 		/*
 		 * VREAD
@@ -2519,13 +2513,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		reset(myInterceptor);
 		obs = myObservationDao.read(id1, mySrd);
 		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualified().getValue(), details.getId().toUnqualified().getValue());
-		assertEquals("Observation", details.getResourceType());
 
 	}
 
@@ -2603,7 +2590,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertGone(id);
 
-		patient.setId(id);
+		patient.setId(id.getValue());
 		patient.addAddress().addLine("AAA");
 		myPatientDao.update(patient, mySrd);
 

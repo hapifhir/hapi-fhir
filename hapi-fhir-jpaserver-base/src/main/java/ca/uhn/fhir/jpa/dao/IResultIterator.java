@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
+import java.io.Closeable;
 import java.util.Iterator;
 
-public interface IResultIterator extends Iterator<Long> {
+public interface IResultIterator extends Iterator<Long>, Closeable {
 
 	int getSkippedCount();
 

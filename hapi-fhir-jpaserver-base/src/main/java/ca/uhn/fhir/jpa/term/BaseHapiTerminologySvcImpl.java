@@ -398,7 +398,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
-				theDao.deleteInBatch(link);
+				theDao.deleteAll(link);
 				return null;
 			});
 
@@ -1399,10 +1399,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+				try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 
-				while (scrollableResultsIterator.hasNext()) {
-					targets.add(scrollableResultsIterator.next());
+					while (scrollableResultsIterator.hasNext()) {
+						targets.add(scrollableResultsIterator.next());
+					}
+
 				}
 
 				ourLastResultsFromTranslationCache = false; // For testing.
@@ -1484,27 +1486,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
+				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
 
-				while (scrollableResultsIterator.hasNext()) {
-					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
-					nextElement.getConceptMapGroupElementTargets().size();
-					myEntityManager.detach(nextElement);
+					while (scrollableResultsIterator.hasNext()) {
+						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+						nextElement.getConceptMapGroupElementTargets().size();
+						myEntityManager.detach(nextElement);
 
-					if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
-						for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
-							TermConceptMapGroupElementTarget next = iter.next();
-							if (targetCodeSystem.equals(next.getSystem())) {
-								if (targetCode.equals(next.getCode())) {
-									continue;
+						if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
+							for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
+								TermConceptMapGroupElementTarget next = iter.next();
+								if (targetCodeSystem.equals(next.getSystem())) {
+									if (targetCode.equals(next.getCode())) {
+										continue;
+									}
 								}
-							}
 
-							iter.remove();
+								iter.remove();
+							}
 						}
+
+						elements.add(nextElement);
 					}
 
-					elements.add(nextElement);
 				}
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.

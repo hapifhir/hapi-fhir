@@ -64,7 +64,7 @@ public class BundleTypeInResponseHl7OrgTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(ourCtx));
+		servlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
@@ -83,7 +83,7 @@ public class BundleTypeInResponseHl7OrgTest {
 
 		@Search
 		public List<Patient> findPatient() {
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			ArrayList<Patient> retVal = new ArrayList<>();
 
 			Patient patient = new Patient();
 			patient.setId("1");

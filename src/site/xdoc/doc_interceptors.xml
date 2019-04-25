@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+	<properties>
+		<title>Interceptors</title>
+		<author email="jamesagnew@gmail.com">James Agnew</author>
+	</properties>
+
+	<body>
+
+		<section name="Interceptors">
+
+			<p>
+				HAPI FHIR 3.8.0 introduced a new interceptor framework that is used across the entire
+				library. In previous versions of HAPI FHIR, a "Server Interceptor" framework existed and a
+				separate "Client Interceptor" framework existed. These have now been combined into a single
+				unified (and very powerful) framework.
+			</p>
+
+			<p>
+				Interceptor classes may "hook into" various points in the processing chain in both
+				the client and the erver.
+			</p>
+
+				<macro name="snippet">
+					<param name="id" value="resource" />
+					<param name="file" value="examples/src/main/java/example/NewInterceptors.java" />
+				</macro>
+
+		</section>
+			
+	</body>
+
+</document>

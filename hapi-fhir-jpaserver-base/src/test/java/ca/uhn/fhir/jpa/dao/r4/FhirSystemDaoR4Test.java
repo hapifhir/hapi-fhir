@@ -58,6 +58,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	@Before
 	public void beforeDisableResultReuse() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
 
@@ -590,13 +591,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = new Patient();
-		p.setId(id);
+		p.setId(id.getValue());
 		p.addName().setFamily("family1");
 		p.addName().setFamily("family2");
 		myPatientDao.update(p);
 
 		p = new Patient();
-		p.setId(id);
+		p.setId(id.getValue());
 		p.addName().setFamily("family1");
 		p.addName().setFamily("family2");
 		p.addName().setFamily("family3");
@@ -936,80 +937,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-
-	@Test
-	public void testTransactionUpdatingManuallyDeletedResource() {
-
-		// Create an observation
-		Observation obs = new Observation();
-		obs.addIdentifier().setSystem("urn:system").setValue("foo");
-		IIdType obId = myObservationDao.create(obs).getId();
-
-		// Manually mark it a deleted
-		runInTransaction(()->{
-			myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE SET RES_DELETED_AT = CURRENT_TIMESTAMP").executeUpdate();
-		});
-
-		runInTransaction(()->{
-			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
-			assertNotNull(obsTable.getDeleted());
-			assertEquals(1L, obsTable.getVersion());
-		});
-
-		// Now create a transaction
-
-		obs = new Observation();
-		obs.setId(IdType.newRandomUuid());
-		obs.addIdentifier().setSystem("urn:system").setValue("foo");
-
-		DiagnosticReport dr = new DiagnosticReport();
-		dr.setId(IdType.newRandomUuid());
-		dr.addIdentifier().setSystem("urn:system").setValue("bar");
-		dr.addResult().setReference(obs.getId());
-
-		Bundle bundle = new Bundle();
-		bundle.setType(BundleType.TRANSACTION);
-		bundle.addEntry()
-			.setResource(obs)
-			.setFullUrl(obs.getId())
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("Observation?identifier=urn:system|foo");
-		bundle.addEntry()
-			.setResource(dr)
-			.setFullUrl(dr.getId())
-			.getRequest()
-			.setMethod(HTTPVerb.PUT)
-			.setUrl("DiagnosticReport?identifier=urn:system|bar");
-
-		Bundle resp = mySystemDao.transaction(mySrd, bundle);
-		assertEquals(2, resp.getEntry().size());
-
-		BundleEntryComponent respEntry = resp.getEntry().get(0);
-		assertEquals(Constants.STATUS_HTTP_200_OK + " OK", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("Observation/" + obId.getIdPart()));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/3"));
-		assertEquals("3", respEntry.getResponse().getEtag());
-
-		respEntry = resp.getEntry().get(1);
-		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		assertThat(respEntry.getResponse().getLocation(), containsString("DiagnosticReport/"));
-		assertThat(respEntry.getResponse().getLocation(), endsWith("/_history/1"));
-		IdType drId = new IdType(respEntry.getResponse().getLocation());
-		assertEquals("1", respEntry.getResponse().getEtag());
-
-		runInTransaction(()->{
-			ResourceTable obsTable = myResourceTableDao.findById(obId.getIdPartAsLong()).get();
-			assertNull(obsTable.getDeleted());
-			assertEquals(3L, obsTable.getVersion());
-		});
-
-		runInTransaction(()->{
-			DiagnosticReport savedDr = myDiagnosticReportDao.read(drId);
-			assertEquals(obId.toUnqualifiedVersionless().getValue(), savedDr.getResult().get(0).getReference());
-		});
-
-	}
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatchLastUpdated() {
@@ -1381,22 +1308,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
 		String patientId = respEntry.getResponse().getLocation();
 		assertThat(patientId, not(containsString("test")));
-
-		/*
-		 * Interceptor should have been called once for the transaction, and once for the embedded operation
-		 */
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals("Bundle", details.getResourceType());
-		assertEquals(Bundle.class, details.getResource().getClass());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
 
 	}
 
@@ -2447,33 +2358,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(Bundle.class, nextEntry.getResource().getClass());
 		Bundle respBundle = (Bundle) nextEntry.getResource();
 		assertEquals(1, respBundle.getTotal());
-
-		/*
-		 * Interceptor should have been called once for the transaction, and once for the embedded operation
-		 */
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals("Bundle", details.getResourceType());
-		assertEquals(Bundle.class, details.getResource().getClass());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualifiedVersionless().getValue(), details.getId().getValue());
-		assertEquals("Patient", details.getResourceType());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualified().getValue(), details.getId().getValue());
-		assertEquals("Patient", details.getResourceType());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.SEARCH_TYPE), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals("Patient", details.getResourceType());
-
 
 	}
 

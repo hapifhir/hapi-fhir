@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.servlet;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -48,8 +49,8 @@ public class ServletRequestDetails extends RequestDetails {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 
-	public ServletRequestDetails() {
-		super();
+	public ServletRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		super(theInterceptorBroadcaster);
 		setResponse(new ServletRestfulResponse(this));
 	}
 
@@ -101,7 +102,7 @@ public class ServletRequestDetails extends RequestDetails {
 	@Override
 	public List<String> getHeaders(String name) {
 		Enumeration<String> headers = getServletRequest().getHeaders(name);
-		return headers == null ? Collections.<String> emptyList() : Collections.list(getServletRequest().getHeaders(name));
+		return headers == null ? Collections.emptyList() : Collections.list(getServletRequest().getHeaders(name));
 	}
 
 	@Override

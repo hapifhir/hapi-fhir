@@ -126,21 +126,14 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!--
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 		</dependency>
-		-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -153,6 +146,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<dependency>
@@ -189,14 +186,8 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>net.riotopsys</groupId>
-			<artifactId>json_patch</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>com.google.code.gson</artifactId>
-					<groupId>gson</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.github.java-json-tools</groupId>
+			<artifactId>json-patch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
@@ -460,6 +451,10 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -521,11 +516,6 @@
 		<dependency>
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-spring</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 			<scope>test</scope>
 		</dependency>
 

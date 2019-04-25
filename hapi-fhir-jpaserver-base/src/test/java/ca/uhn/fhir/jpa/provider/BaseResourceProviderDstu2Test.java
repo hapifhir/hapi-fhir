@@ -72,11 +72,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 	
-			ourRestServer.setResourceProviders((List)myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 	
-			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator(myFhirCtx));
+			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	
-			ourRestServer.setPlainProviders(mySystemProvider);
+			ourRestServer.registerProvider(mySystemProvider);
 	
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

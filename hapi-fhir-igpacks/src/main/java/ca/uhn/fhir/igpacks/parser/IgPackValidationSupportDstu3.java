@@ -68,6 +68,11 @@ public class IgPackValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+		return fetchResource(theContext, ValueSet.class, theSystem);
+	}
+
+	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		for (Map.Entry<IIdType, IBaseResource> next : myIgResources.entrySet()) {
 			if (theClass.equals(CodeSystem.class)) {

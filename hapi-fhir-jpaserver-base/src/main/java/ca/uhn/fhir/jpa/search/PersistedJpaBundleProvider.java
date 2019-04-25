@@ -201,16 +201,21 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return template.execute(new TransactionCallback<List<IBaseResource>>() {
-					@Override
-					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-						return doHistoryInTransaction(theFromIndex, theToIndex);
-					}
-				});
+				return template.execute(theStatus -> doHistoryInTransaction(theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
-				return doSearchOrEverything(theFromIndex, theToIndex);
+				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex);
+				/*
+				 * If we got fewer resources back than we asked for, it's possible that the search
+				 * completed. If that's the case, the cached version of the search entity is probably
+				 * no longer valid so let's force a reload if it gets asked for again (most likely
+				 * because someone is calling size() on us)
+				 */
+				if (retVal.size() < theToIndex - theFromIndex) {
+					mySearchEntity = null;
+				}
+				return retVal;
 		}
 	}
 

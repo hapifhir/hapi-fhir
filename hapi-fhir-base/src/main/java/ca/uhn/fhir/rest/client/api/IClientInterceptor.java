@@ -20,6 +20,9 @@ package ca.uhn.fhir.rest.client.api;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+
 import java.io.IOException;
 
 /**
@@ -35,11 +38,13 @@ public interface IClientInterceptor {
 	/**
 	 * Fired by the client just before invoking the HTTP client request
 	 */
+	@Hook(Pointcut.CLIENT_REQUEST)
 	void interceptRequest(IHttpRequest theRequest);
 	
 	/**
 	 * Fired by the client upon receiving an HTTP response, prior to processing that response
 	 */
+	@Hook(Pointcut.CLIENT_RESPONSE)
 	void interceptResponse(IHttpResponse theResponse) throws IOException;
 
 }

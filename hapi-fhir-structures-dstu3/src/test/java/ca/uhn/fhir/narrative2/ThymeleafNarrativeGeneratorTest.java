@@ -58,13 +58,13 @@ public class ThymeleafNarrativeGeneratorTest {
 		ref.setReference("DiagnosticReport/1").setResource(dr1);
 		sect.getEntry().add(ref);
 
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(myCtx, "classpath:narrative2/narratives.properties");
-		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator(myCtx);
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
+		ThymeleafNarrativeGenerator gen = new ThymeleafNarrativeGenerator();
 		gen.setManifest(manifest);
 
-		gen.populateResourceNarrative(composition);
+		gen.populateResourceNarrative(myCtx, composition);
 
-		// Firt narrative should be empty
+		// First narrative should be empty
 		String narrative = composition.getSection().get(0).getText().getDiv().getValueAsString();
 		assertThat(narrative, Matchers.emptyOrNullString());
 
@@ -78,7 +78,7 @@ public class ThymeleafNarrativeGeneratorTest {
 
 	@Test
 	public void testTemplateCount() throws IOException {
-		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(myCtx, "classpath:narrative2/narratives.properties");
+		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
 		assertEquals(4, manifest.getNamedTemplateCount());
 	}
 

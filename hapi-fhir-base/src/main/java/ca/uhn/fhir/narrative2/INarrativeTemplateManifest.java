@@ -20,14 +20,16 @@ package ca.uhn.fhir.narrative2;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 
-import java.util.Optional;
+import java.util.EnumSet;
+import java.util.List;
 
 public interface INarrativeTemplateManifest {
-	Optional<INarrativeTemplate> getTemplateByResourceName(TemplateTypeEnum theStyle, String theResourceName);
+	List<INarrativeTemplate> getTemplateByResourceName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theResourceName);
 
-	Optional<INarrativeTemplate> getTemplateByName(TemplateTypeEnum theStyle, String theName);
+	List<INarrativeTemplate> getTemplateByName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theName);
 
-	Optional<INarrativeTemplate> getTemplateByElement(TemplateTypeEnum theStyle, IBase theElementValue);
+	List<INarrativeTemplate> getTemplateByElement(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, IBase theElementValue);
 }

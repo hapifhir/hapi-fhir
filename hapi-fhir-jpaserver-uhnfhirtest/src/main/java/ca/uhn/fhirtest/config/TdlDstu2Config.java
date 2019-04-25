@@ -14,7 +14,6 @@ import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.TdlSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +52,7 @@ public class TdlDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Bean 
-	public IServerInterceptor securityInterceptor() {
+	public TdlSecurityInterceptor securityInterceptor() {
 		return new TdlSecurityInterceptor();
 	}
 	

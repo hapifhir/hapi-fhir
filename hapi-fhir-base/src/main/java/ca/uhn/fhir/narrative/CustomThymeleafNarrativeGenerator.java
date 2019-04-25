@@ -23,7 +23,6 @@ package ca.uhn.fhir.narrative;
 import java.util.Arrays;
 import java.util.List;
 
-import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.lang3.Validate;
 
 public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
@@ -40,8 +39,8 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 *            <li>classpath:/com/package/file.properties</li>
 	 *            </ul>
 	 */
-	public CustomThymeleafNarrativeGenerator(FhirContext theFhirContext, String... thePropertyFile) {
-		super(theFhirContext);
+	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) {
+		super();
 		setPropertyFile(thePropertyFile);
 	}
 

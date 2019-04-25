@@ -20,19 +20,26 @@ package ca.uhn.fhir.jpa.dao.index;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.Nonnull;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Service
 public class IdHelperService {
@@ -40,42 +47,73 @@ public class IdHelperService {
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired(required = true)
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public void delete(ForcedId forcedId) {
 		myForcedIdDao.delete(forcedId);
 	}
 
-	public Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-		return translateForcedIdToPids(myDaoConfig, new IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
+	/**
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
+	public Long translateForcedIdToPid(String theResourceName, String theResourceId) throws ResourceNotFoundException {
+		// We only pass 1 input in so only 0..1 will come back
+		IdDt id = new IdDt(theResourceName, theResourceId);
+		List<Long> matches = translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, Collections.singletonList(id));
+		assert matches.size() <= 1;
+		if (matches.isEmpty()) {
+			throw new ResourceNotFoundException(id);
+		}
+		return matches.get(0);
 	}
 
-	public List<Long> translateForcedIdToPids(IIdType theId) {
-		return IdHelperService.translateForcedIdToPids(myDaoConfig, theId, myForcedIdDao);
+	public List<Long> translateForcedIdToPids(Collection<IIdType> theId) {
+		return IdHelperService.translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, theId);
 	}
 
-	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IIdType theId, IForcedIdDao theForcedIdDao) {
-		Validate.isTrue(theId.hasIdPart());
+	static List<Long> translateForcedIdToPids(DaoConfig theDaoConfig, IInterceptorBroadcaster theInterceptorBroadcaster, IForcedIdDao theForcedIdDao, Collection<IIdType> theId) {
+		theId.forEach(id -> Validate.isTrue(id.hasIdPart()));
 
-		if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(theId)) {
-			return Collections.singletonList(theId.getIdPartAsLong());
-		} else {
-			List<ForcedId> forcedId;
-			if (theId.hasResourceType()) {
-				forcedId = theForcedIdDao.findByTypeAndForcedId(theId.getResourceType(), theId.getIdPart());
+		if (theId.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		List<Long> retVal = new ArrayList<>();
+
+		ListMultimap<String, String> typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
+		for (IIdType nextId : theId) {
+			if (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY && isValidPid(nextId)) {
+				retVal.add(nextId.getIdPartAsLong());
 			} else {
-				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
-			}
-
-			if (!forcedId.isEmpty()) {
-				List<Long> retVal = new ArrayList<>(forcedId.size());
-				for (ForcedId next : forcedId) {
-					retVal.add(next.getResourcePid());
+				if (nextId.hasResourceType()) {
+					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
+				} else {
+					typeToIds.put("", nextId.getIdPart());
 				}
-				return retVal;
-			} else {
-				throw new ResourceNotFoundException(theId);
 			}
 		}
+
+		for (Map.Entry<String, Collection<String>> nextEntry : typeToIds.asMap().entrySet()) {
+			String nextResourceType = nextEntry.getKey();
+			Collection<String> nextIds = nextEntry.getValue();
+			if (isBlank(nextResourceType)) {
+
+				StorageProcessingMessage msg = new StorageProcessingMessage()
+					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
+				HookParams params = new HookParams()
+					.add(StorageProcessingMessage.class, msg);
+				theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
+
+				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
+
+			} else {
+				retVal.addAll(theForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds));
+			}
+		}
+
+			return retVal;
 	}
 
 	public String translatePidIdToForcedId(String theResourceType, Long theId) {
