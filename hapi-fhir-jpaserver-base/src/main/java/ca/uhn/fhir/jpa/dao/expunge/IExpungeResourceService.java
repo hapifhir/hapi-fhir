@@ -5,7 +5,7 @@ import org.springframework.data.domain.Slice;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public interface IExpungeDaoService {
+public interface IExpungeResourceService {
 	Slice<Long> findHistoricalVersionsOfDeletedResources(String theResourceName, Long theResourceId, int theI);
 
 	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theI);
