@@ -17,7 +17,6 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 
@@ -114,8 +113,9 @@ public class FhirServerConfigCommon {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 * @return
 	 */
-	public static IServerInterceptor getResponseHighlighterInterceptor() {
+	public static ResponseHighlighterInterceptor getResponseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
