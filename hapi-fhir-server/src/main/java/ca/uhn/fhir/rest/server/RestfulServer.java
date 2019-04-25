@@ -1643,7 +1643,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
 	 */
 	@Deprecated
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+	public void unregisterInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
 		getInterceptorService().unregisterInterceptor(theInterceptor);
 	}
