@@ -26,7 +26,10 @@ import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
@@ -55,7 +58,9 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 		for (QueryInfo next : theQueryInfoList) {
 			String sql = trim(next.getQuery());
 			List<String> params;
+			int size = 0;
 			if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
+				size = next.getParametersList().size();
 				List<ParameterSetOperation> values = next
 					.getParametersList()
 					.get(0);
@@ -74,7 +79,7 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			queryList.add(new Query(sql, params, startTime, elapsedTime, stackTraceElements));
+			queryList.add(new Query(sql, params, startTime, elapsedTime, stackTraceElements, size));
 		}
 	}
 
@@ -87,13 +92,15 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 		private final long myQueryTimestamp;
 		private final long myElapsedTime;
 		private final StackTraceElement[] myStackTrace;
+		private final int mySize;
 
-		Query(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements) {
+		Query(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements, int theSize) {
 			mySql = theSql;
 			myParams = Collections.unmodifiableList(theParams);
 			myQueryTimestamp = theQueryTimestamp;
 			myElapsedTime = theElapsedTime;
 			myStackTrace = theStackTraceElements;
+			mySize = theSize;
 		}
 
 		public long getQueryTimestamp() {
@@ -121,7 +128,6 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			if (theInlineParams) {
 				List<String> nextParams = new ArrayList<>(myParams);
-
 				int idx = 0;
 				while (nextParams.size() > 0) {
 					idx = retVal.indexOf("?", idx);
@@ -134,12 +140,19 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 				}
 			}
 
+			if (mySize > 1) {
+				retVal += "\nsize: " + mySize + "\n";
+			}
 			return trim(retVal);
 
 		}
 
 		public StackTraceElement[] getStackTrace() {
 			return myStackTrace;
+		}
+
+		public int getSize() {
+			return mySize;
 		}
 	}
 

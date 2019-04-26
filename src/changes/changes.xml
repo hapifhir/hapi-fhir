@@ -175,7 +175,7 @@
 				The JSON Patch provider has been switched to use the provider from the
 				<![CDATA[
 				<a href="https://github.com/java-json-tools/json-patch">Java JSON Tools</a>
-				]]> 
+				]]>
 				project, as it is much more robust and fault tolerant.
 			</action>
 			<action type="fix">
@@ -185,6 +185,10 @@
 				When performing a JSON Patch in JPA server, the post-patched document is now validated to
 				ensure that the patch was valid for the candidate resource. This means that invalid patches
 				are caught and not just silently ignored.
+			</action>
+			<action type="add">
+				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				in DaoConfig.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

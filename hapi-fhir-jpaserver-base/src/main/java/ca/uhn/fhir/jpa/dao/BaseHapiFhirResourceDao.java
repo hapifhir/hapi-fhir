@@ -90,12 +90,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected DaoConfig myDaoConfig;
 	@Autowired
 	private MatchResourceUrlService myMatchResourceUrlService;
+	@Autowired
+	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	private String myResourceName;
 	private Class<T> myResourceType;
 	private String mySecondaryPrimaryKeyParamName;
-	@Autowired
-	private IResourceReindexingSvc myResourceReindexingSvc;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -236,8 +236,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			notifyInterceptors(RestOperationTypeEnum.DELETE, requestDetails);
 		}
 
-		Date updateTime = new Date();
-		ResourceTable savedEntity = updateEntity(theRequest, null, entity, updateTime, updateTime);
+		ResourceTable savedEntity = updateEntityForDelete(theRequest, entity);
 		resourceToDelete.setId(entity.getIdDt());
 
 		// Notify JPA interceptors
@@ -285,15 +284,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		Set<Long> resource = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
-		if (resource.size() > 1) {
+		Set<Long> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
+		if (resourceIds.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
-				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resource.size()));
+				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
 			}
 		}
 
-		List<ResourceTable> deletedResources = new ArrayList<ResourceTable>();
-		for (Long pid : resource) {
+		List<ResourceTable> deletedResources = new ArrayList<>();
+		for (Long pid : resourceIds) {
 			ResourceTable entity = myEntityManager.find(ResourceTable.class, pid);
 			deletedResources.add(entity);
 
@@ -316,8 +315,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			// Perform delete
-			Date updateTime = new Date();
-			updateEntity(theRequest, null, entity, updateTime, updateTime);
+
+			updateEntityForDelete(theRequest, entity);
 			resourceToDelete.setId(entity.getIdDt());
 
 			// Notify JPA interceptors
@@ -558,10 +557,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return doExpunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
+			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
 		}
 
-		return doExpunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
 	}
 
 	@Override
@@ -569,7 +568,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
-		return doExpunge(getResourceName(), null, null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions);
 	}
 
 	@Override
