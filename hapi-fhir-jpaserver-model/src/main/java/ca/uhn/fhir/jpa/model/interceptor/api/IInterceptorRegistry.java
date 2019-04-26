@@ -22,9 +22,36 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import javax.annotation.Nullable;
+import java.util.Collection;
+
 public interface IInterceptorRegistry {
 
 	int DEFAULT_ORDER = 0;
+
+	/**
+	 * Register an interceptor that will be used in a {@link ThreadLocal} context.
+	 * This means that events will only be broadcast to the given interceptor if
+	 * they were fired from the current thread.
+	 * <p>
+	 * Note that it is almost always desirable to call this method with a
+	 * try-finally statment that removes the interceptor afterwards, since
+	 * this can lead to memory leakage, poor performance due to ever-increasing
+	 * numbers of interceptors, etc.
+	 * </p>
+	 *
+	 * @param theInterceptor The interceptor
+	 * @return Returns <code>true</code> if at least one valid hook method was found on this interceptor
+	 */
+	boolean registerThreadLocalInterceptor(Object theInterceptor);
+
+	/**
+	 * Unregisters a ThreadLocal interceptor
+	 *
+	 * @param theInterceptor The interceptor
+	 * @see #registerThreadLocalInterceptor(Object)
+	 */
+	void unregisterThreadLocalInterceptor(Object theInterceptor);
 
 	/**
 	 * Register an interceptor. This method has no effect if the given interceptor is already registered.
@@ -53,13 +80,12 @@ public interface IInterceptorRegistry {
 	@Deprecated
 	void unregisterGlobalInterceptor(Object theInterceptor);
 
+	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, IAnonymousLambdaHook theHook);
-
-	@VisibleForTesting
-	void registerAnonymousHookForUnitTest(Pointcut thePointcut, int theOrder, IAnonymousLambdaHook theHook);
+	void registerAnonymousInterceptor(Pointcut thePointcut, int theOrder, IAnonymousInterceptor theInterceptor);
 
 	@VisibleForTesting
 	void clearAnonymousHookForUnitTest();
+
+	void unregisterInterceptors(@Nullable Collection<?> theInterceptors);
 }

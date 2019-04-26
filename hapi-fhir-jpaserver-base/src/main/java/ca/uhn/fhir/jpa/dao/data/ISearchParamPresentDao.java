@@ -33,6 +33,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent, Long> {
 
 	@Query("SELECT s FROM SearchParamPresent s WHERE s.myResource = :res")
-	public Collection<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
+	Collection<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
 
 }

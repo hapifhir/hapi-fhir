@@ -123,6 +123,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         entry.getRequest().getUrlElement().setValue(next.getId());
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
     }
 
     /*
@@ -215,6 +218,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         if (id != null) {
           entry.getRequest().setUrl(id.getValue());
         }
+      }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
       }
 
       // Populate Response

@@ -3,7 +3,7 @@ package ca.uhn.fhir.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.ActivityDefinition;
 import org.hl7.fhir.dstu3.model.ConceptMap;

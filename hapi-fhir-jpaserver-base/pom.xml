@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.7.0</version>
+		<version>3.8.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -126,21 +126,14 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!--
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 		</dependency>
-		-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -460,6 +453,10 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -521,11 +518,6 @@
 		<dependency>
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-spring</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 			<scope>test</scope>
 		</dependency>
 

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -44,14 +45,12 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.FhirTerser;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hibernate.Session;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -67,7 +66,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
+import javax.persistence.PersistenceException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -88,6 +89,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired(required = false)
+	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -97,6 +100,14 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 		String actionName = "Transaction";
 		BUNDLE response = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, theRequest, actionName);
+
+		List<BUNDLEENTRY> entries = myVersionAdapter.getEntries(response);
+		for (int i = 0; i < entries.size(); i++) {
+			if (ElementUtil.isEmpty(entries.get(i))) {
+				entries.remove(i);
+				i--;
+			}
+		}
 
 		return response;
 	}
@@ -446,7 +457,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 		transactionStopWatch.endCurrentTask();
 
-		ourLog.info("Transaction timing:\n{}", transactionStopWatch.formatTaskDurations());
+		ourLog.debug("Transaction timing:\n{}", transactionStopWatch.formatTaskDurations());
 
 		return response;
 	}
@@ -501,13 +512,78 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 			/*
+			 * Look for duplicate conditional creates and consolidate them
+			 */
+			final HashMap<String, String> keyToUuid = new HashMap<>();
+			final IdentityHashMap<IBaseResource, String> identityToUuid = new IdentityHashMap<>();
+			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
+				BUNDLEENTRY nextReqEntry = theEntries.get(index);
+				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
+				if (resource != null) {
+					String verb = myVersionAdapter.getEntryRequestVerb(nextReqEntry);
+					String entryUrl = myVersionAdapter.getFullUrl(nextReqEntry);
+					String requestUrl = myVersionAdapter.getEntryRequestUrl(nextReqEntry);
+					String ifNoneExist = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
+					String key = verb + "|" + requestUrl + "|" + ifNoneExist;
+
+					// Conditional UPDATE
+					boolean consolidateEntry = false;
+					if ("PUT".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl)) {
+							int questionMarkIndex = requestUrl.indexOf('?');
+							if (questionMarkIndex >= 0 && requestUrl.length() > (questionMarkIndex + 1)) {
+								consolidateEntry = true;
+							}
+						}
+					}
+
+					// Conditional CREATE
+					if ("POST".equals(verb)) {
+						if (isNotBlank(entryUrl) && isNotBlank(requestUrl) && isNotBlank(ifNoneExist)) {
+							if (!entryUrl.equals(requestUrl)) {
+								consolidateEntry = true;
+							}
+						}
+					}
+
+					if (consolidateEntry) {
+						if (!keyToUuid.containsKey(key)) {
+							keyToUuid.put(key, entryUrl);
+							identityToUuid.put(resource, entryUrl);
+						} else {
+							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
+							theEntries.remove(index);
+							index--;
+							String existingUuid = keyToUuid.get(key);
+							for (BUNDLEENTRY nextEntry : theEntries) {
+								IBaseResource nextResource = myVersionAdapter.getResource(nextEntry);
+								for (ResourceReferenceInfo nextReference : myContext.newTerser().getAllResourceReferences(nextResource)) {
+									// We're interested in any references directly to the placeholder ID, but also
+									// references that have a resource target that has the placeholder ID.
+									String nextReferenceId = nextReference.getResourceReference().getReferenceElement().getValue();
+									if (isBlank(nextReferenceId) && nextReference.getResourceReference().getResource() != null) {
+										nextReferenceId = nextReference.getResourceReference().getResource().getIdElement().getValue();
+									}
+									if (entryUrl.equals(nextReferenceId)) {
+										nextReference.getResourceReference().setReference(existingUuid);
+										nextReference.getResourceReference().setResource(null);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+
+			/*
 			 * Loop through the request and process any entries of type
 			 * PUT, POST or DELETE
 			 */
 			for (int i = 0; i < theEntries.size(); i++) {
 
-				if (i % 100 == 0) {
-					ourLog.debug("Processed {} non-GET entries out of {}", i, theEntries.size());
+				if (i % 250 == 0) {
+					ourLog.info("Processed {} non-GET entries out of {} in transaction", i, theEntries.size());
 				}
 
 				BUNDLEENTRY nextReqEntry = theEntries.get(i);
@@ -679,7 +755,13 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			FhirTerser terser = myContext.newTerser();
 			theTransactionStopWatch.startTask("Index " + theIdToPersistedOutcome.size() + " resources");
+			int i = 0;
 			for (DaoMethodOutcome nextOutcome : theIdToPersistedOutcome.values()) {
+
+				if (i++ % 250 == 0) {
+					ourLog.info("Have indexed {} entities out of {} in transaction", i, theIdToPersistedOutcome.values().size());
+				}
+
 				IBaseResource nextResource = nextOutcome.getResource();
 				if (nextResource == null) {
 					continue;
@@ -733,7 +815,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			theTransactionStopWatch.endCurrentTask();
 			theTransactionStopWatch.startTask("Flush writes to database");
 
-			flushJpaSession();
+			try {
+				flushJpaSession();
+			} catch (PersistenceException e) {
+				if (myHapiFhirHibernateJpaDialect != null) {
+					List<String> types = theIdToPersistedOutcome.keySet().stream().filter(t -> t != null).map(t -> t.getResourceType()).collect(Collectors.toList());
+					String message = "Error flushing transaction with resource types: " + types;
+					throw myHapiFhirHibernateJpaDialect.translate(e, message);
+				}
+				throw e;
+			}
 
 			theTransactionStopWatch.endCurrentTask();
 			if (conditionalRequestUrls.size() > 0) {

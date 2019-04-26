@@ -260,16 +260,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		myId = theId;
 	}
 
-	@Override
-	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = myId;
-			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
-		} else {
-			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
-		}
-	}
-
 	public Long getIndexStatus() {
 		return myIndexStatus;
 	}
@@ -577,6 +567,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
 		retVal.setVersion(myVersion);
+		retVal.setTransientForcedId(getTransientForcedId());
 
 		retVal.setPublished(getPublished());
 		retVal.setUpdated(getUpdated());

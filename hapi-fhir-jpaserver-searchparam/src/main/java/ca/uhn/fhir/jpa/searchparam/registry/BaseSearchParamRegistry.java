@@ -48,9 +48,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	private static final int MAX_MANAGED_PARAM_COUNT = 10000;
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseSearchParamRegistry.class);
-	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
 	private static final int MAX_RETRIES = 60; // 5 minutes
-
+	private static long REFRESH_INTERVAL = 60 * DateUtils.MILLIS_PER_MINUTE;
 	@Autowired
 	private ModelConfig myModelConfig;
 	@Autowired
@@ -170,12 +169,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			}
 
 			if (next.getCompositeOf() != null) {
-				next.getCompositeOf().sort(new Comparator<RuntimeSearchParam>() {
-					@Override
-					public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
-						return StringUtils.compare(theO1.getName(), theO2.getName());
-					}
-				});
+				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
 					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
 						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());
@@ -327,8 +321,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		mySearchParamProvider = theSearchParamProvider;
 	}
 
-	synchronized int refreshCacheWithRetry() {
-		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL), MAX_RETRIES);
+	int refreshCacheWithRetry() {
+		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> {
+			synchronized(BaseSearchParamRegistry.this) {
+				return mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL);
+			}
+		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
 	}
 

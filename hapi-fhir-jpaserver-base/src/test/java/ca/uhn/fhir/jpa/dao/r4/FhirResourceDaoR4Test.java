@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.entity.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
@@ -73,6 +73,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setTreatReferencesAsLogical(new DaoConfig().getTreatReferencesAsLogical());
 		myDaoConfig.setEnforceReferentialIntegrityOnDelete(new DaoConfig().isEnforceReferentialIntegrityOnDelete());
+		myDaoConfig.setEnforceReferenceTargetTypes(new DaoConfig().isEnforceReferenceTargetTypes());
 	}
 
 	private void assertGone(IIdType theId) {
@@ -944,6 +945,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("Resource Organization/testCreateWithIllegalReference not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
+
+		// Disable validation
+		myDaoConfig.setEnforceReferenceTargetTypes(false);
+		Patient p = new Patient();
+		p.getManagingOrganization().setReferenceElement(id1);
+		myPatientDao.create(p, mySrd);
+
 
 	}
 
@@ -2003,7 +2011,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		try {
 			myEncounterDao.read(outcome.getId(), mySrd);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (InvalidRequestException e) {
 			// expected
 		}
 		try {

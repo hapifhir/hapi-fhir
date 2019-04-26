@@ -20,6 +20,9 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.search.PerformanceMessage;
+import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +31,11 @@ import java.util.List;
  * Value for {@link Hook#value()}
  */
 public enum Pointcut {
+
+	/**
+	 * This pointcut will be called once when a given interceptor is registered
+	 */
+	REGISTERED,
 
 	/**
 	 * Invoked whenever a persisted resource has been modified and is being submitted to the
@@ -125,6 +133,28 @@ public enum Pointcut {
 	SUBSCRIPTION_AFTER_DELIVERY("ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
 	/**
+	 * Invoked immediately after the attempted delivery of a subscription, if the delivery
+	 * failed.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>java.lang.Exception - The exception that caused the failure.  Note this could be an exception thrown by a SUBSCRIPTION_BEFORE_DELIVERY or SUBSCRIPTION_AFTER_DELIVERY interceptor</li>
+	 * <li>ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage - the message that triggered the exception</li>
+	 * <li>java.lang.Exception</li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>void</code> or may return a <code>boolean</code>. If the method returns
+	 * <code>void</code> or <code>true</code>, processing will continue normally, meaning that
+	 * an exception will be thrown by the delivery mechanism. This typically means that the
+	 * message will be returned to the processing queue. If the method
+	 * returns <code>false</code>, processing will be aborted and no further action will be
+	 * taken for the delivery.
+	 * </p>
+	 */
+	SUBSCRIPTION_AFTER_DELIVERY_FAILED("ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "java.lang.Exception"),
+
+	/**
 	 * Invoked immediately after the delivery of a REST HOOK subscription.
 	 * <p>
 	 * When this hook is called, all processing is complete so this hook should not
@@ -179,6 +209,7 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
 
+
 	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been checked for whether any subscriptions
@@ -194,7 +225,6 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED("ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
-
 
 	/**
 	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
@@ -289,6 +319,7 @@ public enum Pointcut {
 	 */
 	OP_PRECOMMIT_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
 
+
 	/**
 	 * Invoked before a resource will be updated, immediately before the resource
 	 * is persisted to the database.
@@ -309,8 +340,160 @@ public enum Pointcut {
 	 */
 	OP_PRESTORAGE_RESOURCE_UPDATED("org.hl7.fhir.instance.model.api.IBaseResource", "org.hl7.fhir.instance.model.api.IBaseResource"),
 
-	;
+	/**
+	 * Invoked when a resource may be returned to the user, whether as a part of a READ,
+	 * a SEARCH, or even as the response to a CREATE/UPDATE, etc.
+	 * <p>
+	 * This hook is invoked when a resource has been loaded by the storage engine and
+	 * is being returned to the HTTP stack for response. This is not a guarantee that the
+	 * client will ultimately see it, since filters/headers/etc may affect what
+	 * is returned but if a resource is loaded it is likely to be used.
+	 * Note also that caching may affect whether this pointcut is invoked.
+	 * </p>
+	 * <p>
+	 * Hooks will have access to the contents of the resource being returned
+	 * and may choose to make modifications. These changes will be reflected in
+	 * returned resource but have no effect on storage.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource (the resource being returned)</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	RESOURCE_MAY_BE_RETURNED("org.hl7.fhir.instance.model.api.IBaseResource"),
 
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has returned the very first result
+	 * from the database. The timing on this call can be a good indicator of how
+	 * performant a query is in general.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_FIRST_RESULT_LOADED(SearchRuntimeDetails.class.getName()),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when an individual search query SQL SELECT statement
+	 * has completed and no more results are available from that query. Note that this
+	 * doesn't necessarily mean that no more matching results exist in the database,
+	 * since HAPI FHIR JPA batch loads results in to the query cache in chunks in order
+	 * to provide predicable results without overloading memory or the database.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_SELECT_COMPLETE(SearchRuntimeDetails.class.getName()),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has failed for any reason. When this pointcut
+	 * is invoked, the search has completed unsuccessfully and will not be continued.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_FAILED(SearchRuntimeDetails.class.getName()),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has failed for any reason. When this pointcut
+	 * is invoked, a pass in the Search Coordinator has completed successfully, but
+	 * not all possible resources have been loaded yet so a future paging request
+	 * may trigger a new task that will load further resources.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_PASS_COMPLETE(SearchRuntimeDetails.class.getName()),
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a search has failed for any reason. When this pointcut
+	 * is invoked, a pass in the Search Coordinator has completed successfully, and all
+	 * possible results have been fetched and loaded into the query cache.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
+	 * performed. Hooks should not modify this object.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_SEARCH_COMPLETE(SearchRuntimeDetails.class.getName()),
+
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when any informational or warning messages generated by the
+	 * SearchCoordinator are created. It is typically used to provide logging
+	 * or capture details related to a specific request.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * {@link PerformanceMessage} - Contains the message
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	PERFTRACE_MESSAGE(PerformanceMessage.class.getName())
+
+	;
 	private final List<String> myParameterTypes;
 
 	Pointcut(String... theParameterTypes) {

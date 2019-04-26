@@ -6,6 +6,138 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="3.8.0" date="TBD" description="Hippo">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Hibernate (JPA): 5.4.1 -&gt; 5.4.2</li>
+					<li>Jackson (JPA): 2.9.7 -&gt; 2.9.8</li>
+					<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.6.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.5.RELEASE</li>
+					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
+					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
+				</ul>
+				]]>
+			</action>
+			<action type="add">
+				In Servers that are configured to support extended mode
+				<![CDATA[<code>_elements</code>]]> parameters, it is now possible to
+				use the :exclude modifier to exclude entire resource types.
+			</action>
+			<action type="add">
+				RequestDetails now has methods called getAttribute and setAttribute that can
+				be used by interceptors to pass arbitrary data between requests.
+			</action>
+			<action type="add">
+				The hapi-fhir-jpaserver-starter project has been updated to use a properties
+				file for configuration, making it much easier to get started with this 
+				project. Thanks to Sean McIlvenna for the pull request!
+			</action>
+			<action type="fix">
+				The hapi-fhir-jpaserver-example did not have Subscription capabilities
+				enabled after the refactoring of how Subscriptions are enabled that
+				occurred in HAPI FHIR 3.7.0. Thanks to Volker Schmidt for the pull request!
+			</action>
+			<action type="change">
+				Re-use subscription channel and handlers when a subscription is updated (unless the channel type changed).
+			</action>
+			<action type="fix">
+				When using the <![CDATA[<code>_elements</code>]]> parameter on searches and reads,
+				requesting extensions to be included caused the extensions to be included but
+				not any values contained within. This has been corrected.
+			</action>
+			<action type="add">
+				The JPA terminology service can now detect when Hibvernate Search (Lucene)
+				is not enabled, and will perform simple ValueSet expansions without relying
+				on Hibenrate Search in such cases.
+			</action>
+			<action type="change" issue="1209">
+				A Google Analytics script fragment was leftover in the hapi-fhir-jpaserver
+				example and starter projects. Thanks to Patrick Werner for removing these!
+			</action>
+			<action type="add">
+				ParametersUtil now has a utility method that can be used to add parameter values
+				using the string name of the datatype (e.g. "dateTime") in order to help
+				building Parameters resources in a version-independent way.
+			</action>
+			<action type="fix">
+				When performing a search using the JPA server, if a search returned between 1500
+				and 2000 results, a query for the final page of results would timeout due to
+				a page calculation error. This has been corrected.
+			</action>
+			<action type="add">
+				In the JPA server, a much more readable error message is now returned returned when 
+				two client threads collide while trying to simultaneously create a resource with the
+				same client-assigned ID. In addition, better error messages are now returned
+				when conflicts such as this one are hit within a FHIR transaction operation.
+			<action type="add">
+				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
+				when performing token searches with multiple OR values.
+			</action>
+			<action type="add">
+				The JPA server transaction processor will now automatically detect if the request
+				Bundle contains multiple entries having identical conditional create operations, and
+				collapse these into a single operation. This is done as a convenience, since many
+				conversion algorithms can accidentally generate such duplicates.
+			</action>
+			<action type="fix" issue="1223">
+				Searching the JPA server with multiple instances of the same token search parameter
+				(e.g. "Patient?identifier=&amp;identifier=b" returned no results even if resources
+				should have matched. Thanks to @mingdatacom for reporting!
+			</action>
+			<action type="add">
+				A new config setting has been added to the JPA DaoConfig that disables validation
+				of the resource type for target resources in references.
+			</action>
+			<action type="add">
+				HapiLocalizer can now handle message patterns with braces that aren't a part of a
+				message format expression. E.g. "Here is an {example}".
+			</action>
+			<action type="add">
+				JPA searches using a Composite Unique Index will now use that index for faster
+				searching even if the search has _includes and/or _sorts. Previously these two
+				features caused the search builder to skip using the index.
+			</action>
+			<action type="fix">
+				JPA searches using a Composite Unique Index did not return the correct results if
+				a REFERENCE search parameter was used with arguments that consisted of
+				unqualified resource IDs.
+			</action>
+			<action type="fix">
+				A non-threadsafe use of DateFormat was cleaned up in the StopWatch class.
+			</action>
+			<action type="add">
+				When performing a search in the JPA server where one of the parameters is a
+				reference with multiple values (e.g. Patient?organization=A,B) the generated
+				SQL was previously a set of OR clauses and this has been collapsed into a single
+				IN clause for better performance.
+			</action>
+			<action type="fix">
+				When returning the results of a history operation from a HAPI FHIR server,
+				any entries with a method of DELETE contained a stub resource in
+				Bundle.entry.resource, even though the FHIR spec states that this field
+				should be empty. This was corrected.
+			</action>
+			<action type="change">
+				The hapi-fhir-testpage-overlay project no longer includes any library JARs
+				in the built WAR, in order to prevent duplicates and conflicts in implementing
+				projects.
+			</action>
+			<action type="fix">
+				Two expunge bug fixes:
+				The first bug is that the expunge operation wasn't bailing once it hit its limit.  This resulted in a
+				"Page size must not be less than one!" error.
+				The second bug is that one case wasn't properly handled: when a resourceId with no version is provided.
+				This executed the case where only resource type is provided.
+			</action>
+			<action type="fix">
+				When updating a resource in the JPA server, if the contents have not actually changed
+				the resource version is not updated and no new version is created. In this situation,
+				the update time was modified however. It will no longer be updated.
+			</action>
+		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
 				HAPI FHIR is now built using OpenJDK 11. Users are recommended to upgrade to this version
@@ -544,7 +676,6 @@
 				date was corrected. Thanks Heinz-Dieter Conradi for the Pull Request!
 			</action>
 		</release>
-
 		<release version="3.5.0" date="2018-09-17">
 			<action type="add">
 				HAPI FHIR now supports JDK 9 and JDK 10, both for building HAPI FHIR
@@ -6102,7 +6233,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 				<![CDATA[<b>API CHANGE:</b>]]>: Most elements in the HAPI FHIR model contain
 				a getId() and setId() method. This method is confusing because it is only actually used
 				for IDREF elements (which are rare) but its name makes it easy to confuse with more
-				important identifiers. For this reason, these methods have been deprocated and replaced with
+				important identifiers. For this reason, these methods have been deprecated and replaced with
 				get/setElementSpecificId() methods. The old methods will be removed at some point. Resource
 				types are unchanged and retain their get/setId methods.
 			</action>

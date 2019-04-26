@@ -18,10 +18,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -30,7 +27,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ElementsParamR4Test {
 
@@ -42,12 +40,99 @@ public class ElementsParamR4Test {
 	private static Server ourServer;
 	private static Procedure ourNextProcedure;
 	private static RestfulServer ourServlet;
+	private static Observation ourNextObservation;
 
 	@Before
 	public void before() {
 		ourLastElements = null;
 		ourNextProcedure = null;
 		ourServlet.setElementsSupport(new RestfulServer().getElementsSupport());
+	}
+
+	@Test
+	public void testElementsOnChoiceWithGenericName() throws IOException {
+		createObservationWithQuantity();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Observation?_elements=value,status",
+			bundle -> {
+				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
+				assertEquals("mg", obs.getValueQuantity().getCode());
+			});
+	}
+
+	@Test
+	public void testElementsOnChoiceWithSpecificName() throws IOException {
+		createObservationWithQuantity();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Observation?_elements=valueQuantity,status",
+			bundle -> {
+				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals("222", obs.getValueQuantity().getValueElement().getValueAsString());
+				assertEquals("mg", obs.getValueQuantity().getCode());
+			});
+	}
+
+	@Test
+	@Ignore
+	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
+		createObservationWithQuantity();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Observation?_elements=valueString,status",
+			bundle -> {
+				Observation obs = (Observation) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals(null, obs.getValueQuantity());
+			});
+	}
+
+	@Test
+	public void testExcludeResources() throws IOException {
+		createProcedureWithLongChain();
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
+			bundle -> {
+				assertEquals(null, bundle.getEntry().get(0).getResource());
+				assertEquals(null, bundle.getEntry().get(1).getResource());
+
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
+				assertEquals(true, obs.getMeta().isEmpty());
+				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
+				assertEquals(1, obs.getCode().getCoding().size());
+				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+			});
+	}
+
+	@Test
+	public void testInvalidInclude() throws IOException {
+		createProcedureWithLongChain();
+		EncodingEnum encodingEnum;
+		HttpGet httpGet;
+
+		encodingEnum = EncodingEnum.JSON;
+		httpGet = new HttpGet(("http://localhost:" + ourPort + "/Procedure?_include=*&_elements=DiagnosticReport:foo") + "&_pretty=true&_format=" + encodingEnum.getFormatContentType());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(400, status.getStatusLine().getStatusCode());
+		}
+
+	}
+
+	private void createObservationWithQuantity() {
+		ourNextObservation = new Observation();
+		ourNextObservation.setId("Observation/123/_history/456");
+		ourNextObservation.setStatus(Observation.ObservationStatus.FINAL);
+		ourNextObservation.setSubject(new Reference("Patient/AAA"));
+		ourNextObservation.setValue(new Quantity()
+			.setValue(222)
+			.setCode("mg")
+			.setSystem("http://unitsofmeasure.org"));
 	}
 
 	@Test
@@ -108,7 +193,7 @@ public class ElementsParamR4Test {
 				assertThat(responseContent, containsString("THE DIV"));
 				assertThat(responseContent, not(containsString("family")));
 				assertThat(responseContent, not(containsString("maritalStatus")));
-				assertThat(ourLastElements, containsInAnyOrder( "text"));
+				assertThat(ourLastElements, containsInAnyOrder("text"));
 			}
 		);
 	}
@@ -132,13 +217,12 @@ public class ElementsParamR4Test {
 				assertEquals(0, dr.getMeta().getTag().size());
 				assertEquals("Observation/OBSA", dr.getResult().get(0).getReference());
 
-				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
 				assertEquals(0, obs.getMeta().getTag().size());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals("1234-5", obs.getCode().getCoding().get(0).getCode());
 			});
 	}
-
 
 	@Test
 	public void testMultiResourceElementsFilter() throws IOException {
@@ -154,11 +238,47 @@ public class ElementsParamR4Test {
 				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
 				assertEquals(0, dr.getMeta().getTag().size());
 
-				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
 				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals(0, obs.getCode().getCoding().size());
 				assertEquals("STRING VALUE", obs.getValueStringType().getValue());
+			});
+	}
+
+	@Test
+	public void testMultiResourceElementsOnExtension() throws IOException {
+		ourNextProcedure = new Procedure();
+		ourNextProcedure.setId("Procedure/PROC");
+		ourNextProcedure.addExtension()
+			.setUrl("http://quantity")
+			.setValue(Quantity.fromUcum("1.1", "mg"));
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("http://quantity", procedure.getExtension().get(0).getUrl());
+				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
+				assertEquals(null, ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.reason",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getExtension().size());
 			});
 	}
 
@@ -176,7 +296,7 @@ public class ElementsParamR4Test {
 				DiagnosticReport dr = (DiagnosticReport) bundle.getEntry().get(1).getResource();
 				assertEquals(true, dr.getMeta().isEmpty());
 
-				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
 				assertEquals(true, obs.getMeta().isEmpty());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals(0, obs.getCode().getCoding().size());
@@ -203,7 +323,7 @@ public class ElementsParamR4Test {
 				assertEquals(true, dr.getMeta().isEmpty());
 				assertEquals(1, dr.getResult().size());
 
-				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
 				assertEquals("SUBSETTED", obs.getMeta().getTag().get(0).getCode());
 				assertEquals(null, obs.getStatus());
 				assertEquals(0, obs.getCode().getCoding().size());
@@ -228,7 +348,7 @@ public class ElementsParamR4Test {
 				assertEquals(true, dr.getMeta().isEmpty());
 				assertEquals(1, dr.getResult().size());
 
-				Observation obs = (Observation ) bundle.getEntry().get(2).getResource();
+				Observation obs = (Observation) bundle.getEntry().get(2).getResource();
 				assertEquals(true, obs.getMeta().isEmpty());
 				assertEquals(Observation.ObservationStatus.FINAL, obs.getStatus());
 				assertEquals(1, obs.getCode().getCoding().size());
@@ -297,6 +417,21 @@ public class ElementsParamR4Test {
 		}
 	}
 
+	public static class DummyObservationResourceProvider implements IResourceProvider {
+
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Observation.class;
+		}
+
+		@Search
+		public Observation search(@IncludeParam(allow = {"*"}) Collection<Include> theIncludes) {
+			return ourNextObservation;
+		}
+
+	}
+
 	public static class DummyProcedureResourceProvider implements IResourceProvider {
 
 		@Override
@@ -358,6 +493,8 @@ public class ElementsParamR4Test {
 
 		ourServlet.registerProvider(new DummyPatientResourceProvider());
 		ourServlet.registerProvider(new DummyProcedureResourceProvider());
+		ourServlet.registerProvider(new DummyObservationResourceProvider());
+
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

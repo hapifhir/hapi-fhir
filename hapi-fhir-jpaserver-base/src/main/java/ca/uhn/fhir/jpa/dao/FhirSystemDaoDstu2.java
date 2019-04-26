@@ -60,6 +60,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -665,7 +666,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
-	//@formatter:off
+	@Override
+	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
+		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+	}
+
 
 	/**
 	 * Transaction Order, per the spec:
@@ -675,7 +680,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	 * Process any PUT interactions
 	 * Process any GET interactions
 	 */
-	//@formatter:off
 	public class TransactionSorter implements Comparator<Entry> {
 
 		@Override

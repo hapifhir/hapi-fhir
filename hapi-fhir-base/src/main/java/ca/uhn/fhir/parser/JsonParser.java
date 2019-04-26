@@ -360,7 +360,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						narr = null;
 					}
 					if (narr != null && narr.isEmpty()) {
-						gen.generateNarrative(myContext, theResource, narr);
+						gen.populateResourceNarrative(myContext, theResource);
 						if (!narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -410,8 +410,17 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					continue;
 				}
 
-				String childName = childNameAndDef.getChildName();
-				theEncodeContext.pushPath(childName, false);
+				/*
+				 * Often the two values below will be the same thing. There are cases though
+				 * where they will not be. An example would be Observation.value, which is
+				 * a choice type. If the value contains a Quantity, then:
+				 * nextChildGenericName = "value"
+				 * nextChildSpecificName = "valueQuantity"
+				 */
+				String nextChildSpecificName = childNameAndDef.getChildName();
+				String nextChildGenericName = nextChild.getElementName();
+
+				theEncodeContext.pushPath(nextChildGenericName, false);
 
 				BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
 				boolean primitive = childDef.getChildType() == ChildTypeEnum.PRIMITIVE_DATATYPE;
@@ -451,20 +460,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					}
 				}
 
-				if (currentChildName == null || !currentChildName.equals(childName)) {
+				if (currentChildName == null || !currentChildName.equals(nextChildSpecificName)) {
 					if (inArray) {
 						theEventWriter.endArray();
 					}
 					if (nextChild.getMax() > 1 || nextChild.getMax() == Child.MAX_UNLIMITED) {
-						beginArray(theEventWriter, childName);
+						beginArray(theEventWriter, nextChildSpecificName);
 						inArray = true;
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
 					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
 						// suppress narratives from contained resources
 					} else {
-						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, childName, theContainedResource, nextChildElem, false, theEncodeContext);
+						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, nextChildSpecificName, theContainedResource, nextChildElem, false, theEncodeContext);
 					}
-					currentChildName = childName;
+					currentChildName = nextChildSpecificName;
 				} else {
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
 				}
@@ -594,6 +603,11 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private void encodeResourceToJsonStreamWriter(RuntimeResourceDefinition theResDef, IBaseResource theResource, JsonLikeWriter theEventWriter, String theObjectNameOrNull,
 																 boolean theContainedResource, IIdType theResourceId, EncodeContext theEncodeContext) throws IOException {
+
+		if (!super.shouldEncodeResource(theResDef.getName())) {
+			return;
+		}
+
 		if (!theContainedResource) {
 			super.containResourcesForEncoding(theResource);
 		}
@@ -1263,18 +1277,22 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonLikeWriter theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
 															List<HeldExtension> modifierExtensions, EncodeContext theEncodeContext) throws IOException {
 		if (extensions.isEmpty() == false) {
+			theEncodeContext.pushPath("extension", false);
 			beginArray(theEventWriter, "extension");
 			for (HeldExtension next : extensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 		if (modifierExtensions.isEmpty() == false) {
+			theEncodeContext.pushPath("modifierExtension", false);
 			beginArray(theEventWriter, "modifierExtension");
 			for (HeldExtension next : modifierExtensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 	}
 

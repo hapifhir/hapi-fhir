@@ -78,8 +78,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
 		}
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
 	}
 
 	@After
@@ -171,7 +171,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		public MethodOutcome update(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
 			ourContentTypes.add(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE).replaceAll(";.*", ""));
 			ourUpdatedObservations.add(theObservation);
-			updateLatch.invoke(new HookParams().add(Observation.class, theObservation));
+			updateLatch.invoke(null, new HookParams().add(Observation.class, theObservation));
 			ourLog.info("Received Listener Update (now have {} updates)", ourUpdatedObservations.size());
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}

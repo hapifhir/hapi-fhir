@@ -63,13 +63,61 @@ public abstract class BaseParser implements IParser {
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
-
 	/**
 	 * Constructor
 	 */
 	public BaseParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		myContext = theContext;
 		myErrorHandler = theParserErrorHandler;
+	}
+
+	List<ElementsPath> getDontEncodeElements() {
+		return myDontEncodeElements;
+	}
+
+	@Override
+	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
+		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
+			myDontEncodeElements = null;
+		} else {
+			myDontEncodeElements = theDontEncodeElements
+				.stream()
+				.map(ElementsPath::new)
+				.collect(Collectors.toList());
+		}
+	}
+
+	List<ElementsPath> getEncodeElements() {
+		return myEncodeElements;
+	}
+
+	@Override
+	public void setEncodeElements(Set<String> theEncodeElements) {
+
+		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
+			myEncodeElements = null;
+			myEncodeElementsAppliesToResourceTypes = null;
+		} else {
+			myEncodeElements = theEncodeElements
+				.stream()
+				.map(ElementsPath::new)
+				.collect(Collectors.toList());
+
+			myEncodeElementsAppliesToResourceTypes = new HashSet<>();
+			for (String next : myEncodeElements.stream().map(t -> t.getPath().get(0).getName()).collect(Collectors.toList())) {
+				if (next.startsWith("*")) {
+					myEncodeElementsAppliesToResourceTypes = null;
+					break;
+				}
+				int dotIdx = next.indexOf('.');
+				if (dotIdx == -1) {
+					myEncodeElementsAppliesToResourceTypes.add(next);
+				} else {
+					myEncodeElementsAppliesToResourceTypes.add(next.substring(0, dotIdx));
+				}
+			}
+
+		}
 	}
 
 	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
@@ -403,35 +451,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setEncodeElements(Set<String> theEncodeElements) {
-
-		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
-			myEncodeElements = null;
-			myEncodeElementsAppliesToResourceTypes = null;
-		} else {
-			myEncodeElements = theEncodeElements
-				.stream()
-				.map(ElementsPath::new)
-				.collect(Collectors.toList());
-
-			myEncodeElementsAppliesToResourceTypes = new HashSet<>();
-			for (String next : myEncodeElements.stream().map(t -> t.getPath().get(0).getName()).collect(Collectors.toList())) {
-				if (next.startsWith("*")) {
-					myEncodeElementsAppliesToResourceTypes = null;
-					break;
-				}
-				int dotIdx = next.indexOf('.');
-				if (dotIdx == -1) {
-					myEncodeElementsAppliesToResourceTypes.add(next);
-				} else {
-					myEncodeElementsAppliesToResourceTypes.add(next.substring(0, dotIdx));
-				}
-			}
-
-		}
-	}
-
-	@Override
 	public IIdType getEncodeForceResourceId() {
 		return myEncodeForceResourceId;
 	}
@@ -630,7 +649,7 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException {
-		return parseResource(theResourceType, new InputStreamReader(theInputStream, Charsets.UTF_8));
+		return parseResource(theResourceType, new InputStreamReader(theInputStream, Constants.CHARSET_UTF8));
 	}
 
 	@Override
@@ -804,18 +823,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
-		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
-			myDontEncodeElements = null;
-		} else {
-			myDontEncodeElements = theDontEncodeElements
-				.stream()
-				.map(ElementsPath::new)
-				.collect(Collectors.toList());
-		}
-	}
-
-	@Override
 	public IParser setDontStripVersionsFromReferencesAtPaths(String... thePaths) {
 		if (thePaths == null) {
 			setDontStripVersionsFromReferencesAtPaths((List<String>) null);
@@ -936,7 +943,7 @@ public abstract class BaseParser implements IParser {
 			String resourceName = myContext.getResourceDefinition(theResource).getName();
 			if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
 				return false;
-			} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*."+ thePath))) {
+			} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*." + thePath))) {
 				return false;
 			}
 		}
@@ -961,6 +968,17 @@ public abstract class BaseParser implements IParser {
 			throw new DataFormatException(b.toString());
 		}
 		throw new DataFormatException(nextChild + " has no child of type " + theType);
+	}
+
+	protected boolean shouldEncodeResource(String theName) {
+		if (myDontEncodeElements != null) {
+			for (ElementsPath next : myDontEncodeElements) {
+				if (next.equalsPath(theName)) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	class ChildNameAndDef {
@@ -1289,8 +1307,22 @@ public abstract class BaseParser implements IParser {
 			if (myResource != theOther.isResource()) {
 				return false;
 			}
-			if (myName.equals(theOther.getName())) {
+			String otherName = theOther.getName();
+			if (myName.equals(otherName)) {
 				return true;
+			}
+			/*
+			 * This is here to handle situations where a path like
+			 *    Observation.valueQuantity has been specified as an include/exclude path,
+			 * since we only know that path as
+			 *    Observation.value
+			 * until we get to actually looking at the values there.
+			 */
+			if (myName.length() > otherName.length() && myName.startsWith(otherName)) {
+				char ch = myName.charAt(otherName.length());
+				if (Character.isUpperCase(ch)) {
+					return true;
+				}
 			}
 			if (myName.equals("*")) {
 				return true;

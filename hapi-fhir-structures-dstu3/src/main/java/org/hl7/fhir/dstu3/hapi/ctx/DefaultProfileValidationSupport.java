@@ -1,11 +1,10 @@
-package org.hl7.fhir.dstu3.hapi.validation;
+package org.hl7.fhir.dstu3.hapi.ctx;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;

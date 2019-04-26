@@ -90,6 +90,38 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+
+	@Test
+	public void testSearchByExternalReference() {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FooName");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
+		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+
+		Media media = new Media();
+		Attachment attachment = new Attachment();
+		attachment.setLanguage("ENG");
+		media.setContent(attachment);
+		media.setSubject(patientReference);
+		media.setType(Media.DigitalMediaType.AUDIO);
+		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+
+
+		// Act
+		Bundle returnedBundle = ourClient.search()
+			.forResource(Observation.class)
+			.where(Observation.CONTEXT.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Assert
+		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
 	/**
 	 * See #872
 	 */
@@ -1843,10 +1875,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(id.withVersion("3").getValue(), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
 
-		assertEquals(id.withVersion("2").getValue(), history.getEntry().get(1).getResource().getId());
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
-		assertEquals(0, ((Patient) history.getEntry().get(1).getResource()).getName().size());
+		assertEquals(null, history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());

@@ -14,7 +14,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.*;
 
-public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test {
+public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test {
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
@@ -541,7 +541,41 @@ public class InMemorySubscriptionMatcherTestR3 extends BaseSubscriptionDstu3Test
 		}
 	}
 
-	// These last two are covered by other tests above
-	//				 String criteria = "ProcedureRequest?intent=original-order&category=Laboratory,Ancillary%20Orders,Hemodialysis&status=suspended,entered-in-error,cancelled";
-	//				 String criteria = "Observation?code=70965-9&context.type=IHD";
+	@Test
+	public void testCommunicationRequestWithRefAndDate() {
+		String criteria = "CommunicationRequest?requester=O1271,O1276&occurrence=ge2019-02-08T00:00:00-05:00&occurrence=le2019-02-09T00:00:00-05:00";
+		CommunicationRequest cr = new CommunicationRequest();
+		cr.getRequester().getAgent().setReference("Organization/O1276");
+		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
+		assertUnsupported(cr, criteria);
+	}
+
+
+	@Test
+	public void testCommunicationRequestWithRef() {
+		String criteria = "CommunicationRequest?requester=O1271,O1276";
+		CommunicationRequest cr = new CommunicationRequest();
+		cr.getRequester().getAgent().setReference("Organization/O1276");
+		assertMatched(cr, criteria);
+	}
+
+	@Test
+	public void testSystemWithNullValue() {
+		String criteria = "Observation?code=17861-6";
+		Observation observation = new Observation();
+		CodeableConcept code = new CodeableConcept();
+		observation.getCode().addCoding().setSystem("http://loinc.org");
+
+		assertNotMatched(observation, criteria);
+	}
+
+	@Test
+	public void testNullSystemNotNullValue() {
+		String criteria = "Observation?code=17861-6";
+		Observation observation = new Observation();
+		CodeableConcept code = new CodeableConcept();
+		observation.getCode().addCoding().setCode("look ma no system");
+
+		assertNotMatched(observation, criteria);
+	}
 }

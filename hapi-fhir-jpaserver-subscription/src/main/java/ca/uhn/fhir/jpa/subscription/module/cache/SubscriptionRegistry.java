@@ -60,6 +60,13 @@ public class SubscriptionRegistry {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionRegistry() {
+		super();
+	}
+
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}
@@ -130,6 +137,11 @@ public class SubscriptionRegistry {
 				return false;
 			}
 			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			if (channelTypeSame(existingSubscription.get(), newSubscription)) {
+				ourLog.info("Channel type is same.  Updating active subscription and re-using existing channel and handlers.");
+				updateSubscription(theSubscription);
+				return true;
+			}
 			unregisterSubscription(theSubscription.getIdElement());
 		} else {
 			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
@@ -140,7 +152,23 @@ public class SubscriptionRegistry {
 		} else {
 			return false;
 		}
+	}
 
+	private void updateSubscription(IBaseResource theSubscription) {
+		IIdType theId = theSubscription.getIdElement();
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
+		Validate.notNull(activeSubscription);
+		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		activeSubscription.setSubscription(canonicalized);
+
+		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
+		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
+	}
+
+	private boolean channelTypeSame(CanonicalSubscription theExistingSubscription, CanonicalSubscription theNewSubscription) {
+		return theExistingSubscription.getChannelType().equals(theNewSubscription.getChannelType());
 	}
 
 	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {

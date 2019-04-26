@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.interceptor.api;
+package ca.uhn.fhir.narrative2;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,17 +20,16 @@ package ca.uhn.fhir.jpa.model.interceptor.api;
  * #L%
  */
 
-import com.google.common.annotations.VisibleForTesting;
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
 
-/**
- * This is currently only here for unit tests!
- *
- * DO NOT USE IN NON-TEST CODE. Maybe this will change in the future?
- */
-@FunctionalInterface
-@VisibleForTesting
-public interface IAnonymousLambdaHook {
+import java.util.EnumSet;
+import java.util.List;
 
-	void invoke(HookParams theArgs);
+public interface INarrativeTemplateManifest {
+	List<INarrativeTemplate> getTemplateByResourceName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theResourceName);
 
+	List<INarrativeTemplate> getTemplateByName(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, String theName);
+
+	List<INarrativeTemplate> getTemplateByElement(FhirContext theFhirContext, EnumSet<TemplateTypeEnum> theStyles, IBase theElementValue);
 }

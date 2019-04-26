@@ -76,7 +76,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 	
-			ourRestServer.setPlainProviders(mySystemProvider);
+			ourRestServer.registerProvider(mySystemProvider);
 	
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

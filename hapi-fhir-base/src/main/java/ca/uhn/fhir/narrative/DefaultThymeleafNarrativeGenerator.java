@@ -30,6 +30,10 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 
 	private boolean myUseHapiServerConformanceNarrative;
 
+	public DefaultThymeleafNarrativeGenerator() {
+		super();
+	}
+
 	@Override
 	protected List<String> getPropertyFile() {
 		List<String> retVal = new ArrayList<String>();

@@ -26,7 +26,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;

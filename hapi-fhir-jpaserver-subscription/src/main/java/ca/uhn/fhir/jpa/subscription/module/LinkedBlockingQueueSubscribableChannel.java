@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -41,7 +40,7 @@ public class LinkedBlockingQueueSubscribableChannel implements SubscribableChann
 	private final ExecutorSubscribableChannel mySubscribableChannel;
 	private final BlockingQueue<Runnable> myQueue;
 
-	public LinkedBlockingQueueSubscribableChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern) {
+	public LinkedBlockingQueueSubscribableChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern, int theConcurrentConsumers) {
 
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern(theThreadNamingPattern)
@@ -53,15 +52,16 @@ public class LinkedBlockingQueueSubscribableChannel implements SubscribableChann
 			StopWatch sw = new StopWatch();
 			try {
 				theQueue.put(theRunnable);
-			} catch (InterruptedException theE) {
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new RejectedExecutionException("Task " + theRunnable.toString() +
-					" rejected from " + theE.toString());
+					" rejected from " + e.toString());
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			1,
-			SubscriptionConstants.EXECUTOR_THREAD_COUNT,
+			theConcurrentConsumers,
 			0L,
 			TimeUnit.MILLISECONDS,
 			theQueue,

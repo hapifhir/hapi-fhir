@@ -15,10 +15,12 @@ import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -248,6 +250,28 @@ public class JpaSystemProviderDstu3 extends BaseJpaSystemProviderDstu2Plus<Bundl
 		} finally {
 			endRequest(((ServletRequestDetails) theRequestDetails).getServletRequest());
 		}
+	}
+
+	/**
+	 * /$process-message
+	 */
+	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
+	public IBaseBundle processMessage(
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1)
+		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+			Bundle theMessageToProcess
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			return getDao().processMessage(theRequestDetails, theMessageToProcess);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
 	}
 
 	public static void validateFulltextSearchEnabled(IFulltextSearchSvc theSearchDao) {

@@ -1410,7 +1410,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testInvalidDateTimeValueInvalid() throws Exception {
+	public void testInvalidDateTimeValueInvalid() {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 
 		String res = "{ \"resourceType\": \"Observation\", \"valueDateTime\": \"foo\" }";
@@ -1422,7 +1422,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1454,7 +1454,7 @@ public class JsonParserDstu3Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq(""), msgCaptor.capture());
 		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1474,7 +1474,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1509,7 +1509,7 @@ public class JsonParserDstu3Test {
 	// FIXME: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationEncode() throws Exception {
+	public void testNamespacePreservationEncode() {
 		//@formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" +
 			"<text>" +
@@ -1533,7 +1533,7 @@ public class JsonParserDstu3Test {
 	// TODO: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationParse() throws Exception {
+	public void testNamespacePreservationParse() {
 		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
 		XhtmlNode div = parsed.getText().getDiv();
@@ -2065,7 +2065,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testParseMetadata() throws Exception {
+	public void testParseMetadata() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +
@@ -2219,7 +2219,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test(expected = DataFormatException.class)
-	public void testParseWithTrailingContent() throws Exception {
+	public void testParseWithTrailingContent() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +

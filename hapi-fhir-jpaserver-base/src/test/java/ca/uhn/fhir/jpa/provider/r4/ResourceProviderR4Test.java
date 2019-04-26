@@ -37,8 +37,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -137,6 +139,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(new DaoConfig().getReuseCachedSearchResultsForMillis());
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
@@ -156,6 +159,71 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
+	@Test
+	public void testSearchWithContainsLowerCase() {
+		myDaoConfig.setAllowContainsSearches(true);
+
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Elizabeth");
+		String pt1id = myPatientDao.create(pt1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient pt2 = new Patient();
+		pt2.addName().setFamily("fghijk");
+		String pt2id = myPatientDao.create(pt2).getId().toUnqualifiedVersionless().getValue();
+
+		Patient pt3 = new Patient();
+		pt3.addName().setFamily("zzzzz");
+		myPatientDao.create(pt3).getId().toUnqualifiedVersionless().getValue();
+
+
+		Bundle output = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("ZAB"))
+			.returnBundle(Bundle.class)
+			.execute();
+		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt1id));
+
+		output = ourClient
+			.search()
+			.forResource("Patient")
+			.where(Patient.NAME.contains().value("zab"))
+			.returnBundle(Bundle.class)
+			.execute();
+		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(pt1id));
+
+	}
+
+	@Test
+	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
+
+		for (int i = 0; i < 50; i++) {
+			Organization o = new Organization();
+			o.setId("O" + i);
+			o.setName("O" + i);
+			ourClient.update().resource(o).execute().getId().toUnqualifiedVersionless();
+		}
+
+		Bundle output = ourClient
+			.search()
+			.forResource("Organization")
+			.count(3)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		String linkNext = output.getLink("next").getUrl();
+		linkNext = linkNext.replaceAll("_getpagesoffset=[0-9]+", "_getpagesoffset=3300");
+		assertThat(linkNext, containsString("_getpagesoffset=3300"));
+
+		Bundle nextPageBundle = ourClient.loadPage().byUrl(linkNext).andReturnBundle(Bundle.class).execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
+		assertEquals(null, nextPageBundle.getLink("next"));
+	}
 
 	@Test
 	public void testSearchLinksWorkWithIncludes() {
@@ -198,6 +266,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertNull(output.getLink("next"));
 
 	}
+
 
 	@Test
 	public void testSearchFetchPageBeyondEnd() {
@@ -632,6 +701,41 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Question with linkId[link0]"));
 		}
+	}
+
+	@Test
+	public void testSearchByExternalReference() {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FooName");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
+		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+
+		Media media = new Media();
+		Attachment attachment = new Attachment();
+		attachment.setLanguage("ENG");
+		media.setContent(attachment);
+		media.setSubject(patientReference);
+		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+
+		// Search for wrong type
+		Bundle returnedBundle = ourClient.search()
+			.forResource(Observation.class)
+			.where(Observation.ENCOUNTER.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(0, returnedBundle.getEntry().size());
+
+		// Search for right type
+		returnedBundle = ourClient.search()
+			.forResource(Media.class)
+			.where(Media.SUBJECT.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(mediaId, returnedBundle.getEntryFirstRep().getResource().getIdElement());
 	}
 
 	@Test
@@ -1163,6 +1267,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertEquals(1, newSize - initialSize);
 
+	}
+
+	@Test
+	public void testElements() throws IOException {
+		DiagnosticReport dr = new DiagnosticReport();
+		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+		dr.getCode().setText("CODE TEXT");
+		ourClient.create().resource(dr).execute();
+
+		HttpGet get = new HttpGet(ourServerBase + "/DiagnosticReport?_include=DiagnosticReport:result&_elements:exclude=DiagnosticReport&_elements=DiagnosticReport.status,Observation.value,Observation.code,Observation.subject&_pretty=true");
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(output, not(containsString("<Diagn")));
+			ourLog.info(output);
+		}
 	}
 
 	@Test
@@ -2076,15 +2196,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		patient.setId(id);
 		ourClient.update().resource(patient).execute();
 
+		ourLog.info("Res ID: {}", id);
+
 		Bundle history = ourClient.history().onInstance(id).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
 		assertEquals(3, history.getEntry().size());
 		assertEquals(id.withVersion("3").getValue(), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
 
-		assertEquals(id.withVersion("2").getValue(), history.getEntry().get(1).getResource().getId());
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
-		assertEquals(0, ((Patient) history.getEntry().get(1).getResource()).getName().size());
+		assertEquals(null, history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
@@ -3503,7 +3624,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		response.getEntity().getContent().close();
 		ourLog.info(resp);
 		Bundle bundle = myFhirCtx.newXmlParser().parseResource(Bundle.class, resp);
-		matches = bundle.getTotal();
+		matches = bundle.getEntry().size();
 
 		assertThat(matches, greaterThan(0));
 	}

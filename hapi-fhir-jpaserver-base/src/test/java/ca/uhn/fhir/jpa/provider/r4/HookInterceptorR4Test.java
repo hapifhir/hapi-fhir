@@ -17,7 +17,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testOP_PRESTORAGE_RESOURCE_CREATED_ModifyResource() {
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRESTORAGE_RESOURCE_CREATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.OP_PRESTORAGE_RESOURCE_CREATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 0);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -36,7 +36,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testOP_PRECOMMIT_RESOURCE_CREATED_ModifyResource() {
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 0);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -59,7 +59,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -83,7 +83,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});

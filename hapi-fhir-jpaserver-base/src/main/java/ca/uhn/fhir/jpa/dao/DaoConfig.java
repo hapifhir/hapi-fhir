@@ -142,6 +142,7 @@ public class DaoConfig {
 	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
 	private boolean myDisableHashBasedSearches;
 	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 
 	/**
@@ -159,6 +160,26 @@ public class DaoConfig {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public boolean isEnforceReferenceTargetTypes() {
+		return myEnforceReferenceTargetTypes;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public void setEnforceReferenceTargetTypes(boolean theEnforceReferenceTargetTypes) {
+		myEnforceReferenceTargetTypes = theEnforceReferenceTargetTypes;
 	}
 
 	/**
@@ -1392,6 +1413,7 @@ public class DaoConfig {
 	/**
 	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
 	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
 	 * @since 3.7.0
 	 */
 
@@ -1402,6 +1424,7 @@ public class DaoConfig {
 	/**
 	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
 	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
 	 * @since 3.7.0
 	 */
 

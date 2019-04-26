@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.config;
 
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
@@ -24,8 +26,8 @@ import static org.junit.Assert.fail;
 @EnableTransactionManagement()
 public class TestR4Config extends BaseJavaConfigR4 {
 
-	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
-	private static int ourMaxThreads;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+	public static Integer ourMaxThreads;
 
 	static {
 		/*
@@ -33,11 +35,17 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		 * and catch any potential deadlocks caused by database connection
 		 * starvation
 		 */
-		ourMaxThreads = (int) (Math.random() * 6.0) + 1;
-		ourMaxThreads = 1;
+		if (ourMaxThreads == null) {
+			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
+		}
 	}
 
 	private Exception myLastStackTrace;
+
+	@Bean
+	public CircularQueueCaptureQueriesListener captureQueriesListener() {
+		return new CircularQueueCaptureQueriesListener();
+	}
 
 	@Bean
 	public DataSource dataSource() {
@@ -91,16 +99,15 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
-
 		retVal.setMaxTotal(ourMaxThreads);
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 //			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
-			.afterQuery(new CaptureQueriesListener())
+			.afterQuery(captureQueriesListener())
 			.countQuery(singleQueryCountHolder())
 			.build();
 

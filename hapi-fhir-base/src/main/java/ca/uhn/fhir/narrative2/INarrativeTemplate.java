@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.narrative2;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR - Core Library
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,25 +20,23 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
-public enum SearchStatusEnum {
+import org.hl7.fhir.instance.model.api.IBase;
 
-	/**
-	 * The search is currently actively working
-	 */
-	LOADING,
-	/**
-	 * The search has loaded a set of results and has stopped searching because it
-	 * reached an appropriate threshold
-	 */
-	PASSCMPLET,
-	/**
-	 * The search completed normally and loaded all of the results it as permitted to
-	 * load
-	 */
-	FINISHED,
-	/**
-	 * The search failed and will not continue
-	 */
-	FAILED
+import java.io.IOException;
+import java.util.Set;
 
+public interface INarrativeTemplate {
+	String getContextPath();
+
+	Set<String> getAppliesToProfiles();
+
+	Set<String> getAppliesToResourceTypes();
+
+	Set<Class<? extends IBase>> getAppliesToResourceClasses();
+
+	TemplateTypeEnum getTemplateType();
+
+	String getTemplateName();
+
+	String getTemplateText();
 }

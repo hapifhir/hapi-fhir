@@ -171,7 +171,7 @@ public class TestRestfulServer extends RestfulServer {
 		}
 		setResourceProviders(beans);
 
-		setPlainProviders(plainProviders);
+		registerProviders(plainProviders);
 
 		/*
 		 * Enable CORS

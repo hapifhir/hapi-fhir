@@ -517,7 +517,7 @@ public class SearchSearchServerDstu1Test {
 
     @Search(compartmentName = "fooCompartment")
     public List<Patient> compartment(@IdParam IdType theId) {
-      ArrayList<Patient> retVal = new ArrayList<Patient>();
+      ArrayList<Patient> retVal = new ArrayList<>();
 
       Patient patient = new Patient();
       patient.setId(theId);
