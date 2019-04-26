@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.*;
@@ -197,6 +198,7 @@ public class BundleUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
+		Objects.requireNonNull(theTypeToInclude, "ResourceType must not be null");
 		List<T> retVal = new ArrayList<>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -207,7 +209,7 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		for (IBase nextEntry : entries) {
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
-				if (theTypeToInclude != null && !theTypeToInclude.isAssignableFrom(next.getClass())) {
+				if (!theTypeToInclude.isAssignableFrom(next.getClass())) {
 					continue;
 				}
 				retVal.add((T) next);
