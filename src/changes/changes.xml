@@ -19,7 +19,7 @@
 					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.6.RELEASE</li>
 					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
 					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
-					<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>
+					<!--<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>-->
 				</ul>
 				]]>
 			</action>
@@ -180,6 +180,11 @@
 			</action>
 			<action type="fix">
 				Ensure that database cursors are closed immediately after performing a FHIR search.
+			</action>
+			<action type="add">
+				When performing a JSON Patch in JPA server, the post-patched document is now validated to
+				ensure that the patch was valid for the candidate resource. This means that invalid patches
+				are caught and not just silently ignored.
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

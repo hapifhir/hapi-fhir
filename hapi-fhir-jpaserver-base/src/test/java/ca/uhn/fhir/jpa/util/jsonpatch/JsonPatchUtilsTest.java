@@ -11,8 +11,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class JsonPatchUtilsTest extends BaseJpaTest {
 
@@ -48,12 +47,12 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 	public void testInvalidPatchSyntaxError() {
 
 		// Quotes are incorrect in the "value" body
-		String patchText = "[ {\n" +
-			"        \"comment\": \"add image to examination\",\n" +
-			"        \"patch\": [ {\n" +
-			"            \"op\": \"foo\",\n" +
-			"            \"path\": \"/derivedFrom/-\",\n" +
-			"            \"value\": [{\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]\n" +
+		String patchText = "[ {" +
+			"        \"comment\": \"add image to examination\"," +
+			"        \"patch\": [ {" +
+			"            \"op\": \"foo\"," +
+			"            \"path\": \"/derivedFrom/-\"," +
+			"            \"value\": [{\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]" +
 			"        } ]\n" +
 			"    } ]";
 
@@ -65,6 +64,52 @@ public class JsonPatchUtilsTest extends BaseJpaTest {
 			assertThat(e.toString(), containsString("missing type id property 'op'"));
 			// The error message should not contain the patch body
 			assertThat(e.toString(), not(containsString("add image to examination")));
+		}
+
+	}
+
+
+	@Test
+	public void testPatchAddArray() {
+
+		String patchText = "[ " +
+			"      {" +
+			"        \"op\": \"add\"," +
+			"        \"path\": \"/derivedFrom\"," +
+			"        \"value\": [" +
+			"          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}" +
+			"        ]" +
+			"      } " +
+			"]";
+
+		Observation toUpdate = new Observation();
+		toUpdate = JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
+
+		String outcome = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(toUpdate);
+		ourLog.info(outcome);
+
+		assertThat(outcome, containsString("\"reference\": \"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\""));
+	}
+
+	@Test
+	public void testPatchAddInvalidElement() {
+
+		String patchText = "[ " +
+			"      {" +
+			"        \"op\": \"add\"," +
+			"        \"path\": \"/derivedFromXXX\"," +
+			"        \"value\": [" +
+			"          {\"reference\": \"/Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}" +
+			"        ]" +
+			"      } " +
+			"]";
+
+		Observation toUpdate = new Observation();
+		try {
+			JsonPatchUtils.apply(ourCtx, toUpdate, patchText);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Failed to apply JSON patch to Observation: Unknown element 'derivedFromXXX' found during parse", e.getMessage());
 		}
 
 	}
