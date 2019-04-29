@@ -190,6 +190,10 @@
 				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
 				in DaoConfig.
 			</action>
+			<action type="fix">
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				the target instead of the source with the reference.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
