@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.model.concurrency;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
