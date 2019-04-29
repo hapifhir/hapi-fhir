@@ -190,6 +190,10 @@
 				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
 				in DaoConfig.
 			</action>
+			<action type="fix">
+				Validation errors were fixed when using a Questionnaire with enableWhen on a question that
+				contains sub-items.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
