@@ -198,6 +198,11 @@
 				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
 				the target instead of the source with the reference.
 			</action>
+			<action type="add">
+				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
+				Anders Havn for the suggestion!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
