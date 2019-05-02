@@ -754,6 +754,8 @@ public class BaseController {
 					case '"':
 					case '<':
 					case '>':
+					case '&':
+					case '/':
 						retVal = retVal.replace(nextChar, '_');
 				}
 			}
