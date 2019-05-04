@@ -168,7 +168,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(StaleSearchDeletingSvcImpl.class.getName());
 		jobDetail.setJobClass(StaleSearchDeletingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(DEFAULT_CUTOFF_SLACK, false, jobDetail);
+		mySchedulerService.scheduleFixedDelay(DEFAULT_CUTOFF_SLACK, true, jobDetail);
 	}
 
 	@Transactional(propagation = Propagation.NEVER)

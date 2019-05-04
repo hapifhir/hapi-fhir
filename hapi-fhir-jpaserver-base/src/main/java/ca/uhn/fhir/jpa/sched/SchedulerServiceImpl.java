@@ -11,6 +11,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextStartedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -60,12 +62,23 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 	@PostConstruct
 	public void start() throws SchedulerException {
-
 		myLocalScheduler = createLocalScheduler();
 		myClusteredScheduler = createClusteredScheduler();
+	}
 
-		ourLog.info("Starting task scheduler");
-		myLocalScheduler.start();
+	/**
+	 * We defer startup of executing started tasks until we're sure we're ready for it
+	 * and the startup is completely done
+	 */
+	@EventListener(classes = {ContextStartedEvent.class})
+	public void contextStarted() throws SchedulerException {
+		ourLog.info("Starting task schedulers");
+		if (myLocalScheduler != null) {
+			myLocalScheduler.start();
+		}
+		if (myClusteredScheduler != null) {
+			myClusteredScheduler.start();
+		}
 	}
 
 	private Scheduler createLocalScheduler() throws SchedulerException {
@@ -76,6 +89,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		factory.initialize(localProperties);
 		Scheduler scheduler = factory.getScheduler();
 		configureSchedulerCommon(scheduler);
+		scheduler.standby();
 		return scheduler;
 	}
 
@@ -87,6 +101,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		factory.initialize(clusteredProperties);
 		Scheduler scheduler = factory.getScheduler();
 		configureSchedulerCommon(scheduler);
+		scheduler.standby();
 		return scheduler;
 	}
 
@@ -174,6 +189,18 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		@Override
 		public boolean isConcurrentExectionDisallowed() {
 			return true;
+		}
+	}
+
+	public static class NullSchedulerService implements ISchedulerService {
+		@Override
+		public void stop() {
+			// nothing
+		}
+
+		@Override
+		public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
+			// nothing
 		}
 	}
 }

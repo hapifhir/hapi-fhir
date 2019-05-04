@@ -161,8 +161,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@PostConstruct
 	public void registerScheduledJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
-		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
-		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
+		jobDetail.setId(SubscriptionTriggeringSvcImpl.class.getName());
+		jobDetail.setJobClass(SubscriptionTriggeringSvcImpl.SubmitJob.class);
 		mySchedulerService.scheduleFixedDelay(DateUtils.MILLIS_PER_SECOND, false, jobDetail);
 	}
 

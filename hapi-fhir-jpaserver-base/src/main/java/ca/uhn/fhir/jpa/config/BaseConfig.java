@@ -21,6 +21,8 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.jpa.util.JpaInterceptorService;
 import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -66,10 +68,9 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 public abstract class BaseConfig {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
-
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseConfig.class);
 	@Autowired
 	protected Environment myEnv;
-
 
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
@@ -182,6 +183,10 @@ public abstract class BaseConfig {
 
 	@Bean
 	public ISchedulerService schedulerService() {
+		if ("true".equals(System.getProperty("scheduling_disabled"))) {
+			ourLog.warn("Scheduling is DISABLED on this server");
+			return new SchedulerServiceImpl.NullSchedulerService();
+		}
 		return new SchedulerServiceImpl();
 	}
 

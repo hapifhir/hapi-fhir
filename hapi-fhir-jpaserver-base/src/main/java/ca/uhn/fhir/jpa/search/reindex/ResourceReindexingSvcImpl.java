@@ -191,7 +191,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
 		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, false, jobDetail);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, true, jobDetail);
 	}
 
 	@Override
@@ -541,6 +541,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
+			ourLog.info("****** RUNNING A REINDEX");
 			myTarget.runReindexingPass();
 		}
 	}

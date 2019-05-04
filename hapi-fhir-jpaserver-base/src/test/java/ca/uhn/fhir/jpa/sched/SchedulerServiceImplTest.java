@@ -64,7 +64,7 @@ public class SchedulerServiceImplTest {
 	public void testScheduleTaskLongRunningDoesntRunConcurrently() throws SchedulerException {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
-			.setId("TESTER")
+			.setId(CountingJob.class.getName())
 			.setJobClass(CountingJob.class);
 		ourTaskDelay = 500;
 
