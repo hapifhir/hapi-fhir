@@ -87,13 +87,8 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx = new AnnotationConfigWebApplicationContext();
 				myAppCtx.setServletConfig(getServletConfig());
 				myAppCtx.setParent(parentAppCtx);
-				if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
-					myAppCtx.register(TdlDstu2Config.class);
-					baseUrlProperty = FHIR_BASEURL_TDL2;
-				} else {
-					myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
-					baseUrlProperty = FHIR_BASEURL_DSTU2;
-				}
+				myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU2;
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forDstu2());
 				beans = myAppCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
@@ -105,18 +100,12 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				break;
 			}
-			case "TDL3":
 			case "DSTU3": {
 				myAppCtx = new AnnotationConfigWebApplicationContext();
 				myAppCtx.setServletConfig(getServletConfig());
 				myAppCtx.setParent(parentAppCtx);
-				if ("TDL3".equals(fhirVersionParam.trim().toUpperCase())) {
-					myAppCtx.register(TdlDstu3Config.class);
-					baseUrlProperty = FHIR_BASEURL_TDL3;
-				} else {
-					myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
-					baseUrlProperty = FHIR_BASEURL_DSTU3;
-				}
+				myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU3;
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forDstu3());
 				beans = myAppCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
