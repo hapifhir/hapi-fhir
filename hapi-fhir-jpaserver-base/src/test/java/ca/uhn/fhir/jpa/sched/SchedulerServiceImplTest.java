@@ -47,7 +47,7 @@ public class SchedulerServiceImplTest {
 	public void testScheduleTask() {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
-			.setId("TESTER")
+			.setId(CountingJob.class.getName())
 			.setJobClass(CountingJob.class);
 
 		mySvc.scheduleFixedDelay(100, false, def);
