@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import javax.annotation.Nonnull;
+
 public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithResourceParam {
 
 	public CreateMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
@@ -47,6 +49,7 @@ public class CreateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 		return null;
 	}
 
+	@Nonnull
 	@Override
 	public RestOperationTypeEnum getRestOperationType() {
 		return RestOperationTypeEnum.CREATE;

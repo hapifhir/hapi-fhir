@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A person who is directly or indirectly involved in the provisioning of healthcare.
  */
-@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/Profile/Practitioner")
+@ResourceDef(name="Practitioner", profile="http://hl7.org/fhir/StructureDefinition/Practitioner")
 public class Practitioner extends DomainResource {
 
     @Block()

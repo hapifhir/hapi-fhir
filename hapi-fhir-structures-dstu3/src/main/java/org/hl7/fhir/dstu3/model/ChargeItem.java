@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The resource ChargeItem describes the provision of healthcare provider products for a certain patient, therefore referring not only to the product, but containing in addition details of the provision, like date, time, amounts and participating organizations and persons. Main Usage of the ChargeItem is to enable the billing process and internal cost allocation.
  */
-@ResourceDef(name="ChargeItem", profile="http://hl7.org/fhir/Profile/ChargeItem")
+@ResourceDef(name="ChargeItem", profile="http://hl7.org/fhir/StructureDefinition/ChargeItem")
 public class ChargeItem extends DomainResource {
 
     public enum ChargeItemStatus {

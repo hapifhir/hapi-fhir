@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A set of information summarized from a list of other resources.
  */
-@ResourceDef(name="List", profile="http://hl7.org/fhir/Profile/ListResource")
+@ResourceDef(name="List", profile="http://hl7.org/fhir/StructureDefinition/ListResource")
 public class ListResource extends DomainResource {
 
     public enum ListStatus {

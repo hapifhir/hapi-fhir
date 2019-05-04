@@ -1,24 +1,23 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-import java.util.Date;
-
-import javax.persistence.TemporalType;
-
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.ResourceHistoryTable;
+import javax.persistence.TemporalType;
+import java.util.Collection;
+import java.util.Date;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,6 +76,13 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"SELECT v.myId FROM ResourceHistoryTable v " +
 		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
 		"WHERE v.myResourceVersion != t.myVersion AND " +
+		"t.myId = :resId")
+	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") Long theResourceId);
+
+	@Query("" +
+		"SELECT v.myId FROM ResourceHistoryTable v " +
+		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
+		"WHERE v.myResourceVersion != t.myVersion AND " +
 		"t.myResourceType = :restype")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage, @Param("restype") String theResourceName);
 
@@ -91,4 +97,8 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) " + 
 		"WHERE r.myId in (:pids)")
 	Collection<ResourceHistoryTable> findByResourceIds(@Param("pids") Collection<Long> pids);
+
+	@Modifying
+	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
+	void updateVersion(@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
 }

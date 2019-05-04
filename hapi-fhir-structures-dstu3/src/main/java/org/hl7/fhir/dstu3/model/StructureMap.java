@@ -51,7 +51,7 @@ import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 /**
  * A Map of relationships between 2 structures that can be used to transform data.
  */
-@ResourceDef(name="StructureMap", profile="http://hl7.org/fhir/Profile/StructureMap")
+@ResourceDef(name="StructureMap", profile="http://hl7.org/fhir/StructureDefinition/StructureMap")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "structure", "import", "group"})
 public class StructureMap extends MetadataResource {
 

@@ -10,7 +10,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -44,7 +44,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Defines an affiliation/assotiation/relationship between 2 distinct oganizations, that is not a part-of relationship/sub-division relationship.
  */
-@ResourceDef(name="OrganizationAffiliation", profile="http://hl7.org/fhir/Profile/OrganizationAffiliation")
+@ResourceDef(name="OrganizationAffiliation", profile="http://hl7.org/fhir/StructureDefinition/OrganizationAffiliation")
 public class OrganizationAffiliation extends DomainResource {
 
     /**

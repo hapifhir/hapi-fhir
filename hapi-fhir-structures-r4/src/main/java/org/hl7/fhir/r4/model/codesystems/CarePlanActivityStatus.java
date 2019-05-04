@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,7 +37,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum CarePlanActivityStatus {
 
         /**
-         * Activity is planned but no action has yet been taken.
+         * Care plan activity is planned but no action has yet been taken.
          */
         NOTSTARTED, 
         /**
@@ -45,31 +45,31 @@ public enum CarePlanActivityStatus {
          */
         SCHEDULED, 
         /**
-         * Activity has been started but is not yet complete.
+         * Care plan activity has been started but is not yet complete.
          */
         INPROGRESS, 
         /**
-         * Activity was started but has temporarily ceased with an expectation of resumption at a future time.
+         * Care plan activity was started but has temporarily ceased with an expectation of resumption at a future time.
          */
         ONHOLD, 
         /**
-         * The activity has been completed (more or less) as planned.
+         * Care plan activity has been completed (more or less) as planned.
          */
         COMPLETED, 
         /**
-         * The planned activity has been withdrawn.
+         * The planned care plan activity has been withdrawn.
          */
         CANCELLED, 
         /**
-         * The planned activity has been ended prior to completion after the activity was started.
+         * The planned care plan activity has been ended prior to completion after the activity was started.
          */
         STOPPED, 
         /**
-         * The current state of the activity is not known.  Note: This concept is not to be used for "other".
+         * The current state of the care plan activity is not known.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one.
          */
         UNKNOWN, 
         /**
-         * The activity was entered in error and voided.
+         * Care plan activity was entered in error and voided.
          */
         ENTEREDINERROR, 
         /**
@@ -118,15 +118,15 @@ public enum CarePlanActivityStatus {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSTARTED: return "Activity is planned but no action has yet been taken.";
+            case NOTSTARTED: return "Care plan activity is planned but no action has yet been taken.";
             case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun.";
-            case INPROGRESS: return "Activity has been started but is not yet complete.";
-            case ONHOLD: return "Activity was started but has temporarily ceased with an expectation of resumption at a future time.";
-            case COMPLETED: return "The activity has been completed (more or less) as planned.";
-            case CANCELLED: return "The planned activity has been withdrawn.";
-            case STOPPED: return "The planned activity has been ended prior to completion after the activity was started.";
-            case UNKNOWN: return "The current state of the activity is not known.  Note: This concept is not to be used for \"other\".";
-            case ENTEREDINERROR: return "The activity was entered in error and voided.";
+            case INPROGRESS: return "Care plan activity has been started but is not yet complete.";
+            case ONHOLD: return "Care plan activity was started but has temporarily ceased with an expectation of resumption at a future time.";
+            case COMPLETED: return "Care plan activity has been completed (more or less) as planned.";
+            case CANCELLED: return "The planned care plan activity has been withdrawn.";
+            case STOPPED: return "The planned care plan activity has been ended prior to completion after the activity was started.";
+            case UNKNOWN: return "The current state of the care plan activity is not known.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one.";
+            case ENTEREDINERROR: return "Care plan activity was entered in error and voided.";
             default: return "?";
           }
         }
@@ -140,7 +140,7 @@ public enum CarePlanActivityStatus {
             case CANCELLED: return "Cancelled";
             case STOPPED: return "Stopped";
             case UNKNOWN: return "Unknown";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
     }

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -45,7 +45,7 @@ public enum ConceptmapUnmappedMode {
          */
         FIXED, 
         /**
-         * Use the map identified by the canonical URL in URL.
+         * Use the map identified by the canonical URL in the url element.
          */
         OTHERMAP, 
         /**
@@ -78,7 +78,7 @@ public enum ConceptmapUnmappedMode {
           switch (this) {
             case PROVIDED: return "Use the code as provided in the $translate request.";
             case FIXED: return "Use the code explicitly provided in the group.unmapped.";
-            case OTHERMAP: return "Use the map identified by the canonical URL in URL.";
+            case OTHERMAP: return "Use the map identified by the canonical URL in the url element.";
             default: return "?";
           }
         }

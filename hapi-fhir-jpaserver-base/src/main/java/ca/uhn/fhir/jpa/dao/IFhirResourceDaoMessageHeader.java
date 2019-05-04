@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +23,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  */
 
 public interface IFhirResourceDaoMessageHeader<T extends IBaseResource> extends IFhirResourceDao<T> {
-
-	IBaseBundle messageHeaderProcessMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
-
+	// nothing right now
 }

@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package ca.uhn.fhir.rest.client.api;
  * limitations under the License.
  * #L%
  */
+
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 
 import java.io.IOException;
 
@@ -35,11 +38,13 @@ public interface IClientInterceptor {
 	/**
 	 * Fired by the client just before invoking the HTTP client request
 	 */
+	@Hook(Pointcut.CLIENT_REQUEST)
 	void interceptRequest(IHttpRequest theRequest);
 	
 	/**
 	 * Fired by the client upon receiving an HTTP response, prior to processing that response
 	 */
+	@Hook(Pointcut.CLIENT_RESPONSE)
 	void interceptResponse(IHttpResponse theResponse) throws IOException;
 
 }

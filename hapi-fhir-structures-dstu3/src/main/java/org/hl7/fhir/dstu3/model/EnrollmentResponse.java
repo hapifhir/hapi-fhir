@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides enrollment and plan details from the processing of an Enrollment resource.
  */
-@ResourceDef(name="EnrollmentResponse", profile="http://hl7.org/fhir/Profile/EnrollmentResponse")
+@ResourceDef(name="EnrollmentResponse", profile="http://hl7.org/fhir/StructureDefinition/EnrollmentResponse")
 public class EnrollmentResponse extends DomainResource {
 
     public enum EnrollmentResponseStatus {

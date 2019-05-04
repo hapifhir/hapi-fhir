@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -37,15 +37,15 @@ import org.hl7.fhir.exceptions.FHIRException;
 public enum MedicationAdminCategory {
 
         /**
-         * Includes administrations in an inpatient or acute care setting.
+         * Includes administrations in an inpatient or acute care setting
          */
         INPATIENT, 
         /**
-         * Includes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).
+         * Includes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)
          */
         OUTPATIENT, 
         /**
-         * Includes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.).
+         * Includes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.)
          */
         COMMUNITY, 
         /**
@@ -76,9 +76,9 @@ public enum MedicationAdminCategory {
         }
         public String getDefinition() {
           switch (this) {
-            case INPATIENT: return "Includes administrations in an inpatient or acute care setting.";
-            case OUTPATIENT: return "Includes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office).";
-            case COMMUNITY: return "Includes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.).";
+            case INPATIENT: return "Includes administrations in an inpatient or acute care setting";
+            case OUTPATIENT: return "Includes administrations in an outpatient setting (for example, Emergency Department, Outpatient Clinic, Outpatient Surgery, Doctor's office)";
+            case COMMUNITY: return "Includes administrations by the patient in their home (this would include long term care or nursing homes, hospices, etc.)";
             default: return "?";
           }
         }

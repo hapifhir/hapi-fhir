@@ -132,7 +132,7 @@ public class ServerFeaturesDstu2Test {
 
 		ourLog.info(status.toString());
 		
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
 	}
 

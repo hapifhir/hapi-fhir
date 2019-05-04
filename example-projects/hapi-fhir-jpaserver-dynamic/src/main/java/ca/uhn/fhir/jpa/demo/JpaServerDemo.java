@@ -1,16 +1,6 @@
 
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.ServletException;
-
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.Meta;
-import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.WebApplicationContext;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
@@ -20,13 +10,21 @@ import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.ETagSupportEnum;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.Meta;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.ServletException;
+import java.util.List;
 
 public class JpaServerDemo extends RestfulServer {
 
@@ -64,8 +62,8 @@ public class JpaServerDemo extends RestfulServer {
 		} else {
 			throw new IllegalStateException();
 		}
-		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
-		setResourceProviders(beans);
+		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
+		registerProviders(beans.createProviders());
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
@@ -79,7 +77,7 @@ public class JpaServerDemo extends RestfulServer {
 		} else {
 			throw new IllegalStateException();
 		}
-		setPlainProviders(systemProvider);
+		registerProviders(systemProvider);
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for
@@ -129,12 +127,10 @@ public class JpaServerDemo extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
+		 * Register interceptors for the server based on DaoConfig.getSupportedSubscriptionTypes()
 		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
+		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
+		subscriptionInterceptorLoader.registerInterceptors();
 
 		/*
 		 * If you are hosting this server at a specific DNS name, the server will try to 

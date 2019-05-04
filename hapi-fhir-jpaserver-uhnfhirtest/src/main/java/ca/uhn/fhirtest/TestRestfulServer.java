@@ -13,19 +13,18 @@ import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
+import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.ETagSupportEnum;
-import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.interceptor.BanUnsupportedHttpMethodsInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhirtest.config.*;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -34,7 +33,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class TestRestfulServer extends RestfulServer {
@@ -76,12 +74,12 @@ public class TestRestfulServer extends RestfulServer {
 		// Depending on the version this server is supporing, we will
 		// retrieve all the appropriate resource providers and the
 		// conformance provider
-		List<IResourceProvider> beans;
+		ResourceProviderFactory beans;
 		@SuppressWarnings("rawtypes")
 		IFhirSystemDao systemDao;
 		ETagSupportEnum etagSupport;
 		String baseUrlProperty;
-		List<Object> plainProviders = new ArrayList<Object>();
+		List<Object> providers = new ArrayList<>();
 
 		switch (fhirVersionParam.trim().toUpperCase()) {
 			case "TDL2":
@@ -89,17 +87,12 @@ public class TestRestfulServer extends RestfulServer {
 				myAppCtx = new AnnotationConfigWebApplicationContext();
 				myAppCtx.setServletConfig(getServletConfig());
 				myAppCtx.setParent(parentAppCtx);
-				if ("TDL2".equals(fhirVersionParam.trim().toUpperCase())) {
-					myAppCtx.register(TdlDstu2Config.class);
-					baseUrlProperty = FHIR_BASEURL_TDL2;
-				} else {
-					myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
-					baseUrlProperty = FHIR_BASEURL_DSTU2;
-				}
+				myAppCtx.register(TestDstu2Config.class, WebsocketDispatcherConfig.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU2;
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forDstu2());
-				beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
-				plainProviders.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
+				beans = myAppCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
+				providers.add(myAppCtx.getBean("mySystemProviderDstu2", JpaSystemProviderDstu2.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(DaoConfig.class));
@@ -107,28 +100,22 @@ public class TestRestfulServer extends RestfulServer {
 				setServerConformanceProvider(confProvider);
 				break;
 			}
-			case "TDL3":
 			case "DSTU3": {
 				myAppCtx = new AnnotationConfigWebApplicationContext();
 				myAppCtx.setServletConfig(getServletConfig());
 				myAppCtx.setParent(parentAppCtx);
-				if ("TDL3".equals(fhirVersionParam.trim().toUpperCase())) {
-					myAppCtx.register(TdlDstu3Config.class);
-					baseUrlProperty = FHIR_BASEURL_TDL3;
-				} else {
-					myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
-					baseUrlProperty = FHIR_BASEURL_DSTU3;
-				}
+				myAppCtx.register(TestDstu3Config.class, WebsocketDispatcherConfig.class);
+				baseUrlProperty = FHIR_BASEURL_DSTU3;
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forDstu3());
-				beans = myAppCtx.getBean("myResourceProvidersDstu3", List.class);
-				plainProviders.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
+				beans = myAppCtx.getBean("myResourceProvidersDstu3", ResourceProviderFactory.class);
+				providers.add(myAppCtx.getBean("mySystemProviderDstu3", JpaSystemProviderDstu3.class));
 				systemDao = myAppCtx.getBean("mySystemDaoDstu3", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu3 confProvider = new JpaConformanceProviderDstu3(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
-				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
+				providers.add(myAppCtx.getBean(TerminologyUploaderProviderDstu3.class));
 				break;
 			}
 			case "R4": {
@@ -139,14 +126,15 @@ public class TestRestfulServer extends RestfulServer {
 				baseUrlProperty = FHIR_BASEURL_R4;
 				myAppCtx.refresh();
 				setFhirContext(FhirContext.forR4());
-				beans = myAppCtx.getBean("myResourceProvidersR4", List.class);
-				plainProviders.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
+				beans = myAppCtx.getBean("myResourceProvidersR4", ResourceProviderFactory.class);
+				providers.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 				systemDao = myAppCtx.getBean("mySystemDaoR4", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(this, systemDao, myAppCtx.getBean(DaoConfig.class));
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
-				plainProviders.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+				providers.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			default:
@@ -169,12 +157,8 @@ public class TestRestfulServer extends RestfulServer {
 		 * operations in this server) are all retrieved from the spring context above
 		 * and are provided to the server here.
 		 */
-		for (IResourceProvider nextResourceProvider : beans) {
-			ourLog.info(" * Have resource provider for: {}", nextResourceProvider.getResourceType().getSimpleName());
-		}
-		setResourceProviders(beans);
-
-		setPlainProviders(plainProviders);
+		registerProviders(beans.createProviders());
+		registerProviders(providers);
 
 		/*
 		 * Enable CORS
@@ -205,6 +189,11 @@ public class TestRestfulServer extends RestfulServer {
 		setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		/*
+		 * Use extended support for the _elements parameter
+		 */
+		setElementsSupport(ElementsSupportEnum.EXTENDED);
+
+		/*
 		 * The server's base URL (e.g. http://fhirtest.uhn.ca/baseDstu2) is
 		 * pulled from a system property, which is helpful if you want to try
 		 * hosting your own copy of this server.
@@ -225,13 +214,10 @@ public class TestRestfulServer extends RestfulServer {
 		setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 		/*
-		 * Load interceptors for the server from Spring
+		 * Register subscription interceptors
 		 */
-		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
-		for (IServerInterceptor interceptor : interceptorBeans) {
-			this.registerInterceptor(interceptor);
-		}
-
+		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
+		subscriptionInterceptorLoader.registerInterceptors();
 	}
 
 	/**

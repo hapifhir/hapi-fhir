@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
  */
-@ResourceDef(name="EnrollmentRequest", profile="http://hl7.org/fhir/Profile/EnrollmentRequest")
+@ResourceDef(name="EnrollmentRequest", profile="http://hl7.org/fhir/StructureDefinition/EnrollmentRequest")
 public class EnrollmentRequest extends DomainResource {
 
     public enum EnrollmentRequestStatus {

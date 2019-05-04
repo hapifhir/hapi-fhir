@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Record details about the anatomical location of a specimen or body part.  This resource may be used when a coded concept does not provide the necessary detail needed for the use case.
  */
-@ResourceDef(name="BodySite", profile="http://hl7.org/fhir/Profile/BodySite")
+@ResourceDef(name="BodySite", profile="http://hl7.org/fhir/StructureDefinition/BodySite")
 public class BodySite extends DomainResource {
 
     /**

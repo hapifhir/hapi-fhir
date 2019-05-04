@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Resource;
 
 import java.util.Date;
 import java.util.List;
@@ -148,6 +148,16 @@ public class TransactionProcessorVersionAdapterR4 implements TransactionProcesso
 	@Override
 	public void setResponseOutcome(Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
 		theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
+	}
+
+	@Override
+	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
+		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
+	}
+
+	@Override
+	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+		theEntry.getRequest().setUrl(theUrl);
 	}
 
 }

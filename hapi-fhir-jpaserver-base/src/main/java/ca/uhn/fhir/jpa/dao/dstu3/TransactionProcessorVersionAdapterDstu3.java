@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,6 +148,16 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 	@Override
 	public void setResponseOutcome(Bundle.BundleEntryComponent theEntry, IBaseOperationOutcome theOperationOutcome) {
 		theEntry.getResponse().setOutcome((Resource) theOperationOutcome);
+	}
+
+	@Override
+	public void setRequestVerb(Bundle.BundleEntryComponent theEntry, String theVerb) {
+		theEntry.getRequest().setMethod(Bundle.HTTPVerb.fromCode(theVerb));
+	}
+
+	@Override
+	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
+		theEntry.getRequest().setUrl(theUrl);
 	}
 
 }

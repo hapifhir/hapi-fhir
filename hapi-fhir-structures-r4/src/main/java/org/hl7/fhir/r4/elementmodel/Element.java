@@ -296,13 +296,13 @@ public class Element extends Base {
 	
   @Override
   public Base setProperty(int hash, String name, Base value) throws FHIRException {
-    if (isPrimitive() && (hash == "value".hashCode())) {
-      this.value = castToString(value).asStringValue();
-      return this;
-    }
     if ("xhtml".equals(getType()) && (hash == "value".hashCode())) {
       this.xhtml = castToXhtml(value);
       this.value =  castToXhtmlString(value);
+      return this;
+    }
+    if (isPrimitive() && (hash == "value".hashCode())) {
+      this.value = castToString(value).asStringValue();
       return this;
     }
     
@@ -333,11 +333,20 @@ public class Element extends Base {
       }
     }
 
+    int i = 0;
     if (childForValue == null)
       for (Property p : property.getChildProperties(this.name, type)) {
+        int t = -1;
+        for (int c =0; c < children.size(); c++) {
+          Element e = children.get(c);
+          if (p.getName().equals(e.getName()))
+            t = c;
+        }
+        if (t > i)
+          i = t;
         if (p.getName().equals(name) || p.getName().equals(name+"[x]")) {
           Element ne = new Element(name, p);
-          children.add(ne);
+          children.add(i, ne);
           childForValue = ne;
           break;
         }
@@ -486,7 +495,7 @@ public class Element extends Base {
 	    setUserData("fhir.decorations", decorations);
 	  }
 	  decorations.add(new ElementDecoration(DecorationType.TYPE, profile.getUserString("path"), definition.getPath()));
-	  if (tail(definition.getId()).contains(":")) {
+	  if (definition.getId() != null && tail(definition.getId()).contains(":")) {
 	    String[] details = tail(definition.getId()).split("\\:");
 	    decorations.add(new ElementDecoration(DecorationType.SLICE, null, details[1]));
 	  }
@@ -548,7 +557,7 @@ public class Element extends Base {
 
 	@Override
 	public boolean isEmpty() {
-		if (isNotBlank(value)) {
+		if (value != null && !"".equals(value)) {
 			return false;
 		}
 		for (Element next : getChildren()) {

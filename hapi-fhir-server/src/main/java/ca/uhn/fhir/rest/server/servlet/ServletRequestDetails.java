@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ package ca.uhn.fhir.rest.server.servlet;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.Validate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,9 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -49,8 +49,8 @@ public class ServletRequestDetails extends RequestDetails {
 	private HttpServletRequest myServletRequest;
 	private HttpServletResponse myServletResponse;
 
-	public ServletRequestDetails() {
-		super();
+	public ServletRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		super(theInterceptorBroadcaster);
 		setResponse(new ServletRestfulResponse(this));
 	}
 
@@ -102,7 +102,19 @@ public class ServletRequestDetails extends RequestDetails {
 	@Override
 	public List<String> getHeaders(String name) {
 		Enumeration<String> headers = getServletRequest().getHeaders(name);
-		return headers == null ? Collections.<String> emptyList() : Collections.list(getServletRequest().getHeaders(name));
+		return headers == null ? Collections.emptyList() : Collections.list(getServletRequest().getHeaders(name));
+	}
+
+	@Override
+	public Object getAttribute(String theAttributeName) {
+		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
+		return getServletRequest().getAttribute(theAttributeName);
+	}
+
+	@Override
+	public void setAttribute(String theAttributeName, Object theAttributeValue) {
+		Validate.notBlank(theAttributeName, "theAttributeName must not be null or blank");
+		getServletRequest().setAttribute(theAttributeName, theAttributeValue);
 	}
 
 	@Override
@@ -145,4 +157,18 @@ public class ServletRequestDetails extends RequestDetails {
 		this.myServletResponse = myServletResponse;
 	}
 
+	public Map<String,List<String>> getHeaders() {
+		Map<String, List<String>> retVal = new HashMap<>();
+		Enumeration<String> names = myServletRequest.getHeaderNames();
+		while (names.hasMoreElements()) {
+			String nextName = names.nextElement();
+			ArrayList<String> headerValues = new ArrayList<>();
+			retVal.put(nextName, headerValues);
+			Enumeration<String> valuesEnum = myServletRequest.getHeaders(nextName);
+			while (valuesEnum.hasMoreElements()) {
+				headerValues.add(valuesEnum.nextElement());
+			}
+		}
+		return Collections.unmodifiableMap(retVal);
+	}
 }

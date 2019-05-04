@@ -14,7 +14,7 @@ public class AddTableTest extends BaseTest {
 	@Test
 	public void testTableDoesntAlreadyExist() throws SQLException {
 
-		AddTableTask task = new AddTableTask();
+		AddTableRawSqlTask task = new AddTableRawSqlTask();
 		task.setTableName("SOMETABLE");
 		task.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
@@ -29,7 +29,7 @@ public class AddTableTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), containsInAnyOrder("SOMETABLE"));
 
-		AddTableTask task = new AddTableTask();
+		AddTableRawSqlTask task = new AddTableRawSqlTask();
 		task.setTableName("SOMETABLE");
 		task.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);

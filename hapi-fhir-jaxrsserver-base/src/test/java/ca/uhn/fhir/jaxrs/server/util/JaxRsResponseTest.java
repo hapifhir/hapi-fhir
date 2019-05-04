@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.junit.Before;
 import org.junit.Test;
@@ -108,10 +110,24 @@ public class JaxRsResponseTest {
 		assertEquals("application/xml+fhir; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 	}
 
+	@Test
+	public void addMultipleHeaderValues() throws IOException {
+		response.addHeader("Authorization", "Basic");
+		response.addHeader("Authorization", "Bearer");
+		response.addHeader("Cache-Control", "no-cache, no-store");
+
+		final IBaseBinary binary = new Binary();
+		binary.setContentType("abc");
+		binary.setContent(new byte[] { 1 });
+		final Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, false, false, this.request);
+
+		assertThat(result.getHeaders().get("Authorization"), Matchers.contains("Basic", "Bearer"));
+		assertThat(result.getHeaders().get("Cache-Control"), Matchers.contains("no-cache, no-store"));
+	}
+
 	private Patient createPatient() {
 		Patient theResource = new Patient();
 		theResource.setId(new IdDt(15L));
 		return theResource;
 	}
-
 }

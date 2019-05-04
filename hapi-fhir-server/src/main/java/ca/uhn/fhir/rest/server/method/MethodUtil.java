@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,12 @@ package ca.uhn.fhir.rest.server.method;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.binder.CollectionBinder;
 import ca.uhn.fhir.rest.server.method.OperationParameter.IOperationParamConverter;
@@ -122,12 +122,14 @@ public class MethodUtil {
 				param = new ServletResponseParameter();
 			} else if (parameterType.equals(RequestDetails.class) || parameterType.equals(ServletRequestDetails.class)) {
 				param = new RequestDetailsParameter();
-			} else if (parameterType.equals(IRequestOperationCallback.class)) {
-				param = new RequestOperationCallbackParameter();
+			} else if (parameterType.equals(IInterceptorBroadcaster.class)) {
+				param = new InterceptorBroadcasterParameter();
 			} else if (parameterType.equals(SummaryEnum.class)) {
 				param = new SummaryEnumParameter();
 			} else if (parameterType.equals(PatchTypeEnum.class)) {
 				param = new PatchTypeParameter();
+			} else if (parameterType.equals(SearchTotalModeEnum.class)) {
+				param = new SearchTotalModeParameter();
 			} else {
 				for (int i = 0; i < annotations.length && param == null; i++) {
 					Annotation nextAnnotation = annotations[i];
@@ -191,7 +193,8 @@ public class MethodUtil {
 							b.append(" or String or byte[]");
 							throw new ConfigurationException(b.toString());
 						}
-						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode);
+						boolean methodIsOperation = theMethod.getAnnotation(Operation.class) != null;
+						param = new ResourceParameter((Class<? extends IBaseResource>) parameterType, theProvider, mode, methodIsOperation);
 					} else if (nextAnnotation instanceof IdParam) {
 						param = new NullParameter();
 					} else if (nextAnnotation instanceof ServerBase) {

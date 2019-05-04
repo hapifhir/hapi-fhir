@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * An authorization for the supply of glasses and/or contact lenses to a patient.
  */
-@ResourceDef(name="VisionPrescription", profile="http://hl7.org/fhir/Profile/VisionPrescription")
+@ResourceDef(name="VisionPrescription", profile="http://hl7.org/fhir/StructureDefinition/VisionPrescription")
 public class VisionPrescription extends DomainResource {
 
     public enum VisionStatus {

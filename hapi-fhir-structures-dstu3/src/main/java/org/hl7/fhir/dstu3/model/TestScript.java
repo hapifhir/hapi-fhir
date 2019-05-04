@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A structured set of tests against a FHIR server implementation to determine compliance against the FHIR specification.
  */
-@ResourceDef(name="TestScript", profile="http://hl7.org/fhir/Profile/TestScript")
+@ResourceDef(name="TestScript", profile="http://hl7.org/fhir/StructureDefinition/TestScript")
 @ChildOrder(names={"url", "identifier", "version", "name", "title", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "purpose", "copyright", "origin", "destination", "metadata", "fixture", "profile", "variable", "rule", "ruleset", "setup", "test", "teardown"})
 public class TestScript extends MetadataResource {
 

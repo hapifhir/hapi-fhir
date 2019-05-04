@@ -86,7 +86,7 @@
 			
 			<p>
 				HAPI FHIR 1.5 introduced a new interceptor, the
-				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
+				<a href="./apidocs-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
 			</p>
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
@@ -96,10 +96,10 @@
 			</p>
 
 			<p class="doc_info_bubble">
-				AuthorizationInterceptor is a new feature in HAPI FHIR, and has not yet
-				been heavily tested. Use with caution, and do lots of testing! We welcome
-				feedback and suggestions on this feature. In addition, this documentation is 
-				not yet complete. More examples and details will be added soon! Please get in
+				AuthorizationInterceptor has been well tested, but it is impossible to
+				predeict every scenario and environment in which HAPI FHIR will be used.
+				Use with caution, and do lots of testing! We welcome
+				feedback and suggestions on this feature. Please get in
 				touch if you'd like to help test, have suggestions, etc.
 			</p>
 			
@@ -253,7 +253,37 @@
 			</subsection>
 			
 		</section>
-		
+
+		<section name="Search Narrowing">
+
+			<p>
+				HAPI FHIR 3.7.0 introduced a new interceptor, the
+				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/auth/SearchNarrowingInterceptor.html">SearchNarrowingInterceptor</a>.
+			</p>
+			<p>
+				This interceptor is designed to be used in conjunction with AuthorizationInterceptor. It
+				uses a similar strategy where a dynamic list is built up for each request, but the
+				purpose of this interceptor is to modify client searches that are received (after
+				HAPI FHIR received the HTTP request, but before the search is actually performed)
+				to restrict the search to only search for specific resources or compartments that the
+				user has access to.
+			</p>
+			<p>
+				This could be used, for example, to allow the user to perform a search for<br/>
+				<code>http://baseurl/Observation?category=laboratory</code><br/>
+				and then receive results as though they had requested<br/>
+				<code>http://baseurl/Observation?subject=Patient/123&amp;category=laboratory</code>.
+			</p>
+			<p>
+				An example of this interceptor follows:
+			</p>
+			<macro name="snippet">
+				<param name="id" value="narrowing" />
+				<param name="file" value="examples/src/main/java/example/AuthorizationInterceptors.java" />
+			</macro>
+
+		</section>
+
 	</body>
 
 </document>

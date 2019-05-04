@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Identifies two or more records (resource instances) that are referring to the same real-world "occurrence".
  */
-@ResourceDef(name="Linkage", profile="http://hl7.org/fhir/Profile/Linkage")
+@ResourceDef(name="Linkage", profile="http://hl7.org/fhir/StructureDefinition/Linkage")
 public class Linkage extends DomainResource {
 
     public enum LinkageType {

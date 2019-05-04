@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -46,6 +48,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
@@ -83,6 +86,8 @@ public abstract class BaseMethodBinding<T> {
 			}
 		}
 
+		// This allows us to invoke methods on private classes
+		myMethod.setAccessible(true);
 	}
 
 	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
@@ -223,6 +228,7 @@ public abstract class BaseMethodBinding<T> {
 	 */
 	public abstract String getResourceName();
 
+	@Nonnull
 	public abstract RestOperationTypeEnum getRestOperationType();
 
 	/**
@@ -243,10 +249,15 @@ public abstract class BaseMethodBinding<T> {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
-			for (IServerInterceptor next : theServer.getInterceptors()) {
-				ActionRequestDetails details = new ActionRequestDetails(theRequest);
-				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-				next.incomingRequestPreHandled(operationType, details);
+			ActionRequestDetails details = new ActionRequestDetails(theRequest);
+			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+			HookParams preHandledParams = new HookParams();
+			preHandledParams.add(RestOperationTypeEnum.class, operationType);
+			preHandledParams.add(ActionRequestDetails.class, details);
+			if (theRequest.getInterceptorBroadcaster() != null) {
+				theRequest
+					.getInterceptorBroadcaster()
+					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
 			}
 		}
 
@@ -446,8 +457,7 @@ public abstract class BaseMethodBinding<T> {
 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
-				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
-					//FIXME potential null access on retunrTypeFromMethod
+				if (returnTypeFromMethod != null && !returnTypeFromRp.isAssignableFrom(returnTypeFromMethod)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
 							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
@@ -475,7 +485,7 @@ public abstract class BaseMethodBinding<T> {
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
+			return new SearchMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {

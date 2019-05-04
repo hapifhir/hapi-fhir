@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A homogeneous material with a definite composition.
  */
-@ResourceDef(name="Substance", profile="http://hl7.org/fhir/Profile/Substance")
+@ResourceDef(name="Substance", profile="http://hl7.org/fhir/StructureDefinition/Substance")
 public class Substance extends DomainResource {
 
     public enum FHIRSubstanceStatus {
@@ -495,7 +495,7 @@ public class Substance extends DomainResource {
          */
         public CodeableConcept getSubstanceCodeableConcept() throws FHIRException { 
           if (this.substance == null)
-            return null;
+            this.substance = new CodeableConcept();
           if (!(this.substance instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (CodeableConcept) this.substance;
@@ -510,7 +510,7 @@ public class Substance extends DomainResource {
          */
         public Reference getSubstanceReference() throws FHIRException { 
           if (this.substance == null)
-            return null;
+            this.substance = new Reference();
           if (!(this.substance instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.substance.getClass().getName()+" was encountered");
           return (Reference) this.substance;

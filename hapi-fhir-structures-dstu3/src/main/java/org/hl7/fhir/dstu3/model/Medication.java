@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource is primarily used for the identification and definition of a medication. It covers the ingredients and the packaging for a medication.
  */
-@ResourceDef(name="Medication", profile="http://hl7.org/fhir/Profile/Medication")
+@ResourceDef(name="Medication", profile="http://hl7.org/fhir/StructureDefinition/Medication")
 public class Medication extends DomainResource {
 
     public enum MedicationStatus {

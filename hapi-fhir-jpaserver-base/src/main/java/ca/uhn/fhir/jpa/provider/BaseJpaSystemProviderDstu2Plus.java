@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,11 +34,11 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name = "status")
 	})
 	public IBaseResource markAllResourcesForReindexing() {
-		Integer count = getDao().markAllResourcesForReindexing();
+		getResourceReindexingSvc().markAllResourcesForReindexing();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 
-		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked " + count + " resources");
+		IPrimitiveType<?> string = ParametersUtil.createString(getContext(), "Marked resources");
 		ParametersUtil.addParameterToParameters(getContext(), retVal, "status", string);
 
 		return retVal;
@@ -48,7 +48,7 @@ public abstract class BaseJpaSystemProviderDstu2Plus<T, MT> extends BaseJpaSyste
 		@OperationParam(name = "status")
 	})
 	public IBaseResource performReindexingPass() {
-		Integer count = getDao().performReindexingPass(1000);
+		Integer count = getResourceReindexingSvc().runReindexingPass();
 
 		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
 

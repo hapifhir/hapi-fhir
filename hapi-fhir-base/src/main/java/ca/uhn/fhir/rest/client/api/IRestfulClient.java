@@ -1,12 +1,19 @@
 package ca.uhn.fhir.rest.client.api;
 
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import javax.annotation.Nonnull;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,23 +29,29 @@ import java.util.List;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-
 public interface IRestfulClient {
+
+	/**
+	 * Sets the interfceptor service used by this client
+	 *
+	 * @since 3.8.0
+	 */
+	IInterceptorService getInterceptorService();
+
+	/**
+	 * Sets the interfceptor service used by this client
+	 *
+	 * @since 3.8.0
+	 */
+	void setInterceptorService(@Nonnull IInterceptorService theInterceptorService);
 
 	/**
 	 * Retrieve the contents at the given URL and parse them as a resource. This
 	 * method could be used as a low level implementation of a read/vread/search
 	 * operation.
-	 * 
-	 * @param theResourceType
-	 *           The resource type to parse
-	 * @param theUrl
-	 *           The URL to load
+	 *
+	 * @param theResourceType The resource type to parse
+	 * @param theUrl          The URL to load
 	 * @return The parsed resource
 	 */
 	<T extends IBaseResource> T fetchResourceFromUrl(Class<T> theResourceType, String theUrl);
@@ -48,6 +61,17 @@ public interface IRestfulClient {
 	 * explicitly request an encoding. (This is standard behaviour according to the FHIR specification)
 	 */
 	EncodingEnum getEncoding();
+
+	/**
+	 * Specifies that the client should use the given encoding to do its
+	 * queries. This means that the client will append the "_format" param
+	 * to GET methods (read/search/etc), and will add an appropriate header for
+	 * write methods.
+	 *
+	 * @param theEncoding The encoding to use in the request, or <code>null</code> not specify
+	 *                    an encoding (which generally implies the use of XML). The default is <code>null</code>.
+	 */
+	void setEncoding(EncodingEnum theEncoding);
 
 	/**
 	 * Returns the FHIR context associated with this client
@@ -61,11 +85,6 @@ public interface IRestfulClient {
 	IHttpClient getHttpClient();
 
 	/**
-	 * Returns the client interceptors that have been registered with this client
-	 */
-	List<IClientInterceptor> getInterceptors();
-
-	/**
 	 * Base URL for the server, with no trailing "/"
 	 */
 	String getServerBase();
@@ -73,28 +92,18 @@ public interface IRestfulClient {
 	/**
 	 * Register a new interceptor for this client. An interceptor can be used to add additional
 	 * logging, or add security headers, or pre-process responses, etc.
+	 *
+	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
 	 */
+	@Deprecated
 	void registerInterceptor(IClientInterceptor theInterceptor);
-
-	/**
-	 * Specifies that the client should use the given encoding to do its
-	 * queries. This means that the client will append the "_format" param
-	 * to GET methods (read/search/etc), and will add an appropriate header for
-	 * write methods.
-	 * 
-	 * @param theEncoding
-	 *           The encoding to use in the request, or <code>null</code> not specify
-	 *           an encoding (which generally implies the use of XML). The default is <code>null</code>.
-	 */
-	void setEncoding(EncodingEnum theEncoding);
 
 	/**
 	 * Specifies that the client should request that the server respond with "pretty printing"
 	 * enabled. Note that this is a non-standard parameter, not all servers will
 	 * support it.
-	 * 
-	 * @param thePrettyPrint
-	 *           The pretty print flag to use in the request (default is <code>false</code>)
+	 *
+	 * @param thePrettyPrint The pretty print flag to use in the request (default is <code>false</code>)
 	 */
 	void setPrettyPrint(Boolean thePrettyPrint);
 
@@ -106,7 +115,14 @@ public interface IRestfulClient {
 
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 *
+	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
 	 */
+	@Deprecated
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
+	/**
+	 * Configures what style of _format parameter should be used in requests
+	 */
+	void setFormatParamStyle(RequestFormatParamStyleEnum theRequestFormatParamStyle);
 }

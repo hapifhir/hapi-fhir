@@ -34,7 +34,7 @@ import java.util.Map.Entry;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -442,8 +442,6 @@ public class FhirContext {
 	 *
 	 * @throws DataFormatException If the resource name is not known
 	 */
-	// Multiple spots in HAPI FHIR and Smile CDR depend on DataFormatException being
-	// thrown by this method, don't change that.
 	public RuntimeResourceDefinition getResourceDefinition(String theResourceName) throws DataFormatException {
 		validateInitialized();
 		Validate.notBlank(theResourceName, "theResourceName must not be blank");
@@ -454,6 +452,10 @@ public class FhirContext {
 		if (retVal == null) {
 			Class<? extends IBaseResource> clazz = myNameToResourceType.get(resourceName.toLowerCase());
 			if (clazz == null) {
+				// ***********************************************************************
+				// Multiple spots in HAPI FHIR and Smile CDR depend on DataFormatException
+				// being thrown by this method, don't change that.
+				// ***********************************************************************
 				throw new DataFormatException(createUnknownResourceNameError(theResourceName, myVersion.getVersion()));
 			}
 			if (IBaseResource.class.isAssignableFrom(clazz)) {

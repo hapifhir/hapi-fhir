@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.jpa.entity.TagDefinition;
+import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Meta;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -79,11 +81,17 @@ public class FhirSystemDaoDstu3 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 		return retVal;
 	}
 
+	@Override
+	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
+		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+	}
+
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public Bundle transaction(RequestDetails theRequestDetails, Bundle theRequest) {
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest);
 	}
+
 
 
 }

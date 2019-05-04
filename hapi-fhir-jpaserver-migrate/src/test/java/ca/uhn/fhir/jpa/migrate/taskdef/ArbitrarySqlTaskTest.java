@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
-import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
+import ca.uhn.fhir.util.VersionEnum;
 import org.junit.Test;
 
 import java.util.List;
@@ -19,7 +22,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (100, 1, true, null)");
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (101, 2, true, null)");
 
-		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 		task.setBatchSize(1);
 		String sql = "SELECT " +
@@ -34,7 +37,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
-			task.executeSql("update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
+			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENT = ? where PID = ?", hash, pid);
 		});
 
 		getMigrator().addTask(task);
@@ -53,11 +56,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	@Test
 	public void testExecuteOnlyIfTableExists() {
-		ArbitrarySqlTask task = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setBatchSize(1);
 		String sql = "SELECT * FROM HFJ_SEARCH_PARM";
 		task.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
-			task.executeSql("update HFJ_RES_PARAM_PRESENT set FOOFOOOFOO = null");
+			task.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set FOOFOOOFOO = null");
 		});
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 
@@ -66,4 +69,52 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 	}
+
+	@Test
+	public void testUpdateTask() {
+		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
+		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
+
+		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(1, rows.size());
+
+		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
+		};
+		migrator
+			.forVersion(VersionEnum.V3_5_0)
+			.addTableRawSql("A")
+			.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
+
+		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().migrate();
+
+		rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(0, rows.size());
+
+	}
+
+	@Test
+	public void testArbitrarySql() {
+		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
+		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
+		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Encounter', 'identifier')");
+
+		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(2, rows.size());
+
+		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
+		};
+		migrator
+			.forVersion(VersionEnum.V3_5_0)
+			.executeRawSql(DriverTypeEnum.DERBY_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
+			.executeRawSql(DriverTypeEnum.DERBY_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
+
+		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().migrate();
+
+		rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(0, rows.size());
+
+	}
+
 }

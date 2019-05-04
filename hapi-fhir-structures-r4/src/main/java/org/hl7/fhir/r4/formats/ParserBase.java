@@ -77,7 +77,7 @@ public abstract class ParserBase extends FormatUtilities implements IParser {
   }
 
   public String composeString(Resource resource) throws IOException {
-    return new String(composeBytes(resource));
+    return new String(composeBytes(resource), "UTF-8");
   }
 
   public byte[] composeBytes(Resource resource) throws IOException {

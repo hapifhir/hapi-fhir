@@ -49,9 +49,9 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			for (IValidatorModule next : validators) {
 				ourValidatingInterceptor.addValidatorModule(next);
 			}
-			ourRestServer.registerInterceptor(ourValidatingInterceptor);
 		}
-		
+
+		ourRestServer.getInterceptorService().registerInterceptor(ourValidatingInterceptor);
 	}
 
 	

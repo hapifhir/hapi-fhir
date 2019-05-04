@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Resource to define constraints on the Expansion of a FHIR ValueSet.
  */
-@ResourceDef(name="ExpansionProfile", profile="http://hl7.org/fhir/Profile/ExpansionProfile")
+@ResourceDef(name="ExpansionProfile", profile="http://hl7.org/fhir/StructureDefinition/ExpansionProfile")
 @ChildOrder(names={"url", "identifier", "version", "name", "status", "experimental", "date", "publisher", "contact", "description", "useContext", "jurisdiction", "fixedVersion", "excludedSystem", "includeDesignations", "designation", "includeDefinition", "activeOnly", "excludeNested", "excludeNotForUI", "excludePostCoordinated", "displayLanguage", "limitedExpansion"})
 public class ExpansionProfile extends MetadataResource {
 

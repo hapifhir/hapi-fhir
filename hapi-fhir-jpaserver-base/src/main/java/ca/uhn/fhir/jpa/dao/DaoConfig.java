@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
-import ca.uhn.fhir.jpa.entity.ResourceEncodingEnum;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
+import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.instance.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +21,7 @@ import java.util.*;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,21 +39,6 @@ import java.util.*;
 
 public class DaoConfig {
 
-	/**
-	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
-	 * values:
-	 * <ul>
-	 * <li><code>"http://hl7.org/fhir/valueset-*"</code></li>
-	 * <li><code>"http://hl7.org/fhir/codesystem-*"</code></li>
-	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
-	 * </ul>
-	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-		"http://hl7.org/fhir/ValueSet/*",
-		"http://hl7.org/fhir/CodeSystem/*",
-		"http://hl7.org/fhir/valueset-*",
-		"http://hl7.org/fhir/codesystem-*",
-		"http://hl7.org/fhir/StructureDefinition/*")));
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
@@ -84,7 +73,15 @@ public class DaoConfig {
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+
+	/**
+	 * Child Configurations
+	 */
+
+	private ModelConfig myModelConfig = new ModelConfig();
+
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -92,17 +89,8 @@ public class DaoConfig {
 	/**
 	 * update setter javadoc if default changes
 	 */
-	private boolean myAllowExternalReferences = false;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private boolean myAllowContainsSearches = false;
-	/**
-	 * update setter javadoc if default changes
-	 */
 	private boolean myAllowInlineMatchUrlReferences = true;
 	private boolean myAllowMultipleDelete;
-	private boolean myDefaultSearchParamsCanBeOverridden = false;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -112,6 +100,7 @@ public class DaoConfig {
 	private boolean myUniqueIndexesEnabled = true;
 	private boolean myUniqueIndexesCheckedBeforeSave = true;
 	private boolean myEnforceReferentialIntegrityOnWrite = true;
+	private SearchTotalModeEnum myDefaultTotalMode = null;
 	private int myEverythingIncludesFetchPageSize = 50;
 	/**
 	 * update setter javadoc if default changes
@@ -126,7 +115,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors;
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -140,8 +128,6 @@ public class DaoConfig {
 	private Long myReuseCachedSearchResultsForMillis = DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS;
 	private boolean mySchedulingDisabled;
 	private boolean mySuppressUpdatesWithNoChange = true;
-	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
-	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private Integer myCacheControlNoStoreMaxResultsUpperLimit = 1000;
 	private Integer myCountSearchResultsUpTo = null;
@@ -149,10 +135,17 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
 	private int myReindexThreadCount;
+	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
-	private List<Integer> myPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
+	private List<WarmCacheEntry> myWarmCacheEntries = new ArrayList<>();
+	private boolean myDisableHashBasedSearches;
+	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myEnforceReferenceTargetTypes = true;
+	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
 
 	/**
 	 * Constructor
@@ -163,12 +156,73 @@ public class DaoConfig {
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
+		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
 
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
 			ourLog.info("Status based reindexing is DISABLED");
 			setStatusBasedReindexingDisabled(true);
 		}
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public boolean isEnforceReferenceTargetTypes() {
+		return myEnforceReferenceTargetTypes;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) when a resource is being persisted,
+	 * the target resource types of references will be validated to ensure that they
+	 * are appropriate for the field containing the reference. This is generally a good idea
+	 * because invalid reference target types may not be searchable.
+	 */
+	public void setEnforceReferenceTargetTypes(boolean theEnforceReferenceTargetTypes) {
+		myEnforceReferenceTargetTypes = theEnforceReferenceTargetTypes;
+	}
+
+	/**
+	 * If a non-null value is supplied (default is <code>null</code>), a default
+	 * for the <code>_total</code> parameter may be specified here. For example,
+	 * setting this value to {@link SearchTotalModeEnum#ACCURATE} will force a
+	 * count to always be calculated for all searches. This can have a performance impact
+	 * since it means that a count query will always be performed, but this is desirable
+	 * for some solutions.
+	 */
+	public SearchTotalModeEnum getDefaultTotalMode() {
+		return myDefaultTotalMode;
+	}
+
+	/**
+	 * If a non-null value is supplied (default is <code>null</code>), a default
+	 * for the <code>_total</code> parameter may be specified here. For example,
+	 * setting this value to {@link SearchTotalModeEnum#ACCURATE} will force a
+	 * count to always be calculated for all searches. This can have a performance impact
+	 * since it means that a count query will always be performed, but this is desirable
+	 * for some solutions.
+	 */
+	public void setDefaultTotalMode(SearchTotalModeEnum theDefaultTotalMode) {
+		myDefaultTotalMode = theDefaultTotalMode;
+	}
+
+	/**
+	 * Returns a set of searches that should be kept "warm", meaning that
+	 * searches will periodically be performed in the background to
+	 * keep results ready for this search
+	 */
+	public List<WarmCacheEntry> getWarmCacheEntries() {
+		if (myWarmCacheEntries == null) {
+			myWarmCacheEntries = new ArrayList<>();
+		}
+		return myWarmCacheEntries;
+	}
+
+	public void setWarmCacheEntries(List<WarmCacheEntry> theWarmCacheEntries) {
+		myWarmCacheEntries = theWarmCacheEntries;
 	}
 
 	/**
@@ -203,12 +257,7 @@ public class DaoConfig {
 	 * @see #setTreatReferencesAsLogical(Set)
 	 */
 	public void addTreatReferencesAsLogical(String theTreatReferencesAsLogical) {
-		validateTreatBaseUrlsAsLocal(theTreatReferencesAsLogical);
-
-		if (myTreatReferencesAsLogical == null) {
-			myTreatReferencesAsLogical = new HashSet<>();
-		}
-		myTreatReferencesAsLogical.add(theTreatReferencesAsLogical);
+		myModelConfig.addTreatReferencesAsLogical(theTreatReferencesAsLogical);
 	}
 
 	/**
@@ -482,35 +531,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Returns the interceptors which will be notified of operations.
-	 *
-	 * @see #setInterceptors(List)
-	 */
-	public List<IServerInterceptor> getInterceptors() {
-		if (myInterceptors == null) {
-			myInterceptors = new ArrayList<>();
-		}
-		return myInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<IServerInterceptor>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
-	}
-
-	/**
 	 * See {@link #setMaximumExpansionSize(int)}
 	 */
 	public int getMaximumExpansionSize() {
@@ -585,6 +605,31 @@ public class DaoConfig {
 		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
 	}
 
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getExpungeThreadCount() {
+		return myExpungeThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setExpungeThreadCount(int theExpungeThreadCount) {
+		myExpungeThreadCount = theExpungeThreadCount;
+		myExpungeThreadCount = Math.max(myExpungeThreadCount, 1); // Minimum of 1
+	}
+
 	public ResourceEncodingEnum getResourceEncoding() {
 		return myResourceEncoding;
 	}
@@ -624,8 +669,38 @@ public class DaoConfig {
 	}
 
 	/**
+	 * Controls the behaviour when a client-assigned ID is encountered, i.e. an HTTP PUT
+	 * on a resource ID that does not already exist in the database.
+	 * <p>
+	 * Default is {@link ClientIdStrategyEnum#ALPHANUMERIC}
+	 * </p>
+	 */
+	public ClientIdStrategyEnum getResourceClientIdStrategy() {
+		return myResourceClientIdStrategy;
+	}
+
+	/**
+	 * Controls the behaviour when a client-assigned ID is encountered, i.e. an HTTP PUT
+	 * on a resource ID that does not already exist in the database.
+	 * <p>
+	 * Default is {@link ClientIdStrategyEnum#ALPHANUMERIC}
+	 * </p>
+	 *
+	 * @param theResourceClientIdStrategy Must not be <code>null</code>
+	 */
+	public void setResourceClientIdStrategy(ClientIdStrategyEnum theResourceClientIdStrategy) {
+		Validate.notNull(theResourceClientIdStrategy, "theClientIdStrategy must not be null");
+		myResourceClientIdStrategy = theResourceClientIdStrategy;
+	}
+
+	/**
 	 * This setting configures the strategy to use in generating IDs for newly
 	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 * <p>
+	 * This strategy is only used for server-assigned IDs, i.e. for HTTP POST
+	 * where the client is requesing that the server store a new resource and give
+	 * it an ID.
+	 * </p>
 	 */
 	public IdStrategyEnum getResourceServerIdStrategy() {
 		return myResourceServerIdStrategy;
@@ -634,8 +709,13 @@ public class DaoConfig {
 	/**
 	 * This setting configures the strategy to use in generating IDs for newly
 	 * created resources on the server. The default is {@link IdStrategyEnum#SEQUENTIAL_NUMERIC}.
+	 * <p>
+	 * This strategy is only used for server-assigned IDs, i.e. for HTTP POST
+	 * where the client is requesing that the server store a new resource and give
+	 * it an ID.
+	 * </p>
 	 *
-	 * @param theResourceIdStrategy The strategy. Must not be null.
+	 * @param theResourceIdStrategy The strategy. Must not be <code>null</code>.
 	 */
 	public void setResourceServerIdStrategy(IdStrategyEnum theResourceIdStrategy) {
 		Validate.notNull(theResourceIdStrategy, "theResourceIdStrategy must not be null");
@@ -700,57 +780,6 @@ public class DaoConfig {
 
 	/**
 	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 * <p>
-	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
-	 * </p>
-	 *
-	 * @see #getTreatReferencesAsLogical()
-	 */
-	public Set<String> getTreatBaseUrlsAsLocal() {
-		return myTreatBaseUrlsAsLocal;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
-	 * resources that have any of the base URLs given here will be replaced with
-	 * simple local references.
-	 * <p>
-	 * For example, if the set contains the value <code>http://example.com/base/</code>
-	 * and a resource is submitted to the server that contains a reference to
-	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
-	 * convert this reference to <code>Patient/1</code>
-	 * </p>
-	 *
-	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
-	 *                                means no references will be treated as external
-	 */
-	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
-		if (theTreatBaseUrlsAsLocal != null) {
-			for (String next : theTreatBaseUrlsAsLocal) {
-				validateTreatBaseUrlsAsLocal(next);
-			}
-		}
-
-		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
-		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
-			while (next.endsWith("/")) {
-				next = next.substring(0, next.length() - 1);
-			}
-			treatBaseUrlsAsLocal.add(next);
-		}
-		myTreatBaseUrlsAsLocal = treatBaseUrlsAsLocal;
-	}
-
-	/**
-	 * This setting may be used to advise the server that any references found in
 	 * resources that have any of the base URLs given here will be treated as logical
 	 * references instead of being treated as real references.
 	 * <p>
@@ -768,10 +797,10 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 *
-	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
+	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public Set<String> getTreatReferencesAsLogical() {
-		return myTreatReferencesAsLogical;
+		return myModelConfig.getTreatReferencesAsLogical();
 	}
 
 	/**
@@ -793,47 +822,11 @@ public class DaoConfig {
 	 * <li><code>http://example.com/some-base*</code> <b>(will match anything beginning with the part before the *)</b></li>
 	 * </ul>
 	 *
-	 * @see #DEFAULT_LOGICAL_BASE_URLS Default values for this property
+	 * @see ModelConfig#DEFAULT_LOGICAL_BASE_URLS Default values for this property
 	 */
 	public DaoConfig setTreatReferencesAsLogical(Set<String> theTreatReferencesAsLogical) {
-		myTreatReferencesAsLogical = theTreatReferencesAsLogical;
+		myModelConfig.setTreatReferencesAsLogical(theTreatReferencesAsLogical);
 		return this;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public boolean isAllowContainsSearches() {
-		return myAllowContainsSearches;
-	}
-
-	/**
-	 * If enabled, the server will support the use of :contains searches,
-	 * which are helpful but can have adverse effects on performance.
-	 * <p>
-	 * Default is <code>false</code> (Note that prior to HAPI FHIR
-	 * 3.5.0 the default was <code>true</code>)
-	 * </p>
-	 * <p>
-	 * Note: If you change this value after data already has
-	 * already been stored in the database, you must for a reindexing
-	 * of all data in the database or resources may not be
-	 * searchable.
-	 * </p>
-	 */
-	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
-		this.myAllowContainsSearches = theAllowContainsSearches;
 	}
 
 	/**
@@ -862,7 +855,7 @@ public class DaoConfig {
 	 * @see #setAllowExternalReferences(boolean)
 	 */
 	public boolean isAllowExternalReferences() {
-		return myAllowExternalReferences;
+		return myModelConfig.isAllowExternalReferences();
 	}
 
 	/**
@@ -891,7 +884,7 @@ public class DaoConfig {
 	 * @see #setAllowExternalReferences(boolean)
 	 */
 	public void setAllowExternalReferences(boolean theAllowExternalReferences) {
-		myAllowExternalReferences = theAllowExternalReferences;
+		myModelConfig.setAllowExternalReferences(theAllowExternalReferences);
 	}
 
 	/**
@@ -966,38 +959,6 @@ public class DaoConfig {
 	 */
 	public void setAutoCreatePlaceholderReferenceTargets(boolean theAutoCreatePlaceholderReferenceTargets) {
 		myAutoCreatePlaceholderReferenceTargets = theAutoCreatePlaceholderReferenceTargets;
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public boolean isDefaultSearchParamsCanBeOverridden() {
-		return myDefaultSearchParamsCanBeOverridden;
-	}
-
-	/**
-	 * If set to {@code true} the default search params (i.e. the search parameters that are
-	 * defined by the FHIR specification itself) may be overridden by uploading search
-	 * parameters to the server with the same code as the built-in search parameter.
-	 * <p>
-	 * This can be useful if you want to be able to disable or alter
-	 * the behaviour of the default search parameters.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}
-	 * </p>
-	 */
-	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
-		myDefaultSearchParamsCanBeOverridden = theDefaultSearchParamsCanBeOverridden;
 	}
 
 	/**
@@ -1117,6 +1078,22 @@ public class DaoConfig {
 	}
 
 	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
+	}
+
+	/**
 	 * Should contained IDs be indexed the same way that non-contained IDs are (default is
 	 * <code>true</code>)
 	 */
@@ -1217,7 +1194,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1228,7 +1205,7 @@ public class DaoConfig {
 
 	/**
 	 * If set to <code>true</code> (default is <code>true</code>), indexes will be
-	 * created for search parameters marked as {@link JpaConstants#EXT_SP_UNIQUE}.
+	 * created for search parameters marked as {@link SearchParamConstants#EXT_SP_UNIQUE}.
 	 * This is a HAPI FHIR specific extension which can be used to specify that no more than one
 	 * resource can exist which matches a given criteria, using a database constraint to
 	 * enforce this.
@@ -1334,18 +1311,8 @@ public class DaoConfig {
 	 * given number.
 	 * </p>
 	 */
-	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
-		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
-		int last = 0;
-		for (Integer nextInteger : thePreFetchThresholds) {
-			int nextInt = nextInteger.intValue();
-			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
-			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
-			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
-			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
-			last = nextInt;
-		}
-		myPreFetchThresholds = thePreFetchThresholds;
+	public List<Integer> getSearchPreFetchThresholds() {
+		return mySearchPreFetchThresholds;
 	}
 
 	/**
@@ -1361,8 +1328,275 @@ public class DaoConfig {
 	 * given number.
 	 * </p>
 	 */
-	public List<Integer> getPreFetchThresholds() {
-		return myPreFetchThresholds;
+	public void setSearchPreFetchThresholds(List<Integer> thePreFetchThresholds) {
+		Validate.isTrue(thePreFetchThresholds.size() > 0, "thePreFetchThresholds must not be empty");
+		int last = 0;
+		for (Integer nextInt : thePreFetchThresholds) {
+			Validate.isTrue(nextInt > 0 || nextInt == -1, nextInt + " is not a valid prefetch threshold");
+			Validate.isTrue(nextInt != last, "Prefetch thresholds must be sequential");
+			Validate.isTrue(nextInt > last || nextInt == -1, "Prefetch thresholds must be sequential");
+			Validate.isTrue(last != -1, "Prefetch thresholds must be sequential");
+			last = nextInt;
+		}
+		mySearchPreFetchThresholds = thePreFetchThresholds;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false) the server will not use
+	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
+	 * and are the new default way of searching. However they require a very
+	 * large data migration if an existing system has a large amount of data
+	 * so this setting can be used to use the old search mechanism while data
+	 * is migrated.
+	 *
+	 * @since 3.6.0
+	 */
+	public boolean getDisableHashBasedSearches() {
+		return myDisableHashBasedSearches;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is false) the server will not use
+	 * hash based searches. These searches were introduced in HAPI FHIR 3.5.0
+	 * and are the new default way of searching. However they require a very
+	 * large data migration if an existing system has a large amount of data
+	 * so this setting can be used to use the old search mechanism while data
+	 * is migrated.
+	 *
+	 * @since 3.6.0
+	 */
+	public void setDisableHashBasedSearches(boolean theDisableHashBasedSearches) {
+		myDisableHashBasedSearches = theDisableHashBasedSearches;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
+	 */
+
+	public boolean isEnableInMemorySubscriptionMatching() {
+		return myEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to <code>false</code> (default is true) the server will not use
+	 * in-memory subscription searching and instead use the database matcher for all subscription
+	 * criteria matching.
+	 * <p>
+	 * When there are subscriptions registered
+	 * on the server, the default behaviour is to compare the changed resource to the
+	 * subscription criteria directly in-memory without going out to the database.
+	 * Certain types of subscription criteria, e.g. chained references of queries with
+	 * qualifiers or prefixes, are not supported by the in-memory matcher and will fall back
+	 * to a database matcher.
+	 * <p>
+	 * The database matcher performs a query against the
+	 * database by prepending ?id=XYZ to the subscription criteria where XYZ is the id of the changed entity
+	 *
+	 * @since 3.6.1
+	 */
+
+	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
+		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
+	 * @since 3.7.0
+	 */
+
+	public boolean isSubscriptionMatchingEnabled() {
+		return myModelConfig.isSubscriptionMatchingEnabled();
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 *
+	 * @since 3.7.0
+	 */
+
+	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
+		myModelConfig.setSubscriptionMatchingEnabled(theSubscriptionMatchingEnabled);
+	}
+
+	public ModelConfig getModelConfig() {
+		return myModelConfig;
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
+	 */
+	public boolean isAllowContainsSearches() {
+		return this.myModelConfig.isAllowContainsSearches();
+	}
+
+	/**
+	 * If enabled, the server will support the use of :contains searches,
+	 * which are helpful but can have adverse effects on performance.
+	 * <p>
+	 * Default is <code>false</code> (Note that prior to HAPI FHIR
+	 * 3.5.0 the default was <code>true</code>)
+	 * </p>
+	 * <p>
+	 * Note: If you change this value after data already has
+	 * already been stored in the database, you must for a reindexing
+	 * of all data in the database or resources may not be
+	 * searchable.
+	 * </p>
+	 */
+	public void setAllowContainsSearches(boolean theAllowContainsSearches) {
+		this.myModelConfig.setAllowContainsSearches(theAllowContainsSearches);
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 * <p>
+	 * Note that this property has different behaviour from {@link DaoConfig#getTreatReferencesAsLogical()}
+	 * </p>
+	 *
+	 * @see #getTreatReferencesAsLogical()
+	 */
+	public Set<String> getTreatBaseUrlsAsLocal() {
+		return myModelConfig.getTreatBaseUrlsAsLocal();
+	}
+
+	/**
+	 * This setting may be used to advise the server that any references found in
+	 * resources that have any of the base URLs given here will be replaced with
+	 * simple local references.
+	 * <p>
+	 * For example, if the set contains the value <code>http://example.com/base/</code>
+	 * and a resource is submitted to the server that contains a reference to
+	 * <code>http://example.com/base/Patient/1</code>, the server will automatically
+	 * convert this reference to <code>Patient/1</code>
+	 * </p>
+	 *
+	 * @param theTreatBaseUrlsAsLocal The set of base URLs. May be <code>null</code>, which
+	 *                                means no references will be treated as external
+	 */
+	public void setTreatBaseUrlsAsLocal(Set<String> theTreatBaseUrlsAsLocal) {
+		myModelConfig.setTreatBaseUrlsAsLocal(theTreatBaseUrlsAsLocal);
+	}
+
+	/**
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public boolean isDefaultSearchParamsCanBeOverridden() {
+		return myModelConfig.isDefaultSearchParamsCanBeOverridden();
+	}
+
+	/**
+	 * If set to {@code true} the default search params (i.e. the search parameters that are
+	 * defined by the FHIR specification itself) may be overridden by uploading search
+	 * parameters to the server with the same code as the built-in search parameter.
+	 * <p>
+	 * This can be useful if you want to be able to disable or alter
+	 * the behaviour of the default search parameters.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}
+	 * </p>
+	 */
+	public void setDefaultSearchParamsCanBeOverridden(boolean theDefaultSearchParamsCanBeOverridden) {
+		myModelConfig.setDefaultSearchParamsCanBeOverridden(theDefaultSearchParamsCanBeOverridden);
+	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 */
+	public DaoConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+		myModelConfig.addSupportedSubscriptionType(theSubscriptionChannelType);
+		return this;
+	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 */
+	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
+		return myModelConfig.getSupportedSubscriptionTypes();
+	}
+
+	@VisibleForTesting
+	public void clearSupportedSubscriptionTypesForUnitTest() {
+		myModelConfig.clearSupportedSubscriptionTypesForUnitTest();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public String getEmailFromAddress() {
+		return myModelConfig.getEmailFromAddress();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public void setEmailFromAddress(String theEmailFromAddress) {
+		myModelConfig.setEmailFromAddress(theEmailFromAddress);
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myModelConfig.getWebsocketContextPath();
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
 	}
 
 	public enum IndexEnabledEnum {
@@ -1382,16 +1616,33 @@ public class DaoConfig {
 		UUID
 	}
 
-	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
-		Validate.notBlank(theUrl, "Base URL must not be null or empty");
+	public enum ClientIdStrategyEnum {
+		/**
+		 * Clients are not allowed to supply IDs for resources that do not
+		 * already exist
+		 */
+		NOT_ALLOWED,
 
-		int starIdx = theUrl.indexOf('*');
-		if (starIdx != -1) {
-			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException("Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
-			}
-		}
+		/**
+		 * Clients may supply IDs but these IDs are not permitted to be purely
+		 * numeric. In other words, values such as "A", "A1" and "000A" would be considered
+		 * valid but "123" would not.
+		 * <p><b>This is the default setting.</b></p>
+		 */
+		ALPHANUMERIC,
 
+		/**
+		 * Clients may supply any ID including purely numeric IDs. Note that this setting should
+		 * only be set on an empty database, or on a database that has always had this setting
+		 * set as it causes a "forced ID" to be used for all resources.
+		 * <p>
+		 * Note that if you use this setting, it is highly recommended that you also
+		 * set the {@link #setResourceServerIdStrategy(IdStrategyEnum) ResourceServerIdStrategy}
+		 * to {@link IdStrategyEnum#UUID} in order to avoid any potential for conflicts. Otherwise
+		 * a database sequence will be used to generate IDs and these IDs can conflict with
+		 * client-assigned numeric IDs.
+		 * </P>
+		 */
+		ANY
 	}
-
 }

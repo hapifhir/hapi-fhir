@@ -4,7 +4,7 @@ package ca.uhn.fhir.narrative;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,19 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.INarrative;
-
 import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface INarrativeGenerator {
 
-	void generateNarrative(FhirContext theContext, IBaseResource theResource, INarrative theNarrative);
+	/**
+	 * Generate any narratives for the given resource that have applicable
+	 * templates, and populates the appropriate field(s). This almost always means
+	 * the <code>Resource.text.narrative</code> field, but for some resource types
+	 * it can mean other fields (e.g. <code>Composition.</code>
+	 *
+	 * @return Returns <code>true</code> if a narrative was actually generated
+	 */
+	boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource);
 
 }

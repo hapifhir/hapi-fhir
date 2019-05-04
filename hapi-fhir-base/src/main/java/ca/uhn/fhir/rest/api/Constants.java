@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.api;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,8 +42,14 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	/**
+	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
+	 */
 	public static final String CT_FHIR_JSON_NEW = "application/fhir+json";
 	public static final String CT_FHIR_XML = "application/xml+fhir";
+	/**
+	 * The FHIR MimeType for XML encoding in FHIR DSTU3+
+	 */
 	public static final String CT_FHIR_XML_NEW = "application/fhir+xml";
 	public static final String CT_HTML = "text/html";
 	public static final String CT_HTML_WITH_UTF8 = "text/html" + CHARSET_UTF8_CTSUFFIX;
@@ -86,6 +92,7 @@ public class Constants {
 	public static final String HEADER_CONTENT_LOCATION = "Content-Location";
 	public static final String HEADER_CONTENT_LOCATION_LC = HEADER_CONTENT_LOCATION.toLowerCase();
 	public static final String HEADER_CONTENT_TYPE = "Content-Type";
+	public static final String HEADER_CONTENT_TYPE_LC = HEADER_CONTENT_TYPE.toLowerCase();
 	public static final String HEADER_COOKIE = "Cookie";
 	public static final String HEADER_CORS_ALLOW_METHODS = "Access-Control-Allow-Methods";
 	public static final String HEADER_CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
@@ -130,6 +137,7 @@ public class Constants {
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
 	public static final String PARAM_ELEMENTS = "_elements";
+	public static final String PARAM_ELEMENTS_EXCLUDE_MODIFIER = ":exclude";
 	public static final String PARAM_FORMAT = "_format";
 	public static final String PARAM_HAS = "_has";
 	public static final String PARAM_HISTORY = "_history";
@@ -197,6 +205,8 @@ public class Constants {
 	 * This is provided for testing only! Use with caution as this property may change.
 	 */
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
+	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
+	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

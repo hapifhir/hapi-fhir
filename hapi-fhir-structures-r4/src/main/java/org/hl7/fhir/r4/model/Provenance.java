@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * Provenance of a resource is a record that describes entities and processes involved in producing and delivering or otherwise influencing that resource. Provenance provides a critical foundation for assessing authenticity, enabling trust, and allowing reproducibility. Provenance assertions are a form of contextual metadata and can themselves become important records with their own provenance. Provenance statement indicates clinical significance in terms of confidence in authenticity, reliability, and trustworthiness, integrity, and stage in lifecycle (e.g. Document Completion - has the artifact been legally authenticated), all of which may impact security, privacy, and trust policies.
  */
-@ResourceDef(name="Provenance", profile="http://hl7.org/fhir/Profile/Provenance")
+@ResourceDef(name="Provenance", profile="http://hl7.org/fhir/StructureDefinition/Provenance")
 public class Provenance extends DomainResource {
 
     public enum ProvenanceEntityRole {
@@ -1063,7 +1063,7 @@ public class Provenance extends DomainResource {
      */
     public Period getOccurredPeriod() throws FHIRException { 
       if (this.occurred == null)
-        return null;
+        this.occurred = new Period();
       if (!(this.occurred instanceof Period))
         throw new FHIRException("Type mismatch: the type Period was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (Period) this.occurred;
@@ -1078,7 +1078,7 @@ public class Provenance extends DomainResource {
      */
     public DateTimeType getOccurredDateTimeType() throws FHIRException { 
       if (this.occurred == null)
-        return null;
+        this.occurred = new DateTimeType();
       if (!(this.occurred instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.occurred.getClass().getName()+" was encountered");
       return (DateTimeType) this.occurred;

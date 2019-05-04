@@ -87,7 +87,9 @@ public class StringType extends PrimitiveType<String> {
 
 	@Override
 	public StringType copy() {
-		return new StringType(getValue());
+		StringType ret = new StringType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	public String fhirType() {

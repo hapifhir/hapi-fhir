@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Raw data describing a biological sequence.
  */
-@ResourceDef(name="Sequence", profile="http://hl7.org/fhir/Profile/Sequence")
+@ResourceDef(name="Sequence", profile="http://hl7.org/fhir/StructureDefinition/Sequence")
 public class Sequence extends DomainResource {
 
     public enum SequenceType {

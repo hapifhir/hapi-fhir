@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.sp;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,15 @@ package ca.uhn.fhir.jpa.sp;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.entity.ResourceTable;
-import ca.uhn.fhir.jpa.entity.SearchParamPresent;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.Map.Entry;
 
+@Service
 public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 	@Autowired
@@ -74,7 +76,7 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 				toDelete.add(nextEntry.getValue());
 			}
 		}
-		mySearchParamPresentDao.deleteInBatch(toDelete);
+		mySearchParamPresentDao.deleteAll(toDelete);
 
 		// Add any that should be added
 		List<SearchParamPresent> toAdd = new ArrayList<>();

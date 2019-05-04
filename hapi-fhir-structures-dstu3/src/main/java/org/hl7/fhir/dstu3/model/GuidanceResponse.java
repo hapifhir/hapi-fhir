@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A guidance response is the formal response to a guidance request, including any output parameters returned by the evaluation, as well as the description of any proposed actions to be taken.
  */
-@ResourceDef(name="GuidanceResponse", profile="http://hl7.org/fhir/Profile/GuidanceResponse")
+@ResourceDef(name="GuidanceResponse", profile="http://hl7.org/fhir/StructureDefinition/GuidanceResponse")
 public class GuidanceResponse extends DomainResource {
 
     public enum GuidanceResponseStatus {

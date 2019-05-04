@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.sched;
 
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
@@ -77,10 +79,6 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		return scheduler;
 	}
 
-	private void configureSchedulerCommon(Scheduler theScheduler) throws SchedulerException {
-		theScheduler.setJobFactory(mySpringBeanJobFactory);
-	}
-
 	private Scheduler createClusteredScheduler() throws SchedulerException {
 		Properties clusteredProperties = new Properties();
 		quartzPropertiesCommon(clusteredProperties);
@@ -90,6 +88,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		Scheduler scheduler = factory.getScheduler();
 		configureSchedulerCommon(scheduler);
 		return scheduler;
+	}
+
+	private void configureSchedulerCommon(Scheduler theScheduler) throws SchedulerException {
+		theScheduler.setJobFactory(mySpringBeanJobFactory);
 	}
 
 	@Override
@@ -106,6 +108,9 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		Validate.notNull(theJobDefinition);
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
+
+		// FIXME: JA remove
+		Validate.isTrue(theJobDefinition.getJobClass().getName().contains(theJobDefinition.getId()), "Definition[" + theJobDefinition.getJobClass().getName() + "] - ID[" + theJobDefinition.getId() + "]");
 
 		JobKey jobKey = new JobKey(theJobDefinition.getId());
 

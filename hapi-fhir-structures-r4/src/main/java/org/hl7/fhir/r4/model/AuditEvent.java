@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * A record of an event made for purposes of maintaining a security log. Typical uses include detection of intrusion attempts and monitoring for inappropriate usage.
  */
-@ResourceDef(name="AuditEvent", profile="http://hl7.org/fhir/Profile/AuditEvent")
+@ResourceDef(name="AuditEvent", profile="http://hl7.org/fhir/StructureDefinition/AuditEvent")
 public class AuditEvent extends DomainResource {
 
     public enum AuditEventAction {
@@ -2650,7 +2650,7 @@ public class AuditEvent extends DomainResource {
          */
         public StringType getValueStringType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new StringType();
           if (!(this.value instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (StringType) this.value;
@@ -2665,7 +2665,7 @@ public class AuditEvent extends DomainResource {
          */
         public Base64BinaryType getValueBase64BinaryType() throws FHIRException { 
           if (this.value == null)
-            return null;
+            this.value = new Base64BinaryType();
           if (!(this.value instanceof Base64BinaryType))
             throw new FHIRException("Type mismatch: the type Base64BinaryType was expected, but "+this.value.getClass().getName()+" was encountered");
           return (Base64BinaryType) this.value;

@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes the intended objective(s) for a patient, group or organization care, for example, weight loss, restoring an activity of daily living, obtaining herd immunity via immunization, meeting a process improvement objective, etc.
  */
-@ResourceDef(name="Goal", profile="http://hl7.org/fhir/Profile/Goal")
+@ResourceDef(name="Goal", profile="http://hl7.org/fhir/StructureDefinition/Goal")
 public class Goal extends DomainResource {
 
     public enum GoalStatus {

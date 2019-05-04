@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A reference to a document.
  */
-@ResourceDef(name="DocumentReference", profile="http://hl7.org/fhir/Profile/DocumentReference")
+@ResourceDef(name="DocumentReference", profile="http://hl7.org/fhir/StructureDefinition/DocumentReference")
 public class DocumentReference extends DomainResource {
 
     public enum ReferredDocumentStatus {

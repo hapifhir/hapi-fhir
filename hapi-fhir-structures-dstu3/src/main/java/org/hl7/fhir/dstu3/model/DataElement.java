@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * The formal description of a single piece of information that can be gathered and reported.
  */
-@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/Profile/DataElement")
+@ResourceDef(name="DataElement", profile="http://hl7.org/fhir/StructureDefinition/DataElement")
 @ChildOrder(names={"url", "identifier", "version", "status", "experimental", "date", "publisher", "name", "title", "contact", "useContext", "jurisdiction", "copyright", "stringency", "mapping", "element"})
 public class DataElement extends MetadataResource {
 

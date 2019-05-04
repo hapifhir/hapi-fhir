@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A binary resource can contain any content, whether text, image, pdf, zip archive, etc.
  */
-@ResourceDef(name="Binary", profile="http://hl7.org/fhir/Profile/Binary")
+@ResourceDef(name="Binary", profile="http://hl7.org/fhir/StructureDefinition/Binary")
 public class Binary extends BaseBinary implements IBaseBinary {
 
     /**

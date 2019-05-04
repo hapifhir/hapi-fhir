@@ -261,7 +261,7 @@ public class FhirInstanceValidatorR4Test {
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("primitive types must have a value or must have child extensions", all.get(0).getMessage());
+		assertEquals("Primitive types must have a value that is not empty", all.get(0).getMessage());
 	}
 
 	/**
@@ -796,7 +796,7 @@ public class FhirInstanceValidatorR4Test {
 		List<SingleValidationMessage> messages = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(output.toString(), 3, messages.size());
 		assertThat(messages.get(0).getMessage(), containsString("Element must have some content"));
-		assertThat(messages.get(1).getMessage(), containsString("primitive types must have a value or must have child extensions"));
+		assertThat(messages.get(1).getMessage(), containsString("Primitive types must have a value or must have child extensions"));
 		assertThat(messages.get(2).getMessage(), containsString("All FHIR elements must have a @value or children [hasValue() or (children().count() > id.count())]"));
 	}
 
@@ -1027,7 +1027,7 @@ public class FhirInstanceValidatorR4Test {
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
 		assertEquals(
-			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])",
+			"The value provided ('notvalidcode') is not in the value set http://hl7.org/fhir/ValueSet/observation-status|4.0.0 (http://hl7.org/fhir/ValueSet/observation-status, and a code is required from this value set) (error message = Unknown code[notvalidcode] in system[null])",
 			output.getMessages().get(0).getMessage());
 	}
 

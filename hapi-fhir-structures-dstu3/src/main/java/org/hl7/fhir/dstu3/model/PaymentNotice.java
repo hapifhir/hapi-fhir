@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides the status of the payment for goods and services rendered, and the request and response resource references.
  */
-@ResourceDef(name="PaymentNotice", profile="http://hl7.org/fhir/Profile/PaymentNotice")
+@ResourceDef(name="PaymentNotice", profile="http://hl7.org/fhir/StructureDefinition/PaymentNotice")
 public class PaymentNotice extends DomainResource {
 
     public enum PaymentNoticeStatus {

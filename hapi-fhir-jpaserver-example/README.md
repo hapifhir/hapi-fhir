@@ -1,4 +1,18 @@
-## Running hapi-fhir-jpaserver-example in Tomcat from IntelliJ
+# Unsupported
+
+This [hapi-fhir-jpaserver-example](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example) project is no longer supported.
+
+
+## Supported JPA Example
+
+The supported HAPI-FHIR JPA example is available in the [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)
+project within the [hapifhir](https://github.com/hapifhir) GitHub Organization.
+
+## Previous Documentation
+
+Below is the original documentation for this project.  Note that this documentation is no longer being updated.
+
+#### Running hapi-fhir-jpaserver-example in Tomcat from IntelliJ
 
 Install Tomcat.
 
@@ -28,12 +42,12 @@ Run the configuration.
 - Select your server, and click the green triangle (or the bug if you want to debug)
 - Wait for the console output to stop
 
-Point your browser (or fiddler, or what have you) to `http://localhost:8080/hapi/base/Patient`
+Point your browser (or fiddler, or what have you) to `http://localhost:8080/hapi/baseDstu3/Patient`
 
 You should get an empty bundle back.
 
 
-## Running hapi-fhir-jpaserver-example in a Docker container
+#### Running hapi-fhir-jpaserver-example in a Docker container
 
 Execute the `build-docker-image.sh` script to build the docker image. 
 
@@ -42,6 +56,9 @@ Use this command to start the container:
 
 Note: with this command data is persisted across container restarts, but not after removal of the container. Use a docker volume mapping on /var/lib/jetty/target to achieve this.
 
+After the docker container initial startup, point your browser (or fiddler, or what have you) to `http://localhost:8080/baseDstu3/Patient`
+
+You should get an empty bundle back.
 #### Using ElasticSearch as the search engine instead of the default Apache Lucene
 1. Install ElasticSearch server and the phonetic plugin
     * Download ElasticSearch from https://www.elastic.co/downloads/elasticsearch

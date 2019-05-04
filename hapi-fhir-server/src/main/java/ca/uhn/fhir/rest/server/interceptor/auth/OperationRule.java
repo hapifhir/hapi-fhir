@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	private boolean myAppliesToAnyType;
 	private boolean myAppliesToAnyInstance;
 	private boolean myAppliesAtAnyLevel;
+	private boolean myAllowAllResponses;
 
 	OperationRule(String theRuleName) {
 		super(theRuleName);
@@ -48,6 +49,10 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	void appliesAtAnyLevel(boolean theAppliesAtAnyLevel) {
 		myAppliesAtAnyLevel = theAppliesAtAnyLevel;
+	}
+
+	public void allowAllResponses() {
+		myAllowAllResponses = true;
 	}
 
 	void appliesToAnyInstance() {
@@ -114,23 +119,32 @@ class OperationRule extends BaseRule implements IAuthRule {
 			case EXTENDED_OPERATION_INSTANCE:
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
-				} else if (theInputResourceId != null) {
-					if (myAppliesToIds != null) {
-						String instanceId = theInputResourceId.toUnqualifiedVersionless().getValue();
-						for (IIdType next : myAppliesToIds) {
-							if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
-								applies = true;
-								break;
+				} else {
+					IIdType requestResourceId = null;
+					if (theInputResourceId != null) {
+						requestResourceId = theInputResourceId;
+					}
+					if (requestResourceId == null && myAllowAllResponses) {
+						requestResourceId = theRequestDetails.getId();
+					}
+					if (requestResourceId != null) {
+						if (myAppliesToIds != null) {
+							String instanceId = requestResourceId .toUnqualifiedVersionless().getValue();
+							for (IIdType next : myAppliesToIds) {
+								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
+									applies = true;
+									break;
+								}
 							}
 						}
-					}
-					if (myAppliesToInstancesOfType != null) {
-						// TODO: Convert to a map of strings and keep the result
-						for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
-							String resName = ctx.getResourceDefinition(next).getName();
-							if (resName.equals(theInputResourceId.getResourceType())) {
-								applies = true;
-								break;
+						if (myAppliesToInstancesOfType != null) {
+							// TODO: Convert to a map of strings and keep the result
+							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+								String resName = ctx.getResourceDefinition(next).getName();
+								if (resName.equals(requestResourceId .getResourceType())) {
+									applies = true;
+									break;
+								}
 							}
 						}
 					}

@@ -28,6 +28,7 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -64,7 +65,7 @@ public class GraphQLR4RawTest {
 		servlet.setDefaultResponseEncoding(EncodingEnum.JSON);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
 
-		servlet.registerProvider(new MyGraphQLProvider());
+		servlet.registerProviders(Collections.singletonList(new MyGraphQLProvider()));
 		servlet.registerProvider(new MyPatientResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

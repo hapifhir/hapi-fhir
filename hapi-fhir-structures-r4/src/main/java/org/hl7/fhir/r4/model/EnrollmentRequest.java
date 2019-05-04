@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -45,7 +45,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 /**
  * This resource provides the insurance enrollment details to the insurer regarding a specified coverage.
  */
-@ResourceDef(name="EnrollmentRequest", profile="http://hl7.org/fhir/Profile/EnrollmentRequest")
+@ResourceDef(name="EnrollmentRequest", profile="http://hl7.org/fhir/StructureDefinition/EnrollmentRequest")
 public class EnrollmentRequest extends DomainResource {
 
     public enum EnrollmentRequestStatus {
@@ -860,17 +860,17 @@ public class EnrollmentRequest extends DomainResource {
  /**
    * Search parameter: <b>status</b>
    * <p>
-   * Description: <b>The status fo the enrollment</b><br>
+   * Description: <b>The status of the enrollment</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EnrollmentRequest.status</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="status", path="EnrollmentRequest.status", description="The status fo the enrollment", type="token" )
+  @SearchParamDefinition(name="status", path="EnrollmentRequest.status", description="The status of the enrollment", type="token" )
   public static final String SP_STATUS = "status";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>status</b>
    * <p>
-   * Description: <b>The status fo the enrollment</b><br>
+   * Description: <b>The status of the enrollment</b><br>
    * Type: <b>token</b><br>
    * Path: <b>EnrollmentRequest.status</b><br>
    * </p>

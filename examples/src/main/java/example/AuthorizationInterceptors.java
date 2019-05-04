@@ -1,15 +1,14 @@
 package example;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
-
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -17,6 +16,13 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
 public class AuthorizationInterceptors {
@@ -99,7 +105,8 @@ public class AuthorizationInterceptors {
          @IdParam IdDt theId, 
          @ResourceParam Patient theResource, 
          @ConditionalUrlParam String theConditionalUrl, 
-         RequestDetails theRequestDetails) {
+         ServletRequestDetails theRequestDetails,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
 
       // If we're processing a conditional URL...
       if (isNotBlank(theConditionalUrl)) {
@@ -109,20 +116,25 @@ public class AuthorizationInterceptors {
          // and supply the actual ID that's being updated
          IdDt actual = new IdDt("Patient", "1123");
          
-         // There are a number of possible constructors for ActionRequestDetails.
-         // You should supply as much detail about the sub-operation as possible
-         IServerInterceptor.ActionRequestDetails subRequest = 
-               new IServerInterceptor.ActionRequestDetails(theRequestDetails, actual);
-         
-         // Notify the interceptors
-         subRequest.notifyIncomingRequestPreHandled(RestOperationTypeEnum.UPDATE);
       }
       
       // In a real server, perhaps we would process the conditional 
       // request differently and follow a separate path. Either way,
       // let's pretend there is some storage code here.
-      
       theResource.setId(theId.withVersion("2"));
+
+      // Notify the interceptor framework when we're about to perform an update. This is
+		// useful as the authorization interceptor will pick this event up and use it
+		// to factor into a decision about whether the operation should be allowed to proceed.
+		IBaseResource previousContents = theResource;
+		IBaseResource newContents = theResource;
+		HookParams params = new HookParams()
+			.add(IBaseResource.class, previousContents)
+			.add(IBaseResource.class, newContents)
+			.add(RequestDetails.class, theRequestDetails)
+			.add(ServletRequestDetails.class, theRequestDetails);
+		theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, params);
+
       MethodOutcome retVal = new MethodOutcome();
       retVal.setCreated(true);
       retVal.setResource(theResource);
@@ -158,4 +170,47 @@ public class AuthorizationInterceptors {
 		//END SNIPPET: patchAll
 
 	}
+
+
+	//START SNIPPET: narrowing
+	public class MyPatientSearchNarrowingInterceptor extends SearchNarrowingInterceptor {
+
+		/**
+		 * This method must be overridden to provide the list of compartments
+		 * and/or resources that the current user should have access to
+		 */
+		@Override
+		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
+			// Process authorization header - The following is a fake
+			// implementation. Obviously we'd want something more real
+			// for a production scenario.
+			//
+			// In this basic example we have two hardcoded bearer tokens,
+			// one which is for a user that has access to one patient, and
+			// another that has full access.
+			String authHeader = theRequestDetails.getHeader("Authorization");
+			if ("Bearer dfw98h38r".equals(authHeader)) {
+
+				// This user will have access to two compartments
+				return new AuthorizedList()
+					.addCompartment("Patient/123")
+					.addCompartment("Patient/456");
+
+			} else if ("Bearer 39ff939jgg".equals(authHeader)) {
+
+				// This user has access to everything
+				return new AuthorizedList();
+
+			} else {
+
+				throw new AuthenticationException("Unknown bearer token");
+
+			}
+
+		}
+
+	}
+	//END SNIPPET: narrowing
+
+
 }

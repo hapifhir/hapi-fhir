@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A container for slots of time that may be available for booking appointments.
  */
-@ResourceDef(name="Schedule", profile="http://hl7.org/fhir/Profile/Schedule")
+@ResourceDef(name="Schedule", profile="http://hl7.org/fhir/StructureDefinition/Schedule")
 public class Schedule extends DomainResource {
 
     /**

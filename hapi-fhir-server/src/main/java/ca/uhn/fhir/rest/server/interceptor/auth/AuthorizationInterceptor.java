@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ServerOperationInterceptorAdapter;
 import ca.uhn.fhir.util.CoverageIgnore;
 import com.google.common.collect.Lists;
@@ -54,8 +58,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_security.html">Documentation on Server Security</a>
  * for information on how to use this interceptor.
  * </p>
+ *
+ * @see SearchNarrowingInterceptor
  */
-public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter implements IRuleApplier {
+@Interceptor
+public class AuthorizationInterceptor implements IRuleApplier {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptor.class);
 
@@ -87,7 +94,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 			return;
 		}
 
-		handleDeny(decision);
+		handleDeny(theRequestDetails, decision);
 	}
 
 	@Override
@@ -185,6 +192,9 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 				// Nothing yet
 				return OperationExamineDirection.NONE;
 
+			case GRAPHQL_REQUEST:
+				return OperationExamineDirection.IN;
+
 			default:
 				// Should not happen
 				throw new IllegalStateException("Unable to apply security to event of type " + theOperation);
@@ -224,6 +234,19 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	 * applied. By default no flags are applied.
 	 *
 	 * @param theFlags The flags (must not be null)
+	 * @see #setFlags(AuthorizationFlagsEnum...)
+	 */
+	public AuthorizationInterceptor setFlags(Collection<AuthorizationFlagsEnum> theFlags) {
+		Validate.notNull(theFlags, "theFlags must not be null");
+		myFlags = new HashSet<>(theFlags);
+		return this;
+	}
+
+	/**
+	 * This property configures any flags affecting how authorization is
+	 * applied. By default no flags are applied.
+	 *
+	 * @param theFlags The flags (must not be null)
 	 * @see #setFlags(Collection)
 	 */
 	public AuthorizationInterceptor setFlags(AuthorizationFlagsEnum... theFlags) {
@@ -238,6 +261,17 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 	 * throw {@link ForbiddenOperationException} (HTTP 403) with error message citing the
 	 * rule name which trigered failure
 	 * </p>
+	 *
+	 * @since HAPI FHIR 3.6.0
+	 */
+	protected void handleDeny(RequestDetails theRequestDetails, Verdict decision) {
+		handleDeny(decision);
+	}
+
+	/**
+	 * This method should not be overridden. As of HAPI FHIR 3.6.0, you
+	 * should override {@link #handleDeny(RequestDetails, Verdict)} instead. This
+	 * method will be removed in the future.
 	 */
 	protected void handleDeny(Verdict decision) {
 		if (decision.getDecidingRule() != null) {
@@ -251,8 +285,8 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		applyRulesAndFailIfDeny(operation, theRequest, theResource, theResource.getIdElement(), null);
 	}
 
-	@Override
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, ActionRequestDetails theProcessedRequest) {
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, IServerInterceptor.ActionRequestDetails theProcessedRequest) {
 		IBaseResource inputResource = null;
 		IIdType inputResourceId = null;
 
@@ -274,7 +308,7 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		applyRulesAndFailIfDeny(theOperation, requestDetails, inputResource, inputResourceId, null);
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		switch (determineOperationDirection(theRequestDetails.getRestOperationType(), null)) {
 			case IN:
@@ -319,80 +353,22 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		return true;
 	}
 
-	@CoverageIgnore
-	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject) {
-		throw failForDstu1();
-	}
-
-	@CoverageIgnore
-	@Override
-	public boolean outgoingResponse(RequestDetails theRequestDetails, TagList theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws AuthenticationException {
-		throw failForDstu1();
-	}
-
-	@Override
-	public void resourceCreated(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
+	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.CREATE);
 	}
 
-	@Override
-	public void resourceDeleted(RequestDetails theRequest, IBaseResource theResource) {
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
+	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.DELETE);
 	}
 
-	@Override
-	public void resourceUpdated(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
+	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE);
 		}
 		handleUserOperation(theRequest, theNewResource, RestOperationTypeEnum.UPDATE);
-	}
-
-	/**
-	 * This property configures any flags affecting how authorization is
-	 * applied. By default no flags are applied.
-	 *
-	 * @param theFlags The flags (must not be null)
-	 * @see #setFlags(AuthorizationFlagsEnum...)
-	 */
-	public AuthorizationInterceptor setFlags(Collection<AuthorizationFlagsEnum> theFlags) {
-		Validate.notNull(theFlags, "theFlags must not be null");
-		myFlags = new HashSet<>(theFlags);
-		return this;
-	}
-
-	private static UnsupportedOperationException failForDstu1() {
-		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
-	}
-
-	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
-		if (theResponseObject == null) {
-			return Collections.emptyList();
-		}
-
-		List<IBaseResource> retVal;
-
-		boolean isContainer = false;
-		if (theResponseObject instanceof IBaseBundle) {
-			isContainer = true;
-		} else if (theResponseObject instanceof IBaseParameters) {
-			isContainer = true;
-		}
-
-		if (!isContainer) {
-			return Collections.singletonList(theResponseObject);
-		}
-
-		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
-
-		// Exclude the container
-		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
-			retVal = retVal.subList(1, retVal.size());
-		}
-
-		return retVal;
 	}
 
 	private enum OperationExamineDirection {
@@ -425,11 +401,49 @@ public class AuthorizationInterceptor extends ServerOperationInterceptorAdapter 
 		@Override
 		public String toString() {
 			ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-			b.append("rule", myDecidingRule.getName());
+			String ruleName;
+			if (myDecidingRule != null) {
+				ruleName = myDecidingRule.getName();
+			} else {
+				ruleName = "(none)";
+			}
+			b.append("rule", ruleName);
 			b.append("decision", myDecision.name());
 			return b.build();
 		}
 
+	}
+
+	private static UnsupportedOperationException failForDstu1() {
+		return new UnsupportedOperationException("Use of this interceptor on DSTU1 servers is not supportd");
+	}
+
+	static List<IBaseResource> toListOfResourcesAndExcludeContainer(IBaseResource theResponseObject, FhirContext fhirContext) {
+		if (theResponseObject == null) {
+			return Collections.emptyList();
+		}
+
+		List<IBaseResource> retVal;
+
+		boolean isContainer = false;
+		if (theResponseObject instanceof IBaseBundle) {
+			isContainer = true;
+		} else if (theResponseObject instanceof IBaseParameters) {
+			isContainer = true;
+		}
+
+		if (!isContainer) {
+			return Collections.singletonList(theResponseObject);
+		}
+
+		retVal = fhirContext.newTerser().getAllPopulatedChildElementsOfType(theResponseObject, IBaseResource.class);
+
+		// Exclude the container
+		if (retVal.size() > 0 && retVal.get(0) == theResponseObject) {
+			retVal = retVal.subList(1, retVal.size());
+		}
+
+		return retVal;
 	}
 
 }

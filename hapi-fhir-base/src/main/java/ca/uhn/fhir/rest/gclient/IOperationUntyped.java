@@ -6,7 +6,7 @@ import org.hl7.fhir.instance.model.api.IBase;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public interface IOperationUntyped {
 	 * @param theParameters The parameters to use as input. May also be <code>null</code> if the operation
 	 * does not require any input parameters.
 	 */
-	<T extends IBaseParameters> IOperationUntypedWithInput<T> withParameters(T theParameters);
+	<T extends IBaseParameters> IOperationUntypedWithInputAndPartialOutput<T> withParameters(T theParameters);
 
 	/**
 	 * The operation does not require any input parameters

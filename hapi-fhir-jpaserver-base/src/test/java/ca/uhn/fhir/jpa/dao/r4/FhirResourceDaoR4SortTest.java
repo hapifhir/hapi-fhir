@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -206,31 +206,38 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	@SuppressWarnings("unused")
 	@Test
 	public void testSortOnSparselyPopulatedFields() {
+//		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
+
 		IIdType pid1, pid2, pid3, pid4, pid5, pid6;
 		{
 			Patient p = new Patient();
+			p.setId("pid1");
 			p.setActive(true);
-			pid1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			pid1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient p = new Patient();
+			p.setId("pid2");
 			p.addName().setFamily("A");
-			pid2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			pid2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient p = new Patient();
+			p.setId("pid3");
 			p.addName().setFamily("B");
-			pid3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			pid3 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient p = new Patient();
+			p.setId("pid4");
 			p.addName().setFamily("B").addGiven("A");
-			pid4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			pid4 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
 		}
 		{
 			Patient p = new Patient();
+			p.setId("pid5");
 			p.addName().setFamily("B").addGiven("B");
-			pid5 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
+			pid5 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
 		}
 
 		SearchParameterMap map;
@@ -239,6 +246,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC).setChain(new SortSpec(Patient.SP_GIVEN, SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
+		ourLog.info("** Got IDs: {}", ids);
 		assertThat(ids, contains(pid2, pid4, pid5, pid3, pid1));
 		assertEquals(5, ids.size());
 

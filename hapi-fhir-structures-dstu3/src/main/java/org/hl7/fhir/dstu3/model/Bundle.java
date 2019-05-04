@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A container for a collection of resources.
  */
-@ResourceDef(name="Bundle", profile="http://hl7.org/fhir/Profile/Bundle")
+@ResourceDef(name="Bundle", profile="http://hl7.org/fhir/StructureDefinition/Bundle")
 public class Bundle extends Resource implements IBaseBundle {
 
     public enum BundleType {

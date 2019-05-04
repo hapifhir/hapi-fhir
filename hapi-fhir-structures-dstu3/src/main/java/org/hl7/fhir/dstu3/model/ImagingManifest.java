@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A text description of the DICOM SOP instances selected in the ImagingManifest; or the reason for, or significance of, the selection.
  */
-@ResourceDef(name="ImagingManifest", profile="http://hl7.org/fhir/Profile/ImagingManifest")
+@ResourceDef(name="ImagingManifest", profile="http://hl7.org/fhir/StructureDefinition/ImagingManifest")
 public class ImagingManifest extends DomainResource {
 
     @Block()

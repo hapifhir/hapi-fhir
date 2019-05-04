@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A collection of error, warning or information messages that result from a system action.
  */
-@ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/Profile/OperationOutcome")
+@ResourceDef(name="OperationOutcome", profile="http://hl7.org/fhir/StructureDefinition/OperationOutcome")
 public class OperationOutcome extends DomainResource implements IBaseOperationOutcome {
 
     public enum IssueSeverity {

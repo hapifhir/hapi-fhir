@@ -2,8 +2,11 @@ package org.hl7.fhir.r4.context;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -277,23 +280,23 @@ public class TerminologyCache {
       return;
     
     try {
-      FileWriter sw = new FileWriter(new File(Utilities.path(folder, nc.name+".cache")));
+      OutputStreamWriter sw = new OutputStreamWriter(new FileOutputStream(Utilities.path(folder, nc.name+".cache")), "UTF-8");
       sw.write(ENTRY_MARKER+"\r\n");
       JsonParser json = new JsonParser();
       json.setOutputStyle(OutputStyle.PRETTY);
       for (CacheEntry ce : nc.list) {
-        sw.write(ce.request);
+        sw.write(ce.request.trim());
         sw.write(BREAK+"\r\n");
         if (ce.e != null) {
           sw.write("e: {\r\n");
           if (ce.e.getValueset() != null)
-            sw.write("  \"valueSet\" : "+json.composeString(ce.e.getValueset())+",\r\n");
-          sw.write("  \"error\" : \""+Utilities.escapeJson(ce.e.getError())+"\"\r\n}\r\n");
+            sw.write("  \"valueSet\" : "+json.composeString(ce.e.getValueset()).trim()+",\r\n");
+          sw.write("  \"error\" : \""+Utilities.escapeJson(ce.e.getError()).trim()+"\"\r\n}\r\n");
         } else {
           sw.write("v: {\r\n");
-          sw.write("  \"display\" : \""+Utilities.escapeJson(ce.v.getDisplay())+"\",\r\n");
-          sw.write("  \"severity\" : "+(ce.v.getSeverity() == null ? "null" : "\""+ce.v.getSeverity().toCode()+"\"")+",\r\n");
-          sw.write("  \"error\" : \""+Utilities.escapeJson(ce.v.getMessage())+"\"\r\n}\r\n");
+          sw.write("  \"display\" : \""+Utilities.escapeJson(ce.v.getDisplay()).trim()+"\",\r\n");
+          sw.write("  \"severity\" : "+(ce.v.getSeverity() == null ? "null" : "\""+ce.v.getSeverity().toCode().trim()+"\"")+",\r\n");
+          sw.write("  \"error\" : \""+Utilities.escapeJson(ce.v.getMessage()).trim()+"\"\r\n}\r\n");
         }
         sw.write(ENTRY_MARKER+"\r\n");
       }      
@@ -313,6 +316,8 @@ public class TerminologyCache {
           nc.name = title;
           caches.put(title, nc);
           String src = TextFile.fileToString(Utilities.path(folder, fn));
+          if (src.startsWith("?"))
+            src = src.substring(1);
           int i = src.indexOf(ENTRY_MARKER); 
           while (i > -1) {
             String s = src.substring(0, i);

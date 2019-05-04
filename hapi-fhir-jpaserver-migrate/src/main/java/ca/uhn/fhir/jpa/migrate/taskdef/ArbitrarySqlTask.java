@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ArbitrarySqlTask.class);
 	private final String myDescription;
+	private final String myTableName;
 	private List<Task> myTask = new ArrayList<>();
 	private int myBatchSize = 1000;
 	private String myExecuteOnlyIfTableExists;
+	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
-	public ArbitrarySqlTask(String theDescription) {
+	public ArbitrarySqlTask(String theTableName, String theDescription) {
+		myTableName = theTableName;
 		myDescription = theDescription;
 	}
 
@@ -67,6 +70,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 			}
 		}
 
+		for (TableAndColumn next : myConditionalOnExistenceOf) {
+			String columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			if (columnType == null) {
+				ourLog.info("Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				return;
+			}
+		}
+
 		for (Task next : myTask) {
 			next.execute();
 		}
@@ -79,6 +90,13 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	public void setExecuteOnlyIfTableExists(String theExecuteOnlyIfTableExists) {
 		myExecuteOnlyIfTableExists = theExecuteOnlyIfTableExists;
+	}
+
+	/**
+	 * This task will only execute if the following column exists
+	 */
+	public void addExecuteOnlyIfColumnExists(String theTableName, String theColumnName) {
+		myConditionalOnExistenceOf.add(new TableAndColumn(theTableName, theColumnName));
 	}
 
 	public enum QueryModeEnum {
@@ -104,7 +122,6 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		@Override
 		public void execute() {
 			if (isDryRun()) {
-				logDryRunSql(mySql);
 				return;
 			}
 
@@ -126,6 +143,24 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 					return null;
 				});
 			} while (rows.size() > 0);
+		}
+	}
+
+	private static class TableAndColumn {
+		private final String myTable;
+		private final String myColumn;
+
+		private TableAndColumn(String theTable, String theColumn) {
+			myTable = theTable;
+			myColumn = theColumn;
+		}
+
+		public String getTable() {
+			return myTable;
+		}
+
+		public String getColumn() {
+			return myColumn;
 		}
 	}
 }

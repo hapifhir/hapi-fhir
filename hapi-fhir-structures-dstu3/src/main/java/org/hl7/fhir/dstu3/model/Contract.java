@@ -48,7 +48,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * A formal agreement between parties regarding the conduct of business, exchange of information or other matters.
  */
-@ResourceDef(name="Contract", profile="http://hl7.org/fhir/Profile/Contract")
+@ResourceDef(name="Contract", profile="http://hl7.org/fhir/StructureDefinition/Contract")
 public class Contract extends DomainResource {
 
     public enum ContractStatus {

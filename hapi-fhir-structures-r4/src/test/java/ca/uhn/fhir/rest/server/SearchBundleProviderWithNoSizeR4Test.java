@@ -64,7 +64,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		when(ourLastBundleProvider.size()).thenReturn(null);
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
 			@Override
-			public List<IBaseResource> answer(InvocationOnMock theInvocation) throws Throwable {
+			public List<IBaseResource> answer(InvocationOnMock theInvocation) {
 				int from =(Integer)theInvocation.getArguments()[0]; 
 				int to =(Integer)theInvocation.getArguments()[1];
 				ArrayList<IBaseResource> retVal = Lists.newArrayList();

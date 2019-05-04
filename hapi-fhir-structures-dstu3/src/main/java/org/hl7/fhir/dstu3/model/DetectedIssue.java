@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Indicates an actual or potential clinical issue with or between one or more active or proposed clinical actions for a patient; e.g. Drug-drug interaction, Ineffective treatment frequency, Procedure-condition conflict, etc.
  */
-@ResourceDef(name="DetectedIssue", profile="http://hl7.org/fhir/Profile/DetectedIssue")
+@ResourceDef(name="DetectedIssue", profile="http://hl7.org/fhir/StructureDefinition/DetectedIssue")
 public class DetectedIssue extends DomainResource {
 
     public enum DetectedIssueStatus {

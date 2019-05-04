@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,36 +28,36 @@ public interface IAuthRuleBuilderOperationNamed {
 	/**
 	 * Rule applies to invocations of this operation at the <code>server</code> level
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onServer();
+	IAuthRuleBuilderOperationNamedAndScoped onServer();
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>type</code> level
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onType(Class<? extends IBaseResource> theType);
+	IAuthRuleBuilderOperationNamedAndScoped onType(Class<? extends IBaseResource> theType);
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>type</code> level on any type
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onAnyType();
+	IAuthRuleBuilderOperationNamedAndScoped onAnyType();
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onInstance(IIdType theInstanceId);
+	IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onInstancesOfType(Class<? extends IBaseResource> theType);
+	IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(Class<? extends IBaseResource> theType);
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished onAnyInstance();
+	IAuthRuleBuilderOperationNamedAndScoped onAnyInstance();
 
 	/**
 	 * Rule applies to invocations of this operation at any level (server, type or instance)
 	 */
-	IAuthRuleBuilderRuleOpClassifierFinished atAnyLevel();
+	IAuthRuleBuilderOperationNamedAndScoped atAnyLevel();
 
 }

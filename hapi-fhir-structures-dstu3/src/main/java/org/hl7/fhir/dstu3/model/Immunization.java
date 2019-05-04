@@ -46,7 +46,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * Describes the event of a patient being administered a vaccination or a record of a vaccination as reported by a patient, a clinician or another party and may include vaccine reaction information and what vaccination protocol was followed.
  */
-@ResourceDef(name="Immunization", profile="http://hl7.org/fhir/Profile/Immunization")
+@ResourceDef(name="Immunization", profile="http://hl7.org/fhir/StructureDefinition/Immunization")
 public class Immunization extends DomainResource {
 
     public enum ImmunizationStatus {

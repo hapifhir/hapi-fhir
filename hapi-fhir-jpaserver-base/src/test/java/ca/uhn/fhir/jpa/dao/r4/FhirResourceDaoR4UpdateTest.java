@@ -1,31 +1,34 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-
-import java.util.*;
-
-import net.ttddyy.dsproxy.QueryCountHolder;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
+import org.junit.*;
+import org.mockito.ArgumentCaptor;
 import org.springframework.test.context.TestPropertySource;
+
+import java.util.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 @TestPropertySource(properties = {
 	"scheduling_disabled=true"
@@ -37,6 +40,11 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 	public void afterResetDao() {
 		myDaoConfig.setResourceMetaCountHardLimit(new DaoConfig().getResourceMetaCountHardLimit());
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
+	}
+
+	@Before
+	public void before() {
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
 	}
 
 	@Test
@@ -78,6 +86,58 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		} catch (ResourceGoneException e) {
 			// nothing
 		}
+
+	}
+
+
+	@Test
+	public void testUpdateNotModifiedDoesNotAffectDates() {
+		IIdType id = runInTransaction(() -> {
+			Patient p = new Patient();
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			return myPatientDao.create(p).getId().toUnqualified();
+		});
+
+		String createTime = runInTransaction(() -> {
+			List<ResourceTable> allResources = myResourceTableDao.findAll();
+			assertEquals(1, allResources.size());
+			ResourceTable resourceTable = allResources.get(0);
+
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertEquals(1, allHistory.size());
+			ResourceHistoryTable historyTable = allHistory.get(0);
+
+			assertEquals(resourceTable.getUpdated().getValueAsString(), historyTable.getUpdated().getValueAsString());
+			return resourceTable.getUpdated().getValueAsString();
+		});
+
+		myCaptureQueriesListener.clear();
+		runInTransaction(() -> {
+			Patient p = new Patient();
+			p.setId(id.getIdPart());
+			p.addIdentifier().setSystem("urn:system").setValue("2");
+			myPatientDao.update(p);
+		});
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		// TODO: it'd be nice if this was lower
+		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
+		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
+
+		runInTransaction(() -> {
+			List<ResourceTable> allResources = myResourceTableDao.findAll();
+			assertEquals(1, allResources.size());
+			ResourceTable resourceTable = allResources.get(0);
+
+			List<ResourceHistoryTable> allHistory = myResourceHistoryTableDao.findAll();
+			assertEquals(1, allHistory.size());
+			ResourceHistoryTable historyTable = allHistory.get(0);
+
+			assertEquals(createTime, historyTable.getUpdated().getValueAsString());
+			assertEquals(createTime, resourceTable.getUpdated().getValueAsString());
+		});
 
 	}
 
@@ -133,7 +193,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 
 	}
-	
+
 	@Test
 	public void testDuplicateTagsOnUpdateIgnored() {
 		IIdType id;
@@ -145,7 +205,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		{
 			Patient patient = new Patient();
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.setActive(true);
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
@@ -217,7 +277,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			patient.setActive(true);
 			id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
-		
+
 		{
 			Meta meta = new Meta();
 			meta.addTag().setSystem("http://foo").setCode("1");
@@ -233,7 +293,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		}
 	}
-	
+
 	@Test
 	public void testMultipleUpdatesWithNoChangesDoesNotResultInAnUpdateForDiscreteUpdates() {
 
@@ -309,12 +369,15 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		assertEquals("1", outcome.getId().getVersionIdPart());
 
+		TestUtil.sleepOneClick();
+
 		Date now = new Date();
+
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
-		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
+		InstantType updated = TestUtil.getTimestamp(retrieved);
 		assertTrue(updated.before(now));
 
-		Thread.sleep(1000);
+		TestUtil.sleepOneClick();
 
 		reset(myInterceptor);
 		retrieved.getIdentifier().get(0).setValue("002");
@@ -323,25 +386,18 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
 		assertEquals("2", outcome2.getId().getVersionIdPart());
 
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
+		TestUtil.sleepOneClick();
 		Date now2 = new Date();
 
 		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), mySrd);
 
 		assertEquals("2", retrieved2.getIdElement().getVersionIdPart());
 		assertEquals("002", retrieved2.getIdentifier().get(0).getValue());
-		InstantType updated2 = retrieved2.getMeta().getLastUpdatedElement();
+		InstantType updated2 = TestUtil.getTimestamp(retrieved2);
 		assertTrue(updated2.after(now));
 		assertTrue(updated2.before(now2));
 
-		Thread.sleep(2000);
+		TestUtil.sleepOneClick();
 
 		/*
 		 * Get history
@@ -565,7 +621,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().setFamily(methodName);
 
 			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
@@ -583,7 +639,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			}
 			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
 			List<Coding> secList = p1.getMeta().getSecurity();
-			secListValues = new HashSet<String>();
+			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}
@@ -666,33 +722,6 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			ourLog.error("Good", e);
 		}
 
-	}
-
-	@Test
-	public void testUpdateReusesIndexes() {
-		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.DISABLED);
-
-		QueryCountHolder.clear();
-
-		Patient pt = new Patient();
-		pt.setActive(true);
-		pt.addName().setFamily("FAMILY1").addGiven("GIVEN1A").addGiven("GIVEN1B");
-		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
-
-		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
-		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
-		QueryCountHolder.clear();
-
-		ourLog.info("** About to update");
-
-		pt.setId(id);
-		pt.getNameFirstRep().addGiven("GIVEN1C");
-		myPatientDao.update(pt);
-
-		ourLog.info("Now have {} deleted", QueryCountHolder.getGrandTotal().getDelete());
-		ourLog.info("Now have {} inserts", QueryCountHolder.getGrandTotal().getInsert());
-		assertEquals(0, QueryCountHolder.getGrandTotal().getDelete());
-		assertEquals(4, QueryCountHolder.getGrandTotal().getInsert());
 	}
 
 	@Test

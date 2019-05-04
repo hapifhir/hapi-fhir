@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.SearchParameterMap;
-import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
@@ -61,10 +61,11 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(500);
 
 		for (Argument nextArgument : theSearchParams) {
 
-			RuntimeSearchParam searchParam = getSearchParamByName(typeDef, nextArgument.getName());
+			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
 
 			for (Value nextValue : nextArgument.getValues()) {
 				String value = nextValue.getValue();

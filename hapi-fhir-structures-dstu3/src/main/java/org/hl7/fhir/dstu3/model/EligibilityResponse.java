@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides eligibility and plan details from the processing of an Eligibility resource.
  */
-@ResourceDef(name="EligibilityResponse", profile="http://hl7.org/fhir/Profile/EligibilityResponse")
+@ResourceDef(name="EligibilityResponse", profile="http://hl7.org/fhir/StructureDefinition/EligibilityResponse")
 public class EligibilityResponse extends DomainResource {
 
     public enum EligibilityResponseStatus {

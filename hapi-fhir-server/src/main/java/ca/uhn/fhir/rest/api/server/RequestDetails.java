@@ -1,17 +1,19 @@
 package ca.uhn.fhir.rest.api.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,7 +22,6 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -29,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
 
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
 	private String myCompartmentName;
 	private String myCompleteUrl;
@@ -55,7 +57,7 @@ public abstract class RequestDetails {
 	private String myOperation;
 	private Map<String, String[]> myParameters;
 	private byte[] myRequestContents;
-	private IRequestOperationCallback myRequestOperationCallback = new RequestOperationCallback();
+	private DeferredOperationCallback myDeferredInterceptorBroadcaster;
 	private String myRequestPath;
 	private RequestTypeEnum myRequestType;
 	private String myResourceName;
@@ -66,6 +68,13 @@ public abstract class RequestDetails {
 	private boolean mySubRequest;
 	private Map<String, List<String>> myUnqualifiedToQualifiedNames;
 	private Map<Object, Object> myUserData;
+
+	/**
+	 * Constructor
+	 */
+	public RequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
 
 	public void addParameter(String theName, String[] theValues) {
 		getParameters();
@@ -160,6 +169,20 @@ public abstract class RequestDetails {
 	}
 
 	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract Object getAttribute(String theAttributeName);
+
+	/**
+	 * Returns the attribute map for this request. Attributes are a place for user-supplied
+	 * objects of any type to be attached to an individual request. They can be used to pass information
+	 * between interceptor methods.
+	 */
+	public abstract void setAttribute(String theAttributeName, Object theAttributeValue);
+
+	/**
 	 * Retrieves the body of the request as binary data. Either this method or {@link #getReader} may be called to read
 	 * the body, not both.
 	 *
@@ -222,8 +245,11 @@ public abstract class RequestDetails {
 	 * of any nested operations being invoked within operations. This invoker acts as a proxy for
 	 * all interceptors
 	 */
-	public IRequestOperationCallback getRequestOperationCallback() {
-		return myRequestOperationCallback;
+	public IInterceptorBroadcaster getInterceptorBroadcaster() {
+		if (myDeferredInterceptorBroadcaster != null) {
+			return myDeferredInterceptorBroadcaster;
+		}
+		return myInterceptorBroadcaster;
 	}
 
 	/**
@@ -406,106 +432,58 @@ public abstract class RequestDetails {
 		myRequestContents = theRequestContents;
 	}
 
-	private class RequestOperationCallback implements IRequestOperationCallback {
+	/**
+	 * Sets the {@link #getInterceptorBroadcaster()} () interceptor broadcaster} handler in
+	 * deferred mode, meaning that any notifications will be queued up for delivery, but
+	 * won't be delivered until {@link #stopDeferredRequestOperationCallbackAndRunDeferredItems()}
+	 * is called.
+	 */
+	public void startDeferredOperationCallback() {
+		myDeferredInterceptorBroadcaster = new DeferredOperationCallback(myInterceptorBroadcaster);
+	}
 
-		private List<IServerInterceptor> getInterceptors() {
-			if (getServer() == null) {
-				return Collections.emptyList();
-			}
-			return getServer().getInterceptors();
+	/**
+	 * @see #startDeferredOperationCallback()
+	 */
+	public void stopDeferredRequestOperationCallbackAndRunDeferredItems() {
+		DeferredOperationCallback deferredCallback = myDeferredInterceptorBroadcaster;
+		deferredCallback.playDeferredActions();
+		myInterceptorBroadcaster = deferredCallback.getWrap();
+	}
+
+
+	private class DeferredOperationCallback implements IInterceptorBroadcaster {
+
+		private final IInterceptorBroadcaster myWrap;
+		private final List<Runnable> myDeferredTasks = new ArrayList<>();
+
+		private DeferredOperationCallback(@Nonnull IInterceptorBroadcaster theWrap) {
+			Validate.notNull(theWrap);
+			myWrap = theWrap;
+		}
+
+
+		void playDeferredActions() {
+			myDeferredTasks.forEach(Runnable::run);
+		}
+
+		IInterceptorBroadcaster getWrap() {
+			return myWrap;
 		}
 
 		@Override
-		public void resourceCreated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceCreated(RequestDetails.this, theResource);
-				}
-			}
+		public boolean callHooks(Pointcut thePointcut, HookParams theParams) {
+			myDeferredTasks.add(() -> myWrap.callHooks(thePointcut, theParams));
+			return true;
 		}
 
 		@Override
-		public void resourceDeleted(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceDeleted(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcePreCreate(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourcePreCreate(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcePreDelete(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourcePreDelete(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcePreUpdate(IBaseResource theOldResource, IBaseResource theNewResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourcePreUpdate(RequestDetails.this, theOldResource, theNewResource);
-				}
-			}
-		}
-
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		@Override
-		public void resourceUpdated(IBaseResource theResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-			for (IServerInterceptor next : getInterceptors()) {
-				if (next instanceof IServerOperationInterceptor) {
-					((IServerOperationInterceptor) next).resourceUpdated(RequestDetails.this, theOldResource, theNewResource);
-				}
-			}
-		}
-
-		@Override
-		public void resourcesCreated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceCreated(next);
-			}
-		}
-
-		@Override
-		public void resourcesDeleted(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceDeleted(next);
-			}
-		}
-
-		/**
-		 * @deprecated Deprecated in HAPI FHIR 2.6 - Use {@link IRequestOperationCallback#resourceUpdated(IBaseResource, IBaseResource)} instead
-		 */
-		@Deprecated
-		public void resourcesUpdated(Collection<? extends IBaseResource> theResource) {
-			for (IBaseResource next : theResource) {
-				resourceUpdated(next);
-			}
+		public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
+			myDeferredTasks.add(() -> myWrap.callHooksAndReturnObject(thePointcut, theParams));
+			return null;
 		}
 
 	}
+
 
 }

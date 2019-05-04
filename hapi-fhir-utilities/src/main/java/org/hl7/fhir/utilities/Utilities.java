@@ -42,7 +42,10 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.channels.FileChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -56,6 +59,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.exceptions.FHIRException;
+
 
 public class Utilities {
 
@@ -194,7 +198,7 @@ public class Utilities {
    String[] files = src.list();
    for (String f : files) {
      if (new CSFile(sourceFolder+File.separator+f).isDirectory()) {
-       if (!f.startsWith(".")) // ignore .svn...
+       if (!f.startsWith(".")) // ignore .git files...
          copyDirectory(sourceFolder+File.separator+f, destFolder+File.separator+f, notifier);
      } else {
        if (notifier != null)
@@ -249,7 +253,8 @@ public class Utilities {
   	throws IOException
   {
     if (!new CSFile(dir+file).exists()) {
-      errors.add("Unable to find "+purpose+" file "+file+" in "+dir);
+      if (errors != null)
+    	  errors.add("Unable to find "+purpose+" file "+file+" in "+dir);
       return false;
     } else {
       return true;
@@ -321,12 +326,28 @@ public class Utilities {
   }
 
 
+  public static byte[] transform(Map<String, byte[]> files, byte[] source, byte[] xslt) throws TransformerException  {
+    TransformerFactory f = TransformerFactory.newInstance();
+    f.setAttribute("http://saxon.sf.net/feature/version-warning", Boolean.FALSE);
+    StreamSource xsrc = new StreamSource(new ByteArrayInputStream(xslt));
+    f.setURIResolver(new ZipURIResolver(files));
+    Transformer t = f.newTransformer(xsrc);
+
+    t.setURIResolver(new ZipURIResolver(files));
+    StreamSource src = new StreamSource(new ByteArrayInputStream(source));
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    StreamResult res = new StreamResult(out);
+    t.transform(src, res);
+    return out.toByteArray();    
+  }
+  
   public static void bytesToFile(byte[] content, String filename) throws IOException  {
     FileOutputStream out = new FileOutputStream(filename);
     out.write(content);
     out.close();
     
   }
+
 
   public static void transform(String xsltDir, String source, String xslt, String dest, URIResolver alt) throws FileNotFoundException, TransformerException  {
 
@@ -445,6 +466,8 @@ public class Utilities {
       else if (!s.toString().endsWith(File.separator))
         s.append(File.separator);
       String a = arg;
+      if ("[tmp]".equals(a))
+        a = System.getProperty("java.io.tmpdir");
       a = a.replace("\\", File.separator);
       a = a.replace("/", File.separator);
       if (s.length() > 0 && a.startsWith(File.separator))

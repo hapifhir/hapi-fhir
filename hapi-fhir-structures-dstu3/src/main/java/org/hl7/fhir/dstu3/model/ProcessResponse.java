@@ -47,7 +47,7 @@ import org.hl7.fhir.exceptions.FHIRFormatError;
 /**
  * This resource provides processing status, errors and notes from the processing of a resource.
  */
-@ResourceDef(name="ProcessResponse", profile="http://hl7.org/fhir/Profile/ProcessResponse")
+@ResourceDef(name="ProcessResponse", profile="http://hl7.org/fhir/StructureDefinition/ProcessResponse")
 public class ProcessResponse extends DomainResource {
 
     public enum ProcessResponseStatus {

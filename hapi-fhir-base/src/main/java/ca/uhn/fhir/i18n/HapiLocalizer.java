@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,11 +101,34 @@ public class HapiLocalizer {
 
 			String formatString = getFormatString(theQualifiedKey);
 
-			format = new MessageFormat(formatString.trim());
+			format = newMessageFormat(formatString);
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters);
 		}
 		return getFormatString(theQualifiedKey);
+	}
+
+	MessageFormat newMessageFormat(String theFormatString) {
+		StringBuilder pattern = new StringBuilder(theFormatString.trim());
+
+
+		for (int i = 0; i < (pattern.length()-1); i++) {
+			if (pattern.charAt(i) == '{') {
+				char nextChar = pattern.charAt(i+1);
+				if (nextChar >= '0' && nextChar <= '9') {
+					continue;
+				}
+
+				pattern.replace(i, i+1, "'{'");
+				int closeBraceIndex = pattern.indexOf("}", i);
+				if (closeBraceIndex > 0) {
+					i = closeBraceIndex;
+					pattern.replace(i, i+1, "'}'");
+				}
+			}
+		}
+
+		return new MessageFormat(pattern.toString());
 	}
 
 	protected void init() {

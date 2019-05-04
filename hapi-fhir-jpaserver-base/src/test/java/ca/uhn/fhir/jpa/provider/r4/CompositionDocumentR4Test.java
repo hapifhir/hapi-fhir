@@ -1,33 +1,40 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.codesystems.EncounterStatus;
-import org.hl7.fhir.r4.model.codesystems.ObservationStatus;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
@@ -38,6 +45,8 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	private String encId;
 	private String listId;
 	private String compId;
+	@Captor
+	private ArgumentCaptor<HookParams> myHookParamsCaptor;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -77,7 +86,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		ListResource listResource = new ListResource();
 
 		ArrayList<Observation> myObs = new ArrayList<>();
-		myObsIds = new ArrayList<String>();
+		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
@@ -125,14 +134,38 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
 	}
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
+	@Test
+	public void testInterceptorHookIsCalledForAllContents_RESOURCE_MAY_BE_RETURNED() throws IOException {
+
+		IAnonymousInterceptor pointcut = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCE, pointcut);
+
+		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+		fetchBundle(theUrl, EncodingEnum.JSON);
+
+		Mockito.verify(pointcut, times(10)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCE), myHookParamsCaptor.capture());
+
+		List<String> returnedClasses = myHookParamsCaptor
+			.getAllValues()
+			.stream()
+			.map(t -> t.get(IBaseResource.class, 0))
+			.map(t -> t.getClass().getSimpleName())
+			.collect(Collectors.toList());
+
+		ourLog.info("Returned classes: {}", returnedClasses);
+
+		assertThat(returnedClasses, hasItem("Composition"));
+		assertThat(returnedClasses, hasItem("Organization"));
+	}
+
+	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, resourceString);
-		} 
+		}
 		return bundle;
 	}
 

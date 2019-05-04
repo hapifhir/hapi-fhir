@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 import java.io.*;
+import java.util.List;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.MediaType;
@@ -104,8 +105,11 @@ public class JaxRsResponse extends RestfulResponse<JaxRsRequest> {
 
 	private ResponseBuilder buildResponse(int statusCode) {
 		ResponseBuilder response = Response.status(statusCode);
-		for (Entry<String, String> header : getHeaders().entrySet()) {
-			response.header(header.getKey(), header.getValue());
+		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
+			final String key = header.getKey();
+			for (String value : header.getValue()) {
+				response.header(key, value);
+			}
 		}
 		return response;
 	}

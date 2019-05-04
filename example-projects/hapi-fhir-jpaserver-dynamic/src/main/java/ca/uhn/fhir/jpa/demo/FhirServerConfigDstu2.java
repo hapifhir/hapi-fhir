@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.demo;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -57,7 +59,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
 	@SuppressWarnings("deprecation")
-	@Bean()
+	@Bean
 	public DaoConfig daoConfig() {
 	return FhirServerConfigCommon.getDaoConfig();
 	}
@@ -74,7 +76,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean()
+	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		return FhirServerConfigCommon.getEntityManagerFactory(env, dataSource(), fhirContextDstu2());
 	}
@@ -82,16 +84,18 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
-	public IServerInterceptor loggingInterceptor() {
+	public LoggingInterceptor loggingInterceptor() {
 		return FhirServerConfigCommon.loggingInterceptor();
 	}
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor responseHighlighterInterceptor() {
+	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		return FhirServerConfigCommon.getResponseHighlighterInterceptor();
 	}
 
@@ -103,7 +107,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return interceptor;
 	}
 
-	@Bean()
+	@Bean
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		return FhirServerConfigCommon.getTransactionManager(entityManagerFactory);
 	}

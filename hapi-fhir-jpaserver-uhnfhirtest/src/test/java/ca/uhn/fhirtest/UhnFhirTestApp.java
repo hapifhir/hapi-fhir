@@ -17,7 +17,7 @@ public class UhnFhirTestApp {
 
 	public static void main(String[] args) throws Exception {
 
-		int myPort = 8888;
+		int myPort = 8889;
 		String base = "http://localhost:" + myPort + "/baseDstu2";
 
 		//		new File("target/testdb").mkdirs();

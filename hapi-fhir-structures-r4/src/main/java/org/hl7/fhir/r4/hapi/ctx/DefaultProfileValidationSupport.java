@@ -112,10 +112,19 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         myValueSets = valueSets;
       }
 
+      // System can take the form "http://url|version"
+      String system = theSystem;
+      if (system.contains("|")) {
+        String version = system.substring(system.indexOf('|') + 1);
+        if (version.matches("^[0-9.]+$")) {
+          system = system.substring(0, system.indexOf('|'));
+        }
+      }
+
       if (codeSystem) {
-        return codeSystems.get(theSystem);
+        return codeSystems.get(system);
       } else {
-        return valueSets.get(theSystem);
+        return valueSets.get(system);
       }
     }
   }
@@ -149,8 +158,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return provideStructureDefinitionMap(theContext).get(url);
   }
 
-  ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-    return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+  @Override
+  public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+    return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
   }
 
   public void flush() {

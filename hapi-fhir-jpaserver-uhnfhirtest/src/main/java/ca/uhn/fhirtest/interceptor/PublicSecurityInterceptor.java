@@ -34,11 +34,11 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 
 		if (isBlank(authHeader)) {
 			return new RuleBuilder()
-				.deny().operation().named(BaseJpaSystemProvider.MARK_ALL_RESOURCES_FOR_REINDEXING).onServer().andThen()
-				.deny().operation().named(BaseTerminologyUploaderProvider.UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onServer().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyType().andThen()
-				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyInstance().andThen()
+				.deny().operation().named(BaseJpaSystemProvider.MARK_ALL_RESOURCES_FOR_REINDEXING).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(BaseTerminologyUploaderProvider.UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyType().andAllowAllResponses().andThen()
+				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onAnyInstance().andAllowAllResponses().andThen()
 				.allowAll()
 				.build();
 		}

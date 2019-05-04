@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,34 +24,47 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.dstu3.model.InstantType;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import javax.annotation.PostConstruct;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Deletes old searches
  */
+//
+// NOTE: This is not a @Service because we manually instantiate
+// it in BaseConfig. This is so that we can override the definition
+// in Smile.
+//
 public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
 	/*
 	 * Be careful increasing this number! We use the number of params here in a
 	 * DELETE FROM foo WHERE params IN (aaaa)
 	 * type query and this can fail if we have 1000s of params
 	 */
-	public static int ourMaximumResultsToDelete = 500;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
+	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StaleSearchDeletingSvcImpl.class);
+	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
+	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
 	private static Long ourNowForUnitTests;
 	/*
 	 * We give a bit of extra leeway just to avoid race conditions where a query result
@@ -69,12 +82,11 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private PlatformTransactionManager myTransactionManager;
-	@PersistenceContext()
-	private EntityManager myEntityManager;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {
-			ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 			mySearchIncludeDao.deleteForSearch(searchToDelete.getId());
 
 			/*
@@ -85,15 +97,22 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 			 * huge deal to be only partially deleting search results. They'll get deleted
 			 * eventually
 			 */
-			int max = ourMaximumResultsToDelete;
+			int max = ourMaximumResultsToDeleteInOnePass;
 			Slice<Long> resultPids = mySearchResultDao.findForSearch(PageRequest.of(0, max), searchToDelete.getId());
 			if (resultPids.hasContent()) {
-				mySearchResultDao.deleteByIds(resultPids.getContent());
+				List<List<Long>> partitions = Lists.partition(resultPids.getContent(), ourMaximumResultsToDeleteInOneStatement);
+				for (List<Long> nextPartition : partitions) {
+					mySearchResultDao.deleteByIds(nextPartition);
+				}
+
 			}
 
 			// Only delete if we don't have results left in this search
 			if (resultPids.getNumberOfElements() < max) {
+				ourLog.debug("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
+			} else {
+				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
 			}
 		});
 	}
@@ -119,7 +138,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(now()), PageRequest.of(0, 1000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(now()), PageRequest.of(0, 2000))
 		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
@@ -136,13 +155,22 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			long total = tt.execute(t -> mySearchDao.count());
-			ourLog.info("Deleted {} searches, {} remaining", count, total);
+			if (ourLog.isDebugEnabled()) {
+				long total = tt.execute(t -> mySearchDao.count());
+				ourLog.debug("Deleted {} searches, {} remaining", count, total);
+			}
 		}
 
 	}
 
-	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)
+	@PostConstruct
+	public void registerScheduledJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(StaleSearchDeletingSvcImpl.class.getName());
+		jobDetail.setJobClass(StaleSearchDeletingSvcImpl.SubmitJob.class);
+		mySchedulerService.scheduleFixedDelay(DEFAULT_CUTOFF_SLACK, false, jobDetail);
+	}
+
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
@@ -156,9 +184,24 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		myCutoffSlack = theCutoffSlack;
 	}
 
+	public static class SubmitJob implements Job {
+		@Autowired
+		private IStaleSearchDeletingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.schedulePollForStaleSearches();
+		}
+	}
+
+	@VisibleForTesting
+	public static void setMaximumResultsToDeleteInOnePassForUnitTest(int theMaximumResultsToDeleteInOnePass) {
+		ourMaximumResultsToDeleteInOnePass = theMaximumResultsToDeleteInOnePass;
+	}
+
 	@VisibleForTesting
 	public static void setMaximumResultsToDeleteForUnitTest(int theMaximumResultsToDelete) {
-		ourMaximumResultsToDelete = theMaximumResultsToDelete;
+		ourMaximumResultsToDeleteInOneStatement = theMaximumResultsToDelete;
 	}
 
 	private static long now() {
