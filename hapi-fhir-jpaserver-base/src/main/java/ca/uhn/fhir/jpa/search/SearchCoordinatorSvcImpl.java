@@ -366,7 +366,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					Search searchToUse = null;
 
 					int hashCode = queryString.hashCode();
-					Collection<Search> candidates = mySearchDao.findWithCutoffOrExpiry(resourceType, hashCode, createdCutoff, now);
+					Collection<Search> candidates = mySearchDao.findWithCutoffOrExpiry(resourceType, hashCode, createdCutoff);
 					for (Search nextCandidateSearch : candidates) {
 						if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
 							searchToUse = nextCandidateSearch;

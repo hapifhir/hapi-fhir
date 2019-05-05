@@ -78,7 +78,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 				.setUrl("Patient?name=smith")
 		);
 		CacheWarmingSvcImpl cacheWarmingSvc = (CacheWarmingSvcImpl) myCacheWarmingSvc;
-		cacheWarmingSvc.initCacheMap();
+		ourLog.info("Have {} tasks", cacheWarmingSvc.initCacheMap().size());
 
 		Patient p1 = new Patient();
 		p1.setId("p1");

@@ -42,8 +42,8 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 //	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 //	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
-	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND ((s.myCreated > :cutoff) OR (s.myExpiryOrNull > :now)) AND s.myDeleted = false")
-	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff, @Param("now") Date theNow);
+	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND (s.myCreated > :cutoff) AND s.myDeleted = false")
+	Collection<Search> findWithCutoffOrExpiry(@Param("type") String theResourceType, @Param("hash") int theHashCode, @Param("cutoff") Date theCreatedCutoff);
 
 	@Modifying
 	@Query("UPDATE Search s SET s.mySearchLastReturned = :last WHERE s.myId = :pid")

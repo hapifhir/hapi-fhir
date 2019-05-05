@@ -10,6 +10,7 @@ import org.junit.runner.RunWith;
 import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,12 +18,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.util.ProxyUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -59,7 +61,29 @@ public class SchedulerServiceImplTest {
 	}
 
 	@Test
-	public void testScheduleTaskLongRunningDoesntRunConcurrently() throws SchedulerException {
+	public void testStopAndStartService() throws SchedulerException {
+
+		ScheduledJobDefinition def = new ScheduledJobDefinition()
+			.setId(CountingJob.class.getName())
+			.setJobClass(CountingJob.class);
+
+		SchedulerServiceImpl svc = AopTestUtils.getTargetObject(mySvc);
+		svc.stop();
+		svc.start();
+		svc.contextStarted(null);
+
+		mySvc.scheduleFixedDelay(100, false, def);
+
+		sleepAtLeast(1000);
+
+		ourLog.info("Fired {} times", CountingJob.ourCount);
+
+		assertThat(CountingJob.ourCount, greaterThan(3));
+		assertThat(CountingJob.ourCount, lessThan(20));
+	}
+
+	@Test
+	public void testScheduleTaskLongRunningDoesntRunConcurrently() {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
 			.setId(CountingJob.class.getName())
@@ -72,12 +96,12 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
-		assertThat(CountingJob.ourCount, greaterThan(1));
+		assertThat(CountingJob.ourCount, greaterThanOrEqualTo(1));
 		assertThat(CountingJob.ourCount, lessThan(5));
 	}
 
 	@Test
-	public void testIntervalJob() throws SchedulerException {
+	public void testIntervalJob() {
 
 		ScheduledJobDefinition def = new ScheduledJobDefinition()
 			.setId(CountingIntervalJob.class.getName())
@@ -90,7 +114,7 @@ public class SchedulerServiceImplTest {
 
 		ourLog.info("Fired {} times", CountingIntervalJob.ourCount);
 
-		assertThat(CountingIntervalJob.ourCount, greaterThan(2));
+		assertThat(CountingIntervalJob.ourCount, greaterThanOrEqualTo(2));
 		assertThat(CountingIntervalJob.ourCount, lessThan(6));
 	}
 

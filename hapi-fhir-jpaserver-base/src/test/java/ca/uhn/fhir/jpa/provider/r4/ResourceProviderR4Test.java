@@ -3790,93 +3790,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.forResource("Organization")
 				.returnBundle(Bundle.class)
 				.execute();
-			final String uuid2 = toSearchUuidFromLinkNext(result2);
-			assertEquals(uuid1, uuid2);
 
-			sleepAtLeast(2000);
-			Bundle result3 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
-			final String uuid3 = toSearchUuidFromLinkNext(result3);
-			assertNotEquals(uuid1, uuid3);
-
-		}
-	}
-
-
-	@Test
-	public void testSearchReusesBeforeExpiryWithReuseDisabled() {
-		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-
-		List<IBaseResource> resources = new ArrayList<>();
-		for (int i = 0; i < 50; i++) {
-			Organization org = new Organization();
-			org.setName("HELLO");
-			resources.add(org);
-		}
-		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
-
-		myDaoConfig.setReuseCachedSearchResultsForMillis(10L);
-
-		/*
-		 * First, make sure that we don't reuse a search if
-		 * it's not marked with an expiry
-		 */
-		{
-			Bundle result1 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
-			final String uuid1 = toSearchUuidFromLinkNext(result1);
-			sleepAtLeast(20);
-			Bundle result2 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
+			// Expiry doesn't affect reusablility
 			final String uuid2 = toSearchUuidFromLinkNext(result2);
 			assertNotEquals(uuid1, uuid2);
-		}
-
-		/*
-		 * Now try one but mark it with an expiry time
-		 * in the future
-		 */
-		{
-			Bundle result1 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
-			final String uuid1 = toSearchUuidFromLinkNext(result1);
-			runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuid(uuid1);
-				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), 1));
-				mySearchEntityDao.save(search);
-			});
-			sleepAtLeast(20);
-			Bundle result2 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
-			final String uuid2 = toSearchUuidFromLinkNext(result2);
-			assertEquals(uuid1, uuid2);
-
-			sleepAtLeast(1500);
-			Bundle result3 = ourClient
-				.search()
-				.forResource("Organization")
-				.returnBundle(Bundle.class)
-				.execute();
-			final String uuid3 = toSearchUuidFromLinkNext(result3);
-			assertNotEquals(uuid1, uuid3);
 
 		}
 	}
+
 
 	@Test
 	public void testSearchReusesResultsDisabled() {

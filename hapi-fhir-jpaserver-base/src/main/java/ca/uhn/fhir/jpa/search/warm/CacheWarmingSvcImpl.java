@@ -42,10 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
@@ -119,7 +116,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		initCacheMap();
 	}
 
-	public synchronized void initCacheMap() {
+	public synchronized Set<WarmCacheEntry> initCacheMap() {
 
 		myCacheEntryToNextRefresh.clear();
 		List<WarmCacheEntry> warmCacheEntries = myDaoConfig.getWarmCacheEntries();
@@ -131,6 +128,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 			myCacheEntryToNextRefresh.put(next, 0L);
 		}
+
+		return Collections.unmodifiableSet(myCacheEntryToNextRefresh.keySet());
 
 	}
 

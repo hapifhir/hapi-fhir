@@ -79,18 +79,25 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	 */
 	@EventListener
 	public void contextStarted(ContextRefreshedEvent theEvent) throws SchedulerException {
-		ourLog.info("Starting task schedulers for context {}", theEvent.getApplicationContext().getId());
-		if (myLocalScheduler != null) {
-			myLocalScheduler.start();
-		}
-		if (myClusteredScheduler != null) {
-			myClusteredScheduler.start();
+		try {
+			ourLog.info("Starting task schedulers for context {}", theEvent != null ? theEvent.getApplicationContext().getId() : "null");
+			if (myLocalScheduler != null) {
+				myLocalScheduler.start();
+			}
+			if (myClusteredScheduler != null) {
+				myClusteredScheduler.start();
+			}
+		} catch(Exception e) {
+			ourLog.error("Failed to start context", e);
+			throw new SchedulerException(e);
 		}
 	}
 
+	private static int ourNextSchedulerId = 0;
+
 	private Scheduler createLocalScheduler() throws SchedulerException {
 		Properties localProperties = new Properties();
-		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local");
+		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local-" + ourNextSchedulerId++);
 		quartzPropertiesCommon(localProperties);
 		quartzPropertiesLocal(localProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -103,7 +110,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 	private Scheduler createClusteredScheduler() throws SchedulerException {
 		Properties clusteredProperties = new Properties();
-		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered");
+		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered-" + ourNextSchedulerId++);
 		quartzPropertiesCommon(clusteredProperties);
 		quartzPropertiesClustered(clusteredProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -124,6 +131,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 		myStopping.set(true);
 		myLocalScheduler.shutdown(true);
+		myClusteredScheduler.shutdown(true);
 	}
 
 	@Override
@@ -136,11 +144,11 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	public void logStatus() {
 		try {
 			Set<JobKey> keys = myLocalScheduler.getJobKeys(GroupMatcher.anyGroup());
-			String keysString = keys.stream().map(t->t.getName()).collect(Collectors.joining(", "));
+			String keysString = keys.stream().map(t -> t.getName()).collect(Collectors.joining(", "));
 			ourLog.info("Local scheduler has jobs: {}", keysString);
 
 			keys = myClusteredScheduler.getJobKeys(GroupMatcher.anyGroup());
-			keysString = keys.stream().map(t->t.getName()).collect(Collectors.joining(", "));
+			keysString = keys.stream().map(t -> t.getName()).collect(Collectors.joining(", "));
 			ourLog.info("Clustered scheduler has jobs: {}", keysString);
 		} catch (SchedulerException e) {
 			throw new InternalErrorException(e);
@@ -204,19 +212,19 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	 * Properties for the local scheduler (see the class docs to learn what this means)
 	 */
 	protected void quartzPropertiesLocal(Properties theProperties) {
-		theProperties.put("org.quartz.threadPool.threadNamePrefix", getThreadNamePrefix() + "-local");
+		// nothing
 	}
 
 	/**
 	 * Properties for the cluster scheduler (see the class docs to learn what this means)
 	 */
 	protected void quartzPropertiesClustered(Properties theProperties) {
-		theProperties.put("org.quartz.threadPool.threadNamePrefix", getThreadNamePrefix() + "-clustered");
 //		theProperties.put("org.quartz.jobStore.tablePrefix", "QRTZHFJC_");
 	}
 
 	protected void quartzPropertiesCommon(Properties theProperties) {
 		theProperties.put("org.quartz.threadPool.threadCount", "4");
+		theProperties.put("org.quartz.threadPool.threadNamePrefix", getThreadNamePrefix() + "-" + theProperties.get(PROP_SCHED_INSTANCE_NAME));
 	}
 
 
