@@ -1,15 +1,13 @@
 package ca.uhn.fhir.jpa.sched;
 
+import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.SchedulerException;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -72,17 +70,35 @@ public class SchedulerServiceImplTest {
 
 		sleepAtLeast(1000);
 
-		mySvc.stop();
-
 		ourLog.info("Fired {} times", CountingJob.ourCount);
 
 		assertThat(CountingJob.ourCount, greaterThan(1));
 		assertThat(CountingJob.ourCount, lessThan(5));
 	}
 
+	@Test
+	public void testIntervalJob() throws SchedulerException {
+
+		ScheduledJobDefinition def = new ScheduledJobDefinition()
+			.setId(CountingIntervalJob.class.getName())
+			.setJobClass(CountingIntervalJob.class);
+		ourTaskDelay = 500;
+
+		mySvc.scheduleFixedDelay(100, false, def);
+
+		sleepAtLeast(2000);
+
+		ourLog.info("Fired {} times", CountingIntervalJob.ourCount);
+
+		assertThat(CountingIntervalJob.ourCount, greaterThan(2));
+		assertThat(CountingIntervalJob.ourCount, lessThan(6));
+	}
+
 	@After
-	public void after() {
+	public void after() throws SchedulerException {
 		CountingJob.ourCount = 0;
+		CountingIntervalJob.ourCount = 0;
+		mySvc.purgeAllScheduledJobsForUnitTest();
 	}
 
 	@DisallowConcurrentExecution
@@ -117,6 +133,31 @@ public class SchedulerServiceImplTest {
 		public void setApplicationContext(ApplicationContext theAppCtx) throws BeansException {
 			myAppCtx = theAppCtx;
 		}
+	}
+
+
+	@DisallowConcurrentExecution
+	@PersistJobDataAfterExecution
+	public static class CountingIntervalJob extends FireAtIntervalJob {
+
+		private static int ourCount;
+
+		@Autowired
+		@Qualifier("stringBean")
+		private String myStringBean;
+		private ApplicationContext myAppCtx;
+
+		public CountingIntervalJob() {
+			super(500);
+		}
+
+		@Override
+		public void doExecute(JobExecutionContext theContext) {
+				ourLog.info("Job has fired, going to sleep for {}ms", ourTaskDelay);
+				sleepAtLeast(ourTaskDelay);
+			ourCount++;
+		}
+
 	}
 
 

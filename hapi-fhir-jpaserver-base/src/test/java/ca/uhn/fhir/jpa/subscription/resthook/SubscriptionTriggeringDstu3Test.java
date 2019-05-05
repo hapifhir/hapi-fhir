@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
@@ -54,6 +55,10 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired
+	private SubscriptionTriggeringSvcImpl mySubscriptionTriggeringSvc;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -79,9 +84,6 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
 
-	@Autowired
-	private SubscriptionTriggeringSvcImpl mySubscriptionTriggeringSvc;
-
 	@Before
 	public void beforeRegisterRestHookListener() {
 		mySubscriptionTestUtil.registerRestHookInterceptor();
@@ -97,6 +99,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		ourCreatedPatients.clear();
 		ourUpdatedPatients.clear();
 		ourContentTypes.clear();
+
+		mySchedulerService.logStatus();
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {

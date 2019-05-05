@@ -28,8 +28,8 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
@@ -56,8 +56,9 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.quartz.Job;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +78,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc {
+	public static final long SCHEDULE_DELAY = DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringProvider.class);
-
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
 	private final List<SubscriptionTriggeringJobDetails> myActiveJobs = new ArrayList<>();
 	@Autowired
@@ -147,8 +148,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		// Submit job for processing
 		synchronized (myActiveJobs) {
 			myActiveJobs.add(jobDetails);
+			ourLog.info("Subscription triggering requested for {} resource and {} search - Gave job ID: {} and have {} jobs", resourceIds.size(), searchUrls.size(), jobDetails.getJobId(), myActiveJobs.size());
 		}
-		ourLog.info("Subscription triggering requested for {} resource and {} search - Gave job ID: {}", resourceIds.size(), searchUrls.size(), jobDetails.getJobId());
 
 		// Create a parameters response
 		IBaseParameters retVal = ParametersUtil.newInstance(myFhirContext);
@@ -163,17 +164,22 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SubscriptionTriggeringSvcImpl.class.getName());
 		jobDetail.setJobClass(SubscriptionTriggeringSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(DateUtils.MILLIS_PER_SECOND, false, jobDetail);
+		mySchedulerService.scheduleFixedDelay(SCHEDULE_DELAY, false, jobDetail);
 	}
 
 	@Override
 	public void runDeliveryPass() {
 
-		// FIXME: JA remove when working
-		ourLog.info("Entering reindexing pass");
-
 		synchronized (myActiveJobs) {
+
+			// FIXME: JA remove when working
+			ourLog.info("Entering subscription triggering pass for {} jobs", myActiveJobs.size());
+
 			if (myActiveJobs.isEmpty()) {
+
+				// FIXME: JA remove when working
+				ourLog.info("Have no jobs outstanding");
+
 				return;
 			}
 
@@ -390,12 +396,18 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 	}
 
-	public static class SubmitJob implements Job {
+	@DisallowConcurrentExecution
+	@PersistJobDataAfterExecution
+	public static class SubmitJob extends FireAtIntervalJob {
 		@Autowired
 		private ISubscriptionTriggeringSvc myTarget;
 
+		public SubmitJob() {
+			super(SCHEDULE_DELAY);
+		}
+
 		@Override
-		public void execute(JobExecutionContext theContext) {
+		protected void doExecute(JobExecutionContext theContext) {
 			myTarget.runDeliveryPass();
 		}
 	}

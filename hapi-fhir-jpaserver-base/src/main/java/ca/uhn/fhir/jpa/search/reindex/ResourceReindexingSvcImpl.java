@@ -228,15 +228,20 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	public void cancelAndPurgeAllJobs() {
 		ourLog.info("Cancelling and purging all resource reindexing jobs");
-		myTxTemplate.execute(t -> {
-			myReindexJobDao.markAllOfTypeAsDeleted();
-			return null;
-		});
+		myIndexingLock.lock();
+		try {
+			myTxTemplate.execute(t -> {
+				myReindexJobDao.markAllOfTypeAsDeleted();
+				return null;
+			});
 
-		myTaskExecutor.shutdown();
-		initExecutor();
+			myTaskExecutor.shutdown();
+			initExecutor();
 
-		expungeJobsMarkedAsDeleted();
+			expungeJobsMarkedAsDeleted();
+		} finally {
+			myIndexingLock.unlock();
+		}
 	}
 
 	private int runReindexJobs() {
@@ -282,7 +287,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@VisibleForTesting
-	public void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 

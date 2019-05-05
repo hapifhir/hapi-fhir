@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.model.sched;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.quartz.SchedulerException;
 
-import javax.annotation.PreDestroy;
-
 public interface ISchedulerService {
-	@PreDestroy
-	void stop() throws SchedulerException;
+
+	@VisibleForTesting
+	void purgeAllScheduledJobsForUnitTest() throws SchedulerException;
+
+	void logStatus();
 
 	/**
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
@@ -14,4 +16,6 @@ public interface ISchedulerService {
 	 * @param theJobDefinition  The Job to fire
 	 */
 	void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition);
+
+	boolean isStopping();
 }

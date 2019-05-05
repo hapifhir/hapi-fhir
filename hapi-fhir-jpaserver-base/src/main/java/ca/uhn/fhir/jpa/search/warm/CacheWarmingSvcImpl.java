@@ -26,14 +26,16 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.PersistJobDataAfterExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,8 +50,8 @@ import java.util.Map;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	public static final long SCHEDULED_JOB_INTERVAL = DateUtils.MILLIS_PER_SECOND;
+	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
@@ -63,9 +65,9 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private ISchedulerService mySchedulerService;
 
 	@Override
-	public void performWarmingPass() {
+	public synchronized void performWarmingPass() {
 		// FIXME: JA remove once we only fire once per second
-		ourLog.info("Starting cache warming pass");
+		ourLog.info("Starting cache warming pass for {} tasks", myCacheEntryToNextRefresh.size());
 
 		for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
 
@@ -132,6 +134,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	}
 
+	@DisallowConcurrentExecution
+	@PersistJobDataAfterExecution
 	public static class SubmitJob extends FireAtIntervalJob {
 		@Autowired
 		private ICacheWarmingSvc myTarget;

@@ -241,11 +241,15 @@ public class Search implements Serializable {
 	}
 
 	public void setSearchQueryString(String theSearchQueryString) {
-		if (theSearchQueryString != null && theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
-			mySearchQueryString = null;
+		if (theSearchQueryString == null || theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
+			// We want this field to always have a wide distribution of values in order
+			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
+			// case of null, just put a value that will never be hit
+			mySearchQueryString = UUID.randomUUID().toString();
 		} else {
 			mySearchQueryString = theSearchQueryString;
 		}
+		mySearchQueryStringHash = mySearchQueryString.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {

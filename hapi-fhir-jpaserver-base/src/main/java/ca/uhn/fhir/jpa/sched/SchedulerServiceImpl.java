@@ -8,17 +8,21 @@ import org.apache.commons.lang3.Validate;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+
+import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
 
 /**
  * This class provides task scheduling for the entire module using the Quartz library.
@@ -45,6 +49,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	private String myThreadNamePrefix;
 	@Autowired
 	private AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
+	private AtomicBoolean myStopping = new AtomicBoolean(false);
 
 	/**
 	 * Constructor
@@ -65,6 +70,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	public void start() throws SchedulerException {
 		myLocalScheduler = createLocalScheduler();
 		myClusteredScheduler = createClusteredScheduler();
+		myStopping.set(false);
 	}
 
 	/**
@@ -84,6 +90,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 	private Scheduler createLocalScheduler() throws SchedulerException {
 		Properties localProperties = new Properties();
+		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local");
 		quartzPropertiesCommon(localProperties);
 		quartzPropertiesLocal(localProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -96,6 +103,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 	private Scheduler createClusteredScheduler() throws SchedulerException {
 		Properties clusteredProperties = new Properties();
+		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered");
 		quartzPropertiesCommon(clusteredProperties);
 		quartzPropertiesClustered(clusteredProperties);
 		StdSchedulerFactory factory = new StdSchedulerFactory();
@@ -110,12 +118,35 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		theScheduler.setJobFactory(mySpringBeanJobFactory);
 	}
 
-	@Override
 	@PreDestroy
 	public void stop() throws SchedulerException {
 		ourLog.info("Shutting down task scheduler...");
+
+		myStopping.set(true);
 		myLocalScheduler.shutdown(true);
 	}
+
+	@Override
+	public void purgeAllScheduledJobsForUnitTest() throws SchedulerException {
+		myLocalScheduler.clear();
+		myClusteredScheduler.clear();
+	}
+
+	@Override
+	public void logStatus() {
+		try {
+			Set<JobKey> keys = myLocalScheduler.getJobKeys(GroupMatcher.anyGroup());
+			String keysString = keys.stream().map(t->t.getName()).collect(Collectors.joining(", "));
+			ourLog.info("Local scheduler has jobs: {}", keysString);
+
+			keys = myClusteredScheduler.getJobKeys(GroupMatcher.anyGroup());
+			keysString = keys.stream().map(t->t.getName()).collect(Collectors.joining(", "));
+			ourLog.info("Clustered scheduler has jobs: {}", keysString);
+		} catch (SchedulerException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
 
 	@Override
 	public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
@@ -160,6 +191,12 @@ public class SchedulerServiceImpl implements ISchedulerService {
 			ourLog.error("Failed to schedule job", e);
 			throw new InternalErrorException(e);
 		}
+
+	}
+
+	@Override
+	public boolean isStopping() {
+		return myStopping.get();
 	}
 
 
@@ -175,7 +212,7 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	 */
 	protected void quartzPropertiesClustered(Properties theProperties) {
 		theProperties.put("org.quartz.threadPool.threadNamePrefix", getThreadNamePrefix() + "-clustered");
-		theProperties.put("org.quartz.jobStore.tablePrefix", "QRTZHFJC_");
+//		theProperties.put("org.quartz.jobStore.tablePrefix", "QRTZHFJC_");
 	}
 
 	protected void quartzPropertiesCommon(Properties theProperties) {
@@ -195,13 +232,23 @@ public class SchedulerServiceImpl implements ISchedulerService {
 
 	public static class NullSchedulerService implements ISchedulerService {
 		@Override
-		public void stop() {
+		public void purgeAllScheduledJobsForUnitTest() {
+			// nothing
+		}
+
+		@Override
+		public void logStatus() {
 			// nothing
 		}
 
 		@Override
 		public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
 			// nothing
+		}
+
+		@Override
+		public boolean isStopping() {
+			return false;
 		}
 	}
 }

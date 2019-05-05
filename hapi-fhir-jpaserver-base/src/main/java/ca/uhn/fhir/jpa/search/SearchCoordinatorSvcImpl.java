@@ -1051,7 +1051,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		theSearch.setStatus(SearchStatusEnum.LOADING);
 
 		theSearch.setSearchQueryString(theQueryString);
-		theSearch.setSearchQueryStringHash(theQueryString.hashCode());
 
 		for (Include next : theParams.getIncludes()) {
 			theSearch.addInclude(new SearchInclude(theSearch, next.getValue(), false, next.isRecurse()));
