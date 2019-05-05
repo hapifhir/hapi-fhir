@@ -201,7 +201,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				String nextReplacementIdPart = nextReplacementId.getValueAsString();
 				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
 					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-					matchUrl = matchUrl.replace(UrlUtil.escapeUrlParam(nextTemporaryIdPart), nextReplacementIdPart);
+					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
+					if (isNotBlank(escapedUrlParam)) {
+						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
+					}
 				}
 			}
 		}

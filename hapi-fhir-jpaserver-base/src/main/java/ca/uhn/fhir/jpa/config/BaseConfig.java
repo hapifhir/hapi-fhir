@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
@@ -193,6 +195,11 @@ public abstract class BaseConfig {
 	@Bean
 	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
 		return new AutowiringSpringBeanJobFactory();
+	}
+
+	@Bean
+	public IBulkDataExportSvc myBulkDataExportSvc() {
+		return new BulkDataExportSvcImpl();
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

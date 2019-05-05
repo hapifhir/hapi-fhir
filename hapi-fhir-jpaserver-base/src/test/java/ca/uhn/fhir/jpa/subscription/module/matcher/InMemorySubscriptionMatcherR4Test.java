@@ -405,6 +405,19 @@ public class InMemorySubscriptionMatcherR4Test {
 	}
 
 	@Test
+	public void testReferenceAlias() {
+		Observation obs = new Observation();
+		obs.setId("Observation/123");
+		obs.getSubject().setReference("Patient/123");
+
+		SearchParameterMap params;
+
+		params = new SearchParameterMap();
+		params.add(Observation.SP_PATIENT, new ReferenceParam("Patient/123"));
+		assertMatched(obs, params);
+	}
+
+	@Test
 	public void testSearchResourceReferenceOnlyCorrectPath() {
 		Organization org = new Organization();
 		org.setActive(true);
