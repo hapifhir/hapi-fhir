@@ -154,7 +154,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
 				Extension websocketExtension = new Extension();
 				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new org.hl7.fhir.dstu3.model.UriType(myDaoConfig.getWebsocketContextPath()));
+				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
 				retVal.getRestFirstRep().addExtension(websocketExtension);
 			}
 		}
