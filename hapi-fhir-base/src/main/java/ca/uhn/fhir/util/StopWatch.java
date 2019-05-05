@@ -63,6 +63,9 @@ public class StopWatch {
 		myStarted = theStart.getTime();
 	}
 
+	public StopWatch(long theL) {
+	}
+
 	private void addNewlineIfContentExists(StringBuilder theB) {
 		if (theB.length() > 0) {
 			theB.append("\n");

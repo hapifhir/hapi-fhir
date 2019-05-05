@@ -169,6 +169,9 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Override
 	public void runDeliveryPass() {
 
+		// FIXME: JA remove when working
+		ourLog.info("Entering reindexing pass");
+
 		synchronized (myActiveJobs) {
 			if (myActiveJobs.isEmpty()) {
 				return;

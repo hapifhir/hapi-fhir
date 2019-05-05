@@ -28,11 +28,11 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +49,7 @@ import java.util.Map;
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
+	public static final long SCHEDULED_JOB_INTERVAL = DateUtils.MILLIS_PER_SECOND;
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
@@ -62,7 +63,8 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 	private ISchedulerService mySchedulerService;
 
 	@Override
-	public synchronized void performWarmingPass() {
+	public void performWarmingPass() {
+		// FIXME: JA remove once we only fire once per second
 		ourLog.info("Starting cache warming pass");
 
 		for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
@@ -88,7 +90,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(CacheWarmingSvcImpl.class.getName());
 		jobDetail.setJobClass(CacheWarmingSvcImpl.SubmitJob.class);
-		mySchedulerService.scheduleFixedDelay(DateUtils.MILLIS_PER_SECOND, true, jobDetail);
+		mySchedulerService.scheduleFixedDelay(SCHEDULED_JOB_INTERVAL, true, jobDetail);
 	}
 
 	private void refreshNow(WarmCacheEntry theCacheEntry) {
@@ -130,12 +132,16 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	}
 
-	public static class SubmitJob implements Job {
+	public static class SubmitJob extends FireAtIntervalJob {
 		@Autowired
 		private ICacheWarmingSvc myTarget;
 
+		public SubmitJob() {
+			super(SCHEDULED_JOB_INTERVAL);
+		}
+
 		@Override
-		public void execute(JobExecutionContext theContext) {
+		protected void doExecute(JobExecutionContext theContext) {
 			myTarget.performWarmingPass();
 		}
 	}
