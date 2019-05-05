@@ -11,6 +11,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 
@@ -70,9 +71,9 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	 * We defer startup of executing started tasks until we're sure we're ready for it
 	 * and the startup is completely done
 	 */
-	@EventListener(classes = {ContextStartedEvent.class})
-	public void contextStarted() throws SchedulerException {
-		ourLog.info("Starting task schedulers");
+	@EventListener
+	public void contextStarted(ContextRefreshedEvent theEvent) throws SchedulerException {
+		ourLog.info("Starting task schedulers for context {}", theEvent.getApplicationContext().getId());
 		if (myLocalScheduler != null) {
 			myLocalScheduler.start();
 		}

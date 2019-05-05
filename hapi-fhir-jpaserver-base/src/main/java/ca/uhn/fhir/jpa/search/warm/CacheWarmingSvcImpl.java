@@ -34,6 +34,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,6 +48,7 @@ import java.util.Map;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
 	private Map<WarmCacheEntry, Long> myCacheEntryToNextRefresh = new LinkedHashMap<>();
@@ -60,6 +63,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	@Override
 	public synchronized void performWarmingPass() {
+		ourLog.info("Starting cache warming pass");
 
 		for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
 

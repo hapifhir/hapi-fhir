@@ -541,7 +541,6 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 
 		@Override
 		public void execute(JobExecutionContext theContext) {
-			ourLog.info("****** RUNNING A REINDEX");
 			myTarget.runReindexingPass();
 		}
 	}
