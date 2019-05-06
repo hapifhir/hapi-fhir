@@ -208,6 +208,7 @@ public class Constants {
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
 	public static final String CT_FHIR_NDJSON = "application/fhir+ndjson";
+	public static final String HEADER_PREFER_RESPOND_ASYNC = "respond-async";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

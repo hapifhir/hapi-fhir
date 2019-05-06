@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Enumeration;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -322,12 +321,12 @@ public class GenericJaxRsClientDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
 
-		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
@@ -1949,12 +1948,12 @@ public class GenericJaxRsClientDstu3Test {
 		p.setId(new IdType("1"));
 		p.addName().setFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
 
-		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		

@@ -99,9 +99,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
 	/**
-	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
+	 * Default value for {@link #setDefaultPreferReturn(PreferHeader.PreferReturnEnum)}
 	 */
-	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
+	public static final PreferHeader.PreferReturnEnum DEFAULT_PREFER_RETURN = PreferHeader.PreferReturnEnum.REPRESENTATION;
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
@@ -131,7 +131,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private boolean myStarted;
 	private boolean myUncompressIncomingContents = true;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
-	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
+	private PreferHeader.PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
 	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 
 	/**
@@ -1702,13 +1702,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * <code>Prefer</code> header.
 	 * <p>
 	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
-	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * The default is {@link PreferHeader.PreferReturnEnum#REPRESENTATION}
 	 * </p>
 	 *
 	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
 	 */
 	@Override
-	public PreferReturnEnum getDefaultPreferReturn() {
+	public PreferHeader.PreferReturnEnum getDefaultPreferReturn() {
 		return myDefaultPreferReturn;
 	}
 
@@ -1718,12 +1718,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * <code>Prefer</code> header.
 	 * <p>
 	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
-	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * The default is {@link PreferHeader.PreferReturnEnum#REPRESENTATION}
 	 * </p>
 	 *
 	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
 	 */
-	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
+	public void setDefaultPreferReturn(PreferHeader.PreferReturnEnum theDefaultPreferReturn) {
 		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
 		myDefaultPreferReturn = theDefaultPreferReturn;
 	}

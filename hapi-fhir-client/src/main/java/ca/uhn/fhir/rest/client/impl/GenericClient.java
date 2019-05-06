@@ -54,7 +54,6 @@ import org.hl7.fhir.instance.model.api.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -517,7 +516,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	private class CreateInternal extends BaseSearch<ICreateTyped, ICreateWithQueryTyped, MethodOutcome> implements ICreate, ICreateTyped, ICreateWithQuery, ICreateWithQueryTyped {
 
 		private boolean myConditional;
-		private PreferReturnEnum myPrefer;
+		private PreferHeader.PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -564,7 +563,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public ICreateTyped prefer(PreferReturnEnum theReturn) {
+		public ICreateTyped prefer(PreferHeader.PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -1359,13 +1358,13 @@ public class GenericClient extends BaseClient implements IGenericClient {
 	}
 
 	private final class OutcomeResponseHandler implements IClientResponseHandler<MethodOutcome> {
-		private PreferReturnEnum myPrefer;
+		private PreferHeader.PreferReturnEnum myPrefer;
 
 		private OutcomeResponseHandler() {
 			super();
 		}
 
-		private OutcomeResponseHandler(PreferReturnEnum thePrefer) {
+		private OutcomeResponseHandler(PreferHeader.PreferReturnEnum thePrefer) {
 			this();
 			myPrefer = thePrefer;
 		}
@@ -1375,7 +1374,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			MethodOutcome response = MethodUtil.process2xxResponse(myContext, theResponseStatusCode, theResponseMimeType, theResponseInputStream, theHeaders);
 			response.setCreatedUsingStatusCode(theResponseStatusCode);
 
-			if (myPrefer == PreferReturnEnum.REPRESENTATION) {
+			if (myPrefer == PreferHeader.PreferReturnEnum.REPRESENTATION) {
 				if (response.getResource() == null) {
 					if (response.getId() != null && isNotBlank(response.getId().getValue()) && response.getId().hasBaseUrl()) {
 						ourLog.info("Server did not return resource for Prefer-representation, going to fetch: {}", response.getId().getValue());
@@ -1397,7 +1396,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		private IIdType myId;
 		private String myPatchBody;
 		private PatchTypeEnum myPatchType;
-		private PreferReturnEnum myPrefer;
+		private PreferHeader.PreferReturnEnum myPrefer;
 		private String myResourceType;
 		private String mySearchUrl;
 
@@ -1455,7 +1454,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IPatchExecutable prefer(PreferReturnEnum theReturn) {
+		public IPatchExecutable prefer(PreferHeader.PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -2027,7 +2026,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 		private boolean myConditional;
 		private IIdType myId;
-		private PreferReturnEnum myPrefer;
+		private PreferHeader.PreferReturnEnum myPrefer;
 		private IBaseResource myResource;
 		private String myResourceBody;
 		private String mySearchUrl;
@@ -2081,7 +2080,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		}
 
 		@Override
-		public IUpdateExecutable prefer(PreferReturnEnum theReturn) {
+		public IUpdateExecutable prefer(PreferHeader.PreferReturnEnum theReturn) {
 			myPrefer = theReturn;
 			return this;
 		}
@@ -2261,7 +2260,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		params.get(parameterName).add(parameterValue);
 	}
 
-	private static void addPreferHeader(PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
+	private static void addPreferHeader(PreferHeader.PreferReturnEnum thePrefer, BaseHttpClientInvocation theInvocation) {
 		if (thePrefer != null) {
 			theInvocation.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + thePrefer.getHeaderValue());
 		}

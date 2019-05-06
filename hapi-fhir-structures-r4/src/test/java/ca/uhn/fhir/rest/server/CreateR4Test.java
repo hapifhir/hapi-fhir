@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -250,7 +250,7 @@ public class CreateR4Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
+		ourServlet.setDefaultPreferReturn(PreferHeader.PreferReturnEnum.OPERATION_OUTCOME);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());
@@ -275,7 +275,7 @@ public class CreateR4Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
-		ourServlet.setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
+		ourServlet.setDefaultPreferReturn(PreferHeader.PreferReturnEnum.MINIMAL);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertEquals(201, status.getStatusLine().getStatusCode());

@@ -30,10 +30,7 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -176,9 +173,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
+				PreferHeader.PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
 				if (preferReturn != null) {
-					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+					if (preferReturn == PreferHeader.PreferReturnEnum.REPRESENTATION) {
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
 					}
 				}

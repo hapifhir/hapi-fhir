@@ -364,11 +364,11 @@ public class GenericOkHttpClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
-		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}
@@ -1729,11 +1729,11 @@ public class GenericOkHttpClientDstu2Test {
 		p.setId(new IdDt("1"));
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
-		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}

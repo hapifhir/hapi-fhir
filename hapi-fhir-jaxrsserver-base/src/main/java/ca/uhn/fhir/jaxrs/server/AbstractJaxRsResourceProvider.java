@@ -28,7 +28,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -342,8 +341,8 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
     }
 
 	@Override
-	public PreferReturnEnum getDefaultPreferReturn() {
-		return PreferReturnEnum.REPRESENTATION;
+	public PreferHeader.PreferReturnEnum getDefaultPreferReturn() {
+		return PreferHeader.PreferReturnEnum.REPRESENTATION;
 	}
 
 	/**

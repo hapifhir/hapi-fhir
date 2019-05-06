@@ -40,6 +40,7 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.*;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
@@ -664,36 +665,45 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static PreferReturnEnum parsePreferHeader(String theValue) {
-		if (isBlank(theValue)) {
-			return null;
+	public static PreferHeader parsePreferHeader(String theValue) {
+		PreferHeader retVal = new PreferHeader();
+
+		if (isNotBlank(theValue)) {
+			StringTokenizer tok = new StringTokenizer(theValue, ";");
+			while (tok.hasMoreTokens()) {
+				String next = trim(tok.nextToken());
+				int eqIndex = next.indexOf('=');
+
+				String key;
+				String value;
+				if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+					key = next;
+					value = "";
+	 			} else {
+					key = next.substring(0, eqIndex).trim();
+					value = next.substring(eqIndex + 1).trim();
+				}
+
+				if (key.equals(Constants.HEADER_PREFER_RETURN)) {
+
+					if (value.length() < 2) {
+						continue;
+					}
+					if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+						value = value.substring(1, value.length() - 1);
+					}
+
+					retVal.setReturn(PreferHeader.PreferReturnEnum.fromHeaderValue(value));
+
+				} else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
+
+					retVal.setRespondAsync(true);
+
+				}
+			}
 		}
 
-		StringTokenizer tok = new StringTokenizer(theValue, ",");
-		while (tok.hasMoreTokens()) {
-			String next = tok.nextToken();
-			int eqIndex = next.indexOf('=');
-			if (eqIndex == -1 || eqIndex >= next.length() - 2) {
-				continue;
-			}
-
-			String key = next.substring(0, eqIndex).trim();
-			if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
-				continue;
-			}
-
-			String value = next.substring(eqIndex + 1).trim();
-			if (value.length() < 2) {
-				continue;
-			}
-			if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-				value = value.substring(1, value.length() - 1);
-			}
-
-			return PreferReturnEnum.fromHeaderValue(value);
-		}
-
-		return null;
+		return retVal;
 	}
 
 	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {
