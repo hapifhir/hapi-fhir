@@ -393,12 +393,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testCreateWithClientAssignedId() throws IOException {
-		
+
+		// Create with client assigned ID
 		Patient p = new Patient();
 		p.setActive(true);
 		p.setId("AAA");
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
-		
 		HttpPut httpPut = new HttpPut(ourServerBase + "/Patient/AAA");
 		httpPut.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
@@ -409,6 +409,30 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, containsString("true"));
 		}
+
+		// Delete
+		HttpDelete httpDelete = new HttpDelete(ourServerBase + "/Patient/AAA");
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpDelete)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+		}
+
+		// Create it again
+		p = new Patient();
+		p.setActive(true);
+		p.setId("AAA");
+		encoded = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		httpPut = new HttpPut(ourServerBase + "/Patient/AAA");
+		httpPut.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
+		try (CloseableHttpResponse status = ourHttpClient.execute(httpPut)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(status.getStatusLine().toString());
+			ourLog.info(responseContent);
+
+			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("true"));
+		}
+
+
 
 	}
 

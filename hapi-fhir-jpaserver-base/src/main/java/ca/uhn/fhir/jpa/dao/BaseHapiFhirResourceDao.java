@@ -1266,7 +1266,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		IIdType resourceId;
 		if (isNotBlank(theMatchUrl)) {
-			StopWatch sw = new StopWatch();
 			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType);
 			if (match.size() > 1) {
 				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
@@ -1315,6 +1314,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * See SystemProviderR4Test#testTransactionReSavesPreviouslyDeletedResources
 		 * for a test that needs this.
 		 */
+		boolean wasDeleted = entity.getDeleted() != null;
 		entity.setDeleted(null);
 
 		/*
@@ -1325,7 +1325,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 */
 		if (!thePerformIndexing) {
 			theResource.setId(entity.getIdDt().getValue());
-			DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, entity, theResource).setCreated(false);
+			DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, entity, theResource).setCreated(wasDeleted);
 			outcome.setPreviousResource(oldResource);
 			return outcome;
 		}
@@ -1334,7 +1334,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * Otherwise, we're not in a transaction
 		 */
 		ResourceTable savedEntity = updateInternal(theRequestDetails, theResource, thePerformIndexing, theForceUpdateVersion, entity, resourceId, oldResource);
-		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource).setCreated(false);
+		DaoMethodOutcome outcome = toMethodOutcome(theRequestDetails, savedEntity, theResource).setCreated(wasDeleted);
 
 		if (!thePerformIndexing) {
 			outcome.setId(theResource.getIdElement());
