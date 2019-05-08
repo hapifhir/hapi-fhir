@@ -63,7 +63,6 @@ public class BaseController {
 		final String serverName = theRequest.getServerName(myConfig);
 		final String apiKey = theRequest.getApiKey(theServletRequest, myConfig);
 		theModel.put("serverId", sanitizeInput(serverId));
-		theModel.put("base", sanitizeInput(serverBase));
 		theModel.put("baseName", sanitizeInput(serverName));
 		theModel.put("apiKey", sanitizeInput(apiKey));
 		theModel.put("resourceName", sanitizeInput(defaultString(theRequest.getResource())));
@@ -71,6 +70,9 @@ public class BaseController {
 		theModel.put("pretty", sanitizeInput(theRequest.getPretty()));
 		theModel.put("_summary", sanitizeInput(theRequest.get_summary()));
 		theModel.put("serverEntries", myConfig.getIdToServerName());
+
+		// doesn't need sanitizing
+		theModel.put("base", serverBase);
 
 		return loadAndAddConf(theServletRequest, theRequest, theModel);
 	}

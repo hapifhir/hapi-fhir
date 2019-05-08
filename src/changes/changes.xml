@@ -208,6 +208,11 @@
 				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
 				Anders Havn for the suggestion!
 			</action>
+			<action type="fix" issue="1299">
+				In JPA server when updating a resource using a client assigned ID, if the resource was previously
+				deleted (meaning that the operation is actually a create), the server will now return
+				an HTTP 201 instead of an HTTP 200. Thanks to Mario Hyland for reporting!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
