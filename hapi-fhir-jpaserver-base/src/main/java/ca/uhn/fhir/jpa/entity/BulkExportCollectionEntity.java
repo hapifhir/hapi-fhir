@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLLECTION")
@@ -23,6 +25,8 @@ public class BulkExportCollectionEntity {
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+	@OneToMany(fetch = FetchType.LAZY)
+	private Collection<BulkExportCollectionFileEntity> myFiles;
 
 	public void setJob(BulkExportJobEntity theJob) {
 		myJob = theJob;
@@ -52,4 +56,10 @@ public class BulkExportCollectionEntity {
 		myVersion = theVersion;
 	}
 
+	public Collection<BulkExportCollectionFileEntity> getFiles() {
+		if (myFiles == null) {
+			myFiles = new ArrayList<>();
+		}
+		return myFiles;
+	}
 }

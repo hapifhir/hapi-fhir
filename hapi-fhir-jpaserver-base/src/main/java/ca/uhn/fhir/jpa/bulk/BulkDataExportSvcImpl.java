@@ -6,17 +6,21 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionDao;
+import ca.uhn.fhir.jpa.dao.data.IBulkExportCollectionFileDao;
 import ca.uhn.fhir.jpa.dao.data.IBulkExportJobDao;
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
+import ca.uhn.fhir.jpa.entity.BulkExportCollectionFileEntity;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -45,6 +49,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
@@ -56,6 +61,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Autowired
 	private IBulkExportCollectionDao myBulkExportCollectionDao;
 	@Autowired
+	private IBulkExportCollectionFileDao myBulkExportCollectionFileDao;
+	@Autowired
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -64,18 +71,24 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Autowired
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
+
 	private long myFileMaxChars = FileUtils.ONE_MB;
+	private int myRetentionPeriod = (int) DateUtils.MILLIS_PER_DAY;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
 
+	/**
+	 * This method is called by the scheduler to run a pass of the
+	 * generator
+	 */
 	@Transactional(value = Transactional.TxType.NEVER)
 	@Override
-	public synchronized void runPass() {
+	public synchronized void buildExportFiles() {
 
 		Optional<BulkExportJobEntity> jobToProcessOpt = myTxTemplate.execute(t -> {
 			Pageable page = PageRequest.of(0, 1);
-			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByStatus(page, BulkExportJobEntity.StatusEnum.SUBMITTED);
+			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByStatus(page, BulkJobStatusEnum.SUBMITTED);
 			if (submittedJobs.isEmpty()) {
 				return Optional.empty();
 			}
@@ -86,72 +99,158 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
-		myTxTemplate.execute(t -> {
-			String jobUuid = jobToProcessOpt.get().getJobId();
-			ourLog.info("Starting generation for batch export job: {}", jobUuid);
+		String jobUuid = jobToProcessOpt.get().getJobId();
 
-			Optional<BulkExportJobEntity> job = myBulkExportJobDao.findById(jobToProcessOpt.get().getId());
-			if (!job.isPresent()) {
-				ourLog.info("Job appears to be deleted");
-				return;
-			}
-
-			for (BulkExportCollectionEntity nextCollection : job.get().getCollections()) {
-
-				String nextType = nextCollection.getResourceType();
-				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
-
-				ISearchBuilder sb = dao.newSearchBuilder();
-				SearchParameterMap map = new SearchParameterMap();
-				map.setLoadSynchronous(true);
-				dao.search(map);
-				try (IResultIterator query = sb.createQuery(map, new SearchRuntimeDetails(jobUuid))) {
-
-					ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-					OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
-					IParser parser = myContext.newJsonParser().setPrettyPrint(false);
-
-					List<Long> filePids = new ArrayList<>();
-					List<IBaseResource> fileResources = new ArrayList<>();
-					while (query.hasNext()) {
-						filePids.add(query.next());
-
-						if (filePids.size() >= 10) {
-
-							sb.loadResourcesByPid(filePids, fileResources, Collections.emptySet(), false, myEntityManager, myContext, dao);
-
-							for (IBaseResource nextFileResource : fileResources) {
-								parser.encodeResourceToWriter(nextFileResource, writer);
-								writer.append("\n");
-							}
-
-							filePids.clear();
-							fileResources.clear();
-
-							if (outputStream.size() >= myFileMaxChars) {
-
-								IBaseBinary binary = BinaryUtil.newBinary(myContext);
-								binary.setContentType(Constants.CT_FHIR_NDJSON);
-								binary.setContent(outputStream.toByteArray());
-
-								IFhirResourceDao binaryDao = myDaoRegistry.getResourceDao("Binary");
-								IIdType createdId = binaryDao.create(binary).getId();
-
-
-								outputStream.reset();
-							}
-
-						}
-					}
-
-
-				} catch (IOException e) {
-					throw new InternalErrorException(e);
+		try {
+			myTxTemplate.execute(t -> {
+				processJob(jobUuid);
+				return null;
+			});
+		} catch (Exception e) {
+			ourLog.error("Failure while preparing bulk export extract", e);
+			myTxTemplate.execute(t -> {
+				Optional<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByJobId(jobUuid);
+				if (submittedJobs.isPresent()) {
+					submittedJobs.get().setStatus(BulkJobStatusEnum.ERROR);
+					myBulkExportJobDao.save(submittedJobs.get());
 				}
+				return null;
+			});
+		}
 
+	}
+
+
+	/**
+	 * This method is called by the scheduler to run a pass of the
+	 * generator
+	 */
+	@Transactional(value = Transactional.TxType.NEVER)
+	@Override
+	public void purgeExpiredFiles() {
+		Optional<BulkExportJobEntity> jobToDelete = myTxTemplate.execute(t -> {
+			Pageable page = PageRequest.of(0, 1);
+			Slice<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByExpiry(page, new Date());
+			if (submittedJobs.isEmpty()) {
+				return Optional.empty();
 			}
+			return Optional.of(submittedJobs.getContent().get(0));
 		});
 
+		if (jobToDelete.isPresent()) {
+
+			BulkExportJobEntity job = jobToDelete.get();
+			ourLog.info("Deleting bulk export job: {}", job.getJobId());
+
+			myTxTemplate.execute(t->{
+
+				for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
+					for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
+
+						ourLog.info("");
+						getBinaryDao().delete(toQualifiedBinaryId(nextFile.getResourceId()));
+						getBinaryDao().expunge(toQualifiedBinaryId(nextFile.getResourceId()), new ExpungeOptions().setExpungeEverything(true));
+
+					}
+				}
+
+				return null;
+			});
+
+		}
+
+	}
+
+	private void processJob(String theJobUuid) {
+		ourLog.info("Starting generation for batch export job: {}", theJobUuid);
+
+		Optional<BulkExportJobEntity> job = myBulkExportJobDao.findByJobId(theJobUuid);
+		if (!job.isPresent()) {
+			ourLog.info("Job appears to be deleted");
+			return;
+		}
+
+		for (BulkExportCollectionEntity nextCollection : job.get().getCollections()) {
+
+			String nextType = nextCollection.getResourceType();
+			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
+
+			ISearchBuilder sb = dao.newSearchBuilder();
+			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
+			sb.setType(nextTypeClass, nextType);
+			
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			dao.search(map);
+			try (IResultIterator query = sb.createQuery(map, new SearchRuntimeDetails(theJobUuid))) {
+
+				AtomicInteger counter = new AtomicInteger(0);
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
+				IParser parser = myContext.newJsonParser().setPrettyPrint(false);
+
+				List<Long> pidsSpool = new ArrayList<>();
+				List<IBaseResource> resourcesSpool = new ArrayList<>();
+				while (query.hasNext()) {
+					pidsSpool.add(query.next());
+					counter.incrementAndGet();
+
+					if (pidsSpool.size() >= 10) {
+
+						sb.loadResourcesByPid(pidsSpool, resourcesSpool, Collections.emptySet(), false, myEntityManager, myContext, dao);
+
+						for (IBaseResource nextFileResource : resourcesSpool) {
+							parser.encodeResourceToWriter(nextFileResource, writer);
+							writer.append("\n");
+						}
+
+						pidsSpool.clear();
+						resourcesSpool.clear();
+
+						if (outputStream.size() >= myFileMaxChars) {
+							flushToFiles(nextCollection, counter, outputStream);
+						}
+
+					}
+				}
+
+				flushToFiles(nextCollection, counter, outputStream);
+
+			} catch (IOException e) {
+				throw new InternalErrorException(e);
+			}
+
+
+		}
+
+		job.get().setStatus(BulkJobStatusEnum.COMPLETE);
+		myBulkExportJobDao.save(job.get());
+
+	}
+
+	private void flushToFiles(BulkExportCollectionEntity theCollection, AtomicInteger theCounter, ByteArrayOutputStream theOutputStream) {
+		if (theOutputStream.size() > 0) {
+			IBaseBinary binary = BinaryUtil.newBinary(myContext);
+			binary.setContentType(Constants.CT_FHIR_NDJSON);
+			binary.setContent(theOutputStream.toByteArray());
+
+			IIdType createdId = getBinaryDao().create(binary).getResource().getIdElement();
+
+			BulkExportCollectionFileEntity file = new BulkExportCollectionFileEntity();
+			theCollection.getFiles().add(file);
+			file.setCollection(theCollection);
+			file.setResource(createdId.getIdPart());
+			myBulkExportCollectionFileDao.saveAndFlush(file);
+			theOutputStream.reset();
+
+			ourLog.info("Created resource {} for bulk export file containing {} resources of type {}", createdId, theCounter.get(), theCollection.getResourceType());
+
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private IFhirResourceDao<IBaseBinary> getBinaryDao() {
+		return myDaoRegistry.getResourceDao("Binary");
 	}
 
 	@PostConstruct
@@ -169,16 +268,56 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public NewJobInfo submitJob(Set<String> theResourceTypes, DateTimeType theSince, Set<String> theFilters) {
+	public JobInfo submitJob(Set<String> theResourceTypes, DateTimeType theSince, Set<String> theFilters) {
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
-		job.setStatus(BulkExportJobEntity.StatusEnum.SUBMITTED);
-		job.setStatusTime(new Date());
+		job.setStatus(BulkJobStatusEnum.SUBMITTED);
+		job.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
 		myBulkExportJobDao.save(job);
+
+		for (String nextType : theResourceTypes) {
+			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
+			collection.setJob(job);
+			collection.setResourceType(nextType);
+			job.getCollections().add(collection);
+			myBulkExportCollectionDao.save(collection);
+		}
 
 		ourLog.info("New bulk data export job submitted with ID: {}", job.getJobId());
 
-		return new NewJobInfo().setJobId(job.getJobId());
+		return new JobInfo().setJobId(job.getJobId());
+	}
+
+	@Transactional
+	@Override
+	public JobInfo getJobStatus(String theJobId) {
+		BulkExportJobEntity job = myBulkExportJobDao
+			.findByJobId(theJobId)
+			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
+
+		JobInfo retVal = new JobInfo();
+		retVal.setJobId(theJobId);
+		retVal.setStatus(job.getStatus());
+		retVal.setFiles(new ArrayList<>());
+
+		if (job.getStatus() == BulkJobStatusEnum.COMPLETE) {
+			for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
+				for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
+					retVal.getFiles().add(new FileEntry()
+						.setResourceType(nextCollection.getResourceType())
+						.setResourceId(toQualifiedBinaryId(nextFile.getResourceId())));
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	private IIdType toQualifiedBinaryId(String theIdPart) {
+		IIdType retVal = myContext.getVersion().newIdType();
+		retVal.setParts(null, "Binary", theIdPart, null);
+
+		return retVal;
 	}
 
 	@Override
@@ -199,9 +338,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		@Override
 		protected void doExecute(JobExecutionContext theContext) {
-			myTarget.runPass();
+			myTarget.buildExportFiles();
 		}
 	}
-	
+
 
 }

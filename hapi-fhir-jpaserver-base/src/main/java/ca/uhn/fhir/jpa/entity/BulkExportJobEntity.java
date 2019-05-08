@@ -1,12 +1,17 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
+
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_BLKEX_JOB_ID", columnNames = "JOB_ID")
+}, indexes = {
+	@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
 public class BulkExportJobEntity {
 
@@ -21,18 +26,28 @@ public class BulkExportJobEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private StatusEnum myStatus;
+	private BulkJobStatusEnum myStatus;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "EXP_TIME", nullable = false)
+	private Date myExpiry;
 	@OneToMany(fetch = FetchType.LAZY)
 	private Collection<BulkExportCollectionEntity> myCollections;
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
 
+	public void setExpiry(Date theExpiry) {
+		myExpiry = theExpiry;
+	}
+
 	public Collection<BulkExportCollectionEntity> getCollections() {
+		if (myCollections == null) {
+			myCollections = new ArrayList<>();
+		}
 		return myCollections;
 	}
 
@@ -44,20 +59,19 @@ public class BulkExportJobEntity {
 		myJobId = theJobId;
 	}
 
-	public StatusEnum getStatus() {
+	public BulkJobStatusEnum getStatus() {
 		return myStatus;
 	}
 
-	public void setStatus(StatusEnum theStatus) {
-		myStatus = theStatus;
+	public void setStatus(BulkJobStatusEnum theStatus) {
+		if (myStatus != theStatus) {
+			myStatusTime = new Date();
+			myStatus = theStatus;
+		}
 	}
 
 	public Date getStatusTime() {
 		return myStatusTime;
-	}
-
-	public void setStatusTime(Date theStatusTime) {
-		myStatusTime = theStatusTime;
 	}
 
 	public int getVersion() {
@@ -70,15 +84,6 @@ public class BulkExportJobEntity {
 
 	public Long getId() {
 		return myId;
-	}
-
-	public enum StatusEnum {
-
-		SUBMITTED,
-		BUILDING,
-		COMPLETE,
-		ERROR
-
 	}
 
 }

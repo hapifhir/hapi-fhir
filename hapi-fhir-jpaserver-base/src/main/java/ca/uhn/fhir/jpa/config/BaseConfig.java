@@ -184,8 +184,9 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISchedulerService schedulerService() {
-		if ("true".equals(System.getProperty("scheduling_disabled"))) {
+	public ISchedulerService schedulerService(Environment theEnvironment) {
+		String schedulingDisabled = theEnvironment.getProperty("scheduling_disabled");
+		if ("true".equals(schedulingDisabled)) {
 			ourLog.warn("Scheduling is DISABLED on this server");
 			return new SchedulerServiceImpl.NullSchedulerService();
 		}

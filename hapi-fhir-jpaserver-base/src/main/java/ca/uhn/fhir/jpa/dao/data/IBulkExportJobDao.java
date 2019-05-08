@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
 import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Date;
 import java.util.Optional;
 
 /*
@@ -35,5 +37,8 @@ public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Lo
 	Optional<BulkExportJobEntity> findByJobId(@Param("jobid") String theUuid);
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myStatus = :status")
-	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkExportJobEntity.StatusEnum theSubmitted);
+	Slice<BulkExportJobEntity> findByStatus(Pageable thePage, @Param("status") BulkJobStatusEnum theSubmitted);
+
+	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry < :cutoff")
+	Slice<BulkExportJobEntity> findByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
 }
