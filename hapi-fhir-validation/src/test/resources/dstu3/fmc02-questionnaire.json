@@ -1,0 +1,44 @@
+{
+	"resourceType": "Questionnaire",
+	"id": "FMCBinderOptimization",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-04-27T22:40:19.860-04:00"
+	},
+	"name": "TestQ",
+	"item": [
+		{
+			"linkId": "1",
+			"type": "group",
+			"item": [
+				{
+					"linkId": "BO_RecCons",
+					"text": "Recommendation Consistent with binder optimization guidelines",
+					"type": "choice",
+					"options": {
+						"reference": "ValueSet/FMCYesNoUnk"
+					},
+					"item": [
+						{
+							"linkId": "BO_ConsDrop",
+							"text": "Binder Recommended",
+							"type": "choice",
+							"enableWhen": [
+								{
+									"question": "BO_RecCons",
+									"answerCoding": {
+										"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+										"code": "Yes"
+									}
+								}
+							],
+							"options": {
+								"reference": "ValueSet/FMCBinderRecomm"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

@@ -7,6 +7,11 @@
 	</properties>
 	<body>
 		<release version="3.8.0" date="TBD" description="Hippo">
+			<action type="fix">
+				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
+				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
+				Mudit Punia and Dushyant Garg for reporting this.
+			</action>
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -19,7 +24,7 @@
 					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.6.RELEASE</li>
 					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
 					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
-					<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>
+					<!--<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>-->
 				</ul>
 				]]>
 			</action>
@@ -182,8 +187,31 @@
 				Ensure that database cursors are closed immediately after performing a FHIR search.
 			</action>
 			<action type="add">
+				When performing a JSON Patch in JPA server, the post-patched document is now validated to
+				ensure that the patch was valid for the candidate resource. This means that invalid patches
+				are caught and not just silently ignored.
+			</action>
+			<action type="add">
 				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
 				in DaoConfig.
+			</action>
+			<action type="fix">
+				Validation errors were fixed when using a Questionnaire with enableWhen on a question that
+				contains sub-items.
+			</action>
+			<action type="fix">
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				the target instead of the source with the reference.
+			</action>
+			<action type="add">
+				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
+				Anders Havn for the suggestion!
+			</action>
+			<action type="fix" issue="1299">
+				In JPA server when updating a resource using a client assigned ID, if the resource was previously
+				deleted (meaning that the operation is actually a create), the server will now return
+				an HTTP 201 instead of an HTTP 200. Thanks to Mario Hyland for reporting!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

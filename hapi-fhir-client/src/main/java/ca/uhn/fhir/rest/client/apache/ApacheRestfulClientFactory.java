@@ -93,9 +93,14 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
-			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
-					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();
+			RequestConfig defaultRequestConfig =
+				RequestConfig.custom()
+					.setSocketTimeout(getSocketTimeout())
+					.setConnectTimeout(getConnectTimeout())
+					.setConnectionRequestTimeout(getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true)
+					.setProxy(myProxy)
+					.build();
 
 			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
 					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();

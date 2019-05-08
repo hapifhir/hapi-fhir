@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemAnswerComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -195,6 +196,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(QUESTIONNAIRE_URL))).thenReturn(q);
+
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"),  any()))
+			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"),  any()))
+			.thenReturn(new CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -853,6 +861,13 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		QuestionnaireItemComponent item = q.addItem();
 		item.setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.OPENCHOICE).setOptions(new Reference("http://somevalueset"));
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
+
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"),  any()))
+			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"),  any()))
+			.thenReturn(new CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);

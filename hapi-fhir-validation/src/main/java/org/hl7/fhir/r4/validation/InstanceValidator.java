@@ -1098,7 +1098,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
             }
           }
       } catch (Exception e) {
-        rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Error "+e.getMessage()+" validating Coding");
+        rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, false, "Error "+e.getMessage()+" validating Coding: " + e.toString());
       }
     }
   }
@@ -2371,13 +2371,17 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
         return null;
       } else {
         long t = System.nanoTime();
-        if (!Utilities.isAbsoluteUrl(reference))
-          reference = resolve(uri, reference);
-        ValueSet fr = context.fetchResource(ValueSet.class, reference);
-        txTime = txTime + (System.nanoTime() - t);
+			ValueSet fr = context.fetchResource(ValueSet.class, reference);
+			if (fr == null) {
+				if (!Utilities.isAbsoluteUrl(reference)) {
+					reference = resolve(uri, reference);
+					fr = context.fetchResource(ValueSet.class, reference);
+				}
+			}
+			txTime = txTime + (System.nanoTime() - t);
         return fr;
       }
-    } else 
+    } else
       return null;
   }
 

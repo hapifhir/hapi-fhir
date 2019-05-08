@@ -1294,7 +1294,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			b.append("Unable to delete ");
 			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
 			b.append(" because at least one resource has a reference to this resource. First reference found was resource ");
-			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
+			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
 			b.append(" in path ");
 			b.append(next.getSourcePath());
 			String msg = b.toString();

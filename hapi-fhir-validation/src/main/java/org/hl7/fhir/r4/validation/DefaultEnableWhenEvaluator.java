@@ -66,7 +66,10 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         return new EnableWhenResult(result, linkId, enableCondition, questionnaireResponse);
     }
     
-    public Type convertToType(Element element) throws FHIRException {
+    private Type convertToType(Element element) throws FHIRException {
+    		if (element.fhirType().equals("BackboneElement")) {
+    			return null;
+			}
         Type b = new Factory().create(element.fhirType());
         if (b instanceof PrimitiveType) {
           ((PrimitiveType<?>) b).setValueAsString(element.primitiveValue());
@@ -92,6 +95,9 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         try {
         	actualAnswer = convertToType(answer);
+        	if (actualAnswer == null) {
+        		return false;
+			}
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Unexpected answer type", e);
         }

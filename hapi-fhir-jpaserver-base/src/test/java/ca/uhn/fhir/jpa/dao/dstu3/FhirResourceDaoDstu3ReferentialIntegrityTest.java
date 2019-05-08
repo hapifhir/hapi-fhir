@@ -70,7 +70,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 			myOrganizationDao.delete(oid);
 			fail();
 		} catch (ResourceVersionConflictException e) {
-			assertEquals("Unable to delete Organization/"+oid.getIdPart()+" because at least one resource has a reference to this resource. First reference found was resource Organization/"+oid.getIdPart()+" in path Patient.managingOrganization", e.getMessage());
+			assertEquals("Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
 
 		myPatientDao.delete(pid);
