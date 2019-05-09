@@ -112,6 +112,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions);
 
+	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions);
+
 	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
 	Class<T> getResourceType();

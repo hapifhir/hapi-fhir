@@ -139,21 +139,25 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		if (jobToDelete.isPresent()) {
 
-			BulkExportJobEntity job = jobToDelete.get();
-			ourLog.info("Deleting bulk export job: {}", job.getJobId());
+			ourLog.info("Deleting bulk export job: {}", jobToDelete.get().getJobId());
 
-			myTxTemplate.execute(t->{
+			myTxTemplate.execute(t -> {
 
+				BulkExportJobEntity job = myBulkExportJobDao.getOne(jobToDelete.get().getId());
 				for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
 					for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
 
-						ourLog.info("");
-						getBinaryDao().delete(toQualifiedBinaryId(nextFile.getResourceId()));
-						getBinaryDao().expunge(toQualifiedBinaryId(nextFile.getResourceId()), new ExpungeOptions().setExpungeEverything(true));
+						ourLog.info("Purging bulk data file: {}", nextFile.getResourceId());
+						getBinaryDao().delete(toId(nextFile.getResourceId()));
+						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true));
+						myBulkExportCollectionFileDao.delete(nextFile);
 
 					}
+
+					myBulkExportCollectionDao.delete(nextCollection);
 				}
 
+				myBulkExportJobDao.delete(job);
 				return null;
 			});
 
@@ -162,15 +166,16 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private void processJob(String theJobUuid) {
-		ourLog.info("Starting generation for batch export job: {}", theJobUuid);
+		ourLog.info("Starting generation for batch export jobOpt: {}", theJobUuid);
 
-		Optional<BulkExportJobEntity> job = myBulkExportJobDao.findByJobId(theJobUuid);
-		if (!job.isPresent()) {
+		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(theJobUuid);
+		if (!jobOpt.isPresent()) {
 			ourLog.info("Job appears to be deleted");
 			return;
 		}
 
-		for (BulkExportCollectionEntity nextCollection : job.get().getCollections()) {
+		BulkExportJobEntity job = jobOpt.get();
+		for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
 
 			String nextType = nextCollection.getResourceType();
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
@@ -178,7 +183,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			ISearchBuilder sb = dao.newSearchBuilder();
 			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
 			sb.setType(nextTypeClass, nextType);
-			
+
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
 			dao.search(map);
@@ -223,8 +228,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		}
 
-		job.get().setStatus(BulkJobStatusEnum.COMPLETE);
-		myBulkExportJobDao.save(job.get());
+		job.setStatus(BulkJobStatusEnum.COMPLETE);
+		updateExpiry(job);
+		myBulkExportJobDao.save(job);
 
 	}
 
@@ -272,7 +278,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
 		job.setStatus(BulkJobStatusEnum.SUBMITTED);
-		job.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
+		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
 		for (String nextType : theResourceTypes) {
@@ -286,6 +292,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		ourLog.info("New bulk data export job submitted with ID: {}", job.getJobId());
 
 		return new JobInfo().setJobId(job.getJobId());
+	}
+
+	private void updateExpiry(BulkExportJobEntity theJob) {
+		theJob.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));
 	}
 
 	@Transactional
@@ -310,6 +320,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			}
 		}
 
+		return retVal;
+	}
+
+	private IIdType toId(String theResourceId) {
+		IIdType retVal = myContext.getVersion().newIdType();
+		retVal.setValue(theResourceId);
 		return retVal;
 	}
 

@@ -55,6 +55,16 @@ public class PartitionRunner {
 			return;
 		}
 
+		if (callableTasks.size() == 1) {
+			try {
+				callableTasks.get(0).call();
+				return;
+			} catch (Exception e) {
+				ourLog.error("Error while expunging.", e);
+				throw new InternalErrorException(e);
+			}
+		}
+
 		ExecutorService executorService = buildExecutor(callableTasks.size());
 		try {
 			List<Future<Void>> futures = executorService.invokeAll(callableTasks);

@@ -48,9 +48,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
@@ -546,7 +544,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions) {
+		validateExpungeEnabled();
+		return forceExpungeInExistingTransaction(theId, theExpungeOptions);
+	}
 
+	private void validateExpungeEnabled() {
+		if (!myDaoConfig.isExpungeEnabled()) {
+			throw new MethodNotAllowedException("$expunge is not enabled on this server");
+		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
 		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId));
@@ -566,6 +576,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+		validateExpungeEnabled();
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
 		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions);
