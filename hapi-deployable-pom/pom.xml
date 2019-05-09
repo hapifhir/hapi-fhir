@@ -145,7 +145,8 @@
 						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
-						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
+						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
+						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
