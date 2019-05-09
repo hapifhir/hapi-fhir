@@ -719,7 +719,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 							}
 						}
 
-						if (outcome.getCreated() == Boolean.FALSE) {
+						if (outcome.getCreated() == Boolean.FALSE
+							|| (outcome.getCreated() == Boolean.TRUE && outcome.getId().getVersionIdPartAsLong() > 1)) {
 							updatedEntities.add(outcome.getEntity());
 						}
 
