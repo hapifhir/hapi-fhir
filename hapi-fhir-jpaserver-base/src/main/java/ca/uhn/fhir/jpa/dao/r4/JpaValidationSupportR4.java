@@ -161,7 +161,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
+		return fetchCodeSystem(theCtx, theSystem) != null;
 	}
 
 	@Override

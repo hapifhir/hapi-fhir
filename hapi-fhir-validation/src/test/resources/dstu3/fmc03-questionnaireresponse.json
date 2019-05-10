@@ -1,0 +1,147 @@
+{
+	"resourceType": "QuestionnaireResponse",
+	"id": "QRsfId",
+	"identifier": {
+		"system": "urn:oid:2.16.840.1.113883.3.7418.21.1",
+		"value": "sfId"
+	},
+	"questionnaire": {
+		"reference": "Questionnaire/FMCBinderOptimizationAssessmentTest"
+	},
+	"status": "completed",
+	"subject": {
+		"reference": "Patient/P123456"
+	},
+	"context": {
+		"reference": "EpisodeOfCare/EC12345"
+	},
+	"authored": "2019-05-02T10:41:00-04:00",
+	"author": {
+		"reference": "Practitioner/PRLoginID"
+	},
+	"item": [{
+		"linkId": "Binder Optimization Assessment Test",
+		"text": "Binder Optimization Assessment Test",
+		"item": [{
+			"linkId": "BINDER OPTIMIZATION ASSESSMENT TEST",
+			"text": "BINDER OPTIMIZATION ASSESSMENT TEST",
+			"item": [{
+				"linkId": "Home Medications",
+				"text": "Home Medications",
+				"item": [{
+					"linkId": "BO_ConsPharm",
+					"text": "Pharmacist consult",
+					"answer": [{
+						"valueCoding": {
+							"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+							"code": "Yes",
+							"display": "Yes"
+						}
+					}]
+				},
+					{
+						"linkId": "BO_ConsTxt",
+						"text": "Pharmacy consult notes",
+						"answer": [{
+							"valueString": "Pharmacy consult notes comes here"
+						}]
+					},
+					{
+						"linkId": "BO_RecNotCons",
+						"text": "Recommendation not consistent with binder optimization guidelines",
+						"answer": [{
+							"valueCoding": {
+								"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+								"code": "Yes",
+								"display": "Yes"
+							}
+						}],
+						"item": [{
+							"linkId": "BO_NotConsDrop",
+							"text": "Recommendation not consistent with binder optimization guidelines",
+							"answer": [{
+								"valueString": "Chewing difficulty,Other"
+							}],
+							"item": [{
+								"linkId": "BO_OtherTxt",
+								"text": "Other",
+								"answer": [{
+									"valueString": "Other difficulty"
+								}]
+							}]
+						},
+							{
+								"linkId": "BO_Recommend",
+								"text": "What is your recommendation",
+								"answer": [{
+									"valueCoding": {
+										"system": "http://fkcfhir.org/fhir/cs/FMCBinderRecommendation",
+										"code": "Renvela",
+										"display": "Renvela"
+									}
+								}]
+							}
+						]
+					}
+				]
+			},
+				{
+					"linkId": "Plan",
+					"text": "Plan",
+					"item": [{
+						"linkId": "BO_CommPres",
+						"text": "Binder recommendation communicated to prescriber",
+						"answer": [{
+							"valueCoding": {
+								"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+								"code": "No",
+								"display": "No"
+							}
+						}]
+					},
+						{
+							"linkId": "BO_ComAssmt",
+							"text": "Referred to MSW for expressed co-pay concerns",
+							"answer": [{
+								"valueCoding": {
+									"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+									"code": "No",
+									"display": "No"
+								}
+							}]
+						},
+						{
+							"linkId": "BO_RefMSW",
+							"text": "Referred to MSW for potential medication adherence issues",
+							"answer": [{
+								"valueCoding": {
+									"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+									"code": "No",
+									"display": "No"
+								}
+							}]
+						},
+						{
+							"linkId": "BO_AdjHyp",
+							"text": "Continue adjustments per CMAB Hyperphosphatemia Algorithm",
+							"answer": [{
+								"valueCoding": {
+									"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+									"code": "No",
+									"display": "No"
+								}
+							}]
+						},
+						{
+							"linkId": "BO_AdjTxt",
+							"text": "Adjustment Text",
+							"answer": [{
+								"valueString": "Adjustment Text comes here"
+							}]
+						}
+					]
+				}
+			]
+		}]
+	}]
+}

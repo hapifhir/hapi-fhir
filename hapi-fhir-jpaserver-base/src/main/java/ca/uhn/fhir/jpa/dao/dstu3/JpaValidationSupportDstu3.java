@@ -167,7 +167,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
+		return fetchCodeSystem(theCtx, theSystem) != null;
 	}
 
 	@Override
