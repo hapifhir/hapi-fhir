@@ -134,8 +134,10 @@ public class ValidationSupportChain implements IValidationSupport {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
 				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
-				ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
-				return result;
+				if (result != null) {
+					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
+					return result;
+				}
 			} else {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}

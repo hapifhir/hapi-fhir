@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -12,11 +17,14 @@ import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
+	public static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	private IIdType myExtensionalVsId;
 
@@ -252,6 +260,42 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("Married", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidationOfUploadedCodeSystems() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		ourClient.update().resource(csYesNo).execute();
+
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc03-cs-binderrecommend.json", CodeSystem.class);
+		ourClient.update().resource(csBinderRecommended).execute();
+
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc03-vs-binderrecommend.json", ValueSet.class);
+		ourClient.update().resource(vsBinderRequired);
+
+		ValueSet vsYesNo = loadResource("/dstu3/fmc03-vs-fmcyesno.json", ValueSet.class);
+		ourClient.update().resource(vsYesNo).execute();
+
+		Questionnaire q = loadResource("/dstu3/fmc03-questionnaire.json", Questionnaire.class);
+		ourClient.update().resource(q).execute();
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc03-questionnaireresponse.json", QuestionnaireResponse.class);
+		IBaseOperationOutcome oo = ourClient.validate().resource(qr).execute().getOperationOutcome();
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info("Encoded:\n{}", encoded);
+	}
+
+	private String loadResource(String theFileName) throws IOException {
+		InputStream resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName);
+		if (resourceAsStream == null) {
+			resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName.substring(1));
+		}
+		return IOUtils.toString(resourceAsStream, Charsets.UTF_8);
+	}
+
+	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {
+		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
 	@AfterClass

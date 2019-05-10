@@ -153,7 +153,7 @@ public class FhirInstanceValidatorDstu3Test {
 					}
 				}
 				if (retVal == null) {
-					ourLog.info("fetchResource({}, {}) : {}", new Object[] {type, id, retVal});
+					ourLog.info("fetchResource({}, {}) : {}", type, id, retVal);
 				}
 				return retVal;
 			}
