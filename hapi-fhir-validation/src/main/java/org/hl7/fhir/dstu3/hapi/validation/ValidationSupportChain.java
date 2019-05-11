@@ -52,14 +52,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		for (IValidationSupport next : myChain) {
 			if (isNotBlank(theInclude.getSystem())) {
 				if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
-					return next.expandValueSet(theCtx, theInclude);
+					ValueSetExpansionComponent expansion = next.expandValueSet(theCtx, theInclude);
+					if (expansion != null) {
+						return expansion;
+					}
 				}
 			}
-			for (UriType nextValueSet : theInclude.getValueSet()) {
-				ValueSetExpansionComponent retVal = next.expandValueSet(theCtx, theInclude);
-				if (retVal != null && retVal.getContains().size() > 0) {
-					return retVal;
-				}
+			ValueSetExpansionComponent retVal = next.expandValueSet(theCtx, theInclude);
+			if (retVal != null && retVal.getContains().size() > 0) {
+				return retVal;
 			}
 		}
 		return myChain.get(0).expandValueSet(theCtx, theInclude);

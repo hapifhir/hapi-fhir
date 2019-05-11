@@ -51,7 +51,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
-				return next.expandValueSet(theCtx, theInclude);
+				ValueSetExpander.ValueSetExpansionOutcome expansion = next.expandValueSet(theCtx, theInclude);
+				if (expansion != null) {
+					return expansion;
+				}
 			}
 		}
 
