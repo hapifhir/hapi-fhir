@@ -56,6 +56,8 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseDstu3");
+		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu3");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu3");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);

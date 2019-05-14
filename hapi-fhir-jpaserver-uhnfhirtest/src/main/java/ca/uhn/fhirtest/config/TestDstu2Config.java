@@ -66,6 +66,8 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseDstu2");
+		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu2");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);

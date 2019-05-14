@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.rp.r4.*;
@@ -49,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -56,7 +59,7 @@ import static org.junit.Assert.*;
 public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderR4Test.class);
-	private static RestfulServer myRestServer;
+	private static RestfulServer ourRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
 	private static CloseableHttpClient ourHttpClient;
@@ -78,7 +81,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@Before
 	public void beforeStartServer() throws Exception {
-		if (myRestServer == null) {
+		if (ourRestServer == null) {
 			PatientResourceProvider patientRp = new PatientResourceProvider();
 			patientRp.setDao(myPatientDao);
 
@@ -135,19 +138,19 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.setLogRequestAndResponse(true);
-			myRestServer = restServer;
+			ourRestServer = restServer;
 		}
 
-		myRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		myRestServer.setPagingProvider(myPagingProvider);
+		ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+		ourRestServer.setPagingProvider(myPagingProvider);
 	}
 
 	@Test
 	public void testEverythingReturnsCorrectBundleType() throws Exception {
-		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
-		myRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
+		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
-		myRestServer.registerInterceptor(interceptor);
+		ourRestServer.registerInterceptor(interceptor);
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
@@ -171,15 +174,15 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			http.close();
 		}
 
-		myRestServer.unregisterInterceptor(interceptor);
+		ourRestServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
 	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
-		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
-		myRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
+		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
-		myRestServer.registerInterceptor(interceptor);
+		ourRestServer.registerInterceptor(interceptor);
 
 		for (int i = 0; i < 11; i++) {
 			Patient p = new Patient();
@@ -200,7 +203,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			http.close();
 		}
 
-		myRestServer.unregisterInterceptor(interceptor);
+		ourRestServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
@@ -249,7 +252,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testResponseUsesCorrectContentType() throws Exception {
-		myRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpGet get = new HttpGet(ourServerBase);
 //		get.addHeader("Accept", "application/xml, text/html");
@@ -716,7 +719,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		interceptor.addValidatorModule(val);
 		interceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);
 		interceptor.setAddResponseHeaderOnSeverity(ResultSeverityEnum.INFORMATION);
-		myRestServer.registerInterceptor(interceptor);
+		ourRestServer.registerInterceptor(interceptor);
 		try {
 
 			InputStream bundleRes = SystemProviderDstu2Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
@@ -741,9 +744,49 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 				IOUtils.closeQuietly(resp.getEntity().getContent());
 			}
 		} finally {
-			myRestServer.unregisterInterceptor(interceptor);
+			ourRestServer.unregisterInterceptor(interceptor);
 		}
 	}
+
+	@Test()
+	public void testEndpointInterceptorIsCalledForTransaction() {
+		// Just to get this out of the way
+		ourClient.forceConformanceCheck();
+
+		// Register an interceptor on the response
+		AtomicBoolean called = new AtomicBoolean(false);
+		Object interceptor = new Object() {
+			@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+			public void outgoing() {
+				called.set(true);
+			}
+		};
+		ourRestServer.getInterceptorService().registerInterceptor(interceptor);
+		try {
+
+			Patient p = new Patient();
+			p.addName().setFamily("Test");
+
+			Bundle b = new Bundle();
+			b.setType(Bundle.BundleType.TRANSACTION);
+			b.addEntry()
+				.setResource(p)
+				.setFullUrl("Patient")
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setUrl("Patient");
+
+			ourClient.transaction().withBundle(b).execute();
+
+			assertTrue(called.get());
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
+
+		}
+	}
+
+
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
