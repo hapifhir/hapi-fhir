@@ -3309,7 +3309,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
-				referred to by a contained reosurce. Thanks to Neal Acharya for reporting!
+				referred to by a contained resource. Thanks to Neal Acharya for reporting!
 			</action>
 			<action type="fix">
 				Fix regression in web testing UI where "prev" and "next" buttons don't work
