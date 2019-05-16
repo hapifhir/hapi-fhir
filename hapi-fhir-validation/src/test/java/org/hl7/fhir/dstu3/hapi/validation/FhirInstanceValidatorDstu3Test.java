@@ -1,21 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -23,48 +9,25 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.conformance.ProfileUtilities;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.BooleanType;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.CodeType;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.ContactPoint;
-import org.hl7.fhir.dstu3.model.DateTimeType;
 import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
-import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Goal;
-import org.hl7.fhir.dstu3.model.ImagingStudy;
-import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Period;
-import org.hl7.fhir.dstu3.model.Procedure;
-import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.dstu3.model.Reference;
-import org.hl7.fhir.dstu3.model.RelatedPerson;
-import org.hl7.fhir.dstu3.model.StringType;
-import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -73,14 +36,15 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FhirInstanceValidatorDstu3Test {
 
@@ -1086,6 +1050,189 @@ public class FhirInstanceValidatorDstu3Test {
 		assertEquals(1, outcome.size());
 		assertThat(outcome.toString(), containsString("value should not start or finish with whitespace"));
 
+	}
+
+	@Test
+	public void validateReferenceType_withNotSupportedContainedType() {
+		// Arrange
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		Communication communication = new Communication();
+		communication.setStatus(Communication.CommunicationStatus.COMPLETED);
+		communication.setDefinition(Arrays.asList(new Reference(patient)));
+
+		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator();
+		fhirInstanceValidator.setValidationSupport(new DefaultProfileValidationSupport());
+
+		FhirContext fhirContext = new FhirContext(FhirVersionEnum.DSTU3);
+		FhirValidator fhirValidator = fhirContext.newValidator();
+		fhirValidator.registerValidatorModule(fhirInstanceValidator);
+
+		// Act
+		ValidationResult validationResult = fhirValidator.validateWithResult(communication);
+
+		// Assert
+		assertEquals(1, validationResult.getMessages().size());
+	}
+
+	@Test
+	public void validateReferenceAggregationMode_Referenced_withContained() {
+		// Arrange
+		String differentialSubjectReferenced = "<StructureDefinition xmlns=\"http://hl7.org/fhir\">\n" +
+			"<url value=\"http://example.org/fhir/StructureDefinition/MyCommunication\"/>\n" +
+			"<name value=\"MyCommunication\"/>\n" +
+			"<status value=\"draft\"/>\n" +
+			"<fhirVersion value=\"3.0.1\"/>\n" +
+			"<kind value=\"resource\"/>\n" +
+			"<abstract value=\"false\"/>\n" +
+			"<type value=\"Communication\"/>\n" +
+			"<baseDefinition value=\"http://hl7.org/fhir/StructureDefinition/Communication\"/>\n" +
+			"<derivation value=\"constraint\"/>\n" +
+			" <differential>\n" +
+			" <element id=\"Communication.subject\">\n" +
+			"<path value=\"Communication.subject\"/>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Patient\"/>\n" +
+			"<aggregation value=\"referenced\"/>\n" +
+			"</type>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Group\"/>\n" +
+			"</type>\n" +
+			"</element>\n" +
+			"</differential>\n" +
+			"</StructureDefinition>";
+
+		Patient containedPatient = new Patient();
+		containedPatient.setActive(true);
+
+		Communication communication = new Communication();
+		communication.getMeta().addProfile("http://example.org/fhir/StructureDefinition/MyCommunication");
+		communication.setStatus(Communication.CommunicationStatus.COMPLETED);
+		communication.setSubject(new Reference(containedPatient));
+
+		FhirValidator fhirValidator = createFhirValidator(differentialSubjectReferenced);
+
+		// Act
+		ValidationResult validationResult = fhirValidator.validateWithResult(communication);
+
+		// Assert
+		assertEquals(1, validationResult.getMessages().size());
+	}
+
+	@Test
+	public void validateReferenceAggregationMode_Contained_withReference() {
+		// Arrange
+		String differentialSubjectReferenced = "<StructureDefinition xmlns=\"http://hl7.org/fhir\">\n" +
+			"<url value=\"http://example.org/fhir/StructureDefinition/MyCommunication\"/>\n" +
+			"<name value=\"MyCommunication\"/>\n" +
+			"<status value=\"draft\"/>\n" +
+			"<fhirVersion value=\"3.0.1\"/>\n" +
+			"<kind value=\"resource\"/>\n" +
+			"<abstract value=\"false\"/>\n" +
+			"<type value=\"Communication\"/>\n" +
+			"<baseDefinition value=\"http://hl7.org/fhir/StructureDefinition/Communication\"/>\n" +
+			"<derivation value=\"constraint\"/>\n" +
+			" <differential>\n" +
+			" <element id=\"Communication.subject\">\n" +
+			"<path value=\"Communication.subject\"/>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Patient\"/>\n" +
+			"<aggregation value=\"contained\"/>\n" +
+			"</type>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Group\"/>\n" +
+			"</type>\n" +
+			"</element>\n" +
+			"</differential>\n" +
+			"</StructureDefinition>";
+
+		Communication communication = new Communication();
+		communication.getMeta().addProfile("http://example.org/fhir/StructureDefinition/MyCommunication");
+		communication.setStatus(Communication.CommunicationStatus.COMPLETED);
+		communication.setSubject(new Reference("Patient/1234"));
+
+		FhirValidator fhirValidator = createFhirValidator(differentialSubjectReferenced);
+
+		// Act
+		ValidationResult validationResult = fhirValidator.validateWithResult(communication);
+
+		// Assert
+		assertEquals(1, validationResult.getMessages().size());
+	}
+
+	@Test
+	public void validateReferenceAggregationMode_ContainedOrReferenced_withContained() {
+		// Arrange
+		String differentialSubjectReferenced = "<StructureDefinition xmlns=\"http://hl7.org/fhir\">\n" +
+			"<url value=\"http://example.org/fhir/StructureDefinition/MyCommunication\"/>\n" +
+			"<name value=\"MyCommunication\"/>\n" +
+			"<status value=\"draft\"/>\n" +
+			"<fhirVersion value=\"3.0.1\"/>\n" +
+			"<kind value=\"resource\"/>\n" +
+			"<abstract value=\"false\"/>\n" +
+			"<type value=\"Communication\"/>\n" +
+			"<baseDefinition value=\"http://hl7.org/fhir/StructureDefinition/Communication\"/>\n" +
+			"<derivation value=\"constraint\"/>\n" +
+			" <differential>\n" +
+			" <element id=\"Communication.subject\">\n" +
+			"<path value=\"Communication.subject\"/>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Patient\"/>\n" +
+			"<aggregation value=\"contained\"/>\n" +
+			"<aggregation value=\"referenced\"/>\n" +
+			"</type>\n" +
+			" <type>\n" +
+			"<code value=\"Reference\"/>\n" +
+			"<targetProfile value=\"http://hl7.org/fhir/StructureDefinition/Group\"/>\n" +
+			"</type>\n" +
+			"</element>\n" +
+			"</differential>\n" +
+			"</StructureDefinition>";
+
+		Patient containedPatient = new Patient();
+		containedPatient.setActive(true);
+
+		Communication communication = new Communication();
+		communication.getMeta().addProfile("http://example.org/fhir/StructureDefinition/MyCommunication");
+		communication.setStatus(Communication.CommunicationStatus.COMPLETED);
+		communication.setSubject(new Reference(containedPatient));
+
+		FhirValidator fhirValidator = createFhirValidator(differentialSubjectReferenced);
+
+		// Act
+		ValidationResult validationResult = fhirValidator.validateWithResult(communication);
+
+		// Assert
+		assertTrue(validationResult.getMessages().isEmpty());
+	}
+
+	private FhirValidator createFhirValidator(String differentialActivityDefinitionReferenced) {
+		PrePopulatedValidationSupport customValidationSupport = new PrePopulatedValidationSupport();
+		customValidationSupport.addStructureDefinition(createSnapshot(ourCtx, differentialActivityDefinitionReferenced));
+
+		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator();
+		fhirInstanceValidator.setValidationSupport(new ValidationSupportChain(myDefaultValidationSupport, customValidationSupport));
+
+		FhirValidator fhirValidator = ourCtx.newValidator();
+		fhirValidator.registerValidatorModule(fhirInstanceValidator);
+		return fhirValidator;
+	}
+
+	private StructureDefinition createSnapshot(FhirContext fhirContext, String differential) {
+		StructureDefinition structureDefinition = fhirContext.newXmlParser().parseResource(StructureDefinition.class, differential);
+		StructureDefinition baseStructureDefinition = myDefaultValidationSupport.fetchStructureDefinition(fhirContext, structureDefinition.getBaseDefinition());
+
+		IWorkerContext workerContext = new HapiWorkerContext(fhirContext, myDefaultValidationSupport);
+		ProfileUtilities profileUtilities = new ProfileUtilities(workerContext, new ArrayList<>(), null);
+		profileUtilities.generateSnapshot(baseStructureDefinition, structureDefinition, "", "");
+
+		return structureDefinition;
 	}
 
 	@AfterClass
