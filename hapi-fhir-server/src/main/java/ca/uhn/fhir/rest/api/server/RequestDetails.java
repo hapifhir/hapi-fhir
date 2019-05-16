@@ -449,6 +449,7 @@ public abstract class RequestDetails {
 		DeferredOperationCallback deferredCallback = myDeferredInterceptorBroadcaster;
 		deferredCallback.playDeferredActions();
 		myInterceptorBroadcaster = deferredCallback.getWrap();
+		myDeferredInterceptorBroadcaster = null;
 	}
 
 

@@ -213,6 +213,10 @@
 				deleted (meaning that the operation is actually a create), the server will now return
 				an HTTP 201 instead of an HTTP 200. Thanks to Mario Hyland for reporting!
 			</action>
+			<action type="fix">
+				The HAPI FHIR CLI was unable to start a server in R4 mode in HAPI FHIR 3.7.0.
+				This has been corrected.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

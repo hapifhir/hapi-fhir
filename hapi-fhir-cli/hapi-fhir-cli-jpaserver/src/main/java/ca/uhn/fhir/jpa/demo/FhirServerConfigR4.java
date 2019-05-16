@@ -30,7 +30,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement()
-@Import(FhirDbConfig.class)
+@Import(CommonConfig.class)
 public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	@Autowired
@@ -38,19 +38,6 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 	@Autowired()
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
-
-	/**
-	 * Configure FHIR properties around the the JPA server via this bean
-	 */
-	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
-		retVal.setAllowMultipleDelete(true);
-		return retVal;
-	}
 
 	@Override
 	@Bean

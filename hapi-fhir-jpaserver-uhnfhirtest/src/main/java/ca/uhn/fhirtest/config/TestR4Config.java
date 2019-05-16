@@ -57,6 +57,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
+		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseR4");
+		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseR4");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseR4");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseR4");
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
