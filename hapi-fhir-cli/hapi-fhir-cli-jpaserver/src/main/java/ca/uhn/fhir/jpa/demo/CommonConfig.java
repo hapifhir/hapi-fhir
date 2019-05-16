@@ -2,9 +2,12 @@ package ca.uhn.fhir.jpa.demo;
 
 import java.util.Properties;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,7 +17,25 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("Duplicates")
 @Configuration
-public class FhirDbConfig {
+public class CommonConfig {
+
+	/**
+	 * Configure FHIR properties around the the JPA server via this bean
+	 */
+	@Bean
+	public DaoConfig daoConfig() {
+		DaoConfig retVal = new DaoConfig();
+		retVal.setSubscriptionEnabled(true);
+		retVal.setSubscriptionPollDelay(5000);
+		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setAllowMultipleDelete(true);
+		return retVal;
+	}
+
+	@Bean
+	public ModelConfig modelConfig() {
+		return daoConfig().getModelConfig();
+	}
 
 	/**
 	 * The following bean configures the database connection. The 'url' property value of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the server should save resources in a
