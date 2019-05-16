@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import com.google.common.annotations.VisibleForTesting;
@@ -47,9 +47,9 @@ public class SubscriptionInterceptorLoader {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
-	private ApplicationContext myAppicationContext;
+	private ApplicationContext myApplicationContext;
 	@Autowired
-	private IInterceptorRegistry myInterceptorRegistry;
+	private IInterceptorService myInterceptorRegistry;
 
 	public void registerInterceptors() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
@@ -69,7 +69,7 @@ public class SubscriptionInterceptorLoader {
 	private void loadSubscriptions() {
 		ourLog.info("Loading subscriptions into the SubscriptionRegistry...");
 		// Activate scheduled subscription loads into the SubscriptionRegistry
-		myAppicationContext.getBean(SubscriptionLoader.class);
+		myApplicationContext.getBean(SubscriptionLoader.class);
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
 	}
 
@@ -77,5 +77,6 @@ public class SubscriptionInterceptorLoader {
 	void unregisterInterceptorsForUnitTest() {
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
+		mySubscriptionMatcherInterceptor.preDestroy();
 	}
 }

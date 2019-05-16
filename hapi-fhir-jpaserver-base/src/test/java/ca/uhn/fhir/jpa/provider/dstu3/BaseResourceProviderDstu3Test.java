@@ -71,8 +71,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myDaoConfig.getInterceptors().clear();
 		myResourceCountsCache.clear();
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -90,7 +90,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourRestServer.setResourceProviders((List) myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 

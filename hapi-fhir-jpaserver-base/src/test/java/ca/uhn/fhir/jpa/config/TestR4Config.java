@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
-import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.context.annotation.Bean;
@@ -103,7 +102,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 //			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
@@ -136,7 +135,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
 		extraProperties.put("hibernate.search.model_mapping", ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
 

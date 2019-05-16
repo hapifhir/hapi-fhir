@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -98,18 +99,20 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		}
 		if (myResourceParameterIndex != -1) {
 			IBaseResource resource = ((IBaseResource) theParams[myResourceParameterIndex]);
-			String resourceId = resource.getIdElement().getIdPart();
-			String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
-			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
-				resource.setId(theRequest.getId());
-			}
+			if (resource != null) {
+				String resourceId = resource.getIdElement().getIdPart();
+				String urlId = theRequest.getId() != null ? theRequest.getId().getIdPart() : null;
+				if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) == false) {
+					resource.setId(theRequest.getId());
+				}
 
-			String matchUrl = null;
-			if (myConditionalUrlIndex != -1) {
-				matchUrl = (String) theParams[myConditionalUrlIndex];
-				matchUrl = defaultIfBlank(matchUrl, null);
+				String matchUrl = null;
+				if (myConditionalUrlIndex != -1) {
+					matchUrl = (String) theParams[myConditionalUrlIndex];
+					matchUrl = defaultIfBlank(matchUrl, null);
+				}
+				validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 			}
-			validateResourceIdAndUrlIdForNonConditionalOperation(resource, resourceId, urlId, matchUrl);
 		}
 	}
 

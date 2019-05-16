@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -35,12 +35,19 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component("myDaoRegistry")
 public class DaoRegistry implements ApplicationContextAware {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
 	private FhirContext myContext;
+
+	/**
+	 * Constructor
+	 */
+	public DaoRegistry() {
+		super();
+	}
+
 
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
@@ -70,6 +77,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
+	/**
+	 * @throws InvalidRequestException If the given resource type is not supported
+	 */
 	public IFhirResourceDao getResourceDao(String theResourceName) {
 		init();
 		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
@@ -92,7 +102,19 @@ public class DaoRegistry implements ApplicationContextAware {
 
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
 		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
-		return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
+	}
+
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(String theResourceType) {
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
 	}
 
 	private void init() {

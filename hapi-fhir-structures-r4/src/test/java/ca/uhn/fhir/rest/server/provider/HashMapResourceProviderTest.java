@@ -205,6 +205,7 @@ public class HashMapResourceProviderTest {
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
+			ourClient.registerInterceptor(new LoggingInterceptor(true));
 			IIdType id = ourClient.create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());

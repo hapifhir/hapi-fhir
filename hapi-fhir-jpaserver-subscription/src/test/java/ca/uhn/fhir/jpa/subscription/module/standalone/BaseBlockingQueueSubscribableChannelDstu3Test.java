@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.concurrency.IPointcutLatch;
+import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
-import ca.uhn.fhir.jpa.subscription.module.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
@@ -50,7 +51,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	@Autowired
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Autowired
-	IInterceptorRegistry myInterceptorRegistry;
+	IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
 
@@ -84,7 +85,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	@After
 	public void cleanup() {
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myInterceptorRegistry.unregisterAllInterceptors();
 		mySubscriptionMatchingPost.clear();
 		mySubscriptionActivatedPost.clear();
 		ourObservationListener.clear();
@@ -150,7 +151,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourListenerServer.stop();
 	}
 
-	public static class ObservationListener implements IResourceProvider {
+	public static class ObservationListener implements IResourceProvider, IPointcutLatch {
 
 		private PointcutLatch updateLatch = new PointcutLatch("Observation Update");
 
@@ -176,18 +177,17 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 			return new MethodOutcome(new IdType("Observation/1"), false);
 		}
 
-		public void setExpectedCount(int count) throws InterruptedException {
+		@Override
+		public void setExpectedCount(int count) {
 			updateLatch.setExpectedCount(count);
 		}
 
-		public void awaitExpected() throws InterruptedException {
-			updateLatch.awaitExpected();
+		@Override
+		public List<HookParams> awaitExpected() throws InterruptedException {
+			return updateLatch.awaitExpected();
 		}
 
-		public void expectNothing() {
-			updateLatch.expectNothing();
-		}
-
+		@Override
 		public void clear() { updateLatch.clear();}
 	}
 }

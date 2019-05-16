@@ -49,9 +49,9 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			for (IValidatorModule next : validators) {
 				ourValidatingInterceptor.addValidatorModule(next);
 			}
-			ourRestServer.registerInterceptor(ourValidatingInterceptor);
 		}
-		
+
+		ourRestServer.registerInterceptor(ourValidatingInterceptor);
 	}
 
 	

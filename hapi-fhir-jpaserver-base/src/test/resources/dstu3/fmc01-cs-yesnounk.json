@@ -1,0 +1,36 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "FMCYesNoUnk",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-04-17T12:50:19.996+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+	"identifier": {
+		"value": "FMCYesNoUnk"
+	},
+	"name": "FMCYesNoUnk",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "CodeSystem for  Yes or No or Unknown",
+	"hierarchyMeaning": "grouped-by",
+	"content": "complete",
+	"concept": [
+		{
+			"code": "Yes",
+			"display": "Yes"
+		},
+		{
+			"code": "No",
+			"display": "No"
+		},
+		{
+			"code": "UnKnown",
+			"display": "UnKnown"
+		},
+		{
+			"code": "Pending",
+			"display": "Pending"
+		}
+	]
+}

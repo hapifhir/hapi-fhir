@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
@@ -28,11 +28,11 @@ public abstract class BaseSubscriptionTest {
 
 	@Autowired
 	protected
-	IInterceptorRegistry myInterceptorRegistry;
+	IInterceptorService myInterceptorRegistry;
 
 	@After
 	public void afterClearAnonymousLambdas() {
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {

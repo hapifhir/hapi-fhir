@@ -30,7 +30,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement()
-@Import(FhirDbConfig.class)
+@Import(CommonConfig.class)
 public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	@Autowired
@@ -38,19 +38,6 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 	@Autowired()
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
-
-	/**
-	 * Configure FHIR properties around the the JPA server via this bean
-	 */
-	@Bean
-	public DaoConfig daoConfig() {
-		DaoConfig retVal = new DaoConfig();
-		retVal.setSubscriptionEnabled(true);
-		retVal.setSubscriptionPollDelay(5000);
-		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
-		retVal.setAllowMultipleDelete(true);
-		return retVal;
-	}
 
 	@Override
 	@Bean
@@ -64,8 +51,9 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
-	public IServerInterceptor loggingInterceptor() {
+	public LoggingInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -77,9 +65,10 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
+	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IServerInterceptor responseHighlighterInterceptor() {
+	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}

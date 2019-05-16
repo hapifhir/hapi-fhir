@@ -1,7 +1,7 @@
-
 package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
@@ -34,6 +34,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -50,14 +51,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private static String ourListenerServerBase;
 	private static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	private static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
-
-	@Autowired
-	private SubscriptionTestUtil mySubscriptionTestUtil;
 	private static NotificationServlet ourNotificationServlet;
 	private static String ourNotificationListenerServer;
 	private static CountDownLatch communicationRequestListenerLatch;
 	private static SubscriptionDebugLogInterceptor ourSubscriptionDebugLogInterceptor = new SubscriptionDebugLogInterceptor();
+	private List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
+	@Autowired
+	private SubscriptionTestUtil mySubscriptionTestUtil;
 
 	@After
 	public void afterUnregisterRestHookListener() {
@@ -81,8 +81,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@Before
 	public void beforeRegisterRestHookListener() {
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 		mySubscriptionTestUtil.registerRestHookInterceptor();
 		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 	}
 
 	@Before
@@ -509,39 +513,6 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
 	}
 
-	@BeforeClass
-	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
-		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
-
-		ObservationListener obsListener = new ObservationListener();
-		CommunicationRequestListener crListener = new CommunicationRequestListener();
-		ourListenerRestServer.setResourceProviders(obsListener, crListener);
-
-		ourListenerServer = new Server(ourListenerPort);
-		ourNotificationServlet = new NotificationServlet();
-
-		ServletContextHandler proxyHandler = new ServletContextHandler();
-		proxyHandler.setContextPath("/");
-
-		ServletHolder servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourListenerRestServer);
-		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
-		servletHolder = new ServletHolder();
-		servletHolder.setServlet(ourNotificationServlet);
-		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
-
-		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
-	}
-
-	@AfterClass
-	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
-	}
-
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
@@ -586,5 +557,48 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			communicationRequestListenerLatch.countDown();
 			return new MethodOutcome(new IdType("CommunicationRequest/1"), false);
 		}
+	}
+
+	public static void logAllInterceptors(IInterceptorService theInterceptorRegistry) {
+		List<Object> allInterceptors = theInterceptorRegistry.getAllRegisteredInterceptors();
+		String interceptorList = allInterceptors
+			.stream()
+			.map(t -> t.getClass().toString())
+			.sorted()
+			.collect(Collectors.joining("\n * "));
+		ourLog.info("Registered interceptors:\n * {}", interceptorList);
+	}
+
+	@BeforeClass
+	public static void startListenerServer() throws Exception {
+		ourListenerPort = PortUtil.findFreePort();
+		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
+
+		ObservationListener obsListener = new ObservationListener();
+		CommunicationRequestListener crListener = new CommunicationRequestListener();
+		ourListenerRestServer.setResourceProviders(obsListener, crListener);
+
+		ourListenerServer = new Server(ourListenerPort);
+		ourNotificationServlet = new NotificationServlet();
+
+		ServletContextHandler proxyHandler = new ServletContextHandler();
+		proxyHandler.setContextPath("/");
+
+		ServletHolder servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourListenerRestServer);
+		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
+		servletHolder = new ServletHolder();
+		servletHolder.setServlet(ourNotificationServlet);
+		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
+
+		ourListenerServer.setHandler(proxyHandler);
+		ourListenerServer.start();
+	}
+
+	@AfterClass
+	public static void stopListenerServer() throws Exception {
+		ourListenerServer.stop();
 	}
 }

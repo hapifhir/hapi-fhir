@@ -86,6 +86,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		return fetchResource(theCtx, ValueSet.class, theSystem);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
@@ -156,7 +161,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
+		return fetchCodeSystem(theCtx, theSystem) != null;
 	}
 
 	@Override

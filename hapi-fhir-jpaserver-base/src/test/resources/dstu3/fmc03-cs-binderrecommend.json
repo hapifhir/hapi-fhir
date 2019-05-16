@@ -1,0 +1,41 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "FMCBinderRecommendation",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-05-02T16:57:22.705+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/cs/FMCBinderRecommendation",
+	"identifier": {
+		"value": "FMCBinderRecommendation"
+	},
+	"name": "FMCBinderRecommendation",
+	"title": "Binder recommendation",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "CodeSystem for Binder recommendation.",
+	"hierarchyMeaning": "grouped-by",
+	"content": "complete",
+	"concept": [
+		{
+			"code": "Velphoro",
+			"display": "Velphoro"
+		},
+		{
+			"code": "Fosrenal",
+			"display": "Fosrenal"
+		},
+		{
+			"code": "Auryxia",
+			"display": "Auryxia"
+		},
+		{
+			"code": "Renvela",
+			"display": "Renvela"
+		},
+		{
+			"code": "Maintain current binder",
+			"display": "Maintain current binder"
+		}
+	]
+}

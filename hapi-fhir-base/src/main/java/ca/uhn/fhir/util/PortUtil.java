@@ -150,16 +150,6 @@ public class PortUtil {
 				int nextCandidatePort = myCurrentControlSocketPort + myCurrentOffset;
 
 				// Try to open a port on this socket and use it
-//				try (ServerSocket server = new ServerSocket()) {
-//					server.setReuseAddress(true);
-//					server.bind(new InetSocketAddress("localhost", nextCandidatePort));
-//					try (Socket client = new Socket()) {
-//						client.setReuseAddress(true);
-//						client.connect(new InetSocketAddress("localhost", nextCandidatePort));
-//					}
-//				} catch (IOException e) {
-//					continue;
-//				}
 				if (!isAvailable(nextCandidatePort)) {
 					continue;
 				}
@@ -172,27 +162,6 @@ public class PortUtil {
 					.orElse(stackTraceElements[2]);
 				ourLog.info("Returned available port {} for: {}", nextCandidatePort, previousElement.toString());
 
-//				/*
-//				 * This is an attempt to make sure the port is actually
-//				 * free before releasing it. For whatever reason on Linux
-//				 * it seems like even after we close the ServerSocket there
-//				 * is a short while where it is not possible to bind the
-//				 * port, even though it should be released by then.
-//				 *
-//				 * I don't have any solid evidence that this is a good
-//				 * way to do this, but it seems to help...
-//				 */
-//				for (int i = 0; i < 10; i++) {
-//					try (Socket client = new Socket()) {
-//						client.setReuseAddress(true);
-//						client.connect(new InetSocketAddress(nextCandidatePort), 1000);
-//						ourLog.info("Socket still seems open");
-//						Thread.sleep(250);
-//					} catch (Exception e) {
-//						break;
-//					}
-//				}
-//
 				try {
 					Thread.sleep(ourPortDelay);
 				} catch (InterruptedException theE) {
@@ -216,30 +185,37 @@ public class PortUtil {
 		}
 	}
 
-	private static boolean isAvailable(int port) {
-		ServerSocket ss = null;
-		DatagramSocket ds = null;
-		try {
-			ss = new ServerSocket(port);
+	/**
+	 * This method checks if we are able to bind a given port to both
+	 * 0.0.0.0 and localhost in order to be sure it's truly available.
+	 */
+	private static boolean isAvailable(int thePort) {
+		ourLog.info("Testing a bind on thePort {}", thePort);
+		try (ServerSocket ss = new ServerSocket()) {
 			ss.setReuseAddress(true);
-			ds = new DatagramSocket(port);
-			ds.setReuseAddress(true);
-			return true;
+			ss.bind(new InetSocketAddress("0.0.0.0", thePort));
+			try (DatagramSocket ds = new DatagramSocket()) {
+				ds.setReuseAddress(true);
+				ds.connect(new InetSocketAddress("127.0.0.1", thePort));
+				ourLog.info("Successfully bound thePort {}", thePort);
+			} catch (IOException e) {
+				ourLog.info("Failed to bind thePort {}: {}", thePort, e.toString());
+				return false;
+			}
 		} catch (IOException e) {
+			ourLog.info("Failed to bind thePort {}: {}", thePort, e.toString());
 			return false;
-		} finally {
-			if (ds != null) {
-				ds.close();
-			}
-
-			if (ss != null) {
-				try {
-					ss.close();
-				} catch (IOException e) {
-					/* should not be thrown */
-				}
-			}
 		}
+
+		try (ServerSocket ss = new ServerSocket()) {
+			ss.setReuseAddress(true);
+			ss.bind(new InetSocketAddress("localhost", thePort));
+		} catch (IOException e) {
+			ourLog.info("Failed to bind thePort {}: {}", thePort, e.toString());
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
