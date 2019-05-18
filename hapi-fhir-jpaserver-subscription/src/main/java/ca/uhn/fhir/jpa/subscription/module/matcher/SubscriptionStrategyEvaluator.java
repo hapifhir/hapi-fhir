@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.matcher.CriteriaResourceMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +32,7 @@ public class SubscriptionStrategyEvaluator {
 	private CriteriaResourceMatcher myCriteriaResourceMatcher;
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteria) {
-		SubscriptionMatchResult result = myCriteriaResourceMatcher.match(theCriteria, null, null);
+		InMemoryMatchResult result = myCriteriaResourceMatcher.match(theCriteria, null, null);
 		if (result.supported()) {
 			return SubscriptionMatchingStrategy.IN_MEMORY;
 		}

@@ -373,4 +373,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			.setId(id);
 	}
 
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
 }
