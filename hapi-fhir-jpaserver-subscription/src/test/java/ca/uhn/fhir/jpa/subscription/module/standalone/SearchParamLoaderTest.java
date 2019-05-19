@@ -11,7 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -35,6 +34,7 @@ public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelD
 
 	@Test
 	public void testSubscriptionLoaderFhirClientDown() {
+		// FIXME KHS use this to index?
 		String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();

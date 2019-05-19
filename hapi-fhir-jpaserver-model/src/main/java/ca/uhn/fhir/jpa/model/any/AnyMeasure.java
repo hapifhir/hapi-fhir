@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.model.any;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -122,7 +123,82 @@ public class AnyMeasure {
 		switch (myFhirVersion) {
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return measure.getRelatedArtifactFirstRep().getResource();
+				return getArtifactOfType(measure, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setPredecessor(String theReferenceId) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				org.hl7.fhir.dstu3.model.RelatedArtifact artifact = new org.hl7.fhir.dstu3.model.RelatedArtifact();
+				artifact.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+				artifact.setResource(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
+				measure.getRelatedArtifact().add(artifact);
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public IBaseReference getPredecessor() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				return getArtifactOfType(measure, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	private IBaseReference getArtifactOfType(org.hl7.fhir.dstu3.model.Measure theMeasure, RelatedArtifact.RelatedArtifactType theType) {
+		return theMeasure.getRelatedArtifact()
+			.stream()
+			.filter(artifact -> theType == artifact.getType())
+			.map(org.hl7.fhir.dstu3.model.RelatedArtifact::getResource)
+			.findFirst()
+			.get();
+	}
+
+	public void setPublisher(String thePublisher) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				measure.setPublisher(thePublisher);
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public String getPublisher() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				return measure.getPublisher();
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setName(String thePublisher) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				measure.setName(thePublisher);
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public String getName() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
+				return measure.getName();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}

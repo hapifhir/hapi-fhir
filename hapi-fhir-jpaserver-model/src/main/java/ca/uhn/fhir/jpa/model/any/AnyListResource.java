@@ -147,7 +147,7 @@ public class AnyListResource {
 				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
 				return listResource.getEntry().stream()
 					.map(entry -> entry.getItem().getReference())
-					.map(reference -> new org.hl7.fhir.dstu3.model.IdType(reference).getIdPart());
+					.map(reference -> new org.hl7.fhir.dstu3.model.IdType(reference).toUnqualifiedVersionless().getValue());
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
