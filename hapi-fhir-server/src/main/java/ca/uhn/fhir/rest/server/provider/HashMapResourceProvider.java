@@ -246,7 +246,9 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			if (next.isEmpty() == false) {
 				T nextResource = next.lastEntry().getValue();
-				retVal.add(nextResource);
+				if (nextResource != null) {
+					retVal.add(nextResource);
+				}
 			}
 		}
 
