@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,13 +53,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class XmlParser extends BaseParser /* implements IParser */ {
 
-	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
-	static final String FHIR_NS = "http://hl7.org/fhir";
-	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
-	static final String RESREF_DISPLAY = "display";
-	static final String RESREF_REFERENCE = "reference";
-	static final String TOMBSTONES_NS = "http://purl.org/atompub/tombstones/1.0";
-	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
+	//static final String ATOM_NS = "http://www.w3.org/2005/Atom";
+	private static final String FHIR_NS = "http://hl7.org/fhir";
+	//static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
+	//static final String RESREF_DISPLAY = "display";
+	//static final String RESREF_REFERENCE = "reference";
+	//static final String TOMBSTONES_NS = "http://purl.org/atompub/tombstones/1.0";
+	//static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 
 	// private static final Set<String> RESOURCE_NAMESPACES;
@@ -70,7 +70,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 	 * Do not use this constructor, the recommended way to obtain a new instance of the XML parser is to invoke
 	 * {@link FhirContext#newXmlParser()}.
 	 *
-	 * @param theParserErrorHandler
+	 * @param theParserErrorHandler the Parser Error Handler
 	 */
 	public XmlParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
@@ -96,11 +96,9 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 
 	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
 		if (myPrettyPrint) {
-			PrettyPrintWriterWrapper retVal = new PrettyPrintWriterWrapper(eventWriter);
-			return retVal;
+			return new PrettyPrintWriterWrapper(eventWriter);
 		}
-		NonPrettyPrintWriterWrapper retVal = new NonPrettyPrintWriterWrapper(eventWriter);
-		return retVal;
+		return new NonPrettyPrintWriterWrapper(eventWriter);
 	}
 
 	@Override
@@ -231,9 +229,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		try {
 
 			if (theElement == null || theElement.isEmpty()) {
-				if (isChildContained(childDef, theIncludedResource)) {
-					// We still want to go in..
-				} else {
+				if (!isChildContained(childDef, theIncludedResource)) {
 					return;
 				}
 			}
@@ -242,9 +238,10 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 
 			switch (childDef.getChildType()) {
 				case ID_DATATYPE: {
-					IIdType value = IIdType.class.cast(theElement);
+					IIdType value = (IIdType) theElement;
+					assert value != null;
 					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
-					if (StringUtils.isNotBlank(encodedValue) || !super.hasNoExtensions(value)) {
+					if (StringUtils.isNotBlank(encodedValue) || hasNoExtensions(value)) {
 						theEventWriter.writeStartElement(theChildName);
 						if (StringUtils.isNotBlank(encodedValue)) {
 							theEventWriter.writeAttribute("value", encodedValue);
@@ -255,9 +252,10 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					break;
 				}
 				case PRIMITIVE_DATATYPE: {
-					IPrimitiveType<?> pd = IPrimitiveType.class.cast(theElement);
+					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
+					assert pd != null;
 					String value = pd.getValueAsString();
-					if (value != null || !super.hasNoExtensions(pd)) {
+					if (value != null || hasNoExtensions(pd)) {
 						theEventWriter.writeStartElement(theChildName);
 						String elementId = getCompositeElementId(theElement);
 						if (isNotBlank(elementId)) {
@@ -308,20 +306,23 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					}
 					theEventWriter.writeStartElement(theChildName);
 					theEncodeContext.pushPath(resourceName, true);
+					assert resource != null;
 					encodeResourceToXmlStreamWriter(resource, theEventWriter, false, theEncodeContext);
 					theEncodeContext.popPath();
 					theEventWriter.writeEndElement();
 					break;
 				}
 				case PRIMITIVE_XHTML: {
-					XhtmlDt dt = XhtmlDt.class.cast(theElement);
+					XhtmlDt dt = (XhtmlDt) theElement;
+					assert dt != null;
 					if (dt.hasContent()) {
 						encodeXhtml(dt, theEventWriter);
 					}
 					break;
 				}
 				case PRIMITIVE_XHTML_HL7ORG: {
-					IBaseXhtml dt = IBaseXhtml.class.cast(theElement);
+					IBaseXhtml dt = (IBaseXhtml) theElement;
+					assert dt != null;
 					if (!dt.isEmpty()) {
 						// TODO: this is probably not as efficient as it could be
 						XhtmlDt hdt = new XhtmlDt();
@@ -370,10 +371,10 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					narr = null;
 				}
 				// FIXME potential null access on narr see line 623
-				if (gen != null && narr.isEmpty()) {
+				if (gen != null && narr != null && narr.isEmpty()) {
 					gen.populateResourceNarrative(myContext, theResource);
 				}
-				if (narr != null && narr.isEmpty() == false) {
+				if (narr != null && !narr.isEmpty()) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
@@ -406,7 +407,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
 					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
 
-					if (extensionUrl != null && childName.equals("extension") == false) {
+					if (extensionUrl != null && !childName.equals("extension")) {
 						encodeExtension(theResource, theEventWriter, theContainedResource, nextChildElem, nextChild, nextValue, childName, extensionUrl, childDef, theEncodeContext);
 					} else if (nextChild instanceof RuntimeChildExtension) {
 						IBaseExtension<?, ?> extension = (IBaseExtension<?, ?>) nextValue;
@@ -416,12 +417,9 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 							}
 						}
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem, theEncodeContext);
-					} else if (nextChild instanceof RuntimeChildNarrativeDefinition && theContainedResource) {
-						// suppress narratives from contained resources
-					} else {
+					} else if (!(nextChild instanceof RuntimeChildNarrativeDefinition) || !theContainedResource) {
 						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
 					}
-
 				}
 			}
 		}
@@ -473,7 +471,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		}
 
 		if (!theIncludedResource) {
-			if (super.shouldEncodeResourceId(theResource, theEncodeContext) == false) {
+			if (!super.shouldEncodeResourceId(theResource, theEncodeContext)) {
 				resourceId = null;
 			} else if (theEncodeContext.getResourcePath().size() == 1 && getEncodeForceResourceId() != null) {
 				resourceId = getEncodeForceResourceId();
@@ -537,7 +535,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 
 			TagList tags = getMetaTagsForEncoding((resource), theEncodeContext);
 
-			if (super.shouldEncodeResourceMeta(resource) && ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles) == false) {
+			if (super.shouldEncodeResourceMeta(resource) && !ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles)) {
 				theEventWriter.writeStartElement("meta");
 				if (shouldEncodePath(resource, "meta.versionId")) {
 					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
@@ -635,7 +633,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-
 	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
 		if (theDt == null || theDt.getValue() == null) {
 			return;
@@ -644,6 +641,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		List<XMLEvent> events = XmlUtil.parse(theDt.getValue());
 		boolean firstElement = true;
 
+		assert events != null;
 		for (XMLEvent event : events) {
 			switch (event.getEventType()) {
 				case XMLStreamConstants.ATTRIBUTE:
@@ -753,7 +751,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 	 * rejected by the compiler some of the time.
 	 */
 	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
-		List<IBaseExtension<?, ?>> retVal = new ArrayList<IBaseExtension<?, ?>>(theList.size());
+		List<IBaseExtension<?, ?>> retVal = new ArrayList<>(theList.size());
 		retVal.addAll(theList);
 		return retVal;
 	}
