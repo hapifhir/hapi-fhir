@@ -239,7 +239,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 			switch (childDef.getChildType()) {
 				case ID_DATATYPE: {
 					IIdType value = (IIdType) theElement;
-					assert value != null;
 					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
 					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
 						theEventWriter.writeStartElement(theChildName);
@@ -253,7 +252,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 				}
 				case PRIMITIVE_DATATYPE: {
 					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
-					assert pd != null;
 					String value = pd.getValueAsString();
 					if (value != null || !hasNoExtensions(pd)) {
 						theEventWriter.writeStartElement(theChildName);
@@ -306,7 +304,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					}
 					theEventWriter.writeStartElement(theChildName);
 					theEncodeContext.pushPath(resourceName, true);
-					assert resource != null;
 					encodeResourceToXmlStreamWriter(resource, theEventWriter, false, theEncodeContext);
 					theEncodeContext.popPath();
 					theEventWriter.writeEndElement();
@@ -314,7 +311,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 				}
 				case PRIMITIVE_XHTML: {
 					XhtmlDt dt = (XhtmlDt) theElement;
-					assert dt != null;
 					if (dt.hasContent()) {
 						encodeXhtml(dt, theEventWriter);
 					}
@@ -322,7 +318,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 				}
 				case PRIMITIVE_XHTML_HL7ORG: {
 					IBaseXhtml dt = (IBaseXhtml) theElement;
-					assert dt != null;
 					if (!dt.isEmpty()) {
 						// TODO: this is probably not as efficient as it could be
 						XhtmlDt hdt = new XhtmlDt();
@@ -371,7 +366,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					narr = null;
 				}
 				// FIXME potential null access on narr see line 623
-				if (gen != null && narr != null && narr.isEmpty()) {
+				if (gen != null && narr.isEmpty()) {
 					gen.populateResourceNarrative(myContext, theResource);
 				}
 				if (narr != null && !narr.isEmpty()) {
@@ -641,7 +636,6 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		List<XMLEvent> events = XmlUtil.parse(theDt.getValue());
 		boolean firstElement = true;
 
-		assert events != null;
 		for (XMLEvent event : events) {
 			switch (event.getEventType()) {
 				case XMLStreamConstants.ATTRIBUTE:

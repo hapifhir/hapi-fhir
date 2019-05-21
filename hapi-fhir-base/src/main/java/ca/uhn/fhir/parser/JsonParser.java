@@ -917,12 +917,10 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				continue;
 			} else if ("extension".equals(nextName)) {
 				JsonLikeArray array = grabJsonArray(theObject, nextName, "extension");
-				assert array != null;
 				parseExtension(theState, array, false);
 				continue;
 			} else if ("modifierExtension".equals(nextName)) {
 				JsonLikeArray array = grabJsonArray(theObject, nextName, "modifierExtension");
-				assert array != null;
 				parseExtension(theState, array, true);
 				continue;
 			} else if (nextName.equals("fhir_comments")) {
@@ -1046,7 +1044,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 		for (int i = 0; i < theValues.size(); i++) {
 			JsonLikeObject nextExtObj = JsonLikeValue.asObject(theValues.get(i));
-			assert nextExtObj != null;
 			JsonLikeValue jsonElement = nextExtObj.get("url");
 			String url;
 			if (null == jsonElement || !(jsonElement.isScalar())) {
@@ -1067,11 +1064,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					continue;
 				} else if ("extension".equals(next)) {
 					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
-					assert jsonVal != null;
 					parseExtension(theState, jsonVal, false);
 				} else if ("modifierExtension".equals(next)) {
 					JsonLikeArray jsonVal = JsonLikeValue.asArray(nextExtObj.get(next));
-					assert jsonVal != null;
 					parseExtension(theState, jsonVal, true);
 				} else if (next.charAt(0) == '_') {
 					allUnderscoreNames++;
