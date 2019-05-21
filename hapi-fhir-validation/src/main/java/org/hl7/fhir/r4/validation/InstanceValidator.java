@@ -1731,9 +1731,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
                 for (Enumeration<AggregationMode> mode : type.getAggregation()) {
                   if (mode.getValue().equals(AggregationMode.CONTAINED) && refType.equals("contained"))
 							modeOk = true;
-                  else if (mode.getValue().equals(AggregationMode.BUNDLED) && refType.equals("bundled"))
+                  else if (mode.getValue().equals(AggregationMode.BUNDLED) && refType.equals("bundle"))
 							modeOk = true;
-                  else if (mode.getValue().equals(AggregationMode.REFERENCED) && (refType.equals("bundled")||refType.equals("remote")))
+                  else if (mode.getValue().equals(AggregationMode.REFERENCED) && (refType.equals("bundle")||refType.equals("remote")))
 							modeOk = true;
                 }
                 rule(errors, IssueType.STRUCTURE, element.line(), element.col(), path, modeOk, "Reference is " + refType + " which isn't supported by the specified aggregation mode(s) for the reference");
