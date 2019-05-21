@@ -241,7 +241,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					IIdType value = (IIdType) theElement;
 					assert value != null;
 					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
-					if (StringUtils.isNotBlank(encodedValue) || hasNoExtensions(value)) {
+					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
 						theEventWriter.writeStartElement(theChildName);
 						if (StringUtils.isNotBlank(encodedValue)) {
 							theEventWriter.writeAttribute("value", encodedValue);
@@ -255,7 +255,7 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
 					assert pd != null;
 					String value = pd.getValueAsString();
-					if (value != null || hasNoExtensions(pd)) {
+					if (value != null || !hasNoExtensions(pd)) {
 						theEventWriter.writeStartElement(theChildName);
 						String elementId = getCompositeElementId(theElement);
 						if (isNotBlank(elementId)) {

@@ -1503,20 +1503,20 @@ public abstract class BaseParser implements IParser {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
 			if (res.getUndeclaredExtensions().size() > 0 || res.getUndeclaredModifierExtensions().size() > 0) {
-				return true;
+				return false;
 			}
 		}
 		if (theElement instanceof IBaseHasExtensions) {
 			IBaseHasExtensions res = (IBaseHasExtensions) theElement;
 			if (res.hasExtension()) {
-				return true;
+				return false;
 			}
 		}
 		if (theElement instanceof IBaseHasModifierExtensions) {
 			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
-			return res.hasModifierExtension();
+			return !res.hasModifierExtension();
 		}
-		return false;
+		return true;
 	}
 
 }
