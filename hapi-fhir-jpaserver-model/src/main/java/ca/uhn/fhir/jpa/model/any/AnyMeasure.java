@@ -183,11 +183,11 @@ public class AnyMeasure {
 		}
 	}
 
-	public void setName(String thePublisher) {
+	public void setName(String theName) {
 		switch (myFhirVersion) {
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				measure.setName(thePublisher);
+				measure.setName(theName);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
