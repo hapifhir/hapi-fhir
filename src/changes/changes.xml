@@ -217,6 +217,10 @@
 				The HAPI FHIR CLI was unable to start a server in R4 mode in HAPI FHIR 3.7.0.
 				This has been corrected.
 			</action>
+			<action type="fix" issue="1311">
+				When encoding resources, profile declarations on contained resources will now be 
+				preserved. Thanks to Anders Havn for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
