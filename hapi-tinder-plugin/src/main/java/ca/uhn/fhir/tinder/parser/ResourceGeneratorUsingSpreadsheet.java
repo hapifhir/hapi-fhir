@@ -20,6 +20,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		super.setFilenameSuffix("");
 	}
 
+	@Override
 	public List<String> getInputStreamNames() {
 		return myInputStreamNames;
 	}

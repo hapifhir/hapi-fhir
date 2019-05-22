@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -81,6 +82,53 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
 
 	}
+
+	@Test
+	public void testDeleteCodeSystemComplete2() {
+		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+
+		String input = "{\n" +
+			"    \"resourceType\": \"CodeSystem\",\n" +
+			"    \"id\": \"CDRTestCodeSystem\",\n" +
+			"    \"url\": \"http://fkcfhir.org/fhir/cs/CDRTestCodeSystem\",\n" +
+			"    \"identifier\": {\n" +
+			"        \"value\": \"CDRTestCodeSystem\"\n" +
+			"    },\n" +
+			"    \"name\": \"CDRTestCodeSystem\",\n" +
+			"    \"status\": \"retired\",\n" +
+			"    \"publisher\": \"FMCNA\",\n" +
+			"    \"description\": \"Smile CDR Test Code System \",\n" +
+			"    \"hierarchyMeaning\": \"grouped-by\",\n" +
+			"    \"content\": \"complete\",\n" +
+			"    \"concept\": [\n" +
+			"        {\n" +
+			"            \"code\": \"IHD\",\n" +
+			"            \"display\": \"IHD\"\n" +
+			"        },\n" +
+			"        {\n" +
+			"            \"code\": \"HHD\",\n" +
+			"            \"display\": \"HHD\"\n" +
+			"        }\n" +
+			"    ]\n" +
+			"}";
+
+		// Create the code system
+		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
+		ourClient.update().resource(cs).execute();
+		runInTransaction(()->{
+			assertEquals(26, myConceptDao.count());
+		});
+
+		// Delete the code system
+		ourClient.delete().resource(cs).execute();
+		runInTransaction(()->{
+			assertEquals(24L, myConceptDao.count());
+		});
+
+	}
+
+
+
 
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {

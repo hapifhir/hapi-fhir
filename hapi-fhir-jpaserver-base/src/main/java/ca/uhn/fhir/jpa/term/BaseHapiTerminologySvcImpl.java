@@ -281,7 +281,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myCodeSystemDao.flush();
 
 		int i = 0;
-		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
+		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+		for (TermCodeSystemVersion next : codeSystemVersions) {
 			deleteCodeSystemVersion(next.getPid());
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
@@ -1105,7 +1106,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid);
 
 		/*
 		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
