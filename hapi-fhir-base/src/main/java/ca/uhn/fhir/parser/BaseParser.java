@@ -181,7 +181,6 @@ public abstract class BaseParser implements IParser {
 									myNext = null;
 								}
 							}
-
 						} while (myNext == null);
 
 						myHasNext = true;
