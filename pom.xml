@@ -510,6 +510,9 @@
 			<id>basecade</id>
 			<name>Anders Havn</name>
 		</developer>
+		<developer>
+			<id>zaewonyx</id>
+		</developer>
 	</developers>
 
 	<licenses>
