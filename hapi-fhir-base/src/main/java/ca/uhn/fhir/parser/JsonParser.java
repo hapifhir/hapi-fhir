@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -66,7 +66,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	 * Do not use this constructor, the recommended way to obtain a new instance of the JSON parser is to invoke
 	 * {@link FhirContext#newJsonParser()}.
 	 *
-	 * @param theParserErrorHandler the IParserErrorHandler
+	 * @param theParserErrorHandler the Parser Error Handler
 	 */
 	public JsonParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
@@ -466,7 +466,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					} else if (!(nextChild instanceof RuntimeChildNarrativeDefinition) || !theContainedResource) {
 						encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, nextChildSpecificName, theContainedResource, nextChildElem, false, theEncodeContext);
 					}
-
 					currentChildName = nextChildSpecificName;
 				} else {
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, nextValue, childDef, null, theContainedResource, nextChildElem, force, theEncodeContext);
@@ -984,8 +983,9 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private void parseChildren(ParserState<?> theState, String theName, JsonLikeValue theJsonVal, JsonLikeValue theAlternateVal, String theAlternateName, boolean theInArray) {
 		if (theName.equals("id")) {
-			if (!theJsonVal.isString())
+			if (!theJsonVal.isString()) {
 				getErrorHandler().incorrectJsonType(null, "id", ValueType.SCALAR, ScalarType.STRING, theJsonVal.getJsonType(), theJsonVal.getDataType());
+			}
 		}
 
 		if (theJsonVal.isArray()) {
@@ -1351,7 +1351,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				extractUndeclaredExtensions(theValue, extensions, modifierExtensions, myParent, null);
 				// Declared extensions
 				extractDeclaredExtensions(theValue, def, extensions, modifierExtensions, myParent);
-
 				boolean haveContent = false;
 				if (!extensions.isEmpty() || !modifierExtensions.isEmpty()) {
 					haveContent = true;

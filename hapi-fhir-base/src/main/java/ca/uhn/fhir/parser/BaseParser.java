@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,8 +47,6 @@ public abstract class BaseParser implements IParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
 
-	private static final Set<String> notEncodeForContainedResource = new HashSet<>(Arrays.asList("security", "versionId", "lastUpdated"));
-
 	private ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
 	private FhirContext myContext;
@@ -65,6 +63,7 @@ public abstract class BaseParser implements IParser {
 	private boolean mySummaryMode;
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
+
 	/*
 	 * Constructor
 	 */
@@ -167,7 +166,7 @@ public abstract class BaseParser implements IParser {
 							 */
 							if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
-							} else if (!myNext.shouldBeEncoded(theContainedResource)) {
+							} else if (!myNext.shouldBeEncoded()) {
 								myNext = null;
 							} else if (isSummaryMode() && !myNext.getDef().isSummary()) {
 								myNext = null;
@@ -182,6 +181,7 @@ public abstract class BaseParser implements IParser {
 									myNext = null;
 								}
 							}
+
 						} while (myNext == null);
 
 						myHasNext = true;
@@ -682,7 +682,7 @@ public abstract class BaseParser implements IParser {
 			if (entries != null) {
 				for (IBase nextEntry : entries) {
 
-					/**
+					/*
 					 * If Bundle.entry.fullUrl is populated, set the resource ID to that
 					 */
 					// TODO: should emit a warning and maybe notify the error handler if the resource ID doesn't match the
@@ -1160,16 +1160,13 @@ public abstract class BaseParser implements IParser {
 			return myParent;
 		}
 
-		public boolean shouldBeEncoded(boolean theContainedResource) {
+		public boolean shouldBeEncoded() {
 			boolean retVal = true;
 			if (myEncodeElements != null) {
 				retVal = checkIfParentShouldBeEncodedAndBuildPath();
 			}
 			if (retVal && myDontEncodeElements != null) {
 				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath();
-			}
-			if (theContainedResource) {
-				retVal = !notEncodeForContainedResource.contains(myDef.getElementName());
 			}
 
 			return retVal;
@@ -1245,7 +1242,6 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-
 	/**
 	 * EncodeContext is a shared state object that is passed around the
 	 * encode process
@@ -1268,7 +1264,6 @@ public abstract class BaseParser implements IParser {
 			}
 			return retVal;
 		}
-
 
 		/**
 		 * Add an element at the end of the path
@@ -1295,7 +1290,6 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-
 	}
 
 	protected class EncodeContextPathElement {
@@ -1307,7 +1301,6 @@ public abstract class BaseParser implements IParser {
 			myName = theName;
 			myResource = theResource;
 		}
-
 
 		public boolean matches(EncodeContextPathElement theOther) {
 			if (myResource != theOther.isResource()) {
