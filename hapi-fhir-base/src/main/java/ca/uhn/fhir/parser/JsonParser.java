@@ -1456,7 +1456,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				if (childDef == null) {
 					throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 				}
-				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, true, myParent,false, theEncodeContext);
+				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent,false, theEncodeContext);
 				managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext);
 			}
 
