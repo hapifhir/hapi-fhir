@@ -427,18 +427,21 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				boolean force = false;
 				if (primitive) {
 					if (nextValue instanceof ISupportsUndeclaredExtensions) {
-						List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
-						force = addToHeldExtensions(valueIdx, ext, modifierExtensions, true, nextChildElem, theParent);
+						List<ExtensionDt> ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredExtensions();
+						force |= addToHeldExtensions(valueIdx, ext, extensions, false, nextChildElem, theParent);
+
+						ext = ((ISupportsUndeclaredExtensions) nextValue).getUndeclaredModifierExtensions();
+						force |= addToHeldExtensions(valueIdx, ext, modifierExtensions, true, nextChildElem, theParent);
 					} else {
 						if (nextValue instanceof IBaseHasExtensions) {
 							IBaseHasExtensions element = (IBaseHasExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getExtension();
-							force = addToHeldExtensions(valueIdx, ext, extensions, false, nextChildElem, theParent);
+							force |= addToHeldExtensions(valueIdx, ext, extensions, false, nextChildElem, theParent);
 						}
 						if (nextValue instanceof IBaseHasModifierExtensions) {
 							IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
-							force = force | addToHeldExtensions(valueIdx, ext, extensions, true, nextChildElem, theParent);
+							force |= addToHeldExtensions(valueIdx, ext, extensions, true, nextChildElem, theParent);
 						}
 					}
 					if (nextValue.hasFormatComment()) {

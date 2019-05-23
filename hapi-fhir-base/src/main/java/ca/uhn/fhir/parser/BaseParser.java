@@ -76,11 +76,11 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setDontEncodeElements(Set<String> notEncodedElements) {
-		if (notEncodedElements == null || notEncodedElements.isEmpty()) {
+	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
+		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
 			myDontEncodeElements = null;
 		} else {
-			myDontEncodeElements = notEncodedElements
+			myDontEncodeElements = theDontEncodeElements
 				.stream()
 				.map(ElementsPath::new)
 				.collect(Collectors.toList());
@@ -92,12 +92,13 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setEncodeElements(Set<String> encodedElements) {
-		if (encodedElements == null || encodedElements.isEmpty()) {
+	public void setEncodeElements(Set<String> theEncodeElements) {
+
+		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
 			myEncodeElements = null;
 			myEncodeElementsAppliesToResourceTypes = null;
 		} else {
-			myEncodeElements = encodedElements
+			myEncodeElements = theEncodeElements
 				.stream()
 				.map(ElementsPath::new)
 				.collect(Collectors.toList());
