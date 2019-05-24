@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-public class SearchParamR4Config {
+public class SearchParamR4Config extends BaseSeachParamConfig {
 	@Bean
 	@Primary
 	public FhirContext fhirContextR4() {

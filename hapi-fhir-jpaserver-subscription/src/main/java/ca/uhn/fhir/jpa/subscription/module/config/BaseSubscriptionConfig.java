@@ -30,7 +30,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
+@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.subscription.module"})
 public abstract class BaseSubscriptionConfig {
 	@Bean
 	public ISubscribableChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
