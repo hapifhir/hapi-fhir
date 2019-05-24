@@ -86,7 +86,7 @@ public class JpaServerDemo extends RestfulServer {
 		} else {
 			throw new IllegalStateException();
 		}
-		registerProvider(systemProvider);
+		registerProviders(systemProvider);
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for
