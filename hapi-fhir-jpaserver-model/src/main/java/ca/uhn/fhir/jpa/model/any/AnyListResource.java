@@ -96,8 +96,7 @@ public class AnyListResource {
 	public void addStringExtension(String theUrl, String theValue) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				listResource.addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
+				getDstu3().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -107,8 +106,7 @@ public class AnyListResource {
 	public String getStringExtensionValueOrNull(String theUrl) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = listResource.getExtensionsByUrl(theUrl);
+				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
 				if (targetTypes.size() < 1) {
 					return null;
 				}
@@ -122,8 +120,7 @@ public class AnyListResource {
 	public void addReference(IBaseReference theReference) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				listResource.addEntry().setItem((org.hl7.fhir.dstu3.model.Reference) theReference);
+				getDstu3().addEntry().setItem((org.hl7.fhir.dstu3.model.Reference) theReference);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -133,8 +130,7 @@ public class AnyListResource {
 	public void addReference(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				listResource.addEntry().setItem(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
+				getDstu3().addEntry().setItem(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -144,8 +140,7 @@ public class AnyListResource {
 	public Stream<String> getReferenceStream() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				return listResource.getEntry().stream()
+				return getDstu3().getEntry().stream()
 					.map(entry -> entry.getItem().getReference())
 					.map(reference -> new org.hl7.fhir.dstu3.model.IdType(reference).toUnqualifiedVersionless().getValue());
 			default:
@@ -156,11 +151,9 @@ public class AnyListResource {
 	public boolean removeItem(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				List<org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent> entries = listResource.getEntry();
 
 				boolean removed = false;
-				for (org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent entry : entries) {
+				for (org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent entry : getDstu3().getEntry()) {
 					if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
 						entry.setDeleted(true);
 						removed = true;
@@ -169,7 +162,7 @@ public class AnyListResource {
 				}
 
 				if (removed) {
-					listResource.getEntry().removeIf(entry -> entry.getDeleted());
+					getDstu3().getEntry().removeIf(entry -> entry.getDeleted());
 				}
 				return removed;
 			default:
@@ -180,8 +173,7 @@ public class AnyListResource {
 	public boolean isEmpty() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.ListResource listResource = getDstu3();
-				return listResource.getEntry().isEmpty();
+				return getDstu3().getEntry().isEmpty();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}

@@ -70,8 +70,7 @@ public class AnyComposition {
 	public String getIdentifier() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Composition composition = getDstu3();
-				return composition.getIdentifier().getValue();
+				return getDstu3().getIdentifier().getValue();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -92,8 +91,7 @@ public class AnyComposition {
 	public void addStringExtension(String theUrl, String theValue) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Composition composition = getDstu3();
-				composition.addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
+				getDstu3().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -103,8 +101,7 @@ public class AnyComposition {
 	public String getStringExtensionValueOrNull(String theUrl) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Composition composition = getDstu3();
-				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = composition.getExtensionsByUrl(theUrl);
+				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
 				if (targetTypes.size() < 1) {
 					return null;
 				}
@@ -128,8 +125,7 @@ public class AnyComposition {
 	public void setTitle(String theTitle) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Composition composition = getDstu3();
-				composition.setTitle(theTitle);
+				getDstu3().setTitle(theTitle);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -139,8 +135,7 @@ public class AnyComposition {
 	public String getTitle() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Composition composition = getDstu3();
-				return composition.getTitle();
+				return getDstu3().getTitle();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}

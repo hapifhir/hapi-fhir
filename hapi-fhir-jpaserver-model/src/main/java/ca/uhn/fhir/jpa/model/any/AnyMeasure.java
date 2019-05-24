@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.model.any;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu3.model.RelatedArtifact;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -72,8 +72,7 @@ public class AnyMeasure {
 	public void addStringExtension(String theUrl, String theValue) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				measure.addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
+				getDstu3().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -83,8 +82,7 @@ public class AnyMeasure {
 	public String getStringExtensionValueOrNull(String theUrl) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = measure.getExtensionsByUrl(theUrl);
+				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
 				if (targetTypes.size() < 1) {
 					return null;
 				}
@@ -98,8 +96,7 @@ public class AnyMeasure {
 	public String getIdentifierFirstRep() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return measure.getIdentifierFirstRep().getValue();
+				return getDstu3().getIdentifierFirstRep().getValue();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -108,11 +105,10 @@ public class AnyMeasure {
 	public void setComposedOf(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
 				org.hl7.fhir.dstu3.model.RelatedArtifact artifact = new org.hl7.fhir.dstu3.model.RelatedArtifact();
 				artifact.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
 				artifact.setResource(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
-				measure.getRelatedArtifact().add(artifact);
+				getDstu3().getRelatedArtifact().add(artifact);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -122,8 +118,7 @@ public class AnyMeasure {
 	public IBaseReference getComposedOf() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return getArtifactOfType(measure, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
+				return getArtifactOfType(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.COMPOSEDOF);
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -132,11 +127,10 @@ public class AnyMeasure {
 	public void setPredecessor(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
 				org.hl7.fhir.dstu3.model.RelatedArtifact artifact = new org.hl7.fhir.dstu3.model.RelatedArtifact();
 				artifact.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
 				artifact.setResource(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
-				measure.getRelatedArtifact().add(artifact);
+				getDstu3().getRelatedArtifact().add(artifact);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -146,14 +140,13 @@ public class AnyMeasure {
 	public IBaseReference getPredecessor() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return getArtifactOfType(measure, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+				return getArtifactOfType(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
 	}
 
-	private IBaseReference getArtifactOfType(org.hl7.fhir.dstu3.model.Measure theMeasure, RelatedArtifact.RelatedArtifactType theType) {
+	private IBaseReference getArtifactOfType(org.hl7.fhir.dstu3.model.Measure theMeasure, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType theType) {
 		return theMeasure.getRelatedArtifact()
 			.stream()
 			.filter(artifact -> theType == artifact.getType())
@@ -165,8 +158,7 @@ public class AnyMeasure {
 	public void setPublisher(String thePublisher) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				measure.setPublisher(thePublisher);
+				getDstu3().setPublisher(thePublisher);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -176,8 +168,7 @@ public class AnyMeasure {
 	public String getPublisher() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return measure.getPublisher();
+				return getDstu3().getPublisher();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -186,8 +177,7 @@ public class AnyMeasure {
 	public void setName(String theName) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				measure.setName(theName);
+				getDstu3().setName(theName);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -197,8 +187,27 @@ public class AnyMeasure {
 	public String getName() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.Measure measure = getDstu3();
-				return measure.getName();
+				return getDstu3().getName();
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setTopic(TokenParam theTokenParam) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				getDstu3().addTopic().addCoding().setSystem(theTokenParam.getSystem()).setCode(theTokenParam.getValue());
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public TokenParam getTopic() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Coding coding = getDstu3().getTopicFirstRep().getCodingFirstRep();
+				return new TokenParam(coding.getSystem(), coding.getCode());
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
