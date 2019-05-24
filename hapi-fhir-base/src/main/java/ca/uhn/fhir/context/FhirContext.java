@@ -628,6 +628,23 @@ public class FhirContext {
 	}
 
 	/**
+	 * Create and return a new RDF parser.
+	 *
+	 * <p>
+	 * Thread safety: <b>Parsers are not guaranteed to be thread safe</b>. Create a new parser instance for every thread
+	 * or every message being parsed/encoded.
+	 * </p>
+	 * <p>
+	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
+	 * without incurring any performance penalty
+	 * </p>
+	 */
+	public IParser newRDFParser() {
+		return new RDFParser(this, myParserErrorHandler);
+	}
+
+
+	/**
 	 * Instantiates a new client instance. This method requires an interface which is defined specifically for your use
 	 * cases to contain methods for each of the RESTful operations you wish to implement (e.g. "read ImagingStudy",
 	 * "search Patient by identifier", etc.). This interface must extend {@link IRestfulClient} (or commonly its

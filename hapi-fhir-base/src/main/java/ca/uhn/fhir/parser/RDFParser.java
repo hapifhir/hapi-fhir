@@ -1,0 +1,777 @@
+package ca.uhn.fhir.parser;
+
+/*-
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2019 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.base.composite.BaseCodingDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.model.primitive.XhtmlDt;
+import ca.uhn.fhir.narrative.INarrativeGenerator;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.NonPrettyPrintWriterWrapper;
+import ca.uhn.fhir.util.PrettyPrintWriterWrapper;
+import ca.uhn.fhir.util.RDFUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.*;
+//import org.apache.jena.rdf.model.*;
+//import org.apache.jena.util.FileManager;
+
+import javax.xml.namespace.QName;
+import javax.xml.stream.*;
+import javax.xml.stream.events.*;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+/**
+ * This class is the FHIR RDF parser/encoder. Users should not interact with this class directly, but should use
+ * {@link FhirContext#newRDFParser()} to get an instance.
+ */
+public class RDFParser extends BaseParser /* implements IParser */ {
+
+	private static final String FHIR_NS = "http://hl7.org/fhir";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RDFParser.class);
+
+	// private static final Set<String> RESOURCE_NAMESPACES;
+	private FhirContext myContext;
+	private boolean myPrettyPrint;
+
+	/**
+	 * Do not use this constructor, the recommended way to obtain a new instance of the RDF parser is to invoke
+	 * {@link FhirContext#newRDFParser()}.
+	 *
+	 * @param theParserErrorHandler the Parser Error Handler
+	 */
+	public RDFParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
+		super(theContext, theParserErrorHandler);
+		myContext = theContext;
+	}
+
+	private XMLEventReader createStreamReader(Reader theReader) {
+		try {
+			return RDFUtil.createXmlReader(theReader);
+		} catch (FactoryConfigurationError e1) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e1);
+		} catch (XMLStreamException e1) {
+			throw new DataFormatException(e1);
+		}
+	}
+
+	private XMLStreamWriter createRDFWriter(Writer theWriter) throws XMLStreamException {
+		XMLStreamWriter eventWriter;
+		eventWriter = RDFUtil.createXmlStreamWriter(theWriter);
+		eventWriter = decorateStreamWriter(eventWriter);
+		return eventWriter;
+	}
+
+	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
+		if (myPrettyPrint) {
+			return new PrettyPrintWriterWrapper(eventWriter);
+		}
+		return new NonPrettyPrintWriterWrapper(eventWriter);
+	}
+
+	@Override
+	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws DataFormatException {
+		XMLStreamWriter eventWriter;
+		try {
+			eventWriter = createRDFWriter(theWriter);
+
+			encodeResourceToRDFStreamWriter(theResource, eventWriter, false, theEncodeContext);
+			eventWriter.flush();
+		} catch (XMLStreamException e) {
+			throw new ConfigurationException("Failed to initialize STaX event factory", e);
+		}
+	}
+
+	@Override
+	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
+		XMLEventReader streamReader = createStreamReader(theReader);
+		return parseResource(theResourceType, streamReader);
+	}
+
+	private <T> T doRDFLoop(XMLEventReader streamReader, ParserState<T> parserState) {
+		ourLog.trace("Entering RDF parsing loop with state: {}", parserState);
+
+		try {
+			List<String> heldComments = new ArrayList<>(1);
+
+			while (streamReader.hasNext()) {
+				XMLEvent nextEvent = streamReader.nextEvent();
+				try {
+
+					switch (nextEvent.getEventType()) {
+						case XMLStreamConstants.START_ELEMENT: {
+							StartElement elem = nextEvent.asStartElement();
+
+							String namespaceURI = elem.getName().getNamespaceURI();
+
+							if ("extension".equals(elem.getName().getLocalPart())) {
+								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+								String url;
+								if (urlAttr == null || isBlank(urlAttr.getValue())) {
+									getErrorHandler().missingRequiredElement(new ParseLocation().setParentElementName("extension"), "url");
+									url = null;
+								} else {
+									url = urlAttr.getValue();
+								}
+								parserState.enteringNewElementExtension(elem, url, false, getServerBaseUrl());
+							} else if ("modifierExtension".equals(elem.getName().getLocalPart())) {
+								Attribute urlAttr = elem.getAttributeByName(new QName("url"));
+								String url;
+								if (urlAttr == null || isBlank(urlAttr.getValue())) {
+									getErrorHandler().missingRequiredElement(new ParseLocation().setParentElementName("modifierExtension"), "url");
+									url = null;
+								} else {
+									url = urlAttr.getValue();
+								}
+								parserState.enteringNewElementExtension(elem, url, true, getServerBaseUrl());
+							} else {
+								String elementName = elem.getName().getLocalPart();
+								parserState.enteringNewElement(namespaceURI, elementName);
+							}
+
+							if (!heldComments.isEmpty()) {
+								for (String next : heldComments) {
+									parserState.commentPre(next);
+								}
+								heldComments.clear();
+							}
+
+							for (Iterator<Attribute> attributes = elem.getAttributes(); attributes.hasNext(); ) {
+								Attribute next = attributes.next();
+								parserState.attributeValue(next.getName().getLocalPart(), next.getValue());
+							}
+
+							break;
+						}
+						case XMLStreamConstants.END_DOCUMENT:
+						case XMLStreamConstants.END_ELEMENT: {
+							if (!heldComments.isEmpty()) {
+								for (String next : heldComments) {
+									parserState.commentPost(next);
+								}
+								heldComments.clear();
+							}
+							parserState.endingElement();
+//						if (parserState.isComplete()) {
+//							return parserState.getObject();
+//						}
+							break;
+						}
+						case XMLStreamConstants.CHARACTERS: {
+							parserState.string(nextEvent.asCharacters().getData());
+							break;
+						}
+						case XMLStreamConstants.COMMENT: {
+							Comment comment = (Comment) nextEvent;
+							String commentText = comment.getText();
+							heldComments.add(commentText);
+							break;
+						}
+					}
+
+					parserState.xmlEvent(nextEvent);
+
+				} catch (DataFormatException e) {
+					throw new DataFormatException("DataFormatException at [" + nextEvent.getLocation().toString() + "]: " + e.getMessage(), e);
+				}
+			}
+			return parserState.getObject();
+		} catch (XMLStreamException e) {
+			throw new DataFormatException(e);
+		}
+	}
+
+	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, BaseRuntimeChildDefinition theChildDefinition, IBase theElement, String theChildName, BaseRuntimeElementDefinition<?> childDef,
+																 String theExtensionUrl, boolean theIncludedResource, CompositeChildElement theParent, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+
+		/*
+		 * Often the two values below will be the same thing. There are cases though
+		 * where they will not be. An example would be Observation.value, which is
+		 * a choice type. If the value contains a Quantity, then:
+		 * childGenericName = "value"
+		 * theChildName = "valueQuantity"
+		 */
+		String childGenericName = theChildDefinition.getElementName();
+
+		theEncodeContext.pushPath(childGenericName, false);
+		try {
+
+			if (theElement == null || theElement.isEmpty()) {
+				if (!isChildContained(childDef, theIncludedResource)) {
+					return;
+				}
+			}
+
+			writeCommentsPre(theEventWriter, theElement);
+
+			switch (childDef.getChildType()) {
+				case ID_DATATYPE: {
+					IIdType value = (IIdType) theElement;
+					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
+					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
+						theEventWriter.writeStartElement(theChildName);
+						if (StringUtils.isNotBlank(encodedValue)) {
+							theEventWriter.writeAttribute("value", encodedValue);
+						}
+						encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource, theEncodeContext);
+						theEventWriter.writeEndElement();
+					}
+					break;
+				}
+				case PRIMITIVE_DATATYPE: {
+					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
+					String value = pd.getValueAsString();
+					if (value != null || !hasNoExtensions(pd)) {
+						theEventWriter.writeStartElement(theChildName);
+						String elementId = getCompositeElementId(theElement);
+						if (isNotBlank(elementId)) {
+							theEventWriter.writeAttribute("id", elementId);
+						}
+						if (value != null) {
+							theEventWriter.writeAttribute("value", value);
+						}
+						encodeExtensionsIfPresent(theResource, theEventWriter, theElement, theIncludedResource, theEncodeContext);
+						theEventWriter.writeEndElement();
+					}
+					break;
+				}
+				case RESOURCE_BLOCK:
+				case COMPOSITE_DATATYPE: {
+					theEventWriter.writeStartElement(theChildName);
+					String elementId = getCompositeElementId(theElement);
+					if (isNotBlank(elementId)) {
+						theEventWriter.writeAttribute("id", elementId);
+					}
+					if (isNotBlank(theExtensionUrl)) {
+						theEventWriter.writeAttribute("url", theExtensionUrl);
+					}
+					encodeCompositeElementToStreamWriter(theResource, theElement, theEventWriter, theIncludedResource, theParent, theEncodeContext);
+					theEventWriter.writeEndElement();
+					break;
+				}
+				case CONTAINED_RESOURCE_LIST:
+				case CONTAINED_RESOURCES: {
+					/*
+					 * Disable per #103 for (IResource next : value.getContainedResources()) { if (getContainedResources().getResourceId(next) != null) { continue; }
+					 * theEventWriter.writeStartElement("contained"); encodeResourceToRDFStreamWriter(next, theEventWriter, true, fixContainedResourceId(next.getId().getValue()));
+					 * theEventWriter.writeEndElement(); }
+					 */
+					for (IBaseResource next : getContainedResources().getContainedResources()) {
+						IIdType resourceId = getContainedResources().getResourceId(next);
+						theEventWriter.writeStartElement("contained");
+						encodeResourceToRDFStreamWriter(next, theEventWriter, true, fixContainedResourceId(resourceId.getValue()), theEncodeContext);
+						theEventWriter.writeEndElement();
+					}
+					break;
+				}
+				case RESOURCE: {
+					IBaseResource resource = (IBaseResource) theElement;
+					String resourceName = myContext.getResourceDefinition(resource).getName();
+					if (!super.shouldEncodeResource(resourceName)) {
+						break;
+					}
+					theEventWriter.writeStartElement(theChildName);
+					theEncodeContext.pushPath(resourceName, true);
+					encodeResourceToRDFStreamWriter(resource, theEventWriter, false, theEncodeContext);
+					theEncodeContext.popPath();
+					theEventWriter.writeEndElement();
+					break;
+				}
+				case PRIMITIVE_XHTML: {
+					XhtmlDt dt = (XhtmlDt) theElement;
+					if (dt.hasContent()) {
+						encodeXhtml(dt, theEventWriter);
+					}
+					break;
+				}
+				case PRIMITIVE_XHTML_HL7ORG: {
+					IBaseXhtml dt = (IBaseXhtml) theElement;
+					if (!dt.isEmpty()) {
+						// TODO: this is probably not as efficient as it could be
+						XhtmlDt hdt = new XhtmlDt();
+						hdt.setValueAsString(dt.getValueAsString());
+						encodeXhtml(hdt, theEventWriter);
+					}
+					break;
+				}
+				case EXTENSION_DECLARED:
+				case UNDECL_EXT: {
+					throw new IllegalStateException("state should not happen: " + childDef.getName());
+				}
+			}
+
+			writeCommentsPost(theEventWriter, theElement);
+
+		} finally {
+			theEncodeContext.popPath();
+		}
+
+	}
+
+	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent, EncodeContext theEncodeContext)
+		throws XMLStreamException, DataFormatException {
+
+		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theElement, theContainedResource, theParent, theEncodeContext)) {
+
+			BaseRuntimeChildDefinition nextChild = nextChildElem.getDef();
+
+			if (nextChild.getElementName().equals("url") && theElement instanceof IBaseExtension) {
+				/*
+				 * RDF encoding is a one-off for extensions. The URL element goes in an attribute
+				 * instead of being encoded as a normal element, only for RDF encoding
+				 */
+				continue;
+			}
+
+			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
+				INarrativeGenerator gen = myContext.getNarrativeGenerator();
+				INarrative narr;
+				if (theResource instanceof IResource) {
+					narr = ((IResource) theResource).getText();
+				} else if (theResource instanceof IDomainResource) {
+					narr = ((IDomainResource) theResource).getText();
+				} else {
+					narr = null;
+				}
+				// FIXME potential null access on narr see line 623
+				if (gen != null && narr.isEmpty()) {
+					gen.populateResourceNarrative(myContext, theResource);
+				}
+				if (narr != null && !narr.isEmpty()) {
+					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
+					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
+					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr, childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
+					continue;
+				}
+			}
+
+			if (nextChild instanceof RuntimeChildContainedResources) {
+				encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null, theContainedResource, nextChildElem, theEncodeContext);
+			} else {
+
+				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
+				values = super.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+
+				if (values == null || values.isEmpty()) {
+					continue;
+				}
+				for (IBase nextValue : values) {
+					if ((nextValue == null || nextValue.isEmpty())) {
+						continue;
+					}
+
+					ChildNameAndDef childNameAndDef = super.getChildNameAndDef(nextChild, nextValue);
+					if (childNameAndDef == null) {
+						continue;
+					}
+
+					String childName = childNameAndDef.getChildName();
+					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
+					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
+
+					if (extensionUrl != null && !childName.equals("extension")) {
+						encodeExtension(theResource, theEventWriter, theContainedResource, nextChildElem, nextChild, nextValue, childName, extensionUrl, childDef, theEncodeContext);
+					} else if (nextChild instanceof RuntimeChildExtension) {
+						IBaseExtension<?, ?> extension = (IBaseExtension<?, ?>) nextValue;
+						if ((extension.getValue() == null || extension.getValue().isEmpty())) {
+							if (extension.getExtension().isEmpty()) {
+								continue;
+							}
+						}
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem, theEncodeContext);
+					} else if (!(nextChild instanceof RuntimeChildNarrativeDefinition) || !theContainedResource) {
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
+					}
+				}
+			}
+		}
+	}
+
+	private void encodeExtension(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement nextChildElem, BaseRuntimeChildDefinition nextChild, IBase nextValue, String childName, String extensionUrl, BaseRuntimeElementDefinition<?> childDef, EncodeContext theEncodeContext)
+		throws XMLStreamException {
+		BaseRuntimeDeclaredChildDefinition extDef = (BaseRuntimeDeclaredChildDefinition) nextChild;
+		if (extDef.isModifier()) {
+			theEventWriter.writeStartElement("modifierExtension");
+		} else {
+			theEventWriter.writeStartElement("extension");
+		}
+
+		String elementId = getCompositeElementId(nextValue);
+		if (isNotBlank(elementId)) {
+			theEventWriter.writeAttribute("id", elementId);
+		}
+
+		theEventWriter.writeAttribute("url", extensionUrl);
+		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, null, theContainedResource, nextChildElem, theEncodeContext);
+		theEventWriter.writeEndElement();
+	}
+
+	private void encodeExtensionsIfPresent(IBaseResource theResource, XMLStreamWriter theWriter, IBase theElement, boolean theIncludedResource, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+		if (theElement instanceof ISupportsUndeclaredExtensions) {
+			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
+			encodeUndeclaredExtensions(theResource, theWriter, toBaseExtensionList(res.getUndeclaredExtensions()), "extension", theIncludedResource, theEncodeContext);
+			encodeUndeclaredExtensions(theResource, theWriter, toBaseExtensionList(res.getUndeclaredModifierExtensions()), "modifierExtension", theIncludedResource, theEncodeContext);
+		}
+		if (theElement instanceof IBaseHasExtensions) {
+			IBaseHasExtensions res = (IBaseHasExtensions) theElement;
+			encodeUndeclaredExtensions(theResource, theWriter, res.getExtension(), "extension", theIncludedResource, theEncodeContext);
+		}
+		if (theElement instanceof IBaseHasModifierExtensions) {
+			IBaseHasModifierExtensions res = (IBaseHasModifierExtensions) theElement;
+			encodeUndeclaredExtensions(theResource, theWriter, res.getModifierExtension(), "modifierExtension", theIncludedResource, theEncodeContext);
+		}
+	}
+
+	private void encodeResourceToRDFStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+		IIdType resourceId = null;
+
+		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
+			resourceId = theResource.getIdElement();
+			if (theResource.getIdElement().getValue().startsWith("urn:")) {
+				resourceId = null;
+			}
+		}
+
+		if (!theIncludedResource) {
+			if (!super.shouldEncodeResourceId(theResource, theEncodeContext)) {
+				resourceId = null;
+			} else if (theEncodeContext.getResourcePath().size() == 1 && getEncodeForceResourceId() != null) {
+				resourceId = getEncodeForceResourceId();
+			}
+		}
+
+		encodeResourceToRDFStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId, theEncodeContext);
+	}
+
+	private void encodeResourceToRDFStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, IIdType theResourceId, EncodeContext theEncodeContext) throws XMLStreamException {
+		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
+		if (resDef == null) {
+			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
+		}
+
+		if (!theContainedResource) {
+			super.containResourcesForEncoding(theResource);
+		}
+
+		theEventWriter.writeStartElement(resDef.getName());
+		theEventWriter.writeDefaultNamespace(FHIR_NS);
+
+		if (theResource instanceof IAnyResource) {
+			// HL7.org Structures
+			if (theResourceId != null) {
+				writeCommentsPre(theEventWriter, theResourceId);
+				theEventWriter.writeStartElement("id");
+				theEventWriter.writeAttribute("value", theResourceId.getIdPart());
+				encodeExtensionsIfPresent(theResource, theEventWriter, theResourceId, false, theEncodeContext);
+				theEventWriter.writeEndElement();
+				writeCommentsPost(theEventWriter, theResourceId);
+			}
+
+			encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, theContainedResource, new CompositeChildElement(resDef, theEncodeContext), theEncodeContext);
+
+		} else {
+
+			// DSTU2+
+
+			IResource resource = (IResource) theResource;
+			if (theResourceId != null) {
+          /*	writeCommentsPre(theEventWriter, theResourceId);
+              writeOptionalTagWithValue(theEventWriter, "id", theResourceId.getIdPart());
+					    writeCommentsPost(theEventWriter, theResourceId);*/
+				theEventWriter.writeStartElement("id");
+				theEventWriter.writeAttribute("value", theResourceId.getIdPart());
+				encodeExtensionsIfPresent(theResource, theEventWriter, theResourceId, false, theEncodeContext);
+				theEventWriter.writeEndElement();
+				writeCommentsPost(theEventWriter, theResourceId);
+			}
+
+			InstantDt updated = (InstantDt) resource.getResourceMetadata().get(ResourceMetadataKeyEnum.UPDATED);
+			IdDt resourceId = resource.getId();
+			String versionIdPart = resourceId.getVersionIdPart();
+			if (isBlank(versionIdPart)) {
+				versionIdPart = ResourceMetadataKeyEnum.VERSION.get(resource);
+			}
+			List<BaseCodingDt> securityLabels = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.SECURITY_LABELS);
+			List<? extends IIdType> profiles = extractMetadataListNotNull(resource, ResourceMetadataKeyEnum.PROFILES);
+			profiles = super.getProfileTagsForEncoding(resource, profiles);
+
+			TagList tags = getMetaTagsForEncoding((resource), theEncodeContext);
+
+			if (super.shouldEncodeResourceMeta(resource) && !ElementUtil.isEmpty(versionIdPart, updated, securityLabels, tags, profiles)) {
+				theEventWriter.writeStartElement("meta");
+				if (shouldEncodePath(resource, "meta.versionId")) {
+					writeOptionalTagWithValue(theEventWriter, "versionId", versionIdPart);
+				}
+				if (updated != null) {
+					if (shouldEncodePath(resource, "meta.lastUpdated")) {
+						writeOptionalTagWithValue(theEventWriter, "lastUpdated", updated.getValueAsString());
+					}
+				}
+
+				for (IIdType profile : profiles) {
+					theEventWriter.writeStartElement("profile");
+					theEventWriter.writeAttribute("value", profile.getValue());
+					theEventWriter.writeEndElement();
+				}
+				for (BaseCodingDt securityLabel : securityLabels) {
+					theEventWriter.writeStartElement("security");
+					encodeCompositeElementToStreamWriter(resource, securityLabel, theEventWriter, theContainedResource, null, theEncodeContext);
+					theEventWriter.writeEndElement();
+				}
+				if (tags != null) {
+					for (Tag tag : tags) {
+						if (tag.isEmpty()) {
+							continue;
+						}
+						theEventWriter.writeStartElement("tag");
+						writeOptionalTagWithValue(theEventWriter, "system", tag.getScheme());
+						writeOptionalTagWithValue(theEventWriter, "code", tag.getTerm());
+						writeOptionalTagWithValue(theEventWriter, "display", tag.getLabel());
+						theEventWriter.writeEndElement();
+					}
+				}
+				theEventWriter.writeEndElement();
+			}
+
+			if (theResource instanceof IBaseBinary) {
+				IBaseBinary bin = (IBaseBinary) theResource;
+				writeOptionalTagWithValue(theEventWriter, "contentType", bin.getContentType());
+				writeOptionalTagWithValue(theEventWriter, "content", bin.getContentAsBase64());
+			} else {
+				encodeCompositeElementToStreamWriter(theResource, theResource, theEventWriter, theContainedResource, new CompositeChildElement(resDef, theEncodeContext), theEncodeContext);
+			}
+
+		}
+
+		theEventWriter.writeEndElement();
+	}
+
+	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theEventWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource, EncodeContext theEncodeContext)
+		throws XMLStreamException, DataFormatException {
+		for (IBaseExtension<?, ?> next : theExtensions) {
+			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
+				continue;
+			}
+
+			writeCommentsPre(theEventWriter, next);
+
+			theEventWriter.writeStartElement(tagName);
+
+			String elementId = getCompositeElementId(next);
+			if (isNotBlank(elementId)) {
+				theEventWriter.writeAttribute("id", elementId);
+			}
+
+			String url = getExtensionUrl(next.getUrl());
+			theEventWriter.writeAttribute("url", url);
+
+			if (next.getValue() != null) {
+				IBaseDatatype value = next.getValue();
+				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+				String childName = extDef.getChildNameByDatatype(value.getClass());
+				BaseRuntimeElementDefinition<?> childDef;
+				if (childName == null) {
+					childDef = myContext.getElementDefinition(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					}
+					childName = RuntimeChildUndeclaredExtensionDefinition.createExtensionChildName(childDef);
+				} else {
+					childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					}
+				}
+				encodeChildElementToStreamWriter(theResource, theEventWriter, extDef, value, childName, childDef, null, theIncludedResource, null, theEncodeContext);
+			}
+
+			// child extensions
+			encodeExtensionsIfPresent(theResource, theEventWriter, next, theIncludedResource, theEncodeContext);
+
+			theEventWriter.writeEndElement();
+
+			writeCommentsPost(theEventWriter, next);
+
+		}
+	}
+
+	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
+		if (theDt == null || theDt.getValue() == null) {
+			return;
+		}
+
+		List<XMLEvent> events = RDFUtil.parse(theDt.getValue());
+		boolean firstElement = true;
+
+		for (XMLEvent event : events) {
+			switch (event.getEventType()) {
+				case XMLStreamConstants.ATTRIBUTE:
+					Attribute attr = (Attribute) event;
+					if (isBlank(attr.getName().getPrefix())) {
+						if (isBlank(attr.getName().getNamespaceURI())) {
+							theEventWriter.writeAttribute(attr.getName().getLocalPart(), attr.getValue());
+						} else {
+							theEventWriter.writeAttribute(attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
+						}
+					} else {
+						theEventWriter.writeAttribute(attr.getName().getPrefix(), attr.getName().getNamespaceURI(), attr.getName().getLocalPart(), attr.getValue());
+					}
+
+					break;
+				case XMLStreamConstants.CDATA:
+					theEventWriter.writeCData(((Characters) event).getData());
+					break;
+				case XMLStreamConstants.CHARACTERS:
+				case XMLStreamConstants.SPACE:
+					String data = ((Characters) event).getData();
+					theEventWriter.writeCharacters(data);
+					break;
+				case XMLStreamConstants.COMMENT:
+					theEventWriter.writeComment(((Comment) event).getText());
+					break;
+				case XMLStreamConstants.END_ELEMENT:
+					theEventWriter.writeEndElement();
+					break;
+				case XMLStreamConstants.ENTITY_REFERENCE:
+					EntityReference er = (EntityReference) event;
+					theEventWriter.writeEntityRef(er.getName());
+					break;
+				case XMLStreamConstants.NAMESPACE:
+					Namespace ns = (Namespace) event;
+					theEventWriter.writeNamespace(ns.getPrefix(), ns.getNamespaceURI());
+					break;
+				case XMLStreamConstants.START_ELEMENT:
+					StartElement se = event.asStartElement();
+					if (firstElement) {
+						if (StringUtils.isBlank(se.getName().getPrefix())) {
+							String namespaceURI = se.getName().getNamespaceURI();
+							if (StringUtils.isBlank(namespaceURI)) {
+								namespaceURI = "http://www.w3.org/1999/xhtml";
+							}
+							theEventWriter.writeStartElement(se.getName().getLocalPart());
+							theEventWriter.writeDefaultNamespace(namespaceURI);
+						} else {
+							String prefix = se.getName().getPrefix();
+							String namespaceURI = se.getName().getNamespaceURI();
+							theEventWriter.writeStartElement(prefix, se.getName().getLocalPart(), namespaceURI);
+							theEventWriter.writeNamespace(prefix, namespaceURI);
+						}
+						firstElement = false;
+					} else {
+						if (isBlank(se.getName().getPrefix())) {
+							if (isBlank(se.getName().getNamespaceURI())) {
+								theEventWriter.writeStartElement(se.getName().getLocalPart());
+							} else {
+								if (StringUtils.isBlank(se.getName().getPrefix())) {
+									theEventWriter.writeStartElement(se.getName().getLocalPart());
+									// theEventWriter.writeDefaultNamespace(se.getName().getNamespaceURI());
+								} else {
+									theEventWriter.writeStartElement(se.getName().getNamespaceURI(), se.getName().getLocalPart());
+								}
+							}
+						} else {
+							theEventWriter.writeStartElement(se.getName().getPrefix(), se.getName().getLocalPart(), se.getName().getNamespaceURI());
+						}
+						for (Iterator<?> attrIter = se.getAttributes(); attrIter.hasNext(); ) {
+							Attribute next = (Attribute) attrIter.next();
+							theEventWriter.writeAttribute(next.getName().getLocalPart(), next.getValue());
+						}
+					}
+					break;
+				case XMLStreamConstants.DTD:
+				case XMLStreamConstants.END_DOCUMENT:
+				case XMLStreamConstants.ENTITY_DECLARATION:
+				case XMLStreamConstants.NOTATION_DECLARATION:
+				case XMLStreamConstants.PROCESSING_INSTRUCTION:
+				case XMLStreamConstants.START_DOCUMENT:
+					break;
+			}
+
+		}
+	}
+
+	@Override
+	public EncodingEnum getEncoding() {
+		return EncodingEnum.XML;
+	}
+
+	private <T extends IBaseResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
+		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType, myContext, false, getErrorHandler());
+		return doRDFLoop(theStreamReader, parserState);
+	}
+
+	@Override
+	public IParser setPrettyPrint(boolean thePrettyPrint) {
+		myPrettyPrint = thePrettyPrint;
+		return this;
+	}
+
+	/**
+	 * This is just to work around the fact that casting java.util.List<ca.uhn.fhir.model.api.ExtensionDt> to
+	 * java.util.List<? extends org.hl7.fhir.instance.model.api.IBaseExtension<?, ?>> seems to be
+	 * rejected by the compiler some of the time.
+	 */
+	private <Q extends IBaseExtension<?, ?>> List<IBaseExtension<?, ?>> toBaseExtensionList(final List<Q> theList) {
+		List<IBaseExtension<?, ?>> retVal = new ArrayList<>(theList.size());
+		retVal.addAll(theList);
+		return retVal;
+	}
+
+	private void writeCommentsPost(XMLStreamWriter theEventWriter, IBase theElement) throws XMLStreamException {
+		if (theElement != null && theElement.hasFormatComment()) {
+			for (String next : theElement.getFormatCommentsPost()) {
+				if (isNotBlank(next)) {
+					theEventWriter.writeComment(next);
+				}
+			}
+		}
+	}
+
+	private void writeCommentsPre(XMLStreamWriter theEventWriter, IBase theElement) throws XMLStreamException {
+		if (theElement != null && theElement.hasFormatComment()) {
+			for (String next : theElement.getFormatCommentsPre()) {
+				if (isNotBlank(next)) {
+					theEventWriter.writeComment(next);
+				}
+			}
+		}
+	}
+
+	private void writeOptionalTagWithValue(XMLStreamWriter theEventWriter, String theName, String theValue) throws XMLStreamException {
+		if (StringUtils.isNotBlank(theValue)) {
+			theEventWriter.writeStartElement(theName);
+			theEventWriter.writeAttribute("value", theValue);
+			theEventWriter.writeEndElement();
+		}
+	}
+
+}
