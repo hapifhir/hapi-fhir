@@ -1,24 +1,24 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import org.hl7.fhir.dstu3.model.Binary;
+import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.junit.Before;
+import org.junit.Test;
 
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
-
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.junit.Before;
-import org.junit.Test;
-
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
+import static org.junit.Assert.*;
 
 public class JaxRsResponseDstu3Test {
 	
@@ -104,7 +104,27 @@ public class JaxRsResponseDstu3Test {
 		assertEquals(Constants.CT_FHIR_JSON_NEW+"; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
 		assertTrue(result.getEntity().toString().contains("resourceType\": \"Patient"));
 		assertTrue(result.getEntity().toString().contains("15"));
-		
+		assertEquals("http://baseuri/Patient/15", result.getHeaderString(Constants.HEADER_CONTENT_LOCATION));
+	}
+
+	@Test
+	public void testReturnResponseWithExistingBaseUrlOnResource() throws IOException {
+		IdType theId = new IdType(15L);
+		int operationStatus = 200;
+		boolean allowPrefer = true;
+		String resourceName = "Patient";
+		MethodOutcome methodOutcome = new MethodOutcome(theId);
+		boolean addContentLocationHeader = true;
+		boolean respondGzip = true;
+		Patient patient = createPatient();
+		patient.setId("http://mybaseurl.com/Patient/" + patient.getId());
+
+		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), patient, theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
+		assertEquals(200, result.getStatus());
+		assertEquals(Constants.CT_FHIR_JSON_NEW+"; charset=UTF-8", result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertTrue(result.getEntity().toString().contains("resourceType\": \"Patient"));
+		assertTrue(result.getEntity().toString().contains("15"));
+		assertEquals(patient.getIdElement().getValue(), result.getHeaderString(Constants.HEADER_CONTENT_LOCATION));
 	}
 	
 	@Test

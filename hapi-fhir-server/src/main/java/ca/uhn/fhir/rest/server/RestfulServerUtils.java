@@ -735,8 +735,12 @@ public class RestfulServerUtils {
 			fullId = theOperationResourceId;
 		} else if (theResource != null) {
 			if (theResource.getIdElement() != null) {
-				IIdType resourceId = theResource.getIdElement();
-				fullId = fullyQualifyResourceIdOrReturnNull(theServer, theResource, serverBase, resourceId);
+				if (theResource.getIdElement().hasBaseUrl()) {
+					fullId = theResource.getIdElement();
+				} else {
+					IIdType resourceId = theResource.getIdElement();
+					fullId = fullyQualifyResourceIdOrReturnNull(theServer, theResource, serverBase, resourceId);
+				}
 			}
 		}
 
