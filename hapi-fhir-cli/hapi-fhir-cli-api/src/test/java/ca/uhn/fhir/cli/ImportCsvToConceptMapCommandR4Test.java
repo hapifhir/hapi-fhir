@@ -369,4 +369,79 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
 	}
+
+	@Test
+	public void testImportCsvToConceptMapCommandWithByteOrderMark() throws FHIRException {
+		ClassLoader classLoader = getClass().getClassLoader();
+		File fileToImport = new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
+		ImportCsvToConceptMapCommandR4Test.file = fileToImport.getAbsolutePath();
+
+		App.main(new String[] {"import-csv-to-conceptmap",
+			"-v", ourVersion,
+			"-t", ourBase,
+			"-u", "http://loinc.org/cm/loinc-to-phenx",
+			"-i", "http://loinc.org",
+			"-o", "http://phenxtoolkit.org",
+			"-f", file,
+			"-l"});
+
+		Bundle response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/1", conceptMap.getId());
+
+		assertEquals("http://loinc.org/cm/loinc-to-phenx", conceptMap.getUrl());
+		assertEquals("http://loinc.org", conceptMap.getSourceUriType().getValueAsString());
+		assertEquals("http://phenxtoolkit.org", conceptMap.getTargetUriType().getValueAsString());
+
+		assertEquals(3, conceptMap.getGroup().size());
+
+		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
+		assertEquals("http://loinc.org", group.getSource());
+		assertNull(group.getSourceVersion());
+		assertEquals("http://phenxtoolkit.org", group.getTarget());
+		assertNull(group.getTargetVersion());
+
+		assertEquals(4, group.getElement().size());
+
+		SourceElementComponent source = group.getElement().get(0);
+		assertEquals("65191-9", source.getCode());
+		assertEquals("During the past 30 days, about how often did you feel restless or fidgety [Kessler 6 Distress]", source.getDisplay());
+
+		assertEquals(1, source.getTarget().size());
+
+		TargetElementComponent target = source.getTarget().get(0);
+		assertEquals("PX121301010300", target.getCode());
+		assertEquals("PX121301_Restless", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUIVALENT, target.getEquivalence());
+		assertNull(target.getComment());
+
+		App.main(new String[] {"import-csv-to-conceptmap",
+			"-v", ourVersion,
+			"-t", ourBase,
+			"-u", "http://loinc.org/cm/loinc-to-phenx",
+			"-i", "http://loinc.org",
+			"-o", "http://phenxtoolkit.org",
+			"-f", file,
+			"-l"});
+
+		response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
+	}
 }
