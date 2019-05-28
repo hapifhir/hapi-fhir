@@ -42,6 +42,7 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	public static final String CT_FHIR_RDF = "application/x-turtle";
 	/**
 	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
 	 */
@@ -70,6 +71,9 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
+	public static final String FORMAT_RDF = "text/turtle";
+
+
 	/**
 	 * "text/html" and "html"
 	 */

@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is the FHIR RDF parser/encoder. Users should not interact with this class directly, but should use
  * {@link FhirContext#newRDFParser()} to get an instance.
  */
-public class RDFParser extends BaseParser /* implements IParser */ {
+public class RDFParser extends BaseParser {
 
 	private static final String FHIR_NS = "http://hl7.org/fhir";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RDFParser.class);
@@ -68,12 +68,12 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 	 *
 	 * @param theParserErrorHandler the Parser Error Handler
 	 */
-	public RDFParser(FhirContext theContext, IParserErrorHandler theParserErrorHandler) {
+	public RDFParser(final FhirContext theContext, final IParserErrorHandler theParserErrorHandler) {
 		super(theContext, theParserErrorHandler);
 		myContext = theContext;
 	}
 
-	private XMLEventReader createStreamReader(Reader theReader) {
+	private XMLEventReader createStreamReader(final Reader theReader) {
 		try {
 			return RDFUtil.createXmlReader(theReader);
 		} catch (FactoryConfigurationError e1) {
@@ -83,14 +83,14 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private XMLStreamWriter createRDFWriter(Writer theWriter) throws XMLStreamException {
+	private XMLStreamWriter createRDFWriter(final Writer theWriter) throws XMLStreamException {
 		XMLStreamWriter eventWriter;
 		eventWriter = RDFUtil.createXmlStreamWriter(theWriter);
 		eventWriter = decorateStreamWriter(eventWriter);
 		return eventWriter;
 	}
 
-	private XMLStreamWriter decorateStreamWriter(XMLStreamWriter eventWriter) {
+	private XMLStreamWriter decorateStreamWriter(final XMLStreamWriter eventWriter) {
 		if (myPrettyPrint) {
 			return new PrettyPrintWriterWrapper(eventWriter);
 		}
@@ -98,7 +98,9 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 	}
 
 	@Override
-	public void doEncodeResourceToWriter(IBaseResource theResource, Writer theWriter, EncodeContext theEncodeContext) throws DataFormatException {
+	public void doEncodeResourceToWriter(final IBaseResource theResource,
+													 final Writer theWriter,
+													 final EncodeContext theEncodeContext) throws DataFormatException {
 		XMLStreamWriter eventWriter;
 		try {
 			eventWriter = createRDFWriter(theWriter);
@@ -111,12 +113,12 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 	}
 
 	@Override
-	public <T extends IBaseResource> T doParseResource(Class<T> theResourceType, Reader theReader) {
+	public <T extends IBaseResource> T doParseResource(final Class<T> theResourceType, final Reader theReader) {
 		XMLEventReader streamReader = createStreamReader(theReader);
 		return parseResource(theResourceType, streamReader);
 	}
 
-	private <T> T doRDFLoop(XMLEventReader streamReader, ParserState<T> parserState) {
+	private <T> T doRDFLoop(final XMLEventReader streamReader, final ParserState<T> parserState) {
 		ourLog.trace("Entering RDF parsing loop with state: {}", parserState);
 
 		try {
@@ -209,8 +211,17 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private void encodeChildElementToStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, BaseRuntimeChildDefinition theChildDefinition, IBase theElement, String theChildName, BaseRuntimeElementDefinition<?> childDef,
-																 String theExtensionUrl, boolean theIncludedResource, CompositeChildElement theParent, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+	private void encodeChildElementToStreamWriter(final IBaseResource theResource,
+																 final XMLStreamWriter theEventWriter,
+																 final BaseRuntimeChildDefinition theChildDefinition,
+																 final IBase theElement,
+																 final String theChildName,
+																 final BaseRuntimeElementDefinition<?> childDef,
+																 final String theExtensionUrl,
+																 final boolean theIncludedResource,
+																 final CompositeChildElement theParent,
+																 final EncodeContext theEncodeContext)
+		throws XMLStreamException, DataFormatException {
 
 		/*
 		 * Often the two values below will be the same thing. There are cases though
@@ -336,7 +347,12 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 
 	}
 
-	private void encodeCompositeElementToStreamWriter(IBaseResource theResource, IBase theElement, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement theParent, EncodeContext theEncodeContext)
+	private void encodeCompositeElementToStreamWriter(final IBaseResource theResource,
+																	  final IBase theElement,
+																	  final XMLStreamWriter theEventWriter,
+																	  final boolean theContainedResource,
+																	  final CompositeChildElement theParent,
+																	  final EncodeContext theEncodeContext)
 		throws XMLStreamException, DataFormatException {
 
 		for (CompositeChildElement nextChildElem : super.compositeChildIterator(theElement, theContainedResource, theParent, theEncodeContext)) {
@@ -369,13 +385,18 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr, childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
+					encodeChildElementToStreamWriter(theResource,
+						theEventWriter, nextChild, narr, childName, type, null,
+						theContainedResource, nextChildElem, theEncodeContext);
 					continue;
 				}
 			}
 
 			if (nextChild instanceof RuntimeChildContainedResources) {
-				encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, null, nextChild.getChildNameByDatatype(null), nextChild.getChildElementDefinitionByDatatype(null), null, theContainedResource, nextChildElem, theEncodeContext);
+				encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, null,
+					nextChild.getChildNameByDatatype(null),
+					nextChild.getChildElementDefinitionByDatatype(null), null,
+					theContainedResource, nextChildElem, theEncodeContext);
 			} else {
 
 				List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
@@ -399,7 +420,8 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
 
 					if (extensionUrl != null && !childName.equals("extension")) {
-						encodeExtension(theResource, theEventWriter, theContainedResource, nextChildElem, nextChild, nextValue, childName, extensionUrl, childDef, theEncodeContext);
+						encodeExtension(theResource, theEventWriter, theContainedResource, nextChildElem, nextChild,
+							nextValue, childName, extensionUrl, childDef, theEncodeContext);
 					} else if (nextChild instanceof RuntimeChildExtension) {
 						IBaseExtension<?, ?> extension = (IBaseExtension<?, ?>) nextValue;
 						if ((extension.getValue() == null || extension.getValue().isEmpty())) {
@@ -407,16 +429,28 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 								continue;
 							}
 						}
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, getExtensionUrl(extension.getUrl()), theContainedResource, nextChildElem, theEncodeContext);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue,
+							childName, childDef, getExtensionUrl(extension.getUrl()),
+							theContainedResource, nextChildElem, theEncodeContext);
 					} else if (!(nextChild instanceof RuntimeChildNarrativeDefinition) || !theContainedResource) {
-						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
+						encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue,
+							childName, childDef, extensionUrl, theContainedResource, nextChildElem, theEncodeContext);
 					}
 				}
 			}
 		}
 	}
 
-	private void encodeExtension(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, CompositeChildElement nextChildElem, BaseRuntimeChildDefinition nextChild, IBase nextValue, String childName, String extensionUrl, BaseRuntimeElementDefinition<?> childDef, EncodeContext theEncodeContext)
+	private void encodeExtension(final IBaseResource theResource,
+										  final XMLStreamWriter theEventWriter,
+										  final boolean theContainedResource,
+										  final CompositeChildElement nextChildElem,
+										  final BaseRuntimeChildDefinition nextChild,
+										  final IBase nextValue,
+										  final String childName,
+										  final String extensionUrl,
+										  final BaseRuntimeElementDefinition<?> childDef,
+										  final EncodeContext theEncodeContext)
 		throws XMLStreamException {
 		BaseRuntimeDeclaredChildDefinition extDef = (BaseRuntimeDeclaredChildDefinition) nextChild;
 		if (extDef.isModifier()) {
@@ -431,11 +465,17 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 
 		theEventWriter.writeAttribute("url", extensionUrl);
-		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName, childDef, null, theContainedResource, nextChildElem, theEncodeContext);
+		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName,
+			childDef, null, theContainedResource, nextChildElem, theEncodeContext);
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeExtensionsIfPresent(IBaseResource theResource, XMLStreamWriter theWriter, IBase theElement, boolean theIncludedResource, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+	private void encodeExtensionsIfPresent(final IBaseResource theResource,
+														final XMLStreamWriter theWriter,
+														final IBase theElement,
+														final boolean theIncludedResource,
+														final EncodeContext theEncodeContext)
+		throws XMLStreamException, DataFormatException {
 		if (theElement instanceof ISupportsUndeclaredExtensions) {
 			ISupportsUndeclaredExtensions res = (ISupportsUndeclaredExtensions) theElement;
 			encodeUndeclaredExtensions(theResource, theWriter, toBaseExtensionList(res.getUndeclaredExtensions()), "extension", theIncludedResource, theEncodeContext);
@@ -451,7 +491,11 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private void encodeResourceToRDFStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theIncludedResource, EncodeContext theEncodeContext) throws XMLStreamException, DataFormatException {
+	private void encodeResourceToRDFStreamWriter(final IBaseResource theResource,
+																final XMLStreamWriter theEventWriter,
+																final boolean theIncludedResource,
+																final EncodeContext theEncodeContext)
+		throws XMLStreamException, DataFormatException {
 		IIdType resourceId = null;
 
 		if (StringUtils.isNotBlank(theResource.getIdElement().getIdPart())) {
@@ -472,7 +516,11 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		encodeResourceToRDFStreamWriter(theResource, theEventWriter, theIncludedResource, resourceId, theEncodeContext);
 	}
 
-	private void encodeResourceToRDFStreamWriter(IBaseResource theResource, XMLStreamWriter theEventWriter, boolean theContainedResource, IIdType theResourceId, EncodeContext theEncodeContext) throws XMLStreamException {
+	private void encodeResourceToRDFStreamWriter(final IBaseResource theResource,
+																final XMLStreamWriter theEventWriter,
+																final boolean theContainedResource,
+																final IIdType theResourceId,
+																final EncodeContext theEncodeContext) throws XMLStreamException {
 		RuntimeResourceDefinition resDef = myContext.getResourceDefinition(theResource);
 		if (resDef == null) {
 			throw new ConfigurationException("Unknown resource type: " + theResource.getClass());
@@ -575,7 +623,12 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		theEventWriter.writeEndElement();
 	}
 
-	private void encodeUndeclaredExtensions(IBaseResource theResource, XMLStreamWriter theEventWriter, List<? extends IBaseExtension<?, ?>> theExtensions, String tagName, boolean theIncludedResource, EncodeContext theEncodeContext)
+	private void encodeUndeclaredExtensions(final IBaseResource theResource,
+														 final XMLStreamWriter theEventWriter,
+														 final List<? extends IBaseExtension<?, ?>> theExtensions,
+														 final String tagName,
+														 final boolean theIncludedResource,
+														 final EncodeContext theEncodeContext)
 		throws XMLStreamException, DataFormatException {
 		for (IBaseExtension<?, ?> next : theExtensions) {
 			if (next == null || (ElementUtil.isEmpty(next.getValue()) && next.getExtension().isEmpty())) {
@@ -611,7 +664,8 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
 					}
 				}
-				encodeChildElementToStreamWriter(theResource, theEventWriter, extDef, value, childName, childDef, null, theIncludedResource, null, theEncodeContext);
+				encodeChildElementToStreamWriter(theResource, theEventWriter, extDef, value, childName,
+					childDef, null, theIncludedResource, null, theEncodeContext);
 			}
 
 			// child extensions
@@ -624,7 +678,7 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private void encodeXhtml(XhtmlDt theDt, XMLStreamWriter theEventWriter) throws XMLStreamException {
+	private void encodeXhtml(final XhtmlDt theDt, final XMLStreamWriter theEventWriter) throws XMLStreamException {
 		if (theDt == null || theDt.getValue() == null) {
 			return;
 		}
@@ -721,16 +775,18 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 
 	@Override
 	public EncodingEnum getEncoding() {
-		return EncodingEnum.XML;
+		return EncodingEnum.RDF;
 	}
 
-	private <T extends IBaseResource> T parseResource(Class<T> theResourceType, XMLEventReader theStreamReader) {
-		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType, myContext, false, getErrorHandler());
+	private <T extends IBaseResource> T parseResource(final Class<T> theResourceType,
+																	  final XMLEventReader theStreamReader) {
+		ParserState<T> parserState = ParserState.getPreResourceInstance(this, theResourceType,
+			myContext, false, getErrorHandler());
 		return doRDFLoop(theStreamReader, parserState);
 	}
 
 	@Override
-	public IParser setPrettyPrint(boolean thePrettyPrint) {
+	public IParser setPrettyPrint(final boolean thePrettyPrint) {
 		myPrettyPrint = thePrettyPrint;
 		return this;
 	}
@@ -746,7 +802,7 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		return retVal;
 	}
 
-	private void writeCommentsPost(XMLStreamWriter theEventWriter, IBase theElement) throws XMLStreamException {
+	private void writeCommentsPost(final XMLStreamWriter theEventWriter, final IBase theElement) throws XMLStreamException {
 		if (theElement != null && theElement.hasFormatComment()) {
 			for (String next : theElement.getFormatCommentsPost()) {
 				if (isNotBlank(next)) {
@@ -756,7 +812,7 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private void writeCommentsPre(XMLStreamWriter theEventWriter, IBase theElement) throws XMLStreamException {
+	private void writeCommentsPre(final XMLStreamWriter theEventWriter, final IBase theElement) throws XMLStreamException {
 		if (theElement != null && theElement.hasFormatComment()) {
 			for (String next : theElement.getFormatCommentsPre()) {
 				if (isNotBlank(next)) {
@@ -766,7 +822,8 @@ public class RDFParser extends BaseParser /* implements IParser */ {
 		}
 	}
 
-	private void writeOptionalTagWithValue(XMLStreamWriter theEventWriter, String theName, String theValue) throws XMLStreamException {
+	private void writeOptionalTagWithValue(final XMLStreamWriter theEventWriter, final String theName, final String theValue)
+		throws XMLStreamException {
 		if (StringUtils.isNotBlank(theValue)) {
 			theEventWriter.writeStartElement(theName);
 			theEventWriter.writeAttribute("value", theValue);
