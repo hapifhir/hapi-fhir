@@ -225,6 +225,10 @@
 				Two incorrect package declarations in unit tests were corrected. Thanks to github user
 				@zaewonyx for the PR!
 			</action>
+			<action type="fix" issue="1320">
+				The HAPI FHIR CLI import-csv-to-conceptmap was not accounting for byte order marks in CSV (e.g. some
+				Excel CSV files). This has been fixed.
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
