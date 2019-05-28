@@ -388,7 +388,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		Bundle response = ourClient
 			.search()
 			.forResource(ConceptMap.class)
-			.where(ConceptMap.URL.matches().value(CM_URL))
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
 			.returnBundle(Bundle.class)
 			.execute();
 
@@ -402,7 +402,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("http://loinc.org", conceptMap.getSourceUriType().getValueAsString());
 		assertEquals("http://phenxtoolkit.org", conceptMap.getTargetUriType().getValueAsString());
 
-		assertEquals(3, conceptMap.getGroup().size());
+		assertEquals(1, conceptMap.getGroup().size());
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
 		assertEquals("http://loinc.org", group.getSource());
@@ -410,7 +410,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("http://phenxtoolkit.org", group.getTarget());
 		assertNull(group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertEquals(1, group.getElement().size());
 
 		SourceElementComponent source = group.getElement().get(0);
 		assertEquals("65191-9", source.getCode());
@@ -436,7 +436,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		response = ourClient
 			.search()
 			.forResource(ConceptMap.class)
-			.where(ConceptMap.URL.matches().value(CM_URL))
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
 			.returnBundle(Bundle.class)
 			.execute();
 

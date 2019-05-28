@@ -39,8 +39,6 @@ import org.hl7.fhir.r4.model.UriType;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -166,8 +164,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		ourLog.info("Converting CSV to ConceptMap...");
 		ConceptMap retVal = new ConceptMap();
 		try (
-			// FIXME: DM 2019-05-27 - Need to use BOMInputStream to handle byte order marks.
-			Reader reader = Files.newBufferedReader(Paths.get(file));
+			Reader reader = getBufferedReader();
 			CSVParser csvParser = new CSVParser(
 				reader,
 				CSVFormat
