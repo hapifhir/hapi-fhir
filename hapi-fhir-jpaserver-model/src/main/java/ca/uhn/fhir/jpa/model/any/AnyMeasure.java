@@ -137,6 +137,28 @@ public class AnyMeasure {
 		}
 	}
 
+	public IBaseReference getDerivedFrom() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				return getArtifactOfType(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DERIVEDFROM);
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setDerivedFrom(String theReferenceId) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.RelatedArtifact artifact = new org.hl7.fhir.dstu3.model.RelatedArtifact();
+				artifact.setType(org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.DERIVEDFROM);
+				artifact.setResource(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
+				getDstu3().getRelatedArtifact().add(artifact);
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
 	public IBaseReference getPredecessor() {
 		switch (myFhirVersion) {
 			case DSTU3:
