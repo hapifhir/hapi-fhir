@@ -374,6 +374,34 @@ public class JsonParserR4Test {
 		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
 
 	}
+	
+	private Composition createComposition(String sectionText) {
+		Composition c = new Composition();
+		Narrative compositionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionText.setDivAsString("Composition");		
+		Narrative compositionSectionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionSectionText.setDivAsString(sectionText);		
+		c.setText(compositionText);
+		c.addSection().setText(compositionSectionText);
+		return c;
+	}
+
+	/**
+	 * See #402 (however JSON is fine)
+	 */
+	@Test
+	public void testEncodingTextSection() {
+
+		String sectionText = "sectionText";
+		Composition composition = createComposition(sectionText);
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(composition);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf(sectionText);
+		assertNotEquals(-1, idx);
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
