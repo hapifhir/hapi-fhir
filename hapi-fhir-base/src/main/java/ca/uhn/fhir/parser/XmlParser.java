@@ -362,10 +362,10 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
 				INarrative narr;
-				if (theResource instanceof IResource) {
-					narr = ((IResource) theResource).getText();
-				} else if (theResource instanceof IDomainResource) {
-					narr = ((IDomainResource) theResource).getText();
+				if (theElement instanceof IResource) {
+					narr = ((IResource) theElement).getText();
+				} else if (theElement instanceof IDomainResource) {
+					narr = ((IDomainResource) theElement).getText();
 				} else {
 					narr = null;
 				}
