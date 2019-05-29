@@ -534,7 +534,7 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.2.2</apache_karaf_version>
+		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>2.7.0</caffeine_version>
 		<commons_codec_version>1.11</commons_codec_version>
