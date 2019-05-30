@@ -229,6 +229,10 @@
 				The InstanceValidator now supports validating QuestionnairResponses with empty items
 				for disabled questions. Thanks to Matti Uusitalo for the pull request!
 			</action>
+			<action type="add" issue="1152">
+				A new method has been added to the client that allows arbitrary headers to be easily
+				added to the request. Thanks to Christian Ohr for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
