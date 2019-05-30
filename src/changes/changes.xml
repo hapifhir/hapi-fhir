@@ -241,6 +241,9 @@
 				The JPA database migration tool has been enhanced to support migration from HAPI FHIR
 				2.5. Thanks to Gary Graham for the pull request!
 			</action>
+			<action type="add" issue="1244">
+				Add a missing @Deprecated tag. Thanks to Drew Mitchell for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

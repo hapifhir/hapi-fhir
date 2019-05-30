@@ -518,7 +518,10 @@
 			<name>Gary Graham</name>
 			<organization>Centre for Global eHealth Innovation</organization>
 		</developer>
-
+		<developer>
+			<id>nerdydrew</id>
+			<name>Drew Mitchell</name>
+		</developer>
 	</developers>
 
 	<licenses>
