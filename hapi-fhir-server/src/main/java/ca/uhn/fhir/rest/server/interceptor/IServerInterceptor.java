@@ -203,6 +203,7 @@ public interface IServerInterceptor {
 	 * favour of {@link #outgoingResponse(RequestDetails, ResponseDetails, HttpServletRequest, HttpServletResponse)}
 	 * and will be removed in a future version of HAPI FHIR.
 	 */
+	@Deprecated
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException;
