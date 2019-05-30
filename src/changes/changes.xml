@@ -225,6 +225,10 @@
 				Two incorrect package declarations in unit tests were corrected. Thanks to github user
 				@zaewonyx for the PR!
 			</action>
+			<action type="add" issue="1228">
+				The InstanceValidator now supports validating QuestionnairResponses with empty items
+				for disabled questions. Thanks to Matti Uusitalo for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
