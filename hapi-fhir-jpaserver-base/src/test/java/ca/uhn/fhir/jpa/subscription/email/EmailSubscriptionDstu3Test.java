@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
@@ -254,13 +253,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		smtp.setReadTimeout(2000);
 		smtp.setConnectionTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
+        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 }
