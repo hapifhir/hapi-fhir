@@ -233,6 +233,10 @@
 				A new method has been added to the client that allows arbitrary headers to be easily
 				added to the request. Thanks to Christian Ohr for the pull request!
 			</action>
+			<action type="add" issue="1213">
+				VersionConverter for R2-R3 has been modified to correectly handle the renamed basedOn
+				field. Thanks to Gary Graham for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">

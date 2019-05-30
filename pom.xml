@@ -513,6 +513,12 @@
 		<developer>
 			<id>zaewonyx</id>
 		</developer>
+		<developer>
+			<id>tadgh</id>
+			<name>Gary Graham</name>
+			<organization>Centre for Global eHealth Innovation</organization>
+		</developer>
+
 	</developers>
 
 	<licenses>
