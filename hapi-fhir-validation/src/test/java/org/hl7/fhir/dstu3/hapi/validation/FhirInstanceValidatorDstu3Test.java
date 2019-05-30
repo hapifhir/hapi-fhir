@@ -385,7 +385,7 @@ public class FhirInstanceValidatorDstu3Test {
 		QuestionnaireResponse qr = loadResource("/dstu3/fmc02-questionnaireresponse-01.json", QuestionnaireResponse.class);
 		ValidationResult result = myVal.validateWithResult(qr);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
-		assertThat(errors.get(0).getMessage(), containsString("Item with linkId [BO_ConsDrop] has answer, even though it is not enabled"));
+		assertThat(errors.get(0).getMessage(), containsString("Item has answer, even though it is not enabled BO_ConsDrop"));
 		assertEquals(1, errors.size());
 	}
 

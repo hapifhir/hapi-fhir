@@ -4,7 +4,7 @@
 	"questionnaire": {
 		"reference": "Questionnaire/FMCBinderOptimization"
 	},
-	"status": "in-progress",
+	"status": "completed",
 	"item": [
 		{
 			"linkId": "1",
