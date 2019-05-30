@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -258,11 +258,11 @@ public class TriggerDefinition extends Type implements ICompositeType {
     protected Type timing;
 
     /**
-     * The triggering data of the event (if this is a data trigger).
+     * The triggering data of the event (if this is a data trigger). If more than one data is requirement is specified, then all the data requirements must be true.
      */
-    @Child(name = "data", type = {DataRequirement.class}, order=3, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Triggering data of the event", formalDefinition="The triggering data of the event (if this is a data trigger)." )
-    protected DataRequirement data;
+    @Child(name = "data", type = {DataRequirement.class}, order=3, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
+    @Description(shortDefinition="Triggering data of the event (multiple = 'and')", formalDefinition="The triggering data of the event (if this is a data trigger). If more than one data is requirement is specified, then all the data requirements must be true." )
+    protected List<DataRequirement> data;
 
     /**
      * A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.
@@ -271,7 +271,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
     @Description(shortDefinition="Whether the event triggers (boolean expression)", formalDefinition="A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires." )
     protected Expression condition;
 
-    private static final long serialVersionUID = -396344653L;
+    private static final long serialVersionUID = -1706033335L;
 
   /**
    * Constructor
@@ -394,7 +394,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
      */
     public Timing getTimingTiming() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Timing();
       if (!(this.timing instanceof Timing))
         throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Timing) this.timing;
@@ -409,7 +409,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
      */
     public Reference getTimingReference() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new Reference();
       if (!(this.timing instanceof Reference))
         throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (Reference) this.timing;
@@ -424,7 +424,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
      */
     public DateType getTimingDateType() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new DateType();
       if (!(this.timing instanceof DateType))
         throw new FHIRException("Type mismatch: the type DateType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateType) this.timing;
@@ -439,7 +439,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
      */
     public DateTimeType getTimingDateTimeType() throws FHIRException { 
       if (this.timing == null)
-        return null;
+        this.timing = new DateTimeType();
       if (!(this.timing instanceof DateTimeType))
         throw new FHIRException("Type mismatch: the type DateTimeType was expected, but "+this.timing.getClass().getName()+" was encountered");
       return (DateTimeType) this.timing;
@@ -464,27 +464,56 @@ public class TriggerDefinition extends Type implements ICompositeType {
     }
 
     /**
-     * @return {@link #data} (The triggering data of the event (if this is a data trigger).)
+     * @return {@link #data} (The triggering data of the event (if this is a data trigger). If more than one data is requirement is specified, then all the data requirements must be true.)
      */
-    public DataRequirement getData() { 
+    public List<DataRequirement> getData() { 
       if (this.data == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create TriggerDefinition.data");
-        else if (Configuration.doAutoCreate())
-          this.data = new DataRequirement(); // cc
+        this.data = new ArrayList<DataRequirement>();
       return this.data;
     }
 
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public TriggerDefinition setData(List<DataRequirement> theData) { 
+      this.data = theData;
+      return this;
+    }
+
     public boolean hasData() { 
-      return this.data != null && !this.data.isEmpty();
+      if (this.data == null)
+        return false;
+      for (DataRequirement item : this.data)
+        if (!item.isEmpty())
+          return true;
+      return false;
+    }
+
+    public DataRequirement addData() { //3
+      DataRequirement t = new DataRequirement();
+      if (this.data == null)
+        this.data = new ArrayList<DataRequirement>();
+      this.data.add(t);
+      return t;
+    }
+
+    public TriggerDefinition addData(DataRequirement t) { //3
+      if (t == null)
+        return this;
+      if (this.data == null)
+        this.data = new ArrayList<DataRequirement>();
+      this.data.add(t);
+      return this;
     }
 
     /**
-     * @param value {@link #data} (The triggering data of the event (if this is a data trigger).)
+     * @return The first repetition of repeating field {@link #data}, creating it if it does not already exist
      */
-    public TriggerDefinition setData(DataRequirement value) { 
-      this.data = value;
-      return this;
+    public DataRequirement getDataFirstRep() { 
+      if (getData().isEmpty()) {
+        addData();
+      }
+      return getData().get(0);
     }
 
     /**
@@ -516,7 +545,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         children.add(new Property("type", "code", "The type of triggering event.", 0, 1, type));
         children.add(new Property("name", "string", "A formal name for the event. This may be an absolute URI that identifies the event formally (e.g. from a trigger registry), or a simple relative URI that identifies the event in a local context.", 0, 1, name));
         children.add(new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing));
-        children.add(new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, data));
+        children.add(new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger). If more than one data is requirement is specified, then all the data requirements must be true.", 0, java.lang.Integer.MAX_VALUE, data));
         children.add(new Property("condition", "Expression", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, condition));
       }
 
@@ -531,7 +560,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         case -1792466399: /*timingReference*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
         case 807935768: /*timingDate*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
         case -1837458939: /*timingDateTime*/  return new Property("timing[x]", "Timing|Reference(Schedule)|date|dateTime", "The timing of the event (if this is a periodic trigger).", 0, 1, timing);
-        case 3076010: /*data*/  return new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger).", 0, 1, data);
+        case 3076010: /*data*/  return new Property("data", "DataRequirement", "The triggering data of the event (if this is a data trigger). If more than one data is requirement is specified, then all the data requirements must be true.", 0, java.lang.Integer.MAX_VALUE, data);
         case -861311717: /*condition*/  return new Property("condition", "Expression", "A boolean-valued expression that is evaluated in the context of the container of the trigger definition and returns whether or not the trigger fires.", 0, 1, condition);
         default: return super.getNamedProperty(_hash, _name, _checkValid);
         }
@@ -544,7 +573,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<TriggerType>
         case 3373707: /*name*/ return this.name == null ? new Base[0] : new Base[] {this.name}; // StringType
         case -873664438: /*timing*/ return this.timing == null ? new Base[0] : new Base[] {this.timing}; // Type
-        case 3076010: /*data*/ return this.data == null ? new Base[0] : new Base[] {this.data}; // DataRequirement
+        case 3076010: /*data*/ return this.data == null ? new Base[0] : this.data.toArray(new Base[this.data.size()]); // DataRequirement
         case -861311717: /*condition*/ return this.condition == null ? new Base[0] : new Base[] {this.condition}; // Expression
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -565,7 +594,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           this.timing = castToType(value); // Type
           return value;
         case 3076010: // data
-          this.data = castToDataRequirement(value); // DataRequirement
+          this.getData().add(castToDataRequirement(value)); // DataRequirement
           return value;
         case -861311717: // condition
           this.condition = castToExpression(value); // Expression
@@ -585,7 +614,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         } else if (name.equals("timing[x]")) {
           this.timing = castToType(value); // Type
         } else if (name.equals("data")) {
-          this.data = castToDataRequirement(value); // DataRequirement
+          this.getData().add(castToDataRequirement(value));
         } else if (name.equals("condition")) {
           this.condition = castToExpression(value); // Expression
         } else
@@ -600,7 +629,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
         case 3373707:  return getNameElement();
         case 164632566:  return getTiming(); 
         case -873664438:  return getTiming(); 
-        case 3076010:  return getData(); 
+        case 3076010:  return addData(); 
         case -861311717:  return getCondition(); 
         default: return super.makeProperty(hash, name);
         }
@@ -645,8 +674,7 @@ public class TriggerDefinition extends Type implements ICompositeType {
           return this.timing;
         }
         else if (name.equals("data")) {
-          this.data = new DataRequirement();
-          return this.data;
+          return addData();
         }
         else if (name.equals("condition")) {
           this.condition = new Expression();
@@ -667,7 +695,11 @@ public class TriggerDefinition extends Type implements ICompositeType {
         dst.type = type == null ? null : type.copy();
         dst.name = name == null ? null : name.copy();
         dst.timing = timing == null ? null : timing.copy();
-        dst.data = data == null ? null : data.copy();
+        if (data != null) {
+          dst.data = new ArrayList<DataRequirement>();
+          for (DataRequirement i : data)
+            dst.data.add(i.copy());
+        };
         dst.condition = condition == null ? null : condition.copy();
         return dst;
       }

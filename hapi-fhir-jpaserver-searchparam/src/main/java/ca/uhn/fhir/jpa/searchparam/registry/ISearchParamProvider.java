@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,5 +27,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 public interface ISearchParamProvider {
 	IBundleProvider search(SearchParameterMap theParams);
 
-	<SP extends IBaseResource> void refreshCache(BaseSearchParamRegistry<SP> theSPBaseSearchParamRegistry, long theRefreshInterval);
+	<SP extends IBaseResource> int refreshCache(BaseSearchParamRegistry<SP> theSPBaseSearchParamRegistry, long theRefreshInterval);
 }

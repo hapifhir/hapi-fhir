@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
@@ -13,12 +13,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -45,6 +42,11 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 
 	private Exception myLastStackTrace;
 	private String myLastStackTraceThreadName;
+
+	@Bean
+	public CircularQueueCaptureQueriesListener captureQueriesListener() {
+		return new CircularQueueCaptureQueriesListener();
+	}
 
 	@Bean
 	public DataSource dataSource() {
@@ -108,6 +110,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 			.create(retVal)
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.afterQuery(captureQueriesListener())
 			.countQuery(new ThreadQueryCountHolder())
 			.build();
 
@@ -136,7 +139,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
 		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		return extraProperties;
 	}

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -145,7 +145,7 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * Primary of secondary specimen.
          */
-        @Child(name = "isDerived", type = {BooleanType.class}, order=1, min=1, max=1, modifier=false, summary=false)
+        @Child(name = "isDerived", type = {BooleanType.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Primary or secondary specimen", formalDefinition="Primary of secondary specimen." )
         protected BooleanType isDerived;
 
@@ -213,9 +213,8 @@ public class SpecimenDefinition extends DomainResource {
     /**
      * Constructor
      */
-      public SpecimenDefinitionTypeTestedComponent(BooleanType isDerived, Enumeration<SpecimenContainedPreference> preference) {
+      public SpecimenDefinitionTypeTestedComponent(Enumeration<SpecimenContainedPreference> preference) {
         super();
-        this.isDerived = isDerived;
         this.preference = preference;
       }
 
@@ -767,6 +766,7 @@ public class SpecimenDefinition extends DomainResource {
          */
         @Child(name = "material", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Container material", formalDefinition="The type of material of the container." )
+        @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/container-material")
         protected CodeableConcept material;
 
         /**
@@ -802,9 +802,9 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * The minimum volume to be conditioned in the container.
          */
-        @Child(name = "minimumVolume", type = {Quantity.class}, order=6, min=0, max=1, modifier=false, summary=false)
+        @Child(name = "minimumVolume", type = {Quantity.class, StringType.class}, order=6, min=0, max=1, modifier=false, summary=false)
         @Description(shortDefinition="Minimum volume", formalDefinition="The minimum volume to be conditioned in the container." )
-        protected Quantity minimumVolume;
+        protected Type minimumVolume;
 
         /**
          * Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.
@@ -820,7 +820,7 @@ public class SpecimenDefinition extends DomainResource {
         @Description(shortDefinition="Specimen container preparation", formalDefinition="Special processing that should be applied to the container for this kind of specimen." )
         protected StringType preparation;
 
-        private static final long serialVersionUID = -539552481L;
+        private static final long serialVersionUID = 175789710L;
 
     /**
      * Constructor
@@ -977,13 +977,38 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @return {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
          */
-        public Quantity getMinimumVolume() { 
-          if (this.minimumVolume == null)
-            if (Configuration.errorOnAutoCreate())
-              throw new Error("Attempt to auto-create SpecimenDefinitionTypeTestedContainerComponent.minimumVolume");
-            else if (Configuration.doAutoCreate())
-              this.minimumVolume = new Quantity(); // cc
+        public Type getMinimumVolume() { 
           return this.minimumVolume;
+        }
+
+        /**
+         * @return {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
+         */
+        public Quantity getMinimumVolumeQuantity() throws FHIRException { 
+          if (this.minimumVolume == null)
+            this.minimumVolume = new Quantity();
+          if (!(this.minimumVolume instanceof Quantity))
+            throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.minimumVolume.getClass().getName()+" was encountered");
+          return (Quantity) this.minimumVolume;
+        }
+
+        public boolean hasMinimumVolumeQuantity() { 
+          return this != null && this.minimumVolume instanceof Quantity;
+        }
+
+        /**
+         * @return {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
+         */
+        public StringType getMinimumVolumeStringType() throws FHIRException { 
+          if (this.minimumVolume == null)
+            this.minimumVolume = new StringType();
+          if (!(this.minimumVolume instanceof StringType))
+            throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.minimumVolume.getClass().getName()+" was encountered");
+          return (StringType) this.minimumVolume;
+        }
+
+        public boolean hasMinimumVolumeStringType() { 
+          return this != null && this.minimumVolume instanceof StringType;
         }
 
         public boolean hasMinimumVolume() { 
@@ -993,7 +1018,9 @@ public class SpecimenDefinition extends DomainResource {
         /**
          * @param value {@link #minimumVolume} (The minimum volume to be conditioned in the container.)
          */
-        public SpecimenDefinitionTypeTestedContainerComponent setMinimumVolume(Quantity value) { 
+        public SpecimenDefinitionTypeTestedContainerComponent setMinimumVolume(Type value) { 
+          if (value != null && !(value instanceof Quantity || value instanceof StringType))
+            throw new Error("Not the right type for SpecimenDefinition.typeTested.container.minimumVolume[x]: "+value.fhirType());
           this.minimumVolume = value;
           return this;
         }
@@ -1107,7 +1134,7 @@ public class SpecimenDefinition extends DomainResource {
           children.add(new Property("cap", "CodeableConcept", "Color of container cap.", 0, 1, cap));
           children.add(new Property("description", "string", "The textual description of the kind of container.", 0, 1, description));
           children.add(new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, capacity));
-          children.add(new Property("minimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume));
+          children.add(new Property("minimumVolume[x]", "SimpleQuantity|string", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume));
           children.add(new Property("additive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive));
           children.add(new Property("preparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, preparation));
         }
@@ -1120,7 +1147,10 @@ public class SpecimenDefinition extends DomainResource {
           case 98258: /*cap*/  return new Property("cap", "CodeableConcept", "Color of container cap.", 0, 1, cap);
           case -1724546052: /*description*/  return new Property("description", "string", "The textual description of the kind of container.", 0, 1, description);
           case -67824454: /*capacity*/  return new Property("capacity", "SimpleQuantity", "The capacity (volume or other measure) of this kind of container.", 0, 1, capacity);
-          case -1674665784: /*minimumVolume*/  return new Property("minimumVolume", "SimpleQuantity", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
+          case 371830456: /*minimumVolume[x]*/  return new Property("minimumVolume[x]", "SimpleQuantity|string", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
+          case -1674665784: /*minimumVolume*/  return new Property("minimumVolume[x]", "SimpleQuantity|string", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
+          case -532143757: /*minimumVolumeQuantity*/  return new Property("minimumVolume[x]", "SimpleQuantity|string", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
+          case 248461049: /*minimumVolumeString*/  return new Property("minimumVolume[x]", "SimpleQuantity|string", "The minimum volume to be conditioned in the container.", 0, 1, minimumVolume);
           case -1226589236: /*additive*/  return new Property("additive", "", "Substance introduced in the kind of container to preserve, maintain or enhance the specimen. Examples: Formalin, Citrate, EDTA.", 0, java.lang.Integer.MAX_VALUE, additive);
           case -1315428713: /*preparation*/  return new Property("preparation", "string", "Special processing that should be applied to the container for this kind of specimen.", 0, 1, preparation);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
@@ -1136,7 +1166,7 @@ public class SpecimenDefinition extends DomainResource {
         case 98258: /*cap*/ return this.cap == null ? new Base[0] : new Base[] {this.cap}; // CodeableConcept
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -67824454: /*capacity*/ return this.capacity == null ? new Base[0] : new Base[] {this.capacity}; // Quantity
-        case -1674665784: /*minimumVolume*/ return this.minimumVolume == null ? new Base[0] : new Base[] {this.minimumVolume}; // Quantity
+        case -1674665784: /*minimumVolume*/ return this.minimumVolume == null ? new Base[0] : new Base[] {this.minimumVolume}; // Type
         case -1226589236: /*additive*/ return this.additive == null ? new Base[0] : this.additive.toArray(new Base[this.additive.size()]); // SpecimenDefinitionTypeTestedContainerAdditiveComponent
         case -1315428713: /*preparation*/ return this.preparation == null ? new Base[0] : new Base[] {this.preparation}; // StringType
         default: return super.getProperty(hash, name, checkValid);
@@ -1163,7 +1193,7 @@ public class SpecimenDefinition extends DomainResource {
           this.capacity = castToQuantity(value); // Quantity
           return value;
         case -1674665784: // minimumVolume
-          this.minimumVolume = castToQuantity(value); // Quantity
+          this.minimumVolume = castToType(value); // Type
           return value;
         case -1226589236: // additive
           this.getAdditive().add((SpecimenDefinitionTypeTestedContainerAdditiveComponent) value); // SpecimenDefinitionTypeTestedContainerAdditiveComponent
@@ -1188,8 +1218,8 @@ public class SpecimenDefinition extends DomainResource {
           this.description = castToString(value); // StringType
         } else if (name.equals("capacity")) {
           this.capacity = castToQuantity(value); // Quantity
-        } else if (name.equals("minimumVolume")) {
-          this.minimumVolume = castToQuantity(value); // Quantity
+        } else if (name.equals("minimumVolume[x]")) {
+          this.minimumVolume = castToType(value); // Type
         } else if (name.equals("additive")) {
           this.getAdditive().add((SpecimenDefinitionTypeTestedContainerAdditiveComponent) value);
         } else if (name.equals("preparation")) {
@@ -1207,6 +1237,7 @@ public class SpecimenDefinition extends DomainResource {
         case 98258:  return getCap(); 
         case -1724546052:  return getDescriptionElement();
         case -67824454:  return getCapacity(); 
+        case 371830456:  return getMinimumVolume(); 
         case -1674665784:  return getMinimumVolume(); 
         case -1226589236:  return addAdditive(); 
         case -1315428713:  return getPreparationElement();
@@ -1223,7 +1254,7 @@ public class SpecimenDefinition extends DomainResource {
         case 98258: /*cap*/ return new String[] {"CodeableConcept"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -67824454: /*capacity*/ return new String[] {"SimpleQuantity"};
-        case -1674665784: /*minimumVolume*/ return new String[] {"SimpleQuantity"};
+        case -1674665784: /*minimumVolume*/ return new String[] {"SimpleQuantity", "string"};
         case -1226589236: /*additive*/ return new String[] {};
         case -1315428713: /*preparation*/ return new String[] {"string"};
         default: return super.getTypesForProperty(hash, name);
@@ -1252,8 +1283,12 @@ public class SpecimenDefinition extends DomainResource {
           this.capacity = new Quantity();
           return this.capacity;
         }
-        else if (name.equals("minimumVolume")) {
+        else if (name.equals("minimumVolumeQuantity")) {
           this.minimumVolume = new Quantity();
+          return this.minimumVolume;
+        }
+        else if (name.equals("minimumVolumeString")) {
+          this.minimumVolume = new StringType();
           return this.minimumVolume;
         }
         else if (name.equals("additive")) {
@@ -1358,7 +1393,7 @@ public class SpecimenDefinition extends DomainResource {
          */
         public CodeableConcept getAdditiveCodeableConcept() throws FHIRException { 
           if (this.additive == null)
-            return null;
+            this.additive = new CodeableConcept();
           if (!(this.additive instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (CodeableConcept) this.additive;
@@ -1373,7 +1408,7 @@ public class SpecimenDefinition extends DomainResource {
          */
         public Reference getAdditiveReference() throws FHIRException { 
           if (this.additive == null)
-            return null;
+            this.additive = new Reference();
           if (!(this.additive instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.additive.getClass().getName()+" was encountered");
           return (Reference) this.additive;
@@ -1849,9 +1884,10 @@ public class SpecimenDefinition extends DomainResource {
     /**
      * Preparation of the patient for specimen collection.
      */
-    @Child(name = "patientPreparation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=false)
+    @Child(name = "patientPreparation", type = {CodeableConcept.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Patient preparation for collection", formalDefinition="Preparation of the patient for specimen collection." )
-    protected StringType patientPreparation;
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/prepare-patient-prior-specimen-collection")
+    protected List<CodeableConcept> patientPreparation;
 
     /**
      * Time aspect of specimen collection (duration or offset).
@@ -1865,6 +1901,7 @@ public class SpecimenDefinition extends DomainResource {
      */
     @Child(name = "collection", type = {CodeableConcept.class}, order=4, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=true)
     @Description(shortDefinition="Specimen collection procedure", formalDefinition="The action to be performed for collecting the specimen." )
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/specimen-collection")
     protected List<CodeableConcept> collection;
 
     /**
@@ -1874,7 +1911,7 @@ public class SpecimenDefinition extends DomainResource {
     @Description(shortDefinition="Specimen in container intended for testing by lab", formalDefinition="Specimen conditioned in a container as expected by the testing laboratory." )
     protected List<SpecimenDefinitionTypeTestedComponent> typeTested;
 
-    private static final long serialVersionUID = -563604076L;
+    private static final long serialVersionUID = -330188872L;
 
   /**
    * Constructor
@@ -1932,52 +1969,56 @@ public class SpecimenDefinition extends DomainResource {
     }
 
     /**
-     * @return {@link #patientPreparation} (Preparation of the patient for specimen collection.). This is the underlying object with id, value and extensions. The accessor "getPatientPreparation" gives direct access to the value
+     * @return {@link #patientPreparation} (Preparation of the patient for specimen collection.)
      */
-    public StringType getPatientPreparationElement() { 
+    public List<CodeableConcept> getPatientPreparation() { 
       if (this.patientPreparation == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create SpecimenDefinition.patientPreparation");
-        else if (Configuration.doAutoCreate())
-          this.patientPreparation = new StringType(); // bb
+        this.patientPreparation = new ArrayList<CodeableConcept>();
       return this.patientPreparation;
     }
 
-    public boolean hasPatientPreparationElement() { 
-      return this.patientPreparation != null && !this.patientPreparation.isEmpty();
+    /**
+     * @return Returns a reference to <code>this</code> for easy method chaining
+     */
+    public SpecimenDefinition setPatientPreparation(List<CodeableConcept> thePatientPreparation) { 
+      this.patientPreparation = thePatientPreparation;
+      return this;
     }
 
     public boolean hasPatientPreparation() { 
-      return this.patientPreparation != null && !this.patientPreparation.isEmpty();
+      if (this.patientPreparation == null)
+        return false;
+      for (CodeableConcept item : this.patientPreparation)
+        if (!item.isEmpty())
+          return true;
+      return false;
     }
 
-    /**
-     * @param value {@link #patientPreparation} (Preparation of the patient for specimen collection.). This is the underlying object with id, value and extensions. The accessor "getPatientPreparation" gives direct access to the value
-     */
-    public SpecimenDefinition setPatientPreparationElement(StringType value) { 
-      this.patientPreparation = value;
+    public CodeableConcept addPatientPreparation() { //3
+      CodeableConcept t = new CodeableConcept();
+      if (this.patientPreparation == null)
+        this.patientPreparation = new ArrayList<CodeableConcept>();
+      this.patientPreparation.add(t);
+      return t;
+    }
+
+    public SpecimenDefinition addPatientPreparation(CodeableConcept t) { //3
+      if (t == null)
+        return this;
+      if (this.patientPreparation == null)
+        this.patientPreparation = new ArrayList<CodeableConcept>();
+      this.patientPreparation.add(t);
       return this;
     }
 
     /**
-     * @return Preparation of the patient for specimen collection.
+     * @return The first repetition of repeating field {@link #patientPreparation}, creating it if it does not already exist
      */
-    public String getPatientPreparation() { 
-      return this.patientPreparation == null ? null : this.patientPreparation.getValue();
-    }
-
-    /**
-     * @param value Preparation of the patient for specimen collection.
-     */
-    public SpecimenDefinition setPatientPreparation(String value) { 
-      if (Utilities.noString(value))
-        this.patientPreparation = null;
-      else {
-        if (this.patientPreparation == null)
-          this.patientPreparation = new StringType();
-        this.patientPreparation.setValue(value);
+    public CodeableConcept getPatientPreparationFirstRep() { 
+      if (getPatientPreparation().isEmpty()) {
+        addPatientPreparation();
       }
-      return this;
+      return getPatientPreparation().get(0);
     }
 
     /**
@@ -2139,7 +2180,7 @@ public class SpecimenDefinition extends DomainResource {
         super.listChildren(children);
         children.add(new Property("identifier", "Identifier", "A business identifier associated with the kind of specimen.", 0, 1, identifier));
         children.add(new Property("typeCollected", "CodeableConcept", "The kind of material to be collected.", 0, 1, typeCollected));
-        children.add(new Property("patientPreparation", "string", "Preparation of the patient for specimen collection.", 0, 1, patientPreparation));
+        children.add(new Property("patientPreparation", "CodeableConcept", "Preparation of the patient for specimen collection.", 0, java.lang.Integer.MAX_VALUE, patientPreparation));
         children.add(new Property("timeAspect", "string", "Time aspect of specimen collection (duration or offset).", 0, 1, timeAspect));
         children.add(new Property("collection", "CodeableConcept", "The action to be performed for collecting the specimen.", 0, java.lang.Integer.MAX_VALUE, collection));
         children.add(new Property("typeTested", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, typeTested));
@@ -2150,7 +2191,7 @@ public class SpecimenDefinition extends DomainResource {
         switch (_hash) {
         case -1618432855: /*identifier*/  return new Property("identifier", "Identifier", "A business identifier associated with the kind of specimen.", 0, 1, identifier);
         case 588504367: /*typeCollected*/  return new Property("typeCollected", "CodeableConcept", "The kind of material to be collected.", 0, 1, typeCollected);
-        case -879411630: /*patientPreparation*/  return new Property("patientPreparation", "string", "Preparation of the patient for specimen collection.", 0, 1, patientPreparation);
+        case -879411630: /*patientPreparation*/  return new Property("patientPreparation", "CodeableConcept", "Preparation of the patient for specimen collection.", 0, java.lang.Integer.MAX_VALUE, patientPreparation);
         case 276972933: /*timeAspect*/  return new Property("timeAspect", "string", "Time aspect of specimen collection (duration or offset).", 0, 1, timeAspect);
         case -1741312354: /*collection*/  return new Property("collection", "CodeableConcept", "The action to be performed for collecting the specimen.", 0, java.lang.Integer.MAX_VALUE, collection);
         case -1407902581: /*typeTested*/  return new Property("typeTested", "", "Specimen conditioned in a container as expected by the testing laboratory.", 0, java.lang.Integer.MAX_VALUE, typeTested);
@@ -2164,7 +2205,7 @@ public class SpecimenDefinition extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return this.identifier == null ? new Base[0] : new Base[] {this.identifier}; // Identifier
         case 588504367: /*typeCollected*/ return this.typeCollected == null ? new Base[0] : new Base[] {this.typeCollected}; // CodeableConcept
-        case -879411630: /*patientPreparation*/ return this.patientPreparation == null ? new Base[0] : new Base[] {this.patientPreparation}; // StringType
+        case -879411630: /*patientPreparation*/ return this.patientPreparation == null ? new Base[0] : this.patientPreparation.toArray(new Base[this.patientPreparation.size()]); // CodeableConcept
         case 276972933: /*timeAspect*/ return this.timeAspect == null ? new Base[0] : new Base[] {this.timeAspect}; // StringType
         case -1741312354: /*collection*/ return this.collection == null ? new Base[0] : this.collection.toArray(new Base[this.collection.size()]); // CodeableConcept
         case -1407902581: /*typeTested*/ return this.typeTested == null ? new Base[0] : this.typeTested.toArray(new Base[this.typeTested.size()]); // SpecimenDefinitionTypeTestedComponent
@@ -2183,7 +2224,7 @@ public class SpecimenDefinition extends DomainResource {
           this.typeCollected = castToCodeableConcept(value); // CodeableConcept
           return value;
         case -879411630: // patientPreparation
-          this.patientPreparation = castToString(value); // StringType
+          this.getPatientPreparation().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
         case 276972933: // timeAspect
           this.timeAspect = castToString(value); // StringType
@@ -2206,7 +2247,7 @@ public class SpecimenDefinition extends DomainResource {
         } else if (name.equals("typeCollected")) {
           this.typeCollected = castToCodeableConcept(value); // CodeableConcept
         } else if (name.equals("patientPreparation")) {
-          this.patientPreparation = castToString(value); // StringType
+          this.getPatientPreparation().add(castToCodeableConcept(value));
         } else if (name.equals("timeAspect")) {
           this.timeAspect = castToString(value); // StringType
         } else if (name.equals("collection")) {
@@ -2223,7 +2264,7 @@ public class SpecimenDefinition extends DomainResource {
         switch (hash) {
         case -1618432855:  return getIdentifier(); 
         case 588504367:  return getTypeCollected(); 
-        case -879411630:  return getPatientPreparationElement();
+        case -879411630:  return addPatientPreparation(); 
         case 276972933:  return getTimeAspectElement();
         case -1741312354:  return addCollection(); 
         case -1407902581:  return addTypeTested(); 
@@ -2237,7 +2278,7 @@ public class SpecimenDefinition extends DomainResource {
         switch (hash) {
         case -1618432855: /*identifier*/ return new String[] {"Identifier"};
         case 588504367: /*typeCollected*/ return new String[] {"CodeableConcept"};
-        case -879411630: /*patientPreparation*/ return new String[] {"string"};
+        case -879411630: /*patientPreparation*/ return new String[] {"CodeableConcept"};
         case 276972933: /*timeAspect*/ return new String[] {"string"};
         case -1741312354: /*collection*/ return new String[] {"CodeableConcept"};
         case -1407902581: /*typeTested*/ return new String[] {};
@@ -2257,7 +2298,7 @@ public class SpecimenDefinition extends DomainResource {
           return this.typeCollected;
         }
         else if (name.equals("patientPreparation")) {
-          throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.patientPreparation");
+          return addPatientPreparation();
         }
         else if (name.equals("timeAspect")) {
           throw new FHIRException("Cannot call addChild on a primitive type SpecimenDefinition.timeAspect");
@@ -2282,7 +2323,11 @@ public class SpecimenDefinition extends DomainResource {
         copyValues(dst);
         dst.identifier = identifier == null ? null : identifier.copy();
         dst.typeCollected = typeCollected == null ? null : typeCollected.copy();
-        dst.patientPreparation = patientPreparation == null ? null : patientPreparation.copy();
+        if (patientPreparation != null) {
+          dst.patientPreparation = new ArrayList<CodeableConcept>();
+          for (CodeableConcept i : patientPreparation)
+            dst.patientPreparation.add(i.copy());
+        };
         dst.timeAspect = timeAspect == null ? null : timeAspect.copy();
         if (collection != null) {
           dst.collection = new ArrayList<CodeableConcept>();
@@ -2320,8 +2365,7 @@ public class SpecimenDefinition extends DomainResource {
         if (!(other_ instanceof SpecimenDefinition))
           return false;
         SpecimenDefinition o = (SpecimenDefinition) other_;
-        return compareValues(patientPreparation, o.patientPreparation, true) && compareValues(timeAspect, o.timeAspect, true)
-          ;
+        return compareValues(timeAspect, o.timeAspect, true);
       }
 
       public boolean isEmpty() {

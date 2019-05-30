@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -56,7 +56,6 @@ public class ResearchStudy extends DomainResource {
         ACTIVE, 
         /**
          * Study is completed prematurely and will not resume; patients are no longer examined nor treated.
-Tagged.
          */
         ADMINISTRATIVELYCOMPLETED, 
         /**
@@ -165,7 +164,7 @@ or intervention but are still being followed according to the primary objective 
         public String getDefinition() {
           switch (this) {
             case ACTIVE: return "Study is opened for accrual.";
-            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.\nTagged.";
+            case ADMINISTRATIVELYCOMPLETED: return "Study is completed prematurely and will not resume; patients are no longer examined nor treated.";
             case APPROVED: return "Protocol is approved by the review board.";
             case CLOSEDTOACCRUAL: return "Study is closed for accrual; patients can be examined and treated.";
             case CLOSEDTOACCRUALANDINTERVENTION: return "Study is closed to accrual and intervention, i.e. the study is closed to enrollment, all study subjects have completed treatment or intervention but are still being followed according to the primary objective of the study.";
@@ -960,14 +959,14 @@ or intervention but are still being followed according to the primary objective 
     /**
      * A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.
      */
-    @Child(name = "principalInvestigator", type = {Practitioner.class}, order=18, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "principalInvestigator", type = {Practitioner.class, PractitionerRole.class}, order=18, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Researcher who oversees multiple aspects of the study", formalDefinition="A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation." )
     protected Reference principalInvestigator;
 
     /**
      * The actual object that is the target of the reference (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
-    protected Practitioner principalInvestigatorTarget;
+    protected Resource principalInvestigatorTarget;
 
     /**
      * A facility in which study activities are conducted.
@@ -1010,7 +1009,7 @@ or intervention but are still being followed according to the primary objective 
     @Description(shortDefinition="A goal for the study", formalDefinition="A goal that the study is aiming to achieve in terms of a scientific question to be answered by the analysis of data collected during the study." )
     protected List<ResearchStudyObjectiveComponent> objective;
 
-    private static final long serialVersionUID = 339148025L;
+    private static final long serialVersionUID = -911538323L;
 
   /**
    * Constructor
@@ -1962,19 +1961,14 @@ or intervention but are still being followed according to the primary objective 
     /**
      * @return {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
-    public Practitioner getPrincipalInvestigatorTarget() { 
-      if (this.principalInvestigatorTarget == null)
-        if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create ResearchStudy.principalInvestigator");
-        else if (Configuration.doAutoCreate())
-          this.principalInvestigatorTarget = new Practitioner(); // aa
+    public Resource getPrincipalInvestigatorTarget() { 
       return this.principalInvestigatorTarget;
     }
 
     /**
      * @param value {@link #principalInvestigator} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.)
      */
-    public ResearchStudy setPrincipalInvestigatorTarget(Practitioner value) { 
+    public ResearchStudy setPrincipalInvestigatorTarget(Resource value) { 
       this.principalInvestigatorTarget = value;
       return this;
     }
@@ -2257,7 +2251,7 @@ or intervention but are still being followed according to the primary objective 
         children.add(new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment));
         children.add(new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period));
         children.add(new Property("sponsor", "Reference(Organization)", "An organization that initiates the investigation and is legally responsible for the study.", 0, 1, sponsor));
-        children.add(new Property("principalInvestigator", "Reference(Practitioner)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator));
+        children.add(new Property("principalInvestigator", "Reference(Practitioner|PractitionerRole)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator));
         children.add(new Property("site", "Reference(Location)", "A facility in which study activities are conducted.", 0, java.lang.Integer.MAX_VALUE, site));
         children.add(new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped));
         children.add(new Property("note", "Annotation", "Comments made about the study by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note));
@@ -2286,7 +2280,7 @@ or intervention but are still being followed according to the primary objective 
         case 116089604: /*enrollment*/  return new Property("enrollment", "Reference(Group)", "Reference to a Group that defines the criteria for and quantity of subjects participating in the study.  E.g. \" 200 female Europeans between the ages of 20 and 45 with early onset diabetes\".", 0, java.lang.Integer.MAX_VALUE, enrollment);
         case -991726143: /*period*/  return new Property("period", "Period", "Identifies the start date and the expected (or actual, depending on status) end date for the study.", 0, 1, period);
         case -1998892262: /*sponsor*/  return new Property("sponsor", "Reference(Organization)", "An organization that initiates the investigation and is legally responsible for the study.", 0, 1, sponsor);
-        case 1437117175: /*principalInvestigator*/  return new Property("principalInvestigator", "Reference(Practitioner)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator);
+        case 1437117175: /*principalInvestigator*/  return new Property("principalInvestigator", "Reference(Practitioner|PractitionerRole)", "A researcher in a study who oversees multiple aspects of the study, such as concept development, protocol writing, protocol submission for IRB approval, participant recruitment, informed consent, data collection, analysis, interpretation and presentation.", 0, 1, principalInvestigator);
         case 3530567: /*site*/  return new Property("site", "Reference(Location)", "A facility in which study activities are conducted.", 0, java.lang.Integer.MAX_VALUE, site);
         case 1181369065: /*reasonStopped*/  return new Property("reasonStopped", "CodeableConcept", "A description and/or code explaining the premature termination of the study.", 0, 1, reasonStopped);
         case 3387378: /*note*/  return new Property("note", "Annotation", "Comments made about the study by the performer, subject or other participants.", 0, java.lang.Integer.MAX_VALUE, note);
@@ -2874,7 +2868,7 @@ or intervention but are still being followed according to the primary objective 
    * Path: <b>ResearchStudy.principalInvestigator</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="principalinvestigator", path="ResearchStudy.principalInvestigator", description="Researcher who oversees multiple aspects of the study", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class } )
+  @SearchParamDefinition(name="principalinvestigator", path="ResearchStudy.principalInvestigator", description="Researcher who oversees multiple aspects of the study", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Practitioner") }, target={Practitioner.class, PractitionerRole.class } )
   public static final String SP_PRINCIPALINVESTIGATOR = "principalinvestigator";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>principalinvestigator</b>

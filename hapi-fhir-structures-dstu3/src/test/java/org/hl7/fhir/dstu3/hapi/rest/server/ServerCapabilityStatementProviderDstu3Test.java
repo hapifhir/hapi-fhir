@@ -1,47 +1,50 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.*;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
-
-import ca.uhn.fhir.model.primitive.InstantDt;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import com.google.common.collect.Lists;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
+import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.ResourceBinding;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestulfulServerConfiguration;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.IParameter;
+import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.collect.Lists;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CapabilityStatement.*;
+import org.hl7.fhir.dstu3.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationDefinitionParameterComponent;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationKind;
+import org.hl7.fhir.dstu3.model.OperationDefinition.OperationParameterUse;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ServerCapabilityStatementProviderDstu3Test {
 
-	private static FhirContext ourCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerCapabilityStatementProviderDstu3Test.class);
+	private static FhirContext ourCtx;
 	private static FhirValidator ourValidator;
 
 	static {
@@ -77,6 +80,47 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			throw new Exception("Could not find resource: " + wantResource);
 		}
 		return resource;
+	}
+
+	@Test
+	@Ignore
+	public void testSearchReferenceParameterWithExplicitChainsDocumentation() throws Exception {
+
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new SearchProviderWithExplicitChains());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		boolean found = false;
+		Collection<ResourceBinding> resourceBindings = rs.getResourceBindings();
+		for (ResourceBinding resourceBinding : resourceBindings) {
+			if (resourceBinding.getResourceName().equals("Patient")) {
+				List<BaseMethodBinding<?>> methodBindings = resourceBinding.getMethodBindings();
+				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
+				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
+				assertEquals("The organization at which this person is a patient", param.getDescription());
+				found = true;
+			}
+		}
+		assertTrue(found);
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		CapabilityStatementRestResourceComponent resource = findRestResource(conformance, "Patient");
+
+		assertEquals(1, resource.getSearchParam().size());
+		CapabilityStatementRestResourceSearchParamComponent param = resource.getSearchParam().get(0);
+		assertEquals("organization", param.getName());
+
+//		assertEquals("bar", param.getChain().get(0).getValue());
+//		assertEquals("baz.bob", param.getChain().get(1).getValue());
+//		assertEquals("foo", param.getChain().get(2).getValue());
+//		assertEquals(3, param.getChain().size());
 	}
 
 	@Test
@@ -124,6 +168,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"));
 		validate(opDef);
 		assertEquals("everything", opDef.getCode());
+		assertThat(opDef.getSystem(), is(false));
+		assertThat(opDef.getType(), is(false));
+		assertThat(opDef.getInstance(), is(true));
 	}
 
 	@Test
@@ -223,7 +270,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
-	/** See #379 */
+	/**
+	 * See #379
+	 */
 	@Test
 	public void testOperationAcrossMultipleTypes() throws Exception {
 		RestfulServer rs = new RestfulServer(ourCtx);
@@ -290,7 +339,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			assertEquals("Patient", opDef.getParameter().get(0).getType());
 		}
 	}
-	
+
 	@Test
 	public void testOperationDocumentation() throws Exception {
 
@@ -344,6 +393,10 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertEquals("1", opDef.getParameter().get(2).getMinElement().getValueAsString());
 		assertEquals("2", opDef.getParameter().get(2).getMaxElement().getValueAsString());
 		assertEquals("string", opDef.getParameter().get(2).getTypeElement().getValueAsString());
+
+		assertThat(opDef.getSystem(), is(true));
+		assertThat(opDef.getType(), is(false));
+		assertThat(opDef.getInstance(), is(true));
 	}
 
 	@Test
@@ -528,7 +581,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@Test
 	public void testSearchReferenceParameterWithList() throws Exception {
 
-		RestfulServer rsNoType = new RestfulServer(ourCtx){
+		RestfulServer rsNoType = new RestfulServer(ourCtx) {
 			@Override
 			public RestulfulServerConfiguration createConfiguration() {
 				RestulfulServerConfiguration retVal = super.createConfiguration();
@@ -545,7 +598,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String confNoType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(confNoType);
 
-		RestfulServer rsWithType = new RestfulServer(ourCtx){
+		RestfulServer rsWithType = new RestfulServer(ourCtx) {
 			@Override
 			public RestulfulServerConfiguration createConfiguration() {
 				RestulfulServerConfiguration retVal = super.createConfiguration();
@@ -622,6 +675,120 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertTrue(result.getMessages().toString(), result.isSuccessful());
 	}
 
+	@Test
+	public void testSystemLevelNamedQueryWithParameters() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new NamedQueryPlainProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
+		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
+		assertThat(operationComponent.getName(), is(NamedQueryPlainProvider.QUERY_NAME));
+
+		String operationReference = operationComponent.getDefinition().getReference();
+		assertThat(operationReference, not(nullValue()));
+
+		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		validate(operationDefinition);
+		assertThat(operationDefinition.getCode(), is(NamedQueryPlainProvider.QUERY_NAME));
+		assertThat("The operation name should be the description, if a description is set", operationDefinition.getName(), is(NamedQueryPlainProvider.DESCRIPTION));
+		assertThat(operationDefinition.getStatus(), is(PublicationStatus.ACTIVE));
+		assertThat(operationDefinition.getKind(), is(OperationKind.QUERY));
+		assertThat(operationDefinition.getDescription(), is(NamedQueryPlainProvider.DESCRIPTION));
+		assertThat(operationDefinition.getIdempotent(), is(true));
+		assertThat("A system level search has no target resources", operationDefinition.getResource(), is(empty()));
+		assertThat(operationDefinition.getSystem(), is(true));
+		assertThat(operationDefinition.getType(), is(false));
+		assertThat(operationDefinition.getInstance(), is(false));
+		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
+		assertThat(parameters.size(), is(1));
+		OperationDefinitionParameterComponent param = parameters.get(0);
+		assertThat(param.getName(), is(NamedQueryPlainProvider.SP_QUANTITY));
+		assertThat(param.getType(), is("string"));
+		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.QUANTITY.getCode()));
+		assertThat(param.getMin(), is(1));
+		assertThat(param.getMax(), is("1"));
+		assertThat(param.getUse(), is(OperationParameterUse.IN));
+	}
+
+	@Test
+	public void testResourceLevelNamedQueryWithParameters() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new NamedQueryResourceProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
+		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
+		String operationReference = operationComponent.getDefinition().getReference();
+		assertThat(operationReference, not(nullValue()));
+
+		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference));
+		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
+		validate(operationDefinition);
+		assertThat("The operation name should be the code if no description is set", operationDefinition.getName(), is(NamedQueryResourceProvider.QUERY_NAME));
+		String patientResourceName = "Patient";
+		assertThat("A resource level search targets the resource of the provider it's defined in", operationDefinition.getResource().get(0).getValue(), is(patientResourceName));
+		assertThat(operationDefinition.getSystem(), is(false));
+		assertThat(operationDefinition.getType(), is(true));
+		assertThat(operationDefinition.getInstance(), is(false));
+		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
+		assertThat(parameters.size(), is(1));
+		OperationDefinitionParameterComponent param = parameters.get(0);
+		assertThat(param.getName(), is(NamedQueryResourceProvider.SP_PARAM));
+		assertThat(param.getType(), is("string"));
+		assertThat(param.getSearchTypeElement().asStringValue(), is(RestSearchParameterTypeEnum.STRING.getCode()));
+		assertThat(param.getMin(), is(0));
+		assertThat(param.getMax(), is("1"));
+		assertThat(param.getUse(), is(OperationParameterUse.IN));
+
+		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
+			.filter(r -> patientResourceName.equals(r.getType()))
+			.findAny().get();
+		assertThat("Named query parameters should not appear in the resource search params", patientResource.getSearchParam(), is(empty()));
+	}
+
+	@Test
+	public void testExtendedOperationAtTypeLevel() throws Exception {
+		RestfulServer rs = new RestfulServer(ourCtx);
+		rs.setProviders(new TypeLevelOperationProvider());
+
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		rs.init(createServletConfig());
+
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+
+		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
+		ourLog.info(conf);
+
+		List<CapabilityStatementRestOperationComponent> operations = conformance.getRest().get(0).getOperation();
+		assertThat(operations.size(), is(1));
+		assertThat(operations.get(0).getName(), is(TypeLevelOperationProvider.OPERATION_NAME));
+
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()));
+		validate(opDef);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
+		assertThat(opDef.getSystem(), is(false));
+		assertThat(opDef.getType(), is(true));
+		assertThat(opDef.getInstance(), is(false));
+	}
+
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (CapabilityStatementRestOperationComponent next : theOperation) {
@@ -653,13 +820,21 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ValidationResult result = ourValidator.validateWithResult(theOpDef);
 		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info("Outcome: {}", outcome);
-		
+
 		assertTrue(outcome, result.isSuccessful());
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+	public static class SearchProviderWithExplicitChains {
+
+		@Search(type = Patient.class)
+		public Patient findPatient1(
+			@Description(shortDefinition = "The organization at which this person is a patient")
+			@RequiredParam(name = "organization.foo") ReferenceAndListParam theFoo,
+			@RequiredParam(name = "organization.bar") ReferenceAndListParam theBar,
+			@RequiredParam(name = "organization.baz.bob") ReferenceAndListParam theBazbob) {
+			return null;
+		}
+
 	}
 
 	@SuppressWarnings("unused")
@@ -706,7 +881,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient(@Description(shortDefinition = "The patient's identifier") @OptionalParam(name = Patient.SP_IDENTIFIER) TokenParam theIdentifier,
-				@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
+											@Description(shortDefinition = "The patient's name") @OptionalParam(name = Patient.SP_NAME) StringParam theName) {
 			return null;
 		}
 
@@ -717,7 +892,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "someOp")
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
-				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
+													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Encounter theEnd) {
 			return null;
 		}
 
@@ -738,7 +913,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "someOp")
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId,
-				@OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
+													 @OperationParam(name = "someOpParam1") DateType theStart, @OperationParam(name = "someOpParam2") Patient theEnd) {
 			return null;
 		}
 
@@ -782,9 +957,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	@SuppressWarnings("unused")
 	public static class PlainProviderWithExtendedOperationOnNoType {
 
-		@Operation(name = "plain", idempotent = true, returnParameters = { @OperationParam(min = 1, max = 2, name = "out1", type = StringType.class) })
+		@Operation(name = "plain", idempotent = true, returnParameters = {@OperationParam(min = 1, max = 2, name = "out1", type = StringType.class)})
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-				@OperationParam(name = "end") DateType theEnd) {
+													 @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -795,7 +970,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Operation(name = "everything", idempotent = true)
 		public IBundleProvider everything(javax.servlet.http.HttpServletRequest theServletRequest, @IdParam IdType theId, @OperationParam(name = "start") DateType theStart,
-				@OperationParam(name = "end") DateType theEnd) {
+													 @OperationParam(name = "end") DateType theEnd) {
 			return null;
 		}
 
@@ -812,8 +987,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		@Description(shortDefinition = "This is a search for stuff!")
 		@Search
 		public List<DiagnosticReport> findDiagnosticReportsByPatient(@RequiredParam(name = DiagnosticReport.SP_SUBJECT + '.' + Patient.SP_IDENTIFIER) TokenParam thePatientId,
-				@OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
-				@IncludeParam(allow = { "DiagnosticReport.result" }) Set<Include> theIncludes) throws Exception {
+																						 @OptionalParam(name = DiagnosticReport.SP_CODE) TokenOrListParam theNames, @OptionalParam(name = DiagnosticReport.SP_DATE) DateRangeParam theDateRange,
+																						 @IncludeParam(allow = {"DiagnosticReport.result"}) Set<Include> theIncludes) throws Exception {
 			return null;
 		}
 
@@ -844,7 +1019,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		@Search(type = Patient.class)
 		public Patient findPatient2(
-				@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = { Patient.class }) ReferenceAndListParam theLink) {
+			@Description(shortDefinition = "All patients linked to the given patient") @OptionalParam(name = "link", targetTypes = {Patient.class}) ReferenceAndListParam theLink) {
 			return null;
 		}
 
@@ -854,21 +1029,20 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	public static class SearchProviderWithWhitelist {
 
 		@Search(type = Patient.class)
-		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = { "foo",
-				"bar" }) ReferenceAndListParam theIdentifier) {
+		public Patient findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION, chainWhitelist = {"foo",
+			"bar"}) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListNoType  implements IResourceProvider {
+	public static class SearchProviderWithListNoType implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
-
 
 
 		@Search()
@@ -879,7 +1053,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 	}
 
 	@SuppressWarnings("unused")
-	public static class SearchProviderWithListWithType  implements IResourceProvider {
+	public static class SearchProviderWithListWithType implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -887,15 +1061,13 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		}
 
 
-
-		@Search(type=Patient.class)
+		@Search(type = Patient.class)
 		public List<Patient> findPatient1(@Description(shortDefinition = "The organization at which this person is a patient") @RequiredParam(name = Patient.SP_ORGANIZATION) ReferenceAndListParam theIdentifier) {
 			return null;
 		}
 
 	}
 
-	
 	public static class SystemHistoryProvider {
 
 		@History
@@ -932,6 +1104,57 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			return null;
 		}
 
+	}
+
+	public static class TypeLevelOperationProvider implements IResourceProvider {
+
+		public static final String OPERATION_NAME = "op";
+
+		@Operation(name = OPERATION_NAME, idempotent = true)
+		public IBundleProvider op() {
+			return null;
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+	}
+
+	public static class NamedQueryPlainProvider {
+
+		public static final String QUERY_NAME = "testQuery";
+		public static final String DESCRIPTION = "A query description";
+		public static final String SP_QUANTITY = "quantity";
+
+		@Search(queryName = QUERY_NAME)
+		@Description(formalDefinition = DESCRIPTION)
+		public Bundle findAllGivenParameter(@RequiredParam(name = SP_QUANTITY) QuantityParam quantity) {
+			return null;
+		}
+	}
+
+	public static class NamedQueryResourceProvider implements IResourceProvider {
+
+		public static final String QUERY_NAME = "testQuery";
+		public static final String SP_PARAM = "param";
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Patient.class;
+		}
+
+		@Search(queryName = QUERY_NAME)
+		public Bundle findAllGivenParameter(@OptionalParam(name = SP_PARAM) StringParam param) {
+			return null;
+		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

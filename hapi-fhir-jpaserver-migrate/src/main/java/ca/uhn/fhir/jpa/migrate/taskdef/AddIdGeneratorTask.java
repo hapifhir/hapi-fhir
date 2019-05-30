@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -78,7 +79,13 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 		}
 
 		if (isNotBlank(sql)) {
-			if (JdbcUtils.getSequenceNames(getConnectionProperties()).contains(myGeneratorName)) {
+			Set<String> sequenceNames =
+				JdbcUtils.getSequenceNames(getConnectionProperties())
+				.stream()
+				.map(String::toLowerCase)
+				.collect(Collectors.toSet());
+			ourLog.debug("Currently have sequences: {}", sequenceNames);
+			if (sequenceNames.contains(myGeneratorName.toLowerCase())) {
 				ourLog.info("Sequence {} already exists - No action performed", myGeneratorName);
 				return;
 			}

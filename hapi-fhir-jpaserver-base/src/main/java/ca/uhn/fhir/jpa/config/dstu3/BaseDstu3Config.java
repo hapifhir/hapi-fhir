@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
-		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
+		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 		return retVal;
 	}
 
@@ -123,7 +123,7 @@ public class BaseDstu3Config extends BaseConfig {
 
 	@Bean
 	public ISearchParamRegistry searchParamRegistry() {
-		return new SearchParamRegistryDstu3(searchParamProvider());
+		return new SearchParamRegistryDstu3();
 	}
 
 	@Bean(name = "mySystemDaoDstu3", autowire = Autowire.BY_NAME)

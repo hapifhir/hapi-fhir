@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -52,7 +52,7 @@ public class Dosage extends BackboneType implements ICompositeType {
         /**
          * The kind of dose or rate specified, for example, ordered or calculated.
          */
-        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=1, max=1, modifier=false, summary=true)
+        @Child(name = "type", type = {CodeableConcept.class}, order=1, min=0, max=1, modifier=false, summary=true)
         @Description(shortDefinition="The kind of dose or rate specified", formalDefinition="The kind of dose or rate specified, for example, ordered or calculated." )
         @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/dose-rate-type")
         protected CodeableConcept type;
@@ -78,14 +78,6 @@ public class Dosage extends BackboneType implements ICompositeType {
      */
       public DosageDoseAndRateComponent() {
         super();
-      }
-
-    /**
-     * Constructor
-     */
-      public DosageDoseAndRateComponent(CodeableConcept type) {
-        super();
-        this.type = type;
       }
 
         /**
@@ -124,7 +116,7 @@ public class Dosage extends BackboneType implements ICompositeType {
          */
         public Range getDoseRange() throws FHIRException { 
           if (this.dose == null)
-            return null;
+            this.dose = new Range();
           if (!(this.dose instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (Range) this.dose;
@@ -139,7 +131,7 @@ public class Dosage extends BackboneType implements ICompositeType {
          */
         public Quantity getDoseQuantity() throws FHIRException { 
           if (this.dose == null)
-            return null;
+            this.dose = new Quantity();
           if (!(this.dose instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.dose.getClass().getName()+" was encountered");
           return (Quantity) this.dose;
@@ -175,7 +167,7 @@ public class Dosage extends BackboneType implements ICompositeType {
          */
         public Ratio getRateRatio() throws FHIRException { 
           if (this.rate == null)
-            return null;
+            this.rate = new Ratio();
           if (!(this.rate instanceof Ratio))
             throw new FHIRException("Type mismatch: the type Ratio was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Ratio) this.rate;
@@ -190,7 +182,7 @@ public class Dosage extends BackboneType implements ICompositeType {
          */
         public Range getRateRange() throws FHIRException { 
           if (this.rate == null)
-            return null;
+            this.rate = new Range();
           if (!(this.rate instanceof Range))
             throw new FHIRException("Type mismatch: the type Range was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Range) this.rate;
@@ -205,7 +197,7 @@ public class Dosage extends BackboneType implements ICompositeType {
          */
         public Quantity getRateQuantity() throws FHIRException { 
           if (this.rate == null)
-            return null;
+            this.rate = new Quantity();
           if (!(this.rate instanceof Quantity))
             throw new FHIRException("Type mismatch: the type Quantity was expected, but "+this.rate.getClass().getName()+" was encountered");
           return (Quantity) this.rate;
@@ -727,7 +719,7 @@ public class Dosage extends BackboneType implements ICompositeType {
      */
     public BooleanType getAsNeededBooleanType() throws FHIRException { 
       if (this.asNeeded == null)
-        return null;
+        this.asNeeded = new BooleanType();
       if (!(this.asNeeded instanceof BooleanType))
         throw new FHIRException("Type mismatch: the type BooleanType was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (BooleanType) this.asNeeded;
@@ -742,7 +734,7 @@ public class Dosage extends BackboneType implements ICompositeType {
      */
     public CodeableConcept getAsNeededCodeableConcept() throws FHIRException { 
       if (this.asNeeded == null)
-        return null;
+        this.asNeeded = new CodeableConcept();
       if (!(this.asNeeded instanceof CodeableConcept))
         throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.asNeeded.getClass().getName()+" was encountered");
       return (CodeableConcept) this.asNeeded;

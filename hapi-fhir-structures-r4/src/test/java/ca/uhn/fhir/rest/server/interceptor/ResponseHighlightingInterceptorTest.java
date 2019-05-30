@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -155,7 +156,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<>();
 		reqDetails.setParameters(params);
@@ -381,7 +382,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setServer(new RestfulServer(ourCtx));
 		reqDetails.setServletRequest(req);
@@ -416,7 +417,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_FORMAT, new String[]{Constants.FORMAT_HTML});
@@ -445,7 +446,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_FORMAT, new String[]{Constants.CT_HTML});
@@ -471,7 +472,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
@@ -500,7 +501,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<>());
 		reqDetails.setServer(new RestfulServer(ourCtx));
@@ -529,7 +530,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
@@ -563,7 +564,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -593,7 +594,7 @@ public class ResponseHighlightingInterceptorTest {
 		Patient resource = new Patient();
 		resource.addName().setFamily("FAMILY");
 
-		ServletRequestDetails reqDetails = new TestServletRequestDetails();
+		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<>());
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -789,6 +790,10 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	class TestServletRequestDetails extends ServletRequestDetails {
+		TestServletRequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
+			super(theInterceptorBroadcaster);
+		}
+
 		@Override
 		public String getServerBaseForRequest() {
 			return "/baseDstu3";

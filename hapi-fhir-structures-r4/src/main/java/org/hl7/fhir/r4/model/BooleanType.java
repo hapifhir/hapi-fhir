@@ -75,7 +75,9 @@ public class BooleanType extends PrimitiveType<Boolean> implements IBaseBooleanD
 	}
 
 	public BooleanType copy() {
-		return new BooleanType(getValue());
+		BooleanType ret = new BooleanType(getValue());
+    copyValues(ret);
+    return ret;
 	}
 
 	protected String encode(Boolean theValue) {

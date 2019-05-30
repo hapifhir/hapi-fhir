@@ -1,12 +1,13 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,11 +31,14 @@ public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
 		return new StringOrListParam();
 	}
 
-	@CoverageIgnore
 	@Override
 	public StringAndListParam addAnd(StringOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
 
+	public StringAndListParam addAnd(StringParam theValue) {
+		addValue(new StringOrListParam().addOr(theValue));
+		return this;
+	}
 }

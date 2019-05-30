@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -58,23 +58,23 @@ public class CarePlan extends DomainResource {
          */
         ACTIVE, 
         /**
-         * The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.
+         * The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.
          */
         ONHOLD, 
         /**
-         * The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
+         * The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.
          */
         REVOKED, 
         /**
-         * Activity against the request has been sufficiently completed to the satisfaction of the requester.
+         * The activity described by the request has been fully performed.  No further activity will occur.
          */
         COMPLETED, 
         /**
-         * This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
+         * This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be "cancelled" rather than "entered-in-error".).
          */
         ENTEREDINERROR, 
         /**
-         * The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.
+         * The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.
          */
         UNKNOWN, 
         /**
@@ -131,11 +131,11 @@ public class CarePlan extends DomainResource {
           switch (this) {
             case DRAFT: return "The request has been created but is not yet complete or ready for action.";
             case ACTIVE: return "The request is in force and ready to be acted upon.";
-            case ONHOLD: return "The authorization/request to act has been temporarily withdrawn but is expected to resume in the future.";
-            case REVOKED: return "The authorization/request to act has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
-            case COMPLETED: return "Activity against the request has been sufficiently completed to the satisfaction of the requester.";
-            case ENTEREDINERROR: return "This electronic record should never have existed, though it is possible that real-world decisions were based on it.  (If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
-            case UNKNOWN: return "The authoring system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" . One of the listed statuses is presumed to apply,  but the system creating the request does not know.";
+            case ONHOLD: return "The request (and any implicit authorization to act) has been temporarily withdrawn but is expected to resume in the future.";
+            case REVOKED: return "The request (and any implicit authorization to act) has been terminated prior to the known full completion of the intended actions.  No further activity should occur.";
+            case COMPLETED: return "The activity described by the request has been fully performed.  No further activity will occur.";
+            case ENTEREDINERROR: return "This request should never have existed and should be considered 'void'.  (It is possible that real-world decisions were based on it.  If real-world activity has occurred, the status should be \"cancelled\" rather than \"entered-in-error\".).";
+            case UNKNOWN: return "The authoring/source system does not know which of the status values currently applies for this request.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply,  but the authoring/source system does not know which.";
             default: return "?";
           }
         }
@@ -534,7 +534,7 @@ public class CarePlan extends DomainResource {
 
     public enum CarePlanActivityStatus {
         /**
-         * Activity is planned but no action has yet been taken.
+         * Care plan activity is planned but no action has yet been taken.
          */
         NOTSTARTED, 
         /**
@@ -542,31 +542,31 @@ public class CarePlan extends DomainResource {
          */
         SCHEDULED, 
         /**
-         * Activity has been started but is not yet complete.
+         * Care plan activity has been started but is not yet complete.
          */
         INPROGRESS, 
         /**
-         * Activity was started but has temporarily ceased with an expectation of resumption at a future time.
+         * Care plan activity was started but has temporarily ceased with an expectation of resumption at a future time.
          */
         ONHOLD, 
         /**
-         * The activity has been completed (more or less) as planned.
+         * Care plan activity has been completed (more or less) as planned.
          */
         COMPLETED, 
         /**
-         * The planned activity has been withdrawn.
+         * The planned care plan activity has been withdrawn.
          */
         CANCELLED, 
         /**
-         * The planned activity has been ended prior to completion after the activity was started.
+         * The planned care plan activity has been ended prior to completion after the activity was started.
          */
         STOPPED, 
         /**
-         * The current state of the activity is not known.  Note: This concept is not to be used for "other".
+         * The current state of the care plan activity is not known.  Note: This concept is not to be used for "other" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one.
          */
         UNKNOWN, 
         /**
-         * The activity was entered in error and voided.
+         * Care plan activity was entered in error and voided.
          */
         ENTEREDINERROR, 
         /**
@@ -629,15 +629,15 @@ public class CarePlan extends DomainResource {
         }
         public String getDefinition() {
           switch (this) {
-            case NOTSTARTED: return "Activity is planned but no action has yet been taken.";
+            case NOTSTARTED: return "Care plan activity is planned but no action has yet been taken.";
             case SCHEDULED: return "Appointment or other booking has occurred but activity has not yet begun.";
-            case INPROGRESS: return "Activity has been started but is not yet complete.";
-            case ONHOLD: return "Activity was started but has temporarily ceased with an expectation of resumption at a future time.";
-            case COMPLETED: return "The activity has been completed (more or less) as planned.";
-            case CANCELLED: return "The planned activity has been withdrawn.";
-            case STOPPED: return "The planned activity has been ended prior to completion after the activity was started.";
-            case UNKNOWN: return "The current state of the activity is not known.  Note: This concept is not to be used for \"other\".";
-            case ENTEREDINERROR: return "The activity was entered in error and voided.";
+            case INPROGRESS: return "Care plan activity has been started but is not yet complete.";
+            case ONHOLD: return "Care plan activity was started but has temporarily ceased with an expectation of resumption at a future time.";
+            case COMPLETED: return "Care plan activity has been completed (more or less) as planned.";
+            case CANCELLED: return "The planned care plan activity has been withdrawn.";
+            case STOPPED: return "The planned care plan activity has been ended prior to completion after the activity was started.";
+            case UNKNOWN: return "The current state of the care plan activity is not known.  Note: This concept is not to be used for \"other\" - one of the listed statuses is presumed to apply, but the authoring/source system does not know which one.";
+            case ENTEREDINERROR: return "Care plan activity was entered in error and voided.";
             default: return "?";
           }
         }
@@ -651,7 +651,7 @@ public class CarePlan extends DomainResource {
             case CANCELLED: return "Cancelled";
             case STOPPED: return "Stopped";
             case UNKNOWN: return "Unknown";
-            case ENTEREDINERROR: return "Entered In Error";
+            case ENTEREDINERROR: return "Entered in Error";
             default: return "?";
           }
         }
@@ -1881,7 +1881,7 @@ public class CarePlan extends DomainResource {
          */
         public Timing getScheduledTiming() throws FHIRException { 
           if (this.scheduled == null)
-            return null;
+            this.scheduled = new Timing();
           if (!(this.scheduled instanceof Timing))
             throw new FHIRException("Type mismatch: the type Timing was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Timing) this.scheduled;
@@ -1896,7 +1896,7 @@ public class CarePlan extends DomainResource {
          */
         public Period getScheduledPeriod() throws FHIRException { 
           if (this.scheduled == null)
-            return null;
+            this.scheduled = new Period();
           if (!(this.scheduled instanceof Period))
             throw new FHIRException("Type mismatch: the type Period was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (Period) this.scheduled;
@@ -1911,7 +1911,7 @@ public class CarePlan extends DomainResource {
          */
         public StringType getScheduledStringType() throws FHIRException { 
           if (this.scheduled == null)
-            return null;
+            this.scheduled = new StringType();
           if (!(this.scheduled instanceof StringType))
             throw new FHIRException("Type mismatch: the type StringType was expected, but "+this.scheduled.getClass().getName()+" was encountered");
           return (StringType) this.scheduled;
@@ -2054,7 +2054,7 @@ public class CarePlan extends DomainResource {
          */
         public CodeableConcept getProductCodeableConcept() throws FHIRException { 
           if (this.product == null)
-            return null;
+            this.product = new CodeableConcept();
           if (!(this.product instanceof CodeableConcept))
             throw new FHIRException("Type mismatch: the type CodeableConcept was expected, but "+this.product.getClass().getName()+" was encountered");
           return (CodeableConcept) this.product;
@@ -2069,7 +2069,7 @@ public class CarePlan extends DomainResource {
          */
         public Reference getProductReference() throws FHIRException { 
           if (this.product == null)
-            return null;
+            this.product = new Reference();
           if (!(this.product instanceof Reference))
             throw new FHIRException("Type mismatch: the type Reference was expected, but "+this.product.getClass().getName()+" was encountered");
           return (Reference) this.product;
@@ -2697,16 +2697,16 @@ public class CarePlan extends DomainResource {
     protected Resource subjectTarget;
 
     /**
-     * Identifies the original context in which this particular care plan was created.
+     * The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.
      */
-    @Child(name = "context", type = {Encounter.class, EpisodeOfCare.class}, order=12, min=0, max=1, modifier=false, summary=true)
-    @Description(shortDefinition="Created in context of", formalDefinition="Identifies the original context in which this particular care plan was created." )
-    protected Reference context;
+    @Child(name = "encounter", type = {Encounter.class}, order=12, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Encounter created as part of", formalDefinition="The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated." )
+    protected Reference encounter;
 
     /**
-     * The actual object that is the target of the reference (Identifies the original context in which this particular care plan was created.)
+     * The actual object that is the target of the reference (The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.)
      */
-    protected Resource contextTarget;
+    protected Encounter encounterTarget;
 
     /**
      * Indicates when the plan did (or is intended to) come into effect and end.
@@ -2808,7 +2808,7 @@ public class CarePlan extends DomainResource {
     @Description(shortDefinition="Comments about the plan", formalDefinition="General notes about the care plan not covered elsewhere." )
     protected List<Annotation> note;
 
-    private static final long serialVersionUID = 973275448L;
+    private static final long serialVersionUID = -584930613L;
 
   /**
    * Constructor
@@ -3508,41 +3508,46 @@ public class CarePlan extends DomainResource {
     }
 
     /**
-     * @return {@link #context} (Identifies the original context in which this particular care plan was created.)
+     * @return {@link #encounter} (The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.)
      */
-    public Reference getContext() { 
-      if (this.context == null)
+    public Reference getEncounter() { 
+      if (this.encounter == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create CarePlan.context");
+          throw new Error("Attempt to auto-create CarePlan.encounter");
         else if (Configuration.doAutoCreate())
-          this.context = new Reference(); // cc
-      return this.context;
+          this.encounter = new Reference(); // cc
+      return this.encounter;
     }
 
-    public boolean hasContext() { 
-      return this.context != null && !this.context.isEmpty();
+    public boolean hasEncounter() { 
+      return this.encounter != null && !this.encounter.isEmpty();
     }
 
     /**
-     * @param value {@link #context} (Identifies the original context in which this particular care plan was created.)
+     * @param value {@link #encounter} (The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.)
      */
-    public CarePlan setContext(Reference value) { 
-      this.context = value;
+    public CarePlan setEncounter(Reference value) { 
+      this.encounter = value;
       return this;
     }
 
     /**
-     * @return {@link #context} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (Identifies the original context in which this particular care plan was created.)
+     * @return {@link #encounter} The actual object that is the target of the reference. The reference library doesn't populate this, but you can use it to hold the resource if you resolve it. (The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.)
      */
-    public Resource getContextTarget() { 
-      return this.contextTarget;
+    public Encounter getEncounterTarget() { 
+      if (this.encounterTarget == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create CarePlan.encounter");
+        else if (Configuration.doAutoCreate())
+          this.encounterTarget = new Encounter(); // aa
+      return this.encounterTarget;
     }
 
     /**
-     * @param value {@link #context} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (Identifies the original context in which this particular care plan was created.)
+     * @param value {@link #encounter} The actual object that is the target of the reference. The reference library doesn't use these, but you can use it to hold the resource if you resolve it. (The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.)
      */
-    public CarePlan setContextTarget(Resource value) { 
-      this.contextTarget = value;
+    public CarePlan setEncounterTarget(Encounter value) { 
+      this.encounterTarget = value;
       return this;
     }
 
@@ -4129,7 +4134,7 @@ public class CarePlan extends DomainResource {
         children.add(new Property("title", "string", "Human-friendly name for the care plan.", 0, 1, title));
         children.add(new Property("description", "string", "A description of the scope and nature of the plan.", 0, 1, description));
         children.add(new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject));
-        children.add(new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular care plan was created.", 0, 1, context));
+        children.add(new Property("encounter", "Reference(Encounter)", "The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.", 0, 1, encounter));
         children.add(new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period));
         children.add(new Property("created", "dateTime", "Represents when this particular CarePlan record was created in the system, which is often a system-generated date.", 0, 1, created));
         children.add(new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "When populated, the author is responsible for the care plan.  The care plan is attributed to the author.", 0, 1, author));
@@ -4157,7 +4162,7 @@ public class CarePlan extends DomainResource {
         case 110371416: /*title*/  return new Property("title", "string", "Human-friendly name for the care plan.", 0, 1, title);
         case -1724546052: /*description*/  return new Property("description", "string", "A description of the scope and nature of the plan.", 0, 1, description);
         case -1867885268: /*subject*/  return new Property("subject", "Reference(Patient|Group)", "Identifies the patient or group whose intended care is described by the plan.", 0, 1, subject);
-        case 951530927: /*context*/  return new Property("context", "Reference(Encounter|EpisodeOfCare)", "Identifies the original context in which this particular care plan was created.", 0, 1, context);
+        case 1524132147: /*encounter*/  return new Property("encounter", "Reference(Encounter)", "The Encounter during which this CarePlan was created or to which the creation of this record is tightly associated.", 0, 1, encounter);
         case -991726143: /*period*/  return new Property("period", "Period", "Indicates when the plan did (or is intended to) come into effect and end.", 0, 1, period);
         case 1028554472: /*created*/  return new Property("created", "dateTime", "Represents when this particular CarePlan record was created in the system, which is often a system-generated date.", 0, 1, created);
         case -1406328437: /*author*/  return new Property("author", "Reference(Patient|Practitioner|PractitionerRole|Device|RelatedPerson|Organization|CareTeam)", "When populated, the author is responsible for the care plan.  The care plan is attributed to the author.", 0, 1, author);
@@ -4188,7 +4193,7 @@ public class CarePlan extends DomainResource {
         case 110371416: /*title*/ return this.title == null ? new Base[0] : new Base[] {this.title}; // StringType
         case -1724546052: /*description*/ return this.description == null ? new Base[0] : new Base[] {this.description}; // StringType
         case -1867885268: /*subject*/ return this.subject == null ? new Base[0] : new Base[] {this.subject}; // Reference
-        case 951530927: /*context*/ return this.context == null ? new Base[0] : new Base[] {this.context}; // Reference
+        case 1524132147: /*encounter*/ return this.encounter == null ? new Base[0] : new Base[] {this.encounter}; // Reference
         case -991726143: /*period*/ return this.period == null ? new Base[0] : new Base[] {this.period}; // Period
         case 1028554472: /*created*/ return this.created == null ? new Base[0] : new Base[] {this.created}; // DateTimeType
         case -1406328437: /*author*/ return this.author == null ? new Base[0] : new Base[] {this.author}; // Reference
@@ -4245,8 +4250,8 @@ public class CarePlan extends DomainResource {
         case -1867885268: // subject
           this.subject = castToReference(value); // Reference
           return value;
-        case 951530927: // context
-          this.context = castToReference(value); // Reference
+        case 1524132147: // encounter
+          this.encounter = castToReference(value); // Reference
           return value;
         case -991726143: // period
           this.period = castToPeriod(value); // Period
@@ -4311,8 +4316,8 @@ public class CarePlan extends DomainResource {
           this.description = castToString(value); // StringType
         } else if (name.equals("subject")) {
           this.subject = castToReference(value); // Reference
-        } else if (name.equals("context")) {
-          this.context = castToReference(value); // Reference
+        } else if (name.equals("encounter")) {
+          this.encounter = castToReference(value); // Reference
         } else if (name.equals("period")) {
           this.period = castToPeriod(value); // Period
         } else if (name.equals("created")) {
@@ -4353,7 +4358,7 @@ public class CarePlan extends DomainResource {
         case 110371416:  return getTitleElement();
         case -1724546052:  return getDescriptionElement();
         case -1867885268:  return getSubject(); 
-        case 951530927:  return getContext(); 
+        case 1524132147:  return getEncounter(); 
         case -991726143:  return getPeriod(); 
         case 1028554472:  return getCreatedElement();
         case -1406328437:  return getAuthor(); 
@@ -4384,7 +4389,7 @@ public class CarePlan extends DomainResource {
         case 110371416: /*title*/ return new String[] {"string"};
         case -1724546052: /*description*/ return new String[] {"string"};
         case -1867885268: /*subject*/ return new String[] {"Reference"};
-        case 951530927: /*context*/ return new String[] {"Reference"};
+        case 1524132147: /*encounter*/ return new String[] {"Reference"};
         case -991726143: /*period*/ return new String[] {"Period"};
         case 1028554472: /*created*/ return new String[] {"dateTime"};
         case -1406328437: /*author*/ return new String[] {"Reference"};
@@ -4439,9 +4444,9 @@ public class CarePlan extends DomainResource {
           this.subject = new Reference();
           return this.subject;
         }
-        else if (name.equals("context")) {
-          this.context = new Reference();
-          return this.context;
+        else if (name.equals("encounter")) {
+          this.encounter = new Reference();
+          return this.encounter;
         }
         else if (name.equals("period")) {
           this.period = new Period();
@@ -4527,7 +4532,7 @@ public class CarePlan extends DomainResource {
         dst.title = title == null ? null : title.copy();
         dst.description = description == null ? null : description.copy();
         dst.subject = subject == null ? null : subject.copy();
-        dst.context = context == null ? null : context.copy();
+        dst.encounter = encounter == null ? null : encounter.copy();
         dst.period = period == null ? null : period.copy();
         dst.created = created == null ? null : created.copy();
         dst.author = author == null ? null : author.copy();
@@ -4584,7 +4589,7 @@ public class CarePlan extends DomainResource {
            && compareDeep(instantiatesUri, o.instantiatesUri, true) && compareDeep(basedOn, o.basedOn, true)
            && compareDeep(replaces, o.replaces, true) && compareDeep(partOf, o.partOf, true) && compareDeep(status, o.status, true)
            && compareDeep(intent, o.intent, true) && compareDeep(category, o.category, true) && compareDeep(title, o.title, true)
-           && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true) && compareDeep(context, o.context, true)
+           && compareDeep(description, o.description, true) && compareDeep(subject, o.subject, true) && compareDeep(encounter, o.encounter, true)
            && compareDeep(period, o.period, true) && compareDeep(created, o.created, true) && compareDeep(author, o.author, true)
            && compareDeep(contributor, o.contributor, true) && compareDeep(careTeam, o.careTeam, true) && compareDeep(addresses, o.addresses, true)
            && compareDeep(supportingInfo, o.supportingInfo, true) && compareDeep(goal, o.goal, true) && compareDeep(activity, o.activity, true)
@@ -4606,7 +4611,7 @@ public class CarePlan extends DomainResource {
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, instantiatesCanonical
           , instantiatesUri, basedOn, replaces, partOf, status, intent, category, title
-          , description, subject, context, period, created, author, contributor, careTeam
+          , description, subject, encounter, period, created, author, contributor, careTeam
           , addresses, supportingInfo, goal, activity, note);
       }
 
@@ -4840,19 +4845,19 @@ public class CarePlan extends DomainResource {
  /**
    * Search parameter: <b>encounter</b>
    * <p>
-   * Description: <b>Created in context of</b><br>
+   * Description: <b>Encounter created as part of</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>CarePlan.context</b><br>
+   * Path: <b>CarePlan.encounter</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="encounter", path="CarePlan.context.where(resolve() is Encounter)", description="Created in context of", type="reference", target={Encounter.class } )
+  @SearchParamDefinition(name="encounter", path="CarePlan.encounter", description="Encounter created as part of", type="reference", providesMembershipIn={ @ca.uhn.fhir.model.api.annotation.Compartment(name="Encounter") }, target={Encounter.class } )
   public static final String SP_ENCOUNTER = "encounter";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>encounter</b>
    * <p>
-   * Description: <b>Created in context of</b><br>
+   * Description: <b>Encounter created as part of</b><br>
    * Type: <b>reference</b><br>
-   * Path: <b>CarePlan.context</b><br>
+   * Path: <b>CarePlan.encounter</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam ENCOUNTER = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_ENCOUNTER);
@@ -4986,32 +4991,6 @@ public class CarePlan extends DomainResource {
    * the path value of "<b>CarePlan:patient</b>".
    */
   public static final ca.uhn.fhir.model.api.Include INCLUDE_PATIENT = new ca.uhn.fhir.model.api.Include("CarePlan:patient").toLocked();
-
- /**
-   * Search parameter: <b>context</b>
-   * <p>
-   * Description: <b>Created in context of</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>CarePlan.context</b><br>
-   * </p>
-   */
-  @SearchParamDefinition(name="context", path="CarePlan.context", description="Created in context of", type="reference", target={Encounter.class, EpisodeOfCare.class } )
-  public static final String SP_CONTEXT = "context";
- /**
-   * <b>Fluent Client</b> search parameter constant for <b>context</b>
-   * <p>
-   * Description: <b>Created in context of</b><br>
-   * Type: <b>reference</b><br>
-   * Path: <b>CarePlan.context</b><br>
-   * </p>
-   */
-  public static final ca.uhn.fhir.rest.gclient.ReferenceClientParam CONTEXT = new ca.uhn.fhir.rest.gclient.ReferenceClientParam(SP_CONTEXT);
-
-/**
-   * Constant for fluent queries to be used to add include statements. Specifies
-   * the path value of "<b>CarePlan:context</b>".
-   */
-  public static final ca.uhn.fhir.model.api.Include INCLUDE_CONTEXT = new ca.uhn.fhir.model.api.Include("CarePlan:context").toLocked();
 
  /**
    * Search parameter: <b>activity-date</b>

@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nullable;
@@ -59,6 +60,12 @@ public interface IFhirSystemDao<T, MT> extends IDao {
 	 * @param theRequestDetails TODO
 	 */
 	MT metaGetOperation(RequestDetails theRequestDetails);
+
+	/**
+	 * Implementations may implement this method to implement the $process-message
+	 * operation
+	 */
+	IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage);
 
 	T transaction(RequestDetails theRequestDetails, T theResources);
 

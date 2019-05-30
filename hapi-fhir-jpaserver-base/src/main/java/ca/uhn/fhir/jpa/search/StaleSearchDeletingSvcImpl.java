@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,10 +102,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 			// Only delete if we don't have results left in this search
 			if (resultPids.getNumberOfElements() < max) {
-				ourLog.info("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
+				ourLog.debug("Deleting search {}/{} - Created[{}] -- Last returned[{}]", searchToDelete.getId(), searchToDelete.getUuid(), new InstantType(searchToDelete.getCreated()), new InstantType(searchToDelete.getSearchLastReturned()));
 				mySearchDao.deleteByPid(searchToDelete.getId());
 			} else {
-				ourLog.info("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
+				ourLog.debug("Purged {} search results for deleted search {}/{}", resultPids.getSize(), searchToDelete.getId(), searchToDelete.getUuid());
 			}
 		});
 	}
@@ -131,7 +131,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 1000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 2000))
 		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
@@ -148,8 +148,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			long total = tt.execute(t -> mySearchDao.count());
-			ourLog.info("Deleted {} searches, {} remaining", count, total);
+			if (ourLog.isDebugEnabled()) {
+				long total = tt.execute(t -> mySearchDao.count());
+				ourLog.debug("Deleted {} searches, {} remaining", count, total);
+			}
 		}
 
 	}

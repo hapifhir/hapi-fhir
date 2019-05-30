@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import javax.persistence.*;
 @Entity()
 @Table(name = "HFJ_FORCED_ID", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_FORCEDID_RESID", columnNames = {"RESOURCE_PID"}),
-	@UniqueConstraint(name = "IDX_FORCEDID_TYPE_FID", columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
+	@UniqueConstraint(name = ForcedId.IDX_FORCEDID_TYPE_FID, columnNames = {"RESOURCE_TYPE", "FORCED_ID"})
 }, indexes = {
 	/*
 	 * NB: We previously had indexes named
@@ -39,6 +39,7 @@ import javax.persistence.*;
 public class ForcedId {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
+	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
 
 	@Column(name = "FORCED_ID", nullable = false, length = MAX_FORCED_ID_LENGTH, updatable = false)
 	private String myForcedId;
@@ -50,7 +51,7 @@ public class ForcedId {
 	private Long myId;
 
 	@JoinColumn(name = "RESOURCE_PID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_FORCEDID_RESOURCE"))
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	private ResourceTable myResource;
 
 	@Column(name = "RESOURCE_PID", nullable = false, updatable = false, insertable = false)

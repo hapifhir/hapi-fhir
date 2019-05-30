@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -258,16 +258,6 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 
 	public void setId(Long theId) {
 		myId = theId;
-	}
-
-	@Override
-	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = myId;
-			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
-		} else {
-			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + myVersion);
-		}
 	}
 
 	public Long getIndexStatus() {
@@ -577,6 +567,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
 		retVal.setVersion(myVersion);
+		retVal.setTransientForcedId(getTransientForcedId());
 
 		retVal.setPublished(getPublished());
 		retVal.setUpdated(getUpdated());

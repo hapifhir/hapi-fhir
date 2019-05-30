@@ -12,11 +12,12 @@ import org.hl7.fhir.r4.elementmodel.ObjectConverter;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.utilities.Utilities;
+import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.hl7.fhir.utilities.xhtml.XhtmlParser;
 
 import ca.uhn.fhir.model.api.IElement;
-//Add comment to test SVN
+
 public abstract class Base implements Serializable, IBase, IElement {
 
   /**
@@ -192,8 +193,16 @@ private Map<String, Object> userData;
   
 	public boolean equalsShallow(Base other) {
 	  return other != null;
-  }  
-  
+  }
+
+  public boolean isDateTime() {
+    return false;
+  }
+
+  public BaseDateTimeType dateTimeValue() {
+    return null;
+  }
+
   public static boolean compareDeep(String s1, String s2, boolean allowNull) {
     if (allowNull) {
       boolean noLeft = s1 == null || Utilities.noString(s1);
@@ -423,6 +432,8 @@ private Map<String, Object> userData;
   public MarkdownType castToMarkdown(Base b) throws FHIRException {
 		if (b instanceof MarkdownType)
 			return (MarkdownType) b;
+    else if (b.hasPrimitiveValue())
+      return new MarkdownType(b.primitiveValue());
 		else
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Markdown");
 	}
@@ -455,18 +466,26 @@ private Map<String, Object> userData;
 			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to an Identifier");
 	}
 	
-	public CodeableConcept castToCodeableConcept(Base b) throws FHIRException {
-		if (b instanceof CodeableConcept)
-			return (CodeableConcept) b;
+  public CodeableConcept castToCodeableConcept(Base b) throws FHIRException {
+    if (b instanceof CodeableConcept)
+      return (CodeableConcept) b;
     else if (b instanceof Element) {
       return ObjectConverter.readAsCodeableConcept((Element) b);
     } else if (b instanceof CodeType) {
-		  CodeableConcept cc = new CodeableConcept();
-		  cc.addCoding().setCode(((CodeType) b).asStringValue());
-		  return cc;
-		} else
-			throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a CodeableConcept");
-	}
+      CodeableConcept cc = new CodeableConcept();
+      cc.addCoding().setCode(((CodeType) b).asStringValue());
+      return cc;
+    } else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a CodeableConcept");
+  }
+  
+  public Population castToPopulation(Base b) throws FHIRException {
+    if (b instanceof Population)
+      return (Population) b;
+    else
+      throw new FHIRException("Unable to convert a "+b.getClass().getName()+" to a Population");
+  }
+  
 	
 	public Coding castToCoding(Base b) throws FHIRException {
     if (b instanceof Coding)
@@ -721,6 +740,8 @@ private Map<String, Object> userData;
   public XhtmlNode castToXhtml(Base b) throws FHIRException {
     if (b instanceof Element) {
       return ((Element) b).getXhtml();
+    } else if (b instanceof XhtmlType) {
+      return ((XhtmlType) b).getValue();
     } else if (b instanceof StringType) {
       try {
         return new XhtmlParser().parseFragment(((StringType) b).asStringValue());
@@ -734,6 +755,12 @@ private Map<String, Object> userData;
   public String castToXhtmlString(Base b) throws FHIRException {
     if (b instanceof Element) {
       return ((Element) b).getValue();
+    } else if (b instanceof XhtmlType) {
+      try {
+        return new XhtmlComposer(true).compose(((XhtmlType) b).getValue());
+      } catch (IOException e) {
+        return null;
+      }
     } else if (b instanceof StringType) {
       return ((StringType) b).asStringValue();
     } else

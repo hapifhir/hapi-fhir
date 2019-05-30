@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,9 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.FhirResourceDaoMessageHeaderDstu2;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoMessageHeader;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.dstu3.model.MessageHeader;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
 
 public class FhirResourceDaoMessageHeaderDstu3 extends FhirResourceDaoDstu3<MessageHeader> implements IFhirResourceDaoMessageHeader<MessageHeader> {
-
-	@Override
-	public IBaseBundle messageHeaderProcessMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
-		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
-	}
-
+	// nothing right now
 }

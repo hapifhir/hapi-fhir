@@ -89,9 +89,9 @@ public class SearchR4Test {
 		String linkSelf;
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_elements=name");
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_elements=name&_elements:exclude=birthDate,active");
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertThat(linkSelf, containsString("_elements=name"));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -102,23 +102,26 @@ public class SearchR4Test {
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
-		assertThat(toJson(bundle), not(containsString("active")));
+		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 	}
 

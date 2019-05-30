@@ -20,14 +20,16 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,6 +208,13 @@ public class ParameterUtil {
 	public static boolean isBindableIntegerType(Class<?> theClass) {
 		return Integer.class.isAssignableFrom(theClass)
 				|| IPrimitiveType.class.isAssignableFrom(theClass);
+	}
+
+	public static String escapeAndJoinOrList(Collection<String> theValues) {
+		return theValues
+			.stream()
+			.map(ParameterUtil::escape)
+			.collect(Collectors.joining(","));
 	}
 
 	public static int nonEscapedIndexOf(String theString, char theCharacter) {

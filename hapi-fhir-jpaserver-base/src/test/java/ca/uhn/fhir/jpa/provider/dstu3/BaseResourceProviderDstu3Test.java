@@ -7,8 +7,6 @@ import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.subscription.email.SubscriptionEmailInterceptor;
-import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -60,8 +58,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static GenericWebApplicationContext ourWebApplicationContext;
 	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
-	protected static SubscriptionEmailInterceptor ourEmailSubscriptionInterceptor;
 	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static Server ourServer;
@@ -75,8 +71,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
-		myDaoConfig.getInterceptors().clear();
 		myResourceCountsCache.clear();
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -94,12 +90,12 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourRestServer.setResourceProviders((List) myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-			ourRestServer.setPlainProviders(mySystemProvider, myTerminologyUploaderProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 
 			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);
@@ -158,8 +154,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
-			ourRestHookSubscriptionInterceptor = wac.getBean(SubscriptionRestHookInterceptor.class);
-			ourEmailSubscriptionInterceptor = wac.getBean(SubscriptionEmailInterceptor.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
 

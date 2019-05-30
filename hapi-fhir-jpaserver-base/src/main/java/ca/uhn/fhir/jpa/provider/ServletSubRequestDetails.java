@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,11 +29,26 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
-	private Map<String, ArrayList<String>> myHeaders = new HashMap<>();
+	private Map<String, List<String>> myHeaders = new HashMap<>();
+
+	/**
+	 * Constructor
+	 *
+	 * @param theRequestDetails The parent request details
+	 */
+	public ServletSubRequestDetails(ServletRequestDetails theRequestDetails) {
+		super(theRequestDetails.getInterceptorBroadcaster());
+		if (theRequestDetails != null) {
+			Map<String, List<String>> headers = theRequestDetails.getHeaders();
+			for (Map.Entry<String, List<String>> next : headers.entrySet()) {
+				myHeaders.put(next.getKey().toLowerCase(), next.getValue());
+			}
+		}
+	}
 
 	public void addHeader(String theName, String theValue) {
 		String lowerCase = theName.toLowerCase();
-		ArrayList<String> list = myHeaders.get(lowerCase);
+		List<String> list = myHeaders.get(lowerCase);
 		if (list == null) {
 			list = new ArrayList<>();
 			myHeaders.put(lowerCase, list);
@@ -43,7 +58,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	
 	@Override
 	public String getHeader(String theName) {
-		ArrayList<String> list = myHeaders.get(theName.toLowerCase());
+		List<String> list = myHeaders.get(theName.toLowerCase());
 		if (list == null || list.isEmpty()) {
 			return null;
 		}
@@ -52,7 +67,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	@Override
 	public List<String> getHeaders(String theName) {
-		ArrayList<String> list = myHeaders.get(theName.toLowerCase());
+		List<String> list = myHeaders.get(theName.toLowerCase());
 		if (list == null || list.isEmpty()) {
 			return null;
 		}

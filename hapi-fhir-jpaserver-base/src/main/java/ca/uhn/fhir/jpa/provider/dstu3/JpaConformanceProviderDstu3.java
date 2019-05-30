@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.model.api.ExtensionDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -38,6 +41,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
 
@@ -149,6 +153,15 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		}
 
 		massage(retVal);
+
+		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.instance.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+				Extension websocketExtension = new Extension();
+				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
+				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
+				retVal.getRestFirstRep().addExtension(websocketExtension);
+			}
+		}
 
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;

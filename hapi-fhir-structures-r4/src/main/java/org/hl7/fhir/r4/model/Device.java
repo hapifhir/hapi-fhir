@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -43,7 +43,7 @@ import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.exceptions.FHIRException;
 /**
- * This resource identifies a type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.  Medical devices include durable (reusable) medical equipment, implantable devices, as well as disposable equipment used for diagnostic, treatment, and research for healthcare and public health.  Non-medical devices may include items such as a machine, cellphone, computer, application, etc. This is the catalog description of a device (not the specific instance).
+ * A type of a manufactured item that is used in the provision of healthcare without being substantially changed through that activity. The device may be a medical or non-medical device.
  */
 @ResourceDef(name="Device", profile="http://hl7.org/fhir/StructureDefinition/Device")
 public class Device extends DomainResource {
@@ -1824,9 +1824,9 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         /**
          * Property value as a quantity.
          */
-        @Child(name = "valueQuanity", type = {Quantity.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
+        @Child(name = "valueQuantity", type = {Quantity.class}, order=2, min=0, max=Child.MAX_UNLIMITED, modifier=false, summary=false)
         @Description(shortDefinition="Property value as a quantity", formalDefinition="Property value as a quantity." )
-        protected List<Quantity> valueQuanity;
+        protected List<Quantity> valueQuantity;
 
         /**
          * Property value as a code, e.g., NTP4 (synced to NTP).
@@ -1835,7 +1835,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         @Description(shortDefinition="Property value as a code, e.g., NTP4 (synced to NTP)", formalDefinition="Property value as a code, e.g., NTP4 (synced to NTP)." )
         protected List<CodeableConcept> valueCode;
 
-        private static final long serialVersionUID = 1035620625L;
+        private static final long serialVersionUID = 1512172633L;
 
     /**
      * Constructor
@@ -1877,56 +1877,56 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         }
 
         /**
-         * @return {@link #valueQuanity} (Property value as a quantity.)
+         * @return {@link #valueQuantity} (Property value as a quantity.)
          */
-        public List<Quantity> getValueQuanity() { 
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          return this.valueQuanity;
+        public List<Quantity> getValueQuantity() { 
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          return this.valueQuantity;
         }
 
         /**
          * @return Returns a reference to <code>this</code> for easy method chaining
          */
-        public DevicePropertyComponent setValueQuanity(List<Quantity> theValueQuanity) { 
-          this.valueQuanity = theValueQuanity;
+        public DevicePropertyComponent setValueQuantity(List<Quantity> theValueQuantity) { 
+          this.valueQuantity = theValueQuantity;
           return this;
         }
 
-        public boolean hasValueQuanity() { 
-          if (this.valueQuanity == null)
+        public boolean hasValueQuantity() { 
+          if (this.valueQuantity == null)
             return false;
-          for (Quantity item : this.valueQuanity)
+          for (Quantity item : this.valueQuantity)
             if (!item.isEmpty())
               return true;
           return false;
         }
 
-        public Quantity addValueQuanity() { //3
+        public Quantity addValueQuantity() { //3
           Quantity t = new Quantity();
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          this.valueQuanity.add(t);
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
           return t;
         }
 
-        public DevicePropertyComponent addValueQuanity(Quantity t) { //3
+        public DevicePropertyComponent addValueQuantity(Quantity t) { //3
           if (t == null)
             return this;
-          if (this.valueQuanity == null)
-            this.valueQuanity = new ArrayList<Quantity>();
-          this.valueQuanity.add(t);
+          if (this.valueQuantity == null)
+            this.valueQuantity = new ArrayList<Quantity>();
+          this.valueQuantity.add(t);
           return this;
         }
 
         /**
-         * @return The first repetition of repeating field {@link #valueQuanity}, creating it if it does not already exist
+         * @return The first repetition of repeating field {@link #valueQuantity}, creating it if it does not already exist
          */
-        public Quantity getValueQuanityFirstRep() { 
-          if (getValueQuanity().isEmpty()) {
-            addValueQuanity();
+        public Quantity getValueQuantityFirstRep() { 
+          if (getValueQuantity().isEmpty()) {
+            addValueQuantity();
           }
-          return getValueQuanity().get(0);
+          return getValueQuantity().get(0);
         }
 
         /**
@@ -1985,7 +1985,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         protected void listChildren(List<Property> children) {
           super.listChildren(children);
           children.add(new Property("type", "CodeableConcept", "Code that specifies the property DeviceDefinitionPropetyCode (Extensible).", 0, 1, type));
-          children.add(new Property("valueQuanity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuanity));
+          children.add(new Property("valueQuantity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuantity));
           children.add(new Property("valueCode", "CodeableConcept", "Property value as a code, e.g., NTP4 (synced to NTP).", 0, java.lang.Integer.MAX_VALUE, valueCode));
         }
 
@@ -1993,7 +1993,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
           switch (_hash) {
           case 3575610: /*type*/  return new Property("type", "CodeableConcept", "Code that specifies the property DeviceDefinitionPropetyCode (Extensible).", 0, 1, type);
-          case 1319984908: /*valueQuanity*/  return new Property("valueQuanity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuanity);
+          case -2029823716: /*valueQuantity*/  return new Property("valueQuantity", "Quantity", "Property value as a quantity.", 0, java.lang.Integer.MAX_VALUE, valueQuantity);
           case -766209282: /*valueCode*/  return new Property("valueCode", "CodeableConcept", "Property value as a code, e.g., NTP4 (synced to NTP).", 0, java.lang.Integer.MAX_VALUE, valueCode);
           default: return super.getNamedProperty(_hash, _name, _checkValid);
           }
@@ -2004,7 +2004,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // CodeableConcept
-        case 1319984908: /*valueQuanity*/ return this.valueQuanity == null ? new Base[0] : this.valueQuanity.toArray(new Base[this.valueQuanity.size()]); // Quantity
+        case -2029823716: /*valueQuantity*/ return this.valueQuantity == null ? new Base[0] : this.valueQuantity.toArray(new Base[this.valueQuantity.size()]); // Quantity
         case -766209282: /*valueCode*/ return this.valueCode == null ? new Base[0] : this.valueCode.toArray(new Base[this.valueCode.size()]); // CodeableConcept
         default: return super.getProperty(hash, name, checkValid);
         }
@@ -2017,8 +2017,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case 3575610: // type
           this.type = castToCodeableConcept(value); // CodeableConcept
           return value;
-        case 1319984908: // valueQuanity
-          this.getValueQuanity().add(castToQuantity(value)); // Quantity
+        case -2029823716: // valueQuantity
+          this.getValueQuantity().add(castToQuantity(value)); // Quantity
           return value;
         case -766209282: // valueCode
           this.getValueCode().add(castToCodeableConcept(value)); // CodeableConcept
@@ -2032,8 +2032,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base setProperty(String name, Base value) throws FHIRException {
         if (name.equals("type")) {
           this.type = castToCodeableConcept(value); // CodeableConcept
-        } else if (name.equals("valueQuanity")) {
-          this.getValueQuanity().add(castToQuantity(value));
+        } else if (name.equals("valueQuantity")) {
+          this.getValueQuantity().add(castToQuantity(value));
         } else if (name.equals("valueCode")) {
           this.getValueCode().add(castToCodeableConcept(value));
         } else
@@ -2045,7 +2045,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getType(); 
-        case 1319984908:  return addValueQuanity(); 
+        case -2029823716:  return addValueQuantity(); 
         case -766209282:  return addValueCode(); 
         default: return super.makeProperty(hash, name);
         }
@@ -2056,7 +2056,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"CodeableConcept"};
-        case 1319984908: /*valueQuanity*/ return new String[] {"Quantity"};
+        case -2029823716: /*valueQuantity*/ return new String[] {"Quantity"};
         case -766209282: /*valueCode*/ return new String[] {"CodeableConcept"};
         default: return super.getTypesForProperty(hash, name);
         }
@@ -2069,8 +2069,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
           this.type = new CodeableConcept();
           return this.type;
         }
-        else if (name.equals("valueQuanity")) {
-          return addValueQuanity();
+        else if (name.equals("valueQuantity")) {
+          return addValueQuantity();
         }
         else if (name.equals("valueCode")) {
           return addValueCode();
@@ -2083,10 +2083,10 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         DevicePropertyComponent dst = new DevicePropertyComponent();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
-        if (valueQuanity != null) {
-          dst.valueQuanity = new ArrayList<Quantity>();
-          for (Quantity i : valueQuanity)
-            dst.valueQuanity.add(i.copy());
+        if (valueQuantity != null) {
+          dst.valueQuantity = new ArrayList<Quantity>();
+          for (Quantity i : valueQuantity)
+            dst.valueQuantity.add(i.copy());
         };
         if (valueCode != null) {
           dst.valueCode = new ArrayList<CodeableConcept>();
@@ -2103,7 +2103,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         if (!(other_ instanceof DevicePropertyComponent))
           return false;
         DevicePropertyComponent o = (DevicePropertyComponent) other_;
-        return compareDeep(type, o.type, true) && compareDeep(valueQuanity, o.valueQuanity, true) && compareDeep(valueCode, o.valueCode, true)
+        return compareDeep(type, o.type, true) && compareDeep(valueQuantity, o.valueQuantity, true) && compareDeep(valueCode, o.valueCode, true)
           ;
       }
 
@@ -2118,7 +2118,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, valueQuanity, valueCode
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, valueQuantity, valueCode
           );
       }
 
@@ -2172,11 +2172,11 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     protected List<CodeableConcept> statusReason;
 
     /**
-     * The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.
+     * The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.
      */
-    @Child(name = "distinctIdentificationCode", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The distinct identification code for a biological product regulated as a device", formalDefinition="The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device." )
-    protected StringType distinctIdentificationCode;
+    @Child(name = "distinctIdentifier", type = {StringType.class}, order=5, min=0, max=1, modifier=false, summary=false)
+    @Description(shortDefinition="The distinct identification string", formalDefinition="The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product." )
+    protected StringType distinctIdentifier;
 
     /**
      * A name of the manufacturer.
@@ -2228,10 +2228,10 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     protected StringType modelNumber;
 
     /**
-     * The part number of thedevice.
+     * The part number of the device.
      */
     @Child(name = "partNumber", type = {StringType.class}, order=13, min=0, max=1, modifier=false, summary=false)
-    @Description(shortDefinition="The part number of the device", formalDefinition="The part number of thedevice." )
+    @Description(shortDefinition="The part number of the device", formalDefinition="The part number of the device." )
     protected StringType partNumber;
 
     /**
@@ -2239,7 +2239,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
      */
     @Child(name = "type", type = {CodeableConcept.class}, order=14, min=0, max=1, modifier=false, summary=false)
     @Description(shortDefinition="The kind or type of device", formalDefinition="The kind or type of device." )
-    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-kind")
+    @ca.uhn.fhir.model.api.annotation.Binding(valueSet="http://hl7.org/fhir/ValueSet/device-type")
     protected CodeableConcept type;
 
     /**
@@ -2339,7 +2339,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
      */
     protected Device parentTarget;
 
-    private static final long serialVersionUID = -53001649L;
+    private static final long serialVersionUID = -298380419L;
 
   /**
    * Constructor
@@ -2601,50 +2601,50 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @return {@link #distinctIdentificationCode} (The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.). This is the underlying object with id, value and extensions. The accessor "getDistinctIdentificationCode" gives direct access to the value
+     * @return {@link #distinctIdentifier} (The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.). This is the underlying object with id, value and extensions. The accessor "getDistinctIdentifier" gives direct access to the value
      */
-    public StringType getDistinctIdentificationCodeElement() { 
-      if (this.distinctIdentificationCode == null)
+    public StringType getDistinctIdentifierElement() { 
+      if (this.distinctIdentifier == null)
         if (Configuration.errorOnAutoCreate())
-          throw new Error("Attempt to auto-create Device.distinctIdentificationCode");
+          throw new Error("Attempt to auto-create Device.distinctIdentifier");
         else if (Configuration.doAutoCreate())
-          this.distinctIdentificationCode = new StringType(); // bb
-      return this.distinctIdentificationCode;
+          this.distinctIdentifier = new StringType(); // bb
+      return this.distinctIdentifier;
     }
 
-    public boolean hasDistinctIdentificationCodeElement() { 
-      return this.distinctIdentificationCode != null && !this.distinctIdentificationCode.isEmpty();
+    public boolean hasDistinctIdentifierElement() { 
+      return this.distinctIdentifier != null && !this.distinctIdentifier.isEmpty();
     }
 
-    public boolean hasDistinctIdentificationCode() { 
-      return this.distinctIdentificationCode != null && !this.distinctIdentificationCode.isEmpty();
+    public boolean hasDistinctIdentifier() { 
+      return this.distinctIdentifier != null && !this.distinctIdentifier.isEmpty();
     }
 
     /**
-     * @param value {@link #distinctIdentificationCode} (The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.). This is the underlying object with id, value and extensions. The accessor "getDistinctIdentificationCode" gives direct access to the value
+     * @param value {@link #distinctIdentifier} (The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.). This is the underlying object with id, value and extensions. The accessor "getDistinctIdentifier" gives direct access to the value
      */
-    public Device setDistinctIdentificationCodeElement(StringType value) { 
-      this.distinctIdentificationCode = value;
+    public Device setDistinctIdentifierElement(StringType value) { 
+      this.distinctIdentifier = value;
       return this;
     }
 
     /**
-     * @return The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.
+     * @return The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.
      */
-    public String getDistinctIdentificationCode() { 
-      return this.distinctIdentificationCode == null ? null : this.distinctIdentificationCode.getValue();
+    public String getDistinctIdentifier() { 
+      return this.distinctIdentifier == null ? null : this.distinctIdentifier.getValue();
     }
 
     /**
-     * @param value The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.
+     * @param value The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.
      */
-    public Device setDistinctIdentificationCode(String value) { 
+    public Device setDistinctIdentifier(String value) { 
       if (Utilities.noString(value))
-        this.distinctIdentificationCode = null;
+        this.distinctIdentifier = null;
       else {
-        if (this.distinctIdentificationCode == null)
-          this.distinctIdentificationCode = new StringType();
-        this.distinctIdentificationCode.setValue(value);
+        if (this.distinctIdentifier == null)
+          this.distinctIdentifier = new StringType();
+        this.distinctIdentifier.setValue(value);
       }
       return this;
     }
@@ -2997,7 +2997,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @return {@link #partNumber} (The part number of thedevice.). This is the underlying object with id, value and extensions. The accessor "getPartNumber" gives direct access to the value
+     * @return {@link #partNumber} (The part number of the device.). This is the underlying object with id, value and extensions. The accessor "getPartNumber" gives direct access to the value
      */
     public StringType getPartNumberElement() { 
       if (this.partNumber == null)
@@ -3017,7 +3017,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @param value {@link #partNumber} (The part number of thedevice.). This is the underlying object with id, value and extensions. The accessor "getPartNumber" gives direct access to the value
+     * @param value {@link #partNumber} (The part number of the device.). This is the underlying object with id, value and extensions. The accessor "getPartNumber" gives direct access to the value
      */
     public Device setPartNumberElement(StringType value) { 
       this.partNumber = value;
@@ -3025,14 +3025,14 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
     }
 
     /**
-     * @return The part number of thedevice.
+     * @return The part number of the device.
      */
     public String getPartNumber() { 
       return this.partNumber == null ? null : this.partNumber.getValue();
     }
 
     /**
-     * @param value The part number of thedevice.
+     * @param value The part number of the device.
      */
     public Device setPartNumber(String value) { 
       if (Utilities.noString(value))
@@ -3619,7 +3619,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         children.add(new Property("udiCarrier", "", "Unique device identifier (UDI) assigned to device label or package.  Note that the Device may include multiple udiCarriers as it either may include just the udiCarrier for the jurisdiction it is sold, or for multiple jurisdictions it could have been sold.", 0, java.lang.Integer.MAX_VALUE, udiCarrier));
         children.add(new Property("status", "code", "Status of the Device availability.", 0, 1, status));
         children.add(new Property("statusReason", "CodeableConcept", "Reason for the dtatus of the Device availability.", 0, java.lang.Integer.MAX_VALUE, statusReason));
-        children.add(new Property("distinctIdentificationCode", "string", "The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.", 0, 1, distinctIdentificationCode));
+        children.add(new Property("distinctIdentifier", "string", "The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.", 0, 1, distinctIdentifier));
         children.add(new Property("manufacturer", "string", "A name of the manufacturer.", 0, 1, manufacturer));
         children.add(new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, 1, manufactureDate));
         children.add(new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, 1, expirationDate));
@@ -3627,7 +3627,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         children.add(new Property("serialNumber", "string", "The serial number assigned by the organization when the device was manufactured.", 0, 1, serialNumber));
         children.add(new Property("deviceName", "", "This represents the manufacturer's name of the device as provided by the device, from a UDI label, or by a person describing the Device.  This typically would be used when a person provides the name(s) or when the device represents one of the names available from DeviceDefinition.", 0, java.lang.Integer.MAX_VALUE, deviceName));
         children.add(new Property("modelNumber", "string", "The model number for the device.", 0, 1, modelNumber));
-        children.add(new Property("partNumber", "string", "The part number of thedevice.", 0, 1, partNumber));
+        children.add(new Property("partNumber", "string", "The part number of the device.", 0, 1, partNumber));
         children.add(new Property("type", "CodeableConcept", "The kind or type of device.", 0, 1, type));
         children.add(new Property("specialization", "", "The capabilities supported on a  device, the standards to which the device conforms for a particular purpose, and used for the communication.", 0, java.lang.Integer.MAX_VALUE, specialization));
         children.add(new Property("version", "", "The actual design of the device or software version running on the device.", 0, java.lang.Integer.MAX_VALUE, version));
@@ -3650,7 +3650,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case -1343558178: /*udiCarrier*/  return new Property("udiCarrier", "", "Unique device identifier (UDI) assigned to device label or package.  Note that the Device may include multiple udiCarriers as it either may include just the udiCarrier for the jurisdiction it is sold, or for multiple jurisdictions it could have been sold.", 0, java.lang.Integer.MAX_VALUE, udiCarrier);
         case -892481550: /*status*/  return new Property("status", "code", "Status of the Device availability.", 0, 1, status);
         case 2051346646: /*statusReason*/  return new Property("statusReason", "CodeableConcept", "Reason for the dtatus of the Device availability.", 0, java.lang.Integer.MAX_VALUE, statusReason);
-        case -952360553: /*distinctIdentificationCode*/  return new Property("distinctIdentificationCode", "string", "The distinct identification code required by §1271.290(c) for a human cell, tissue, or cellular and tissue-based product regulated as a device.", 0, 1, distinctIdentificationCode);
+        case -1836176187: /*distinctIdentifier*/  return new Property("distinctIdentifier", "string", "The distinct identification string as required by regulation for a human cell, tissue, or cellular and tissue-based product.", 0, 1, distinctIdentifier);
         case -1969347631: /*manufacturer*/  return new Property("manufacturer", "string", "A name of the manufacturer.", 0, 1, manufacturer);
         case 416714767: /*manufactureDate*/  return new Property("manufactureDate", "dateTime", "The date and time when the device was manufactured.", 0, 1, manufactureDate);
         case -668811523: /*expirationDate*/  return new Property("expirationDate", "dateTime", "The date and time beyond which this device is no longer valid or should not be used (if applicable).", 0, 1, expirationDate);
@@ -3658,7 +3658,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case 83787357: /*serialNumber*/  return new Property("serialNumber", "string", "The serial number assigned by the organization when the device was manufactured.", 0, 1, serialNumber);
         case 780988929: /*deviceName*/  return new Property("deviceName", "", "This represents the manufacturer's name of the device as provided by the device, from a UDI label, or by a person describing the Device.  This typically would be used when a person provides the name(s) or when the device represents one of the names available from DeviceDefinition.", 0, java.lang.Integer.MAX_VALUE, deviceName);
         case 346619858: /*modelNumber*/  return new Property("modelNumber", "string", "The model number for the device.", 0, 1, modelNumber);
-        case -731502308: /*partNumber*/  return new Property("partNumber", "string", "The part number of thedevice.", 0, 1, partNumber);
+        case -731502308: /*partNumber*/  return new Property("partNumber", "string", "The part number of the device.", 0, 1, partNumber);
         case 3575610: /*type*/  return new Property("type", "CodeableConcept", "The kind or type of device.", 0, 1, type);
         case 682815883: /*specialization*/  return new Property("specialization", "", "The capabilities supported on a  device, the standards to which the device conforms for a particular purpose, and used for the communication.", 0, java.lang.Integer.MAX_VALUE, specialization);
         case 351608024: /*version*/  return new Property("version", "", "The actual design of the device or software version running on the device.", 0, java.lang.Integer.MAX_VALUE, version);
@@ -3684,7 +3684,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case -1343558178: /*udiCarrier*/ return this.udiCarrier == null ? new Base[0] : this.udiCarrier.toArray(new Base[this.udiCarrier.size()]); // DeviceUdiCarrierComponent
         case -892481550: /*status*/ return this.status == null ? new Base[0] : new Base[] {this.status}; // Enumeration<FHIRDeviceStatus>
         case 2051346646: /*statusReason*/ return this.statusReason == null ? new Base[0] : this.statusReason.toArray(new Base[this.statusReason.size()]); // CodeableConcept
-        case -952360553: /*distinctIdentificationCode*/ return this.distinctIdentificationCode == null ? new Base[0] : new Base[] {this.distinctIdentificationCode}; // StringType
+        case -1836176187: /*distinctIdentifier*/ return this.distinctIdentifier == null ? new Base[0] : new Base[] {this.distinctIdentifier}; // StringType
         case -1969347631: /*manufacturer*/ return this.manufacturer == null ? new Base[0] : new Base[] {this.manufacturer}; // StringType
         case 416714767: /*manufactureDate*/ return this.manufactureDate == null ? new Base[0] : new Base[] {this.manufactureDate}; // DateTimeType
         case -668811523: /*expirationDate*/ return this.expirationDate == null ? new Base[0] : new Base[] {this.expirationDate}; // DateTimeType
@@ -3729,8 +3729,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case 2051346646: // statusReason
           this.getStatusReason().add(castToCodeableConcept(value)); // CodeableConcept
           return value;
-        case -952360553: // distinctIdentificationCode
-          this.distinctIdentificationCode = castToString(value); // StringType
+        case -1836176187: // distinctIdentifier
+          this.distinctIdentifier = castToString(value); // StringType
           return value;
         case -1969347631: // manufacturer
           this.manufacturer = castToString(value); // StringType
@@ -3810,8 +3810,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
           this.status = (Enumeration) value; // Enumeration<FHIRDeviceStatus>
         } else if (name.equals("statusReason")) {
           this.getStatusReason().add(castToCodeableConcept(value));
-        } else if (name.equals("distinctIdentificationCode")) {
-          this.distinctIdentificationCode = castToString(value); // StringType
+        } else if (name.equals("distinctIdentifier")) {
+          this.distinctIdentifier = castToString(value); // StringType
         } else if (name.equals("manufacturer")) {
           this.manufacturer = castToString(value); // StringType
         } else if (name.equals("manufactureDate")) {
@@ -3865,7 +3865,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case -1343558178:  return addUdiCarrier(); 
         case -892481550:  return getStatusElement();
         case 2051346646:  return addStatusReason(); 
-        case -952360553:  return getDistinctIdentificationCodeElement();
+        case -1836176187:  return getDistinctIdentifierElement();
         case -1969347631:  return getManufacturerElement();
         case 416714767:  return getManufactureDateElement();
         case -668811523:  return getExpirationDateElement();
@@ -3899,7 +3899,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         case -1343558178: /*udiCarrier*/ return new String[] {};
         case -892481550: /*status*/ return new String[] {"code"};
         case 2051346646: /*statusReason*/ return new String[] {"CodeableConcept"};
-        case -952360553: /*distinctIdentificationCode*/ return new String[] {"string"};
+        case -1836176187: /*distinctIdentifier*/ return new String[] {"string"};
         case -1969347631: /*manufacturer*/ return new String[] {"string"};
         case 416714767: /*manufactureDate*/ return new String[] {"dateTime"};
         case -668811523: /*expirationDate*/ return new String[] {"dateTime"};
@@ -3943,8 +3943,8 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         else if (name.equals("statusReason")) {
           return addStatusReason();
         }
-        else if (name.equals("distinctIdentificationCode")) {
-          throw new FHIRException("Cannot call addChild on a primitive type Device.distinctIdentificationCode");
+        else if (name.equals("distinctIdentifier")) {
+          throw new FHIRException("Cannot call addChild on a primitive type Device.distinctIdentifier");
         }
         else if (name.equals("manufacturer")) {
           throw new FHIRException("Cannot call addChild on a primitive type Device.manufacturer");
@@ -4040,7 +4040,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
           for (CodeableConcept i : statusReason)
             dst.statusReason.add(i.copy());
         };
-        dst.distinctIdentificationCode = distinctIdentificationCode == null ? null : distinctIdentificationCode.copy();
+        dst.distinctIdentifier = distinctIdentifier == null ? null : distinctIdentifier.copy();
         dst.manufacturer = manufacturer == null ? null : manufacturer.copy();
         dst.manufactureDate = manufactureDate == null ? null : manufactureDate.copy();
         dst.expirationDate = expirationDate == null ? null : expirationDate.copy();
@@ -4105,7 +4105,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         Device o = (Device) other_;
         return compareDeep(identifier, o.identifier, true) && compareDeep(definition, o.definition, true)
            && compareDeep(udiCarrier, o.udiCarrier, true) && compareDeep(status, o.status, true) && compareDeep(statusReason, o.statusReason, true)
-           && compareDeep(distinctIdentificationCode, o.distinctIdentificationCode, true) && compareDeep(manufacturer, o.manufacturer, true)
+           && compareDeep(distinctIdentifier, o.distinctIdentifier, true) && compareDeep(manufacturer, o.manufacturer, true)
            && compareDeep(manufactureDate, o.manufactureDate, true) && compareDeep(expirationDate, o.expirationDate, true)
            && compareDeep(lotNumber, o.lotNumber, true) && compareDeep(serialNumber, o.serialNumber, true)
            && compareDeep(deviceName, o.deviceName, true) && compareDeep(modelNumber, o.modelNumber, true)
@@ -4123,7 +4123,7 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
         if (!(other_ instanceof Device))
           return false;
         Device o = (Device) other_;
-        return compareValues(status, o.status, true) && compareValues(distinctIdentificationCode, o.distinctIdentificationCode, true)
+        return compareValues(status, o.status, true) && compareValues(distinctIdentifier, o.distinctIdentifier, true)
            && compareValues(manufacturer, o.manufacturer, true) && compareValues(manufactureDate, o.manufactureDate, true)
            && compareValues(expirationDate, o.expirationDate, true) && compareValues(lotNumber, o.lotNumber, true)
            && compareValues(serialNumber, o.serialNumber, true) && compareValues(modelNumber, o.modelNumber, true)
@@ -4132,10 +4132,10 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
 
       public boolean isEmpty() {
         return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(identifier, definition, udiCarrier
-          , status, statusReason, distinctIdentificationCode, manufacturer, manufactureDate
-          , expirationDate, lotNumber, serialNumber, deviceName, modelNumber, partNumber, type
-          , specialization, version, property, patient, owner, contact, location, url
-          , note, safety, parent);
+          , status, statusReason, distinctIdentifier, manufacturer, manufactureDate, expirationDate
+          , lotNumber, serialNumber, deviceName, modelNumber, partNumber, type, specialization
+          , version, property, patient, owner, contact, location, url, note, safety
+          , parent);
       }
 
   @Override
@@ -4148,17 +4148,17 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
    * <p>
    * Description: <b>The udi Device Identifier (DI)</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="udi-di", path="", description="The udi Device Identifier (DI)", type="string" )
+  @SearchParamDefinition(name="udi-di", path="Device.udiCarrier.deviceIdentifier", description="The udi Device Identifier (DI)", type="string" )
   public static final String SP_UDI_DI = "udi-di";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>udi-di</b>
    * <p>
    * Description: <b>The udi Device Identifier (DI)</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam UDI_DI = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_UDI_DI);
@@ -4186,19 +4186,19 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
  /**
    * Search parameter: <b>udi-carrier</b>
    * <p>
-   * Description: <b>UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.</b><br>
+   * Description: <b>UDI Barcode (RFID or other technology) string in *HRF* format.</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="udi-carrier", path="", description="UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.", type="string" )
+  @SearchParamDefinition(name="udi-carrier", path="Device.udiCarrier.carrierHRF", description="UDI Barcode (RFID or other technology) string in *HRF* format.", type="string" )
   public static final String SP_UDI_CARRIER = "udi-carrier";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>udi-carrier</b>
    * <p>
-   * Description: <b>UDI Barcode (RFID or other technology) string either in HRF format or AIDC format converted to base64 string.</b><br>
+   * Description: <b>UDI Barcode (RFID or other technology) string in *HRF* format.</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.udiCarrier</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam UDI_CARRIER = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_UDI_CARRIER);
@@ -4206,19 +4206,19 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
  /**
    * Search parameter: <b>device-name</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in Device.deviceName or Device.type.</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Device.type.text, Device.type.coding.display</b><br>
+   * Path: <b>Device.deviceName</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="device-name", path="Device.type.text | Device.type.coding.display", description="A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text", type="string" )
+  @SearchParamDefinition(name="device-name", path="Device.deviceName.name | Device.type.coding.display | Device.type.text", description="A server defined search that may match any of the string fields in Device.deviceName or Device.type.", type="string" )
   public static final String SP_DEVICE_NAME = "device-name";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>device-name</b>
    * <p>
-   * Description: <b>A server defined search that may match any of the string fields in the Device.udi.name  or Device.type.coding.display or  Device.type.text</b><br>
+   * Description: <b>A server defined search that may match any of the string fields in Device.deviceName or Device.type.</b><br>
    * Type: <b>string</b><br>
-   * Path: <b>Device.type.text, Device.type.coding.display</b><br>
+   * Path: <b>Device.deviceName</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam DEVICE_NAME = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_DEVICE_NAME);
@@ -4280,17 +4280,17 @@ UDILabelName | UserFriendlyName | PatientReportedName | ManufactureDeviceName | 
    * <p>
    * Description: <b>The model of the device</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.modelNumber</b><br>
    * </p>
    */
-  @SearchParamDefinition(name="model", path="", description="The model of the device", type="string" )
+  @SearchParamDefinition(name="model", path="Device.modelNumber", description="The model of the device", type="string" )
   public static final String SP_MODEL = "model";
  /**
    * <b>Fluent Client</b> search parameter constant for <b>model</b>
    * <p>
    * Description: <b>The model of the device</b><br>
    * Type: <b>string</b><br>
-   * Path: <b></b><br>
+   * Path: <b>Device.modelNumber</b><br>
    * </p>
    */
   public static final ca.uhn.fhir.rest.gclient.StringClientParam MODEL = new ca.uhn.fhir.rest.gclient.StringClientParam(SP_MODEL);

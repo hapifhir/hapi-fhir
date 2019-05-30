@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.hibernate.search.annotations.NumericField;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Embeddable
 @Entity
@@ -162,7 +163,7 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 			return false;
 		}
 		NumberParam number = (NumberParam) theParam;
-		return getValue().equals(number.getValue());
+		return Objects.equals(getValue(), number.getValue());
 	}
 
 }

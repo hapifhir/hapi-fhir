@@ -5,7 +5,7 @@ import java.io.IOException;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.core.*;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -74,6 +75,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 		CTX = ctx;
 	}
 
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return null;
+	}
+
 	/**
 	 * DEFAULT = AddProfileTagEnum.NEVER
 	 */
@@ -84,7 +90,7 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 
 	/**
 	 * This method returns the server base, including the resource path.
-	 * {@link javax.ws.rs.core.UriInfo#getBaseUri() UriInfo#getBaseUri()}
+	 * {@link UriInfo#getBaseUri() UriInfo#getBaseUri()}
 	 * 
 	 * @return the ascii string for the base resource provider path
 	 */
@@ -119,6 +125,14 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 		return ETagSupportEnum.DISABLED;
 	}
 
+	/**
+	 * DEFAULT = {@link ElementsSupportEnum#STANDARD}
+	 */
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return ElementsSupportEnum.STANDARD;
+	}
+
 	@Override
 	public FhirContext getFhirContext() {
 		return CTX;
@@ -137,10 +151,10 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * Default: an empty list of interceptors (Interceptors are not yet supported
 	 * in the JAX-RS server). Please get in touch if you'd like to help!
 	 * 
-	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
 	 */
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 
@@ -240,14 +254,6 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	@Override
 	public boolean isDefaultPrettyPrint() {
-		return true;
-	}
-
-	/**
-	 * DEFAULT = false
-	 */
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
 		return true;
 	}
 

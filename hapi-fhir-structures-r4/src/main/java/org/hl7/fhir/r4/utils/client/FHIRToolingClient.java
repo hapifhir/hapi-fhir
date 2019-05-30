@@ -49,6 +49,7 @@ import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.r4.model.PrimitiveType;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.TerminologyCapabilities;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.Utilities;
 
@@ -157,6 +158,10 @@ public class FHIRToolingClient {
 	
 	public void setMaximumRecordCount(int maxResultSetSize) {
 		this.maxResultSetSize = maxResultSetSize;
+	}
+	
+	public TerminologyCapabilities getTerminologyCapabilities() {
+    return (TerminologyCapabilities) utils.issueGetResourceRequest(resourceAddress.resolveMetadataTxCaps(), getPreferredResourceFormat()).getReference();
 	}
 	
 	public CapabilityStatement getCapabilitiesStatement() {
@@ -783,5 +788,14 @@ public class FHIRToolingClient {
   public void setPassword(String password) {
     utils.setPassword(password);
   }
+
+  public ToolingClientLogger getLogger() {
+    return utils.getLogger();
+  }
+
+  public void setLogger(ToolingClientLogger logger) {
+    utils.setLogger(logger);
+  }
+
 
 }

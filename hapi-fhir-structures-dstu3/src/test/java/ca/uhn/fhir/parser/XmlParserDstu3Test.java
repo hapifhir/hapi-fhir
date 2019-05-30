@@ -70,6 +70,16 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeInvalidMetaTime() {
+
+		Patient p = new Patient();
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
+
+	}
+
+	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 
@@ -1862,6 +1872,7 @@ public class XmlParserDstu3Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -1890,7 +1901,6 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient.name")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);
@@ -1902,7 +1912,6 @@ public class XmlParserDstu3Test {
 		{
 			IParser p = ourCtx.newXmlParser();
 			p.setEncodeElements(new HashSet<String>(Arrays.asList("Patient")));
-			p.setEncodeElementsAppliesToResourceTypes(new HashSet<String>(Arrays.asList("Patient")));
 			p.setPrettyPrint(true);
 			String out = p.encodeResourceToString(bundle);
 			ourLog.info(out);

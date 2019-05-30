@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.*;
 import org.hl7.fhir.dstu3.model.*;
@@ -229,6 +230,12 @@ public class ValidatorExamples {
 
 			@Override
 			public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+				// TODO: implement
+				return null;
+			}
+
+			@Override
+			public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 				// TODO: implement
 				return null;
 			}

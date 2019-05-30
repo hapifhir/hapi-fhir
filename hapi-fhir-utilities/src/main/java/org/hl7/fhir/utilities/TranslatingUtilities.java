@@ -30,7 +30,7 @@ public class TranslatingUtilities {
     return hasTranslator() ? translator.toStr(value) : value.toString();
   }
   
-  protected String translate(String context, String value, Object... args) {
+  public String translate(String context, String value, Object... args) {
     if (hasTranslator()) {
       String alt = translator.translate(context, value);
       if (alt != null)

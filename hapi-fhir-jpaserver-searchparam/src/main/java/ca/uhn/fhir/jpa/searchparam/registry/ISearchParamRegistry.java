@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,6 @@ public interface ISearchParamRegistry {
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames);
 
 	List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName);
-
-	void refreshCacheIfNecessary();
 
 	/**
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)

@@ -2,19 +2,23 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
+import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -61,17 +65,17 @@ public class AuthorizationInterceptorDstu3Test {
 	private static boolean ourHitMethod;
 	private static int ourPort;
 	private static List<Resource> ourReturn;
+	private static List<IBaseResource> ourDeleted;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
 	@Before
 	public void before() {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.NEVER);
-		for (IServerInterceptor next : new ArrayList<>(ourServlet.getInterceptors())) {
-			ourServlet.unregisterInterceptor(next);
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 		ourServlet.setTenantIdentificationStrategy(null);
 		ourReturn = null;
+		ourDeleted = null;
 		ourHitMethod = false;
 		ourConditionalCreateId = "1123";
 	}
@@ -562,8 +566,7 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(input));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
+		assertEquals(422, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -595,6 +598,75 @@ public class AuthorizationInterceptorDstu3Test {
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertEquals(204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testDeleteByCompartmentUsingTransaction() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").delete().resourcesOfType(Patient.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow("Rule 2").delete().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1")).andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.build();
+			}
+		});
+
+		HttpPost httpPost;
+		HttpResponse status;
+		String responseString;
+
+		Bundle responseBundle = new Bundle();
+		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+
+		ourHitMethod = false;
+		Bundle bundle = new Bundle();
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(2));
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createPatient(1));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/2");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/2"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		bundle.getEntry().clear();
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/1");
+		ourReturn = Collections.singletonList(responseBundle);
+		ourDeleted = Collections.singletonList(createObservation(99, "Patient/1"));
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
+		status = ourClient.execute(httpPost);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 	}
 
@@ -645,6 +717,13 @@ public class AuthorizationInterceptorDstu3Test {
 					.denyAll("Default Rule")
 					.build();
 			}
+
+			@Override
+			protected void handleDeny(Verdict decision) {
+				// Make sure the toString() method on Verdict never fails
+				ourLog.info("Denying with decision: {}", decision);
+				super.handleDeny(decision);
+			}
 		});
 
 		HttpGet httpGet;
@@ -684,6 +763,65 @@ public class AuthorizationInterceptorDstu3Test {
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Default Rule"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testDenyAllByDefault() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.build();
+			}
+
+			@Override
+			protected void handleDeny(Verdict decision) {
+				// Make sure the toString() method on Verdict never fails
+				ourLog.info("Denying with decision: {}", decision);
+				super.handleDeny(decision);
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createPatient(2));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$opName");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertThat(response, containsString("Access denied by default policy"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 	}
@@ -1591,7 +1729,7 @@ public class AuthorizationInterceptorDstu3Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("RULE 1").operation().named("process-message").onType(MessageHeader.class).andRequireExplicitResponseAuthorization().andThen()
+					.allow("RULE 1").operation().named("process-message").onServer().andRequireExplicitResponseAuthorization().andThen()
 					.build();
 			}
 		});
@@ -1606,7 +1744,7 @@ public class AuthorizationInterceptorDstu3Test {
 
 		// With body
 		ourHitMethod = false;
-		httpPost = new HttpPost("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		httpPost = new HttpPost("http://localhost:" + ourPort + "/$process-message");
 		httpPost.setEntity(new StringEntity(inputString, ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
@@ -1616,7 +1754,7 @@ public class AuthorizationInterceptorDstu3Test {
 
 		// With body
 		ourHitMethod = false;
-		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/MessageHeader/$process-message");
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/$process-message");
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
@@ -2364,6 +2502,87 @@ public class AuthorizationInterceptorDstu3Test {
 	}
 
 	@Test
+	public void testReadByInstanceAllowsTargetedSearch() throws Exception {
+		ourConditionalCreateId = "1";
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				RuleBuilder ruleBuilder = new RuleBuilder();
+				ruleBuilder.allow().read().instance("Patient/900").andThen();
+				ruleBuilder.allow().read().instance("Patient/700").andThen();
+				return ruleBuilder.build();
+			}
+		});
+
+		HttpResponse status;
+		String response;
+		HttpGet httpGet;
+		ourReturn = Collections.singletonList(createPatient(900));
+
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900");
+//		status = ourClient.execute(httpGet);
+//		extractResponseAndClose(status);
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+//		assertTrue(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900");
+//		status = ourClient.execute(httpGet);
+//		extractResponseAndClose(status);
+//		assertEquals(200, status.getStatusLine().getStatusCode());
+//		assertTrue(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		// technically this is invalid, but just in case..
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=Patient/901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+//
+//		ourHitMethod = false;
+//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=901");
+//		status = ourClient.execute(httpGet);
+//		response = extractResponseAndClose(status);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertEquals(ERR403, response);
+//		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900,Patient/700");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900,777");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
 	public void testReadPageRight() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2456,6 +2675,85 @@ public class AuthorizationInterceptorDstu3Test {
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
+	public void testTransactionWithSearch() throws IOException {
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("read patient").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Request is a transaction with 1 search
+		Bundle requestBundle = new Bundle();
+		requestBundle.setType(Bundle.BundleType.TRANSACTION);
+		String patientId = "10000003857";
+		Bundle.BundleEntryComponent bundleEntryComponent = requestBundle.addEntry();
+		Bundle.BundleEntryRequestComponent bundleEntryRequestComponent = new Bundle.BundleEntryRequestComponent();
+		bundleEntryRequestComponent.setMethod(Bundle.HTTPVerb.GET);
+		bundleEntryRequestComponent.setUrl(ResourceType.Patient + "?identifier=" + patientId);
+		bundleEntryComponent.setRequest(bundleEntryRequestComponent);
+
+		/*
+		 * Response is a transaction response containing the search results
+		 */
+		Bundle searchResponseBundle = new Bundle();
+		Patient patent = new Patient();
+		patent.setActive(true);
+		patent.setId("Patient/123");
+		searchResponseBundle.addEntry().setResource(patent);
+
+		Bundle responseBundle = new Bundle();
+		responseBundle
+			.addEntry()
+			.setResource(searchResponseBundle);
+		ourReturn = Collections.singletonList(responseBundle);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(requestBundle));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+	@Test
+	public void testTransactionWithNoBundleType() throws IOException {
+
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("read patient").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Request is a transaction with 1 search
+		Bundle requestBundle = new Bundle();
+		String patientId = "10000003857";
+		Bundle.BundleEntryComponent bundleEntryComponent = requestBundle.addEntry();
+		Bundle.BundleEntryRequestComponent bundleEntryRequestComponent = new Bundle.BundleEntryRequestComponent();
+		bundleEntryRequestComponent.setMethod(Bundle.HTTPVerb.GET);
+		bundleEntryRequestComponent.setUrl(ResourceType.Patient + "?identifier=" + patientId);
+		bundleEntryComponent.setRequest(bundleEntryRequestComponent);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
+		httpPost.setEntity(createFhirResourceEntity(requestBundle));
+		CloseableHttpResponse status = ourClient.execute(httpPost);
+		String resp = extractResponseAndClose(status);
+		assertEquals(422, status.getStatusLine().getStatusCode());
+		assertThat(resp, containsString("Invalid request Bundle.type value for transaction: \\\"\\\""));
 
 	}
 
@@ -2990,45 +3288,6 @@ public class AuthorizationInterceptorDstu3Test {
 		assertTrue(ourHitMethod);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
-		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
-		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
-		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
-		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
-		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
-		DummyMessageHeaderResourceProvider mshProv = new DummyMessageHeaderResourceProvider();
-		PlainProvider plainProvider = new PlainProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv, mshProv);
-		ourServlet.setPlainProviders(plainProvider);
-		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class DummyCarePlanResourceProvider implements IResourceProvider {
 
 		@Override
@@ -3090,21 +3349,6 @@ public class AuthorizationInterceptorDstu3Test {
 
 	}
 
-	public static class DummyMessageHeaderResourceProvider implements IResourceProvider {
-
-
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return MessageHeader.class;
-		}
-
-		@Operation(name = "process-message", idempotent = true)
-		public Parameters operation0(@OperationParam(name="content") Bundle theInput) {
-			ourHitMethod = true;
-			return (Parameters) new Parameters().setId("1");
-		}
-
-	}
 
 	public static class DummyDiagnosticReportResourceProvider implements IResourceProvider {
 
@@ -3182,7 +3426,9 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Search()
-		public List<Resource> search(@OptionalParam(name = "subject") ReferenceParam theSubject) {
+		public List<Resource> search(
+			@OptionalParam(name = "_id") TokenAndListParam theIds,
+			@OptionalParam(name = "subject") ReferenceParam theSubject) {
 			ourHitMethod = true;
 			return ourReturn;
 		}
@@ -3233,10 +3479,14 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Delete()
-		public MethodOutcome delete(IRequestOperationCallback theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
+		public MethodOutcome delete(IInterceptorBroadcaster theRequestOperationCallback, @IdParam IdType theId, @ConditionalUrlParam String theConditionalUrl, RequestDetails theRequestDetails) {
 			ourHitMethod = true;
 			for (IBaseResource next : ourReturn) {
-				theRequestOperationCallback.resourceDeleted(next);
+				HookParams params = new HookParams()
+					.add(IBaseResource.class, next)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				theRequestOperationCallback.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
 			}
 			return new MethodOutcome();
 		}
@@ -3314,7 +3564,7 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 
 		@Search()
-		public List<Resource> search(@OptionalParam(name = "_id") IdType theIdParam) {
+		public List<Resource> search(@OptionalParam(name = "_id") TokenAndListParam theIdParam) {
 			ourHitMethod = true;
 			return ourReturn;
 		}
@@ -3373,12 +3623,68 @@ public class AuthorizationInterceptorDstu3Test {
 			return (Parameters) new Parameters().setId("1");
 		}
 
-		@Transaction()
-		public Bundle search(@TransactionParam Bundle theInput) {
+		@Operation(name = "process-message", idempotent = true)
+		public Parameters processMessage(@OperationParam(name = "content") Bundle theInput) {
 			ourHitMethod = true;
+			return (Parameters) new Parameters().setId("1");
+		}
+
+
+		@Transaction()
+		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
+			ourHitMethod = true;
+			if (ourDeleted != null) {
+				for (IBaseResource next : ourDeleted) {
+					HookParams params = new HookParams()
+						.add(IBaseResource.class, next)
+						.add(RequestDetails.class, theRequestDetails)
+						.add(ServletRequestDetails.class, theRequestDetails);
+					theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, params);
+				}
+			}
 			return (Bundle) ourReturn.get(0);
 		}
 
 	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		ourServer.stop();
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
+
+		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
+		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummyOrganizationResourceProvider orgProv = new DummyOrganizationResourceProvider();
+		DummyEncounterResourceProvider encProv = new DummyEncounterResourceProvider();
+		DummyCarePlanResourceProvider cpProv = new DummyCarePlanResourceProvider();
+		DummyDiagnosticReportResourceProvider drProv = new DummyDiagnosticReportResourceProvider();
+		PlainProvider plainProvider = new PlainProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.setPlainProviders(plainProvider);
+		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		ourServer.start();
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
+
 
 }

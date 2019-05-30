@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -244,41 +244,48 @@ public class RelatedArtifact extends Type implements ICompositeType {
     protected Enumeration<RelatedArtifactType> type;
 
     /**
+     * A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.
+     */
+    @Child(name = "label", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Description(shortDefinition="Short label", formalDefinition="A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index." )
+    protected StringType label;
+
+    /**
      * A brief description of the document or knowledge resource being referenced, suitable for display to a consumer.
      */
-    @Child(name = "display", type = {StringType.class}, order=1, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "display", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Brief description of the related artifact", formalDefinition="A brief description of the document or knowledge resource being referenced, suitable for display to a consumer." )
     protected StringType display;
 
     /**
      * A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.
      */
-    @Child(name = "citation", type = {StringType.class}, order=2, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "citation", type = {MarkdownType.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Bibliographic citation for the artifact", formalDefinition="A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format." )
-    protected StringType citation;
+    protected MarkdownType citation;
 
     /**
      * A url for the artifact that can be followed to access the actual content.
      */
-    @Child(name = "url", type = {UrlType.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "url", type = {UrlType.class}, order=4, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Where the artifact can be accessed", formalDefinition="A url for the artifact that can be followed to access the actual content." )
     protected UrlType url;
 
     /**
      * The document being referenced, represented as an attachment. This is exclusive with the resource element.
      */
-    @Child(name = "document", type = {Attachment.class}, order=4, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "document", type = {Attachment.class}, order=5, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What document is being referenced", formalDefinition="The document being referenced, represented as an attachment. This is exclusive with the resource element." )
     protected Attachment document;
 
     /**
      * The related resource, such as a library, value set, profile, or other knowledge resource.
      */
-    @Child(name = "resource", type = {CanonicalType.class}, order=5, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "resource", type = {CanonicalType.class}, order=6, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="What resource is being referenced", formalDefinition="The related resource, such as a library, value set, profile, or other knowledge resource." )
     protected CanonicalType resource;
 
-    private static final long serialVersionUID = 365945959L;
+    private static final long serialVersionUID = -695743528L;
 
   /**
    * Constructor
@@ -341,6 +348,55 @@ public class RelatedArtifact extends Type implements ICompositeType {
     }
 
     /**
+     * @return {@link #label} (A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     */
+    public StringType getLabelElement() { 
+      if (this.label == null)
+        if (Configuration.errorOnAutoCreate())
+          throw new Error("Attempt to auto-create RelatedArtifact.label");
+        else if (Configuration.doAutoCreate())
+          this.label = new StringType(); // bb
+      return this.label;
+    }
+
+    public boolean hasLabelElement() { 
+      return this.label != null && !this.label.isEmpty();
+    }
+
+    public boolean hasLabel() { 
+      return this.label != null && !this.label.isEmpty();
+    }
+
+    /**
+     * @param value {@link #label} (A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.). This is the underlying object with id, value and extensions. The accessor "getLabel" gives direct access to the value
+     */
+    public RelatedArtifact setLabelElement(StringType value) { 
+      this.label = value;
+      return this;
+    }
+
+    /**
+     * @return A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.
+     */
+    public String getLabel() { 
+      return this.label == null ? null : this.label.getValue();
+    }
+
+    /**
+     * @param value A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.
+     */
+    public RelatedArtifact setLabel(String value) { 
+      if (Utilities.noString(value))
+        this.label = null;
+      else {
+        if (this.label == null)
+          this.label = new StringType();
+        this.label.setValue(value);
+      }
+      return this;
+    }
+
+    /**
      * @return {@link #display} (A brief description of the document or knowledge resource being referenced, suitable for display to a consumer.). This is the underlying object with id, value and extensions. The accessor "getDisplay" gives direct access to the value
      */
     public StringType getDisplayElement() { 
@@ -392,12 +448,12 @@ public class RelatedArtifact extends Type implements ICompositeType {
     /**
      * @return {@link #citation} (A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.). This is the underlying object with id, value and extensions. The accessor "getCitation" gives direct access to the value
      */
-    public StringType getCitationElement() { 
+    public MarkdownType getCitationElement() { 
       if (this.citation == null)
         if (Configuration.errorOnAutoCreate())
           throw new Error("Attempt to auto-create RelatedArtifact.citation");
         else if (Configuration.doAutoCreate())
-          this.citation = new StringType(); // bb
+          this.citation = new MarkdownType(); // bb
       return this.citation;
     }
 
@@ -412,7 +468,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
     /**
      * @param value {@link #citation} (A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.). This is the underlying object with id, value and extensions. The accessor "getCitation" gives direct access to the value
      */
-    public RelatedArtifact setCitationElement(StringType value) { 
+    public RelatedArtifact setCitationElement(MarkdownType value) { 
       this.citation = value;
       return this;
     }
@@ -428,11 +484,11 @@ public class RelatedArtifact extends Type implements ICompositeType {
      * @param value A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.
      */
     public RelatedArtifact setCitation(String value) { 
-      if (Utilities.noString(value))
+      if (value == null)
         this.citation = null;
       else {
         if (this.citation == null)
-          this.citation = new StringType();
+          this.citation = new MarkdownType();
         this.citation.setValue(value);
       }
       return this;
@@ -563,8 +619,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
       protected void listChildren(List<Property> children) {
         super.listChildren(children);
         children.add(new Property("type", "code", "The type of relationship to the related artifact.", 0, 1, type));
+        children.add(new Property("label", "string", "A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.", 0, 1, label));
         children.add(new Property("display", "string", "A brief description of the document or knowledge resource being referenced, suitable for display to a consumer.", 0, 1, display));
-        children.add(new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation));
+        children.add(new Property("citation", "markdown", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation));
         children.add(new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url));
         children.add(new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document));
         children.add(new Property("resource", "canonical(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource));
@@ -574,8 +631,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public Property getNamedProperty(int _hash, String _name, boolean _checkValid) throws FHIRException {
         switch (_hash) {
         case 3575610: /*type*/  return new Property("type", "code", "The type of relationship to the related artifact.", 0, 1, type);
+        case 102727412: /*label*/  return new Property("label", "string", "A short label that can be used to reference the citation from elsewhere in the containing artifact, such as a footnote index.", 0, 1, label);
         case 1671764162: /*display*/  return new Property("display", "string", "A brief description of the document or knowledge resource being referenced, suitable for display to a consumer.", 0, 1, display);
-        case -1442706713: /*citation*/  return new Property("citation", "string", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation);
+        case -1442706713: /*citation*/  return new Property("citation", "markdown", "A bibliographic citation for the related artifact. This text SHOULD be formatted according to an accepted citation format.", 0, 1, citation);
         case 116079: /*url*/  return new Property("url", "url", "A url for the artifact that can be followed to access the actual content.", 0, 1, url);
         case 861720859: /*document*/  return new Property("document", "Attachment", "The document being referenced, represented as an attachment. This is exclusive with the resource element.", 0, 1, document);
         case -341064690: /*resource*/  return new Property("resource", "canonical(Any)", "The related resource, such as a library, value set, profile, or other knowledge resource.", 0, 1, resource);
@@ -588,8 +646,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public Base[] getProperty(int hash, String name, boolean checkValid) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return this.type == null ? new Base[0] : new Base[] {this.type}; // Enumeration<RelatedArtifactType>
+        case 102727412: /*label*/ return this.label == null ? new Base[0] : new Base[] {this.label}; // StringType
         case 1671764162: /*display*/ return this.display == null ? new Base[0] : new Base[] {this.display}; // StringType
-        case -1442706713: /*citation*/ return this.citation == null ? new Base[0] : new Base[] {this.citation}; // StringType
+        case -1442706713: /*citation*/ return this.citation == null ? new Base[0] : new Base[] {this.citation}; // MarkdownType
         case 116079: /*url*/ return this.url == null ? new Base[0] : new Base[] {this.url}; // UrlType
         case 861720859: /*document*/ return this.document == null ? new Base[0] : new Base[] {this.document}; // Attachment
         case -341064690: /*resource*/ return this.resource == null ? new Base[0] : new Base[] {this.resource}; // CanonicalType
@@ -605,11 +664,14 @@ public class RelatedArtifact extends Type implements ICompositeType {
           value = new RelatedArtifactTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<RelatedArtifactType>
           return value;
+        case 102727412: // label
+          this.label = castToString(value); // StringType
+          return value;
         case 1671764162: // display
           this.display = castToString(value); // StringType
           return value;
         case -1442706713: // citation
-          this.citation = castToString(value); // StringType
+          this.citation = castToMarkdown(value); // MarkdownType
           return value;
         case 116079: // url
           this.url = castToUrl(value); // UrlType
@@ -630,10 +692,12 @@ public class RelatedArtifact extends Type implements ICompositeType {
         if (name.equals("type")) {
           value = new RelatedArtifactTypeEnumFactory().fromType(castToCode(value));
           this.type = (Enumeration) value; // Enumeration<RelatedArtifactType>
+        } else if (name.equals("label")) {
+          this.label = castToString(value); // StringType
         } else if (name.equals("display")) {
           this.display = castToString(value); // StringType
         } else if (name.equals("citation")) {
-          this.citation = castToString(value); // StringType
+          this.citation = castToMarkdown(value); // MarkdownType
         } else if (name.equals("url")) {
           this.url = castToUrl(value); // UrlType
         } else if (name.equals("document")) {
@@ -649,6 +713,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public Base makeProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610:  return getTypeElement();
+        case 102727412:  return getLabelElement();
         case 1671764162:  return getDisplayElement();
         case -1442706713:  return getCitationElement();
         case 116079:  return getUrlElement();
@@ -663,8 +728,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public String[] getTypesForProperty(int hash, String name) throws FHIRException {
         switch (hash) {
         case 3575610: /*type*/ return new String[] {"code"};
+        case 102727412: /*label*/ return new String[] {"string"};
         case 1671764162: /*display*/ return new String[] {"string"};
-        case -1442706713: /*citation*/ return new String[] {"string"};
+        case -1442706713: /*citation*/ return new String[] {"markdown"};
         case 116079: /*url*/ return new String[] {"url"};
         case 861720859: /*document*/ return new String[] {"Attachment"};
         case -341064690: /*resource*/ return new String[] {"canonical"};
@@ -677,6 +743,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
       public Base addChild(String name) throws FHIRException {
         if (name.equals("type")) {
           throw new FHIRException("Cannot call addChild on a primitive type RelatedArtifact.type");
+        }
+        else if (name.equals("label")) {
+          throw new FHIRException("Cannot call addChild on a primitive type RelatedArtifact.label");
         }
         else if (name.equals("display")) {
           throw new FHIRException("Cannot call addChild on a primitive type RelatedArtifact.display");
@@ -707,6 +776,7 @@ public class RelatedArtifact extends Type implements ICompositeType {
         RelatedArtifact dst = new RelatedArtifact();
         copyValues(dst);
         dst.type = type == null ? null : type.copy();
+        dst.label = label == null ? null : label.copy();
         dst.display = display == null ? null : display.copy();
         dst.citation = citation == null ? null : citation.copy();
         dst.url = url == null ? null : url.copy();
@@ -726,9 +796,9 @@ public class RelatedArtifact extends Type implements ICompositeType {
         if (!(other_ instanceof RelatedArtifact))
           return false;
         RelatedArtifact o = (RelatedArtifact) other_;
-        return compareDeep(type, o.type, true) && compareDeep(display, o.display, true) && compareDeep(citation, o.citation, true)
-           && compareDeep(url, o.url, true) && compareDeep(document, o.document, true) && compareDeep(resource, o.resource, true)
-          ;
+        return compareDeep(type, o.type, true) && compareDeep(label, o.label, true) && compareDeep(display, o.display, true)
+           && compareDeep(citation, o.citation, true) && compareDeep(url, o.url, true) && compareDeep(document, o.document, true)
+           && compareDeep(resource, o.resource, true);
       }
 
       @Override
@@ -738,12 +808,12 @@ public class RelatedArtifact extends Type implements ICompositeType {
         if (!(other_ instanceof RelatedArtifact))
           return false;
         RelatedArtifact o = (RelatedArtifact) other_;
-        return compareValues(type, o.type, true) && compareValues(display, o.display, true) && compareValues(citation, o.citation, true)
-           && compareValues(url, o.url, true);
+        return compareValues(type, o.type, true) && compareValues(label, o.label, true) && compareValues(display, o.display, true)
+           && compareValues(citation, o.citation, true) && compareValues(url, o.url, true);
       }
 
       public boolean isEmpty() {
-        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, display, citation
+        return super.isEmpty() && ca.uhn.fhir.util.ElementUtil.isEmpty(type, label, display, citation
           , url, document, resource);
       }
 

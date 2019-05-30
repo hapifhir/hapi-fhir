@@ -7,7 +7,7 @@ import java.util.Date;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,6 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent, Long> {
 
 	@Query("SELECT s FROM SearchParamPresent s WHERE s.myResource = :res")
-	public Collection<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
+	Collection<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
 
 }

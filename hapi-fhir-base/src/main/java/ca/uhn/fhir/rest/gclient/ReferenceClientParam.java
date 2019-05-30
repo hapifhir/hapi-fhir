@@ -1,8 +1,10 @@
 package ca.uhn.fhir.rest.gclient;
 
 import ca.uhn.fhir.context.FhirContext;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -11,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +99,19 @@ public class ReferenceClientParam extends BaseClientParam  implements IParam {
 	public ICriterion<ReferenceClientParam> hasAnyOfIds(Collection<String> theIds) {
 		return new StringCriterion<>(getParamName(), theIds);
 	}
-	
+
+	/**
+	 * Match the referenced resource if the resource has ANY of the given IDs
+	 * (this is an OR search, not an AND search), (this can be the logical ID or
+	 * the absolute URL of the resource). Note that to specify an AND search,
+	 * simply add a subsequent {@link IQuery#where(ICriterion) where} criteria
+	 * with the same parameter.
+	 */
+	public ICriterion<ReferenceClientParam> hasAnyOfIds(String... theIds) {
+		Validate.notNull(theIds, "theIds must not be null");
+		return hasAnyOfIds(Arrays.asList(theIds));
+	}
+
 	private static class ReferenceChainCriterion implements ICriterion<ReferenceClientParam>, ICriterionInternal {
 
 		private final String myResourceTypeQualifier;

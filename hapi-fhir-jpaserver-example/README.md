@@ -1,4 +1,18 @@
-## Running hapi-fhir-jpaserver-example in Tomcat from IntelliJ
+# Unsupported
+
+This [hapi-fhir-jpaserver-example](https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example) project is no longer supported.
+
+
+## Supported JPA Example
+
+The supported HAPI-FHIR JPA example is available in the [hapi-fhir-jpaserver-starter](https://github.com/hapifhir/hapi-fhir-jpaserver-starter)
+project within the [hapifhir](https://github.com/hapifhir) GitHub Organization.
+
+## Previous Documentation
+
+Below is the original documentation for this project.  Note that this documentation is no longer being updated.
+
+#### Running hapi-fhir-jpaserver-example in Tomcat from IntelliJ
 
 Install Tomcat.
 
@@ -33,7 +47,7 @@ Point your browser (or fiddler, or what have you) to `http://localhost:8080/hapi
 You should get an empty bundle back.
 
 
-## Running hapi-fhir-jpaserver-example in a Docker container
+#### Running hapi-fhir-jpaserver-example in a Docker container
 
 Execute the `build-docker-image.sh` script to build the docker image. 
 

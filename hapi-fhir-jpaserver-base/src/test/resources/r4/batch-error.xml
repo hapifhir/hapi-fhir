@@ -2085,8 +2085,6 @@
                <profile value="http://hl7.org/fhir/us/core/StructureDefinition/us-core-allergyintolerance"/>
                <!--CDA templateId: urn:hl7ii:2.16.840.1.113883.10.20.22.4.7:2014-06-09-->
             </meta>
-            <clinicalStatus value="active"/>
-            <verificationStatus value="confirmed"/>
             <code><!--Original negated code: 419199007-->
                <coding>
                   <system value="http://snomed.info/sct"/>
@@ -2150,7 +2148,6 @@
       <fullUrl value="urn:uuid:e6b1a60b-be79-4cf5-b64b-8541315dfadf"/>
       <resource>
          <Goal>
-            <status value="in-progress"/>
             <description>
                <coding>
                   <system value="http://snomed.info/sct"/>
@@ -2182,7 +2179,6 @@
       <fullUrl value="urn:uuid:eba4ea86-9963-4a72-8a08-61c549e67c88"/>
       <resource>
          <Goal>
-            <status value="in-progress"/>
             <description>
                <coding>
                   <system value="http://snomed.info/sct"/>

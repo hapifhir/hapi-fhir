@@ -18,7 +18,7 @@ import java.util.Set;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,8 @@ public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
 	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
-	List<Long> findWithSearchUuid(@Param("search") Search theSearch);
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search")
+	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Search theSearch);
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);

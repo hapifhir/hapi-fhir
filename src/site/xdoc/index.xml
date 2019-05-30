@@ -68,6 +68,29 @@
 
 		<section name="Announcements">
 			<p>
+				<b>Feb 6, 2019 - HAPI FHIR 3.7.0 (Gale) Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release includes support for the now-completed FHIR R4 release (FHIR 4.0.0).
+				It also brings support for Java 11, along with a big number of bugfixes and
+				new features.
+			</p>
+			<p>
+				As always, see the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes.
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<p>
 				<b>Nov 12, 2018 - HAPI FHIR 3.6.0 (Food) Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
@@ -124,7 +147,7 @@
 			</p>
 			<br/><br/>
 
-		
+
 			
 			
 			<p>

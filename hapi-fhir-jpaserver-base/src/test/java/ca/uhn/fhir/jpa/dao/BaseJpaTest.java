@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
@@ -9,6 +12,7 @@ import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.LoggingRule;
@@ -16,9 +20,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
@@ -51,14 +53,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public abstract class BaseJpaTest {
@@ -80,14 +83,20 @@ public abstract class BaseJpaTest {
 	public LoggingRule myLoggingRule = new LoggingRule();
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	protected ServletRequestDetails mySrd;
-	protected ArrayList<IServerInterceptor> myServerInterceptorList;
-	protected IRequestOperationCallback myRequestOperationCallback = mock(IRequestOperationCallback.class);
+	protected InterceptorService myRequestOperationCallback;
 	@Autowired
 	protected DatabaseBackedPagingProvider myDatabaseBackedPagingProvider;
+	@Autowired
+	protected IInterceptorService myInterceptorRegistry;
+	@Autowired
+	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
 
 	@After
 	public void afterPerformCleanup() {
 		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+		if (myCaptureQueriesListener != null) {
+			myCaptureQueriesListener.clear();
+		}
 	}
 
 	@After
@@ -119,13 +128,19 @@ public abstract class BaseJpaTest {
 
 	@Before
 	public void beforeInitMocks() {
+		myRequestOperationCallback = new InterceptorService();
+
 		MockitoAnnotations.initMocks(this);
 
-		when(mySrd.getRequestOperationCallback()).thenReturn(myRequestOperationCallback);
-		myServerInterceptorList = new ArrayList<>();
-		when(mySrd.getServer().getInterceptors()).thenReturn(myServerInterceptorList);
+		when(mySrd.getInterceptorBroadcaster()).thenReturn(myRequestOperationCallback);
 		when(mySrd.getUserData()).thenReturn(new HashMap<>());
 		when(mySrd.getHeaders(eq(JpaConstants.HEADER_META_SNAPSHOT_MODE))).thenReturn(new ArrayList<>());
+	}
+
+	protected CountDownLatch registerLatchHookInterceptor(int theCount, Pointcut theLatchPointcut) {
+		CountDownLatch deliveryLatch = new CountDownLatch(theCount);
+		myInterceptorRegistry.registerAnonymousInterceptor(theLatchPointcut, Integer.MAX_VALUE, (thePointcut, t) -> deliveryLatch.countDown());
+		return deliveryLatch;
 	}
 
 	protected abstract FhirContext getContext();
@@ -302,6 +317,14 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
+	protected List<String> toUnqualifiedVersionlessIdValues(List<? extends IBaseResource> theFound) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theFound) {
+			retVal.add(next.getIdElement().toUnqualifiedVersionless().getValue());
+		}
+		return retVal;
+	}
+
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<IIdType>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
@@ -428,6 +451,20 @@ public abstract class BaseJpaTest {
 				})
 				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
+		}
+	}
+
+	public static void waitForTrue(Supplier<Boolean> theList) {
+		StopWatch sw = new StopWatch();
+		while (!theList.get() && sw.getMillis() <= 16000) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= 16000) {
+			fail("Waited " + sw.toString() + " and is still false");
 		}
 	}
 

@@ -2,15 +2,10 @@ package org.hl7.fhir.utilities.xhtml;
 
 import java.io.IOException;
 
-import javax.print.Doc;
-
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.xml.IXMLWriter;
 import org.hl7.fhir.utilities.xml.XMLUtil;
-import org.hl7.fhir.utilities.xml.IXMLWriter;
-import org.hl7.fhir.utilities.Utilities;
-import org.hl7.fhir.utilities.xhtml.NodeType;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 

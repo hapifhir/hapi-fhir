@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Embeddable
 @Entity
@@ -188,7 +190,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			return false;
 		}
 		UriParam uri = (UriParam) theParam;
-		return getUri().equalsIgnoreCase(uri.getValueNotNull());
+		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
 	public static long calculateHashUri(String theResourceType, String theParamName, String theUri) {

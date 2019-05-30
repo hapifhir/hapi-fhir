@@ -62,7 +62,6 @@ public class EmptyIndexesR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
-		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setIndexMissingFields(new DaoConfig().getIndexMissingFields());
 	}

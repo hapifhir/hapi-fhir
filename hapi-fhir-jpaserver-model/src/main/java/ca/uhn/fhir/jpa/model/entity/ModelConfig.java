@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.entity;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.Subscription;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,13 +40,14 @@ public class ModelConfig {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
 		"http://hl7.org/fhir/ValueSet/*",
 		"http://hl7.org/fhir/CodeSystem/*",
 		"http://hl7.org/fhir/valueset-*",
 		"http://hl7.org/fhir/codesystem-*",
 		"http://hl7.org/fhir/StructureDefinition/*")));
 
+	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -53,6 +56,10 @@ public class ModelConfig {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = false;
+	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
+	private String myEmailFromAddress = "noreply@unknown.com";
+	private boolean mySubscriptionMatchingEnabled = true;
+	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -221,7 +228,7 @@ public class ModelConfig {
 			}
 		}
 
-		HashSet<String> treatBaseUrlsAsLocal = new HashSet<String>();
+		HashSet<String> treatBaseUrlsAsLocal = new HashSet<>();
 		for (String next : ObjectUtils.defaultIfNull(theTreatBaseUrlsAsLocal, new HashSet<String>())) {
 			while (next.endsWith("/")) {
 				next = next.substring(0, next.length() - 1);
@@ -297,6 +304,83 @@ public class ModelConfig {
 		return this;
 	}
 
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public ModelConfig addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
+		return this;
+	}
+
+	/**
+	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
+	 * to the server matching these types will be activated.
+	 *
+	 */
+	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
+		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 * @since 3.7.0
+	 */
+
+	public boolean isSubscriptionMatchingEnabled() {
+		return mySubscriptionMatchingEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> (default is true) the server will match incoming resources against active subscriptions
+	 * and send them to the subscription channel.  If set to <code>false</code> no matching or sending occurs.
+	 * @since 3.7.0
+	 */
+
+
+	public void setSubscriptionMatchingEnabled(boolean theSubscriptionMatchingEnabled) {
+		mySubscriptionMatchingEnabled = theSubscriptionMatchingEnabled;
+	}
+
+	@VisibleForTesting
+	public void clearSupportedSubscriptionTypesForUnitTest() {
+		mySupportedSubscriptionTypes.clear();
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public String getEmailFromAddress() {
+		return myEmailFromAddress;
+	}
+
+	/**
+	 * If e-mail subscriptions are supported, the From address used when sending e-mails
+	 */
+
+	public void setEmailFromAddress(String theEmailFromAddress) {
+		myEmailFromAddress = theEmailFromAddress;
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myWebsocketContextPath;
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myWebsocketContextPath = theWebsocketContextPath;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
@@ -308,6 +392,4 @@ public class ModelConfig {
 		}
 
 	}
-
-
 }

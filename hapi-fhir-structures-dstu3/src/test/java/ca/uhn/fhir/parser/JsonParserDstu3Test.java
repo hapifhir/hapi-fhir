@@ -24,8 +24,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -48,6 +48,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.*;
 
 public class JsonParserDstu3Test {
@@ -1232,6 +1233,7 @@ public class JsonParserDstu3Test {
 			assertThat(out, containsString("id"));
 			assertThat(out, not(containsString("address")));
 			assertThat(out, not(containsString("meta")));
+			assertThat(out, not(containsString("SUBSETTED")));
 		}
 	}
 
@@ -1409,7 +1411,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testInvalidDateTimeValueInvalid() throws Exception {
+	public void testInvalidDateTimeValueInvalid() {
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 
 		String res = "{ \"resourceType\": \"Observation\", \"valueDateTime\": \"foo\" }";
@@ -1421,7 +1423,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getValueDateTimeType().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Invalid date/time format: \"foo\"", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1453,7 +1455,7 @@ public class JsonParserDstu3Test {
 		assertEquals(null, parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq(""), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq(""), msgCaptor.capture());
 		assertEquals("Attribute values must not be empty (\"\")", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1473,7 +1475,7 @@ public class JsonParserDstu3Test {
 		assertEquals("foo", parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-		verify(errorHandler, times(1)).invalidValue(isNull(IParseLocation.class), eq("foo"), msgCaptor.capture());
+		verify(errorHandler, times(1)).invalidValue(isNull(), eq("foo"), msgCaptor.capture());
 		assertEquals("Unknown AdministrativeGender code 'foo'", msgCaptor.getValue());
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(parsed);
@@ -1508,7 +1510,7 @@ public class JsonParserDstu3Test {
 	// FIXME: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationEncode() throws Exception {
+	public void testNamespacePreservationEncode() {
 		//@formatter:off
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\" xmlns:xhtml=\"http://www.w3.org/1999/xhtml\">" +
 			"<text>" +
@@ -1532,7 +1534,7 @@ public class JsonParserDstu3Test {
 	// TODO: this should pass
 	@Test
 	@Ignore
-	public void testNamespacePreservationParse() throws Exception {
+	public void testNamespacePreservationParse() {
 		String input = "{\"resourceType\":\"Patient\",\"text\":{\"div\":\"<xhtml:div xmlns:xhtml=\\\"http://www.w3.org/1999/xhtml\\\"><xhtml:img src=\\\"foo\\\"/>@fhirabend</xhtml:div>\"}}";
 		Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, input);
 		XhtmlNode div = parsed.getText().getDiv();
@@ -2064,7 +2066,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test
-	public void testParseMetadata() throws Exception {
+	public void testParseMetadata() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +
@@ -2218,7 +2220,7 @@ public class JsonParserDstu3Test {
 	}
 
 	@Test(expected = DataFormatException.class)
-	public void testParseWithTrailingContent() throws Exception {
+	public void testParseWithTrailingContent() {
 		//@formatter:off
 		String bundle = "{\n" +
 			"  \"resourceType\" : \"Bundle\",\n" +
@@ -2381,6 +2383,45 @@ public class JsonParserDstu3Test {
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
+	}
+
+	@Test
+	public void encodeResourceToString_withEXCLUDE_ELEMENTS_IN_ENCODED_metaKeptInContainedResource() {
+		// Arrange
+		Organization containedOrganization = new Organization();
+		containedOrganization.getMeta().addProfile(UUID.randomUUID().toString());
+		containedOrganization.getMeta().setLastUpdated(new Date());
+		containedOrganization.getMeta().setVersionId(UUID.randomUUID().toString());
+		containedOrganization.getMeta().setSecurity(Arrays.asList(new Coding(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString())));
+		containedOrganization.getMeta().setTag(Arrays.asList(new Coding(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString())));
+
+		Patient patient = new Patient();
+		patient.setId(UUID.randomUUID().toString());
+		patient.getMeta().addProfile(UUID.randomUUID().toString());
+		patient.setGeneralPractitioner(Arrays.asList(new Reference(containedOrganization)));
+
+		HashSet<String> excludeElementsInEncoded = new HashSet<>(); // ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED
+		excludeElementsInEncoded.add("id");
+		excludeElementsInEncoded.add("*.meta");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setDontEncodeElements(excludeElementsInEncoded);
+
+		// Act
+		String encodedPatient = parser.encodeResourceToString(patient);
+
+		// Assert
+		Patient parsedPatient = (Patient) parser.parseResource(encodedPatient);
+		assertNull(parsedPatient.getId());
+		assertTrue(parsedPatient.getMeta().isEmpty());
+
+		Resource containedResource = parsedPatient.getContained().get(0);
+		assertNotNull(containedResource.getMeta());
+		assertNull(containedResource.getMeta().getVersionId());
+		assertNull(containedResource.getMeta().getLastUpdated());
+		assertTrue(containedResource.getMeta().getSecurity().isEmpty());
+		assertEquals(1, containedResource.getMeta().getProfile().size());
+		assertEquals(1, containedResource.getMeta().getTag().size());
 	}
 
 	@AfterClass

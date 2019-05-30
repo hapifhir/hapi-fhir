@@ -714,13 +714,18 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public void setUcumService(UcumService ucumService) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public String getVersion() {
-			throw new UnsupportedOperationException();
+			return FhirVersionEnum.DSTU2.getFhirVersionString();
 		}
 
 		@Override

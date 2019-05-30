@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -233,7 +234,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			Entry nextRespEntry = response.getEntry().get(originalOrder);
 
-			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails();
+			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
 			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
 			requestDetails.setRequestType(RequestTypeEnum.GET);
 			requestDetails.setServer(theRequestDetails.getServer());
@@ -370,7 +371,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 					IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(res.getClass());
 					res.setId((String) null);
 					DaoMethodOutcome outcome;
-					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theRequestDetails);
+					outcome = resourceDao.create(res, nextReqEntry.getRequest().getIfNoneExist(), false, theUpdateTime, theRequestDetails);
 					handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res);
 					theEntriesToProcess.put(nextRespEntry, outcome.getEntity());
 					if (outcome.getCreated() == false) {
@@ -492,7 +493,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 			InstantDt deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get(nextResource);
 			Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 			if (theUpdatedEntities.contains(nextOutcome.getEntity())) {
-				updateInternal(theRequestDetails, nextResource, true, false, theRequestDetails, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+				updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 			} else if (!theNonUpdatedEntities.contains(nextOutcome.getEntity())) {
 				updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 			}
@@ -665,7 +666,11 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
 	}
 
-	//@formatter:off
+	@Override
+	public IBaseBundle processMessage(RequestDetails theRequestDetails, IBaseBundle theMessage) {
+		return FhirResourceDaoMessageHeaderDstu2.throwProcessMessageNotImplemented();
+	}
+
 
 	/**
 	 * Transaction Order, per the spec:
@@ -675,7 +680,6 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 	 * Process any PUT interactions
 	 * Process any GET interactions
 	 */
-	//@formatter:off
 	public class TransactionSorter implements Comparator<Entry> {
 
 		@Override

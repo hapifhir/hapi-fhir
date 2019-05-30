@@ -107,32 +107,6 @@ public class R4XmlParserTest {
 	}
 
 	@Test
-	public void testExcludeRootStuff() {
-		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("id");
-		excludes.add("meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, IsNot.not(containsString("BUNDLEID")));
-		assertThat(encoded, IsNot.not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", ((Patient) b.getEntry().get(0).getResource()).getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	}
-
-	@Test
 	public void testExcludeStarDotStuff() {
 		IParser parser = ourCtx.newXmlParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();

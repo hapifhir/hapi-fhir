@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.client.apache;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,9 +93,14 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
-			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
-					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();
+			RequestConfig defaultRequestConfig =
+				RequestConfig.custom()
+					.setSocketTimeout(getSocketTimeout())
+					.setConnectTimeout(getConnectTimeout())
+					.setConnectionRequestTimeout(getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true)
+					.setProxy(myProxy)
+					.build();
 
 			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
 					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();

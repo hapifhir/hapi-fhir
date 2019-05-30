@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.search;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -201,16 +201,21 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		switch (mySearchEntity.getSearchType()) {
 			case HISTORY:
-				return template.execute(new TransactionCallback<List<IBaseResource>>() {
-					@Override
-					public List<IBaseResource> doInTransaction(TransactionStatus theStatus) {
-						return doHistoryInTransaction(theFromIndex, theToIndex);
-					}
-				});
+				return template.execute(theStatus -> doHistoryInTransaction(theFromIndex, theToIndex));
 			case SEARCH:
 			case EVERYTHING:
 			default:
-				return doSearchOrEverything(theFromIndex, theToIndex);
+				List<IBaseResource> retVal = doSearchOrEverything(theFromIndex, theToIndex);
+				/*
+				 * If we got fewer resources back than we asked for, it's possible that the search
+				 * completed. If that's the case, the cached version of the search entity is probably
+				 * no longer valid so let's force a reload if it gets asked for again (most likely
+				 * because someone is calling size() on us)
+				 */
+				if (retVal.size() < theToIndex - theFromIndex) {
+					mySearchEntity = null;
+				}
+				return retVal;
 		}
 	}
 

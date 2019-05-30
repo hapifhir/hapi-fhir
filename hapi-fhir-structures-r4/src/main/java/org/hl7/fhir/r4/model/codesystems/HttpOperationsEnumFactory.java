@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.r4.model.EnumFactory;
@@ -51,6 +51,8 @@ public class HttpOperationsEnumFactory implements EnumFactory<HttpOperations> {
       return HttpOperations.POST;
     if ("put".equals(codeString))
       return HttpOperations.PUT;
+    if ("head".equals(codeString))
+      return HttpOperations.HEAD;
     throw new IllegalArgumentException("Unknown HttpOperations code '"+codeString+"'");
   }
 
@@ -67,6 +69,8 @@ public class HttpOperationsEnumFactory implements EnumFactory<HttpOperations> {
       return "post";
     if (code == HttpOperations.PUT)
       return "put";
+    if (code == HttpOperations.HEAD)
+      return "head";
     return "?";
   }
 

@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -18,7 +20,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -39,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,6 +143,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
+			if (numTotalResults == null) {
+				numTotalResults = theResult.size();
+			}
+
 			if (theSearchId != null) {
 				searchId = theSearchId;
 			} else {
@@ -192,19 +197,26 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				linkNext = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkNext = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		} else if (searchId != null) {
-			// We're doing offset pages
-			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
-			}
-			if (theOffset > 0) {
-				int start = Math.max(0, theOffset - theLimit);
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
+			/*
+			 * We're doing offset pages - Note that we only return paging links if we actually
+			 * included some results in the response. We do this to avoid situations where
+			 * people have faked the offset number to some huge number to avoid them getting
+			 * back paging links that don't make sense.
+			 */
+			if (resourceList.size() > 0) {
+				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
+					linkNext = (RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+				}
+				if (theOffset > 0) {
+					int start = Math.max(0, theOffset - theLimit);
+					linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
+				}
 			}
 		}
 
@@ -367,24 +379,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseDetails.setResponseResource(response);
 		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
 
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, response);
-			if (!continueProcessing) {
-				return null;
-			}
-
-			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
-			if (!continueProcessing) {
-				return null;
-			}
+		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
 
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
@@ -414,6 +410,29 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public enum ReturnTypeEnum {
 		BUNDLE,
 		RESOURCE
+	}
+
+	static boolean callOutgoingResponseHook(RequestDetails theRequest, ResponseDetails theResponseDetails) {
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
+		HookParams responseParams = new HookParams();
+		responseParams.add(RequestDetails.class, theRequest);
+		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		responseParams.add(IBaseResource.class, theResponseDetails.getResponseResource());
+		responseParams.add(ResponseDetails.class, theResponseDetails);
+		responseParams.add(HttpServletRequest.class, servletRequest);
+		responseParams.add(HttpServletResponse.class, servletResponse);
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

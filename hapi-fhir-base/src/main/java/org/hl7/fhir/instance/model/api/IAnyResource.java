@@ -7,7 +7,7 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,14 @@ public interface IAnyResource extends IBaseResource {
 	 * Search parameter constant for <b>_language</b>
 	 */
 	@SearchParamDefinition(name="_language", path="", description="The language of the resource", type="string"  )
-	public static final String SP_RES_LANGUAGE = "_language";
+	String SP_RES_LANGUAGE = "_language";
 
 
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
 	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="token"  )
-	public static final String SP_RES_ID = "_id";
+	String SP_RES_ID = "_id";
 
 	/**
 	 * <b>Fluent Client</b> search parameter constant for <b>_id</b>
@@ -46,7 +46,7 @@ public interface IAnyResource extends IBaseResource {
 	 * Path: <b>Resource._id</b><br>
 	 * </p>
 	 */
-	public static final TokenClientParam RES_ID = new TokenClientParam(IAnyResource.SP_RES_ID);
+	TokenClientParam RES_ID = new TokenClientParam(IAnyResource.SP_RES_ID);
 
 	String getId();
 
@@ -55,11 +55,11 @@ public interface IAnyResource extends IBaseResource {
 
 	IPrimitiveType<String> getLanguageElement();
 
-	public Object getUserData(String name);
+	Object getUserData(String name);
 
 	@Override
 	IAnyResource setId(String theId);
 
-	public void setUserData(String name, Object value);
+	void setUserData(String name, Object value);
 
 }

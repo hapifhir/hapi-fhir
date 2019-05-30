@@ -2,12 +2,12 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
@@ -160,12 +160,18 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 
 		Date beforeFirst = new Date();
 
+		TestUtil.sleepOneClick();
+
 		Bundle results1 = ourClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
+
+		TestUtil.sleepOneClick();
+
 		assertEquals(1, results1.getEntry().size());
 		assertEquals(1, mySearchEntityDao.count());
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE), empty());
-		assertThat(results1.getMeta().getLastUpdated(), greaterThan(beforeFirst));
-		assertThat(results1.getMeta().getLastUpdated(), lessThan(new Date()));
+		Date results1Date = TestUtil.getTimestamp(results1).getValue();
+		assertThat(results1Date, greaterThan(beforeFirst));
+		assertThat(results1Date, lessThan(new Date()));
 		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();

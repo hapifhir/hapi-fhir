@@ -315,7 +315,7 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		MethodOutcome outcome = client.create().resource(p1).execute();
+		MethodOutcome outcome = client.create().resource(p1).withAdditionalHeader("myHeaderName", "myHeaderValue").execute();
 		assertEquals("44", outcome.getId().getIdPart());
 		assertEquals("22", outcome.getId().getVersionIdPart());
 
@@ -325,6 +325,7 @@ public class GenericClientTest {
 		assertEquals("POST", capt.getValue().getMethod());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
 		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 		count++;
 
 		/*
@@ -415,17 +416,20 @@ public class GenericClientTest {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-		OperationOutcome outcome = (OperationOutcome) client.delete().resourceById("Patient", "123").execute();
+		OperationOutcome outcome = (OperationOutcome) client.delete().resourceById("Patient", "123")
+			.withAdditionalHeader("myHeaderName", "myHeaderValue").execute();
 
 		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
 		assertEquals("testDelete01", outcome.getIssueFirstRep().getLocation().get(0).getValue());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader("LKJHLKJGLKJKLL"), Charset.forName("UTF-8")));
 		outcome = (OperationOutcome) client.delete().resourceById(new IdType("Location", "123", "456")).prettyPrint().encodedJson().execute();
 
 		assertEquals("http://example.com/fhir/Location/123?_pretty=true", capt.getAllValues().get(1).getURI().toString());
 		assertEquals("DELETE", capt.getValue().getMethod());
+
 		assertEquals(null, outcome);
 
 	}
@@ -455,8 +459,10 @@ public class GenericClientTest {
 			.history()
 			.onServer()
 			.andReturnBundle(Bundle.class)
+			.withAdditionalHeader("myHeaderName", "myHeaderValue")
 			.execute();
 		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 		assertEquals(1, response.getEntry().size());
 		idx++;
 
@@ -464,9 +470,13 @@ public class GenericClientTest {
 			.history()
 			.onType(Patient.class)
 			.andReturnBundle(Bundle.class)
+			.withAdditionalHeader("myHeaderName", "myHeaderValue1")
+			.withAdditionalHeader("myHeaderName", "myHeaderValue2")
 			.execute();
 		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
 		assertEquals(1, response.getEntry().size());
+		assertEquals("myHeaderValue1", capt.getValue().getHeaders("myHeaderName")[0].getValue());
+		assertEquals("myHeaderValue2", capt.getValue().getHeaders("myHeaderName")[1].getValue());
 		idx++;
 
 		response = client
@@ -1145,10 +1155,12 @@ public class GenericClientTest {
 			.forResource(Patient.class)
 			.withTag("urn:foo", "123")
 			.withTag("urn:bar", "456")
+			.withAdditionalHeader("myHeaderName", "myHeaderValue")
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals("http://example.com/fhir/Patient?_tag=urn%3Afoo%7C123&_tag=urn%3Abar%7C456", capt.getValue().getURI().toString());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 	}
 
@@ -1169,10 +1181,12 @@ public class GenericClientTest {
 		Bundle response = client.search()
 			.forResource("Patient")
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("http://example.com/fhir", "ZZZ"))
+			.withAdditionalHeader("myHeaderName", "myHeaderValue")
 			.returnBundle(Bundle.class)
 			.execute();
 
 		assertEquals("http://example.com/fhir/Patient?identifier=http%3A%2F%2Fexample.com%2Ffhir%7CZZZ", capt.getValue().getURI().toString());
+		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), Charset.forName("UTF-8")));
 		response = client.search()

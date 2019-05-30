@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.model.search;
  * #%L
  * HAPI FHIR Model
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,10 @@ import org.hibernate.search.indexes.interceptor.EntityIndexingInterceptor;
 import org.hibernate.search.indexes.interceptor.IndexingOverride;
 
 /**
+ * Note that this is a Hibernate Search interceptor, not a HAPI FHIR interceptor.
+ * It's used in {@link ResourceTable}. There is no reason for this to be used
+ * in any user code.
+ *
  * Only store non-deleted resources
  */
 public class IndexNonDeletedInterceptor implements EntityIndexingInterceptor<ResourceTable> {

@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -102,7 +102,7 @@ public enum EpisodeofcareType {
           switch (this) {
             case HACC: return "Home and Community Care";
             case PAC: return "Post Acute Care";
-            case DIAB: return "Post co-ordinated diabetes program";
+            case DIAB: return "Post coordinated diabetes program";
             case DA: return "Drug and alcohol rehabilitation";
             case CACP: return "Community-based aged care";
             default: return "?";

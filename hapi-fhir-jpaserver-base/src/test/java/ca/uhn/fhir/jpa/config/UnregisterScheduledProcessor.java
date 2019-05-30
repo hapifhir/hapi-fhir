@@ -15,6 +15,8 @@ import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
  */
 public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 
+	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
+
 	private final Environment myEnvironment;
 
 	public UnregisterScheduledProcessor(Environment theEnv) {
@@ -23,7 +25,7 @@ public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 
 	@Override
 	public void postProcessBeanFactory(final ConfigurableListableBeanFactory beanFactory) throws BeansException {
-		String schedulingDisabled = myEnvironment.getProperty("scheduling_disabled");
+		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
 		if ("true".equals(schedulingDisabled)) {
 			for (String beanName : beanFactory.getBeanNamesForType(ScheduledAnnotationBeanPostProcessor.class)) {
 				((DefaultListableBeanFactory) beanFactory).removeBeanDefinition(beanName);

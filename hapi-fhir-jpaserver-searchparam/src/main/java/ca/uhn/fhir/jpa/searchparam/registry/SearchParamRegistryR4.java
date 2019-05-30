@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * #%L
  * HAPI FHIR Search Parameters
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParameter> {
 
-	public SearchParamRegistryR4(ISearchParamProvider theSearchParamProvider) {
-		super(theSearchParamProvider);
-	}
-
 	@Override
 	protected RuntimeSearchParam toRuntimeSp(SearchParameter theNextSp) {
 		String name = theNextSp.getCode();
@@ -76,6 +72,9 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 				break;
 			case URI:
 				paramType = RestSearchParameterTypeEnum.URI;
+				break;
+			case SPECIAL:
+				paramType = RestSearchParameterTypeEnum.SPECIAL;
 				break;
 			case NULL:
 				break;
@@ -128,6 +127,4 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 
 		return new JpaRuntimeSearchParam(id, uri, name, description, path, paramType, providesMembershipInCompartments, targets, status, unique, components, theNextSp.getBase());
 	}
-
-
 }

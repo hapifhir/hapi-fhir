@@ -28,7 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +87,14 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 			return null;
 		}
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		if (isBlank(theSystem)) {
+			return null;
+		}
+		return fetchResource(theCtx, ValueSet.class, theSystem);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -159,7 +167,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
+		return fetchCodeSystem(theCtx, theSystem) != null;
 	}
 
 	@Override

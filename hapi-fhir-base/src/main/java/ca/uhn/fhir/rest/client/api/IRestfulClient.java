@@ -1,18 +1,19 @@
 package ca.uhn.fhir.rest.client.api;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
+import javax.annotation.Nonnull;
 
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +30,20 @@ import java.util.List;
  */
 
 public interface IRestfulClient {
+
+	/**
+	 * Sets the interfceptor service used by this client
+	 *
+	 * @since 3.8.0
+	 */
+	IInterceptorService getInterceptorService();
+
+	/**
+	 * Sets the interfceptor service used by this client
+	 *
+	 * @since 3.8.0
+	 */
+	void setInterceptorService(@Nonnull IInterceptorService theInterceptorService);
 
 	/**
 	 * Retrieve the contents at the given URL and parse them as a resource. This
@@ -70,11 +85,6 @@ public interface IRestfulClient {
 	IHttpClient getHttpClient();
 
 	/**
-	 * Returns the client interceptors that have been registered with this client
-	 */
-	List<IClientInterceptor> getInterceptors();
-
-	/**
 	 * Base URL for the server, with no trailing "/"
 	 */
 	String getServerBase();
@@ -82,7 +92,10 @@ public interface IRestfulClient {
 	/**
 	 * Register a new interceptor for this client. An interceptor can be used to add additional
 	 * logging, or add security headers, or pre-process responses, etc.
+	 *
+	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
 	 */
+	@Deprecated
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	/**
@@ -102,7 +115,10 @@ public interface IRestfulClient {
 
 	/**
 	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
+	 *
+	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
 	 */
+	@Deprecated
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
 	/**

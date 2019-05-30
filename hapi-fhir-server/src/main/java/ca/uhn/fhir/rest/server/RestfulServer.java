@@ -4,7 +4,7 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@ import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.Destroy;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.ParseAction;
@@ -43,19 +44,20 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.ExceptionHandlingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.ConformanceMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.*;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -73,6 +75,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -95,12 +98,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * context, in order to avoid a dependency on Servlet-API 3.0+
 	 */
 	public static final String SERVLET_CONTEXT_ATTRIBUTE = "ca.uhn.fhir.rest.server.RestfulServer.servlet_context";
+	/**
+	 * Default value for {@link #setDefaultPreferReturn(PreferReturnEnum)}
+	 */
+	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServer.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
-	private final List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
+	private IInterceptorService myInterceptorService;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
 	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
@@ -123,9 +130,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private String myServerVersion = createPoweredByHeaderProductVersion();
 	private boolean myStarted;
 	private boolean myUncompressIncomingContents = true;
-	private boolean myUseBrowserFriendlyContentTypes;
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
-	private Date myConformanceDate;
+	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
+	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -142,6 +149,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public RestfulServer(FhirContext theCtx) {
 		myFhirContext = theCtx;
+		setInterceptorService(new InterceptorService());
 	}
 
 	private void addContentLocationHeaders(RequestDetails theRequest, HttpServletResponse servletResponse, MethodOutcome response, String resourceName) {
@@ -509,6 +517,21 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myETagSupport = theETagSupport;
 	}
 
+	@Override
+	public ElementsSupportEnum getElementsSupport() {
+		return myElementsSupport;
+	}
+
+	/**
+	 * Sets the elements support mode.
+	 *
+	 * @see <a href="http://hapifhir.io/doc_rest_server.html#extended_elements_support">Extended Elements Support</a>
+	 */
+	public void setElementsSupport(ElementsSupportEnum theElementsSupport) {
+		Validate.notNull(theElementsSupport, "theElementsSupport must not be null");
+		myElementsSupport = theElementsSupport;
+	}
+
 	/**
 	 * Gets the {@link FhirContext} associated with this server. For efficient processing, resource providers and plain
 	 * providers should generally use this context if one is needed, as opposed to
@@ -538,36 +561,61 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Returns a list of all registered server interceptors
+	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
+	 */
+	@Deprecated
+	@Override
+	public List<IServerInterceptor> getInterceptors_() {
+		List<IServerInterceptor> retVal = getInterceptorService()
+			.getAllRegisteredInterceptors()
+			.stream()
+			.filter(t -> t instanceof IServerInterceptor)
+			.map(t -> (IServerInterceptor) t)
+			.collect(Collectors.toList());
+		return Collections.unmodifiableList(retVal);
+	}
+
+	/**
+	 * Returns the interceptor registry for this service. Use this registry to register and unregister
+	 * @since 3.8.0
 	 */
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
-		return Collections.unmodifiableList(myInterceptors);
+	public IInterceptorService getInterceptorService() {
+		return myInterceptorService;
+	}
+
+	/**
+	 * Sets the interceptor registry for this service. Use this registry to register and unregister
+	 *
+	 * @since 3.8.0
+	 */
+	public void setInterceptorService(@Nonnull IInterceptorService theInterceptorService) {
+		Validate.notNull(theInterceptorService, "theInterceptorService must not be null");
+		myInterceptorService = theInterceptorService;
 	}
 
 	/**
 	 * Sets (or clears) the list of interceptors
 	 *
 	 * @param theList The list of interceptors (may be null)
+	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
 	 */
-	public void setInterceptors(List<IServerInterceptor> theList) {
-		myInterceptors.clear();
-		if (theList != null) {
-			myInterceptors.addAll(theList);
-		}
+	@Deprecated
+	public void setInterceptors(@Nonnull List<?> theList) {
+		myInterceptorService.unregisterAllInterceptors();
+		myInterceptorService.registerInterceptors(theList);
 	}
 
 	/**
 	 * Sets (or clears) the list of interceptors
 	 *
 	 * @param theInterceptors The list of interceptors (may be null)
+	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
 	 */
+	@Deprecated
 	public void setInterceptors(IServerInterceptor... theInterceptors) {
 		Validate.noNullElements(theInterceptors, "theInterceptors must not contain any null elements");
-
-		myInterceptors.clear();
-		if (theInterceptors != null) {
-			myInterceptors.addAll(Arrays.asList(theInterceptors));
-		}
+		setInterceptors(Arrays.asList(theInterceptors));
 	}
 
 	@Override
@@ -595,7 +643,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Sets the non-resource specific providers which implement method calls on this server.
 	 *
 	 * @see #setResourceProviders(Collection)
+	 * @deprecated This method causes inconsistent behaviour depending on the order it is called in. Use {@link #registerProviders(Object...)} instead.
 	 */
+	@Deprecated
 	public void setPlainProviders(Object... theProv) {
 		setPlainProviders(Arrays.asList(theProv));
 	}
@@ -604,7 +654,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Sets the non-resource specific providers which implement method calls on this server.
 	 *
 	 * @see #setResourceProviders(Collection)
+	 * @deprecated This method causes inconsistent behaviour depending on the order it is called in. Use {@link #registerProviders(Object...)} instead.
 	 */
+	@Deprecated
 	public void setPlainProviders(Collection<Object> theProviders) {
 		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
 
@@ -792,7 +844,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@SuppressWarnings("WeakerAccess")
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String fhirServerBase;
-		ServletRequestDetails requestDetails = new ServletRequestDetails();
+		ServletRequestDetails requestDetails = new ServletRequestDetails(getInterceptorService());
 		requestDetails.setServer(this);
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
@@ -823,7 +875,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			String completeUrl;
 			Map<String, String[]> params = null;
-			if (StringUtils.isNotBlank(theRequest.getQueryString())) {
+			if (isNotBlank(theRequest.getQueryString())) {
 				completeUrl = requestUrl + "?" + theRequest.getQueryString();
 				/*
 				 * By default, we manually parse the request params (the URL params, or the body for
@@ -867,14 +919,12 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * Notify interceptors about the incoming request
 			 * *************************/
 
-			for (IServerInterceptor next : myInterceptors) {
-				boolean continueProcessing = next.incomingRequestPreProcessed(theRequest, theResponse);
-				if (!continueProcessing) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
+			HookParams preProcessedParams = new HookParams();
+			preProcessedParams.add(HttpServletRequest.class, theRequest);
+			preProcessedParams.add(HttpServletResponse.class, theResponse);
+			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED, preProcessedParams)) {
+				return;
 			}
-
 
 			String requestPath = getRequestPath(requestFullPath, servletContextPath, servletPath);
 
@@ -911,65 +961,53 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
 
-			// String pagingAction = theRequest.getParameter(Constants.PARAM_PAGINGACTION);
-			// if (getPagingProvider() != null && isNotBlank(pagingAction)) {
-			// requestDetails.setRestOperationType(RestOperationTypeEnum.GET_PAGE);
-			// if (theRequestType != RequestTypeEnum.GET) {
-			// /*
-			// * We reconstruct the link-self URL using the request parameters, and this would break if the parameters came
-			// in using a POST. We could probably work around that but why bother unless
-			// * someone comes up with a reason for needing it.
-			// */
-			// throw new InvalidRequestException(getFhirContext().getLocalizer().getMessage(RestfulServer.class,
-			// "getPagesNonHttpGet"));
-			// }
-			// handlePagingRequest(requestDetails, theResponse, pagingAction);
-			// return;
-			// }
+			validateRequest(requestDetails);
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
 			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
 
 			// Handle server interceptors
-			for (IServerInterceptor next : myInterceptors) {
-				boolean continueProcessing = next.incomingRequestPostProcessed(requestDetails, theRequest, theResponse);
-				if (!continueProcessing) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
+			HookParams postProcessedParams = new HookParams();
+			postProcessedParams.add(RequestDetails.class, requestDetails);
+			postProcessedParams.add(ServletRequestDetails.class, requestDetails);
+			postProcessedParams.add(HttpServletRequest.class, theRequest);
+			postProcessedParams.add(HttpServletResponse.class, theResponse);
+			if (!myInterceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, postProcessedParams)) {
+				return;
 			}
 
 			/*
-			 * Actualy invoke the server method. This call is to a HAPI method binding, which
+			 * Actually invoke the server method. This call is to a HAPI method binding, which
 			 * is an object that wraps a specific implementing (user-supplied) method, but
 			 * handles its input and provides its output back to the client.
 			 *
 			 * This is basically the end of processing for a successful request, since the
 			 * method binding replies to the client and closes the response.
 			 */
-			Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails);
+			try (Closeable outputStreamOrWriter = (Closeable) resourceMethod.invokeServer(this, requestDetails)) {
 
-			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = getInterceptors().get(i);
-				try {
-					next.processingCompletedNormally(requestDetails);
-				} catch (Throwable t) {
-					ourLog.error("Failure in interceptor method", t);
-				}
+				// Invoke interceptors
+				HookParams hookParams = new HookParams();
+				hookParams.add(RequestDetails.class, requestDetails);
+				hookParams.add(ServletRequestDetails.class, requestDetails);
+				myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY, hookParams);
+
+				ourLog.trace("Done writing to stream: {}", outputStreamOrWriter);
 			}
-
-			IOUtils.closeQuietly(outputStreamOrWriter);
 
 		} catch (NotModifiedException | AuthenticationException e) {
 
-			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, e, theRequest, theResponse)) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
+			HookParams handleExceptionParams = new HookParams();
+			handleExceptionParams.add(RequestDetails.class, requestDetails);
+			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
+			handleExceptionParams.add(HttpServletRequest.class, theRequest);
+			handleExceptionParams.add(HttpServletResponse.class, theResponse);
+			handleExceptionParams.add(BaseServerResponseException.class, e);
+			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
+				return;
 			}
+
 			writeExceptionToResponse(theResponse, e);
 
 		} catch (Throwable e) {
@@ -982,15 +1020,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * First we let the interceptors have a crack at converting the exception into something HAPI can use
 			 * (BaseServerResponseException)
 			 */
-			BaseServerResponseException exception = null;
-			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = getInterceptors().get(i);
-				exception = next.preProcessOutgoingException(requestDetails, e, theRequest);
-				if (exception != null) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					break;
-				}
-			}
+			HookParams preProcessParams = new HookParams();
+			preProcessParams.add(RequestDetails.class, requestDetails);
+			preProcessParams.add(ServletRequestDetails.class, requestDetails);
+			preProcessParams.add(HttpServletRequest.class, theRequest);
+			preProcessParams.add(HttpServletResponse.class, theResponse);
+			preProcessParams.add(Throwable.class, e);
+			BaseServerResponseException exception = (BaseServerResponseException) myInterceptorService.callHooksAndReturnObject(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION, preProcessParams);
 
 			/*
 			 * If none of the interceptors converted the exception, default behaviour is to keep the exception as-is if it
@@ -1004,12 +1040,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			/*
 			 * Next, interceptors get a shot at handling the exception
 			 */
-			for (int i = getInterceptors().size() - 1; i >= 0; i--) {
-				IServerInterceptor next = getInterceptors().get(i);
-				if (!next.handleException(requestDetails, exception, theRequest, theResponse)) {
-					ourLog.debug("Interceptor {} returned false, not continuing processing");
-					return;
-				}
+			HookParams handleExceptionParams = new HookParams();
+			handleExceptionParams.add(RequestDetails.class, requestDetails);
+			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
+			handleExceptionParams.add(HttpServletRequest.class, theRequest);
+			handleExceptionParams.add(HttpServletResponse.class, theResponse);
+			handleExceptionParams.add(BaseServerResponseException.class, exception);
+			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
+				return;
 			}
 
 			/*
@@ -1017,12 +1055,33 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 */
 			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
 			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
+			requestDetails.removeParameter(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
 
 			/*
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
+		}
+	}
+
+	protected void validateRequest(ServletRequestDetails theRequestDetails) {
+		String[] elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
+		}
+
+		elements = theRequestDetails.getParameters().get(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+		if (elements != null) {
+			for (String next : elements) {
+				if (next.indexOf(':') != -1) {
+					throw new InvalidRequestException("Invalid _elements value: \"" + next + "\"");
+				}
+			}
 		}
 	}
 
@@ -1175,6 +1234,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * <p>
 	 * The default is <code>false</code>
 	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
+	 * </p>
 	 *
 	 * @return Returns the default pretty print setting
 	 */
@@ -1189,6 +1253,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * parameter in the request URL.
 	 * <p>
 	 * The default is <code>false</code>
+	 * </p>
+	 * <p>
+	 * Note that this setting is ignored by {@link ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor}
+	 * when streaming HTML, although even when that interceptor it used this setting will
+	 * still be honoured when streaming raw FHIR.
 	 * </p>
 	 *
 	 * @param theDefaultPrettyPrint The default pretty print setting
@@ -1243,26 +1312,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
 
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	@Override
-	public boolean isUseBrowserFriendlyContentTypes() {
-		return myUseBrowserFriendlyContentTypes;
-	}
-
-	/**
-	 * @deprecated This feature did not work well, and will be removed. Use {@link ResponseHighlighterInterceptor}
-	 * instead as an interceptor on your server and it will provide more useful syntax
-	 * highlighting. Deprocated in 1.4
-	 */
-	@Deprecated
-	public void setUseBrowserFriendlyContentTypes(boolean theUseBrowserFriendlyContentTypes) {
-		myUseBrowserFriendlyContentTypes = theUseBrowserFriendlyContentTypes;
-	}
 
 	public void populateRequestDetailsFromRequestPath(RequestDetails theRequestDetails, String theRequestPath) {
 		UrlPathTokenizer tok = new UrlPathTokenizer(theRequestPath);
@@ -1336,9 +1385,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theRequestDetails.setCompartmentName(compartment);
 	}
 
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
+	/**
+	 * Registers an interceptor. This method is a convenience method which calls
+	 * <code>getInterceptorService().registerInterceptor(theInterceptor);</code>
+	 *
+	 * @param theInterceptor The interceptor, must not be null
+	 */
+	public void registerInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.add(theInterceptor);
+		getInterceptorService().registerInterceptor(theInterceptor);
 	}
 
 	/**
@@ -1351,6 +1406,16 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			providerList.add(provider);
 			registerProviders(providerList);
 		}
+	}
+
+	/**
+	 * Register a group of providers. These could be Resource Providers (classes implementing {@link IResourceProvider}) or "plain" providers, or a mixture of the two.
+	 *
+	 * @param theProviders a {@code Collection} of theProviders. The parameter could be null or an empty {@code Collection}
+	 */
+	public void registerProviders(Object... theProviders) {
+		Validate.noNullElements(theProviders);
+		registerProviders(Arrays.asList(theProviders));
 	}
 
 	/**
@@ -1398,7 +1463,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					if (resourceType == null) {
 						throw new NullPointerException("getResourceType() on class '" + rsrcProvider.getClass().getCanonicalName() + "' returned null");
 					}
-					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
 					}
@@ -1572,9 +1636,15 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		throw new ResourceNotFoundException("Unknown resource type '" + theResourceName + "' - Server knows how to handle: " + myResourceNameToBinding.keySet());
 	}
 
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
+	/**
+	 * Unregisters an interceptor. This method is a convenience method which calls
+	 * <code>getInterceptorService().unregisterInterceptor(theInterceptor);</code>
+	 *
+	 * @param theInterceptor The interceptor, must not be null
+	 */
+	public void unregisterInterceptor(Object theInterceptor) {
 		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
+		getInterceptorService().unregisterInterceptor(theInterceptor);
 	}
 
 	/**
@@ -1600,7 +1670,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					myResourceProviders.remove(provider);
 					IResourceProvider rsrcProvider = (IResourceProvider) provider;
 					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
-					String resourceName = getFhirContext().getResourceDefinition(resourceType).getName();
 					providedResourceScanner.removeProvidedResources(rsrcProvider);
 				} else {
 					myPlainProviders.remove(provider);
@@ -1625,6 +1694,38 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
 		theResponse.getWriter().write(theException.getMessage());
+	}
+
+	/**
+	 * By default, server create/update/patch/transaction methods return a copy of the resource
+	 * as it was stored. This may be overridden by the client using the
+	 * <code>Prefer</code> header.
+	 * <p>
+	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
+	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * </p>
+	 *
+	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
+	 */
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return myDefaultPreferReturn;
+	}
+
+	/**
+	 * By default, server create/update/patch/transaction methods return a copy of the resource
+	 * as it was stored. This may be overridden by the client using the
+	 * <code>Prefer</code> header.
+	 * <p>
+	 * This setting changes the default behaviour if no Prefer header is supplied by the client.
+	 * The default is {@link PreferReturnEnum#REPRESENTATION}
+	 * </p>
+	 *
+	 * @see <a href="http://hl7.org/fhir/http.html#ops">HL7 FHIR Specification</a> section on the Prefer header
+	 */
+	public void setDefaultPreferReturn(PreferReturnEnum theDefaultPreferReturn) {
+		Validate.notNull(theDefaultPreferReturn, "theDefaultPreferReturn must not be null");
+		myDefaultPreferReturn = theDefaultPreferReturn;
 	}
 
 	/**

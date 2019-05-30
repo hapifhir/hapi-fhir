@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 import java.util.*;
 
@@ -66,7 +66,7 @@ public class Signature extends Type implements ICompositeType {
     /**
      * A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).
      */
-    @Child(name = "who", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=true)
+    @Child(name = "who", type = {Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=2, min=1, max=1, modifier=false, summary=true)
     @Description(shortDefinition="Who signed", formalDefinition="A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key)." )
     protected Reference who;
 
@@ -78,7 +78,7 @@ public class Signature extends Type implements ICompositeType {
     /**
      * A reference to an application-usable description of the identity that is represented by the signature.
      */
-    @Child(name = "onBehalfOf", type = {Practitioner.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
+    @Child(name = "onBehalfOf", type = {Practitioner.class, PractitionerRole.class, RelatedPerson.class, Patient.class, Device.class, Organization.class}, order=3, min=0, max=1, modifier=false, summary=true)
     @Description(shortDefinition="The party represented", formalDefinition="A reference to an application-usable description of the identity that is represented by the signature." )
     protected Reference onBehalfOf;
 
@@ -455,8 +455,8 @@ public class Signature extends Type implements ICompositeType {
         super.listChildren(children);
         children.add(new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type));
         children.add(new Property("when", "instant", "When the digital signature was signed.", 0, 1, when));
-        children.add(new Property("who", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who));
-        children.add(new Property("onBehalfOf", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf));
+        children.add(new Property("who", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who));
+        children.add(new Property("onBehalfOf", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf));
         children.add(new Property("targetFormat", "code", "A mime type that indicates the technical format of the target resources signed by the signature.", 0, 1, targetFormat));
         children.add(new Property("sigFormat", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc.", 0, 1, sigFormat));
         children.add(new Property("data", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, 1, data));
@@ -467,8 +467,8 @@ public class Signature extends Type implements ICompositeType {
         switch (_hash) {
         case 3575610: /*type*/  return new Property("type", "Coding", "An indication of the reason that the entity signed this document. This may be explicitly included as part of the signature information and can be used when determining accountability for various actions concerning the document.", 0, java.lang.Integer.MAX_VALUE, type);
         case 3648314: /*when*/  return new Property("when", "instant", "When the digital signature was signed.", 0, 1, when);
-        case 117694: /*who*/  return new Property("who", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
-        case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Practitioner|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
+        case 117694: /*who*/  return new Property("who", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that signed  (e.g. the signature used their private key).", 0, 1, who);
+        case -14402964: /*onBehalfOf*/  return new Property("onBehalfOf", "Reference(Practitioner|PractitionerRole|RelatedPerson|Patient|Device|Organization)", "A reference to an application-usable description of the identity that is represented by the signature.", 0, 1, onBehalfOf);
         case -917363480: /*targetFormat*/  return new Property("targetFormat", "code", "A mime type that indicates the technical format of the target resources signed by the signature.", 0, 1, targetFormat);
         case -58720216: /*sigFormat*/  return new Property("sigFormat", "code", "A mime type that indicates the technical format of the signature. Important mime types are application/signature+xml for X ML DigSig, application/jose for JWS, and image/* for a graphical image of a signature, etc.", 0, 1, sigFormat);
         case 3076010: /*data*/  return new Property("data", "base64Binary", "The base64 encoding of the Signature content. When signature is not recorded electronically this element would be empty.", 0, 1, data);

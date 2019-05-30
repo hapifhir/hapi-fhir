@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.graphql;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(500);
 
 		for (Argument nextArgument : theSearchParams) {
 

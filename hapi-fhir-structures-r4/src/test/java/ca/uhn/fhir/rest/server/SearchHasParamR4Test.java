@@ -57,7 +57,7 @@ public class SearchHasParamR4Test {
 		
 		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		assertEquals("Encounter", param.getTargetResourceType());
-		assertEquals("patient", param.getOwningFieldName());
+		assertEquals("patient", param.getReferenceFieldName());
 		assertEquals("type", param.getParameterName());
 		assertEquals("SURG", param.getParameterValue());
 	}

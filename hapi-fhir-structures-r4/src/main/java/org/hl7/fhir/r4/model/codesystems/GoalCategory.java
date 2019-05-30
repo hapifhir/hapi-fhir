@@ -29,7 +29,7 @@ package org.hl7.fhir.r4.model.codesystems;
   
 */
 
-// Generated on Thu, Sep 13, 2018 09:04-0400 for FHIR v3.5.0
+// Generated on Thu, Dec 27, 2018 10:06-0500 for FHIR v4.0.0
 
 
 import org.hl7.fhir.exceptions.FHIRException;
@@ -53,7 +53,7 @@ public enum GoalCategory {
          */
         NURSING, 
         /**
-         * Goals related to the mobility and motor capability of the subject.
+         * Goals related to the mobility and/or motor capability of the subject.
          */
         PHYSIOTHERAPY, 
         /**
@@ -94,7 +94,7 @@ public enum GoalCategory {
             case SAFETY: return "Goals related to the personal protection of the subject.";
             case BEHAVIORAL: return "Goals related to the manner in which the subject acts.";
             case NURSING: return "Goals related to the practice of nursing or established by nurses.";
-            case PHYSIOTHERAPY: return "Goals related to the mobility and motor capability of the subject.";
+            case PHYSIOTHERAPY: return "Goals related to the mobility and/or motor capability of the subject.";
             default: return "?";
           }
         }

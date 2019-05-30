@@ -4,7 +4,7 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2018 University Health Network
+ * Copyright (C) 2014 - 2019 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,11 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	@Override
 	public BundleInclusionRule getBundleInclusionRule() {
 		return BundleInclusionRule.BASED_ON_INCLUDES;
+	}
+
+	@Override
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return PreferReturnEnum.REPRESENTATION;
 	}
 
 }

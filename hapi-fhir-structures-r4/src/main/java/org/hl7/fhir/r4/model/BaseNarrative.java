@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.model;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.INarrative;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
+import org.hl7.fhir.utilities.xhtml.NodeType;
 
 public abstract class BaseNarrative extends Type implements INarrative {
 
@@ -15,7 +16,7 @@ public abstract class BaseNarrative extends Type implements INarrative {
 	public void setDivAsString(String theString) {
 		XhtmlNode div;
 		if (StringUtils.isNotBlank(theString)) {
-			div = new XhtmlNode();
+			div = new XhtmlNode(NodeType.Element, "div");
 			div.setValueAsString(theString);
 		} else {
 			div = null;
