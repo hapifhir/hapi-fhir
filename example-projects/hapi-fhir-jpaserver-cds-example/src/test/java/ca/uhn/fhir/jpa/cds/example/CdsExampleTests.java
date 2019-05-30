@@ -6,6 +6,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.util.JettyUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.*;
@@ -41,8 +42,7 @@ public class CdsExampleTests {
 		// Configure and spin up server
 		String path = Paths.get("").toAbsolutePath().toString();
 
-		ourPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		WebAppContext webAppContext = new WebAppContext();
 		webAppContext.setContextPath("/hapi-fhir-jpaserver-cds");
@@ -51,7 +51,8 @@ public class CdsExampleTests {
 		webAppContext.setParentLoaderPriority(true);
 
 		ourServer.setHandler(webAppContext);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
@@ -70,7 +71,7 @@ public class CdsExampleTests {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 	}
 
 	private static void putResource(String resourceFileName, String id) {
@@ -376,28 +377,4 @@ public class CdsExampleTests {
 
 		Assert.assertTrue(procedureRequest.getDoNotPerform());
 	}
-}
-
-class RandomServerPortProvider {
-
-	private static List<Integer> ourPorts = new ArrayList<>();
-
-	static int findFreePort() {
-		ServerSocket server;
-		try {
-			server = new ServerSocket(0);
-			int port = server.getLocalPort();
-			ourPorts.add(port);
-			server.close();
-			Thread.sleep(500);
-			return port;
-		} catch (IOException | InterruptedException e) {
-			throw new Error(e);
-		}
-	}
-
-	public static List<Integer> list() {
-		return ourPorts;
-	}
-
 }
