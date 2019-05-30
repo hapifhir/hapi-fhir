@@ -237,6 +237,10 @@
 				VersionConverter for R2-R3 has been modified to correectly handle the renamed basedOn
 				field. Thanks to Gary Graham for the pull request!
 			</action>
+			<action type="fix" issue="1141">
+				The JPA database migration tool has been enhanced to support migration from HAPI FHIR
+				2.5. Thanks to Gary Graham for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
