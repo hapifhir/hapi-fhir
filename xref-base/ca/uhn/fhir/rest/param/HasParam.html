@@ -41,8 +41,8 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="HasParam" href="../../../../../ca/uhn/fhir/rest/param/HasParam.html#HasParam">HasParam</a> <strong class="jxr_keyword">extends</strong> <a name="BaseParam" href="../../../../../ca/uhn/fhir/rest/param/BaseParam.html#BaseParam">BaseParam</a> <strong class="jxr_keyword">implements</strong> <a name="IQueryParameterType" href="../../../../../ca/uhn/fhir/model/api/IQueryParameterType.html#IQueryParameterType">IQueryParameterType</a> {
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> serialVersionUID = 1L;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> String myOwningFieldName;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  	<strong class="jxr_keyword">private</strong> String myReferenceFieldName;
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">private</strong> String myParameterName;
 <a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">private</strong> String myParameterValue;
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  	<strong class="jxr_keyword">private</strong> String myTargetResourceType;
@@ -52,10 +52,10 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	}
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">public</strong> <a name="HasParam" href="../../../../../ca/uhn/fhir/rest/param/HasParam.html#HasParam">HasParam</a>(String theTargetResourceType, String theOwningFieldName, String theParameterName, String theParameterValue) {
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">public</strong> <a name="HasParam" href="../../../../../ca/uhn/fhir/rest/param/HasParam.html#HasParam">HasParam</a>(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  		<strong class="jxr_keyword">this</strong>();
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  		myTargetResourceType = theTargetResourceType;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  		myOwningFieldName = theOwningFieldName;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  		myReferenceFieldName = theReferenceFieldName;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  		myParameterName = theParameterName;
 <a class="jxr_linenumber" name="L52" href="#L52">52</a>  		myParameterValue = theParameterValue;
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  	}
@@ -83,13 +83,13 @@
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  		validateColon(qualifier, colonIndex1);
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  		
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  		myTargetResourceType = qualifier.substring(1, colonIndex0);
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		myOwningFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		myParameterName = qualifier.substring(colonIndex1 + 1);
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  		myParameterValue = theValue;
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  	}
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> String getOwningFieldName() {
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<strong class="jxr_keyword">return</strong> myOwningFieldName;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<strong class="jxr_keyword">public</strong> String getReferenceFieldName() {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<strong class="jxr_keyword">return</strong> myReferenceFieldName;
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  	}
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  	<strong class="jxr_keyword">public</strong> String getParameterName() {

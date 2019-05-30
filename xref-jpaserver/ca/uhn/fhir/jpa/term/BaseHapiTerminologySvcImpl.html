@@ -406,7 +406,7 @@
 <a class="jxr_linenumber" name="L398" href="#L398">398</a> 			TransactionTemplate txTemplate = <strong class="jxr_keyword">new</strong> TransactionTemplate(myTransactionManager);
 <a class="jxr_linenumber" name="L399" href="#L399">399</a> 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 <a class="jxr_linenumber" name="L400" href="#L400">400</a> 			txTemplate.execute(t -&gt; {
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 				theDao.deleteInBatch(link);
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 				theDao.deleteAll(link);
 <a class="jxr_linenumber" name="L402" href="#L402">402</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L403" href="#L403">403</a> 			});
 <a class="jxr_linenumber" name="L404" href="#L404">404</a> 
@@ -1407,204 +1407,208 @@
 <a class="jxr_linenumber" name="L1399" href="#L1399">1399</a> 				org.hibernate.query.Query&lt;TermConceptMapGroupElementTarget&gt; hibernateQuery = (org.hibernate.query.Query&lt;TermConceptMapGroupElementTarget&gt;) typedQuery;
 <a class="jxr_linenumber" name="L1400" href="#L1400">1400</a> 				hibernateQuery.setFetchSize(myFetchSize);
 <a class="jxr_linenumber" name="L1401" href="#L1401">1401</a> 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a> 				Iterator&lt;TermConceptMapGroupElementTarget&gt; scrollableResultsIterator = <strong class="jxr_keyword">new</strong> ScrollableResultsIterator&lt;&gt;(scrollableResults);
+<a class="jxr_linenumber" name="L1402" href="#L1402">1402</a> 				<strong class="jxr_keyword">try</strong> (ScrollableResultsIterator&lt;TermConceptMapGroupElementTarget&gt; scrollableResultsIterator = <strong class="jxr_keyword">new</strong> ScrollableResultsIterator&lt;&gt;(scrollableResults)) {
 <a class="jxr_linenumber" name="L1403" href="#L1403">1403</a> 
-<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a> 				<strong class="jxr_keyword">while</strong> (scrollableResultsIterator.hasNext()) {
-<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a> 					targets.add(scrollableResultsIterator.next());
-<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a> 				}
+<a class="jxr_linenumber" name="L1404" href="#L1404">1404</a> 					<strong class="jxr_keyword">while</strong> (scrollableResultsIterator.hasNext()) {
+<a class="jxr_linenumber" name="L1405" href="#L1405">1405</a> 						targets.add(scrollableResultsIterator.next());
+<a class="jxr_linenumber" name="L1406" href="#L1406">1406</a> 					}
 <a class="jxr_linenumber" name="L1407" href="#L1407">1407</a> 
-<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a> 				ourLastResultsFromTranslationCache = false; <em class="jxr_comment">// For testing.</em>
-<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a> 				myTranslationCache.get(translationQuery, k -&gt; targets);
-<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a> 				retVal.addAll(targets);
-<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a> 				ourLastResultsFromTranslationCache = <strong class="jxr_keyword">true</strong>; <em class="jxr_comment">// For testing.</em>
-<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a> 				retVal.addAll(cachedTargets);
-<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a> 			}
-<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a> 		}
-<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a> 
-<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L1418" href="#L1418">1418</a> 	}
-<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a> 
-<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a> 	@Override
-<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a> 	@Transactional(propagation = Propagation.REQUIRED)
-<a class="jxr_linenumber" name="L1422" href="#L1422">1422</a> 	<strong class="jxr_keyword">public</strong> List&lt;TermConceptMapGroupElement&gt; translateWithReverse(<a name="TranslationRequest" href="../../../../../ca/uhn/fhir/jpa/term/TranslationRequest.html#TranslationRequest">TranslationRequest</a> theTranslationRequest) {
-<a class="jxr_linenumber" name="L1423" href="#L1423">1423</a> 		List&lt;TermConceptMapGroupElement&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a> 
-<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a> 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
-<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a> 		CriteriaQuery&lt;TermConceptMapGroupElement&gt; query = criteriaBuilder.createQuery(TermConceptMapGroupElement.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1427" href="#L1427">1427</a> 		Root&lt;TermConceptMapGroupElement&gt; root = query.from(TermConceptMapGroupElement.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a> 
-<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> 		Join&lt;TermConceptMapGroupElement, TermConceptMapGroupElementTarget&gt; targetJoin = root.join(<span class="jxr_string">"myConceptMapGroupElementTargets"</span>);
-<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a> 		Join&lt;TermConceptMapGroupElement, TermConceptMapGroup&gt; groupJoin = root.join(<span class="jxr_string">"myConceptMapGroup"</span>);
-<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> 		Join&lt;TermConceptMapGroup, TermConceptMap&gt; conceptMapJoin = groupJoin.join(<span class="jxr_string">"myConceptMap"</span>);
-<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a> 
-<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a> 		List&lt;TranslationQuery&gt; translationQueries = theTranslationRequest.getTranslationQueries();
-<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a> 		List&lt;TermConceptMapGroupElement&gt; cachedElements;
-<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a> 		ArrayList&lt;Predicate&gt; predicates;
-<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a> 		Coding coding;
-<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a> 		<strong class="jxr_keyword">for</strong> (<a name="TranslationQuery" href="../../../../../ca/uhn/fhir/jpa/term/TranslationQuery.html#TranslationQuery">TranslationQuery</a> translationQuery : translationQueries) {
-<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a> 			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
-<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a> 			<strong class="jxr_keyword">if</strong> (cachedElements == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a> 				<strong class="jxr_keyword">final</strong> List&lt;TermConceptMapGroupElement&gt; elements = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a> 
-<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a> 				predicates = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L1408" href="#L1408">1408</a> 				}
+<a class="jxr_linenumber" name="L1409" href="#L1409">1409</a> 
+<a class="jxr_linenumber" name="L1410" href="#L1410">1410</a> 				ourLastResultsFromTranslationCache = false; <em class="jxr_comment">// For testing.</em>
+<a class="jxr_linenumber" name="L1411" href="#L1411">1411</a> 				myTranslationCache.get(translationQuery, k -&gt; targets);
+<a class="jxr_linenumber" name="L1412" href="#L1412">1412</a> 				retVal.addAll(targets);
+<a class="jxr_linenumber" name="L1413" href="#L1413">1413</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1414" href="#L1414">1414</a> 				ourLastResultsFromTranslationCache = <strong class="jxr_keyword">true</strong>; <em class="jxr_comment">// For testing.</em>
+<a class="jxr_linenumber" name="L1415" href="#L1415">1415</a> 				retVal.addAll(cachedTargets);
+<a class="jxr_linenumber" name="L1416" href="#L1416">1416</a> 			}
+<a class="jxr_linenumber" name="L1417" href="#L1417">1417</a> 		}
+<a class="jxr_linenumber" name="L1418" href="#L1418">1418</a> 
+<a class="jxr_linenumber" name="L1419" href="#L1419">1419</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L1420" href="#L1420">1420</a> 	}
+<a class="jxr_linenumber" name="L1421" href="#L1421">1421</a> 
+<a class="jxr_linenumber" name="L1422" href="#L1422">1422</a> 	@Override
+<a class="jxr_linenumber" name="L1423" href="#L1423">1423</a> 	@Transactional(propagation = Propagation.REQUIRED)
+<a class="jxr_linenumber" name="L1424" href="#L1424">1424</a> 	<strong class="jxr_keyword">public</strong> List&lt;TermConceptMapGroupElement&gt; translateWithReverse(<a name="TranslationRequest" href="../../../../../ca/uhn/fhir/jpa/term/TranslationRequest.html#TranslationRequest">TranslationRequest</a> theTranslationRequest) {
+<a class="jxr_linenumber" name="L1425" href="#L1425">1425</a> 		List&lt;TermConceptMapGroupElement&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L1426" href="#L1426">1426</a> 
+<a class="jxr_linenumber" name="L1427" href="#L1427">1427</a> 		CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+<a class="jxr_linenumber" name="L1428" href="#L1428">1428</a> 		CriteriaQuery&lt;TermConceptMapGroupElement&gt; query = criteriaBuilder.createQuery(TermConceptMapGroupElement.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1429" href="#L1429">1429</a> 		Root&lt;TermConceptMapGroupElement&gt; root = query.from(TermConceptMapGroupElement.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L1430" href="#L1430">1430</a> 
+<a class="jxr_linenumber" name="L1431" href="#L1431">1431</a> 		Join&lt;TermConceptMapGroupElement, TermConceptMapGroupElementTarget&gt; targetJoin = root.join(<span class="jxr_string">"myConceptMapGroupElementTargets"</span>);
+<a class="jxr_linenumber" name="L1432" href="#L1432">1432</a> 		Join&lt;TermConceptMapGroupElement, TermConceptMapGroup&gt; groupJoin = root.join(<span class="jxr_string">"myConceptMapGroup"</span>);
+<a class="jxr_linenumber" name="L1433" href="#L1433">1433</a> 		Join&lt;TermConceptMapGroup, TermConceptMap&gt; conceptMapJoin = groupJoin.join(<span class="jxr_string">"myConceptMap"</span>);
+<a class="jxr_linenumber" name="L1434" href="#L1434">1434</a> 
+<a class="jxr_linenumber" name="L1435" href="#L1435">1435</a> 		List&lt;TranslationQuery&gt; translationQueries = theTranslationRequest.getTranslationQueries();
+<a class="jxr_linenumber" name="L1436" href="#L1436">1436</a> 		List&lt;TermConceptMapGroupElement&gt; cachedElements;
+<a class="jxr_linenumber" name="L1437" href="#L1437">1437</a> 		ArrayList&lt;Predicate&gt; predicates;
+<a class="jxr_linenumber" name="L1438" href="#L1438">1438</a> 		Coding coding;
+<a class="jxr_linenumber" name="L1439" href="#L1439">1439</a> 		<strong class="jxr_keyword">for</strong> (<a name="TranslationQuery" href="../../../../../ca/uhn/fhir/jpa/term/TranslationQuery.html#TranslationQuery">TranslationQuery</a> translationQuery : translationQueries) {
+<a class="jxr_linenumber" name="L1440" href="#L1440">1440</a> 			cachedElements = myTranslationWithReverseCache.getIfPresent(translationQuery);
+<a class="jxr_linenumber" name="L1441" href="#L1441">1441</a> 			<strong class="jxr_keyword">if</strong> (cachedElements == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1442" href="#L1442">1442</a> 				<strong class="jxr_keyword">final</strong> List&lt;TermConceptMapGroupElement&gt; elements = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
 <a class="jxr_linenumber" name="L1443" href="#L1443">1443</a> 
-<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a> 				coding = translationQuery.getCoding();
-<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a> 				String targetCode = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a> 				String targetCodeSystem = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a> 				<strong class="jxr_keyword">if</strong> (coding.hasCode()) {
-<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a> 					predicates.add(criteriaBuilder.equal(targetJoin.get(<span class="jxr_string">"myCode"</span>), coding.getCode()));
-<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a> 					targetCode = coding.getCode();
-<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"A code must be provided for translation to occur."</span>);
-<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a> 				}
-<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a> 
-<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a> 				<strong class="jxr_keyword">if</strong> (coding.hasSystem()) {
-<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"myTarget"</span>), coding.getSystem()));
-<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a> 					targetCodeSystem = coding.getSystem();
-<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a> 				}
-<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a> 
-<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> 				<strong class="jxr_keyword">if</strong> (coding.hasVersion()) {
-<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"myTargetVersion"</span>), coding.getVersion()));
-<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> 				}
-<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> 
-<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasTargetSystem()) {
-<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"mySource"</span>), translationQuery.getTargetSystem().getValueAsString()));
-<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a> 				}
-<a class="jxr_linenumber" name="L1466" href="#L1466">1466</a> 
-<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasSource()) {
-<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"myTarget"</span>), translationQuery.getSource().getValueAsString()));
-<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a> 				}
-<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 
-<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasTarget()) {
-<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"mySource"</span>), translationQuery.getTarget().getValueAsString()));
-<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a> 				}
-<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a> 
-<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasResourceId()) {
-<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"myResourcePid"</span>), translationQuery.getResourceId()));
-<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a> 				}
-<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a> 
-<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a> 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(<strong class="jxr_keyword">new</strong> Predicate[0]));
-<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a> 				query.where(outerPredicate);
-<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a> 
-<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a> 				<em class="jxr_comment">// Use scrollable results.</em>
-<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a> 				<strong class="jxr_keyword">final</strong> TypedQuery&lt;TermConceptMapGroupElement&gt; typedQuery = myEntityManager.createQuery(query.select(root));
-<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a> 				org.hibernate.query.Query&lt;TermConceptMapGroupElement&gt; hibernateQuery = (org.hibernate.query.Query&lt;TermConceptMapGroupElement&gt;) typedQuery;
-<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a> 				hibernateQuery.setFetchSize(myFetchSize);
-<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a> 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a> 				Iterator&lt;TermConceptMapGroupElement&gt; scrollableResultsIterator = <strong class="jxr_keyword">new</strong> ScrollableResultsIterator&lt;&gt;(scrollableResults);
-<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a> 
-<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a> 				<strong class="jxr_keyword">while</strong> (scrollableResultsIterator.hasNext()) {
-<a class="jxr_linenumber" name="L1490" href="#L1490">1490</a> 					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
-<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> 					nextElement.getConceptMapGroupElementTargets().size();
-<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a> 					myEntityManager.detach(nextElement);
-<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a> 
-<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a> 					<strong class="jxr_keyword">if</strong> (isNotBlank(targetCode) &amp;&amp; isNotBlank(targetCodeSystem)) {
-<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a> 						<strong class="jxr_keyword">for</strong> (Iterator&lt;TermConceptMapGroupElementTarget&gt; iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
-<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a> 							TermConceptMapGroupElementTarget next = iter.next();
-<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a> 							<strong class="jxr_keyword">if</strong> (targetCodeSystem.equals(next.getSystem())) {
-<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a> 								<strong class="jxr_keyword">if</strong> (targetCode.equals(next.getCode())) {
-<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a> 									<strong class="jxr_keyword">continue</strong>;
-<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a> 								}
-<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a> 							}
-<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a> 
-<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a> 							iter.remove();
-<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a> 						}
-<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a> 					}
-<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a> 
-<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a> 					elements.add(nextElement);
-<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a> 				}
-<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a> 
-<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a> 				ourLastResultsFromTranslationWithReverseCache = false; <em class="jxr_comment">// For testing.</em>
-<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a> 				myTranslationWithReverseCache.get(translationQuery, k -&gt; elements);
-<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a> 				retVal.addAll(elements);
-<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a> 				ourLastResultsFromTranslationWithReverseCache = <strong class="jxr_keyword">true</strong>; <em class="jxr_comment">// For testing.</em>
-<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a> 				retVal.addAll(cachedElements);
-<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a> 			}
-<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a> 		}
-<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a> 
-<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a> 	}
-<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a> 
-<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> validateConceptForStorage(TermConcept theConcept, <a name="TermCodeSystemVersion" href="../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> theCodeSystem, ArrayList&lt;String&gt; theConceptsStack,
-<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a> 													  IdentityHashMap&lt;TermConcept, Object&gt; theAllConcepts) {
-<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a> 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"CodesystemValue is null"</span>);
-<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a> 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, <span class="jxr_string">"CodeSystems are not equal"</span>);
-<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a> 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), <span class="jxr_string">"Codesystem contains a code with no code value"</span>);
-<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a> 
-<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a> 		<strong class="jxr_keyword">if</strong> (theConceptsStack.contains(theConcept.getCode())) {
-<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"CodeSystem contains circular reference around code "</span> + theConcept.getCode());
-<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a> 		}
-<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a> 		theConceptsStack.add(theConcept.getCode());
-<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a> 
-<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a> 		<strong class="jxr_keyword">int</strong> retVal = 0;
-<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a> 		<strong class="jxr_keyword">if</strong> (theAllConcepts.put(theConcept, theAllConcepts) == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a> 			<strong class="jxr_keyword">if</strong> (theAllConcepts.size() % 1000 == 0) {
-<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a> 				ourLog.info(<span class="jxr_string">"Have validated {} concepts"</span>, theAllConcepts.size());
-<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a> 			}
-<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a> 			retVal = 1;
-<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a> 		}
-<a class="jxr_linenumber" name="L1540" href="#L1540">1540</a> 
-<a class="jxr_linenumber" name="L1541" href="#L1541">1541</a> 		<strong class="jxr_keyword">for</strong> (<a name="TermConceptParentChildLink" href="../../../../../ca/uhn/fhir/jpa/entity/TermConceptParentChildLink.html#TermConceptParentChildLink">TermConceptParentChildLink</a> next : theConcept.getChildren()) {
-<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a> 			next.setCodeSystem(theCodeSystem);
-<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a> 			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack, theAllConcepts);
-<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a> 		}
-<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a> 
-<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a> 		theConceptsStack.remove(theConceptsStack.size() - 1);
-<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> 
-<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> 	}
-<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> 
-<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> verifyNoDuplicates(Collection&lt;TermConcept&gt; theConcepts, Set&lt;String&gt; theCodes) {
-<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a> 		<strong class="jxr_keyword">for</strong> (TermConcept next : theConcepts) {
-<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a> 			<strong class="jxr_keyword">if</strong> (!theCodes.add(next.getCode())) {
-<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Duplicate code "</span> + next.getCode() + <span class="jxr_string">" found in codesystem after checking "</span> + theCodes.size() + <span class="jxr_string">" codes"</span>);
-<a class="jxr_linenumber" name="L1555" href="#L1555">1555</a> 			}
-<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a> 			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
-<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a> 		}
-<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a> 	}
-<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> 
-<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
-<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> clearOurLastResultsFromTranslationCache() {
-<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> 		ourLastResultsFromTranslationCache = false;
-<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> 	}
-<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 
-<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
-<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> clearOurLastResultsFromTranslationWithReverseCache() {
-<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> 		ourLastResultsFromTranslationWithReverseCache = false;
-<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> 	}
-<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 
-<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
-<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isOurLastResultsFromTranslationCache() {
-<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> 		<strong class="jxr_keyword">return</strong> ourLastResultsFromTranslationCache;
-<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> 	}
-<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 
-<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
-<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isOurLastResultsFromTranslationWithReverseCache() {
-<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a> 		<strong class="jxr_keyword">return</strong> ourLastResultsFromTranslationWithReverseCache;
-<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a> 	}
-<a class="jxr_linenumber" name="L1591" href="#L1591">1591</a> 
-<a class="jxr_linenumber" name="L1592" href="#L1592">1592</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L1593" href="#L1593">1593</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
-<a class="jxr_linenumber" name="L1594" href="#L1594">1594</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L1595" href="#L1595">1595</a> 	@VisibleForTesting
-<a class="jxr_linenumber" name="L1596" href="#L1596">1596</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setForceSaveDeferredAlwaysForUnitTest(<strong class="jxr_keyword">boolean</strong> theForceSaveDeferredAlwaysForUnitTest) {
-<a class="jxr_linenumber" name="L1597" href="#L1597">1597</a> 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
-<a class="jxr_linenumber" name="L1598" href="#L1598">1598</a> 	}
-<a class="jxr_linenumber" name="L1599" href="#L1599">1599</a> }
+<a class="jxr_linenumber" name="L1444" href="#L1444">1444</a> 				predicates = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L1445" href="#L1445">1445</a> 
+<a class="jxr_linenumber" name="L1446" href="#L1446">1446</a> 				coding = translationQuery.getCoding();
+<a class="jxr_linenumber" name="L1447" href="#L1447">1447</a> 				String targetCode = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1448" href="#L1448">1448</a> 				String targetCodeSystem = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L1449" href="#L1449">1449</a> 				<strong class="jxr_keyword">if</strong> (coding.hasCode()) {
+<a class="jxr_linenumber" name="L1450" href="#L1450">1450</a> 					predicates.add(criteriaBuilder.equal(targetJoin.get(<span class="jxr_string">"myCode"</span>), coding.getCode()));
+<a class="jxr_linenumber" name="L1451" href="#L1451">1451</a> 					targetCode = coding.getCode();
+<a class="jxr_linenumber" name="L1452" href="#L1452">1452</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1453" href="#L1453">1453</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"A code must be provided for translation to occur."</span>);
+<a class="jxr_linenumber" name="L1454" href="#L1454">1454</a> 				}
+<a class="jxr_linenumber" name="L1455" href="#L1455">1455</a> 
+<a class="jxr_linenumber" name="L1456" href="#L1456">1456</a> 				<strong class="jxr_keyword">if</strong> (coding.hasSystem()) {
+<a class="jxr_linenumber" name="L1457" href="#L1457">1457</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"myTarget"</span>), coding.getSystem()));
+<a class="jxr_linenumber" name="L1458" href="#L1458">1458</a> 					targetCodeSystem = coding.getSystem();
+<a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> 				}
+<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 
+<a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> 				<strong class="jxr_keyword">if</strong> (coding.hasVersion()) {
+<a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"myTargetVersion"</span>), coding.getVersion()));
+<a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> 				}
+<a class="jxr_linenumber" name="L1464" href="#L1464">1464</a> 
+<a class="jxr_linenumber" name="L1465" href="#L1465">1465</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasTargetSystem()) {
+<a class="jxr_linenumber" name="L1466" href="#L1466">1466</a> 					predicates.add(criteriaBuilder.equal(groupJoin.get(<span class="jxr_string">"mySource"</span>), translationQuery.getTargetSystem().getValueAsString()));
+<a class="jxr_linenumber" name="L1467" href="#L1467">1467</a> 				}
+<a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 
+<a class="jxr_linenumber" name="L1469" href="#L1469">1469</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasSource()) {
+<a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"myTarget"</span>), translationQuery.getSource().getValueAsString()));
+<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 				}
+<a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 
+<a class="jxr_linenumber" name="L1473" href="#L1473">1473</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasTarget()) {
+<a class="jxr_linenumber" name="L1474" href="#L1474">1474</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"mySource"</span>), translationQuery.getTarget().getValueAsString()));
+<a class="jxr_linenumber" name="L1475" href="#L1475">1475</a> 				}
+<a class="jxr_linenumber" name="L1476" href="#L1476">1476</a> 
+<a class="jxr_linenumber" name="L1477" href="#L1477">1477</a> 				<strong class="jxr_keyword">if</strong> (translationQuery.hasResourceId()) {
+<a class="jxr_linenumber" name="L1478" href="#L1478">1478</a> 					predicates.add(criteriaBuilder.equal(conceptMapJoin.get(<span class="jxr_string">"myResourcePid"</span>), translationQuery.getResourceId()));
+<a class="jxr_linenumber" name="L1479" href="#L1479">1479</a> 				}
+<a class="jxr_linenumber" name="L1480" href="#L1480">1480</a> 
+<a class="jxr_linenumber" name="L1481" href="#L1481">1481</a> 				Predicate outerPredicate = criteriaBuilder.and(predicates.toArray(<strong class="jxr_keyword">new</strong> Predicate[0]));
+<a class="jxr_linenumber" name="L1482" href="#L1482">1482</a> 				query.where(outerPredicate);
+<a class="jxr_linenumber" name="L1483" href="#L1483">1483</a> 
+<a class="jxr_linenumber" name="L1484" href="#L1484">1484</a> 				<em class="jxr_comment">// Use scrollable results.</em>
+<a class="jxr_linenumber" name="L1485" href="#L1485">1485</a> 				<strong class="jxr_keyword">final</strong> TypedQuery&lt;TermConceptMapGroupElement&gt; typedQuery = myEntityManager.createQuery(query.select(root));
+<a class="jxr_linenumber" name="L1486" href="#L1486">1486</a> 				org.hibernate.query.Query&lt;TermConceptMapGroupElement&gt; hibernateQuery = (org.hibernate.query.Query&lt;TermConceptMapGroupElement&gt;) typedQuery;
+<a class="jxr_linenumber" name="L1487" href="#L1487">1487</a> 				hibernateQuery.setFetchSize(myFetchSize);
+<a class="jxr_linenumber" name="L1488" href="#L1488">1488</a> 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+<a class="jxr_linenumber" name="L1489" href="#L1489">1489</a> 				<strong class="jxr_keyword">try</strong> (ScrollableResultsIterator&lt;TermConceptMapGroupElement&gt; scrollableResultsIterator = <strong class="jxr_keyword">new</strong> ScrollableResultsIterator&lt;&gt;(scrollableResults)) {
+<a class="jxr_linenumber" name="L1490" href="#L1490">1490</a> 
+<a class="jxr_linenumber" name="L1491" href="#L1491">1491</a> 					<strong class="jxr_keyword">while</strong> (scrollableResultsIterator.hasNext()) {
+<a class="jxr_linenumber" name="L1492" href="#L1492">1492</a> 						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+<a class="jxr_linenumber" name="L1493" href="#L1493">1493</a> 						nextElement.getConceptMapGroupElementTargets().size();
+<a class="jxr_linenumber" name="L1494" href="#L1494">1494</a> 						myEntityManager.detach(nextElement);
+<a class="jxr_linenumber" name="L1495" href="#L1495">1495</a> 
+<a class="jxr_linenumber" name="L1496" href="#L1496">1496</a> 						<strong class="jxr_keyword">if</strong> (isNotBlank(targetCode) &amp;&amp; isNotBlank(targetCodeSystem)) {
+<a class="jxr_linenumber" name="L1497" href="#L1497">1497</a> 							<strong class="jxr_keyword">for</strong> (Iterator&lt;TermConceptMapGroupElementTarget&gt; iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
+<a class="jxr_linenumber" name="L1498" href="#L1498">1498</a> 								TermConceptMapGroupElementTarget next = iter.next();
+<a class="jxr_linenumber" name="L1499" href="#L1499">1499</a> 								<strong class="jxr_keyword">if</strong> (targetCodeSystem.equals(next.getSystem())) {
+<a class="jxr_linenumber" name="L1500" href="#L1500">1500</a> 									<strong class="jxr_keyword">if</strong> (targetCode.equals(next.getCode())) {
+<a class="jxr_linenumber" name="L1501" href="#L1501">1501</a> 										<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L1502" href="#L1502">1502</a> 									}
+<a class="jxr_linenumber" name="L1503" href="#L1503">1503</a> 								}
+<a class="jxr_linenumber" name="L1504" href="#L1504">1504</a> 
+<a class="jxr_linenumber" name="L1505" href="#L1505">1505</a> 								iter.remove();
+<a class="jxr_linenumber" name="L1506" href="#L1506">1506</a> 							}
+<a class="jxr_linenumber" name="L1507" href="#L1507">1507</a> 						}
+<a class="jxr_linenumber" name="L1508" href="#L1508">1508</a> 
+<a class="jxr_linenumber" name="L1509" href="#L1509">1509</a> 						elements.add(nextElement);
+<a class="jxr_linenumber" name="L1510" href="#L1510">1510</a> 					}
+<a class="jxr_linenumber" name="L1511" href="#L1511">1511</a> 
+<a class="jxr_linenumber" name="L1512" href="#L1512">1512</a> 				}
+<a class="jxr_linenumber" name="L1513" href="#L1513">1513</a> 
+<a class="jxr_linenumber" name="L1514" href="#L1514">1514</a> 				ourLastResultsFromTranslationWithReverseCache = false; <em class="jxr_comment">// For testing.</em>
+<a class="jxr_linenumber" name="L1515" href="#L1515">1515</a> 				myTranslationWithReverseCache.get(translationQuery, k -&gt; elements);
+<a class="jxr_linenumber" name="L1516" href="#L1516">1516</a> 				retVal.addAll(elements);
+<a class="jxr_linenumber" name="L1517" href="#L1517">1517</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L1518" href="#L1518">1518</a> 				ourLastResultsFromTranslationWithReverseCache = <strong class="jxr_keyword">true</strong>; <em class="jxr_comment">// For testing.</em>
+<a class="jxr_linenumber" name="L1519" href="#L1519">1519</a> 				retVal.addAll(cachedElements);
+<a class="jxr_linenumber" name="L1520" href="#L1520">1520</a> 			}
+<a class="jxr_linenumber" name="L1521" href="#L1521">1521</a> 		}
+<a class="jxr_linenumber" name="L1522" href="#L1522">1522</a> 
+<a class="jxr_linenumber" name="L1523" href="#L1523">1523</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L1524" href="#L1524">1524</a> 	}
+<a class="jxr_linenumber" name="L1525" href="#L1525">1525</a> 
+<a class="jxr_linenumber" name="L1526" href="#L1526">1526</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> validateConceptForStorage(TermConcept theConcept, <a name="TermCodeSystemVersion" href="../../../../../ca/uhn/fhir/jpa/entity/TermCodeSystemVersion.html#TermCodeSystemVersion">TermCodeSystemVersion</a> theCodeSystem, ArrayList&lt;String&gt; theConceptsStack,
+<a class="jxr_linenumber" name="L1527" href="#L1527">1527</a> 													  IdentityHashMap&lt;TermConcept, Object&gt; theAllConcepts) {
+<a class="jxr_linenumber" name="L1528" href="#L1528">1528</a> 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"CodesystemValue is null"</span>);
+<a class="jxr_linenumber" name="L1529" href="#L1529">1529</a> 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, <span class="jxr_string">"CodeSystems are not equal"</span>);
+<a class="jxr_linenumber" name="L1530" href="#L1530">1530</a> 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), <span class="jxr_string">"Codesystem contains a code with no code value"</span>);
+<a class="jxr_linenumber" name="L1531" href="#L1531">1531</a> 
+<a class="jxr_linenumber" name="L1532" href="#L1532">1532</a> 		<strong class="jxr_keyword">if</strong> (theConceptsStack.contains(theConcept.getCode())) {
+<a class="jxr_linenumber" name="L1533" href="#L1533">1533</a> 			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"CodeSystem contains circular reference around code "</span> + theConcept.getCode());
+<a class="jxr_linenumber" name="L1534" href="#L1534">1534</a> 		}
+<a class="jxr_linenumber" name="L1535" href="#L1535">1535</a> 		theConceptsStack.add(theConcept.getCode());
+<a class="jxr_linenumber" name="L1536" href="#L1536">1536</a> 
+<a class="jxr_linenumber" name="L1537" href="#L1537">1537</a> 		<strong class="jxr_keyword">int</strong> retVal = 0;
+<a class="jxr_linenumber" name="L1538" href="#L1538">1538</a> 		<strong class="jxr_keyword">if</strong> (theAllConcepts.put(theConcept, theAllConcepts) == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L1539" href="#L1539">1539</a> 			<strong class="jxr_keyword">if</strong> (theAllConcepts.size() % 1000 == 0) {
+<a class="jxr_linenumber" name="L1540" href="#L1540">1540</a> 				ourLog.info(<span class="jxr_string">"Have validated {} concepts"</span>, theAllConcepts.size());
+<a class="jxr_linenumber" name="L1541" href="#L1541">1541</a> 			}
+<a class="jxr_linenumber" name="L1542" href="#L1542">1542</a> 			retVal = 1;
+<a class="jxr_linenumber" name="L1543" href="#L1543">1543</a> 		}
+<a class="jxr_linenumber" name="L1544" href="#L1544">1544</a> 
+<a class="jxr_linenumber" name="L1545" href="#L1545">1545</a> 		<strong class="jxr_keyword">for</strong> (<a name="TermConceptParentChildLink" href="../../../../../ca/uhn/fhir/jpa/entity/TermConceptParentChildLink.html#TermConceptParentChildLink">TermConceptParentChildLink</a> next : theConcept.getChildren()) {
+<a class="jxr_linenumber" name="L1546" href="#L1546">1546</a> 			next.setCodeSystem(theCodeSystem);
+<a class="jxr_linenumber" name="L1547" href="#L1547">1547</a> 			retVal += validateConceptForStorage(next.getChild(), theCodeSystem, theConceptsStack, theAllConcepts);
+<a class="jxr_linenumber" name="L1548" href="#L1548">1548</a> 		}
+<a class="jxr_linenumber" name="L1549" href="#L1549">1549</a> 
+<a class="jxr_linenumber" name="L1550" href="#L1550">1550</a> 		theConceptsStack.remove(theConceptsStack.size() - 1);
+<a class="jxr_linenumber" name="L1551" href="#L1551">1551</a> 
+<a class="jxr_linenumber" name="L1552" href="#L1552">1552</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L1553" href="#L1553">1553</a> 	}
+<a class="jxr_linenumber" name="L1554" href="#L1554">1554</a> 
+<a class="jxr_linenumber" name="L1555" href="#L1555">1555</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> verifyNoDuplicates(Collection&lt;TermConcept&gt; theConcepts, Set&lt;String&gt; theCodes) {
+<a class="jxr_linenumber" name="L1556" href="#L1556">1556</a> 		<strong class="jxr_keyword">for</strong> (TermConcept next : theConcepts) {
+<a class="jxr_linenumber" name="L1557" href="#L1557">1557</a> 			<strong class="jxr_keyword">if</strong> (!theCodes.add(next.getCode())) {
+<a class="jxr_linenumber" name="L1558" href="#L1558">1558</a> 				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Duplicate code "</span> + next.getCode() + <span class="jxr_string">" found in codesystem after checking "</span> + theCodes.size() + <span class="jxr_string">" codes"</span>);
+<a class="jxr_linenumber" name="L1559" href="#L1559">1559</a> 			}
+<a class="jxr_linenumber" name="L1560" href="#L1560">1560</a> 			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
+<a class="jxr_linenumber" name="L1561" href="#L1561">1561</a> 		}
+<a class="jxr_linenumber" name="L1562" href="#L1562">1562</a> 	}
+<a class="jxr_linenumber" name="L1563" href="#L1563">1563</a> 
+<a class="jxr_linenumber" name="L1564" href="#L1564">1564</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1565" href="#L1565">1565</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
+<a class="jxr_linenumber" name="L1566" href="#L1566">1566</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1567" href="#L1567">1567</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L1568" href="#L1568">1568</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> clearOurLastResultsFromTranslationCache() {
+<a class="jxr_linenumber" name="L1569" href="#L1569">1569</a> 		ourLastResultsFromTranslationCache = false;
+<a class="jxr_linenumber" name="L1570" href="#L1570">1570</a> 	}
+<a class="jxr_linenumber" name="L1571" href="#L1571">1571</a> 
+<a class="jxr_linenumber" name="L1572" href="#L1572">1572</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1573" href="#L1573">1573</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
+<a class="jxr_linenumber" name="L1574" href="#L1574">1574</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1575" href="#L1575">1575</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L1576" href="#L1576">1576</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> clearOurLastResultsFromTranslationWithReverseCache() {
+<a class="jxr_linenumber" name="L1577" href="#L1577">1577</a> 		ourLastResultsFromTranslationWithReverseCache = false;
+<a class="jxr_linenumber" name="L1578" href="#L1578">1578</a> 	}
+<a class="jxr_linenumber" name="L1579" href="#L1579">1579</a> 
+<a class="jxr_linenumber" name="L1580" href="#L1580">1580</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1581" href="#L1581">1581</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
+<a class="jxr_linenumber" name="L1582" href="#L1582">1582</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1583" href="#L1583">1583</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L1584" href="#L1584">1584</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isOurLastResultsFromTranslationCache() {
+<a class="jxr_linenumber" name="L1585" href="#L1585">1585</a> 		<strong class="jxr_keyword">return</strong> ourLastResultsFromTranslationCache;
+<a class="jxr_linenumber" name="L1586" href="#L1586">1586</a> 	}
+<a class="jxr_linenumber" name="L1587" href="#L1587">1587</a> 
+<a class="jxr_linenumber" name="L1588" href="#L1588">1588</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1589" href="#L1589">1589</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
+<a class="jxr_linenumber" name="L1590" href="#L1590">1590</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1591" href="#L1591">1591</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L1592" href="#L1592">1592</a> 	<strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isOurLastResultsFromTranslationWithReverseCache() {
+<a class="jxr_linenumber" name="L1593" href="#L1593">1593</a> 		<strong class="jxr_keyword">return</strong> ourLastResultsFromTranslationWithReverseCache;
+<a class="jxr_linenumber" name="L1594" href="#L1594">1594</a> 	}
+<a class="jxr_linenumber" name="L1595" href="#L1595">1595</a> 
+<a class="jxr_linenumber" name="L1596" href="#L1596">1596</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L1597" href="#L1597">1597</a> <em class="jxr_javadoccomment">	 * This method is present only for unit tests, do not call from client code</em>
+<a class="jxr_linenumber" name="L1598" href="#L1598">1598</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L1599" href="#L1599">1599</a> 	@VisibleForTesting
+<a class="jxr_linenumber" name="L1600" href="#L1600">1600</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> setForceSaveDeferredAlwaysForUnitTest(<strong class="jxr_keyword">boolean</strong> theForceSaveDeferredAlwaysForUnitTest) {
+<a class="jxr_linenumber" name="L1601" href="#L1601">1601</a> 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
+<a class="jxr_linenumber" name="L1602" href="#L1602">1602</a> 	}
+<a class="jxr_linenumber" name="L1603" href="#L1603">1603</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

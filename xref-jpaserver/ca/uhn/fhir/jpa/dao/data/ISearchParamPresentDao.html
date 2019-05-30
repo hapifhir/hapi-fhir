@@ -41,7 +41,7 @@
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="ISearchParamPresentDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/ISearchParamPresentDao.html#ISearchParamPresentDao">ISearchParamPresentDao</a> <strong class="jxr_keyword">extends</strong> JpaRepository&lt;SearchParamPresent, Long&gt; {
 <a class="jxr_linenumber" name="L34" href="#L34">34</a>  
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  	@Query(<span class="jxr_string">"SELECT s FROM SearchParamPresent s WHERE s.myResource = :res"</span>)
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">public</strong> Collection&lt;SearchParamPresent&gt; findAllForResource(@Param(<span class="jxr_string">"res"</span>) ResourceTable theResource);
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	Collection&lt;SearchParamPresent&gt; findAllForResource(@Param(<span class="jxr_string">"res"</span>) ResourceTable theResource);
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  
 <a class="jxr_linenumber" name="L38" href="#L38">38</a>  }
 </pre>

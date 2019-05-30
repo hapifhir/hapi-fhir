@@ -70,51 +70,54 @@
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		Long valueOf;
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId);
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		} <strong class="jxr_keyword">catch</strong> (ResourceNotFoundException e) {
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			}
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			String resName = missingResourceDef.getName();
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  				IBaseResource newResource = missingResourceDef.newInstance();
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  				newResource.setId(resName + <span class="jxr_string">"/"</span> + theId);
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  				IFhirResourceDao&lt;IBaseResource&gt; placeholderResourceDao = (IFhirResourceDao&lt;IBaseResource&gt;) myDaoRegistry.getResourceDao(newResource.getClass());
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  				ourLog.debug(<span class="jxr_string">"Automatically creating empty placeholder resource: {}"</span>, newResource.getIdElement().getValue());
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  				valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" not found, specified in path: "</span> + theNextPathsUnsplit);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			}
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		}
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		target = myEntityManager.find(ResourceTable.<strong class="jxr_keyword">class</strong>, valueOf);
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		RuntimeResourceDefinition targetResourceDef = myContext.getResourceDefinition(theType);
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		<strong class="jxr_keyword">if</strong> (target == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			String resName = targetResourceDef.getName();
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" not found, specified in path: "</span> + theNextPathsUnsplit);
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		}
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  		<strong class="jxr_keyword">if</strong> (!theTypeString.equals(target.getResourceType())) {
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  				<span class="jxr_string">"Resource contains reference to "</span> + theNextId.getValue() + <span class="jxr_string">" but resource with ID "</span> + theNextId.getIdPart() + <span class="jxr_string">" is actually of type "</span> + target.getResourceType());
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		}
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		<strong class="jxr_keyword">if</strong> (target.getDeleted() != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			String resName = targetResourceDef.getName();
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" is deleted, specified in path: "</span> + theNextPathsUnsplit);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		}
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">if</strong> (theNextSpDef.getTargets() != <strong class="jxr_keyword">null</strong> &amp;&amp; !theNextSpDef.getTargets().contains(theTypeString)) {
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		}
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		<strong class="jxr_keyword">return</strong> target;
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	@Override
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateTypeOrThrowException(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		myDaoRegistry.getDaoOrThrowException(theType);
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	}
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> }
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			ourLog.trace(<span class="jxr_string">"Translated {}/{} to resource PID {}"</span>, theType, theId, valueOf);
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		} <strong class="jxr_keyword">catch</strong> (ResourceNotFoundException e) {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			}
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			RuntimeResourceDefinition missingResourceDef = myContext.getResourceDefinition(theType);
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  			String resName = missingResourceDef.getName();
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  			<strong class="jxr_keyword">if</strong> (myDaoConfig.isAutoCreatePlaceholderReferenceTargets()) {
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  				IBaseResource newResource = missingResourceDef.newInstance();
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  				newResource.setId(resName + <span class="jxr_string">"/"</span> + theId);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  				IFhirResourceDao&lt;IBaseResource&gt; placeholderResourceDao = (IFhirResourceDao&lt;IBaseResource&gt;) myDaoRegistry.getResourceDao(newResource.getClass());
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  				ourLog.debug(<span class="jxr_string">"Automatically creating empty placeholder resource: {}"</span>, newResource.getIdElement().getValue());
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  				valueOf = placeholderResourceDao.update(newResource).getEntity().getId();
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" not found, specified in path: "</span> + theNextPathsUnsplit);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  			}
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		}
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		target = myEntityManager.find(ResourceTable.<strong class="jxr_keyword">class</strong>, valueOf);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		RuntimeResourceDefinition targetResourceDef = myContext.getResourceDefinition(theType);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">if</strong> (target == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			String resName = targetResourceDef.getName();
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" not found, specified in path: "</span> + theNextPathsUnsplit);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		}
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		ourLog.trace(<span class="jxr_string">"Resource PID {} is of type {}"</span>, valueOf, target.getResourceType());
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">if</strong> (!theTypeString.equals(target.getResourceType())) {
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			ourLog.error(<span class="jxr_string">"Resource {} with PID {} was not of type {}"</span>, target.getIdDt().getValue(), target.getId(), theTypeString);
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> UnprocessableEntityException(
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  				<span class="jxr_string">"Resource contains reference to "</span> + theNextId.getValue() + <span class="jxr_string">" but resource with ID "</span> + theNextId.getIdPart() + <span class="jxr_string">" is actually of type "</span> + target.getResourceType());
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  		<strong class="jxr_keyword">if</strong> (target.getDeleted() != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			String resName = targetResourceDef.getName();
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Resource "</span> + resName + <span class="jxr_string">"/"</span> + theId + <span class="jxr_string">" is deleted, specified in path: "</span> + theNextPathsUnsplit);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		}
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 		<strong class="jxr_keyword">if</strong> (theNextSpDef.getTargets() != <strong class="jxr_keyword">null</strong> &amp;&amp; !theNextSpDef.getTargets().contains(theTypeString)) {
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		<strong class="jxr_keyword">return</strong> target;
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 	}
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 	@Override
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateTypeOrThrowException(Class&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; theType) {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		myDaoRegistry.getDaoOrThrowException(theType);
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	}
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

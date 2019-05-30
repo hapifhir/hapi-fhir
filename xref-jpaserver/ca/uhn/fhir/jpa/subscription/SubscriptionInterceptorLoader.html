@@ -29,7 +29,7 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.DaoConfig;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.interceptor.api.IInterceptorService;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> com.google.common.annotations.VisibleForTesting;
@@ -55,9 +55,9 @@
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  	@Autowired
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  	<strong class="jxr_keyword">private</strong> SubscriptionRegistry mySubscriptionRegistry;
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  	@Autowired
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">private</strong> ApplicationContext myAppicationContext;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">private</strong> ApplicationContext myApplicationContext;
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	@Autowired
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">private</strong> IInterceptorRegistry myInterceptorRegistry;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">private</strong> IInterceptorService myInterceptorRegistry;
 <a class="jxr_linenumber" name="L53" href="#L53">53</a>  
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> registerInterceptors() {
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  		Set&lt;Subscription.SubscriptionChannelType&gt; supportedSubscriptionTypes = myDaoConfig.getSupportedSubscriptionTypes();
@@ -77,7 +77,7 @@
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> loadSubscriptions() {
 <a class="jxr_linenumber" name="L70" href="#L70">70</a>  		ourLog.info(<span class="jxr_string">"Loading subscriptions into the SubscriptionRegistry..."</span>);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  		<em class="jxr_comment">// Activate scheduled subscription loads into the SubscriptionRegistry</em>
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		myAppicationContext.getBean(SubscriptionLoader.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		myApplicationContext.getBean(SubscriptionLoader.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  		ourLog.info(<span class="jxr_string">"...{} subscriptions loaded"</span>, mySubscriptionRegistry.size());
 <a class="jxr_linenumber" name="L74" href="#L74">74</a>  	}
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
@@ -85,8 +85,9 @@
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  	<strong class="jxr_keyword">void</strong> unregisterInterceptorsForUnitTest() {
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  		myInterceptorRegistry.unregisterInterceptor(mySubscriptionActivatingInterceptor);
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  		myInterceptorRegistry.unregisterInterceptor(mySubscriptionMatcherInterceptor);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	}
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  }
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		mySubscriptionMatcherInterceptor.preDestroy();
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	}
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

@@ -89,7 +89,7 @@
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		<strong class="jxr_keyword">super</strong>();
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	}
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction&lt;?&gt; theBoolean, List&lt;List&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterType&gt;&gt; theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction&lt;?&gt; theBoolean, List&lt;List&lt;IQueryParameterType&gt;&gt; theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 <a class="jxr_linenumber" name="L85" href="#L85">85</a>  		<strong class="jxr_keyword">if</strong> (theTerms == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		}
@@ -179,13 +179,13 @@
 <a class="jxr_linenumber" name="L171" href="#L171">171</a> 		<em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L172" href="#L172">172</a> <em class="jxr_comment">		 * Handle _content parameter (resource body content)</em>
 <a class="jxr_linenumber" name="L173" href="#L173">173</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		List&lt;List&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterType&gt;&gt; contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+<a class="jxr_linenumber" name="L174" href="#L174">174</a> 		List&lt;List&lt;IQueryParameterType&gt;&gt; contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 <a class="jxr_linenumber" name="L175" href="#L175">175</a> 		addTextSearch(qb, bool, contentAndTerms, <span class="jxr_string">"myContentText"</span>, <span class="jxr_string">"myContentTextEdgeNGram"</span>, <span class="jxr_string">"myContentTextNGram"</span>);
 <a class="jxr_linenumber" name="L176" href="#L176">176</a> 
 <a class="jxr_linenumber" name="L177" href="#L177">177</a> 		<em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L178" href="#L178">178</a> <em class="jxr_comment">		 * Handle _text parameter (resource narrative content)</em>
 <a class="jxr_linenumber" name="L179" href="#L179">179</a> <em class="jxr_comment">		 */</em>
-<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		List&lt;List&lt;? <strong class="jxr_keyword">extends</strong> IQueryParameterType&gt;&gt; textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+<a class="jxr_linenumber" name="L180" href="#L180">180</a> 		List&lt;List&lt;IQueryParameterType&gt;&gt; textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 <a class="jxr_linenumber" name="L181" href="#L181">181</a> 		addTextSearch(qb, bool, textAndTerms, <span class="jxr_string">"myNarrativeText"</span>, <span class="jxr_string">"myNarrativeTextEdgeNGram"</span>, <span class="jxr_string">"myNarrativeTextNGram"</span>);
 <a class="jxr_linenumber" name="L182" href="#L182">182</a> 
 <a class="jxr_linenumber" name="L183" href="#L183">183</a> 		<strong class="jxr_keyword">if</strong> (theReferencingPid != <strong class="jxr_keyword">null</strong>) {

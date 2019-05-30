@@ -28,87 +28,125 @@
 <a class="jxr_linenumber" name="L20" href="#L20">20</a>  <em class="jxr_comment"> * #L%</em>
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
-<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.DaoConfig;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.ForcedId;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdDt;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.ResourceNotFoundException;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.Validate;
-<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> org.springframework.beans.factory.annotation.Autowired;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> org.springframework.stereotype.Service;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> java.util.ArrayList;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> java.util.Collections;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  @Service
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="IdHelperService" href="../../../../../../ca/uhn/fhir/jpa/dao/index/IdHelperService.html#IdHelperService">IdHelperService</a> {
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	@Autowired
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  	<strong class="jxr_keyword">protected</strong> <a name="IForcedIdDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IForcedIdDao.html#IForcedIdDao">IForcedIdDao</a> myForcedIdDao;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	@Autowired(required = <strong class="jxr_keyword">true</strong>)
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  	<strong class="jxr_keyword">private</strong> <a name="DaoConfig" href="../../../../../../ca/uhn/fhir/jpa/dao/DaoConfig.html#DaoConfig">DaoConfig</a> myDaoConfig;
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.interceptor.api.HookParams;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.DaoConfig;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.ForcedId;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.interceptor.api.Pointcut;
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.primitive.IdDt;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.ResourceNotFoundException;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.ListMultimap;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> com.google.common.collect.MultimapBuilder;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.apache.commons.lang3.Validate;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.springframework.beans.factory.annotation.Autowired;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.springframework.stereotype.Service;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> javax.annotation.Nonnull;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> java.util.*;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> <strong class="jxr_keyword">static</strong> org.apache.commons.lang3.StringUtils.isBlank;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> delete(ForcedId forcedId) {
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  		myForcedIdDao.delete(forcedId);
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	}
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	<strong class="jxr_keyword">public</strong> Long translateForcedIdToPid(String theResourceName, String theResourceId) {
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  		<strong class="jxr_keyword">return</strong> translateForcedIdToPids(myDaoConfig, <strong class="jxr_keyword">new</strong> IdDt(theResourceName, theResourceId), myForcedIdDao).get(0);
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	}
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> List&lt;Long&gt; translateForcedIdToPids(IIdType theId) {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">return</strong> IdHelperService.translateForcedIdToPids(myDaoConfig, theId, myForcedIdDao);
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">static</strong> List&lt;Long&gt; translateForcedIdToPids(<a name="DaoConfig" href="../../../../../../ca/uhn/fhir/jpa/dao/DaoConfig.html#DaoConfig">DaoConfig</a> theDaoConfig, IIdType theId, <a name="IForcedIdDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IForcedIdDao.html#IForcedIdDao">IForcedIdDao</a> theForcedIdDao) {
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  		Validate.isTrue(theId.hasIdPart());
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		<strong class="jxr_keyword">if</strong> (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY &amp;&amp; isValidPid(theId)) {
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  			<strong class="jxr_keyword">return</strong> Collections.singletonList(theId.getIdPartAsLong());
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  			List&lt;ForcedId&gt; forcedId;
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			<strong class="jxr_keyword">if</strong> (theId.hasResourceType()) {
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  				forcedId = theForcedIdDao.findByTypeAndForcedId(theId.getResourceType(), theId.getIdPart());
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  				forcedId = theForcedIdDao.findByForcedId(theId.getIdPart());
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			}
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  			<strong class="jxr_keyword">if</strong> (!forcedId.isEmpty()) {
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  				List&lt;Long&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;(forcedId.size());
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  				<strong class="jxr_keyword">for</strong> (ForcedId next : forcedId) {
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  					retVal.add(next.getResourcePid());
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  				}
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  				<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  				<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResourceNotFoundException(theId);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  			}
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		}
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  	}
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> String translatePidIdToForcedId(String theResourceType, Long theId) {
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId);
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">if</strong> (forcedId != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<strong class="jxr_keyword">return</strong> forcedId.getResourceType() + '/' + forcedId.getForcedId();
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<strong class="jxr_keyword">return</strong> theResourceType + '/' + theId.toString();
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		}
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isValidPid(IIdType theId) {
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong> || theId.getIdPart() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		}
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		String idPart = theId.getIdPart();
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; idPart.length(); i++) {
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			<strong class="jxr_keyword">char</strong> nextChar = idPart.charAt(i);
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			<strong class="jxr_keyword">if</strong> (nextChar &lt; '0' || nextChar &gt; '9') {
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  				<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			}
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		}
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 	}
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> }
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  @Service
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="IdHelperService" href="../../../../../../ca/uhn/fhir/jpa/dao/index/IdHelperService.html#IdHelperService">IdHelperService</a> {
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Autowired
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	<strong class="jxr_keyword">protected</strong> <a name="IForcedIdDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IForcedIdDao.html#IForcedIdDao">IForcedIdDao</a> myForcedIdDao;
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  	@Autowired(required = <strong class="jxr_keyword">true</strong>)
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  	<strong class="jxr_keyword">private</strong> <a name="DaoConfig" href="../../../../../../ca/uhn/fhir/jpa/dao/DaoConfig.html#DaoConfig">DaoConfig</a> myDaoConfig;
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Autowired
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">private</strong> IInterceptorBroadcaster myInterceptorBroadcaster;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> delete(ForcedId forcedId) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		myForcedIdDao.delete(forcedId);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	}
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment">	 * @throws ResourceNotFoundException If the ID can not be found</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	@Nonnull
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	<strong class="jxr_keyword">public</strong> Long translateForcedIdToPid(String theResourceName, String theResourceId) <strong class="jxr_keyword">throws</strong> ResourceNotFoundException {
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<em class="jxr_comment">// We only pass 1 input in so only 0..1 will come back</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		IdDt id = <strong class="jxr_keyword">new</strong> IdDt(theResourceName, theResourceId);
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		List&lt;Long&gt; matches = translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, Collections.singletonList(id));
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		assert matches.size() &lt;= 1;
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		<strong class="jxr_keyword">if</strong> (matches.isEmpty()) {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResourceNotFoundException(id);
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		}
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<strong class="jxr_keyword">return</strong> matches.get(0);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	}
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">public</strong> List&lt;Long&gt; translateForcedIdToPids(Collection&lt;IIdType&gt; theId) {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<strong class="jxr_keyword">return</strong> IdHelperService.translateForcedIdToPids(myDaoConfig, myInterceptorBroadcaster, myForcedIdDao, theId);
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	}
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">static</strong> List&lt;Long&gt; translateForcedIdToPids(<a name="DaoConfig" href="../../../../../../ca/uhn/fhir/jpa/dao/DaoConfig.html#DaoConfig">DaoConfig</a> theDaoConfig, IInterceptorBroadcaster theInterceptorBroadcaster, <a name="IForcedIdDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IForcedIdDao.html#IForcedIdDao">IForcedIdDao</a> theForcedIdDao, Collection&lt;IIdType&gt; theId) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		theId.forEach(id -&gt; Validate.isTrue(id.hasIdPart()));
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">if</strong> (theId.isEmpty()) {
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">return</strong> Collections.emptyList();
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		}
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		List&lt;Long&gt; retVal = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		ListMultimap&lt;String, String&gt; typeToIds = MultimapBuilder.hashKeys().arrayListValues().build();
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		<strong class="jxr_keyword">for</strong> (IIdType nextId : theId) {
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			<strong class="jxr_keyword">if</strong> (theDaoConfig.getResourceClientIdStrategy() != DaoConfig.ClientIdStrategyEnum.ANY &amp;&amp; isValidPid(nextId)) {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  				retVal.add(nextId.getIdPartAsLong());
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  				<strong class="jxr_keyword">if</strong> (nextId.hasResourceType()) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  					typeToIds.put(nextId.getResourceType(), nextId.getIdPart());
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  					typeToIds.put(<span class="jxr_string">""</span>, nextId.getIdPart());
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  				}
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		}
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  		<strong class="jxr_keyword">for</strong> (Map.Entry&lt;String, Collection&lt;String&gt;&gt; nextEntry : typeToIds.asMap().entrySet()) {
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			String nextResourceType = nextEntry.getKey();
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			Collection&lt;String&gt; nextIds = nextEntry.getValue();
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			<strong class="jxr_keyword">if</strong> (isBlank(nextResourceType)) {
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 				StorageProcessingMessage msg = <strong class="jxr_keyword">new</strong> StorageProcessingMessage()
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 					.setMessage(<span class="jxr_string">"This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type."</span>);
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 				HookParams params = <strong class="jxr_keyword">new</strong> HookParams()
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 					.add(StorageProcessingMessage.<strong class="jxr_keyword">class</strong>, msg);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 				theInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 				retVal.addAll(theForcedIdDao.findByForcedId(nextIds));
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 				retVal.addAll(theForcedIdDao.findByTypeAndForcedId(nextResourceType, nextIds));
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			}
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 		}
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	}
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	<strong class="jxr_keyword">public</strong> String translatePidIdToForcedId(String theResourceType, Long theId) {
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		ForcedId forcedId = myForcedIdDao.findByResourcePid(theId);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		<strong class="jxr_keyword">if</strong> (forcedId != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			<strong class="jxr_keyword">return</strong> forcedId.getResourceType() + '/' + forcedId.getForcedId();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			<strong class="jxr_keyword">return</strong> theResourceType + '/' + theId.toString();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		}
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	}
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">boolean</strong> isValidPid(IIdType theId) {
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		<strong class="jxr_keyword">if</strong> (theId == <strong class="jxr_keyword">null</strong> || theId.getIdPart() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 			<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		}
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		String idPart = theId.getIdPart();
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; idPart.length(); i++) {
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			<strong class="jxr_keyword">char</strong> nextChar = idPart.charAt(i);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			<strong class="jxr_keyword">if</strong> (nextChar &lt; '0' || nextChar &gt; '9') {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 				<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			}
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 		}
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 	}
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

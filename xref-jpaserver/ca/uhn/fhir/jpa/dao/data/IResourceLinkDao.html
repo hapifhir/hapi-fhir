@@ -31,12 +31,16 @@
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.ResourceLink;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IResourceLinkDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IResourceLinkDao.html#IResourceLinkDao">IResourceLinkDao</a>  <strong class="jxr_keyword">extends</strong> JpaRepository&lt;ResourceLink, Long&gt; {
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.repository.query.Param;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  
-<a class="jxr_linenumber" name="L30" href="#L30">30</a>  
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  }
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">interface</strong> <a name="IResourceLinkDao" href="../../../../../../ca/uhn/fhir/jpa/dao/data/IResourceLinkDao.html#IResourceLinkDao">IResourceLinkDao</a>  <strong class="jxr_keyword">extends</strong> JpaRepository&lt;ResourceLink, Long&gt; {
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  	@Modifying
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	@Query(<span class="jxr_string">"delete from ResourceLink t WHERE t.mySourceResourcePid = :resid"</span>)
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">void</strong> deleteByResourceId(@Param(<span class="jxr_string">"resid"</span>) Long theResourcePid);
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

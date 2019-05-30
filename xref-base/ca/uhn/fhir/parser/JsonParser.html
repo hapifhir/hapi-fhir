@@ -368,7 +368,7 @@
 <a class="jxr_linenumber" name="L360" href="#L360">360</a> 						narr = <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L361" href="#L361">361</a> 					}
 <a class="jxr_linenumber" name="L362" href="#L362">362</a> 					<strong class="jxr_keyword">if</strong> (narr != <strong class="jxr_keyword">null</strong> &amp;&amp; narr.isEmpty()) {
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> 						gen.populateResourceNarrative(theResource);
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 						gen.populateResourceNarrative(myContext, theResource);
 <a class="jxr_linenumber" name="L364" href="#L364">364</a> 						<strong class="jxr_keyword">if</strong> (!narr.isEmpty()) {
 <a class="jxr_linenumber" name="L365" href="#L365">365</a> 							RuntimeChildNarrativeDefinition child = (<a name="RuntimeChildNarrativeDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildNarrativeDefinition.html#RuntimeChildNarrativeDefinition">RuntimeChildNarrativeDefinition</a>) nextChild;
 <a class="jxr_linenumber" name="L366" href="#L366">366</a> 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -386,7 +386,7 @@
 <a class="jxr_linenumber" name="L378" href="#L378">378</a> 			}
 <a class="jxr_linenumber" name="L379" href="#L379">379</a> 
 <a class="jxr_linenumber" name="L380" href="#L380">380</a> 			List&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; values = nextChild.getAccessor().getValues(theElement);
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 			values = <strong class="jxr_keyword">super</strong>.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 			values = preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 <a class="jxr_linenumber" name="L382" href="#L382">382</a> 
 <a class="jxr_linenumber" name="L383" href="#L383">383</a> 			<strong class="jxr_keyword">if</strong> (values == <strong class="jxr_keyword">null</strong> || values.isEmpty()) {
 <a class="jxr_linenumber" name="L384" href="#L384">384</a> 				<strong class="jxr_keyword">continue</strong>;
@@ -1465,7 +1465,7 @@
 <a class="jxr_linenumber" name="L1457" href="#L1457">1457</a> <em class="jxr_comment">				 * Pre-process value - This is called in case the value is a reference</em>
 <a class="jxr_linenumber" name="L1458" href="#L1458">1458</a> <em class="jxr_comment">				 * since we might modify the text</em>
 <a class="jxr_linenumber" name="L1459" href="#L1459">1459</a> <em class="jxr_comment">				 */</em>
-<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 				value = JsonParser.<strong class="jxr_keyword">super</strong>.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
+<a class="jxr_linenumber" name="L1460" href="#L1460">1460</a> 				value = preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
 <a class="jxr_linenumber" name="L1461" href="#L1461">1461</a> 
 <a class="jxr_linenumber" name="L1462" href="#L1462">1462</a> 				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
 <a class="jxr_linenumber" name="L1463" href="#L1463">1463</a> 				String childName = extDef.getChildNameByDatatype(value.getClass());
@@ -1476,7 +1476,7 @@
 <a class="jxr_linenumber" name="L1468" href="#L1468">1468</a> 				<strong class="jxr_keyword">if</strong> (childDef == <strong class="jxr_keyword">null</strong>) {
 <a class="jxr_linenumber" name="L1469" href="#L1469">1469</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="ConfigurationException" href="../../../../ca/uhn/fhir/context/ConfigurationException.html#ConfigurationException">ConfigurationException</a>(<span class="jxr_string">"Unable to encode extension, unrecognized child element type: "</span> + value.getClass().getCanonicalName());
 <a class="jxr_linenumber" name="L1470" href="#L1470">1470</a> 				}
-<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, <strong class="jxr_keyword">true</strong>, myParent,false, theEncodeContext);
+<a class="jxr_linenumber" name="L1471" href="#L1471">1471</a> 				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent,false, theEncodeContext);
 <a class="jxr_linenumber" name="L1472" href="#L1472">1472</a> 				managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext);
 <a class="jxr_linenumber" name="L1473" href="#L1473">1473</a> 			}
 <a class="jxr_linenumber" name="L1474" href="#L1474">1474</a> 

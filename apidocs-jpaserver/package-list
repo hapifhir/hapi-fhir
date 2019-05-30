@@ -4,10 +4,12 @@ ca.uhn.fhir.jpa.config.r4
 ca.uhn.fhir.jpa.dao
 ca.uhn.fhir.jpa.dao.data
 ca.uhn.fhir.jpa.dao.dstu3
+ca.uhn.fhir.jpa.dao.expunge
 ca.uhn.fhir.jpa.dao.index
 ca.uhn.fhir.jpa.dao.r4
 ca.uhn.fhir.jpa.entity
 ca.uhn.fhir.jpa.graphql
+ca.uhn.fhir.jpa.interceptor
 ca.uhn.fhir.jpa.provider
 ca.uhn.fhir.jpa.provider.dstu3
 ca.uhn.fhir.jpa.provider.r4

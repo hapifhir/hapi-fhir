@@ -3,6 +3,8 @@ ca.uhn.fhir.context.api
 ca.uhn.fhir.context.support
 ca.uhn.fhir.fluentpath
 ca.uhn.fhir.i18n
+ca.uhn.fhir.interceptor.api
+ca.uhn.fhir.interceptor.executor
 ca.uhn.fhir.model.api
 ca.uhn.fhir.model.api.annotation
 ca.uhn.fhir.model.base.composite

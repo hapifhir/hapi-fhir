@@ -379,7 +379,7 @@
 <a class="jxr_linenumber" name="L371" href="#L371">371</a> 				}
 <a class="jxr_linenumber" name="L372" href="#L372">372</a> 				<em class="jxr_comment">// FIXME potential null access on narr see line 623</em>
 <a class="jxr_linenumber" name="L373" href="#L373">373</a> 				<strong class="jxr_keyword">if</strong> (gen != <strong class="jxr_keyword">null</strong> &amp;&amp; narr.isEmpty()) {
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 					gen.populateResourceNarrative(theResource);
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> 					gen.populateResourceNarrative(myContext, theResource);
 <a class="jxr_linenumber" name="L375" href="#L375">375</a> 				}
 <a class="jxr_linenumber" name="L376" href="#L376">376</a> 				<strong class="jxr_keyword">if</strong> (narr != <strong class="jxr_keyword">null</strong> &amp;&amp; narr.isEmpty() == false) {
 <a class="jxr_linenumber" name="L377" href="#L377">377</a> 					RuntimeChildNarrativeDefinition child = (<a name="RuntimeChildNarrativeDefinition" href="../../../../ca/uhn/fhir/context/RuntimeChildNarrativeDefinition.html#RuntimeChildNarrativeDefinition">RuntimeChildNarrativeDefinition</a>) nextChild;
@@ -395,7 +395,7 @@
 <a class="jxr_linenumber" name="L387" href="#L387">387</a> 			} <strong class="jxr_keyword">else</strong> {
 <a class="jxr_linenumber" name="L388" href="#L388">388</a> 
 <a class="jxr_linenumber" name="L389" href="#L389">389</a> 				List&lt;? <strong class="jxr_keyword">extends</strong> IBase&gt; values = nextChild.getAccessor().getValues(theElement);
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 				values = <strong class="jxr_keyword">super</strong>.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 				values = preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 <a class="jxr_linenumber" name="L391" href="#L391">391</a> 
 <a class="jxr_linenumber" name="L392" href="#L392">392</a> 				<strong class="jxr_keyword">if</strong> (values == <strong class="jxr_keyword">null</strong> || values.isEmpty()) {
 <a class="jxr_linenumber" name="L393" href="#L393">393</a> 					<strong class="jxr_keyword">continue</strong>;
