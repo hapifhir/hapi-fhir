@@ -244,6 +244,10 @@
 			<action type="add" issue="1244">
 				Add a missing @Deprecated tag. Thanks to Drew Mitchell for the pull request!
 			</action>
+			<action type="add" issue="1303">
+				The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour.
+				Thanks to Anders Havn for the pull request!
+			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
 			<action type="add">
