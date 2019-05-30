@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.entity;
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;

@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
+import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -78,15 +79,27 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
+	public CodeSystem fetchCodeSystem(FhirContext theCtx, String uri) {
 		for (IValidationSupport next : myChain) {
-			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
+			CodeSystem retVal = next.fetchCodeSystem(theCtx, uri);
 			if (retVal != null) {
 				return retVal;
 			}
 		}
 		return null;
 	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String uri) {
+		for (IValidationSupport next : myChain) {
+			ValueSet retVal = next.fetchValueSet(theCtx, uri);
+			if (retVal != null) {
+				return retVal;
+			}
+		}
+		return null;
+	}
+
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {

@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.dao.index;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,17 +43,17 @@ public class DaoSearchParamSynchronizer {
 
 	public void synchronizeSearchParamsToDatabase(ResourceIndexedSearchParams theParams, ResourceTable theEntity, ResourceIndexedSearchParams existingParams) {
 
-		synchronize(theParams, theEntity, theParams.stringParams, existingParams.stringParams);
-		synchronize(theParams, theEntity, theParams.tokenParams, existingParams.tokenParams);
-		synchronize(theParams, theEntity, theParams.numberParams, existingParams.numberParams);
-		synchronize(theParams, theEntity, theParams.quantityParams, existingParams.quantityParams);
-		synchronize(theParams, theEntity, theParams.dateParams, existingParams.dateParams);
-		synchronize(theParams, theEntity, theParams.uriParams, existingParams.uriParams);
-		synchronize(theParams, theEntity, theParams.coordsParams, existingParams.coordsParams);
-		synchronize(theParams, theEntity, theParams.links, existingParams.links);
+		synchronize(theParams, theEntity, theParams.myStringParams, existingParams.myStringParams);
+		synchronize(theParams, theEntity, theParams.myTokenParams, existingParams.myTokenParams);
+		synchronize(theParams, theEntity, theParams.myNumberParams, existingParams.myNumberParams);
+		synchronize(theParams, theEntity, theParams.myQuantityParams, existingParams.myQuantityParams);
+		synchronize(theParams, theEntity, theParams.myDateParams, existingParams.myDateParams);
+		synchronize(theParams, theEntity, theParams.myUriParams, existingParams.myUriParams);
+		synchronize(theParams, theEntity, theParams.myCoordsParams, existingParams.myCoordsParams);
+		synchronize(theParams, theEntity, theParams.myLinks, existingParams.myLinks);
 
 		// make sure links are indexed
-		theEntity.setResourceLinks(theParams.links);
+		theEntity.setResourceLinks(theParams.myLinks);
 	}
 
 	private <T extends BaseResourceIndex> void synchronize(ResourceIndexedSearchParams theParams, ResourceTable theEntity, Collection<T> theNewParms, Collection<T> theExistingParms) {

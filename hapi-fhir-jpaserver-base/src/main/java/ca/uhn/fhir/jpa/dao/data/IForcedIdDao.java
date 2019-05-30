@@ -30,16 +30,15 @@ import org.springframework.data.repository.query.Param;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 
 public interface IForcedIdDao extends JpaRepository<ForcedId, Long> {
-	
-	@Query("SELECT f FROM ForcedId f WHERE myForcedId = :forced_id")
-	public List<ForcedId> findByForcedId(@Param("forced_id") String theForcedId);
 
-	@Query("SELECT f FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId = :forced_id")
-	public List<ForcedId> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") String theForcedId);
+	// FIXME: JA We should log a performance warning if this is used since it's not indexed
+	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myForcedId IN (:forced_id)")
+	List<Long> findByForcedId(@Param("forced_id") Collection<String> theForcedId);
+
+	@Query("SELECT f.myResourcePid FROM ForcedId f WHERE myResourceType = :resource_type AND myForcedId IN (:forced_id)")
+	List<Long> findByTypeAndForcedId(@Param("resource_type") String theResourceType, @Param("forced_id") Collection<String> theForcedId);
 
 	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid = :resource_pid")
-	public ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	ForcedId findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
-	@Query("SELECT f FROM ForcedId f WHERE f.myResourcePid in (:pids)")
-	Collection<ForcedId> findByResourcePids(@Param("pids") Collection<Long> pids);
 }

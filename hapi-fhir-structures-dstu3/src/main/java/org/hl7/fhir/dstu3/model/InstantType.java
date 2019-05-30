@@ -156,7 +156,9 @@ public class InstantType extends BaseDateTimeType {
 
 	@Override
 	public InstantType copy() {
-		return new InstantType(getValueAsString());
+     InstantType retVal = new InstantType();
+     retVal.setValueAsString(getValueAsString());
+     return retVal;
 	}
 
 	public String fhirType() {

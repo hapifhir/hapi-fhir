@@ -64,7 +64,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
-	private static Server ourServer;
+	protected static Server ourServer;
 	protected IGenericClient ourClient;
 	ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
@@ -81,6 +81,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	@After
 	public void after() throws Exception {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
+		ourRestServer.getInterceptorService().unregisterAllInterceptors();
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
@@ -97,7 +98,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
-			ourRestServer.setResourceProviders((List) myResourceProviders);
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 
@@ -205,7 +206,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				fail("Failed to init subscriptions");
 			}
 			try {
-				mySubscriptionLoader.syncSubscriptions();
+				mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 				break;
 			} catch (ResourceVersionConflictException e) {
 				Thread.sleep(250);

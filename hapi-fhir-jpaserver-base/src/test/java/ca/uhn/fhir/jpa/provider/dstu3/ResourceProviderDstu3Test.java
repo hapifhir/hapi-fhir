@@ -90,6 +90,38 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
+
+	@Test
+	public void testSearchByExternalReference() {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FooName");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId();
+
+		//Reference patientReference = new Reference("Patient/" + patientId.getIdPart()); <--- this works
+		Reference patientReference = new Reference(patientId); // <--- this is seen as an external reference
+
+		Media media = new Media();
+		Attachment attachment = new Attachment();
+		attachment.setLanguage("ENG");
+		media.setContent(attachment);
+		media.setSubject(patientReference);
+		media.setType(Media.DigitalMediaType.AUDIO);
+		IIdType mediaId = ourClient.create().resource(media).execute().getId();
+
+
+		// Act
+		Bundle returnedBundle = ourClient.search()
+			.forResource(Observation.class)
+			.where(Observation.CONTEXT.hasId(patientReference.getReference()))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Assert
+		assertEquals(0, returnedBundle.getEntry().size());
+	}
+
 	/**
 	 * See #872
 	 */
@@ -1843,10 +1875,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(id.withVersion("3").getValue(), history.getEntry().get(0).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(0).getResource()).getName().size());
 
-		assertEquals(id.withVersion("2").getValue(), history.getEntry().get(1).getResource().getId());
 		assertEquals(HTTPVerb.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValue());
 		assertEquals("http://localhost:" + ourPort + "/fhir/context/Patient/" + id.getIdPart() + "/_history/2", history.getEntry().get(1).getRequest().getUrl());
-		assertEquals(0, ((Patient) history.getEntry().get(1).getResource()).getName().size());
+		assertEquals(null, history.getEntry().get(1).getResource());
 
 		assertEquals(id.withVersion("1").getValue(), history.getEntry().get(2).getResource().getId());
 		assertEquals(1, ((Patient) history.getEntry().get(2).getResource()).getName().size());
@@ -2167,131 +2198,6 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	}
 
-	@Test
-	public void testPatchUsingJsonPatch() throws Exception {
-		String methodName = "testPatchUsingJsonPatch";
-		IIdType pid1;
-		{
-			Patient patient = new Patient();
-			patient.setActive(true);
-			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().setFamily(methodName).addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-
-		CloseableHttpResponse response = ourHttpClient.execute(patch);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
-		} finally {
-			response.close();
-		}
-
-		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
-	}
-
-	@Test
-	public void testPatchUsingJsonPatchWithContentionCheckBad() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckBad";
-		IIdType pid1;
-		{
-			Patient patient = new Patient();
-			patient.setActive(true);
-			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().setFamily(methodName).addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
-		patch.addHeader("If-Match", "W/\"9\"");
-
-		CloseableHttpResponse response = ourHttpClient.execute(patch);
-		try {
-			assertEquals(409, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("<diagnostics value=\"Version 9 is not the most recent version of this resource, unable to apply patch\"/>"));
-		} finally {
-			response.close();
-		}
-
-		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertEquals("1", newPt.getIdElement().getVersionIdPart());
-		assertEquals(true, newPt.getActive());
-	}
-
-	@Test
-	public void testPatchUsingJsonPatchWithContentionCheckGood() throws Exception {
-		String methodName = "testPatchUsingJsonPatchWithContentionCheckGood";
-		IIdType pid1;
-		{
-			Patient patient = new Patient();
-			patient.setActive(true);
-			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().setFamily(methodName).addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		patch.setEntity(new StringEntity("[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]", ContentType.parse(Constants.CT_JSON_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
-		patch.addHeader("If-Match", "W/\"1\"");
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-
-		CloseableHttpResponse response = ourHttpClient.execute(patch);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
-		} finally {
-			response.close();
-		}
-
-		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
-	}
-
-	@Test
-	public void testPatchUsingXmlPatch() throws Exception {
-		String methodName = "testPatchUsingXmlPatch";
-		IIdType pid1;
-		{
-			Patient patient = new Patient();
-			patient.setActive(true);
-			patient.addIdentifier().setSystem("urn:system").setValue("0");
-			patient.addName().setFamily(methodName).addGiven("Joe");
-			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-		}
-
-		HttpPatch patch = new HttpPatch(ourServerBase + "/Patient/" + pid1.getIdPart());
-		String patchString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><diff xmlns:fhir=\"http://hl7.org/fhir\"><replace sel=\"fhir:Patient/fhir:active/@value\">false</replace></diff>";
-		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
-
-		CloseableHttpResponse response = ourHttpClient.execute(patch);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("INFORMATION"));
-		} finally {
-			response.close();
-		}
-
-		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
-	}
 
 	@Test
 	public void testPreserveVersionsOnAuditEvent() {

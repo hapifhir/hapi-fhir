@@ -54,7 +54,7 @@ public class JpaServerDemo extends RestfulServer {
 		 * file which is automatically generated as a part of hapi-fhir-jpaserver-base and
 		 * contains bean definitions for a resource provider for each resource type
 		 */
-		List<IResourceProvider> beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
+		ResourceProviderFactory beans = myAppCtx.getBean("myResourceProvidersDstu2", List.class);
 		setResourceProviders(beans);
 		
 		/* 

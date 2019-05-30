@@ -30,15 +30,17 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 
+import java.io.Closeable;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class ActiveSubscription {
+public class ActiveSubscription implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	private CanonicalSubscription mySubscription;
 	private final SubscribableChannel mySubscribableChannel;
 	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
+	private boolean flagForDeletion;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, SubscribableChannel theSubscribableChannel) {
 		mySubscription = theSubscription;
@@ -61,20 +63,6 @@ public class ActiveSubscription {
 	public void unregister(MessageHandler theMessageHandler) {
 		if (mySubscribableChannel != null) {
 			mySubscribableChannel.unsubscribe(theMessageHandler);
-			if (mySubscribableChannel instanceof DisposableBean) {
-				try {
-					((DisposableBean) mySubscribableChannel).destroy();
-				} catch (Exception e) {
-					ourLog.error("Failed to destroy channel bean", e);
-				}
-			}
-		}
-
-	}
-
-	public void unregisterAll() {
-		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
-			unregister(messageHandler);
 		}
 	}
 
@@ -93,5 +81,42 @@ public class ActiveSubscription {
 
 	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
 		mySubscription = theCanonicalizedSubscription;
+	}
+
+	public boolean isFlagForDeletion() {
+		return flagForDeletion;
+	}
+
+	public void setFlagForDeletion(boolean theFlagForDeletion) {
+		flagForDeletion = theFlagForDeletion;
+	}
+
+	@Override
+	public void close() {
+		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
+			unregister(messageHandler);
+		}
+		if (mySubscribableChannel instanceof DisposableBean) {
+			try {
+				((DisposableBean) mySubscribableChannel).destroy();
+			} catch (Exception e) {
+				ourLog.error("Failed to destroy channel bean", e);
+			}
+		}
+	}
+
+	public void removeChannel() {
+		if (mySubscribableChannel instanceof IRemovableChannel) {
+			((IRemovableChannel)mySubscribableChannel).removeChannel();
+		}
+	}
+
+	/**
+	 * Use close() instead
+	 * KHS 15 Apr 2019
+	 */
+	@Deprecated
+	public void unregisterAll() {
+		close();
 	}
 }

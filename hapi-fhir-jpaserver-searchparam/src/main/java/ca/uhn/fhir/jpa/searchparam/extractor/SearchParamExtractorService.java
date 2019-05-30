@@ -37,20 +37,20 @@ public class SearchParamExtractorService {
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	public void extractFromResource(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource) {
-		theParams.stringParams.addAll(extractSearchParamStrings(theEntity, theResource));
-		theParams.numberParams.addAll(extractSearchParamNumber(theEntity, theResource));
-		theParams.quantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
-		theParams.dateParams.addAll(extractSearchParamDates(theEntity, theResource));
-		theParams.uriParams.addAll(extractSearchParamUri(theEntity, theResource));
-		theParams.coordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
+		theParams.myStringParams.addAll(extractSearchParamStrings(theEntity, theResource));
+		theParams.myNumberParams.addAll(extractSearchParamNumber(theEntity, theResource));
+		theParams.myQuantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
+		theParams.myDateParams.addAll(extractSearchParamDates(theEntity, theResource));
+		theParams.myUriParams.addAll(extractSearchParamUri(theEntity, theResource));
+		theParams.myCoordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
 
-		ourLog.trace("Storing date indexes: {}", theParams.dateParams);
+		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
 		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
-				theParams.tokenParams.add((ResourceIndexedSearchParamToken) next);
+				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
 			} else {
-				theParams.stringParams.add((ResourceIndexedSearchParamString) next);
+				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
 	}

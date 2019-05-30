@@ -362,7 +362,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -370,7 +369,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);

@@ -1,0 +1,54 @@
+{
+	"resourceType": "Questionnaire",
+	"id": "FMCBinderOptimizationAssessment",
+	"meta": {
+		"versionId": "3",
+		"lastUpdated": "2019-04-17T14:15:39.487+00:00"
+	},
+	"status": "active",
+	"item": [
+		{
+			"linkId": "Home Medications",
+			"text": "Home Medications",
+			"type": "group",
+			"item": [
+				{
+					"linkId": "BO_ConsPharm",
+					"text": "Pharmacist consult",
+					"type": "choice",
+					"options": {
+						"reference": "ValueSet/FMCYesNoUnk"
+					}
+				},
+				{
+					"linkId": "BO_ConsTxt",
+					"text": "Pharmacy consult notes",
+					"type": "text"
+				},
+				{
+					"linkId": "BO_RecCons",
+					"text": "Recommendation consistent with binder optimization guidelines",
+					"type": "choice",
+					"options": {
+						"reference": "ValueSet/FMCYesNoUnk"
+					}
+				},
+				{
+					"linkId": "BO_ConsDrop",
+					"text": "Binder recommended",
+					"type": "choice",
+					"enableWhen": [
+						{
+							"question": "BO_RecCons",
+							"hasAnswer": true
+						}
+					],
+					"options": {
+						"reference": "ValueSet/FMCBinderRecommended"
+					}
+				}
+			]
+		}
+	]
+}
+

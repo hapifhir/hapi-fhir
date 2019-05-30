@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +40,14 @@ public class PortUtilTest {
 		}
 	}
 
+	@After
+	public void after() {
+		PortUtil.setPortDelay(null);
+	}
+
 	@Test
 	public void testPortsAreNotReused() throws InterruptedException {
+		PortUtil.setPortDelay(0);
 
 		List<Integer> ports = Collections.synchronizedList(new ArrayList<>());
 		List<PortUtil> portUtils = Collections.synchronizedList(new ArrayList<>());
@@ -48,7 +55,7 @@ public class PortUtilTest {
 
 		int tasksCount = 20;
 		ExecutorService pool = Executors.newFixedThreadPool(tasksCount);
-		int portsPerTaskCount = 51;
+		int portsPerTaskCount = 151;
 		for (int i = 0; i < tasksCount; i++) {
 			pool.submit(() -> {
 				PortUtil portUtil = new PortUtil();
@@ -56,13 +63,23 @@ public class PortUtilTest {
 				for (int j = 0; j < portsPerTaskCount; j++) {
 					int nextFreePort = portUtil.getNextFreePort();
 
+					boolean bound;
 					try (ServerSocket ss = new ServerSocket()) {
 						ss.bind(new InetSocketAddress("localhost", nextFreePort));
+						bound = true;
 					} catch (IOException e) {
-						String msg = "Failure binding new port " + nextFreePort + ": " + e.toString();
-						ourLog.error(msg, e);
-						errors.add(msg);
+						bound = false;
+					}
 
+					if (!bound) {
+						try (ServerSocket ss = new ServerSocket()) {
+							Thread.sleep(1000);
+							ss.bind(new InetSocketAddress("localhost", nextFreePort));
+						} catch (Exception e) {
+							String msg = "Failure binding new port (second attempt) " + nextFreePort + ": " + e.toString();
+							ourLog.error(msg, e);
+							errors.add(msg);
+						}
 					}
 
 					ports.add(nextFreePort);

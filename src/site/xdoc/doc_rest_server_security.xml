@@ -86,7 +86,7 @@
 			
 			<p>
 				HAPI FHIR 1.5 introduced a new interceptor, the
-				<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
+				<a href="./apidocs-server/ca/uhn/fhir/rest/server/interceptor/auth/AuthorizationInterceptor.html">AuthorizationInterceptor</a>.
 			</p>
 			<p>
 				This interceptor can help with the complicated task of determining whether a user
