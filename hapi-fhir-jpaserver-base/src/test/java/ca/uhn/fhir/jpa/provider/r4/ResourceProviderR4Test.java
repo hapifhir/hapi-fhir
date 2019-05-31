@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -14,6 +15,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -111,6 +113,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
+
+	@Test
+	public void testSearchForTokenValueOnlyUsesValueHash() {
+
+		myCaptureQueriesListener.clear();
+
+		ourClient
+			.loadPage()
+			.byUrl(ourServerBase + "/Practitioner?identifier=" + UrlUtil.escapeUrlParam("ABC|,DEF"))
+			.andReturnBundle(Bundle.class)
+			.execute();
+
+		myCaptureQueriesListener.logSelectQueries();
+	}
+
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
