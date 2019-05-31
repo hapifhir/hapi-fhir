@@ -6,6 +6,13 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<release version="4.0.0" date="TBD" description="Igloo">
+			<action type="add">
+				The $expunge global everything operation has been refactored to do deletes
+				in small batches. This change will likely reduce performance, but does allow
+				for the operation to succeed without timing out in larger system.
+			</action>
+		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
 				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
