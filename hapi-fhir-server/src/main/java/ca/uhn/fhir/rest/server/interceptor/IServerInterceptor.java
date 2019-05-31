@@ -47,7 +47,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -59,6 +58,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <b>See:</b> See the <a href="http://jamesagnew.github.io/hapi-fhir/doc_rest_server_interceptor.html">server
  * interceptor documentation</a> for more information on how to use this class.
  * </p>
+ * Note that unless otherwise stated, it is possible to throw any subclass of
+ * {@link BaseServerResponseException} from any interceptor method.
  */
 public interface IServerInterceptor {
 
@@ -202,6 +203,7 @@ public interface IServerInterceptor {
 	 * favour of {@link #outgoingResponse(RequestDetails, ResponseDetails, HttpServletRequest, HttpServletResponse)}
 	 * and will be removed in a future version of HAPI FHIR.
 	 */
+	@Deprecated
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException;
@@ -428,7 +430,7 @@ public interface IServerInterceptor {
 
 			IInterceptorService interceptorService = server.getInterceptorService();
 
-			HookParams params= new HookParams();
+			HookParams params = new HookParams();
 			params.add(RestOperationTypeEnum.class, theOperationType);
 			params.add(this);
 			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);

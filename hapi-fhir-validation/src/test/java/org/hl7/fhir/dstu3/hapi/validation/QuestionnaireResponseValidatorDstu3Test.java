@@ -357,7 +357,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	
 	@Test
 	public void testEnableWhenWithHasAnswerTrueDisablesQuestionWhenNoAnswerIsPresent() {
-
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
 		q.addItem().setLinkId("link1").setRequired(true).addEnableWhen().setQuestion("link0").setHasAnswer(true);
@@ -381,7 +380,31 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 		
-		//link1 question is enabled when link0 has answer
+		// create the questionnaire
+		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
+		item1.setLinkId("link1").setRequired(true).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+		q.addItem(item1);
+	
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+
+		qa.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		
+		String reference = qa.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		ValidationResult errors = myVal.validateWithResult(qa);
+
+		ourLog.info(errors.toString());
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testRequiredQuestionWithEnableWhenHidesQuestion() {
+
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		
+		// create the questionnaire
 		QuestionnaireItemComponent item1 = new QuestionnaireItemComponent();
 		item1.setLinkId("link1").setRequired(true);
 		q.addItem(item1);
@@ -433,7 +456,6 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	
 	@Test
 	public void testRequiredQuestionQuantityWithEnableWhenEnablesQuestionValue() {
-
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.QUANTITY);
 		
@@ -537,6 +559,50 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qr);
 		
 		assertThat(errors.toString(), Matchers.not(containsString("No issues")));
+	}
+	
+	@Test
+	public void testGivenQuestionIsNotEnabledWithEnableWhenButHasItemsWithoutAnswersAreOk() throws Exception {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link2").setRequired(false).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		
+		qr.addItem().setLinkId("link2");
+		
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qr);
+		
+		assertThat(errors.toString(), containsString("No issues"));
+	}
+	
+	@Test
+	public void testGivenQuestionIsNotEnabledWithEnableWhenButHasItemsWithoutAnswersAreOk2() throws Exception {
+		Questionnaire q = new Questionnaire();
+		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(false).setType(QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link2").setRequired(true).setType(QuestionnaireItemType.STRING).addEnableWhen().setQuestion("link0").setHasAnswer(true);
+		
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qr.getQuestionnaire().setReference(QUESTIONNAIRE_URL);
+		qr.addItem().setLinkId("link0");
+
+		qr.addItem().setLinkId("link1").addAnswer().setValue(new StringType("Answer"));
+
+		qr.addItem().setLinkId("link2");
+		
+		String reference = qr.getQuestionnaire().getReference();
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(reference))).thenReturn(q);
+		
+		ValidationResult errors = myVal.validateWithResult(qr);
+		
+		assertThat(errors.toString(), containsString("No issues"));
 	}
 	
 	@Test

@@ -48,7 +48,6 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
 
     protected EnableWhenResult evaluateCondition(QuestionnaireItemEnableWhenComponent enableCondition,
             Element questionnaireResponse, String linkId) {
-        //TODO: Fix EnableWhenResult stuff
         List<Element> answerItems = findQuestionAnswers(questionnaireResponse,
                 enableCondition.getQuestion());        
         QuestionnaireItemOperator operator = enableCondition.getOperator();

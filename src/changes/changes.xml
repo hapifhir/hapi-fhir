@@ -6,7 +6,14 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.8.0" date="TBD" description="Hippo">
+		<release version="4.0.0" date="TBD" description="Igloo">
+			<action type="add">
+				The $expunge global everything operation has been refactored to do deletes
+				in small batches. This change will likely reduce performance, but does allow
+				for the operation to succeed without timing out in larger system.
+			</action>
+		</release>
+		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
 				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
 				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
@@ -224,6 +231,29 @@
 			<action type="fix" issue="1305">
 				Two incorrect package declarations in unit tests were corrected. Thanks to github user
 				@zaewonyx for the PR!
+			</action>
+			<action type="add" issue="1228">
+				The InstanceValidator now supports validating QuestionnairResponses with empty items
+				for disabled questions. Thanks to Matti Uusitalo for the pull request!
+			</action>
+			<action type="add" issue="1152">
+				A new method has been added to the client that allows arbitrary headers to be easily
+				added to the request. Thanks to Christian Ohr for the pull request!
+			</action>
+			<action type="add" issue="1213">
+				VersionConverter for R2-R3 has been modified to correectly handle the renamed basedOn
+				field. Thanks to Gary Graham for the pull request!
+			</action>
+			<action type="fix" issue="1141">
+				The JPA database migration tool has been enhanced to support migration from HAPI FHIR
+				2.5. Thanks to Gary Graham for the pull request!
+			</action>
+			<action type="add" issue="1244">
+				Add a missing @Deprecated tag. Thanks to Drew Mitchell for the pull request!
+			</action>
+			<action type="add" issue="1303">
+				The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour.
+				Thanks to Anders Havn for the pull request!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

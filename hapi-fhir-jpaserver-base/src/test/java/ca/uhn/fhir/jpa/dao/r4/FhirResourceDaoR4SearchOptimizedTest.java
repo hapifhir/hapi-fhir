@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -588,6 +588,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSearchForTokenValueOnlyUsesValueHash() {
+
+		myCaptureQueriesListener.clear();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("PT00000"));
+		IBundleProvider results = myPatientDao.search(params);
+		results.getResources(0, 1); // won't return anything
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
+		assertThat(selectQuery, containsString("HASH_VALUE in"));
+		assertThat(selectQuery, not(containsString("HASH_SYS")));
+
+	}
+
 
 	/**
 	 * A search with a big list of OR clauses for references should use a single SELECT ... WHERE .. IN
@@ -777,7 +795,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		});
 
 
-
 		myCaptureQueriesListener.clear();
 		p = new Patient();
 		p.setId(id);
@@ -956,16 +973,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-
 	@Test
 	public void testReferenceOrLinksUseInList_ForcedIds() {
 
 		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			Organization org = new Organization();
-			org.setId("ORG"+i);
+			org.setId("ORG" + i);
 			org.setActive(true);
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				IIdType id = myOrganizationDao.update(org).getId();
 				ids.add(id.getIdPart());
 			});
@@ -974,12 +990,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 //			assertTrue(org.getActive());
 		}
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			for (ResourceTable next : myResourceTableDao.findAll()) {
 				ourLog.info("Resource pid {} of type {}", next.getId(), next.getResourceType());
 			}
 		});
-
 
 
 		for (int i = 0; i < 5; i++) {
