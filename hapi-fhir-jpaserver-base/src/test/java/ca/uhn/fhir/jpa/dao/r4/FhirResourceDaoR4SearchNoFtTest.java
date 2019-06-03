@@ -1301,6 +1301,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testSearchDate_TimingValueUsingPeriod() {
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement().setValueAsString("2018-01-01");
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement().setValueAsString("2018-02-01");
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			SearchParameterMap map = new SearchParameterMap()
+				.setLoadSynchronous(true)
+				.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+			IBundleProvider found = myServiceRequestDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size().intValue());
+		}
+	}
+
+
+
 	@Test
 	public void testSearchDateWrongParam() {
 		Patient p1 = new Patient();
