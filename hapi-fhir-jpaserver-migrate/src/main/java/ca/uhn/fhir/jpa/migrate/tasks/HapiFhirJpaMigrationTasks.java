@@ -49,10 +49,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.map(FlagEnum::fromCommandLineValue)
 			.collect(Collectors.toSet());
 
+		init330();
 		init340();
 		init350();
 		init360();
 	}
+
+
 
 	private void init360() {
 		Builder version = forVersion(VersionEnum.V3_6_0);
@@ -540,6 +543,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
 
+	}
+
+	private void init330() {
+		Builder version = forVersion(VersionEnum.V3_3_0);
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
+		hfjResource.dropColumn("RES_TEXT");
+		hfjResource.dropColumn("RES_ENCODING");
+
+		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
+		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
+		hfjResVer.modifyColumn("RES_ENCODING")
+			.nullable();
+		hfjResVer.modifyColumn("RES_TEXT")
+			.nullable();
 	}
 
 	public enum FlagEnum {

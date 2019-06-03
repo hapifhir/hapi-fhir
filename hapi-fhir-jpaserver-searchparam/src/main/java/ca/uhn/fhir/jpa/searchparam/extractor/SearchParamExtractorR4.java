@@ -201,6 +201,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 							}
 						}
 					}
+					if (nextValue.getRepeat().hasBounds()) {
+						if (nextValue.getRepeat().getBoundsPeriod().getStart() != null) {
+							dates.add(nextValue.getRepeat().getBoundsPeriod().getStart());
+						}
+						if (nextValue.getRepeat().getBoundsPeriod().getEnd() != null) {
+							dates.add(nextValue.getRepeat().getBoundsPeriod().getEnd());
+						}
+					}
 					if (dates.isEmpty()) {
 						continue;
 					}

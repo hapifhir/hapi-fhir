@@ -34,6 +34,11 @@ import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Expression.ExpressionLanguage;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.HealthcareService.HealthcareServiceEligibilityComponent;
 import org.hl7.fhir.utilities.Utilities;
 
