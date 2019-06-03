@@ -140,12 +140,6 @@ Tissue Antigens (2000), 55:280-287
     IMGTHLA concept properties.
   -->
   <property>
-    <code value="allele_id"/>
-    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/allele_id"/>
-    <description value="IPD-IMGT/HLA database accession number."/>
-    <type value="string"/>
-  </property>
-  <property>
     <code value="expression_suffix"/>
     <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/expression_suffix"/>
     <description value="Expression suffix (if any) assigned to the concept.  See http://hla.alleles.org/nomenclature/naming.html"/>
