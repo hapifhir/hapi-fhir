@@ -3,18 +3,16 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
@@ -25,7 +23,6 @@ import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -42,9 +39,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
@@ -413,44 +407,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		MedicationRequest mo = myMedicationRequestDao.read(id);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
-	}
-
-	@Test
-	public void testDeleteWithHas() {
-		Observation obs1 = new Observation();
-		obs1.setStatus(ObservationStatus.FINAL);
-		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
-
-		Observation obs2 = new Observation();
-		obs2.setStatus(ObservationStatus.FINAL);
-		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
-
-		DiagnosticReport rpt = new DiagnosticReport();
-		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
-		rpt.addResult(new Reference(obs2id));
-		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
-
-		myObservationDao.read(obs1id);
-		myObservationDao.read(obs2id);
-
-		rpt = new DiagnosticReport();
-		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
-
-		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
-		mySystemDao.transaction(mySrd, b);
-
-		myObservationDao.read(obs1id);
-		try {
-			myObservationDao.read(obs2id);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-
-		rpt = myDiagnosticReportDao.read(rptId);
-		assertThat(rpt.getResult(), empty());
 	}
 
 	@Test
