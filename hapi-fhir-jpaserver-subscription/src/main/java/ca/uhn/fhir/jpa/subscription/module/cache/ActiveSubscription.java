@@ -105,12 +105,6 @@ public class ActiveSubscription implements Closeable {
 		}
 	}
 
-	public void removeChannel() {
-		if (mySubscribableChannel instanceof IRemovableChannel) {
-			((IRemovableChannel)mySubscribableChannel).removeChannel();
-		}
-	}
-
 	/**
 	 * Use close() instead
 	 * KHS 15 Apr 2019
