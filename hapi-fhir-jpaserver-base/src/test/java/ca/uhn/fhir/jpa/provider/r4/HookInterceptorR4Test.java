@@ -1,11 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -15,9 +16,17 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(HookInterceptorR4Test.class);
 
+//	@Override
+//	@After
+//	public void after( ) throws Exception {
+//		super.after();
+//
+//		myInterceptorRegistry.unregisterAllInterceptors();
+//	}
+
 	@Test
 	public void testOP_PRESTORAGE_RESOURCE_CREATED_ModifyResource() {
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRESTORAGE_RESOURCE_CREATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 0);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -36,7 +45,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testOP_PRECOMMIT_RESOURCE_CREATED_ModifyResource() {
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 0);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -59,7 +68,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRESTORAGE_RESOURCE_UPDATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});
@@ -83,7 +92,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		p.setActive(true);
 		IIdType id = ourClient.create().resource(p).execute().getId();
 
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED, t->{
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t)->{
 			Patient contents = (Patient) t.get(IBaseResource.class, 1);
 			contents.getNameFirstRep().setFamily("NEWFAMILY");
 		});

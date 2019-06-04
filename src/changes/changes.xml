@@ -6,14 +6,41 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="3.8.0" date="TBD" description="Hippo">
+		<release version="4.0.0" date="TBD" description="Igloo">
+			<action type="add">
+				The $expunge global everything operation has been refactored to do deletes
+				in small batches. This change will likely reduce performance, but does allow
+				for the operation to succeed without timing out in larger system.
+			</action>
+			<action type="fix">
+				The JPA server did not correctly index Timing fields where the timing contained
+				a period but no individual events. This has been corrected.
+			</action>
+			<action type="fix" issue="1320">
+				The HAPI FHIR CLI import-csv-to-conceptmap command was not accounting for byte order marks in
+				CSV files (e.g. some Excel CSV files). This has been fixed.
+			</action>
+		</release>
+		<release version="3.8.0" date="2019-05-30" description="Hippo">
+			<action type="fix">
+				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
+				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
+				Mudit Punia and Dushyant Garg for reporting this.
+			</action>
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
-					<ul>
-						<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.5.RELEASE</li>
-					</ul>
+				<ul>
+					<li>Guava (base): 25-jre -&gt; 27.1-jre</li>
+					<li>Hibernate (JPA): 5.4.1 -&gt; 5.4.2</li>
+					<li>Jackson (JPA): 2.9.7 -&gt; 2.9.8</li>
+					<li>Spring (JPA): 5.1.3.RELEASE -&gt; 5.1.6.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.3.RELEASE -&gt; 2.1.6.RELEASE</li>
+					<li>Caffeine (JPA): 2.6.2 -&gt; 2.7.0</li>
+					<li>JANSI (CLI): 1.16 -&gt; 1.17.1</li>
+					<!--<li>Jetty (CLI): 9.4.14.v20181114 -&gt; 9.4.17.v20190418</li>-->
+				</ul>
 				]]>
 			</action>
 			<action type="add">
@@ -27,7 +54,7 @@
 			</action>
 			<action type="add">
 				The hapi-fhir-jpaserver-starter project has been updated to use a properties
-				file for configuration, making it much easier to get started with this 
+				file for configuration, making it much easier to get started with this
 				project. Thanks to Sean McIlvenna for the pull request!
 			</action>
 			<action type="fix">
@@ -67,6 +94,7 @@
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
+			</action>
 			<action type="add">
 				The JPA query builder has been optimized to take better advantage of SQL IN (..) expressions
 				when performing token searches with multiple OR values.
@@ -89,6 +117,151 @@
 			<action type="add">
 				HapiLocalizer can now handle message patterns with braces that aren't a part of a
 				message format expression. E.g. "Here is an {example}".
+			</action>
+			<action type="add">
+				JPA searches using a Composite Unique Index will now use that index for faster
+				searching even if the search has _includes and/or _sorts. Previously these two
+				features caused the search builder to skip using the index.
+			</action>
+			<action type="fix">
+				JPA searches using a Composite Unique Index did not return the correct results if
+				a REFERENCE search parameter was used with arguments that consisted of
+				unqualified resource IDs.
+			</action>
+			<action type="fix">
+				A non-threadsafe use of DateFormat was cleaned up in the StopWatch class.
+			</action>
+			<action type="add">
+				When performing a search in the JPA server where one of the parameters is a
+				reference with multiple values (e.g. Patient?organization=A,B) the generated
+				SQL was previously a set of OR clauses and this has been collapsed into a single
+				IN clause for better performance.
+			</action>
+			<action type="fix">
+				When returning the results of a history operation from a HAPI FHIR server,
+				any entries with a method of DELETE contained a stub resource in
+				Bundle.entry.resource, even though the FHIR spec states that this field
+				should be empty. This was corrected.
+			</action>
+			<action type="change">
+				The hapi-fhir-testpage-overlay project no longer includes any library JARs
+				in the built WAR, in order to prevent duplicates and conflicts in implementing
+				projects.
+			</action>
+			<action type="fix">
+				Two expunge bug fixes:
+				The first bug is that the expunge operation wasn't bailing once it hit its limit. This resulted in a
+				"Page size must not be less than one!" error.
+				The second bug is that one case wasn't properly handled: when a resourceId with no version is provided.
+				This executed the case where only resource type is provided.
+			</action>
+			<action type="fix">
+				When updating a resource in the JPA server, if the contents have not actually changed
+				the resource version is not updated and no new version is created. In this situation,
+				the update time was modified however. It will no longer be updated.
+			</action>
+			<action type="fix">
+				When running the JPA server in Resource Client ID strategy mode of "ANY", using the
+				<![CDATA[<code>_id</code>]]> search parameter could return incorrect results. This
+				has been corrected.
+			</action>
+			<action type="fix">
+				Performing a PUT or POST against a HAPI FHIR Server with no request body caused an
+				HTTP 500 to be returned instead of a more appropriate HTTP 400. This has been
+				corrected.
+			</action>
+			<action type="fix" issue="1255">
+				The fetchValueSet method on IValidationSupport implementation was not visible and could
+				not be overridden. Thanks to Patrick Werner for the pull reuqest!
+			</action>
+			<action type="fix" issue="1280">
+				The JPA server failed to index R4 reources with search parameters pointing to the Money data type.
+				Thanks to GitHub user @navyflower for reporting!
+			</action>
+			<action type="fix">
+				When validating DSTU3 QuestionnaireResponses that leverage the "enableWhen" functionality available
+				in Questionnaire resources, the validation could sometimes fail incorrectly.
+			</action>
+			<action type="add">
+				Added new configuration parameter to DaoConfig and ModelConfig to specify the websocket context path.
+				(Before it was hardcoded to "/websocket").
+			</action>
+			<action type="add">
+				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
+				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
+				channel.
+			</action>
+			<action type="change">
+				The JSON Patch provider has been switched to use the provider from the
+				<![CDATA[
+				<a href="https://github.com/java-json-tools/json-patch">Java JSON Tools</a>
+				]]>
+				project, as it is much more robust and fault tolerant.
+			</action>
+			<action type="fix">
+				Ensure that database cursors are closed immediately after performing a FHIR search.
+			</action>
+			<action type="add">
+				When performing a JSON Patch in JPA server, the post-patched document is now validated to
+				ensure that the patch was valid for the candidate resource. This means that invalid patches
+				are caught and not just silently ignored.
+			</action>
+			<action type="add">
+				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				in DaoConfig.
+			</action>
+			<action type="fix">
+				Validation errors were fixed when using a Questionnaire with enableWhen on a question that
+				contains sub-items.
+			</action>
+			<action type="fix">
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				the target instead of the source with the reference.
+			</action>
+			<action type="add">
+				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
+				Anders Havn for the suggestion!
+			</action>
+			<action type="fix" issue="1299">
+				In JPA server when updating a resource using a client assigned ID, if the resource was previously
+				deleted (meaning that the operation is actually a create), the server will now return
+				an HTTP 201 instead of an HTTP 200. Thanks to Mario Hyland for reporting!
+			</action>
+			<action type="fix">
+				The HAPI FHIR CLI was unable to start a server in R4 mode in HAPI FHIR 3.7.0.
+				This has been corrected.
+			</action>
+			<action type="fix" issue="1311">
+				When encoding resources, profile declarations on contained resources will now be 
+				preserved. Thanks to Anders Havn for the pull request!
+			</action>
+			<action type="fix" issue="1305">
+				Two incorrect package declarations in unit tests were corrected. Thanks to github user
+				@zaewonyx for the PR!
+			</action>
+			<action type="add" issue="1228">
+				The InstanceValidator now supports validating QuestionnairResponses with empty items
+				for disabled questions. Thanks to Matti Uusitalo for the pull request!
+			</action>
+			<action type="add" issue="1152">
+				A new method has been added to the client that allows arbitrary headers to be easily
+				added to the request. Thanks to Christian Ohr for the pull request!
+			</action>
+			<action type="add" issue="1213">
+				VersionConverter for R2-R3 has been modified to correectly handle the renamed basedOn
+				field. Thanks to Gary Graham for the pull request!
+			</action>
+			<action type="fix" issue="1141">
+				The JPA database migration tool has been enhanced to support migration from HAPI FHIR
+				2.5. Thanks to Gary Graham for the pull request!
+			</action>
+			<action type="add" issue="1244">
+				Add a missing @Deprecated tag. Thanks to Drew Mitchell for the pull request!
+			</action>
+			<action type="add" issue="1303">
+				The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour.
+				Thanks to Anders Havn for the pull request!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">
@@ -128,11 +301,11 @@
 				by two new interceptors: SubscriptionActivatingInterceptor that is responsible for activating subscriptions
 				and SubscriptionMatchingInterceptor that is responsible for matching incoming resources against activated
 				subscriptions. Call DaoConfig.addSupportedSubscriptionType(type) to configure which subscription types
-				are supported in your environment.  If you are processing subscriptions on a separate server and only want
+				are supported in your environment. If you are processing subscriptions on a separate server and only want
 				to activate subscriptions on this server, you should set DaoConfig.setSubscriptionMatchingEnabled to false.
 				The helper method SubscriptionInterceptorLoader.registerInterceptors()
 				will check if any subscription types are supported, and if so then load active subscriptions into the
-				SubscriptionRegistry and register the subscription activating interceptor.  This method also registers
+				SubscriptionRegistry and register the subscription activating interceptor. This method also registers
 				the subscription matching interceptor (that matches incoming resources and sends matches to subscription
 				channels) only if DaoConfig.isSubscriptionMatchingEnabled is true.
 				See https://github.com/jamesagnew/hapi-fhir/wiki/Proposed-Subscription-Design-Change for more
@@ -339,7 +512,7 @@
 			</action>
 			<action type="add">
 				AuthorizationInterceptor now rejects transactions with an invalid or unset request
-				using an HTTP 422 response	Bundle type instead of silently refusing to authorize them.
+				using an HTTP 422 response Bundle type instead of silently refusing to authorize them.
 			</action>
 			<action type="add">
 				AuthorizationInterceptor is now able to authorize DELETE operations performed via a
@@ -357,7 +530,7 @@
 			</action>
 			<action type="add">
 				In a DSTU2 server, if search parameters are expressed with chains directly in the
-				parameter name (e.g. 
+				parameter name (e.g.
 				<![CDATA[<code>@RequiredParam(name="subject.name.family")</code>]]>) the second
 				part of the chain was lost when the chain was described in the server
 				CapabilityStatement. This has been corrected.
@@ -415,7 +588,7 @@
 			<action type="add">
 				Add a "subscription-matching-strategy" meta tag to incoming subscriptions with value of IN_MEMORY
 				or DATABASE indicating whether the subscription can be matched against new resources in-memory or
-				whether a call out to the database may be required.  I say "may" because subscription matches fail fast
+				whether a call out to the database may be required. I say "may" because subscription matches fail fast
 				so a negative match may be performed in-memory, but a positive match will require a database call.
 			</action>
 			<action type="fix">

@@ -36,9 +36,17 @@ public class TokenAndListParam extends BaseAndListParam<TokenOrListParam> {
 		return this;
 	}
 
-	public TokenAndListParam addAnd(TokenParam theValue) {
+	/**
+	 * @param theValue The OR values
+	 * @return Returns a reference to this for convenient chaining
+	 */
+	public TokenAndListParam addAnd(TokenParam... theValue) {
 		Validate.notNull(theValue, "theValue must not be null");
-		addValue(new TokenOrListParam().add(theValue));
+		TokenOrListParam orListParam = new TokenOrListParam();
+		for (TokenParam next : theValue) {
+			orListParam.add(next);
+		}
+		addValue(orListParam);
 		return this;
 	}
 }

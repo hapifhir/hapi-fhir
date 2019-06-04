@@ -47,7 +47,6 @@ import java.util.function.Predicate;
 @Service
 public class CriteriaResourceMatcher {
 
-	private static final String CRITERIA = "CRITERIA";
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	@Autowired
@@ -83,9 +82,9 @@ public class CriteriaResourceMatcher {
 			return SubscriptionMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, SubscriptionMatchResult.STANDARD_PARAMETER);
 		}
 
-		for (Map.Entry<String, List<List<? extends IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
+		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
-			List<List<? extends IQueryParameterType>> theAndOrParams = entry.getValue();
+			List<List<IQueryParameterType>> theAndOrParams = entry.getValue();
 			SubscriptionMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, resourceDefinition, theResource, theSearchParams);
 			if (!result.matched()){
 				return result;
@@ -95,7 +94,7 @@ public class CriteriaResourceMatcher {
 	}
 
 	// This method is modelled from SearchBuilder.searchForIdsWithAndOr()
-	private SubscriptionMatchResult matchIdsWithAndOr(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
+	private SubscriptionMatchResult matchIdsWithAndOr(String theParamName, List<List<IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		if (theAndOrParams.isEmpty()) {
 			return SubscriptionMatchResult.successfulMatch();
 		}
@@ -132,13 +131,13 @@ public class CriteriaResourceMatcher {
 		}
 	}
 
-	private boolean matchIdsAndOr(List<List<? extends IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
+	private boolean matchIdsAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
 		if (theResource == null) {
 			return true;
 		}
 		return theAndOrParams.stream().allMatch(nextAnd -> matchIdsOr(nextAnd, theResource));
 	}
-	private boolean matchIdsOr(List<? extends IQueryParameterType> theOrParams, IBaseResource theResource) {
+	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
 		if (theResource == null) {
 			return true;
 		}
@@ -149,7 +148,7 @@ public class CriteriaResourceMatcher {
 		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
 	}
 
-	private SubscriptionMatchResult matchResourceParam(String theParamName, List<List<? extends IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+	private SubscriptionMatchResult matchResourceParam(String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -183,15 +182,15 @@ public class CriteriaResourceMatcher {
 		return theNextAnd.stream().anyMatch(token -> theSearchParams.matchParam(theResourceName, theParamName, paramDef, token));
 	}
 
-	private boolean hasChain(List<List<? extends IQueryParameterType>> theAndOrParams) {
+	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param instanceof ReferenceParam && ((ReferenceParam)param).getChain() != null);
 	}
 
-	private boolean hasQualifiers(List<List<? extends IQueryParameterType>> theAndOrParams) {
+	private boolean hasQualifiers(List<List<IQueryParameterType>> theAndOrParams) {
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param.getQueryParameterQualifier() != null);
 	}
 
-	private boolean hasPrefixes(List<List<? extends IQueryParameterType>> theAndOrParams) {
+	private boolean hasPrefixes(List<List<IQueryParameterType>> theAndOrParams) {
 		Predicate<IQueryParameterType> hasPrefixPredicate = param -> param instanceof BaseParamWithPrefix &&
 			((BaseParamWithPrefix) param).getPrefix() != null;
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(hasPrefixPredicate);

@@ -8,7 +8,9 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
@@ -34,6 +36,7 @@ public class SearchParamExtractorR4Test {
 
 	@Before
 	public void before() {
+
 		mySearchParamRegistry = new ISearchParamRegistry() {
 			@Override
 			public void forceRefresh() {
@@ -52,11 +55,12 @@ public class SearchParamExtractorR4Test {
 
 			@Override
 			public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 				Map<String, RuntimeSearchParam> sps = new HashMap<>();
+				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
 					sps.put(nextSp.getName(), nextSp);
 				}
+
 				return sps;
 			}
 
@@ -128,6 +132,21 @@ public class SearchParamExtractorR4Test {
 		assertEquals(1, links.size());
 		assertEquals("Consent.source", links.get(0).getPath());
 		assertEquals("Consent/999", ((Reference) links.get(0).getRef()).getReference());
+	}
+
+
+	@Test
+	public void testExtensionContainingReference() {
+		String path = "Patient.extension('http://patext').value.as(Reference)";
+
+		RuntimeSearchParam sp = new RuntimeSearchParam("extpat", "Patient SP", path, RestSearchParameterTypeEnum.REFERENCE, new HashSet<>(), Sets.newHashSet("Patient"), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+
+		Patient patient = new Patient();
+		patient.addExtension("http://patext", new Reference("Organization/AAA"));
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		List<PathAndRef> links = extractor.extractResourceLinks(patient, sp);
+		assertEquals(1, links.size());
 	}
 
 	@Test

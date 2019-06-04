@@ -74,7 +74,7 @@ public class ResourceLinkExtractor {
 			extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, theResourceLinkResolver, resourceType, nextSpDef, theFailOnInvalidReference);
 		}
 
-		theEntity.setHasLinks(theParams.links.size() > 0);
+		theEntity.setHasLinks(theParams.myLinks.size() > 0);
 	}
 
 	private void extractResourceLinks(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, String theResourceType, RuntimeSearchParam nextSpDef, boolean theFailOnInvalidReference) {
@@ -155,11 +155,11 @@ public class ResourceLinkExtractor {
 			}
 		}
 
-		theParams.populatedResourceLinkParameters.add(nextSpDef.getName());
+		theParams.myPopulatedResourceLinkParameters.add(nextSpDef.getName());
 
 		if (LogicalReferenceHelper.isLogicalReference(myModelConfig, nextId)) {
 			ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
-			if (theParams.links.add(resourceLink)) {
+			if (theParams.myLinks.add(resourceLink)) {
 				ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 			}
 			return;
@@ -195,7 +195,7 @@ public class ResourceLinkExtractor {
 				throw new InvalidRequestException(msg);
 			} else {
 				ResourceLink resourceLink = new ResourceLink(nextPathAndRef.getPath(), theEntity, nextId, theUpdateTime);
-				if (theParams.links.add(resourceLink)) {
+				if (theParams.myLinks.add(resourceLink)) {
 					ourLog.debug("Indexing remote resource reference URL: {}", nextId);
 				}
 				return;
@@ -217,7 +217,7 @@ public class ResourceLinkExtractor {
 		theResourceLinkResolver.validateTypeOrThrowException(type);
 		ResourceLink resourceLink = createResourceLink(theEntity, theUpdateTime, theResourceLinkResolver, nextSpDef, theNextPathsUnsplit, nextPathAndRef, nextId, typeString, type, id);
 		if (resourceLink == null) return;
-		theParams.links.add(resourceLink);
+		theParams.myLinks.add(resourceLink);
 	}
 
 	private ResourceLink createResourceLink(ResourceTable theEntity, Date theUpdateTime, IResourceLinkResolver theResourceLinkResolver, RuntimeSearchParam nextSpDef, String theNextPathsUnsplit, PathAndRef nextPathAndRef, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId) {

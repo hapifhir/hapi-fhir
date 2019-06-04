@@ -67,6 +67,7 @@ public class JaxRsRequest extends RequestDetails {
 	 */
 	public JaxRsRequest(AbstractJaxRsProvider server, String resourceString, RequestTypeEnum requestType,
 							  RestOperationTypeEnum restOperation) {
+		super(server.getInterceptorService());
 		this.myHeaders = server.getHeaders();
 		this.myResourceString = resourceString;
 		this.setRestOperationType(restOperation);

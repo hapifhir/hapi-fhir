@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -147,6 +147,10 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.helger</groupId>
@@ -178,18 +182,18 @@
 		<dependency>
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.javolution</groupId>
+					<artifactId>javolution</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>net.riotopsys</groupId>
-			<artifactId>json_patch</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>com.google.code.gson</artifactId>
-					<groupId>gson</groupId>
-				</exclusion>
-			</exclusions>
+			<groupId>com.github.java-json-tools</groupId>
+			<artifactId>json-patch</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
@@ -220,10 +224,10 @@
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-api</artifactId>-->
+<!--		</dependency>-->
 		<!--<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
@@ -352,6 +356,10 @@
 				<exclusion>
 					<artifactId>xml-apis</artifactId>
 					<groupId>xml-apis</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
 				<!--<exclusion>-->
 					<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
@@ -530,6 +538,12 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>16.0.3</version>
+			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>

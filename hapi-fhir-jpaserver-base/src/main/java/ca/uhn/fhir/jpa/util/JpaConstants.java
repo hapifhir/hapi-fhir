@@ -29,6 +29,11 @@ public class JpaConstants {
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
 	/**
+	 * Operation name for the $match operation
+	 */
+	public static final String OPERATION_MATCH = "$match";
+
+	/**
 	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
 	 */
 	@Deprecated

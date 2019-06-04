@@ -1,0 +1,41 @@
+{
+	"resourceType": "QuestionnaireResponse",
+	"id": "TestQR",
+	"questionnaire": {
+		"reference": "Questionnaire/FMCBinderOptimization"
+	},
+	"status": "completed",
+	"item": [
+		{
+			"linkId": "1",
+			"item": [
+				{
+					"linkId": "BO_RecCons",
+					"text": "Recommendation Consistent with binder optimization guidelines",
+					"answer": [
+						{
+							"valueCoding": {
+								"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+								"code": "No"
+							},
+							"item": [
+								{
+									"linkId": "BO_ConsDrop",
+									"text": "Binder Recommended",
+									"answer": [
+										{
+											"valueCoding": {
+												"system": "http://fkcfhir.org/fhir/cs/FMCBinderRecomm",
+												"code": "Velphoro"
+											}
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

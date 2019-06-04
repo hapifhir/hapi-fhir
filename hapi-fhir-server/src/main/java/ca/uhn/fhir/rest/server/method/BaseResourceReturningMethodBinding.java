@@ -2,6 +2,8 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -18,7 +20,6 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -378,24 +379,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseDetails.setResponseResource(response);
 		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
 
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
-			IServerInterceptor next = theServer.getInterceptors().get(i);
-			boolean continueProcessing = next.outgoingResponse(theRequest, response);
-			if (!continueProcessing) {
-				return null;
-			}
-
-			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
-			if (!continueProcessing) {
-				return null;
-			}
+		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
+			return null;
 		}
 
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
@@ -425,6 +410,29 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public enum ReturnTypeEnum {
 		BUNDLE,
 		RESOURCE
+	}
+
+	static boolean callOutgoingResponseHook(RequestDetails theRequest, ResponseDetails theResponseDetails) {
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
+		HookParams responseParams = new HookParams();
+		responseParams.add(RequestDetails.class, theRequest);
+		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		responseParams.add(IBaseResource.class, theResponseDetails.getResponseResource());
+		responseParams.add(ResponseDetails.class, theResponseDetails);
+		responseParams.add(HttpServletRequest.class, servletRequest);
+		responseParams.add(HttpServletResponse.class, servletResponse);
+		if (theRequest.getInterceptorBroadcaster() != null) {
+			if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }

@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
@@ -82,6 +82,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourNextAfterRestHookDeliveryReturn = true;
 		ourHitBeforeRestHookDelivery = false;
 		ourHitAfterRestHookDelivery = false;
+
+		myInterceptorRegistry.registerInterceptor(myTestInterceptor);
 	}
 
 	@Test
@@ -191,7 +193,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		registerLatch.await(10, TimeUnit.SECONDS);
 
 		CountDownLatch latch = new CountDownLatch(1);
-		myInterceptorRegistry.registerAnonymousHookForUnitTest(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, params -> {
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, (thePointcut, params) -> {
 			latch.countDown();
 		});
 
@@ -300,18 +302,19 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 	}
 
+	@Autowired
+	private IInterceptorService myInterceptorRegistry;
+
+	@Autowired
+	private MyTestInterceptor myTestInterceptor;
 
 	@Configuration
 	static class MyTestCtxConfig {
 
-		@Autowired
-		private IInterceptorRegistry myInterceptorRegistry;
 
 		@Bean
 		public MyTestInterceptor interceptor() {
-			MyTestInterceptor retVal = new MyTestInterceptor();
-			myInterceptorRegistry.registerInterceptor(retVal);
-			return retVal;
+			return new MyTestInterceptor();
 		}
 
 	}
@@ -343,9 +346,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		}
 
 		@Hook(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY)
-		public boolean afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
+		public void afterRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			ourHitAfterRestHookDelivery = true;
-			return ourNextAfterRestHookDeliveryReturn;
 		}
 
 	}

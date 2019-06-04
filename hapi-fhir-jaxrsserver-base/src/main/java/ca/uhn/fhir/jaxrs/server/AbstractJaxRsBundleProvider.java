@@ -156,10 +156,10 @@ public abstract class AbstractJaxRsBundleProvider extends AbstractJaxRsProvider 
     /**
      * Default: an empty list of interceptors
      *
-     * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+     * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
      */
     @Override
-    public List<IServerInterceptor> getInterceptors() {
+    public List<IServerInterceptor> getInterceptors_() {
         return Collections.emptyList();
     }
 

@@ -33,7 +33,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	private static final String CS_URL_1 = "http://example.com/codesystem/1";
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
-	private static final String FILE = "./target/output.csv";
+	private static final String FILE = new File("./target/output.csv").getAbsolutePath();
 
 	private static String ourBase;
 	private static IGenericClient ourClient;

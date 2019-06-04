@@ -293,6 +293,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
+	@Ignore
 	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
 
 		for (int i = 0; i < 10; i++) {
