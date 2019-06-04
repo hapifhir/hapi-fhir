@@ -91,7 +91,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testDeleteWithHas_TargetModifiedToNoLongerIncludeReference() {
+	public void testDeleteWithHas_SourceModifiedToNoLongerIncludeReference() {
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
@@ -129,9 +129,46 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		assertThat(rpt.getResult(), empty());
 	}
 
+	@Test
+	public void testDeleteWithId_SourceModifiedToNoLongerIncludeReference() {
+
+		Observation obs1 = new Observation();
+		obs1.setStatus(Observation.ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(Observation.ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs1id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+
+		rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs2id));
+
+		Bundle b = new Bundle();
+		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs1id.getValue());
+		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(rptId.getValue());
+		mySystemDao.transaction(mySrd, b);
+
+		myObservationDao.read(obs2id);
+		myDiagnosticReportDao.read(rptId);
+		try {
+			myObservationDao.read(obs1id);
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+	}
+
 
 	@Test
-	public void testDeleteWithHas_TargetModifiedToStillIncludeReference() {
+	public void testDeleteWithHas_SourceModifiedToStillIncludeReference() {
 
 		Observation obs1 = new Observation();
 		obs1.setStatus(Observation.ObservationStatus.FINAL);
