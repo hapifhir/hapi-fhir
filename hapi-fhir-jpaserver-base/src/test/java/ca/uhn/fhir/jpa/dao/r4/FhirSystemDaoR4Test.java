@@ -2471,6 +2471,66 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+
+	@Test
+	public void testDeleteInTransactionShouldFailWhenReferencesExist() {
+		final Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		final Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		final DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs2id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+		myDiagnosticReportDao.read(rptId);
+
+		Bundle b = new Bundle();
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(obs2id.getValue());
+
+		try {
+			mySystemDao.transaction(mySrd, b);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good, transaction should not succeed because DiagnosticReport has a reference to the obs2
+		}
+	}
+
+	@Test
+	public void testDeleteInTransactionShouldSucceedWhenReferencesAreAlsoRemoved() {
+		final Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		final Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		final DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs2id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+		myDiagnosticReportDao.read(rptId);
+
+		Bundle b = new Bundle();
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(obs2id.getValue());
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(rptId.getValue());
+
+		try {
+			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
+			mySystemDao.transaction(mySrd, b);
+		} catch (ResourceVersionConflictException e) {
+			fail();
+		}
+	}
+
 	private Bundle createTransactionBundleForTestTransactionWithRefsToConditionalCreate() {
 		Bundle b = new Bundle();
 		b.setType(BundleType.TRANSACTION);

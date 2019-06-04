@@ -720,7 +720,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 							}
 						}
 
-						if (outcome.getCreated() == Boolean.FALSE) {
+						if (outcome.getCreated() == Boolean.FALSE
+							|| (outcome.getCreated() == Boolean.TRUE && outcome.getId().getVersionIdPartAsLong() > 1)) {
 							updatedEntities.add(outcome.getEntity());
 						}
 
@@ -744,9 +745,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * was also deleted as a part of this transaction, which is why we check this now at the
 			 * end.
 			 */
-
 			deleteConflicts.removeIf(next ->
 				deletedResources.contains(next.getSourceId().toUnqualifiedVersionless().getValue()));
+
 			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*

@@ -65,9 +65,19 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		myObservationDao.read(obs2id);
 		myDiagnosticReportDao.read(rptId);
 
+		/*
+		 * We're deleting the Observation, which the DiagnosticReport refers to, so it
+		 * normally should cause a constraint error... BUT we're also removing the reference
+		 * so it actually is ok. Magical.
+		 */
+
+		DiagnosticReport rpt2 = new DiagnosticReport();
+		rpt2.setId(rptId);
+		rpt2.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
+
 		Bundle b = new Bundle();
 		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obs2id.getValue());
-		b.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(rptId.getValue());
+		b.addEntry().setResource(rpt2).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl(rptId.getValue());
 
 		try {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
