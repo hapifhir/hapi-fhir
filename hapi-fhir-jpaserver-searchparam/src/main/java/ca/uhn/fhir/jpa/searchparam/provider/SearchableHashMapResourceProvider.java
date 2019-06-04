@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -39,6 +40,9 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 		List<T> matches = new ArrayList<>();
 		for (T resource : allEResources) {
 			InMemoryMatchResult result = theMatcher.apply(resource);
+			if (!result.supported()) {
+				throw new InvalidRequestException("Search not supported by in-memory matcher: "+result.getUnsupportedReason());
+			}
 			if (result.matched()) {
 				matches.add(resource);
 			}
