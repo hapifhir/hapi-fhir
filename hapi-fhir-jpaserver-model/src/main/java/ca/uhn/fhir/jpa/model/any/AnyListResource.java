@@ -78,6 +78,9 @@ public class AnyListResource {
 			case DSTU3:
 				getDstu3().getCode().addCoding().setSystem(theSystem).setCode(theCode);
 				break;
+			case R4:
+				getR4().getCode().addCoding().setSystem(theSystem).setCode(theCode);
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -87,6 +90,9 @@ public class AnyListResource {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().getIdentifier().add(new org.hl7.fhir.dstu3.model.Identifier().setSystem(theSystem).setValue(theValue));
+				break;
+			case R4:
+				getR4().getIdentifier().add(new org.hl7.fhir.r4.model.Identifier().setSystem(theSystem).setValue(theValue));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -98,6 +104,9 @@ public class AnyListResource {
 			case DSTU3:
 				getDstu3().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
 				break;
+			case R4:
+				getR4().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.r4.model.StringType(theValue));
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -106,21 +115,39 @@ public class AnyListResource {
 	public String getStringExtensionValueOrNull(String theUrl) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
-				if (targetTypes.size() < 1) {
-					return null;
-				}
-				org.hl7.fhir.dstu3.model.StringType targetType = (org.hl7.fhir.dstu3.model.StringType) targetTypes.get(0).getValue();
-				return targetType.getValue();
+				return getStringExtensionValueOrNullDstu3(theUrl);
+			case R4:
+				return getStringExtensionValueOrNullR4(theUrl);
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
+	}
+
+	private String getStringExtensionValueOrNullDstu3(String theUrl) {
+		List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
+		if (targetTypes.size() < 1) {
+			return null;
+		}
+		org.hl7.fhir.dstu3.model.StringType targetType = (org.hl7.fhir.dstu3.model.StringType) targetTypes.get(0).getValue();
+		return targetType.getValue();
+	}
+
+	private String getStringExtensionValueOrNullR4(String theUrl) {
+		List<org.hl7.fhir.r4.model.Extension> targetTypes = getR4().getExtensionsByUrl(theUrl);
+		if (targetTypes.size() < 1) {
+			return null;
+		}
+		org.hl7.fhir.r4.model.StringType targetType = (org.hl7.fhir.r4.model.StringType) targetTypes.get(0).getValue();
+		return targetType.getValue();
 	}
 
 	public void addReference(IBaseReference theReference) {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().addEntry().setItem((org.hl7.fhir.dstu3.model.Reference) theReference);
+				break;
+			case R4:
+				getR4().addEntry().setItem((org.hl7.fhir.r4.model.Reference) theReference);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -131,6 +158,9 @@ public class AnyListResource {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().addEntry().setItem(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
+				break;
+			case R4:
+				getR4().addEntry().setItem(new org.hl7.fhir.r4.model.Reference(theReferenceId));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -143,6 +173,10 @@ public class AnyListResource {
 				return getDstu3().getEntry().stream()
 					.map(entry -> entry.getItem().getReference())
 					.map(reference -> new org.hl7.fhir.dstu3.model.IdType(reference).toUnqualifiedVersionless().getValue());
+			case R4:
+				return getR4().getEntry().stream()
+					.map(entry -> entry.getItem().getReference())
+					.map(reference -> new org.hl7.fhir.r4.model.IdType(reference).toUnqualifiedVersionless().getValue());
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -151,29 +185,52 @@ public class AnyListResource {
 	public boolean removeItem(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
-
-				boolean removed = false;
-				for (org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent entry : getDstu3().getEntry()) {
-					if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
-						entry.setDeleted(true);
-						removed = true;
-						break;
-					}
-				}
-
-				if (removed) {
-					getDstu3().getEntry().removeIf(entry -> entry.getDeleted());
-				}
-				return removed;
+				return removeItemDstu3(theReferenceId);
+			case R4:
+				return removeItemR4(theReferenceId);
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
+	}
+
+	private boolean removeItemDstu3(String theReferenceId) {
+		boolean removed = false;
+		for (org.hl7.fhir.dstu3.model.ListResource.ListEntryComponent entry : getDstu3().getEntry()) {
+			if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
+				entry.setDeleted(true);
+				removed = true;
+				break;
+			}
+		}
+
+		if (removed) {
+			getDstu3().getEntry().removeIf(entry -> entry.getDeleted());
+		}
+		return removed;
+	}
+
+	private boolean removeItemR4(String theReferenceId) {
+		boolean removed = false;
+		for (org.hl7.fhir.r4.model.ListResource.ListEntryComponent entry : getR4().getEntry()) {
+			if (theReferenceId.equals(entry.getItem().getReference()) && !entry.getDeleted()) {
+				entry.setDeleted(true);
+				removed = true;
+				break;
+			}
+		}
+
+		if (removed) {
+			getR4().getEntry().removeIf(entry -> entry.getDeleted());
+		}
+		return removed;
 	}
 
 	public boolean isEmpty() {
 		switch (myFhirVersion) {
 			case DSTU3:
 				return getDstu3().getEntry().isEmpty();
+			case R4:
+				return getR4().getEntry().isEmpty();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}

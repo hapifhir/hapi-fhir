@@ -62,6 +62,9 @@ public class AnyComposition {
 			case DSTU3:
 				getDstu3().setIdentifier(new org.hl7.fhir.dstu3.model.Identifier().setSystem(theSystem).setValue(theValue));
 				break;
+			case R4:
+				getR4().setIdentifier(new org.hl7.fhir.r4.model.Identifier().setSystem(theSystem).setValue(theValue));
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -71,6 +74,8 @@ public class AnyComposition {
 		switch (myFhirVersion) {
 			case DSTU3:
 				return getDstu3().getIdentifier().getValue();
+			case R4:
+				return getR4().getIdentifier().getValue();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -79,13 +84,26 @@ public class AnyComposition {
 	public void setClass(String theSystem, String theCode) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept = new org.hl7.fhir.dstu3.model.CodeableConcept();
-				codeableConcept.addCoding().setSystem(theSystem).setCode(theCode);
-				getDstu3().setClass_(codeableConcept);
+				setClassDstu3(theSystem, theCode);
+				break;
+			case R4:
+				setClassR4(theSystem, theCode);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
+	}
+
+	private void setClassDstu3(String theSystem, String theCode) {
+		org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept = new org.hl7.fhir.dstu3.model.CodeableConcept();
+		codeableConcept.addCoding().setSystem(theSystem).setCode(theCode);
+		getDstu3().setClass_(codeableConcept);
+	}
+
+	private void setClassR4(String theSystem, String theCode) {
+		org.hl7.fhir.r4.model.CodeableConcept codeableConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+		codeableConcept.addCoding().setSystem(theSystem).setCode(theCode);
+		getR4().addCategory(codeableConcept);
 	}
 
 	public void addStringExtension(String theUrl, String theValue) {
@@ -93,29 +111,51 @@ public class AnyComposition {
 			case DSTU3:
 				getDstu3().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.dstu3.model.StringType(theValue));
 				break;
+			case R4:
+				getR4().addExtension().setUrl(theUrl).setValue(new org.hl7.fhir.r4.model.StringType(theValue));
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
 	}
 
+	// TODO KHS Consolidate with other classes in this package
 	public String getStringExtensionValueOrNull(String theUrl) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
-				if (targetTypes.size() < 1) {
-					return null;
-				}
-				org.hl7.fhir.dstu3.model.StringType targetType = (org.hl7.fhir.dstu3.model.StringType) targetTypes.get(0).getValue();
-				return targetType.getValue();
+				return getStringExtensionValueOrNullDstu3(theUrl);
+			case R4:
+				return getStringExtensionValueOrNullR4(theUrl);
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
+	}
+
+	private String getStringExtensionValueOrNullDstu3(String theUrl) {
+		List<org.hl7.fhir.dstu3.model.Extension> targetTypes = getDstu3().getExtensionsByUrl(theUrl);
+		if (targetTypes.size() < 1) {
+			return null;
+		}
+		org.hl7.fhir.dstu3.model.StringType targetType = (org.hl7.fhir.dstu3.model.StringType) targetTypes.get(0).getValue();
+		return targetType.getValue();
+	}
+
+	private String getStringExtensionValueOrNullR4(String theUrl) {
+		List<org.hl7.fhir.r4.model.Extension> targetTypes = getR4().getExtensionsByUrl(theUrl);
+		if (targetTypes.size() < 1) {
+			return null;
+		}
+		org.hl7.fhir.r4.model.StringType targetType = (org.hl7.fhir.r4.model.StringType) targetTypes.get(0).getValue();
+		return targetType.getValue();
 	}
 
 	public void setSubject(String theReferenceId) {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().setSubject(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
+				break;
+			case R4:
+				getR4().setSubject(new org.hl7.fhir.r4.model.Reference(theReferenceId));
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -127,6 +167,9 @@ public class AnyComposition {
 			case DSTU3:
 				getDstu3().setTitle(theTitle);
 				break;
+			case R4:
+				getR4().setTitle(theTitle);
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -136,6 +179,8 @@ public class AnyComposition {
 		switch (myFhirVersion) {
 			case DSTU3:
 				return getDstu3().getTitle();
+			case R4:
+				return getR4().getTitle();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -146,6 +191,9 @@ public class AnyComposition {
 			case DSTU3:
 				getDstu3().getSectionFirstRep().addEntry(new org.hl7.fhir.dstu3.model.Reference(theReferenceId));
 				break;
+			case R4:
+				getR4().getSectionFirstRep().addEntry(new org.hl7.fhir.r4.model.Reference(theReferenceId));
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
@@ -155,6 +203,9 @@ public class AnyComposition {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().setId(org.hl7.fhir.dstu3.model.IdType.newRandomUuid());
+				break;
+			case R4:
+				getR4().setId(org.hl7.fhir.r4.model.IdType.newRandomUuid());
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
