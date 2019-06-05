@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -508,6 +508,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
+			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 			/*
@@ -722,6 +723,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						if (outcome.getCreated() == Boolean.FALSE
 							|| (outcome.getCreated() == Boolean.TRUE && outcome.getId().getVersionIdPartAsLong() > 1)) {
 							updatedEntities.add(outcome.getEntity());
+							if (outcome.getResource() != null) {
+								updatedResources.add(outcome.getResource());
+							}
 						}
 
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
@@ -744,9 +748,41 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * was also deleted as a part of this transaction, which is why we check this now at the
 			 * end.
 			 */
+			for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
+				DeleteConflict nextDeleteConflict = iter.next();
 
-			deleteConflicts.removeIf(next ->
-				deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
+				/*
+				 * If we have a conflict, it means we can't delete Resource/A because
+				 * Resource/B has a reference to it. We'll ignore that conflict though
+				 * if it turns out we're also deleting Resource/B in this transaction.
+				 */
+				if (deletedResources.contains(nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue())) {
+					iter.remove();
+					continue;
+				}
+
+				/*
+				 * And then, this is kind of a last ditch check. It's also ok to delete
+				 * Resource/A if Resource/B isn't being deleted, but it is being UPDATED
+				 * in this transaction, and the updated version of it has no references
+				 * to Resource/A any more.
+				 */
+				String sourceId = nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue();
+				String targetId = nextDeleteConflict.getTargetId().toUnqualifiedVersionless().getValue();
+				Optional<IBaseResource> updatedSource = updatedResources
+					.stream()
+					.filter(t -> sourceId.equals(t.getIdElement().toUnqualifiedVersionless().getValue()))
+					.findFirst();
+				if (updatedSource.isPresent()) {
+					List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
+					boolean sourceStillReferencesTarget = referencesInSource
+						.stream()
+						.anyMatch(t-> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
+					if (!sourceStillReferencesTarget) {
+						iter.remove();
+					}
+				}
+			}
 			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*
