@@ -927,6 +927,16 @@
 				<version>${derby_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbyshared</artifactId>
+				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.derby</groupId>
+				<artifactId>derbytools</artifactId>
+				<version>${derby_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient</artifactId>
 				<version>${httpclient_version}</version>
