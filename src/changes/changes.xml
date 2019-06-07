@@ -8,6 +8,21 @@
 	<body>
 		<release version="4.0.0" date="TBD" description="Igloo">
 			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Commons Codec (Core): 1.11 -&gt; 1.12</li>
+					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.8</li>
+					<li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li>
+					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.7.RELEASE</li>
+					<li>Spring-Data (JPA): 2.0.6.RELEASE -&gt; 2.0.8.RELEASE</li>
+					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>
+					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
+				</ul>
+				]]>
+			</action>
+			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
 				for the operation to succeed without timing out in larger system.
