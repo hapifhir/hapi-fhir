@@ -176,6 +176,18 @@ public class AnyMeasure {
 		}
 	}
 
+
+	public IBaseReference getPredecessor() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				return getArtifactOfTypeDstu3(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+			case R4:
+				return getArtifactOfTypeR4(getR4(), org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
 	public IBaseReference getDerivedFrom() {
 		switch (myFhirVersion) {
 			case DSTU3:
@@ -200,12 +212,25 @@ public class AnyMeasure {
 		}
 	}
 
-	public IBaseReference getPredecessor() {
+	public IBaseReference getSuccessor() {
 		switch (myFhirVersion) {
 			case DSTU3:
-				return getArtifactOfTypeDstu3(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+				return getArtifactOfTypeDstu3(getDstu3(), org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.SUCCESSOR);
 			case R4:
-				return getArtifactOfTypeR4(getR4(), org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.PREDECESSOR);
+				return getArtifactOfTypeR4(getR4(), org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.SUCCESSOR);
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setSuccessor(String theReferenceId) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				getRelatedArtifactDstu3(theReferenceId, org.hl7.fhir.dstu3.model.RelatedArtifact.RelatedArtifactType.SUCCESSOR);
+				break;
+			case R4:
+				getRelatedArtifactR4(theReferenceId, org.hl7.fhir.r4.model.RelatedArtifact.RelatedArtifactType.SUCCESSOR);
+				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
