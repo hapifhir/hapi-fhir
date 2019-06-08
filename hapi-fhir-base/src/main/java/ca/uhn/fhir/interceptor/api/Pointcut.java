@@ -994,6 +994,11 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_COMPLETE(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
 
+	/**
+	 * return true if dao should try again
+	 */
+	// FIXME KHS document
+	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class, "ca.uhn.fhir.jpa.delete.DeleteConflictList"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

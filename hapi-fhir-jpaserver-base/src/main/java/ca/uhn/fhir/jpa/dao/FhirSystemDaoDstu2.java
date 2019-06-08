@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -212,7 +212,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		Collections.sort(theRequest.getEntry(), new TransactionSorter());
 
 		List<IIdType> deletedResources = new ArrayList<>();
-		List<DeleteConflict> deleteConflicts = new ArrayList<>();
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		Map<Entry, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 		Set<ResourceTable> nonUpdatedEntities = new HashSet<ResourceTable>();
 		Set<ResourceTable> updatedEntities = new HashSet<>();
@@ -307,7 +307,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		return response;
 	}
 
-	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, List<DeleteConflict> theDeleteConflicts, Map<Entry, ResourceTable> theEntriesToProcess, Set<ResourceTable> theNonUpdatedEntities, Set<ResourceTable> theUpdatedEntities) {
+	private void handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set<IdDt> theAllIds, Map<IdDt, IdDt> theIdSubstitutions, Map<IdDt, DaoMethodOutcome> theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap<Entry, Integer> theOriginalRequestOrder, List<IIdType> theDeletedResources, DeleteConflictList theDeleteConflicts, Map<Entry, ResourceTable> theEntriesToProcess, Set<ResourceTable> theNonUpdatedEntities, Set<ResourceTable> theUpdatedEntities) {
 		/*
 		 * Loop through the request and process any entries of type
 		 * PUT, POST or DELETE

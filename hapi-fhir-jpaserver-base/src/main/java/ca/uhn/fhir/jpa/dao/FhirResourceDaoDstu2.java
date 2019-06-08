@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.valueset.IssueSeverityEnum;
@@ -25,9 +25,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -84,7 +81,7 @@ public class FhirResourceDaoDstu2<T extends IResource> extends BaseHapiFhirResou
 
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
-			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
 				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true);
 			}

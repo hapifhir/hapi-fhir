@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.delete;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
@@ -20,11 +23,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
 import javax.persistence.TypedQuery;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
+	public static final int MIN_QUERY_RESULT_COUNT = 1;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -34,38 +39,59 @@ public class DeleteConflictService {
 	protected IResourceLinkDao myResourceLinkDao;
 	@Autowired
 	private FhirContext myFhirContext;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
+	public void validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
+		boolean tryAgain = findAndHandleConflicts(theDeleteConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
+		// FIXME KHS keep trying with higher numbers if asked
+	}
+
+	private boolean findAndHandleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
+		List<ResourceLink> resultList = findConflicts(theEntity, theMinQueryResultCount);
+		if (resultList.isEmpty()) {
+			return false;
+		}
+		return handleConflicts(theDeleteConflicts, theEntity, theForValidate, resultList);
+	}
+
+	private List<ResourceLink> findConflicts(ResourceTable theEntity, int maxResults) {
 		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
 		query.setParameter("target_pid", theEntity.getId());
-		query.setMaxResults(1);
-		List<ResourceLink> resultList = query.getResultList();
-		if (resultList.isEmpty()) {
-			return;
+		query.setMaxResults(maxResults);
+		return query.getResultList();
+	}
+
+	private boolean handleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
+		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
+			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", theResultList.size());
+			myResourceLinkDao.deleteAll(theResultList);
+			return false;
 		}
 
-		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false && !theForValidate) {
-			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
-			myResourceLinkDao.deleteAll(resultList);
-			return;
-		}
-
-		ResourceLink link = resultList.get(0);
+		ResourceLink link = theResultList.get(0);
 		IdDt targetId = theEntity.getIdDt();
 		IdDt sourceId = link.getSourceResource().getIdDt();
 		String sourcePath = link.getSourcePath();
 
 		theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
+		// Notify Interceptors about pre-action call
+		HookParams hooks = new HookParams()
+			.add(DeleteConflictList.class, theDeleteConflicts);
+		return myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
-	public void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
+	public void validateDeleteConflictsEmptyOrThrowException(DeleteConflictList theDeleteConflicts) {
 		if (theDeleteConflicts.isEmpty()) {
 			return;
 		}
 
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
 		String firstMsg = null;
-		for (DeleteConflict next : theDeleteConflicts) {
+
+		Iterator<DeleteConflict> iterator = theDeleteConflicts.iterator();
+		while (iterator.hasNext()) {
+			DeleteConflict next = iterator.next();
 			StringBuilder b = new StringBuilder();
 			b.append("Unable to delete ");
 			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
