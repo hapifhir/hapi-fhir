@@ -92,9 +92,9 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 			// would prevent deletion
 			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
 			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
-				validateOkToDelete(deleteConflicts, entity, true);
+				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true);
 			}
-			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Ok to delete");

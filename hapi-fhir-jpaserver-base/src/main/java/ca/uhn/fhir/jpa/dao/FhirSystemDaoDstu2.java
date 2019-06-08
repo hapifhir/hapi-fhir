@@ -444,7 +444,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 		 */
 
 		theDeleteConflicts.removeIf(next -> theDeletedResources.contains(next.getTargetId().toVersionless()));
-		validateDeleteConflictsEmptyOrThrowException(theDeleteConflicts);
+		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(theDeleteConflicts);
 
 		/*
 		 * Perform ID substitutions and then index each resource we have saved
