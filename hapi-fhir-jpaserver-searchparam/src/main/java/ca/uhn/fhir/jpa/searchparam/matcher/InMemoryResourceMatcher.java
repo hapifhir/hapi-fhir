@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @Service
-public class CriteriaResourceMatcher {
+public class InMemoryResourceMatcher {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;

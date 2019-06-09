@@ -10,10 +10,10 @@ public class SearchParamMatcher {
 	@Autowired
 	private IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	@Autowired
-	private CriteriaResourceMatcher myCriteriaResourceMatcher;
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource) {
 		ResourceIndexedSearchParams resourceIndexedSearchParams = myIndexedSearchParamExtractor.extractIndexedSearchParams(theResource);
-		return myCriteriaResourceMatcher.match(theCriteria, theResource, resourceIndexedSearchParams);
+		return myInMemoryResourceMatcher.match(theCriteria, theResource, resourceIndexedSearchParams);
 	}
 }
