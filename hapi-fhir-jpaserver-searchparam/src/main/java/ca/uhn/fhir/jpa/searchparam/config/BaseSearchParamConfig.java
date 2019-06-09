@@ -7,6 +7,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Configuration
 @EnableScheduling
 @ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam"})
-abstract public class BaseSeachParamConfig {
+abstract public class BaseSearchParamConfig {
 
 }

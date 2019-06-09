@@ -3,17 +3,15 @@ package ca.uhn.fhir.jpa.searchparam.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
-public class SearchParamDstu2Config extends BaseSeachParamConfig {
+public class SearchParamDstu2Config extends BaseSearchParamConfig {
 	@Bean
 	@Primary
 	public FhirContext fhirContextDstu2() {
