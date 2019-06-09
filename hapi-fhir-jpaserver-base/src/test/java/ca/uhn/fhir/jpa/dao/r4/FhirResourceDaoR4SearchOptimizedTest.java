@@ -215,6 +215,41 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testCountEvenIfPreviousSimilarSearchDidNotRequestIt() {
+		create200Patients();
+
+		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		IBundleProvider results = myPatientDao.search(params);
+		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
+		assertEquals(null, results.size());
+		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(null, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size());
+
+		// Try the same query again. This time we'll request _total=accurate as well
+		// which means the total should be calculated no matter what.
+
+		params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		results = myPatientDao.search(params);
+		String uuid2 = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid2);
+		assertEquals(200, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid2).size().intValue());
+		assertNotEquals(uuid, uuid2);
+
+	}
+
+	@Test
 	public void testFetchRightUpToActualNumberExistingThenFetchAnotherPage() {
 		create200Patients();
 

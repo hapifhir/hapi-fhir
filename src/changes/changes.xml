@@ -40,6 +40,12 @@
 				enforce referential integrity even if referential integrity was enabled. Thanks to
 				Tuomo Ala-Vannesluoma for reporting!
 			</action>
+			<action type="fix">
+				In the JPA server, the
+				<![CDATA[<code>_total=accurate</code>]]>
+				was not always respected if a previous search already existed
+				in the query cache that matched the same search parameters.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
