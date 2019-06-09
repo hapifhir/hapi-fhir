@@ -25,4 +25,12 @@ public class DeleteConflictList {
 	public boolean removeIf(Predicate<DeleteConflict> theFilter) {
 		return myList.removeIf(theFilter);
 	}
+
+	public void addAll(DeleteConflictList theNewConflicts) {
+		myList.addAll(theNewConflicts.myList);
+	}
+
+	public int size() {
+		return myList.size();
+	}
 }

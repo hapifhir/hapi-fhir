@@ -30,6 +30,8 @@ import java.util.List;
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static final int MIN_QUERY_RESULT_COUNT = 1;
+	public static final int RETRY_RESULT_COUNT = 60;
+	public static final int MAX_RETRIES = 10;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -43,8 +45,16 @@ public class DeleteConflictService {
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public void validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
-		boolean tryAgain = findAndHandleConflicts(theDeleteConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
-		// FIXME KHS keep trying with higher numbers if asked
+		DeleteConflictList newConflicts = new DeleteConflictList();
+		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
+
+		int retryCount = 0;
+		while (tryAgain && retryCount < MAX_RETRIES) {
+			newConflicts = new DeleteConflictList();
+			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, RETRY_RESULT_COUNT);
+			++retryCount;
+		}
+		theDeleteConflicts.addAll(newConflicts);
 	}
 
 	private boolean findAndHandleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
@@ -69,16 +79,21 @@ public class DeleteConflictService {
 			return false;
 		}
 
-		ResourceLink link = theResultList.get(0);
-		IdDt targetId = theEntity.getIdDt();
-		IdDt sourceId = link.getSourceResource().getIdDt();
-		String sourcePath = link.getSourcePath();
+		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
 
-		theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
 			.add(DeleteConflictList.class, theDeleteConflicts);
 		return myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+	}
+
+	private void addConflictsToList(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, List<ResourceLink> theResultList) {
+		for (ResourceLink link : theResultList) {
+			IdDt targetId = theEntity.getIdDt();
+			IdDt sourceId = link.getSourceResource().getIdDt();
+			String sourcePath = link.getSourcePath();
+			theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
+		}
 	}
 
 	public void validateDeleteConflictsEmptyOrThrowException(DeleteConflictList theDeleteConflicts) {
