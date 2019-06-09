@@ -129,6 +129,28 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		assertEquals(3, myInterceptorDeleteCount);
 	}
 
+	@Test
+	public void testBadInterceptorNoInfiniteLoop() throws Exception {
+		Organization organization = new Organization();
+		organization.setName("FOO");
+		IIdType organizationId = myOrganizationDao.create(organization).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.setManagingOrganization(new Reference(organizationId));
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		// Always returning true is bad behaviour.  Our infinite loop checker should halt it
+		myDeleteInterceptor.deleteConflictFunction = list -> true;
+
+		try {
+			myOrganizationDao.delete(organizationId);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			assertEquals("Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
+		}
+		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
+	}
+
 	private boolean deleteConflicts(DeleteConflictList theList) {
 		Iterator<DeleteConflict> iterator = theList.iterator();
 		while (iterator.hasNext()) {
