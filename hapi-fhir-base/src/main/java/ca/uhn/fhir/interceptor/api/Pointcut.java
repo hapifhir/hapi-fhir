@@ -866,6 +866,27 @@ public enum Pointcut {
 		),
 
 	/**
+	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
+	 * <p>
+	 * Hooks will have access to the list of resources that have references to the resource being deleted.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>ca.uhn.fhir.jpa.delete.DeleteConflictList - The list of delete conflicts</li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>boolean</code>.  If the method returns <code>true</code> then the caller
+	 * will retry checking for delete conflicts.  If there are still conflicts, then the hook will be invoked again,
+	 * repeatedly up to a maximum of {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MAX_RETRIES} retries.
+	 * The first time the hook is invoked, there will be a maximum of {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MIN_QUERY_RESULT_COUNT}
+	 * conflicts passed to the method.  Subsequent hook invocations will pass a maximum of
+	 * {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MAX_RETRY_COUNT} conflicts to the hook.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class, "ca.uhn.fhir.jpa.delete.DeleteConflictList"),
+
+
+	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
 	 * <p>
@@ -993,12 +1014,6 @@ public enum Pointcut {
 	 * </p>
 	 */
 	JPA_PERFTRACE_SEARCH_COMPLETE(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
-
-	/**
-	 * return true if dao should try again
-	 */
-	// FIXME KHS document
-	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class, "ca.uhn.fhir.jpa.delete.DeleteConflictList"),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

@@ -30,8 +30,8 @@ import java.util.List;
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
 	public static final int MIN_QUERY_RESULT_COUNT = 1;
-	public static final int RETRY_RESULT_COUNT = 60;
-	public static final int MAX_RETRIES = 10;
+	public static final int MAX_RETRY_COUNT = 60;
+	public static final int MAX_RETRY_ATTEMPTS = 10;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -49,9 +49,9 @@ public class DeleteConflictService {
 		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
-		while (tryAgain && retryCount < MAX_RETRIES) {
+		while (tryAgain && retryCount < MAX_RETRY_ATTEMPTS) {
 			newConflicts = new DeleteConflictList();
-			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, RETRY_RESULT_COUNT);
+			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MAX_RETRY_COUNT);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);

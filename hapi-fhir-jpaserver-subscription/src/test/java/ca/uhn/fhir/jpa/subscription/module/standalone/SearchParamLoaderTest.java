@@ -34,7 +34,6 @@ public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelD
 
 	@Test
 	public void testSubscriptionLoaderFhirClientDown() {
-		// FIXME KHS use this to index?
 		String criteria = "BodySite?accessType=Catheter,PD%20Catheter";
 
 		SearchParameter sp = new SearchParameter();
