@@ -19,10 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
-import javax.persistence.TypedQuery;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,8 +29,8 @@ public class DeleteConflictService {
 	public static final int MAX_RETRY_COUNT = 60;
 	public static final int MAX_RETRY_ATTEMPTS = 10;
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	protected EntityManager myEntityManager;
+	@Autowired
+	DeleteConflictFinderService myDeleteConflictFinderService;
 	@Autowired
 	DaoConfig myDaoConfig;
 	@Autowired
@@ -44,7 +40,7 @@ public class DeleteConflictService {
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public void validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
+	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
 		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
 
@@ -55,21 +51,15 @@ public class DeleteConflictService {
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
+		return retryCount;
 	}
 
 	private boolean findAndHandleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
-		List<ResourceLink> resultList = findConflicts(theEntity, theMinQueryResultCount);
+		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
 		if (resultList.isEmpty()) {
 			return false;
 		}
 		return handleConflicts(theDeleteConflicts, theEntity, theForValidate, resultList);
-	}
-
-	private List<ResourceLink> findConflicts(ResourceTable theEntity, int maxResults) {
-		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
-		query.setParameter("target_pid", theEntity.getId());
-		query.setMaxResults(maxResults);
-		return query.getResultList();
 	}
 
 	private boolean handleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {

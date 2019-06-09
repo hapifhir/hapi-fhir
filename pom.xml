@@ -1288,6 +1288,11 @@
 				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-test</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-tx</artifactId>
 				<version>${spring_version}</version>
