@@ -7,6 +7,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnyMeasure {
@@ -66,6 +67,23 @@ public class AnyMeasure {
 				break;
 			case R4:
 				getR4().getIdentifier().add(new org.hl7.fhir.r4.model.Identifier().setSystem(theSystem).setValue(theValue));
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void addType(String theSystem, String theCode) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept = new org.hl7.fhir.dstu3.model.CodeableConcept();
+				codeableConcept.addCoding().setSystem(theSystem).setCode(theCode);
+				getDstu3().getType().add(codeableConcept);
+				break;
+			case R4:
+				org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+				codeableConceptR4.addCoding().setSystem(theSystem).setCode(theCode);
+				getR4().getType().add(codeableConceptR4);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
@@ -302,26 +320,67 @@ public class AnyMeasure {
 		}
 	}
 
-	public void setTopic(TokenParam theTokenParam) {
+	public void setTopics(List<TokenParam> theTokenParamList) {
 		switch (myFhirVersion) {
 			case DSTU3:
-				getDstu3().addTopic().addCoding().setSystem(theTokenParam.getSystem()).setCode(theTokenParam.getValue());
+				setTopicsDstu3(theTokenParamList);
 				break;
 			case R4:
-				getR4().addTopic().addCoding().setSystem(theTokenParam.getSystem()).setCode(theTokenParam.getValue());
+				setTopicsR4(theTokenParamList);
 				break;
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
 	}
 
-	public TokenParam getTopic() {
+	private void setTopicsDstu3(List<TokenParam> theTokenParamList) {
+		List<org.hl7.fhir.dstu3.model.CodeableConcept> topicList = new ArrayList<>();
+
+		for (TokenParam tokenParam : theTokenParamList) {
+			org.hl7.fhir.dstu3.model.CodeableConcept codeableConcept = new org.hl7.fhir.dstu3.model.CodeableConcept();
+			codeableConcept.addCoding().setSystem(tokenParam.getSystem()).setCode(tokenParam.getValue());
+			topicList.add(codeableConcept);
+		}
+		getDstu3().setTopic(topicList);
+	}
+
+	private void setTopicsR4(List<TokenParam> theTokenParamList) {
+		List<org.hl7.fhir.r4.model.CodeableConcept> topicList = new ArrayList<>();
+
+		for (TokenParam tokenParam : theTokenParamList) {
+			org.hl7.fhir.r4.model.CodeableConcept codeableConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+			codeableConcept.addCoding().setSystem(tokenParam.getSystem()).setCode(tokenParam.getValue());
+			topicList.add(codeableConcept);
+		}
+		getR4().setTopic(topicList);
+	}
+
+	public TokenParam getTopicFirstRep() {
 		switch (myFhirVersion) {
 			case DSTU3:
 				org.hl7.fhir.dstu3.model.Coding codingDstu3 = getDstu3().getTopicFirstRep().getCodingFirstRep();
 				return new TokenParam(codingDstu3.getSystem(), codingDstu3.getCode());
 			case R4:
 				org.hl7.fhir.r4.model.Coding codingR4 = getR4().getTopicFirstRep().getCodingFirstRep();
+				return new TokenParam(codingR4.getSystem(), codingR4.getCode());
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public TokenParam getTopicSecondRepOrNull() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				if (getDstu3().getTopic().size() < 2) {
+					return null;
+				}
+				org.hl7.fhir.dstu3.model.Coding codingDstu3 = getDstu3().getTopic().get(1).getCodingFirstRep();
+				return new TokenParam(codingDstu3.getSystem(), codingDstu3.getCode());
+			case R4:
+				if (getR4().getTopic().size() < 2) {
+					return null;
+				}
+				org.hl7.fhir.r4.model.Coding codingR4 = getR4().getTopic().get(1).getCodingFirstRep();
 				return new TokenParam(codingR4.getSystem(), codingR4.getCode());
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
