@@ -8,6 +8,7 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AnyMeasure {
@@ -315,6 +316,47 @@ public class AnyMeasure {
 				return getDstu3().getName();
 			case R4:
 				return getR4().getName();
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public void setEffectivePeriod(Date start, Date end) {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Period effectivePeriod = new org.hl7.fhir.dstu3.model.Period();
+				effectivePeriod.setStart(start);
+				effectivePeriod.setEnd(end);
+				getDstu3().setEffectivePeriod(effectivePeriod);
+				break;
+			case R4:
+				org.hl7.fhir.r4.model.Period effectivePeriodr4 = new org.hl7.fhir.r4.model.Period();
+				effectivePeriodr4.setStart(start);
+				effectivePeriodr4.setEnd(end);
+				getR4().setEffectivePeriod(effectivePeriodr4);
+				break;
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public Date getEffectivePeriodStart() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				return getDstu3().getEffectivePeriod().getStart();
+			case R4:
+				return getR4().getEffectivePeriod().getStart();
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
+	}
+
+	public Date getEffectivePeriodEnd() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				return getDstu3().getEffectivePeriod().getEnd();
+			case R4:
+				return getR4().getEffectivePeriod().getEnd();
 			default:
 				throw new UnsupportedOperationException(myFhirVersion + " not supported");
 		}
