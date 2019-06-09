@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.model.any;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.param.TokenParam;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -73,7 +74,7 @@ public class AnyListResource {
 		return (org.hl7.fhir.r4.model.ListResource) get();
 	}
 
-	public void addCoding(String theSystem, String theCode) {
+	public void addCode(String theSystem, String theCode) {
 		switch (myFhirVersion) {
 			case DSTU3:
 				getDstu3().getCode().addCoding().setSystem(theSystem).setCode(theCode);
@@ -223,6 +224,19 @@ public class AnyListResource {
 			getR4().getEntry().removeIf(entry -> entry.getDeleted());
 		}
 		return removed;
+	}
+
+	public TokenParam getCodeFirstRep() {
+		switch (myFhirVersion) {
+			case DSTU3:
+				org.hl7.fhir.dstu3.model.Coding codingDstu3 = getDstu3().getCode().getCodingFirstRep();
+				return new TokenParam(codingDstu3.getSystem(), codingDstu3.getCode());
+			case R4:
+				org.hl7.fhir.r4.model.Coding codingR4 = getR4().getCode().getCodingFirstRep();
+				return new TokenParam(codingR4.getSystem(), codingR4.getCode());
+			default:
+				throw new UnsupportedOperationException(myFhirVersion + " not supported");
+		}
 	}
 
 	public boolean isEmpty() {
