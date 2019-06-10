@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SubscriptionTestHelper {
 
-	protected static AtomicLong idCounter = new AtomicLong();
+	protected static final AtomicLong idCounter = new AtomicLong();
 
 
 	public Subscription makeActiveSubscription(String theCriteria, String thePayload, String theEndpoint) {

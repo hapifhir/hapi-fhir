@@ -44,11 +44,11 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	private final String name;
 
-	private CountDownLatch myCountdownLatch;
-	private AtomicReference<List<String>> myFailures;
-	private AtomicReference<List<HookParams>> myCalledWith;
+	private final AtomicReference<CountDownLatch> myCountdownLatch = new AtomicReference<>();
+	private final AtomicReference<List<String>> myFailures = new AtomicReference<>();
+	private final AtomicReference<List<HookParams>> myCalledWith = new AtomicReference<>();
+    private final Pointcut myPointcut;
 	private int myInitialCount;
-	private Pointcut myPointcut;
 
 	public PointcutLatch(Pointcut thePointcut) {
 		this.name = thePointcut.name();
@@ -57,11 +57,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	public PointcutLatch(String theName) {
 		this.name = theName;
+        myPointcut = null;
 	}
 
 	@Override
 	public void setExpectedCount(int count) {
-		if (myCountdownLatch != null) {
+		if (myCountdownLatch.get() != null) {
 			throw new PointcutLatchException("setExpectedCount() called before previous awaitExpected() completed.");
 		}
 		createLatch(count);
@@ -69,14 +70,14 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	private void createLatch(int count) {
-		myFailures = new AtomicReference<>(new ArrayList<>());
-		myCalledWith = new AtomicReference<>(new ArrayList<>());
-		myCountdownLatch = new CountDownLatch(count);
+		myFailures.set(new ArrayList<>());
+		myCalledWith.set(new ArrayList<>());
+		myCountdownLatch.set(new CountDownLatch(count));
 		myInitialCount = count;
 	}
 
 	private void addFailure(String failure) {
-		if (myFailures != null) {
+		if (myFailures.get() != null) {
 			myFailures.get().add(failure);
 		} else {
 			throw new PointcutLatchException("trying to set failure on latch that hasn't been created: " + failure);
@@ -95,9 +96,10 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	public List<HookParams> awaitExpectedWithTimeout(int timeoutSecond) throws InterruptedException {
 		List<HookParams> retval = myCalledWith.get();
 		try {
-			Validate.notNull(myCountdownLatch, getName() + " awaitExpected() called before setExpected() called.");
-			if (!myCountdownLatch.await(timeoutSecond, TimeUnit.SECONDS)) {
-				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + myCountdownLatch.getCount() + ".");
+			CountDownLatch latch = myCountdownLatch.get();
+            Validate.notNull(latch, getName() + " awaitExpected() called before setExpected() called.");
+			if (!latch.await(timeoutSecond, TimeUnit.SECONDS)) {
+				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
 			}
 
 			List<String> failures = myFailures.get();
@@ -121,11 +123,11 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void clear() {
-		myCountdownLatch = null;
+		myCountdownLatch.set(null);
 	}
 
 	private String myCalledWithString() {
-		if (myCalledWith == null) {
+		if (myCalledWith.get() == null) {
 			return "[]";
 		}
 		List<HookParams> calledWith = myCalledWith.get();
@@ -140,21 +142,19 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 
 	@Override
 	public void invoke(Pointcut thePointcut, HookParams theArgs) {
-		if (myCountdownLatch == null) {
+        CountDownLatch latch = myCountdownLatch.get();
+		if (latch == null) {
 			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
-		} else if (myCountdownLatch.getCount() <= 0) {
+		} else if (latch.getCount() <= 0) {
 			addFailure("invoke() called when countdown was zero.");
 		}
 
 		if (myCalledWith.get() != null) {
 			myCalledWith.get().add(theArgs);
 		}
-		ourLog.info("Called {} {} with {}", name, myCountdownLatch, hookParamsToString(theArgs));
+		ourLog.info("Called {} {} with {}", name, latch, hookParamsToString(theArgs));
 
-		if (myCountdownLatch == null) {
-			throw new PointcutLatchException("invoke() called outside of setExpectedCount() .. awaitExpected().  Probably got more invocations than expected or clear() was called before invoke() arrived.", theArgs);
-		}
-		myCountdownLatch.countDown();
+		latch.countDown();
 	}
 
 	public void call(Object arg) {

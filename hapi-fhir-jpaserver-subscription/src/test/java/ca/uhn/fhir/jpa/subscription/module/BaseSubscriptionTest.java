@@ -24,9 +24,6 @@ public abstract class BaseSubscriptionTest {
 	MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 
 	@Autowired
-	SubscriptionLoader mySubscriptionLoader;
-
-	@Autowired
 	protected
 	IInterceptorService myInterceptorRegistry;
 
@@ -38,10 +35,5 @@ public abstract class BaseSubscriptionTest {
 	public void initSearchParamRegistry(IBundleProvider theBundleProvider) {
 		myMockFhirClientSearchParamProvider.setBundleProvider(theBundleProvider);
 		mySearchParamRegistry.forceRefresh();
-	}
-
-	public void initSubscriptionLoader(IBundleProvider theBundleProvider) {
-		myMockFhirClientSubscriptionProvider.setBundleProvider(theBundleProvider);
-		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 }
