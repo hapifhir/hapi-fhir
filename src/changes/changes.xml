@@ -50,7 +50,7 @@
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
 				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
-				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
+				parameter was not being correctly escaped, leading to a potential XSS vulnerability. A big thanks to
 				Mudit Punia and Dushyant Garg for reporting this.
 			</action>
 			<action type="add">

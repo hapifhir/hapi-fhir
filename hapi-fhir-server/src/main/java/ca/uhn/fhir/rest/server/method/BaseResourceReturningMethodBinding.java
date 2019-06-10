@@ -126,7 +126,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
+			if (theLimit == null || theLimit.equals(0)) {
 				numToReturn = pagingProvider.getDefaultPageSize();
 			} else {
 				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
@@ -151,7 +151,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				searchId = theSearchId;
 			} else {
 				if (numTotalResults == null || numTotalResults > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResult);
+					searchId = pagingProvider.storeResultList(theRequest, theResult);
 					if (isBlank(searchId)) {
 						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
 						searchId = null;

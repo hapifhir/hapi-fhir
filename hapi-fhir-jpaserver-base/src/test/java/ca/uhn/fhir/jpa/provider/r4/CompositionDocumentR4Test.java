@@ -1,17 +1,17 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -135,27 +134,35 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testInterceptorHookIsCalledForAllContents_RESOURCE_MAY_BE_RETURNED() throws IOException {
+	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
 
 		IAnonymousInterceptor pointcut = mock(IAnonymousInterceptor.class);
-		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCE, pointcut);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, pointcut);
+		try {
 
-		String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
-		fetchBundle(theUrl, EncodingEnum.JSON);
+			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+			fetchBundle(theUrl, EncodingEnum.JSON);
 
-		Mockito.verify(pointcut, times(10)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCE), myHookParamsCaptor.capture());
+			Mockito.verify(pointcut, times(10)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
 
-		List<String> returnedClasses = myHookParamsCaptor
-			.getAllValues()
-			.stream()
-			.map(t -> t.get(IBaseResource.class, 0))
-			.map(t -> t.getClass().getSimpleName())
-			.collect(Collectors.toList());
+			List<String> returnedClasses = new ArrayList<>();
+			for (HookParams nextParams : myHookParamsCaptor.getAllValues()) {
+				IPreResourceAccessDetails nextPreResourceAccessDetails = nextParams.get(IPreResourceAccessDetails.class);
+				for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
+					returnedClasses.add(nextPreResourceAccessDetails.getResource(i).getClass().getSimpleName());
+				}
+			}
 
-		ourLog.info("Returned classes: {}", returnedClasses);
+			ourLog.info("Returned classes: {}", returnedClasses);
 
-		assertThat(returnedClasses, hasItem("Composition"));
-		assertThat(returnedClasses, hasItem("Organization"));
+			assertThat(returnedClasses, hasItem("Composition"));
+			assertThat(returnedClasses, hasItem("Organization"));
+
+		} finally {
+
+			ourRestServer.getInterceptorService().unregisterInterceptor(pointcut);
+
+		}
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {

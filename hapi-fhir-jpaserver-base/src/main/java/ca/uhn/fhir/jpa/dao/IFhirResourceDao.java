@@ -112,11 +112,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions);
 
-	TagList getAllResourceTags(RequestDetails theRequestDetails);
-
 	Class<T> getResourceType();
-
-	TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails);
 
 	IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails);
 

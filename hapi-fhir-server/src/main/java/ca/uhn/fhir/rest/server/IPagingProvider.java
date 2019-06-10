@@ -1,6 +1,10 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /*
  * #%L
@@ -30,19 +34,25 @@ public interface IPagingProvider {
 
 	/**
 	 * Retrieve a result list by ID
+	 *
+	 * @param theRequestDetails The server request being made (may be null)
 	 */
-	IBundleProvider retrieveResultList(String theSearchId);
+	IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId);
 
 	/**
 	 * Retrieve a result list by ID
+	 *
+	 * @param theRequestDetails The server request being made (may be null)
 	 */
-	default IBundleProvider retrieveResultList(String theSearchId, String thePageId) {
+	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;
 	}
 
 	/**
 	 * Stores a result list and returns an ID with which that list can be returned
+	 *
+	 * @param theRequestDetails The server request being made (may be null)
 	 */
-	String storeResultList(IBundleProvider theList);
+	String storeResultList(@Nullable RequestDetails theRequestDetails, IBundleProvider theList);
 
 }

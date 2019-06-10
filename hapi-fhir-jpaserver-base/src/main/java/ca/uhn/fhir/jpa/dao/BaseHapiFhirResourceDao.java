@@ -40,17 +40,16 @@ import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.util.xmlpatch.XmlPatchUtils;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
-import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
@@ -483,6 +482,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
+		if (theRequest != null) {
+			HookParams params = new HookParams();
+		}
+
 		ourLog.debug(msg);
 		return outcome;
 	}
@@ -523,7 +526,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private <MT extends IBaseMetaType> void doMetaDelete(MT theMetaDel, BaseHasResource entity) {
 		List<TagDefinition> tags = toTagList(theMetaDel);
 
-		//@formatter:off
 		for (TagDefinition nextDef : tags) {
 			for (BaseTag next : new ArrayList<BaseTag>(entity.getTags())) {
 				if (ObjectUtil.equals(next.getTag().getTagType(), nextDef.getTagType()) &&
@@ -534,7 +536,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-		//@formatter:on
 
 		if (entity.getTags().isEmpty()) {
 			entity.setHasTags(false);
@@ -571,18 +572,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions);
 	}
 
-	@Override
-	public TagList getAllResourceTags(RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
-		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
-
-		StopWatch w = new StopWatch();
-		TagList tags = super.getTags(myResourceType, null);
-		ourLog.debug("Processed getTags on {} in {}ms", myResourceName, w.getMillisAndRestart());
-		return tags;
-	}
-
 	public String getResourceName() {
 		return myResourceName;
 	}
@@ -599,25 +588,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails) {
-		// Notify interceptors
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, null, theResourceId);
-		notifyInterceptors(RestOperationTypeEnum.GET_TAGS, requestDetails);
-
-		StopWatch w = new StopWatch();
-		TagList retVal = super.getTags(myResourceType, theResourceId);
-		ourLog.debug("Processed getTags on {} in {}ms", theResourceId, w.getMillisAndRestart());
-		return retVal;
-	}
-
-	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails) {
 		// Notify interceptors
 		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails);
 		notifyInterceptors(RestOperationTypeEnum.HISTORY_TYPE, requestDetails);
 
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = super.history(myResourceName, null, theSince, theUntil);
+		IBundleProvider retVal = super.history(myResourceName, null, theSince, theUntil, theRequestDetails);
 		ourLog.debug("Processed history on {} in {}ms", myResourceName, w.getMillisAndRestart());
 		return retVal;
 	}
@@ -633,7 +610,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IIdType id = theId.withResourceType(myResourceName).toUnqualifiedVersionless();
 		BaseHasResource entity = readEntity(id);
 
-		IBundleProvider retVal = super.history(myResourceName, entity.getId(), theSince, theUntil);
+		IBundleProvider retVal = super.history(myResourceName, entity.getId(), theSince, theUntil, theRequestDetails);
 
 		ourLog.debug("Processed history on {} in {}ms", id, w.getMillisAndRestart());
 		return retVal;
@@ -915,12 +892,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		// Interceptor broadcast: RESOURCE_MAY_BE_RETURNED
-		HookParams params = new HookParams()
-			.add(IBaseResource.class, retVal)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
+		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
+		if (theRequestDetails != null) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				throw new ResourceNotFoundException(theId);
+			}
+		}
 
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -1084,7 +1067,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			cacheControlDirective.parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL));
 		}
 
-		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective);
+		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(this, theParams, getResourceName(), cacheControlDirective, theRequestDetails);
 
 		if (retVal instanceof PersistedJpaBundleProvider) {
 			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) retVal;
@@ -1110,7 +1093,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		HashSet<Long> retVal = new HashSet<Long>();
 
 		String uuid = UUID.randomUUID().toString();
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(null, uuid);
 
 		try (IResultIterator iter = builder.createQuery(theParams, searchRuntimeDetails)) {
 			while (iter.hasNext()) {
@@ -1158,7 +1141,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	private DaoMethodOutcome toMethodOutcome(RequestDetails theRequest, @Nonnull final ResourceTable theEntity, @Nonnull IBaseResource theResource) {
+	private DaoMethodOutcome toMethodOutcome(RequestDetails theRequestDetails, @Nonnull final ResourceTable theEntity, @Nonnull IBaseResource theResource) {
 		DaoMethodOutcome outcome = new DaoMethodOutcome();
 
 		IIdType id = null;
@@ -1176,12 +1159,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		outcome.setResource(theResource);
 		outcome.setEntity(theEntity);
 
-		// Interceptor broadcast
-		HookParams params = new HookParams()
-			.add(IBaseResource.class, theResource)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCE, params);
+		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
+		if (theRequestDetails != null) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				outcome.setResource(null);
+			}
+		}
 
 		return outcome;
 	}

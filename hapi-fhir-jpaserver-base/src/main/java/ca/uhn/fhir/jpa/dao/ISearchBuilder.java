@@ -41,8 +41,7 @@ public interface ISearchBuilder {
 
 	Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid);
 
-	void loadResourcesByPid(Collection<Long> theIncludePids, List<IBaseResource> theResourceListToPopulate, Set<Long> theRevIncludedPids, boolean theForHistoryOperation, EntityManager theEntityManager,
-									FhirContext theContext, IDao theDao);
+	void loadResourcesByPid(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation);
 
 	Set<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
 								  DateRangeParam theLastUpdated, String theSearchIdOrDescription);

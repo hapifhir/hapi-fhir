@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,22 +21,26 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -48,10 +52,12 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
+	private final RequestDetails myRequestDetails;
 	private FhirContext myContext;
 	private IDao myDao;
 	private EntityManager myEntityManager;
@@ -62,9 +68,10 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private String myUuid;
 	private boolean myCacheHit;
 
-	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao) {
+	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao, RequestDetails theRequestDetails) {
 		myUuid = theSearchUuid;
 		myDao = theDao;
+		myRequestDetails = theRequestDetails;
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		if (predicates.size() > 0) {
-			q.where(predicates.toArray(new Predicate[predicates.size()]));
+			q.where(predicates.toArray(new Predicate[0]));
 		}
 
 		q.orderBy(cb.desc(from.get("myUpdated")));
@@ -125,6 +132,24 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			retVal.add(myDao.toResource(resource, true));
 		}
 
+
+		// Interceptor call: STORAGE_PREACCESS_RESOURCES
+		if (myRequestDetails != null) {
+			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, myRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = retVal.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					retVal.remove(i);
+				}
+			}
+		}
+
 		return retVal;
 	}
 
@@ -135,7 +160,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 
-		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
+		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequestDetails);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -278,16 +303,56 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<Long> thePids) {
 		Set<Long> includedPids = new HashSet<>();
+
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid));
-			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid));
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid));
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid));
+		}
+
+		List<Long> includedPidList = new ArrayList<>(includedPids);
+
+		// Interceptor call: STORAGE_PREACCESS_RESOURCES
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (myRequestDetails != null && includedPidList.size() > 0) {
+			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(thePids, () -> theSearchBuilder);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, myRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = thePids.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					thePids.remove(i);
+				}
+			}
 		}
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
-		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao);
+		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false);
+
+		// Interceptor call: STORAGE_PRESEE_RESOURCES
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (myRequestDetails != null && resources.size() > 0) {
+			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resources);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, accessDetails)
+				.add(RequestDetails.class, myRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCE, params);
+
+			resources = resources
+				.stream()
+				.filter(t -> t != null)
+				.collect(Collectors.toList());
+		}
 
 		return resources;
 	}

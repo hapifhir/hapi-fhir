@@ -24,15 +24,17 @@ import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public interface ISearchCoordinatorSvc {
 
 	void cancelAllActiveSearches();
 
-	List<Long> getResources(String theUuid, int theFrom, int theTo);
+	List<Long> getResources(String theUuid, int theFrom, int theTo, @Nullable RequestDetails theRequestDetails);
 
-	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective);
+	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
 
 }

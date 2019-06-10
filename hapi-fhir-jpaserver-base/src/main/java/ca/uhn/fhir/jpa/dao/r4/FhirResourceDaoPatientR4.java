@@ -64,7 +64,7 @@ public class FhirResourceDaoPatientR4 extends FhirResourceDaoR4<Patient>implemen
 			paramMap.setLoadSynchronous(true);
 		}
 		
-		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)));
+		return mySearchCoordinatorSvc.registerSearch(this, paramMap, getResourceName(), new CacheControlDirective().parse(theRequestDetails.getHeaders(Constants.HEADER_CACHE_CONTROL)), theRequestDetails);
 	}
 
 	@Override

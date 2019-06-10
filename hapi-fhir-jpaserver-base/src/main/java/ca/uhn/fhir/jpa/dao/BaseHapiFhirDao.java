@@ -428,7 +428,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	protected IBundleProvider history(String theResourceName, Long theId, Date theSince, Date theUntil) {
+	protected IBundleProvider history(String theResourceName, Long theId, Date theSince, Date theUntil, RequestDetails theRequestDetails) {
 
 		String resourceName = defaultIfBlank(theResourceName, null);
 
@@ -463,7 +463,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		search = mySearchDao.save(search);
 
-		return new PersistedJpaBundleProvider(search.getUuid(), this);
+		return new PersistedJpaBundleProvider(search.getUuid(), this, theRequestDetails);
 	}
 
 	void incrementId(T theResource, ResourceTable theSavedEntity, IIdType theResourceId) {
