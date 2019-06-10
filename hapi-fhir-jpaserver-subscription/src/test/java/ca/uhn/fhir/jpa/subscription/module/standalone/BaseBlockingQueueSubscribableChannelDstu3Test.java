@@ -9,7 +9,10 @@ import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSearchParamProvider;
+import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -17,8 +20,10 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
@@ -54,7 +59,10 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
-
+    @Autowired
+	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
+    @Autowired
+	private SubscriptionLoader mySubscriptionLoader;
 
 	protected String myCode = "1000000050";
 
@@ -62,12 +70,12 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	private static RestfulServer ourListenerRestServer;
 	private static Server ourListenerServer;
 	protected static String ourListenerServerBase;
-	protected static List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
-	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
+	protected static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	protected static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
+	protected static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	private static SubscribableChannel ourSubscribableChannel;
-	protected PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
-	protected PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
+	protected final PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
+	protected final PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 
 	@Before
 	public void beforeReset() {
@@ -75,10 +83,8 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		ourUpdatedObservations.clear();
 		ourContentTypes.clear();
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		if (ourSubscribableChannel == null) {
 			ourSubscribableChannel = mySubscriptionChannelFactory.newDeliveryChannel("test", Subscription.SubscriptionChannelType.RESTHOOK.toCode().toLowerCase());
 			ourSubscribableChannel.subscribe(myStandaloneSubscriptionMessageHandler);
-		}
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, mySubscriptionMatchingPost);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, mySubscriptionActivatedPost);
 	}
@@ -100,6 +106,11 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		return theResource;
 	}
 
+    protected void initSubscriptionLoader(List<Subscription> subscriptions, String uuid) throws InterruptedException {
+		myMockFhirClientSubscriptionProvider.setBundleProvider(new SimpleBundleProvider(new ArrayList<>(subscriptions), uuid));
+		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
+	}
+    
 	protected Subscription sendSubscription(String theCriteria, String thePayload, String theEndpoint) throws InterruptedException {
 		Subscription subscription = makeActiveSubscription(theCriteria, thePayload, theEndpoint);
 		mySubscriptionActivatedPost.setExpectedCount(1);
@@ -144,6 +155,9 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 		ourListenerServer.setHandler(proxyHandler);
 		ourListenerServer.start();
+        FhirContext context = ourListenerRestServer.getFhirContext();
+        //Preload structure definitions so the load doesn't happen during the test (first load can be a little slow)
+        context.getValidationSupport().fetchAllStructureDefinitions(context);
 	}
 
 	@AfterClass
@@ -153,7 +167,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 
 	public static class ObservationListener implements IResourceProvider, IPointcutLatch {
 
-		private PointcutLatch updateLatch = new PointcutLatch("Observation Update");
+		private final PointcutLatch updateLatch = new PointcutLatch("Observation Update");
 
 		@Create
 		public MethodOutcome create(@ResourceParam Observation theObservation, HttpServletRequest theRequest) {
