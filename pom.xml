@@ -522,6 +522,10 @@
 			<id>nerdydrew</id>
 			<name>Drew Mitchell</name>
 		</developer>
+		<developer>
+			<id>srdo</id>
+			<name>Stig Døssing</name>
+		</developer>
 	</developers>
 
 	<licenses>

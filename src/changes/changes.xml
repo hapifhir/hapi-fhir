@@ -46,6 +46,9 @@
 				was not always respected if a previous search already existed
 				in the query cache that matched the same search parameters.
 			</action>
+			<action type="fix" issue="1337">
+				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
