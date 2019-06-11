@@ -116,7 +116,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </tr>
  * <tr>
  * <td>${processingTimeMillis}</td>
- * <td>The number of milliseconds spent processing this request</td>
+ * <td>The number of milliseconds spen processing this request</td>
  * </tr>
  * </table>
  */
