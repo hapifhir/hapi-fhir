@@ -72,7 +72,8 @@ public interface IConsentService {
 	ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource);
 
 	/**
-	 * This method is called when an operation is complete.
+	 * This method is called when an operation is complete. It can be used to perform
+	 * any necessary cleanup, flush audit events, etc.
 	 */
 	ConsentOutcome completeOperation(RequestDetails theRequestDetails);
 
