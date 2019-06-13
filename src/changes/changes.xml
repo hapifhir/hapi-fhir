@@ -49,6 +49,26 @@
 			<action type="fix" issue="1337">
 				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="change">
+				Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type
+				from SubscriptionMatchResult to InMemoryMatchResult.
+			</action>
+			<action type="add">
+				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any.  They permit
+				writing code that is version independent.
+			</action>
+			<action type="add">
+				Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the
+				in-memory matcher to search the HashMap (using a full table scan).  This allows rudimentary testing
+				without a database.
+			</action>
+			<action type="add">
+				Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a
+				resource delete operation is about to fail due to referential integrity conflicts.
+				Hooks have access to the list of resources that have references to the resource being deleted and
+				can delete them.  The boolean return value of the hook indicates whether the server should try
+				checking for conflicts again (true means try again).
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
