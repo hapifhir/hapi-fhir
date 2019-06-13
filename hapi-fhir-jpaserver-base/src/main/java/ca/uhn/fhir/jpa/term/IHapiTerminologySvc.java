@@ -1,14 +1,18 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /*
@@ -44,7 +48,7 @@ public interface IHapiTerminologySvc {
 
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
-	TermConcept findCode(String theCodeSystem, String theCode);
+	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
 	List<TermConcept> findCodes(String theSystem);
 
@@ -84,4 +88,6 @@ public interface IHapiTerminologySvc {
 	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
 
 	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
+
+	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 }
