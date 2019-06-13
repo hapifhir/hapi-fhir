@@ -42,6 +42,10 @@ public class DeleteConflictService {
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
+
+		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
+		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
+
 		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
