@@ -25,8 +25,8 @@ import java.util.List;
 @Service
 public class DeleteConflictService {
 	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.class);
-	public static final int MIN_QUERY_RESULT_COUNT = 1;
-	public static final int MAX_RETRY_COUNT = 60;
+	public static final int FIRST_QUERY_RESULT_COUNT = 1;
+	public static final int RETRY_QUERY_RESULT_COUNT = 60;
 	public static final int MAX_RETRY_ATTEMPTS = 10;
 
 	@Autowired
@@ -42,12 +42,12 @@ public class DeleteConflictService {
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
-		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MIN_QUERY_RESULT_COUNT);
+		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
 		while (tryAgain && retryCount < MAX_RETRY_ATTEMPTS) {
 			newConflicts = new DeleteConflictList();
-			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, MAX_RETRY_COUNT);
+			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
