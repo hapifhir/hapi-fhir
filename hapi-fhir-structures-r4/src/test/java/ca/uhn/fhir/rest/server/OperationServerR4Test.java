@@ -86,7 +86,6 @@ public class OperationServerR4Test {
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
 
-//		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition()).execute();
 		assertEquals("OP_TYPE", def.getCode());
 	}
@@ -238,19 +237,19 @@ public class OperationServerR4Test {
 
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/123/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
+			assertEquals("RET1", resp.getParameter().get(0).getName());
+			assertNull(status.getFirstHeader(Constants.HEADER_ETAG));
+		}
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE", ourLastMethod);
-
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 		/*
 		 * Against type should fail
@@ -258,13 +257,14 @@ public class OperationServerR4Test {
 
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		status = ourClient.execute(httpPost);
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
-		response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		ourLog.info(response);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(response);
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertNull(status.getFirstHeader(Constants.HEADER_ETAG));
 
+		}
 	}
 
 	@Test
@@ -611,18 +611,17 @@ public class OperationServerR4Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
+			retVal.setId("Parameters/123/_history/1");
 			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_INSTANCE_OR_TYPE")
 		public Parameters opInstanceOrType(
 			@IdParam(optional = true) IdType theId,
 			@OperationParam(name = "PARAM1") StringType theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_INSTANCE_OR_TYPE";
 			ourLastId = theId;
@@ -630,16 +629,15 @@ public class OperationServerR4Test {
 			ourLastParam2 = theParam2;
 
 			Parameters retVal = new Parameters();
+			retVal.setId("Parameters/123/_history/1");
 			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_PROFILE_DT2", idempotent = true)
 		public Bundle opProfileType(
 			@OperationParam(name = "PARAM1") MoneyQuantity theParam1
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_PROFILE_DT2";
 			ourLastParamMoney1 = theParam1;
@@ -649,12 +647,10 @@ public class OperationServerR4Test {
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_PROFILE_DT", idempotent = true)
 		public Bundle opProfileType(
 			@OperationParam(name = "PARAM1") UnsignedIntType theParam1
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_PROFILE_DT";
 			ourLastParamUnsignedInt1 = theParam1;
@@ -664,7 +660,6 @@ public class OperationServerR4Test {
 			return retVal;
 		}
 
-		//@formatter:off
 		@SuppressWarnings("unused")
 		@Operation(name = "$OP_TYPE", idempotent = true)
 		public Parameters opType(
@@ -673,7 +668,6 @@ public class OperationServerR4Test {
 			@OperationParam(name = "PARAM3", min = 2, max = 5) List<StringType> theParam3,
 			@OperationParam(name = "PARAM4", min = 1) List<StringType> theParam4
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_TYPE";
 			ourLastParam1 = theParam1;
@@ -684,12 +678,10 @@ public class OperationServerR4Test {
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_TYPE_ONLY_STRING", idempotent = true)
 		public Parameters opTypeOnlyString(
 			@OperationParam(name = "PARAM1") StringType theParam1
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_TYPE";
 			ourLastParam1 = theParam1;
@@ -699,13 +691,11 @@ public class OperationServerR4Test {
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_TYPE_RET_BUNDLE")
 		public Bundle opTypeRetBundle(
 			@OperationParam(name = "PARAM1") StringType theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_TYPE_RET_BUNDLE";
 			ourLastParam1 = theParam1;
@@ -738,7 +728,6 @@ public class OperationServerR4Test {
 
 	public static class PlainProvider {
 
-		//@formatter:off
 		@Operation(name = "$OP_INSTANCE_BUNDLE_PROVIDER", idempotent = true)
 		public IBundleProvider opInstanceReturnsBundleProvider() {
 			ourLastMethod = "$OP_INSTANCE_BUNDLE_PROVIDER";
@@ -754,13 +743,11 @@ public class OperationServerR4Test {
 			return new SimpleBundleProvider(resources);
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_SERVER")
 		public Parameters opServer(
 			@OperationParam(name = "PARAM1") StringType theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_SERVER";
 			ourLastParam1 = theParam1;
@@ -771,13 +758,11 @@ public class OperationServerR4Test {
 			return retVal;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_SERVER_WITH_RAW_STRING")
 		public Parameters opServer(
 			@OperationParam(name = "PARAM1") String theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_SERVER";
 			ourLastParam1 = new StringType(theParam1);
