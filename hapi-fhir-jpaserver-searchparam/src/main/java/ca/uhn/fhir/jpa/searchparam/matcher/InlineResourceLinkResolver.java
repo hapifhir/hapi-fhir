@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.matcher;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 /*-
  * #%L

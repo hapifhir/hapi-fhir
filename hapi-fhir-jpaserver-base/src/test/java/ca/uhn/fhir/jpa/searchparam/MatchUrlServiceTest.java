@@ -1,16 +1,11 @@
-package ca.uhn.fhir.jpa.dao;
+package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.dao.BaseJpaTest;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.dstu2.composite.PeriodDt;
 import ca.uhn.fhir.model.dstu2.resource.Condition;
-import ca.uhn.fhir.model.dstu2.resource.Observation;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.AfterClass;
@@ -29,7 +24,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-public class BaseHapiFhirDaoTest  extends BaseJpaTest {
+public class MatchUrlServiceTest extends BaseJpaTest {
 
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 
@@ -50,14 +45,6 @@ public class BaseHapiFhirDaoTest  extends BaseJpaTest {
 		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
 		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
 		assertEquals("304", ((ReferenceParam)match.get("patient").get(0).get(0)).getIdPart());
-		
-		Observation observation = new Observation();
-		
-		PeriodDt period = new PeriodDt();
-		period.setStart(new DateTimeDt("2011-01-02T11:22:33Z"));
-		period.setEnd(new DateTimeDt("2011-01-02T11:33:33Z"));
-		observation.setEffective(period);
-		
 	}
 
 	@Override

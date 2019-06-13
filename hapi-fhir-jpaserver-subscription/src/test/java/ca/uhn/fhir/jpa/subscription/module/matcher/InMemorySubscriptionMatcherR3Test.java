@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -18,15 +20,15 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@Autowired
-	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
+	SearchParamMatcher mySearchParamMatcher;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
-		assertFalse(myInMemorySubscriptionMatcher.match(criteria, resource).supported());
+		assertFalse(mySearchParamMatcher.match(criteria, resource).supported());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
-		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
+		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
@@ -38,7 +40,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
-		SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(criteria, resource);
+		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource);
 
 		assertTrue(result.supported());
 		assertFalse(result.matched());

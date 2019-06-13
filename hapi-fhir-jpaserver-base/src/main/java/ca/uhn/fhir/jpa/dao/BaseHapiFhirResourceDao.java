@@ -27,13 +27,13 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.jpa.util.jsonpatch.JsonPatchUtils;
@@ -48,15 +48,15 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.IServerOperationInterceptor;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -80,7 +80,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -187,7 +187,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome delete(IIdType theId, List<DeleteConflict> theDeleteConflicts, RequestDetails theRequest) {
+	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
 		if (theId == null || !theId.hasIdPart()) {
 			throw new InvalidRequestException("Can not perform delete, no ID provided");
 		}
@@ -226,7 +226,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			.addIfMatchesType(ServletRequestDetails.class, theRequest);
 		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hook);
 
-		validateOkToDelete(theDeleteConflicts, entity, false);
+		myDeleteConflictService.validateOkToDelete(theDeleteConflicts, entity, false);
 
 		preDelete(resourceToDelete, entity);
 
@@ -265,12 +265,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
-		List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		StopWatch w = new StopWatch();
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
 
-		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		ourLog.debug("Processed delete on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
@@ -281,7 +281,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * transaction processors
 	 */
 	@Override
-	public DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> deleteConflicts, RequestDetails theRequest) {
+	public DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList deleteConflicts, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
 		Set<Long> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
@@ -305,7 +305,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED, hooks);
 
-			validateOkToDelete(deleteConflicts, entity, false);
+			myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false);
 
 			// Notify interceptors
 			IdDt idToDelete = entity.getIdDt();
@@ -357,11 +357,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DeleteMethodOutcome deleteByUrl(String theUrl, RequestDetails theRequestDetails) {
-		List<DeleteConflict> deleteConflicts = new ArrayList<>();
+		DeleteConflictList deleteConflicts = new DeleteConflictList();
 
 		DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequestDetails);
 
-		validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		return outcome;
 	}
@@ -1392,28 +1392,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-	protected void validateOkToDelete(List<DeleteConflict> theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
-		TypedQuery<ResourceLink> query = myEntityManager.createQuery("SELECT l FROM ResourceLink l WHERE l.myTargetResourcePid = :target_pid", ResourceLink.class);
-		query.setParameter("target_pid", theEntity.getId());
-		query.setMaxResults(1);
-		List<ResourceLink> resultList = query.getResultList();
-		if (resultList.isEmpty()) {
-			return;
-		}
 
-		if (myDaoConfig.isEnforceReferentialIntegrityOnDelete() == false && !theForValidate) {
-			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", resultList.size());
-			myResourceLinkDao.deleteAll(resultList);
-			return;
-		}
-
-		ResourceLink link = resultList.get(0);
-		IdDt targetId = theEntity.getIdDt();
-		IdDt sourceId = link.getSourceResource().getIdDt();
-		String sourcePath = link.getSourcePath();
-
-		theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
-	}
 
 	private void validateResourceType(BaseHasResource entity) {
 		validateResourceType(entity, myResourceName);

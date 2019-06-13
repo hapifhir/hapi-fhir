@@ -31,12 +31,12 @@ import java.util.List;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
-	private final List<IBaseResource> myList;
+	private final List<? extends IBaseResource> myList;
 	private final String myUuid;
 	private Integer myPreferredPageSize;
 	private Integer mySize;
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
-	public SimpleBundleProvider(List<IBaseResource> theList) {
+	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
 		this(theList, null);
 	}
 
@@ -51,7 +51,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 		this(Collections.emptyList());
 	}
 
-	public SimpleBundleProvider(List<IBaseResource> theList, String theUuid) {
+	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
 		myList = theList;
 		myUuid = theUuid;
 		setSize(theList.size());
@@ -60,7 +60,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	/**
 	 * Returns the results stored in this provider
 	 */
-	protected List<IBaseResource> getList() {
+	protected List<? extends IBaseResource> getList() {
 		return myList;
 	}
 
@@ -80,7 +80,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
 	}
 
 	@Override

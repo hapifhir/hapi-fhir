@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
@@ -22,7 +23,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -44,12 +44,10 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -129,8 +127,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 	@Autowired
-	protected IResourceLinkDao myResourceLinkDao;
-	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
 	protected ISearchParamRegistry mySerarchParamRegistry;
@@ -163,6 +159,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 	@Autowired
 	ExpungeService myExpungeService;
+	@Autowired
+	protected DeleteConflictService myDeleteConflictService;
 
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
@@ -353,7 +351,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
-		return myDaoRegistry.getResourceDaoIfExists(theType);
+		return myDaoRegistry.getResourceDaoOrNull(theType);
 	}
 
 	protected TagDefinition getTagOrNull(TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel) {
@@ -1280,31 +1278,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 			}
 		}
-	}
-
-	public void validateDeleteConflictsEmptyOrThrowException(List<DeleteConflict> theDeleteConflicts) {
-		if (theDeleteConflicts.isEmpty()) {
-			return;
-		}
-
-		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
-		String firstMsg = null;
-		for (DeleteConflict next : theDeleteConflicts) {
-			StringBuilder b = new StringBuilder();
-			b.append("Unable to delete ");
-			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
-			b.append(" because at least one resource has a reference to this resource. First reference found was resource ");
-			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
-			b.append(" in path ");
-			b.append(next.getSourcePath());
-			String msg = b.toString();
-			if (firstMsg == null) {
-				firstMsg = msg;
-			}
-			OperationOutcomeUtil.addIssue(getContext(), oo, OO_SEVERITY_ERROR, msg, null, "processing");
-		}
-
-		throw new ResourceVersionConflictException(firstMsg, oo);
 	}
 
 	protected void validateMetaCount(int theMetaCount) {
