@@ -1,5 +1,5 @@
 
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.test.utilities;
 
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;

@@ -37,7 +37,7 @@ import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAll
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 /**
  * Test the rest-hook subscriptions

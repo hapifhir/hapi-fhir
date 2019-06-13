@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.fail;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
