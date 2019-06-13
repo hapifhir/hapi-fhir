@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ResponseHighlightingInterceptorTest {
 

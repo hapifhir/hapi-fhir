@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class VersionedApiConverterInterceptorR4Test {
 

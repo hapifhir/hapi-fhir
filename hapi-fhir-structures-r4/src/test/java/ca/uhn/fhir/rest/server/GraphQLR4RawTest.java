@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class GraphQLR4RawTest {
 

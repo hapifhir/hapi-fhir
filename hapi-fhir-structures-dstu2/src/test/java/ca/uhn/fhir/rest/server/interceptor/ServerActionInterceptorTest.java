@@ -43,7 +43,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ServerActionInterceptorTest {
 

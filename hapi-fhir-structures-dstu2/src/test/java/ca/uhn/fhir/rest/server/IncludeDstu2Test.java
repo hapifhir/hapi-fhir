@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;

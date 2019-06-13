@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class BinaryServerR4Test {
 	private static CloseableHttpClient ourClient;

@@ -31,7 +31,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 

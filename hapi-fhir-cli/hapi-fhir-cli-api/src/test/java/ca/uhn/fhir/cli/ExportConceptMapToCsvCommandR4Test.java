@@ -24,7 +24,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ExportConceptMapToCsvCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandR4Test.class);

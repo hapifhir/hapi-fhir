@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 /**
  * Test the rest-hook subscriptions

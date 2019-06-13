@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.Assert.assertEquals;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class CompressOutgoingContentInterceptorTest {
 

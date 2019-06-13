@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
-import ca.uhn.fhir.util.JettyUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderDstu3Test {
