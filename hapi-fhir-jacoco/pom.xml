@@ -147,6 +147,7 @@
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbyshared</artifactId>
@@ -157,6 +158,7 @@
 			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>javax.servlet</groupId>

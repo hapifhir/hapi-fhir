@@ -522,6 +522,10 @@
 			<id>nerdydrew</id>
 			<name>Drew Mitchell</name>
 		</developer>
+		<developer>
+			<id>srdo</id>
+			<name>Stig Døssing</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1285,6 +1289,11 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-starter-test</artifactId>
+				<version>${spring_boot_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-test</artifactId>
 				<version>${spring_boot_version}</version>
 			</dependency>
 			<dependency>
@@ -2299,7 +2308,7 @@
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>
-				<module>osgi</module>
+				<!--<module>osgi</module>-->
 				<!--<module>osgi/hapi-fhir-karaf-features</module>
 				<module>osgi/hapi-fhir-karaf-integration-tests</module>-->
 				<module>example-projects/hapi-fhir-base-example-embedded-ws</module>
