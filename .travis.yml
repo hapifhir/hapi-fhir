@@ -8,12 +8,14 @@ dist: trusty
 
 language: java
 jdk:
-    - openjdk11
-   #- oraclejdk9
-
+ - openjdk11
 env:
   global:
     - MAVEN_OPTS="-Xmx10244M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=1024M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC"
+
+before_cache:
+# Never upload HAPI FHIR artifacts to the build cache, ensuring a clean slate every time
+  - rm -rf $HOME/.m2/repository/ca/uhn/hapi
 
 cache:
   directories:
@@ -28,7 +30,17 @@ before_script:
   - sudo chmod -R 777 "$HOME/.m2/repository";
   - sudo chown -R travis:travis "$HOME/.m2/repository";
 
-script:
-#  - mvn -e -B clean install && cd hapi-fhir-ra && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID clean test jacoco:report coveralls:report
-#  - mvn -Dci=true -e -B -P ALLMODULES,NOPARALLEL,ERRORPRONE clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report 
-  - mvn -Dci=true -e -B -P ALLMODULES,REDUCED_JPA_TESTS,JACOCO clean install && cd hapi-fhir-jacoco && mvn -e -B -DTRAVIS_JOB_ID=$TRAVIS_JOB_ID jacoco:report coveralls:report;
+stages:
+  - name: compile
+  - name: test
+  
+jobs:
+  include:
+    - stage: compile
+      script: ./dev-tools/travis-script.sh compile
+    - stage: test
+      name: "Core"
+      script: ./dev-tools/travis-script.sh core
+    - stage: test
+      name: "JPA Server Tests"
+      script: ./dev-tools/travis-script.sh jpaserver
