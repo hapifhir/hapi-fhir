@@ -26,18 +26,13 @@ import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.narrative.INarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.RDFUtil;
+import ca.uhn.fhir.util.rdf.RDFUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.system.StreamRDF;
 import org.hl7.fhir.instance.model.api.*;
 
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +66,8 @@ public class RDFParser extends BaseParser {
 	protected void doEncodeResourceToWriter(final IBaseResource resource,
 														 final Writer writer,
 														 final EncodeContext encodeContext) {
-
 		StreamRDF eventWriter = RDFUtil.createRDFWriter(writer, this.lang);
+		eventWriter.base(FHIR_NS);
 		encodeResourceToRDFStreamWriter(resource, eventWriter, encodeContext);
 	}
 
@@ -80,7 +75,8 @@ public class RDFParser extends BaseParser {
 	protected <T extends IBaseResource> T doParseResource(final Class<T> resourceType,
 																			final Reader reader) throws DataFormatException {
 
-		StreamRDF streamReader = createStreamReader(reader);
+		StreamRDF streamReader = RDFUtil.createRDFReader(reader, this.lang);
+		streamReader.base(FHIR_NS);
 		return parseResource(resourceType, streamReader);
 	}
 
@@ -92,11 +88,6 @@ public class RDFParser extends BaseParser {
 	@Override
 	public IParser setPrettyPrint(final boolean prettyPrint) {
 		return this;
-	}
-
-
-	private StreamRDF createStreamReader(Reader reader) {
-		return RDFUtil.createRDFReader(reader, this.lang);
 	}
 
 	private void encodeResourceToRDFStreamWriter(final IBaseResource resource,
@@ -113,22 +104,12 @@ public class RDFParser extends BaseParser {
 			super.containResourcesForEncoding(resource);
 		}
 
-		streamWriter.start();
-		streamWriter.base(FHIR_NS);
-
-		Model model = ModelFactory.createDefaultModel();
-
 		if (resource instanceof IAnyResource) {
 			// HL7.org Structures
 			if (resourceId != null) {
 				writeCommentsPre(streamWriter, resourceId);
-
-				Resource element = model.createResource(resourceId.getBaseUrl());
-				Property property = model.createProperty("value", resourceId.getIdPart());
-				element.addProperty(property, resourceId.getIdPart());
-
 				streamWriter.start();
-				streamWriter.prefix("value", resourceId.getIdPart());
+				streamWriter.triple(RDFUtil.triple("<value> " + resourceId.getIdPart() + " </value>"));
 				streamWriter.finish();
 				writeCommentsPost(streamWriter, resourceId);
 			}
@@ -140,7 +121,7 @@ public class RDFParser extends BaseParser {
 			// DSTU2+
 			if (resourceId != null) {
 				streamWriter.start();
-				streamWriter.prefix("value", resourceId.getIdPart());
+				streamWriter.triple(RDFUtil.triple("<value> " + resourceId.getIdPart() + " </value>"));
 				encodeExtensionsIfPresent(resource, streamWriter, resourceId, false, encodeContext);
 				streamWriter.finish();
 				writeCommentsPost(streamWriter, resourceId);
@@ -163,7 +144,7 @@ public class RDFParser extends BaseParser {
 
 				for (IIdType profile : profiles) {
 					streamWriter.start();
-					streamWriter.prefix("value", profile.getValue());
+					streamWriter.triple(RDFUtil.triple("<value> " + profile.getValue() + " </value>"));
 					streamWriter.finish();
 				}
 				for (BaseCodingDt securityLabel : securityLabels) {
@@ -177,9 +158,9 @@ public class RDFParser extends BaseParser {
 							continue;
 						}
 						streamWriter.start();
-						streamWriter.prefix("system", tag.getScheme());
-						streamWriter.prefix("code", tag.getTerm());
-						streamWriter.prefix("display", tag.getLabel());
+					   streamWriter.triple(RDFUtil.triple("<system> " + tag.getScheme() + " </system>"));
+						streamWriter.triple(RDFUtil.triple("<code> "  + tag.getTerm() + " </code>"));
+   					streamWriter.triple(RDFUtil.triple("<display> " + tag.getLabel() + " </display>"));
 						streamWriter.finish();
 					}
 				}
@@ -188,8 +169,8 @@ public class RDFParser extends BaseParser {
 			*/
 			if (resource instanceof IBaseBinary) {
 				IBaseBinary bin = (IBaseBinary) resource;
-				streamWriter.prefix("contentType", bin.getContentType());
-				streamWriter.prefix("content", bin.getContentAsBase64());
+				streamWriter.triple(RDFUtil.triple("<contentType> " + bin.getContentType() + " </contentType>"));
+				streamWriter.triple(RDFUtil.triple("<content> " + bin.getContentAsBase64() + " </content>"));
 			} else {
 				encodeCompositeElementToStreamWriter(resource, resource, streamWriter, containedResource, new CompositeChildElement(resDef, encodeContext), encodeContext);
 			}
@@ -251,7 +232,7 @@ public class RDFParser extends BaseParser {
 					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
 						eventWriter.start();
 						if (StringUtils.isNotBlank(encodedValue)) {
-							eventWriter.prefix("value", encodedValue);
+							eventWriter.triple(RDFUtil.triple("<value> " + encodedValue + " </value>"));
 						}
 						encodeExtensionsIfPresent(resource, eventWriter, element, includedResource, encodeContext);
 						eventWriter.finish();
@@ -266,10 +247,10 @@ public class RDFParser extends BaseParser {
 						eventWriter.start();
 						String elementId = getCompositeElementId(element);
 						if (isNotBlank(elementId)) {
-							eventWriter.prefix("id", elementId);
+							eventWriter.triple(RDFUtil.triple("<id> " + elementId + " </id>"));
 						}
 						if (value != null) {
-							eventWriter.prefix("value", value);
+							eventWriter.triple(RDFUtil.triple("<value> " + value + " </value>"));
 						}
 						encodeExtensionsIfPresent(resource, eventWriter, element, includedResource, encodeContext);
 						eventWriter.finish();
@@ -281,10 +262,10 @@ public class RDFParser extends BaseParser {
 					eventWriter.start();
 					String elementId = getCompositeElementId(element);
 					if (isNotBlank(elementId)) {
-						eventWriter.prefix("id", elementId);
+						eventWriter.triple(RDFUtil.triple("<id> " + elementId + " </id>"));
 					}
 					if (isNotBlank(extensionUrl)) {
-						eventWriter.prefix("url", extensionUrl);
+						eventWriter.triple(RDFUtil.triple("<url> " + extensionUrl + " </url>"));
 					}
 					encodeCompositeElementToStreamWriter(resource, element, eventWriter, includedResource, parent, encodeContext);
 					eventWriter.finish();
@@ -369,11 +350,11 @@ public class RDFParser extends BaseParser {
 
 			String elementId = getCompositeElementId(next);
 			if (isNotBlank(elementId)) {
-				eventWriter.prefix("id", elementId);
+				eventWriter.triple(RDFUtil.triple("<id> " + elementId + " </id>"));
 			}
 
 			String url = getExtensionUrl(next.getUrl());
-			eventWriter.prefix("url", url);
+			eventWriter.triple(RDFUtil.triple("<url> " + url + " </url>"));
 
 			if (next.getValue() != null) {
 				IBaseDatatype value = next.getValue();
@@ -426,32 +407,27 @@ public class RDFParser extends BaseParser {
 		}
 	}
 
-	private void encodeExtension(final IBaseResource theResource,
-										  final StreamRDF theEventWriter,
-										  final boolean theContainedResource,
+	private void encodeExtension(final IBaseResource resource,
+										  final StreamRDF eventWriter,
+										  final boolean containedResource,
 										  final CompositeChildElement nextChildElem,
 										  final BaseRuntimeChildDefinition nextChild,
 										  final IBase nextValue,
 										  final String childName,
 										  final String extensionUrl,
 										  final BaseRuntimeElementDefinition<?> childDef,
-										  final EncodeContext theEncodeContext) {
+										  final EncodeContext encodeContext) {
 		BaseRuntimeDeclaredChildDefinition extDef = (BaseRuntimeDeclaredChildDefinition) nextChild;
-		if (extDef.isModifier()) {
-			theEventWriter.start();
-		} else {
-			theEventWriter.start();
-		}
+		eventWriter.start();
 
 		String elementId = getCompositeElementId(nextValue);
 		if (isNotBlank(elementId)) {
-			theEventWriter.prefix("id", elementId);
+			eventWriter.triple(RDFUtil.triple("<id> " + elementId + " </id>"));
 		}
-
-		theEventWriter.prefix("url", extensionUrl);
-		encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, nextValue, childName,
-			childDef, null, theContainedResource, nextChildElem, theEncodeContext);
-		theEventWriter.finish();
+		eventWriter.triple(RDFUtil.triple("<url> " + extensionUrl + " </url>"));
+		encodeChildElementToStreamWriter(resource, eventWriter, nextChild, nextValue, childName,
+			childDef, null, containedResource, nextChildElem, encodeContext);
+		eventWriter.finish();
 	}
 
 	private void encodeCompositeElementToStreamWriter(final IBaseResource resource,

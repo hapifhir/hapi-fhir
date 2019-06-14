@@ -1,4 +1,4 @@
-package ca.uhn.fhir.util;
+package ca.uhn.fhir.util.rdf;
 
 /*
  * #%L
@@ -22,15 +22,16 @@ package ca.uhn.fhir.util;
 
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.commons.io.output.WriterOutputStream;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFWriter;
 
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
 
 public class RDFUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RDFUtil.class);
@@ -42,13 +43,19 @@ public class RDFUtil {
 	}
 
 	public static StreamRDF createRDFWriter(final Writer writer, final Lang lang) {
-		WriterOutputStream stream = new WriterOutputStream(writer);
-		return StreamRDFWriter.getWriterStream(stream, lang);
+		WriterOutputStream wos = new WriterOutputStream(writer, Charset.defaultCharset());
+		return StreamRDFWriter.getWriterStream(wos, lang);
 	}
 
 	public static StreamRDF createRDFReader(final Reader reader, final Lang lang) {
-		ReaderInputStream stream = new ReaderInputStream(reader);
+		ReaderInputStream ris = new ReaderInputStream(reader, Charset.defaultCharset());
 		return StreamRDFWriter.getWriterStream(null, lang);
+	}
+
+	public static Triple triple(String tripleAsTurtle) {
+		Model m = ModelFactory.createDefaultModel();
+		m.read(new StringReader(tripleAsTurtle), "urn:x-base:", "TURTLE");
+		return m.listStatements().next().asTriple();
 	}
 
 }

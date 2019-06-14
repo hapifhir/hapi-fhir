@@ -44,7 +44,7 @@ public enum EncodingEnum {
 		}
 	},
 
-	RDF(Constants.CT_FHIR_RDF, Constants.CT_FHIR_RDF, Constants.FORMAT_RDF) {
+	RDF(Constants.CT_RDF_TURTLE, Constants.CT_RDF_TURTLE, Constants.FORMAT_TURTLE) {
 		@Override
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newRDFParser();
@@ -60,12 +60,6 @@ public enum EncodingEnum {
 	 * "xml"
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
-
-	/**
-	 * "ttl"
-	 */
-	public static final String TTL_PLAIN_STRING = "ttl";
-
 
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
