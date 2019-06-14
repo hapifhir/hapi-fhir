@@ -264,7 +264,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		 */
 
 		patient = new Patient();
-		patient.setId(pId1);
+		patient.setId(pId1.getValue());
 		patient.getText().setDivAsString("<div>DIVBBB</div>");
 		patient.addName().addGiven("NAMEBBB");
 		myPatientDao.update(patient, mockSrd());

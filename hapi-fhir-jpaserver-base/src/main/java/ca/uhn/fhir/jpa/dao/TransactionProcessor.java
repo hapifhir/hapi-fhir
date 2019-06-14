@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -50,7 +52,6 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
 import org.hibernate.Session;
-import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -91,6 +92,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private DaoRegistry myDaoRegistry;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
+	@Autowired
+	private DeleteConflictService myDeleteConflictService;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -505,10 +508,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
-			List<DeleteConflict> deleteConflicts = new ArrayList<>();
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
+			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 			/*
@@ -720,8 +724,12 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 							}
 						}
 
-						if (outcome.getCreated() == Boolean.FALSE) {
+						if (outcome.getCreated() == Boolean.FALSE
+							|| (outcome.getCreated() == Boolean.TRUE && outcome.getId().getVersionIdPartAsLong() > 1)) {
 							updatedEntities.add(outcome.getEntity());
+							if (outcome.getResource() != null) {
+								updatedResources.add(outcome.getResource());
+							}
 						}
 
 						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
@@ -744,10 +752,42 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * was also deleted as a part of this transaction, which is why we check this now at the
 			 * end.
 			 */
+			for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
+				DeleteConflict nextDeleteConflict = iter.next();
 
-			deleteConflicts.removeIf(next ->
-				deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
-			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+				/*
+				 * If we have a conflict, it means we can't delete Resource/A because
+				 * Resource/B has a reference to it. We'll ignore that conflict though
+				 * if it turns out we're also deleting Resource/B in this transaction.
+				 */
+				if (deletedResources.contains(nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue())) {
+					iter.remove();
+					continue;
+				}
+
+				/*
+				 * And then, this is kind of a last ditch check. It's also ok to delete
+				 * Resource/A if Resource/B isn't being deleted, but it is being UPDATED
+				 * in this transaction, and the updated version of it has no references
+				 * to Resource/A any more.
+				 */
+				String sourceId = nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue();
+				String targetId = nextDeleteConflict.getTargetId().toUnqualifiedVersionless().getValue();
+				Optional<IBaseResource> updatedSource = updatedResources
+					.stream()
+					.filter(t -> sourceId.equals(t.getIdElement().toUnqualifiedVersionless().getValue()))
+					.findFirst();
+				if (updatedSource.isPresent()) {
+					List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
+					boolean sourceStillReferencesTarget = referencesInSource
+						.stream()
+						.anyMatch(t-> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
+					if (!sourceStillReferencesTarget) {
+						iter.remove();
+					}
+				}
+			}
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved

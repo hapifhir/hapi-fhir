@@ -152,15 +152,12 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	public void testSearchAndReindex() {
 		SearchParameterMap map;
 
-		final IIdType pId1= newTxTemplate().execute(new TransactionCallback<IIdType>() {
-			@Override
-			public IIdType doInTransaction(TransactionStatus theStatus) {
-				// TODO Auto-generated method stub
-				Patient patient = new Patient();
-				patient.getText().setDiv("<div>DIVAAA</div>");
-				patient.addName().addGiven("NAMEAAA");
-				return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			}
+		final IIdType pId1= newTxTemplate().execute(t -> {
+			// TODO Auto-generated method stub
+			Patient patient = new Patient();
+			patient.getText().setDiv("<div>DIVAAA</div>");
+			patient.addName().addGiven("NAMEAAA");
+			return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		});
 
 		map = new SearchParameterMap();
@@ -179,7 +176,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				Patient patient = new Patient();
-				patient.setId(pId1);
+				patient.setId(pId1.getValue());
 				patient.getText().setDiv("<div>DIVBBB</div>");
 				patient.addName().addGiven("NAMEBBB");
 				myPatientDao.update(patient, mySrd);

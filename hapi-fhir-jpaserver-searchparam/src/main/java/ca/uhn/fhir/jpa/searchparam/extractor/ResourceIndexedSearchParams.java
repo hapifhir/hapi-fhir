@@ -260,7 +260,7 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
-	private boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
@@ -278,7 +278,9 @@ public final class ResourceIndexedSearchParams {
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
-				return forcedId.getForcedId().equals(theReference.getValue());
+				// TODO KHS is forcedId.getForcedId().equals(theReference.getIdPart() also valid?
+				return forcedId.getForcedId().equals(theReference.getValue()) ||
+					forcedId.getForcedId().equals(theReference.getIdPart());
 			} else {
 				return false;
 			}

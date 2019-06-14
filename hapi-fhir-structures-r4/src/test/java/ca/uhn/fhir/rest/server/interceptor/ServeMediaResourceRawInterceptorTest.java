@@ -47,13 +47,13 @@ public class ServeMediaResourceRawInterceptorTest {
 	@Before
 	public void before() {
 		myInterceptor = new ServeMediaResourceRawInterceptor();
-		ourServlet.registerInterceptor(myInterceptor);
+		ourServlet.getInterceptorService().registerInterceptor(myInterceptor);
 	}
 
 	@After
 	public void after() {
 		ourNextResponse = null;
-		ourServlet.unregisterInterceptor(myInterceptor);
+		ourServlet.getInterceptorService().unregisterInterceptor(myInterceptor);
 	}
 
 	@Test

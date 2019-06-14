@@ -211,6 +211,39 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
 	}
 
+	/**
+	 * Log all captured INSERT queries
+	 */
+	public void logUpdateQueries() {
+		List<String> queries = getUpdateQueries()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Update Queries:\n{}", String.join("\n", queries));
+	}
+
+	/**
+	 * Log all captured DELETE queries
+	 */
+	public void logDeleteQueriesForCurrentThread() {
+		List<String> queries = getDeleteQueriesForCurrentThread()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
+	}
+
+	/**
+	 * Log all captured DELETE queries
+	 */
+	public void logDeleteQueries() {
+		List<String> queries = getDeleteQueries()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Delete Queries:\n{}", String.join("\n", queries));
+	}
+
 	public int countSelectQueries() {
 		return getSelectQueries().size();
 	}

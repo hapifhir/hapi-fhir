@@ -49,7 +49,7 @@ public class LoggingRule implements TestRule {
                 try {
                     statement.evaluate();
                 } catch (final Throwable e) {
-                    logger.info(MessageFormat.format("Exception thrown in test case [{0}]: {1}", description.getDisplayName(), e.toString()));
+                    logger.error(MessageFormat.format("Exception thrown in test case [{0}]: {1}", description.getDisplayName(), e.toString()), e);
                     throw e;
                 } finally {
                     logger.info(MessageFormat.format("Finished test case [{0}]", description.getDisplayName()));

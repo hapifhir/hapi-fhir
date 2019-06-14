@@ -23,7 +23,12 @@ package ca.uhn.fhir.jpa.dao.data;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface IResourceIndexedSearchParamDateDao extends JpaRepository<ResourceIndexedSearchParamDate, Long> {
-	// nothing yet
+	@Modifying
+	@Query("delete from ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

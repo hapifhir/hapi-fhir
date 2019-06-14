@@ -73,6 +73,9 @@ public class SearchParamRegistryR4 extends BaseSearchParamRegistry<SearchParamet
 			case URI:
 				paramType = RestSearchParameterTypeEnum.URI;
 				break;
+			case SPECIAL:
+				paramType = RestSearchParameterTypeEnum.SPECIAL;
+				break;
 			case NULL:
 				break;
 		}

@@ -21,6 +21,9 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -49,7 +52,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <li>The client explicitly requests raw output by adding the parameter <code>_output=data</code></li>
  * </ul>
  */
-public class ServeMediaResourceRawInterceptor extends InterceptorAdapter {
+@Interceptor
+public class ServeMediaResourceRawInterceptor {
 
 	public static final String MEDIA_CONTENT_CONTENT_TYPE_OPT = "Media.content.contentType";
 
@@ -62,7 +66,7 @@ public class ServeMediaResourceRawInterceptor extends InterceptorAdapter {
 		RESPOND_TO_OPERATION_TYPES = Collections.unmodifiableSet(respondToOperationTypes);
 	}
 
-	@Override
+	@Hook(value=Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
 		if (theResponseObject == null) {
 			return true;

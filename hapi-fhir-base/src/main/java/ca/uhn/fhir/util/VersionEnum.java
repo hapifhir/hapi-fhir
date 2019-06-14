@@ -21,12 +21,16 @@ package ca.uhn.fhir.util;
  */
 
 public enum VersionEnum {
-
+	V2_5_0,
+	V3_0_0,
+	V3_1_0,
+	V3_2_0,
 	V3_3_0,
 	V3_4_0,
 	V3_5_0,
 	V3_6_0,
 	V3_7_0,
-	V3_8_0
+	V3_8_0,
+	V4_0_0
 
 }

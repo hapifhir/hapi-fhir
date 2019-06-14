@@ -23,9 +23,13 @@ package ca.uhn.fhir.jpa.dao.data;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface IResourceLinkDao  extends JpaRepository<ResourceLink, Long> {
 
-
-
+	@Modifying
+	@Query("delete from ResourceLink t WHERE t.mySourceResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

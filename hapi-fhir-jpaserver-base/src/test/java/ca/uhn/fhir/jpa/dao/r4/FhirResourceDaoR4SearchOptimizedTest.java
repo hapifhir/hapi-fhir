@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -211,6 +211,41 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
 		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+
+	}
+
+	@Test
+	public void testCountEvenIfPreviousSimilarSearchDidNotRequestIt() {
+		create200Patients();
+
+		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		IBundleProvider results = myPatientDao.search(params);
+		String uuid = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid);
+		assertEquals(null, results.size());
+		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(null, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size());
+
+		// Try the same query again. This time we'll request _total=accurate as well
+		// which means the total should be calculated no matter what.
+
+		params = new SearchParameterMap();
+		params.setSort(new SortSpec(Patient.SP_NAME));
+		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
+		results = myPatientDao.search(params);
+		String uuid2 = results.getUuid();
+		ourLog.info("** Search returned UUID: {}", uuid2);
+		assertEquals(200, results.size().intValue());
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid2).size().intValue());
+		assertNotEquals(uuid, uuid2);
 
 	}
 
@@ -588,6 +623,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSearchForTokenValueOnlyUsesValueHash() {
+
+		myCaptureQueriesListener.clear();
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Patient.SP_IDENTIFIER, new TokenParam("PT00000"));
+		IBundleProvider results = myPatientDao.search(params);
+		results.getResources(0, 1); // won't return anything
+
+		myCaptureQueriesListener.logSelectQueries();
+
+		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, true);
+		assertThat(selectQuery, containsString("HASH_VALUE in"));
+		assertThat(selectQuery, not(containsString("HASH_SYS")));
+
+	}
+
 
 	/**
 	 * A search with a big list of OR clauses for references should use a single SELECT ... WHERE .. IN
@@ -777,7 +830,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		});
 
 
-
 		myCaptureQueriesListener.clear();
 		p = new Patient();
 		p.setId(id);
@@ -887,6 +939,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 *   Select the version from HFJ_RES_VER
 		 *   Select the current token indexes
 		 */
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
@@ -955,16 +1008,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 
-
 	@Test
 	public void testReferenceOrLinksUseInList_ForcedIds() {
 
 		List<String> ids = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			Organization org = new Organization();
-			org.setId("ORG"+i);
+			org.setId("ORG" + i);
 			org.setActive(true);
-			runInTransaction(()->{
+			runInTransaction(() -> {
 				IIdType id = myOrganizationDao.update(org).getId();
 				ids.add(id.getIdPart());
 			});
@@ -973,12 +1025,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 //			assertTrue(org.getActive());
 		}
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			for (ResourceTable next : myResourceTableDao.findAll()) {
 				ourLog.info("Resource pid {} of type {}", next.getId(), next.getResourceType());
 			}
 		});
-
 
 
 		for (int i = 0; i < 5; i++) {

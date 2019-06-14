@@ -46,6 +46,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
 
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MARIADB_10_1, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MYSQL_5_7, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MSSQL_2012, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.ORACLE_12C, "float");
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.POSTGRES_9_4, "float");
+
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MARIADB_10_1, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MYSQL_5_7, "bigint");
@@ -169,6 +176,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 			public String getDescriptor(Long theColumnLength) {
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
 				return "boolean";
+			}
+		},
+		FLOAT {
+			@Override
+			public String getDescriptor(Long theColumnLength) {
+				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
+				return "float";
 			}
 		},
 		INT {

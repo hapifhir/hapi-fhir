@@ -24,8 +24,8 @@ import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Bundle.BundleType;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.UnknownContentCode;
-import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Enumeration;
+import org.hl7.fhir.dstu3.model.Condition.ConditionVerificationStatus;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.dstu3.model.Identifier.IdentifierUse;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
@@ -48,6 +48,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.*;
 
 public class JsonParserDstu3Test {
@@ -2382,6 +2383,45 @@ public class JsonParserDstu3Test {
 
 		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		assertTrue(result.isSuccessful());
+	}
+
+	@Test
+	public void encodeResourceToString_withEXCLUDE_ELEMENTS_IN_ENCODED_metaKeptInContainedResource() {
+		// Arrange
+		Organization containedOrganization = new Organization();
+		containedOrganization.getMeta().addProfile(UUID.randomUUID().toString());
+		containedOrganization.getMeta().setLastUpdated(new Date());
+		containedOrganization.getMeta().setVersionId(UUID.randomUUID().toString());
+		containedOrganization.getMeta().setSecurity(Arrays.asList(new Coding(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString())));
+		containedOrganization.getMeta().setTag(Arrays.asList(new Coding(UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString())));
+
+		Patient patient = new Patient();
+		patient.setId(UUID.randomUUID().toString());
+		patient.getMeta().addProfile(UUID.randomUUID().toString());
+		patient.setGeneralPractitioner(Arrays.asList(new Reference(containedOrganization)));
+
+		HashSet<String> excludeElementsInEncoded = new HashSet<>(); // ResourceMetaParams.EXCLUDE_ELEMENTS_IN_ENCODED
+		excludeElementsInEncoded.add("id");
+		excludeElementsInEncoded.add("*.meta");
+
+		IParser parser = ourCtx.newJsonParser();
+		parser.setDontEncodeElements(excludeElementsInEncoded);
+
+		// Act
+		String encodedPatient = parser.encodeResourceToString(patient);
+
+		// Assert
+		Patient parsedPatient = (Patient) parser.parseResource(encodedPatient);
+		assertNull(parsedPatient.getId());
+		assertTrue(parsedPatient.getMeta().isEmpty());
+
+		Resource containedResource = parsedPatient.getContained().get(0);
+		assertNotNull(containedResource.getMeta());
+		assertNull(containedResource.getMeta().getVersionId());
+		assertNull(containedResource.getMeta().getLastUpdated());
+		assertTrue(containedResource.getMeta().getSecurity().isEmpty());
+		assertEquals(1, containedResource.getMeta().getProfile().size());
+		assertEquals(1, containedResource.getMeta().getTag().size());
 	}
 
 	@AfterClass

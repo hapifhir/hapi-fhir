@@ -19,10 +19,14 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
-import java.lang.annotation.*;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Denotes a parameter for a REST method which will contain the resource actually 
+ * Denotes a parameter for a REST method which will contain the resource actually
  * being created/updated/etc in an operation which contains a resource in the HTTP request.
  * <p>
  * For example, in a {@link Create} operation the method parameter annotated with this
@@ -32,7 +36,7 @@ import java.lang.annotation.*;
  * Parameters with this annotation should typically be of the type of resource being
  * operated on (see below for an exception when raw data is required). For example, in a
  * IResourceProvider for Patient resources, the parameter annotated with this
- * annotation should be of type Patient. 
+ * annotation should be of type Patient.
  * </p>
  * <p>
  * Note that in servers it is also acceptable to have parameters with this annotation
@@ -41,8 +45,11 @@ import java.lang.annotation.*;
  * have multiple parameters with this annotation, so you can have one parameter
  * which accepts the parsed resource, and another which accepts the raw request.
  * </p>
+ * <p>
+ * Also note that this parameter may be null if a client does not supply a body.
+ * </p>
  */
-@Target(value=ElementType.PARAMETER)
+@Target(value = ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceParam {
 

@@ -427,6 +427,13 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSummaryMode().getCode());
 		}
 
+		if (getSearchTotalMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_SEARCH_TOTAL_MODE);
+			b.append('=');
+			b.append(getSearchTotalMode().getCode());
+		}
+
 		if (b.length() == 0) {
 			b.append('?');
 		}

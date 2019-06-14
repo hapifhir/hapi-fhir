@@ -65,9 +65,7 @@ public class RequestValidatingInterceptorDstu3Test {
 	@Before
 	public void before() {
 		ourLastRequestWasSearch = false;
-		while (ourServlet.getInterceptors().size() > 0) {
-			ourServlet.unregisterInterceptor(ourServlet.getInterceptors().get(0));
-		}
+		ourServlet.getInterceptorService().unregisterAllInterceptors();
 
 		myInterceptor = new RequestValidatingInterceptor();
 		//		myInterceptor.setFailOnSeverity(ResultSeverityEnum.ERROR);

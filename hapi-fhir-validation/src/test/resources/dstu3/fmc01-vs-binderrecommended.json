@@ -1,0 +1,44 @@
+{
+	"resourceType": "ValueSet",
+	"id": "FMCBinderRecommended",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-04-17T12:52:11.263+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/vs/FMCBinderRecommended",
+	"identifier": [
+		{
+			"value": "FMCBinderRecommended"
+		}
+	],
+	"name": "FMCBinderRecommended",
+	"title": "Binder recommended",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "ValueSet for Binder recommended.",
+	"compose": {
+		"include": [
+			{
+				"system": "http://binder_recommended_fkc",
+				"concept": [
+					{
+						"code": "VELPHORO",
+						"display": "Velphoro"
+					},
+					{
+						"code": "FOSRENAL",
+						"display": "Fosrenal"
+					},
+					{
+						"code": "AURYXIA",
+						"display": "Auryxia"
+					},
+					{
+						"code": "RENVELA",
+						"display": "Renvela"
+					}
+				]
+			}
+		]
+	}
+}

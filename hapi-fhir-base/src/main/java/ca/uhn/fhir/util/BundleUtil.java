@@ -24,6 +24,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.*;
@@ -50,7 +51,7 @@ public class BundleUtil {
 			BaseRuntimeChildDefinition relChild = relDef.getChildByName("relation");
 			List<IBase> relValues = relChild.getAccessor().getValues(nextLink);
 			for (IBase next : relValues) {
-				IPrimitiveType<?> nextValue = (IPrimitiveType<?>)next;
+				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) next;
 				if (theLinkRelation.equals(nextValue.getValueAsString())) {
 					isRightRel = true;
 				}
@@ -64,7 +65,7 @@ public class BundleUtil {
 			BaseRuntimeChildDefinition urlChild = linkDef.getChildByName("url");
 			List<IBase> values = urlChild.getAccessor().getValues(nextLink);
 			for (IBase nextUrl : values) {
-				IPrimitiveType<?> nextValue = (IPrimitiveType<?>)nextUrl;
+				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) nextUrl;
 				if (isNotBlank(nextValue.getValueAsString())) {
 					return nextValue.getValueAsString();
 				}
@@ -83,35 +84,35 @@ public class BundleUtil {
 
 		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
-		
+
 		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
 		BaseRuntimeElementCompositeDefinition<?> requestDef = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
-		
+
 		BaseRuntimeChildDefinition urlChild = requestDef.getChildByName("url");
 
 		List<Pair<String, IBaseResource>> retVal = new ArrayList<>(entries.size());
 		for (IBase nextEntry : entries) {
-			
+
 			String url = null;
 			IBaseResource resource = null;
-			
+
 			for (IBase nextEntryValue : requestChild.getAccessor().getValues(nextEntry)) {
 				for (IBase nextUrlValue : urlChild.getAccessor().getValues(nextEntryValue)) {
-					url = ((IPrimitiveType<String>)nextUrlValue).getValue();
+					url = ((IPrimitiveType<String>) nextUrlValue).getValue();
 				}
 			}
-			
+
 			// Should return 0..1 only
 			for (IBase nextValue : resourceChild.getAccessor().getValues(nextEntry)) {
 				resource = (IBaseResource) nextValue;
 			}
-			
+
 			retVal.add(Pair.of(url, resource));
 		}
-		
-		return retVal;		
+
+		return retVal;
 	}
-	
+
 	public static String getBundleType(FhirContext theContext, IBaseBundle theBundle) {
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
 		BaseRuntimeChildDefinition entryChild = def.getChildByName("type");
@@ -147,13 +148,13 @@ public class BundleUtil {
 		List<IBase> entries = entryChild.getAccessor().getValues(theBundle);
 
 		BaseRuntimeElementCompositeDefinition<?> entryChildElem = (BaseRuntimeElementCompositeDefinition<?>) entryChild.getChildByName("entry");
-		
+
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
-		BaseRuntimeElementCompositeDefinition<?>  requestElem = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
+		BaseRuntimeElementCompositeDefinition<?> requestElem = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
 		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName("url");
 		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName("method");
-		
+
 		for (IBase nextEntry : entries) {
 			IBaseResource resource = null;
 			String url = null;
@@ -164,39 +165,40 @@ public class BundleUtil {
 			}
 			for (IBase nextRequest : requestChild.getAccessor().getValues(nextEntry)) {
 				for (IBase nextUrl : urlChild.getAccessor().getValues(nextRequest)) {
-					url = ((IPrimitiveType<?>)nextUrl).getValueAsString();
+					url = ((IPrimitiveType<?>) nextUrl).getValueAsString();
 				}
 				for (IBase nextUrl : methodChild.getAccessor().getValues(nextRequest)) {
-					String methodString = ((IPrimitiveType<?>)nextUrl).getValueAsString();
+					String methodString = ((IPrimitiveType<?>) nextUrl).getValueAsString();
 					if (isNotBlank(methodString)) {
 						requestType = RequestTypeEnum.valueOf(methodString);
 					}
 				}
 			}
 
-			/* 
+			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
 			retVal.add(new BundleEntryParts(requestType, url, resource));
 		}
 
-		
+
 		return retVal;
 	}
-	
+
 	/**
 	 * Extract all of the resources from a given bundle
 	 */
 	public static List<IBaseResource> toListOfResources(FhirContext theContext, IBaseBundle theBundle) {
-		return toListOfResourcesOfType(theContext, theBundle, null);
+		return toListOfResourcesOfType(theContext, theBundle, IBaseResource.class);
 	}
 
 	/**
-	 * Extract all of the resources of a given type from a given bundle 
+	 * Extract all of the resources of a given type from a given bundle
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T extends IBaseResource> List<T> toListOfResourcesOfType(FhirContext theContext, IBaseBundle theBundle, Class<T> theTypeToInclude) {
+		Objects.requireNonNull(theTypeToInclude, "ResourceType must not be null");
 		List<T> retVal = new ArrayList<>();
 
 		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
@@ -207,36 +209,36 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		for (IBase nextEntry : entries) {
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
-				if (theTypeToInclude != null && !theTypeToInclude.isAssignableFrom(next.getClass())) {
-					continue;
+				if (theTypeToInclude.isAssignableFrom(next.getClass())) {
+					retVal.add((T) next);
 				}
-				retVal.add((T) next);
 			}
 		}
-
 		return retVal;
 	}
 
-	public static class BundleEntryParts
-	{
+	public static class BundleEntryParts {
 		private final RequestTypeEnum myRequestType;
 		private final IBaseResource myResource;
 		private final String myUrl;
+
 		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
 			super();
 			myRequestType = theRequestType;
 			myUrl = theUrl;
 			myResource = theResource;
 		}
+
 		public RequestTypeEnum getRequestType() {
 			return myRequestType;
 		}
+
 		public IBaseResource getResource() {
 			return myResource;
 		}
+
 		public String getUrl() {
 			return myUrl;
 		}
 	}
-
 }
