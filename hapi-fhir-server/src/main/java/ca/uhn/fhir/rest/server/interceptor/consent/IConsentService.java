@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
 
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -74,7 +75,25 @@ public interface IConsentService {
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
 	 * any necessary cleanup, flush audit events, etc.
+	 * <p>
+	 * This method is not called if the request failed. {@link #completeOperationFailure(RequestDetails, BaseServerResponseException)}
+	 * will be called instead in that case.
+	 * </p>
+	 *
+	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException)
 	 */
-	ConsentOutcome completeOperation(RequestDetails theRequestDetails);
+	void completeOperationSuccess(RequestDetails theRequestDetails);
 
+	/**
+	 * This method is called when an operation is complete. It can be used to perform
+	 * any necessary cleanup, flush audit events, etc.
+	 * <p>
+	 * This method will be called if the request did not complete successfully, instead of
+	 * {@link #completeOperationSuccess(RequestDetails)}. Typically this means that
+	 * the operation failed and a failure is being returned to the client.
+	 * </p>
+	 *
+	 * @see #completeOperationSuccess(RequestDetails)
+	 */
+	void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException);
 }

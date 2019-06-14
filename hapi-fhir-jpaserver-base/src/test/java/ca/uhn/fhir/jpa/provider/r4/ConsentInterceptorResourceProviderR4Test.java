@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
@@ -95,7 +96,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
+		assertEquals(myObservationIdsEvenOnly.subList(15, 25), returnedIdValues);
 	}
 
 
@@ -152,7 +153,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 10), returnedIdValues);
+		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
 
 	}
 
@@ -233,6 +234,17 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			}
 			return ConsentOutcome.PROCEED;
 		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+			// nothing
+		}
+
 	}
 
 	private static class ConsentSvcCantSeeOddNumbered implements IConsentService {
@@ -254,5 +266,16 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
 			return ConsentOutcome.PROCEED;
 		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+			// nothing
+		}
+
 	}
 }

@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.apache.commons.lang3.Validate;
@@ -18,7 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Interceptor
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
-	private final String myRequestKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_AUTHORIZED";
+	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_AUTHORIZED";
+	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_COMPLETED";
 
 	// FIXME: ensure that searches aren't reused if consent applies
 
@@ -41,14 +43,14 @@ public class ConsentInterceptor {
 				break;
 			case AUTHORIZED:
 				Map<Object, Object> userData = theRequestDetails.getUserData();
-				userData.put(myRequestKey, Boolean.TRUE);
+				userData.put(myRequestAuthorizedKey, Boolean.TRUE);
 				break;
 		}
 	}
 
 	@Hook(value = Pointcut.STORAGE_PREACCESS_RESOURCES)
 	public void interceptPreAccess(RequestDetails theRequestDetails, IPreResourceAccessDetails thePreResourceAccessDetails) {
-		Object authorized = theRequestDetails.getUserData().get(myRequestKey);
+		Object authorized = theRequestDetails.getUserData().get(myRequestAuthorizedKey);
 		if (Boolean.TRUE.equals(authorized)) {
 			return;
 		}
@@ -70,7 +72,7 @@ public class ConsentInterceptor {
 
 	@Hook(value = Pointcut.STORAGE_PRESHOW_RESOURCE)
 	public void interceptPreShowResource(RequestDetails theRequestDetails, IPreResourceShowDetails thePreResourceShowDetails) {
-		Object authorized = theRequestDetails.getUserData().get(myRequestKey);
+		Object authorized = theRequestDetails.getUserData().get(myRequestAuthorizedKey);
 		if (Boolean.TRUE.equals(authorized)) {
 			return;
 		}
@@ -92,4 +94,17 @@ public class ConsentInterceptor {
 		}
 	}
 
+	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION)
+	public void requestFailed(RequestDetails theRequest, BaseServerResponseException theException) {
+		theRequest.getUserData().put(myRequestCompletedKey, Boolean.TRUE);
+		myConsentService.completeOperationSuccess(theRequest);
+	}
+
+	@Hook(value = Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
+	public void requestSucceeded(RequestDetails theRequest) {
+		if (Boolean.TRUE.equals(theRequest.getUserData().get(myRequestCompletedKey))) {
+			return;
+		}
+		myConsentService.completeOperationSuccess(theRequest);
+	}
 }
