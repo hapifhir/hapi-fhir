@@ -4,14 +4,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.util.PortUtil;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -22,17 +27,23 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.*;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -47,9 +58,12 @@ public class ConsentInterceptorTest {
 	private static int ourPort;
 	private static RestfulServer ourServlet;
 	private static Server ourServer;
+	private static List<IBaseResource> ourNextReturnList;
 	@Mock
 	private IConsentService myConsentSvc;
 	private ConsentInterceptor myInterceptor;
+	@Captor
+	private ArgumentCaptor<BaseServerResponseException> myExceptionCaptor;
 
 	@After
 	public void after() {
@@ -60,27 +74,231 @@ public class ConsentInterceptorTest {
 	public void before() {
 		myInterceptor = new ConsentInterceptor(myConsentSvc);
 		ourServlet.registerInterceptor(myInterceptor);
+		ourNextReturnList = new ArrayList<>();
 	}
 
 	@Test
-	public void testException() throws IOException {
-		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.canSeeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+	public void testOutcomeSuccess() throws IOException {
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.seeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnNormal=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+		}
+
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+	}
+
+	@Test
+	public void testSeeResourceAuthorizesOuterBundle() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("PTA"));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(1)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+
+	@Test
+	public void testSeeResourceRejectsOuterBundle_ProvidesOperationOutcome() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t->{
+			OperationOutcome oo = new OperationOutcome();
+			oo.addIssue().setDiagnostics("A DIAG");
+			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("A DIAG"));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(1)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testSeeResourceRejectsOuterBundle_ProvidesNothing() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t-> ConsentOutcome.REJECT);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(204, status.getStatusLine().getStatusCode());
+			assertNull(status.getEntity());
+			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(1)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testSeeResourceRejectsInnerResource_ProvidesOperationOutcome() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource == ourNextReturnList.get(0)) {
+				OperationOutcome oo = new OperationOutcome();
+				oo.addIssue().setDiagnostics("A DIAG");
+				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
+			}
+			return ConsentOutcome.PROCEED;
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			Bundle resoonse = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(OperationOutcome.class, resoonse.getEntry().get(0).getResource().getClass());
+			assertEquals("A DIAG", ((OperationOutcome)resoonse.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics());
+			assertEquals(Patient.class, resoonse.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", resoonse.getEntry().get(1).getResource().getIdElement().getIdPart());
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(3)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testSeeResourceReplacesInnerResource() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource == ourNextReturnList.get(0)) {
+				Patient replacement = new Patient();
+				replacement.setId("PTA");
+				replacement.addIdentifier().setSystem("REPLACEMENT");
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, replacement);
+			}
+			return ConsentOutcome.PROCEED;
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			Bundle resoonse = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(Patient.class, resoonse.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", resoonse.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient)resoonse.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(Patient.class, resoonse.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", resoonse.getEntry().get(1).getResource().getIdElement().getIdPart());
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(3)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testSeeResourceModifiesInnerResource() throws IOException {
+		ourNextReturnList.add(new Patient().setActive(true).setId("PTA"));
+		ourNextReturnList.add(new Patient().setActive(false).setId("PTB"));
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t->{
+			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			if (resource == ourNextReturnList.get(0)) {
+				((Patient)resource).addIdentifier().setSystem("REPLACEMENT");
+			}
+			return ConsentOutcome.PROCEED;
+		});
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnList=1");
+
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			Bundle resoonse = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			assertEquals(Patient.class, resoonse.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", resoonse.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient)resoonse.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(Patient.class, resoonse.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", resoonse.getEntry().get(1).getResource().getIdElement().getIdPart());
+		}
+
+		verify(myConsentSvc, times(1)).startOperation(any());
+		verify(myConsentSvc, times(3)).seeResource(any(), any());
+		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
+	}
+
+	@Test
+	public void testOutcomeException() throws IOException {
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchThrowNullPointerException=1");
 
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(500, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
 		}
 
 		verify(myConsentSvc, times(0)).completeOperationSuccess(any());
-		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
+		verify(myConsentSvc, times(1)).completeOperationFailure(any(), myExceptionCaptor.capture());
 
+		assertEquals("Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
+
 
 		@Override
 		public Class<Patient> getResourceType() {
@@ -90,9 +308,37 @@ public class ConsentInterceptorTest {
 		/*
 		 * searchThrowNullPointerException
 		 */
-		@Search()
+		@Search
 		public List<IBaseResource> searchWithWildcardRetVal(@RequiredParam(name = "searchThrowNullPointerException") StringParam theValue) {
 			throw new NullPointerException("A MESSAGE");
+		}
+
+		/**
+		 * searchReturnNormal
+		 */
+		@Search
+		public List<IBaseResource> searchReturnNormal(@RequiredParam(name = "searchReturnNormal") StringParam theParam) {
+			Patient patientA = new Patient();
+			patientA.setId("Patient/A");
+			patientA.setActive(true);
+			patientA.addName().setFamily("FAMILY").addGiven("GIVEN");
+			patientA.addIdentifier().setSystem("SYSTEM").setValue("VALUEA");
+
+			Patient patientB = new Patient();
+			patientB.setId("Patient/B");
+			patientB.setActive(true);
+			patientB.addName().setFamily("FAMILY").addGiven("GIVEN");
+			patientB.addIdentifier().setSystem("SYSTEM").setValue("VALUEB");
+
+			return Lists.newArrayList(patientB);
+		}
+
+		/**
+		 * searchReturnList
+		 */
+		@Search
+		public List<IBaseResource> searchReturnList(@RequiredParam(name = "searchReturnList") StringParam theParam) {
+			return ourNextReturnList;
 		}
 
 	}
@@ -113,6 +359,7 @@ public class ConsentInterceptorTest {
 
 		ServletHandler servletHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setDefaultPrettyPrint(true);
 		ourServlet.setResourceProviders(patientProvider);
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);

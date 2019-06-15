@@ -484,10 +484,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
-		if (theRequest != null) {
-			HookParams params = new HookParams();
-		}
-
 		ourLog.debug(msg);
 		return outcome;
 	}

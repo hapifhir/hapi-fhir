@@ -69,6 +69,16 @@
 				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
 			</action>
+			<action type="change">
+				The default RestfulServer encoding has been changed from XML to JSON in order to
+				reflect the most common usage.
+			</action>
+			<action type="add">
+				A new interceptor called
+				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				JPA based servers to make appropriate consent decisions related to resources that
+				and operations that are being returned.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

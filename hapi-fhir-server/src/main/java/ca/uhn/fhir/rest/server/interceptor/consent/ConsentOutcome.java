@@ -10,6 +10,14 @@ public class ConsentOutcome {
 	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.PROCEED)</code>
 	 */
 	public static final ConsentOutcome PROCEED = new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
+	/**
+	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.REJECT)</code>
+	 */
+	public static final ConsentOutcome REJECT = new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+	/**
+	 * Convenience constant containing <code>new ConsentOutcome(ConsentOperationStatusEnum.AUTHORIZED)</code>
+	 */
+	public static final ConsentOutcome AUTHORIZED = new ConsentOutcome(ConsentOperationStatusEnum.AUTHORIZED);
 
 	private final ConsentOperationStatusEnum myStatus;
 	private final IBaseOperationOutcome myOperationOutcome;

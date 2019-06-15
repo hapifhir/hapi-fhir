@@ -225,11 +225,20 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
-	 * ca.uhn.fhir.rest.api.RestOperationTypeEnum - The type of operation that the FHIR server has determined that the client is trying to invoke
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - An object which will be populated with the details which were extracted from the raw request by the
-	 * server, e.g. the FHIR operation type and the parsed resource body (if any).
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - This parameter is provided for legacy reasons only and will be removed in the fututre. Do not use.
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -242,7 +251,8 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SERVER_INCOMING_REQUEST_PRE_HANDLED(void.class,
-		"ca.uhn.fhir.rest.api.RestOperationTypeEnum",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.rest.server.interceptor.IServerInterceptor$ActionRequestDetails"
 	),
 
@@ -621,8 +631,10 @@ public enum Pointcut {
 	 * </p>
 	 * Hooks may accept the following parameters:
 	 * <ul>
+	 * <li>
 	 * ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails - Contains details about the
 	 * specific resources being returned.
+	 * </li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -644,6 +656,80 @@ public enum Pointcut {
 	 */
 	STORAGE_PREACCESS_RESOURCES(void.class,
 		"ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+
+	/**
+	 * Invoked when the storage engine is about to check for the existence of a pre-cached search
+	 * whose results match the given search parameters.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks may return <code>boolean</code>. If the hook method returns
+	 * <code>false</code>, the server will not attempt to check for a cached
+	 * search no matter what.
+	 * </p>
+	 */
+	STORAGE_PRECHECK_FOR_CACHED_SEARCH(boolean.class,
+		"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+
+	/**
+	 * Invoked when a search is starting, prior to creating a record for the search.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
+	 * is being created and initialized
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESEARCH_REGISTERED(void.class,
+		"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),

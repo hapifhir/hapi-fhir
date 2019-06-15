@@ -1,9 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IConsentService {
@@ -21,7 +19,7 @@ public interface IConsentService {
 	 *                          passed between methods in the consent service.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome startOperation(RestOperationTypeEnum theOperationTypeEnum, IServerInterceptor.ActionRequestDetails theRequestDetails);
+	ConsentOutcome startOperation(RequestDetails theRequestDetails);
 
 	/**
 	 * This method is called if a user may potentially see a resource via READ
@@ -58,8 +56,19 @@ public interface IConsentService {
 	 * called. This method may modify the resource in order to filter/mask aspects of
 	 * the contents, or even to enrich it.
 	 * <p>
-	 *
+	 * The returning {@link ConsentOutcome} may optionally replace the resource
+	 * with a different resource (including an OperationOutcome) by calling the
+	 * resource property on the {@link ConsentOutcome}.
 	 * </p>
+	 * <p>
+	 *     In addition, the {@link ConsentOutcome} must return one of the following
+	 *     statuses:
+	 * </p>
+	 * <ul>
+	 *     <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client.</li>
+	 *     <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #seeResource(RequestDetails, IBaseResource)}.</li>
+	 *     <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
+	 * </ul>
 	 *
 	 * @param theRequestDetails Contains details about the operation that is
 	 *                          beginning, including details about the request type,
@@ -68,7 +77,7 @@ public interface IConsentService {
 	 *                          can be used to store information and state to be
 	 *                          passed between methods in the consent service.
 	 * @param theResource       The resource that will be exposed
-	 * @return An outcome object. See {@link ConsentOutcome}
+	 * @return An outcome object. See method documentation for a description.
 	 */
 	ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource);
 

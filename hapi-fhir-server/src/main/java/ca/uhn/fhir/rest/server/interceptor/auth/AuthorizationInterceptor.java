@@ -286,26 +286,25 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-	public void incomingRequestPreHandled(RestOperationTypeEnum theOperation, IServerInterceptor.ActionRequestDetails theProcessedRequest) {
+	public void incomingRequestPreHandled(RequestDetails theRequest) {
 		IBaseResource inputResource = null;
 		IIdType inputResourceId = null;
 
-		switch (determineOperationDirection(theOperation, theProcessedRequest.getResource())) {
+		switch (determineOperationDirection(theRequest.getRestOperationType(), theRequest.getResource())) {
 			case IN:
 			case BOTH:
-				inputResource = theProcessedRequest.getResource();
-				inputResourceId = theProcessedRequest.getId();
+				inputResource = theRequest.getResource();
+				inputResourceId = theRequest.getId();
 				break;
 			case OUT:
 				// inputResource = null;
-				inputResourceId = theProcessedRequest.getId();
+				inputResourceId = theRequest.getId();
 				break;
 			case NONE:
 				return;
 		}
 
-		RequestDetails requestDetails = theProcessedRequest.getRequestDetails();
-		applyRulesAndFailIfDeny(theOperation, requestDetails, inputResource, inputResourceId, null);
+		applyRulesAndFailIfDeny(theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null);
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)

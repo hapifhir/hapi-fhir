@@ -110,7 +110,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private IInterceptorService myInterceptorService;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
-	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
+	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.JSON;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
 	private boolean myIgnoreServerParsedRequestParameters = true;

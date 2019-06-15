@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.entity.SearchInclude;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -379,11 +380,23 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				PersistedJpaBundleProvider foundSearchProvider = txTemplate.execute(t -> {
 					Search searchToUse = null;
 
+					// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
+					HookParams params = new HookParams()
+						.add(SearchParameterMap.class, theParams)
+						.add(RequestDetails.class, theRequestDetails)
+						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+					Object outcome = myInterceptorBroadcaster.callHooksAndReturnObject(Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
+					if (Boolean.FALSE.equals(outcome)) {
+						return null;
+					}
+
+					// Check for a search matching the given hash
 					int hashCode = queryString.hashCode();
 					Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
 					for (Search nextCandidateSearch : candidates) {
 						if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
 							searchToUse = nextCandidateSearch;
+							break;
 						}
 					}
 
@@ -411,6 +424,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		Search search = new Search();
 		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search);
+
+		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
+		HookParams params = new HookParams()
+			.add(ICachedSearchDetails.class, search)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
 
 		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails);
 		myIdToSearchTask.put(search.getUuid(), task);

@@ -70,6 +70,7 @@ import javax.annotation.Nonnull;
 public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
+	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 
 	@Autowired
 	protected Environment myEnv;

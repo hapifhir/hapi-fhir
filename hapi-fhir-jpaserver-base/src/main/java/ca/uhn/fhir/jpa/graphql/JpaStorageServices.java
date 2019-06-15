@@ -35,6 +35,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
@@ -119,15 +120,21 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
 		IIdType refId = getContext().getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
-		BaseHasResource id = dao.readEntity(refId);
+		return lookup(refId);
+	}
+
+	private Resource lookup(IIdType theRefId) {
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
+		BaseHasResource id = dao.readEntity(theRefId);
 
 		return (Resource) toResource(id, false);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
-		return null;
+	public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
+		Resource outcome = lookup(new IdType(theReference.getReference()));
+		return new ReferenceResolution(theContext, outcome);
 	}
 
 	@Transactional(propagation = Propagation.NEVER)

@@ -291,6 +291,11 @@ public interface IServerInterceptor {
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated This class doesn't bring anything that can't be done with {@link RequestDetails}. That
+	 * class should be used instead. Deprecated in 4.0.0
+	 */
+	@Deprecated
 	class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
