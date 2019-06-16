@@ -84,6 +84,10 @@
 				assign a free port. This should theoretically result in fewer failed builds resulting from
 				port conflicts. Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="fix">
+				AuthorizationInterceptor sometimes failed with a 500 error when checking compartment
+				membership on a resource that has a contained subject (Patient).
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

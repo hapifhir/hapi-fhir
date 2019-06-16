@@ -197,6 +197,62 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+
+	@Test
+	public void testReadWithSubjectMasked() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference(patientId));
+		IIdType observationId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType observationId2 = ourClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Observation.class).inCompartment("Patient", patientId)
+					.build();
+			}
+		});
+
+		Bundle bundle;
+		Observation response;
+
+		// Read (no masking)
+		response = ourClient.read().resource(Observation.class).withId(observationId).execute();
+		assertEquals(ObservationStatus.FINAL, response.getStatus());
+		assertEquals(patientId.getValue(), response.getSubject().getReference());
+
+		// Read (with _elements masking)
+		response = ourClient
+			.read()
+			.resource(Observation.class)
+			.withId(observationId)
+			.elementsSubset("status")
+			.execute();
+		assertEquals(ObservationStatus.FINAL, response.getStatus());
+		assertEquals(null, response.getSubject().getReference());
+
+		// Read a non-allowed observation
+		try {
+			ourClient.read().resource(Observation.class).withId(observationId2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+
+	}
+
+
 	/**
 	 * See #751
 	 */

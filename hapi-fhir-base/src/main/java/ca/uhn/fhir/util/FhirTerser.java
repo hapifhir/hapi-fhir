@@ -642,7 +642,8 @@ public class FhirTerser {
 					wantType = matcher.group(2);
 				}
 
-				for (IBaseReference nextValue : getValues(theSource, nextPath, IBaseReference.class)) {
+				List<IBaseReference> values = getValues(theSource, nextPath, IBaseReference.class);
+				for (IBaseReference nextValue : values) {
 					IIdType nextTargetId = nextValue.getReferenceElement();
 					String nextRef = nextTargetId.toUnqualifiedVersionless().getValue();
 
@@ -662,7 +663,8 @@ public class FhirTerser {
 					}
 
 					if (isNotBlank(wantType)) {
-						if (!nextTargetId.getResourceType().equals(wantType)) {
+						String nextTargetIdResourceType = nextTargetId.getResourceType();
+						if (nextTargetIdResourceType == null || !nextTargetIdResourceType.equals(wantType)) {
 							continue;
 						}
 					}

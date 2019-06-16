@@ -118,7 +118,7 @@ public class SearchCoordinatorSvcImplTest {
 	}
 
 	private Answer<Void> loadPids() {
-		Answer<Void> retVal = theInvocation -> {
+		return theInvocation -> {
 			List<Long> pids = (List<Long>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
 			for (Long nextPid : pids) {
@@ -128,7 +128,6 @@ public class SearchCoordinatorSvcImplTest {
 			}
 			return null;
 		};
-		return retVal;
 	}
 
 	@Test
