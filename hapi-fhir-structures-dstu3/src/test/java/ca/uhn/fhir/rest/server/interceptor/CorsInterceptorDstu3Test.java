@@ -37,7 +37,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class CorsInterceptorDstu3Test {
@@ -140,7 +140,7 @@ public class CorsInterceptorDstu3Test {
 	}
 	
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		ourClient.close();
 	}
 
@@ -157,8 +157,7 @@ public class CorsInterceptorDstu3Test {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
-		int port = PortUtil.findFreePort();
-		ourServer = new Server(port);
+		ourServer = new Server(0);
 
 		RestfulServer restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(new DummyPatientResourceProvider());
@@ -191,7 +190,8 @@ public class CorsInterceptorDstu3Test {
 		ourServer.setHandler(contexts);
 
 		ourServer.setHandler(ch);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        int port = JettyUtil.getPortForStartedServer(ourServer);
 		ourBaseUri = "http://localhost:" + port + "/rootctx/rcp2/fhirctx/fcp2";
 
 	}

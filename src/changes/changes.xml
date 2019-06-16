@@ -79,6 +79,11 @@
 				JPA based servers to make appropriate consent decisions related to resources that
 				and operations that are being returned.
 			</action>
+			<action type="add" issue="1336">
+				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
+				assign a free port. This should theoretically result in fewer failed builds resulting from
+				port conflicts. Thanks to Stig Døssing for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

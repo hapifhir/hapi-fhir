@@ -2274,6 +2274,7 @@
 			<modules>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-fhir-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
@@ -2403,5 +2404,4 @@
 			</build>
 		</profile>
 	</profiles>
-
 </project>
