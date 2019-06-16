@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -94,10 +95,9 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
-
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
-
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
 			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");

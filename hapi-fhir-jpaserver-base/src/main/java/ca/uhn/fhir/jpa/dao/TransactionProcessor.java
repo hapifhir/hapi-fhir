@@ -443,7 +443,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
 			try {
-				IBaseResource resource = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
+
+				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
+				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+
+				IBaseResource resource = methodBinding.doInvokeServer(theRequestDetails.getServer(), requestDetails);
 				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 					resource = filterNestedBundle(requestDetails, resource);
 				}

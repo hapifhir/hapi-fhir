@@ -433,6 +433,9 @@ public interface IServerInterceptor {
 				return;
 			}
 
+			IIdType previousRequestId = requestDetails.getId();
+			requestDetails.setId(getId());
+
 			IInterceptorService interceptorService = server.getInterceptorService();
 
 			HookParams params = new HookParams();
@@ -441,6 +444,9 @@ public interface IServerInterceptor {
 			params.add(RequestDetails.class, this.getRequestDetails());
 			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
 			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
+
+			// Reset the request ID
+			requestDetails.setId(previousRequestId);
 
 		}
 

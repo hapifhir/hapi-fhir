@@ -136,14 +136,14 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
 
-		IAnonymousInterceptor pointcut = mock(IAnonymousInterceptor.class);
-		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, pointcut);
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 		try {
 
 			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
 			fetchBundle(theUrl, EncodingEnum.JSON);
 
-			Mockito.verify(pointcut, times(10)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
+			Mockito.verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
 
 			List<String> returnedClasses = new ArrayList<>();
 			for (HookParams nextParams : myHookParamsCaptor.getAllValues()) {
@@ -160,7 +160,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
 		} finally {
 
-			ourRestServer.getInterceptorService().unregisterInterceptor(pointcut);
+			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
 
 		}
 	}
