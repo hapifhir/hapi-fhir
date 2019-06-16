@@ -5,16 +5,18 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -30,7 +32,41 @@ import static org.mockito.Mockito.when;
 
 public class FhirTerserR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
+
+	@Test
+	public void testClear() {
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+
+		Patient pt = new Patient();
+		pt.setId("pt");
+		pt.setActive(true);
+		input
+			.addEntry()
+			.setResource(pt)
+			.getRequest()
+			.setUrl("Patient/pt")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		Observation obs = new Observation();
+		obs.setId("obs");
+		obs.getSubject().setReference("Patient/pt");
+		input
+			.addEntry()
+			.setResource(obs)
+			.getRequest()
+			.setUrl("Observation/obs")
+			.setMethod(Bundle.HTTPVerb.PUT);
+
+		ourCtx.newTerser().clear(input);
+
+		String output = ourCtx.newJsonParser().encodeResourceToString(input);
+		ourLog.info(output);
+		assertTrue(input.isEmpty());
+		assertEquals("{\"resourceType\":\"Bundle\"}", output);
+	}
 
 	@Test
 	public void testCloneIntoBundle() {
@@ -71,7 +107,7 @@ public class FhirTerserR4Test {
 
 		Assert.assertEquals("CODE", target.getCode());
 	}
-   
+
 	@Test
 	public void testCloneIntoCompositeMismatchedFields() {
 		Quantity source = new Quantity();
@@ -89,24 +125,24 @@ public class FhirTerserR4Test {
 		} catch (DataFormatException e) {
 			// good
 		}
-}
+	}
 
-   /**
+	/**
 	 * See #369
 	 */
-   @Test
-   public void testCloneIntoExtension() {
-       Patient patient = new Patient();
+	@Test
+	public void testCloneIntoExtension() {
+		Patient patient = new Patient();
 
-       patient.addExtension(new Extension("http://example.com", new StringType("FOO")));
+		patient.addExtension(new Extension("http://example.com", new StringType("FOO")));
 
-       Patient target = new Patient();
+		Patient target = new Patient();
 		ourCtx.newTerser().cloneInto(patient, target, false);
-		
+
 		List<Extension> exts = target.getExtensionsByUrl("http://example.com");
 		assertEquals(1, exts.size());
-		Assert.assertEquals("FOO", ((StringType)exts.get(0).getValue()).getValue());
-   }
+		Assert.assertEquals("FOO", ((StringType) exts.get(0).getValue()).getValue());
+	}
 
 
 	@Test
@@ -140,18 +176,18 @@ public class FhirTerserR4Test {
 	/**
 	 * See #369
 	 */
-   @Test
-   public void testCloneIntoValues() {
-       Observation obs = new Observation();
-       obs.setValue(new StringType("AAA"));
-       obs.addNote().setText("COMMENTS");
+	@Test
+	public void testCloneIntoValues() {
+		Observation obs = new Observation();
+		obs.setValue(new StringType("AAA"));
+		obs.addNote().setText("COMMENTS");
 
-       Observation target = new Observation();
+		Observation target = new Observation();
 		ourCtx.newTerser().cloneInto(obs, target, false);
-		
-		Assert.assertEquals("AAA", ((StringType)obs.getValue()).getValue());
+
+		Assert.assertEquals("AAA", ((StringType) obs.getValue()).getValue());
 		Assert.assertEquals("COMMENTS", obs.getNote().get(0).getText());
-   }
+	}
 
 	@Test
 	public void testGetAllPopulatedChildElementsOfTypeDescendsIntoContained() {
@@ -165,7 +201,7 @@ public class FhirTerserR4Test {
 		FhirTerser t = ourCtx.newTerser();
 		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
 
-		assertThat(toStrings(strings), containsInAnyOrder("PATIENT","ORGANIZATION"));
+		assertThat(toStrings(strings), containsInAnyOrder("PATIENT", "ORGANIZATION"));
 
 	}
 
@@ -246,7 +282,7 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
@@ -255,13 +291,13 @@ public class FhirTerserR4Test {
 	@Test
 	public void testGetEmbeddedResourcesOnBundle() {
 
-   	Bundle outerBundle = new Bundle();
-   	outerBundle.setId("outerBundle");
+		Bundle outerBundle = new Bundle();
+		outerBundle.setId("outerBundle");
 
-   	Bundle innerBundle1 = new Bundle();
-   	innerBundle1.setId("innerBundle1");
-   	innerBundle1.setTotal(1);
-   	outerBundle.addEntry().setResource(innerBundle1);
+		Bundle innerBundle1 = new Bundle();
+		innerBundle1.setId("innerBundle1");
+		innerBundle1.setTotal(1);
+		outerBundle.addEntry().setResource(innerBundle1);
 		Patient innerBundle1innerPatient1 = new Patient();
 		innerBundle1innerPatient1.setId("innerBundle1innerPatient1");
 		innerBundle1innerPatient1.setActive(true);
@@ -318,9 +354,9 @@ public class FhirTerserR4Test {
 	}
 
 	private List<String> toUnqualifiedVersionlessIdValues(Collection<IBaseResource> theResources) {
-   	return theResources
+		return theResources
 			.stream()
-			.map(t->t.getIdElement().toUnqualifiedVersionless().getValue())
+			.map(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
 			.collect(Collectors.toList());
 	}
 
@@ -400,7 +436,7 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
@@ -411,7 +447,7 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("modifiedNestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
@@ -472,11 +508,11 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(2, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue1", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
-		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(1)).getUrl());
 		Assert.assertEquals("nestedValue2", ((StringType) ((Extension) values.get(1)).getValue()).getValueAsString());
@@ -730,18 +766,18 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", false, true);
 		assertEquals(2, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
-		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(1)).getUrl());
 		assertNull(((Extension) values.get(1)).getValue());
@@ -750,7 +786,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(1)).getUrl());
 		Assert.assertEquals("addedNestedValue", ((StringType) ((Extension) values.get(1)).getValue()).getValueAsString());
@@ -758,10 +794,10 @@ public class FhirTerserR4Test {
 
 	@Test
 	public void testGetValuesWithTheCreate() {
-   	Patient p = new Patient();
+		Patient p = new Patient();
 
-   	List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
-   	assertEquals(1, values.size());
+		List<Object> values = ourCtx.newTerser().getValues(p, "Patient.active", true);
+		assertEquals(1, values.size());
 		assertTrue(values.get(0) instanceof PrimitiveType);
 		assertTrue(values.get(0) instanceof BooleanType);
 		assertNull(((BooleanType) values.get(0)).getValue());
@@ -782,7 +818,7 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		assertNull(((Extension) values.get(0)).getValue());
@@ -878,18 +914,18 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true, true);
 		assertEquals(2, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
-		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(1)).getUrl());
 		assertNull(((Extension) values.get(1)).getValue());
@@ -898,7 +934,7 @@ public class FhirTerserR4Test {
 
 		System.out.println(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertTrue(values.get(1) instanceof  IBaseExtension);
+		assertTrue(values.get(1) instanceof IBaseExtension);
 		assertTrue(values.get(1) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(1)).getUrl());
 		Assert.assertEquals("addedNestedValue", ((StringType) ((Extension) values.get(1)).getValue()).getValueAsString());
@@ -947,7 +983,7 @@ public class FhirTerserR4Test {
 
 		values = ourCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertEquals(1, values.size());
-		assertTrue(values.get(0) instanceof  IBaseExtension);
+		assertTrue(values.get(0) instanceof IBaseExtension);
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("nestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
@@ -978,13 +1014,28 @@ public class FhirTerserR4Test {
 		// assertEquals(2, containingElementPath.getAllValues().get(2).size());
 
 	}
-	
+
 	private List<String> toStrings(List<StringType> theStrings) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (StringType next : theStrings) {
 			retVal.add(next.getValue());
 		}
 		return retVal;
+	}
+
+	/**
+	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
+	 */
+	private static abstract class ClassGetter<T> {
+		@SuppressWarnings("unchecked")
+		public final Class<T> get() {
+			final ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
+			Type type = superclass.getActualTypeArguments()[0];
+			if (type instanceof ParameterizedType) {
+				return (Class<T>) ((ParameterizedType) type).getOwnerType();
+			}
+			return (Class<T>) type;
+		}
 	}
 
 	@AfterClass
@@ -1006,21 +1057,6 @@ public class FhirTerserR4Test {
 	private static Class<List<BaseRuntimeElementDefinition<?>>> getListClass2() {
 		return new ClassGetter<List<BaseRuntimeElementDefinition<?>>>() {
 		}.get();
-	}
-
-	/**
-	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
-	 */
-	private static abstract class ClassGetter<T> {
-		@SuppressWarnings("unchecked")
-		public final Class<T> get() {
-			final ParameterizedType superclass = (ParameterizedType) getClass().getGenericSuperclass();
-			Type type = superclass.getActualTypeArguments()[0];
-			if (type instanceof ParameterizedType) {
-				return (Class<T>) ((ParameterizedType) type).getOwnerType();
-			}
-			return (Class<T>) type;
-		}
 	}
 
 }

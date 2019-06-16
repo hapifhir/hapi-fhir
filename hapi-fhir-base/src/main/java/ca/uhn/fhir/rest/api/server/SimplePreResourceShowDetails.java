@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api.server;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -9,6 +10,10 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 
 	private final List<IBaseResource> myResources;
 	private final boolean[] mySubSets;
+
+	public SimplePreResourceShowDetails(IBaseResource theResource) {
+		this(Lists.newArrayList(theResource));
+	}
 
 	public SimplePreResourceShowDetails(List<IBaseResource> theResources) {
 		myResources = theResources;

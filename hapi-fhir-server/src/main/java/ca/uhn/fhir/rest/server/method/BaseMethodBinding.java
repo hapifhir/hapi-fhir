@@ -258,6 +258,7 @@ public abstract class BaseMethodBinding<T> {
 			ActionRequestDetails details = new ActionRequestDetails(theRequest);
 			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
 			HookParams preHandledParams = new HookParams();
+			preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
 			preHandledParams.add(RequestDetails.class, theRequest);
 			preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
 			preHandledParams.add(ActionRequestDetails.class, details);

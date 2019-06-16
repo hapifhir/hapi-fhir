@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,7 @@ import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.QualifierDetails;
 import ca.uhn.fhir.rest.server.exceptions.*;
@@ -903,13 +900,24 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		if (theRequestDetails != null) {
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			//noinspection unchecked
+			retVal = (T) showDetails.getResource(0);
+		}
+
 		ourLog.debug("Processed read on {} in {}ms", theId.getValue(), w.getMillisAndRestart());
 		return retVal;
 	}
 
 	@Override
 	public BaseHasResource readEntity(IIdType theId) {
-
 		return readEntity(theId, true);
 	}
 
@@ -1170,6 +1178,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		if (theRequestDetails != null && outcome.getResource() != null) {
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+			outcome.setResource(showDetails.getResource(0));
+		}
+
+
 		return outcome;
 	}
 
@@ -1378,7 +1398,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 	}
-
 
 
 	private void validateResourceType(BaseHasResource entity) {

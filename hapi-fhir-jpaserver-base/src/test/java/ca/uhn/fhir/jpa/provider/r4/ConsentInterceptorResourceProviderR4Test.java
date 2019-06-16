@@ -45,8 +45,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.blankOrNullString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
@@ -216,7 +222,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	public void testSearchMaskSubject() {
 		create50Observations();
 
-		IConsentService consentService = new ConsentSvcMaskObservationSubjects();
+		ConsentSvcMaskObservationSubjects consentService = new ConsentSvcMaskObservationSubjects();
 		myConsentInterceptor = new ConsentInterceptor(consentService);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
@@ -231,6 +237,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		assertEquals(15, resources.size());
+		assertEquals(16, consentService.getSeeCount());
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
@@ -242,6 +249,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirCtx, result);
 		assertEquals(15, resources.size());
+		assertEquals(32, consentService.getSeeCount());
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
@@ -408,6 +416,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseString, containsString("\"family\":\"PATIENT_FAMILY\""));
 			assertThat(responseString, containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]"));
+			assertThat(responseString, containsString("\"name\":\"ORG_NAME\""));
 		}
 
 	}
@@ -420,9 +429,92 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		myConsentInterceptor = new ConsentInterceptor(consentService);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
-		// Proceed everything
-		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		String query = "{ name { family, given } }";
+		IConsentService svc = mock(IConsentService.class);
+		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(), any())).thenReturn(ConsentOutcome.REJECT);
+
+		consentService.setTarget(svc);
+		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
+		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		ourLog.info("HTTP GET {}", url);
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseString, not(containsString("\"family\":\"PATIENT_FAMILY\"")));
+			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
+			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
+
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Patient/[0-9]+ is not known"));
+		}
+
+	}
+
+	@Test
+	public void testGraphQL_RejectLinkedResource() throws IOException {
+		createPatientAndOrg();
+
+		DelegatingConsentService consentService = new DelegatingConsentService();
+		myConsentInterceptor = new ConsentInterceptor(consentService);
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		IConsentService svc = mock(IConsentService.class);
+		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t -> {
+			IBaseResource resource = t.getArgument(1, IBaseResource.class);
+			if (resource instanceof Organization) {
+				return ConsentOutcome.REJECT;
+			}
+			return ConsentOutcome.PROCEED;
+		});
+		when(svc.seeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+
+		consentService.setTarget(svc);
+		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
+		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		ourLog.info("HTTP GET {}", url);
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseString, not(containsString("\"family\":\"PATIENT_FAMILY\"")));
+			assertThat(responseString, not(containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")));
+			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
+
+			OperationOutcome oo = myFhirCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), matchesPattern("Unable to execute GraphQL Expression: HTTP 404 Resource Organization/[0-9]+ is not known"));
+		}
+
+	}
+
+	@Test
+	public void testGraphQL_MaskLinkedResource() throws IOException {
+		createPatientAndOrg();
+
+		DelegatingConsentService consentService = new DelegatingConsentService();
+		myConsentInterceptor = new ConsentInterceptor(consentService);
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		IConsentService svc = mock(IConsentService.class);
+		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t -> {
+			IBaseResource resource = t.getArgument(1, IBaseResource.class);
+			if (resource instanceof Organization) {
+				Organization org = new Organization();
+				org.addIdentifier().setSystem("ORG_SYSTEM").setValue("ORG_VALUE");
+				return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED, org);
+			}
+			return ConsentOutcome.PROCEED;
+		});
+
+		consentService.setTarget(svc);
+		String query = "{ name { family, given }, managingOrganization { reference, resource {name, identifier { system } } } }";
 		String url = ourServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 		ourLog.info("HTTP GET {}", url);
 		HttpGet get = new HttpGet(url);
@@ -433,6 +525,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseString, containsString("\"family\":\"PATIENT_FAMILY\""));
 			assertThat(responseString, containsString("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]"));
+			assertThat(responseString, not(containsString("\"name\":\"ORG_NAME\"")));
+			assertThat(responseString, containsString("\"system\":\"ORG_SYSTEM\""));
 		}
 
 	}
@@ -489,6 +583,8 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	private class ConsentSvcMaskObservationSubjects implements IConsentService {
 
+		private int mySeeCount = 0;
+
 		@Override
 		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
 			return ConsentOutcome.PROCEED;
@@ -499,8 +595,15 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			return ConsentOutcome.PROCEED;
 		}
 
+		public int getSeeCount() {
+			return mySeeCount;
+		}
+
 		@Override
 		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+			mySeeCount++;
+			String resourceId = theResource.getIdElement().toUnqualifiedVersionless().getValue();
+			ourLog.info("** SEE: {}", resourceId);
 			if (theResource instanceof Observation) {
 				((Observation) theResource).getSubject().setReference("");
 				((Observation) theResource).getSubject().setResource(null);

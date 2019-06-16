@@ -150,6 +150,17 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			}
 		}
 
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		if (myRequestDetails != null) {
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, myRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			myRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+		}
+
+
 		return retVal;
 	}
 
@@ -336,7 +347,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false);
 
-		// Interceptor call: STORAGE_PRESEE_RESOURCES
+		// Interceptor call: STORAGE_PRESHOW_RESOURCE
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
 		if (myRequestDetails != null && resources.size() > 0) {
@@ -346,7 +357,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 				.add(IPreResourceShowDetails.class, accessDetails)
 				.add(RequestDetails.class, myRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCE, params);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 			resources = resources
 				.stream()

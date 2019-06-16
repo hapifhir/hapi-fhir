@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -258,6 +259,7 @@ public class IncludeTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		servlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		servlet.setResourceProviders(patientProvider, new DummyDiagnosticReportResourceProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);

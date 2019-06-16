@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -37,7 +38,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.util.*;
 
-public class SearchSearchServerDstu1Test {
+public class SearchSearchServerR4Test {
 
   private static CloseableHttpClient ourClient;
   private static FhirContext ourCtx = FhirContext.forR4();
@@ -45,7 +46,7 @@ public class SearchSearchServerDstu1Test {
   private static StringAndListParam ourLastAndList;
 
   private static Set<Include> ourLastIncludes;
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSearchServerDstu1Test.class);
+  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchSearchServerR4Test.class);
   private static int ourPort;
   private static Server ourServer;
   private static RestfulServer ourServlet;
@@ -475,6 +476,7 @@ public class SearchSearchServerDstu1Test {
     ServletHandler proxyHandler = new ServletHandler();
     ourServlet = new RestfulServer(ourCtx);
     ourServlet.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+    ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
     ourServlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(10));
 
     ourServlet.setResourceProviders(patientProvider, new DummyObservationResourceProvider());

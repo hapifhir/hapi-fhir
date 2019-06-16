@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -83,6 +84,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		ourServlet.setFhirContext(ourCtx);
 		ourServlet.setResourceProviders(patientProvider);
 		ourServlet.registerInterceptor(new ResponseHighlighterInterceptor());
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

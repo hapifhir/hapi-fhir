@@ -384,7 +384,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		// This can be null depending on the exception type
@@ -504,7 +506,9 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<>());
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
@@ -535,7 +539,9 @@ public class ResponseHighlightingInterceptorTest {
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
 		reqDetails.setParameters(params);
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
@@ -755,6 +761,7 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		/*
 		 * Enable CORS

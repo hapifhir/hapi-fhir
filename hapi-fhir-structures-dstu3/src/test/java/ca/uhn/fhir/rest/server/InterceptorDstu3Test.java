@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -128,6 +129,13 @@ public class InterceptorDstu3Test {
 		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(ResponseDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(IBaseResource.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
 		when(myInterceptor2.outgoingResponse(nullable(RequestDetails.class), nullable(HttpServletRequest.class), nullable(HttpServletResponse.class))).thenReturn(true);
+
+		doAnswer(t->{
+			RestOperationTypeEnum type = (RestOperationTypeEnum) t.getArguments()[0];
+			ActionRequestDetails det = (ActionRequestDetails) t.getArguments()[1];
+			type.toString();
+			return null;
+		}).when(myInterceptor1).incomingRequestPreHandled(any(), any());
 
 		String input = createInput();
 
@@ -299,6 +307,7 @@ public class InterceptorDstu3Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setResourceProviders(patientProvider);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

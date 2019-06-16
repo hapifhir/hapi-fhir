@@ -238,6 +238,9 @@ public enum Pointcut {
 	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.RestOperationTypeEnum - The type of operation that the FHIR server has determined that the client is trying to invoke
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - This parameter is provided for legacy reasons only and will be removed in the fututre. Do not use.
 	 * </li>
 	 * </ul>
@@ -253,6 +256,7 @@ public enum Pointcut {
 	SERVER_INCOMING_REQUEST_PRE_HANDLED(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.rest.api.RestOperationTypeEnum",
 		"ca.uhn.fhir.rest.server.interceptor.IServerInterceptor$ActionRequestDetails"
 	),
 
@@ -777,7 +781,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PRESHOW_RESOURCE(void.class,
+	STORAGE_PRESHOW_RESOURCES(void.class,
 		"ca.uhn.fhir.rest.api.server.IPreResourceShowDetails",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"

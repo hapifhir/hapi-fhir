@@ -438,6 +438,8 @@ public interface IServerInterceptor {
 			HookParams params = new HookParams();
 			params.add(RestOperationTypeEnum.class, theOperationType);
 			params.add(this);
+			params.add(RequestDetails.class, this.getRequestDetails());
+			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
 			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
 
 		}

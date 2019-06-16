@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPatch;
@@ -144,8 +145,9 @@ public class PatchDstu3Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
 		servlet.setResourceProviders(patientProvider);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

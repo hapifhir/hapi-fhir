@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.PortUtil;
@@ -184,6 +185,7 @@ public class ETagServerR4Test {
 
     ServletHandler proxyHandler = new ServletHandler();
     RestfulServer servlet = new RestfulServer(ourCtx);
+    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
     servlet.setResourceProviders(patientProvider);
     ServletHolder servletHolder = new ServletHolder(servlet);
     proxyHandler.addServletWithMapping(servletHolder, "/*");

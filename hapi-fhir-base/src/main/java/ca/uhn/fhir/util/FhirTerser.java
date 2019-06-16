@@ -947,4 +947,27 @@ public class FhirTerser {
 
 		return retVal;
 	}
+
+	/**
+	 * Clear all content on a resource
+	 */
+	public void clear(IBaseResource theInput) {
+		visit(theInput, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					((IPrimitiveType) theElement).setValueAsString(null);
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				theNextExt.setUrl(null);
+				theNextExt.setValue(null);
+				return true;
+			}
+
+		});
+	}
 }
