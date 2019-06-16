@@ -3201,9 +3201,9 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
+		assertTrue(ourHitMethod);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertEquals(ERR403, response);
-		assertTrue(ourHitMethod);
 
 	}
 

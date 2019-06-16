@@ -13,6 +13,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.*;

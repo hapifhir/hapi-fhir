@@ -965,7 +965,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
-			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
+			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
+			requestDetails.setRestOperationType(operation);
 
 			// Handle server interceptors
 			HookParams postProcessedParams = new HookParams();

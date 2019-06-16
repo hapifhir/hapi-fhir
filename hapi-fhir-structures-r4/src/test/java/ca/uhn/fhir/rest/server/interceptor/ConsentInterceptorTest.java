@@ -14,7 +14,7 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOperationStatusEnum;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -345,15 +345,13 @@ public class ConsentInterceptorTest {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		ourClient.close();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourLog.info("Using port: {}", ourPort);
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -367,6 +365,7 @@ public class ConsentInterceptorTest {
 
 		ourServer.setHandler(servletHandler);
 		ourServer.start();
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -403,7 +404,7 @@ public class IncludeTest {
 
 		@Search
 		public List<Patient> findPatientWithSimpleNames(@RequiredParam(name = Patient.SP_NAME) StringDt theName, @IncludeParam(allow = { "foo", "bar" }) Set<Include> theIncludes) {
-			ArrayList<Patient> retVal = new ArrayList<Patient>();
+			ArrayList<Patient> retVal = new ArrayList<>();
 
 			Patient p = new Patient();
 			p.addIdentifier().setSystem("Mr").setValue("Test");
@@ -465,10 +466,6 @@ public class IncludeTest {
 		@Override
 		public boolean isEmpty() {
 			return super.isEmpty() && ElementUtil.isEmpty(mySecondOrg);
-		}
-
-		public void setSecondOrg(Reference theSecondOrg) {
-			mySecondOrg = theSecondOrg;
 		}
 
 	}
