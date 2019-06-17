@@ -26,9 +26,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation should be placed on
- * {@link Interceptor}
- * bean methods.
+ * This annotation should be placed on interceptor methods. The
+ * {@link Pointcut value=Pointcut} property determines which event
+ * is actually being invoked. See the Pointcut JavaDoc for information
+ * on available method parameters for a given hook.
  *
  * @see Interceptor
  */
