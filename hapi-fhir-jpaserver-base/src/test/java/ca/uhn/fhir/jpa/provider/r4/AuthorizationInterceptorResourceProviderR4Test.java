@@ -530,6 +530,68 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+
+	@Test
+	public void testTransactionResponses() {
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					// Allow write but not read
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("write patient").write().resourcesOfType(Encounter.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Create a bundle that will be used as a transaction
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Encounter encounter = new Encounter();
+		encounter.addIdentifier(new Identifier().setSystem("http://foo").setValue("123"));
+		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+		bundle.addEntry()
+			.setFullUrl("Encounter")
+			.setResource(encounter)
+			.getRequest()
+			.setUrl("Encounter")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		// return=minimal - should succeed
+		Bundle resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		assertNull(resp.getEntry().get(0).getResource());
+
+		// return=OperationOutcome - should succeed
+		resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		assertNull(resp.getEntry().get(0).getResource());
+
+		// return=Representation - should fail
+		try {
+			ourClient
+				.transaction()
+				.withBundle(bundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
+
 	/**
 	 * See #762
 	 */
@@ -611,7 +673,11 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			.setMethod(Bundle.HTTPVerb.POST);
 
 
-		Bundle resp = ourClient.transaction().withBundle(bundle).execute();
+		Bundle resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.execute();
 		assertEquals(3, resp.getEntry().size());
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}

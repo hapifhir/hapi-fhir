@@ -14,12 +14,10 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -44,7 +42,7 @@ public class ConsentInterceptor {
 	@Hook(value = Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void interceptPreHandled(RequestDetails theRequestDetails) {
 		ConsentOutcome outcome = myConsentService.startOperation(theRequestDetails);
-		Validate.notNull(outcome, "Copnsent service returned null outcome");
+		Validate.notNull(outcome, "Consent service returned null outcome");
 
 		switch (outcome.getStatus()) {
 			case REJECT:
@@ -129,10 +127,13 @@ public class ConsentInterceptor {
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE)
 	public void interceptOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResource) {
-
 		if (theResource.getResponseResource() == null) {
 			return;
 		}
+		if (isRequestAuthorized(theRequestDetails)) {
+			return;
+		}
+
 		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = getAlreadySeenResourcesMap(theRequestDetails);
 
 		// See outer resource
@@ -166,6 +167,12 @@ public class ConsentInterceptor {
 		IModelVisitor2 visitor = new IModelVisitor2() {
 			@Override
 			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+
+				// Clear the total
+				if (theElement instanceof IBaseBundle) {
+					BundleUtil.setTotal(theRequestDetails.getFhirContext(), (IBaseBundle)theElement, null);
+				}
+
 				if (theElement == outerResource) {
 					return true;
 				}

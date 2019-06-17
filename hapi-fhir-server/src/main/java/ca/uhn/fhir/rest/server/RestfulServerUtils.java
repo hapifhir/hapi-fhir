@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -664,36 +665,45 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static PreferReturnEnum parsePreferHeader(String theValue) {
-		if (isBlank(theValue)) {
-			return null;
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
+
+	public static boolean respectPreferHeader(RestOperationTypeEnum theRestOperationType) {
+		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
+	}
+
+	public static PreferReturnEnum parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
+		PreferReturnEnum retVal = null;
+
+		if (isNotBlank(theValue)) {
+			StringTokenizer tok = new StringTokenizer(theValue, ",");
+			while (tok.hasMoreTokens()) {
+				String next = tok.nextToken();
+				int eqIndex = next.indexOf('=');
+				if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+					continue;
+				}
+
+				String key = next.substring(0, eqIndex).trim();
+				if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
+					continue;
+				}
+
+				String value = next.substring(eqIndex + 1).trim();
+				if (value.length() < 2) {
+					continue;
+				}
+				if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+					value = value.substring(1, value.length() - 1);
+				}
+
+				retVal = PreferReturnEnum.fromHeaderValue(value);
+			}
 		}
 
-		StringTokenizer tok = new StringTokenizer(theValue, ",");
-		while (tok.hasMoreTokens()) {
-			String next = tok.nextToken();
-			int eqIndex = next.indexOf('=');
-			if (eqIndex == -1 || eqIndex >= next.length() - 2) {
-				continue;
-			}
-
-			String key = next.substring(0, eqIndex).trim();
-			if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
-				continue;
-			}
-
-			String value = next.substring(eqIndex + 1).trim();
-			if (value.length() < 2) {
-				continue;
-			}
-			if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-				value = value.substring(1, value.length() - 1);
-			}
-
-			return PreferReturnEnum.fromHeaderValue(value);
+		if (retVal == null && theServer != null) {
+			retVal = theServer.getDefaultPreferReturn();
 		}
-
-		return null;
+		return retVal;
 	}
 
 	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {

@@ -1181,15 +1181,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		if (theRequestDetails != null && outcome.getResource() != null) {
-			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
-			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, showDetails)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-			outcome.setResource(showDetails.getResource(0));
-		}
+		// Note that this will only fire if someone actually goes to use the
+		// resource in a response (it's their responsibility to call
+		// outcome.fireResourceViewCallback())
+		outcome.registerResourceViewCallback(()->{
+			if (theRequestDetails != null && outcome.getResource() != null) {
+				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
+				HookParams params = new HookParams()
+					.add(IPreResourceShowDetails.class, showDetails)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+				theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				outcome.setResource(showDetails.getResource(0));
+			}
+		});
 
 		return outcome;
 	}

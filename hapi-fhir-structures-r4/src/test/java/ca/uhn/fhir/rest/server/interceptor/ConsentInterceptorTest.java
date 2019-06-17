@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -59,6 +60,7 @@ public class ConsentInterceptorTest {
 	private static RestfulServer ourServlet;
 	private static Server ourServer;
 	private static List<IBaseResource> ourNextReturnList;
+
 	@Mock
 	private IConsentService myConsentSvc;
 	private ConsentInterceptor myInterceptor;
@@ -92,6 +94,31 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any());
+	}
+
+	@Test
+	public void testTotalModeIgnoredForConsentQueries() throws IOException {
+		HttpGet httpGet;
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.seeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnNormal=1&_total=accurate");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, not(containsString("\"total\"")));
+		}
+
+		when(myConsentSvc.startOperation(any())).thenReturn(ConsentOutcome.AUTHORIZED);
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?searchReturnNormal=1&_total=accurate");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertThat(responseContent, containsString("\"total\""));
+		}
+
 	}
 
 	@Test
@@ -299,7 +326,6 @@ public class ConsentInterceptorTest {
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
-
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
@@ -317,7 +343,9 @@ public class ConsentInterceptorTest {
 		 * searchReturnNormal
 		 */
 		@Search
-		public List<IBaseResource> searchReturnNormal(@RequiredParam(name = "searchReturnNormal") StringParam theParam) {
+		public List<IBaseResource> searchReturnNormal(
+			@RequiredParam(name = "searchReturnNormal") StringParam theParam) {
+
 			Patient patientA = new Patient();
 			patientA.setId("Patient/A");
 			patientA.setActive(true);

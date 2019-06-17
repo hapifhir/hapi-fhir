@@ -312,7 +312,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
-	public void handlePreShow(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
+	public void hookPreShow(RequestDetails theRequestDetails, IPreResourceShowDetails theDetails) {
 		for (int i = 0; i < theDetails.size(); i++) {
 			IBaseResource next = theDetails.getResource(i);
 			checkOutgoingResourceAndFailIfDeny(theRequestDetails, next);
@@ -320,7 +320,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-	public void outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
+	public void hookOutgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		checkOutgoingResourceAndFailIfDeny(theRequestDetails, theResponseObject);
 	}
 
@@ -373,17 +373,17 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void resourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
+	public void hookResourcePreCreate(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.CREATE);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_DELETED)
-	public void resourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
+	public void hookResourcePreDelete(RequestDetails theRequest, IBaseResource theResource) {
 		handleUserOperation(theRequest, theResource, RestOperationTypeEnum.DELETE);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void resourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
+	public void hookResourcePreUpdate(RequestDetails theRequest, IBaseResource theOldResource, IBaseResource theNewResource) {
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE);
 		}

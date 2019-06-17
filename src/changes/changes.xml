@@ -26,7 +26,9 @@
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
-				and operations that are being returned.
+				and operations that are being returned. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>]]>
+				for more information.
 			</action>
 			<action type="add">
 				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
@@ -42,7 +44,7 @@
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
-				for the operation to succeed without timing out in larger system.
+				for the operation to succeed without timing out in larger systems.
 			</action>
 			<action type="fix">
 				The JPA server did not correctly index Timing fields where the timing contained
