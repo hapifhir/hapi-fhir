@@ -673,10 +673,10 @@
 				<version>0.3.0</version>
 			</dependency>
 			<dependency>
-				<groupId>com.github.java-json-tools</groupId>
-				<artifactId>json-patch</artifactId>
-				<version>1.10</version>
-			</dependency>
+            	<groupId>io.dogote</groupId>
+            	<artifactId>json-patch</artifactId>
+            	<version>1.15</version>
+        	</dependency>
 			<dependency>
 				<groupId>com.google.errorprone</groupId>
 				<artifactId>error_prone_core</artifactId>
