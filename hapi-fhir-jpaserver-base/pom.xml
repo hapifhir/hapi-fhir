@@ -192,9 +192,9 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>com.github.java-json-tools</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
+           	<groupId>io.dogote</groupId>
+           	<artifactId>json-patch</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
