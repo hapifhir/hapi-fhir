@@ -671,6 +671,9 @@ public class RestfulServerUtils {
 		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
 	}
 
+	/**
+	 * @param theServer If null, no default will be used. If not null, the default will be read from the server.
+	 */
 	public static PreferReturnEnum parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
 		PreferReturnEnum retVal = null;
 

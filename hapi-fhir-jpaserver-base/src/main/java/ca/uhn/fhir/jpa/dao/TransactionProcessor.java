@@ -180,7 +180,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(theRequestDetails.getServer(), prefer);
+				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer);
 				if (preferReturn != null) {
 					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
 						outcome.fireResourceViewCallbacks();
