@@ -141,7 +141,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString, containsString("<OperationOutcome"));
-			assertThat(responseString, containsString("Invalid match URL &quot;Patient?_id=1FOO&quot; - No resources match this search"));
+			assertThat(responseString, containsString("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search"));
 		}
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
