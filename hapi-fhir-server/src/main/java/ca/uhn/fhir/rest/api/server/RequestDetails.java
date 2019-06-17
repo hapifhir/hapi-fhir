@@ -113,29 +113,32 @@ public abstract class RequestDetails {
 	 * @return Returns the <b>conditional URL</b> if this request has one, or <code>null</code> otherwise
 	 */
 	public String getConditionalUrl(RestOperationTypeEnum theOperationType) {
-		if (theOperationType == RestOperationTypeEnum.CREATE) {
-			String retVal = this.getHeader(Constants.HEADER_IF_NONE_EXIST);
-			if (isBlank(retVal)) {
+		switch (theOperationType) {
+			case CREATE:
+				String retVal = this.getHeader(Constants.HEADER_IF_NONE_EXIST);
+				if (isBlank(retVal)) {
+					return null;
+				}
+				if (retVal.startsWith(this.getFhirServerBase())) {
+					retVal = retVal.substring(this.getFhirServerBase().length());
+				}
+				return retVal;
+			case DELETE:
+			case UPDATE:
+			case PATCH:
+				if (this.getId() != null && this.getId().hasIdPart()) {
+					return null;
+				}
+
+				int questionMarkIndex = this.getCompleteUrl().indexOf('?');
+				if (questionMarkIndex == -1) {
+					return null;
+				}
+
+				return this.getResourceName() + this.getCompleteUrl().substring(questionMarkIndex);
+			default:
 				return null;
-			}
-			if (retVal.startsWith(this.getFhirServerBase())) {
-				retVal = retVal.substring(this.getFhirServerBase().length());
-			}
-			return retVal;
-		} else if (theOperationType != RestOperationTypeEnum.DELETE && theOperationType != RestOperationTypeEnum.UPDATE) {
-			return null;
 		}
-
-		if (this.getId() != null && this.getId().hasIdPart()) {
-			return null;
-		}
-
-		int questionMarkIndex = this.getCompleteUrl().indexOf('?');
-		if (questionMarkIndex == -1) {
-			return null;
-		}
-
-		return this.getResourceName() + this.getCompleteUrl().substring(questionMarkIndex);
 	}
 
 	/**
