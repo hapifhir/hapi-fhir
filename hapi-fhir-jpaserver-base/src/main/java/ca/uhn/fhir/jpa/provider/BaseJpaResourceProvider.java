@@ -115,10 +115,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Patch
-	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
+	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl,  RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
 		startRequest(theRequest);
 		try {
-			return myDao.patch(theId, thePatchType, theBody, theRequestDetails);
+			return myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

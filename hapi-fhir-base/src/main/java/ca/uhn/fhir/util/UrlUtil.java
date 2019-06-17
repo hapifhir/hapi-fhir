@@ -123,7 +123,7 @@ public class UrlUtil {
 		return value.startsWith("http://") || value.startsWith("https://");
 	}
 
-	public static boolean isNeedsSanitization(String theString) {
+	public static boolean isNeedsSanitization(CharSequence theString) {
 		if (theString != null) {
 			for (int i = 0; i < theString.length(); i++) {
 				char nextChar = theString.charAt(i);
@@ -302,7 +302,7 @@ public class UrlUtil {
 	 * This method specifically HTML-encodes the &quot; and
 	 * &lt; characters in order to prevent injection attacks
 	 */
-	public static String sanitizeUrlPart(String theString) {
+	public static String sanitizeUrlPart(CharSequence theString) {
 		if (theString == null) {
 			return null;
 		}
@@ -316,6 +316,9 @@ public class UrlUtil {
 
 				char nextChar = theString.charAt(j);
 				switch (nextChar) {
+					case '\'':
+						buffer.append("&apos;");
+						break;
 					case '"':
 						buffer.append("&quot;");
 						break;
@@ -332,7 +335,7 @@ public class UrlUtil {
 			return buffer.toString();
 		}
 
-		return theString;
+		return theString.toString();
 	}
 
 	private static Map<String, String[]> toQueryStringMap(HashMap<String, List<String>> map) {
