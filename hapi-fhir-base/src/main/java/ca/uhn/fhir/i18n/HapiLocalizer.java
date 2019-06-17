@@ -1,6 +1,7 @@
 package ca.uhn.fhir.i18n;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.util.UrlUtil;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -89,6 +90,20 @@ public class HapiLocalizer {
 	}
 
 	public String getMessage(Class<?> theType, String theKey, Object... theParameters) {
+		return getMessage(toKey(theType, theKey), theParameters);
+	}
+
+	/**
+	 * Create the message and sanitize parameters using {@link }
+	 */
+	public String getMessageSanitized(Class<?> theType, String theKey, Object... theParameters) {
+		if (theParameters != null) {
+			for (int i = 0; i < theParameters.length; i++) {
+				if (theParameters[i] instanceof CharSequence) {
+					theParameters[i] = UrlUtil.sanitizeUrlPart((CharSequence) theParameters[i]);
+				}
+			}
+		}
 		return getMessage(toKey(theType, theKey), theParameters);
 	}
 

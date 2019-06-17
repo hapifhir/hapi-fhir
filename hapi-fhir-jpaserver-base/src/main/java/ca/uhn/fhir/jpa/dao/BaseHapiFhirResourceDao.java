@@ -73,6 +73,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
 
+import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Transactional(propagation = Propagation.REQUIRED)
@@ -149,7 +150,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (isNotBlank(theResource.getIdElement().getIdPart())) {
 			if (getContext().getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
-				String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
+				String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedId", theResource.getIdElement().getIdPart());
 				throw new InvalidRequestException(message, createErrorOperationOutcome(message, "processing"));
 			} else {
 				// As of DSTU3, ID and version in the body should be ignored for a create/update
@@ -285,7 +286,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		Set<Long> resourceIds = myMatchResourceUrlService.processMatchUrl(theUrl, myResourceType);
 		if (resourceIds.size() > 1) {
 			if (myDaoConfig.isAllowMultipleDelete() == false) {
-				throw new PreconditionFailedException(getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
+				throw new PreconditionFailedException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "DELETE", theUrl, resourceIds.size()));
 			}
 		}
 
@@ -333,7 +334,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		IBaseOperationOutcome oo;
 		if (deletedResources.isEmpty()) {
 			oo = OperationOutcomeUtil.newInstance(getContext());
-			String message = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
+			String message = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "unableToDeleteNotFound", theUrl);
 			String severity = "warning";
 			String code = "not-found";
 			OperationOutcomeUtil.addIssue(getContext(), oo, severity, message, null, code);
@@ -382,7 +383,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theIfNoneExist)) {
 			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theIfNoneExist, myResourceType);
 			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "CREATE", theIfNoneExist, match.size());
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
@@ -398,11 +399,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			switch (myDaoConfig.getResourceClientIdStrategy()) {
 				case NOT_ALLOWED:
 					throw new ResourceNotFoundException(
-						getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
+						getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedIdNotAllowed", theResource.getIdElement().getIdPart()));
 				case ALPHANUMERIC:
 					if (theResource.getIdElement().isIdPartValidLong()) {
 						throw new InvalidRequestException(
-							getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
+							getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithClientAssignedNumericId", theResource.getIdElement().getIdPart()));
 					}
 					createForcedIdIfNeeded(entity, theResource.getIdElement(), false);
 					break;
@@ -478,7 +479,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulCreate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		ourLog.debug(msg);
@@ -747,11 +748,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails) {
-		ResourceTable entityToUpdate = readEntityLatestVersion(theId);
-		if (theId.hasVersionIdPart()) {
-			if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
-				throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+	public DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails) {
+
+		ResourceTable entityToUpdate;
+		if (isNotBlank(theConditionalUrl)) {
+
+			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theConditionalUrl, myResourceType);
+			if (match.size() > 1) {
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "PATCH", theConditionalUrl, match.size());
+				throw new PreconditionFailedException(msg);
+			} else if (match.size() == 1) {
+				Long pid = match.iterator().next();
+				entityToUpdate = myEntityManager.find(ResourceTable.class, pid);
+			} else {
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", theConditionalUrl);
+				throw new ResourceNotFoundException(msg);
+			}
+
+		} else {
+			entityToUpdate = readEntityLatestVersion(theId);
+			if (theId.hasVersionIdPart()) {
+				if (theId.getVersionIdPartAsLong() != entityToUpdate.getVersion()) {
+					throw new ResourceVersionConflictException("Version " + theId.getVersionIdPart() + " is not the most recent version of this resource, unable to apply patch");
+				}
 			}
 		}
 
@@ -803,12 +822,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	protected void preProcessResourceForStorage(T theResource) {
 		String type = getContext().getResourceDefinition(theResource).getName();
 		if (!getResourceName().equals(type)) {
-			throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
+			throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "incorrectResourceType", type, getResourceName()));
 		}
 
 		if (theResource.getIdElement().hasIdPart()) {
 			if (!theResource.getIdElement().isIdPartValid()) {
-				throw new InvalidRequestException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
+				throw new InvalidRequestException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "failedToCreateWithInvalidId", theResource.getIdElement().getIdPart()));
 			}
 		}
 
@@ -934,7 +953,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theId.hasVersionIdPart()) {
 			if (theId.isVersionIdPartValidLong() == false) {
-				throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+				throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 			}
 			if (entity.getVersion() != theId.getVersionIdPartAsLong()) {
 				entity = null;
@@ -950,7 +969,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				try {
 					entity = q.getSingleResult();
 				} catch (NoResultException e) {
-					throw new ResourceNotFoundException(getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
+					throw new ResourceNotFoundException(getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidVersion", theId.getVersionIdPart(), theId.toUnqualifiedVersionless()));
 				}
 			}
 		}
@@ -1229,7 +1248,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			QualifierDetails qualifiedParamName = SearchMethodBinding.extractQualifiersFromParameterName(nextParamName);
 			RuntimeSearchParam param = searchParams.get(qualifiedParamName.getParamName());
 			if (param == null) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<String>(searchParams.keySet()));
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "invalidSearchParameter", qualifiedParamName.getParamName(), new TreeSet<String>(searchParams.keySet()));
 				throw new InvalidRequestException(msg);
 			}
 
@@ -1281,7 +1300,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (isNotBlank(theMatchUrl)) {
 			Set<Long> match = myMatchResourceUrlService.processMatchUrl(theMatchUrl, myResourceType);
 			if (match.size() > 1) {
-				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
+				String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirDao.class, "transactionOperationWithMultipleMatchFailure", "UPDATE", theMatchUrl, match.size());
 				throw new PreconditionFailedException(msg);
 			} else if (match.size() == 1) {
 				Long pid = match.iterator().next();
@@ -1353,7 +1372,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			outcome.setId(theResource.getIdElement());
 		}
 
-		String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
+		String msg = getContext().getLocalizer().getMessageSanitized(BaseHapiFhirResourceDao.class, "successfulUpdate", outcome.getId(), w.getMillisAndRestart());
 		outcome.setOperationOutcome(createInfoOperationOutcome(msg));
 
 		ourLog.debug(msg);

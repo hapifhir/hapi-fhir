@@ -143,7 +143,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
+	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
 
 	Set<Long> processMatchUrl(String theMatchUrl);
 

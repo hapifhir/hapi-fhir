@@ -19,6 +19,7 @@
 					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
 <!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
+					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
 				</ul>
 				]]>
 			</action>
@@ -66,26 +67,26 @@
 				in the query cache that matched the same search parameters.
 			</action>
 			<action type="fix" issue="1337">
-				Improved stability of concurrency test framework. Thanks to Stig Døssing for the pull request!
+				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
 			</action>
 			<action type="change">
 				Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type
 				from SubscriptionMatchResult to InMemoryMatchResult.
 			</action>
 			<action type="add">
-				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any. They permit
+				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any.  They permit
 				writing code that is version independent.
 			</action>
 			<action type="add">
 				Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the
-				in-memory matcher to search the HashMap (using a full table scan). This allows rudimentary testing
+				in-memory matcher to search the HashMap (using a full table scan).  This allows rudimentary testing
 				without a database.
 			</action>
 			<action type="add">
 				Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a
 				resource delete operation is about to fail due to referential integrity conflicts.
 				Hooks have access to the list of resources that have references to the resource being deleted and
-				can delete them. The boolean return value of the hook indicates whether the server should try
+				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
 			</action>
 			<action type="change">
@@ -100,6 +101,22 @@
 			<action type="fix">
 				AuthorizationInterceptor sometimes failed with a 500 error when checking compartment
 				membership on a resource that has a contained subject (Patient).
+			</action>
+			<action type="add" issue="1348">
+				JPA server now supports conditional PATCH operation (i.e. performing a patch
+				with a syntax such as
+				<![CDATA[<code>/Patient?identifier=sys|val</code>]]>)
+			</action>
+			<action type="add" issue="1347">
+				The json-patch library used in the JPA server has been changed from
+				<![CDATA[
+				<a href="https://github.com/java-json-tools/json-patch">java-json-tools.json-patch</a>
+				]]>
+				to a more active fork of the same project:
+				<![CDATA[
+				<a href="https://github.com/crate-metadata/json-patch">crate-metadata.json-patch</a>.
+				]]>
+				Thanks to Jens Villadsen for the suggestion and pull request!
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
@@ -171,7 +188,7 @@
 				a page calculation error. This has been corrected.
 			</action>
 			<action type="add">
-				In the JPA server, a much more readable error message is now returned returned when
+				In the JPA server, a much more readable error message is now returned returned when 
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
@@ -268,7 +285,7 @@
 				(Before it was hardcoded to "/websocket").
 			</action>
 			<action type="add">
-				Added new IRemovableChannel interface. If a SubscriptionChannel implements this, then when a subscription
+				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
 				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
 				channel.
 			</action>
@@ -303,7 +320,7 @@
 			</action>
 			<action type="add">
 				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
-				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
 				Anders Havn for the suggestion!
 			</action>
 			<action type="fix" issue="1299">
@@ -316,7 +333,7 @@
 				This has been corrected.
 			</action>
 			<action type="fix" issue="1311">
-				When encoding resources, profile declarations on contained resources will now be
+				When encoding resources, profile declarations on contained resources will now be 
 				preserved. Thanks to Anders Havn for the pull request!
 			</action>
 			<action type="fix" issue="1305">
