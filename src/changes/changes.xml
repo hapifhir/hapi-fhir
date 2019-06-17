@@ -19,6 +19,7 @@
 					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
 <!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
+					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
 				</ul>
 				]]>
 			</action>
@@ -78,6 +79,17 @@
 				JPA server now supports conditional PATCH operation (i.e. performing a patch
 				with a syntax such as
 				<![CDATA[<code>/Patient?identifier=sys|val</code>]]>)
+			</action>
+			<action type="add" issue="1347">
+				The json-patch library used in the JPA server has been changed from
+				<![CDATA[
+				<a href="https://github.com/java-json-tools/json-patch">java-json-tools.json-patch</a>
+				]]>
+				to a more active fork of the same project:
+				<![CDATA[
+				<a href="https://github.com/crate-metadata/json-patch">crate-metadata.json-patch</a>.
+				]]>
+				Thanks to Jens Villadsen for the suggestion and pull request!
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
