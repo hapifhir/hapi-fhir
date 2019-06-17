@@ -748,12 +748,14 @@ public class RestfulServerUtils {
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (fullId != null && fullId.hasVersionIdPart()) {
-				String versionIdPart = fullId.getVersionIdPart();
-				response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
-			} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
-				String versionId = theResource.getMeta().getVersionId();
-				response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+			if (theRequestDetails.getRequestType() == RequestTypeEnum.GET) {
+				if (fullId != null && fullId.hasVersionIdPart()) {
+					String versionIdPart = fullId.getVersionIdPart();
+					response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
+				} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
+					String versionId = theResource.getMeta().getVersionId();
+					response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+				}
 			}
 		}
 

@@ -91,6 +91,11 @@
 				]]>
 				Thanks to Jens Villadsen for the suggestion and pull request!
 			</action>
+			<action type="add" issue="1343">
+				Support has been implemented in the JPA server for the CodeSystem
+				<![CDATA[<code>$subsumes</code>]]>
+				operation.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

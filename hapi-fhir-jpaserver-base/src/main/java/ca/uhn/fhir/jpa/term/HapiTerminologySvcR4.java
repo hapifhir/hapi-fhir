@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -227,8 +228,9 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	@CoverageIgnore
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TermConcept code = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (code != null) {
+		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+		if (codeOpt.isPresent()) {
+			TermConcept code = codeOpt.get();
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
