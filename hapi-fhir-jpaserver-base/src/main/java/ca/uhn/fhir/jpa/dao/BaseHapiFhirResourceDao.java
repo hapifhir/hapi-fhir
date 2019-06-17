@@ -1162,12 +1162,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		outcome.setId(id);
-		outcome.setResource(theResource);
+		if (theEntity.getDeleted() == null) {
+			outcome.setResource(theResource);
+		}
 		outcome.setEntity(theEntity);
 
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
-		if (theRequestDetails != null) {
-			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(theResource);
+		if (theRequestDetails != null && outcome.getResource() != null) {
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(outcome.getResource());
 			HookParams params = new HookParams()
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequestDetails)
@@ -1188,7 +1190,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 			outcome.setResource(showDetails.getResource(0));
 		}
-
 
 		return outcome;
 	}

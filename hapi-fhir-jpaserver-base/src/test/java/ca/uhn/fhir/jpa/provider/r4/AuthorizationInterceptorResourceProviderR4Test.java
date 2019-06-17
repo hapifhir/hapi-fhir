@@ -23,6 +23,8 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,6 +34,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderR4Test.class);
 
 	@Override
 	public void before() throws Exception {
@@ -197,7 +201,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
-
 	@Test
 	public void testReadWithSubjectMasked() {
 
@@ -251,7 +254,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 
 	}
-
 
 	/**
 	 * See #751
@@ -611,7 +613,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 		Bundle resp = ourClient.transaction().withBundle(bundle).execute();
 		assertEquals(3, resp.getEntry().size());
-
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
 	@Test

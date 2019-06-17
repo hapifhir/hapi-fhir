@@ -29,9 +29,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Interceptor
 public class ConsentInterceptor {
 	private static final AtomicInteger ourInstanceCount = new AtomicInteger(0);
-	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_AUTHORIZED";
-	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_COMPLETED";
-	private final String myRequestSeenResourcesKey = ConsentInterceptor.class.getName() + "_" + ourInstanceCount.incrementAndGet() + "_SEENRESOURCES";
+	private final int myInstanceIndex = ourInstanceCount.incrementAndGet();
+	private final String myRequestAuthorizedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_AUTHORIZED";
+	private final String myRequestCompletedKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_COMPLETED";
+	private final String myRequestSeenResourcesKey = ConsentInterceptor.class.getName() + "_" + myInstanceIndex + "_SEENRESOURCES";
 
 	private final IConsentService myConsentService;
 
@@ -123,12 +124,7 @@ public class ConsentInterceptor {
 	}
 
 	private IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(RequestDetails theRequestDetails) {
-		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>) theRequestDetails.getUserData().get(myRequestSeenResourcesKey);
-		if (alreadySeenResources == null) {
-			alreadySeenResources = new IdentityHashMap<>();
-			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
-		}
-		return alreadySeenResources;
+		return getAlreadySeenResourcesMap(theRequestDetails, myRequestSeenResourcesKey);
 	}
 
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE)
@@ -234,6 +230,15 @@ public class ConsentInterceptor {
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {
 		Object authorizedObj = theRequestDetails.getUserData().get(myRequestAuthorizedKey);
 		return Boolean.TRUE.equals(authorizedObj);
+	}
+
+	public static IdentityHashMap<IBaseResource, Boolean> getAlreadySeenResourcesMap(RequestDetails theRequestDetails, String theKey) {
+		IdentityHashMap<IBaseResource, Boolean> alreadySeenResources = (IdentityHashMap<IBaseResource, Boolean>) theRequestDetails.getUserData().get(theKey);
+		if (alreadySeenResources == null) {
+			alreadySeenResources = new IdentityHashMap<>();
+			theRequestDetails.getUserData().put(theKey, alreadySeenResources);
+		}
+		return alreadySeenResources;
 	}
 
 	private static ForbiddenOperationException toForbiddenOperationException(ConsentOutcome theOutcome) {

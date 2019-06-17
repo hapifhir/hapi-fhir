@@ -23,6 +23,23 @@
 				]]>
 			</action>
 			<action type="add">
+				A new interceptor called
+				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				JPA based servers to make appropriate consent decisions related to resources that
+				and operations that are being returned.
+			</action>
+			<action type="add">
+				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
+				<![CDATA[
+				<ul>
+				<li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook,
+				which allows it to successfully authorize JPA operations that don't actually return resource content,
+				such as GraphQL responses.</li>
+				<li>
+				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
+				]]>
+			</action>
+			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
 				for the operation to succeed without timing out in larger system.
@@ -47,37 +64,31 @@
 				in the query cache that matched the same search parameters.
 			</action>
 			<action type="fix" issue="1337">
-				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
+				Improved stability of concurrency test framework. Thanks to Stig Døssing for the pull request!
 			</action>
 			<action type="change">
 				Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type
 				from SubscriptionMatchResult to InMemoryMatchResult.
 			</action>
 			<action type="add">
-				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any.  They permit
+				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any. They permit
 				writing code that is version independent.
 			</action>
 			<action type="add">
 				Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the
-				in-memory matcher to search the HashMap (using a full table scan).  This allows rudimentary testing
+				in-memory matcher to search the HashMap (using a full table scan). This allows rudimentary testing
 				without a database.
 			</action>
 			<action type="add">
 				Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a
 				resource delete operation is about to fail due to referential integrity conflicts.
 				Hooks have access to the list of resources that have references to the resource being deleted and
-				can delete them.  The boolean return value of the hook indicates whether the server should try
+				can delete them. The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
 			</action>
 			<action type="change">
 				The default RestfulServer encoding has been changed from XML to JSON in order to
 				reflect the most common usage.
-			</action>
-			<action type="add">
-				A new interceptor called
-				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
-				JPA based servers to make appropriate consent decisions related to resources that
-				and operations that are being returned.
 			</action>
 			<action type="add" issue="1336">
 				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
@@ -158,7 +169,7 @@
 				a page calculation error. This has been corrected.
 			</action>
 			<action type="add">
-				In the JPA server, a much more readable error message is now returned returned when 
+				In the JPA server, a much more readable error message is now returned returned when
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
@@ -255,7 +266,7 @@
 				(Before it was hardcoded to "/websocket").
 			</action>
 			<action type="add">
-				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
+				Added new IRemovableChannel interface. If a SubscriptionChannel implements this, then when a subscription
 				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
 				channel.
 			</action>
@@ -275,7 +286,8 @@
 				are caught and not just silently ignored.
 			</action>
 			<action type="add">
-				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				Expunges are now done in batches in multiple threads. Both the number of expunge threads and batch size are
+				configurable
 				in DaoConfig.
 			</action>
 			<action type="fix">
@@ -283,12 +295,13 @@
 				contains sub-items.
 			</action>
 			<action type="fix">
-				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly
+				reported
 				the target instead of the source with the reference.
 			</action>
 			<action type="add">
 				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
-				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to
 				Anders Havn for the suggestion!
 			</action>
 			<action type="fix" issue="1299">
@@ -301,7 +314,7 @@
 				This has been corrected.
 			</action>
 			<action type="fix" issue="1311">
-				When encoding resources, profile declarations on contained resources will now be 
+				When encoding resources, profile declarations on contained resources will now be
 				preserved. Thanks to Anders Havn for the pull request!
 			</action>
 			<action type="fix" issue="1305">
