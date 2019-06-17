@@ -74,7 +74,7 @@
 				assign a free port. This should theoretically result in fewer failed builds resulting from
 				port conflicts. Thanks to Stig Døssing for the pull request!
 			</action>
-			<action type="add">
+			<action type="add" issue="1348">
 				JPA server now supports conditional PATCH operation (i.e. performing a patch
 				with a syntax such as
 				<![CDATA[<code>/Patient?identifier=sys|val</code>]]>)
