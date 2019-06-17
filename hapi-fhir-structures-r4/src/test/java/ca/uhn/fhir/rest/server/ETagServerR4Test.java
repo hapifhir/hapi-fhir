@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.util.PortUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -34,6 +33,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ETagServerR4Test {
 
@@ -172,13 +173,12 @@ public class ETagServerR4Test {
 
   @AfterClass
   public static void afterClass() throws Exception {
-    ourServer.stop();
+    JettyUtil.closeServer(ourServer);
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    ourPort = PortUtil.findFreePort();
-    ourServer = new Server(ourPort);
+    ourServer = new Server(0);
 
     PatientProvider patientProvider = new PatientProvider();
 
@@ -188,7 +188,8 @@ public class ETagServerR4Test {
     ServletHolder servletHolder = new ServletHolder(servlet);
     proxyHandler.addServletWithMapping(servletHolder, "/*");
     ourServer.setHandler(proxyHandler);
-    ourServer.start();
+    JettyUtil.startServer(ourServer);
+    ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
     ourConnectionManager = new PoolingHttpClientConnectionManager(50000, TimeUnit.MILLISECONDS);
     HttpClientBuilder builder = HttpClientBuilder.create();

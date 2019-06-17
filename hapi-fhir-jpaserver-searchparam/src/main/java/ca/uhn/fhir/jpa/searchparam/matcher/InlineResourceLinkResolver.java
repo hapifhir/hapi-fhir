@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.matcher;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%

@@ -27,7 +27,8 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.bio.SocketConnector;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -117,8 +118,7 @@ public class ReadTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		DummyProvider patientProvider = new DummyProvider();
 
@@ -130,6 +130,9 @@ public class ReadTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
+        Connector[] connectors = ourServer.getConnectors();
+        assert connectors.length == 1;
+        ourPort = ((SocketConnector) (connectors[0])).getLocalPort();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

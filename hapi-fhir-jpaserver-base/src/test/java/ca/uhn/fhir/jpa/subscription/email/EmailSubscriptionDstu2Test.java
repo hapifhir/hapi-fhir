@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -154,11 +153,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
+        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 

@@ -192,9 +192,9 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>com.github.java-json-tools</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
+           	<groupId>io.dogote</groupId>
+           	<artifactId>json-patch</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
@@ -269,6 +269,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-test-utilities</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -517,8 +523,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -655,6 +661,7 @@
 					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
 					<forkCount>0.6C</forkCount>
+					<excludes>*StressTest*</excludes>
 				</configuration>
 			</plugin>
 			<plugin>

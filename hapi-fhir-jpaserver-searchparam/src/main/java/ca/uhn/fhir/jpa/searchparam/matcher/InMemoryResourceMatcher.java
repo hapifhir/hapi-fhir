@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.matcher;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -45,7 +45,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @Service
-public class CriteriaResourceMatcher {
+public class InMemoryResourceMatcher {
 
 	@Autowired
 	private MatchUrlService myMatchUrlService;
@@ -64,7 +64,7 @@ public class CriteriaResourceMatcher {
 	 *
 	 */
 
-	public SubscriptionMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
+	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		RuntimeResourceDefinition resourceDefinition;
 		if (theResource == null) {
 			resourceDefinition = UrlUtil.parseUrlResourceType(myFhirContext, theCriteria);
@@ -75,45 +75,45 @@ public class CriteriaResourceMatcher {
 		try {
 			searchParameterMap = myMatchUrlService.translateMatchUrl(theCriteria, resourceDefinition);
 		} catch (UnsupportedOperationException e) {
-			return SubscriptionMatchResult.unsupportedFromReason(SubscriptionMatchResult.PARSE_FAIL);
+			return InMemoryMatchResult.unsupportedFromReason(InMemoryMatchResult.PARSE_FAIL);
 		}
 		searchParameterMap.clean();
 		if (searchParameterMap.getLastUpdated() != null) {
-			return SubscriptionMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, SubscriptionMatchResult.STANDARD_PARAMETER);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
 		}
 
 		for (Map.Entry<String, List<List<IQueryParameterType>>> entry : searchParameterMap.entrySet()) {
 			String theParamName = entry.getKey();
 			List<List<IQueryParameterType>> theAndOrParams = entry.getValue();
-			SubscriptionMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, resourceDefinition, theResource, theSearchParams);
+			InMemoryMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, resourceDefinition, theResource, theSearchParams);
 			if (!result.matched()){
 				return result;
 			}
 		}
-		return SubscriptionMatchResult.successfulMatch();
+		return InMemoryMatchResult.successfulMatch();
 	}
 
 	// This method is modelled from SearchBuilder.searchForIdsWithAndOr()
-	private SubscriptionMatchResult matchIdsWithAndOr(String theParamName, List<List<IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
+	private InMemoryMatchResult matchIdsWithAndOr(String theParamName, List<List<IQueryParameterType>> theAndOrParams, RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
 		if (theAndOrParams.isEmpty()) {
-			return SubscriptionMatchResult.successfulMatch();
+			return InMemoryMatchResult.successfulMatch();
 		}
 
 		if (hasQualifiers(theAndOrParams)) {
-			return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.STANDARD_PARAMETER);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.STANDARD_PARAMETER);
 		}
 		if (hasPrefixes(theAndOrParams)) {
 
-			return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.PREFIX);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PREFIX);
 
 		}
 		if (hasChain(theAndOrParams)) {
-			return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.CHAIN);
+			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
 		}
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
 
-				return SubscriptionMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
+				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
 
 			case IAnyResource.SP_RES_LANGUAGE:
 			case Constants.PARAM_HAS:
@@ -121,7 +121,7 @@ public class CriteriaResourceMatcher {
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
 
-				return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.PARAM);
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 
 			default:
 
@@ -148,7 +148,7 @@ public class CriteriaResourceMatcher {
 		return theValue.equals(theId.getValue()) || theValue.equals(theId.getIdPart());
 	}
 
-	private SubscriptionMatchResult matchResourceParam(String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
+	private InMemoryMatchResult matchResourceParam(String theParamName, List<List<IQueryParameterType>> theAndOrParams, ResourceIndexedSearchParams theSearchParams, String theResourceName, RuntimeSearchParam theParamDef) {
 		if (theParamDef != null) {
 			switch (theParamDef.getParamType()) {
 				case QUANTITY:
@@ -159,19 +159,19 @@ public class CriteriaResourceMatcher {
 				case DATE:
 				case REFERENCE:
 					if (theSearchParams == null) {
-						return SubscriptionMatchResult.successfulMatch();
+						return InMemoryMatchResult.successfulMatch();
 					} else {
-						return SubscriptionMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
+						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
 				case COMPOSITE:
 				case HAS:
 				case SPECIAL:
 				default:
-					return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.PARAM);
+					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			}
 		} else {
 			if (Constants.PARAM_CONTENT.equals(theParamName) || Constants.PARAM_TEXT.equals(theParamName)) {
-				return SubscriptionMatchResult.unsupportedFromParameterAndReason(theParamName, SubscriptionMatchResult.PARAM);
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			} else {
 				throw new InvalidRequestException("Unknown search parameter " + theParamName + " for resource type " + theResourceName);
 			}

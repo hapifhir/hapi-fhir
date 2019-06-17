@@ -3,7 +3,6 @@ package ca.uhn.fhir.jaxrs.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
-import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPageProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProvider;
@@ -46,6 +45,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AbstractJaxRsResourceProviderTest {
 
@@ -71,7 +72,8 @@ public class AbstractJaxRsResourceProviderTest {
 	}
 
 	@AfterClass
-	public static void afterClassClearContext() {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -392,11 +394,9 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		ourPort = RandomServerPortProvider.findFreePort();
 		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
 		context.setContextPath("/");
-		System.out.println(ourPort);
-		jettyServer = new Server(ourPort);
+		jettyServer = new Server(0);
 		jettyServer.setHandler(context);
 		ServletHolder jerseyServlet = context.addServlet(org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher.class, "/*");
 		jerseyServlet.setInitOrder(0);
@@ -410,7 +410,8 @@ public class AbstractJaxRsResourceProviderTest {
 						), ","));
 		//@formatter:on
 
-		jettyServer.start();
+		JettyUtil.startServer(jettyServer);
+        ourPort = JettyUtil.getPortForStartedServer(jettyServer);
 
 		ourCtx.setRestfulClientFactory(new JaxRsRestfulClientFactory(ourCtx));
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
@@ -419,15 +420,6 @@ public class AbstractJaxRsResourceProviderTest {
 		client = ourCtx.newRestfulGenericClient(serverBase);
 		client.setEncoding(EncodingEnum.JSON);
 		client.registerInterceptor(new LoggingInterceptor(true));
-	}
-
-	@AfterClass
-	public static void tearDownClass() {
-		try {
-			jettyServer.destroy();
-		} catch (Exception e) {
-
-		}
 	}
 
 }

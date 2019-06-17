@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -90,6 +92,8 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private DaoRegistry myDaoRegistry;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
+	@Autowired
+	private DeleteConflictService myDeleteConflictService;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -504,7 +508,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
-			List<DeleteConflict> deleteConflicts = new ArrayList<>();
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
@@ -783,7 +787,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					}
 				}
 			}
-			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved

@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.matcher;
+package ca.uhn.fhir.jpa.searchparam.matcher;
 
 /*-
  * #%L
- * HAPI FHIR Subscription Server
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  * #L%
  */
 
-public class SubscriptionMatchResult {
+public class InMemoryMatchResult {
 	public static final String PARSE_FAIL = "Failed to translate parse query string";
 	public static final String STANDARD_PARAMETER = "Standard parameters not supported";
 	public static final String PREFIX = "Prefixes not supported";
@@ -34,34 +34,34 @@ public class SubscriptionMatchResult {
 
 	private boolean myInMemory = false;
 
-	private SubscriptionMatchResult(boolean theMatch) {
+	private InMemoryMatchResult(boolean theMatch) {
 		this.myMatch = theMatch;
 		this.mySupported = true;
 		this.myUnsupportedParameter = null;
 		this.myUnsupportedReason = null;
 	}
 
-	private SubscriptionMatchResult(String theUnsupportedParameter, String theUnsupportedReason) {
+	private InMemoryMatchResult(String theUnsupportedParameter, String theUnsupportedReason) {
 		this.myMatch = false;
 		this.mySupported = false;
 		this.myUnsupportedParameter = theUnsupportedParameter;
 		this.myUnsupportedReason = theUnsupportedReason;
 	}
 
-	public static SubscriptionMatchResult successfulMatch() {
-		return new SubscriptionMatchResult(true);
+	public static InMemoryMatchResult successfulMatch() {
+		return new InMemoryMatchResult(true);
 	}
 
-	public static SubscriptionMatchResult fromBoolean(boolean theMatched) {
-		return new SubscriptionMatchResult(theMatched);
+	public static InMemoryMatchResult fromBoolean(boolean theMatched) {
+		return new InMemoryMatchResult(theMatched);
 	}
 
-	public static SubscriptionMatchResult unsupportedFromReason(String theUnsupportedReason) {
-		return new SubscriptionMatchResult(null, theUnsupportedReason);
+	public static InMemoryMatchResult unsupportedFromReason(String theUnsupportedReason) {
+		return new InMemoryMatchResult(null, theUnsupportedReason);
 	}
 
-	public static SubscriptionMatchResult unsupportedFromParameterAndReason(String theUnsupportedParameter, String theUnsupportedReason) {
-		return new SubscriptionMatchResult(theUnsupportedParameter, theUnsupportedReason);
+	public static InMemoryMatchResult unsupportedFromParameterAndReason(String theUnsupportedParameter, String theUnsupportedReason) {
+		return new InMemoryMatchResult(theUnsupportedParameter, theUnsupportedReason);
 	}
 
 	public boolean supported() {
