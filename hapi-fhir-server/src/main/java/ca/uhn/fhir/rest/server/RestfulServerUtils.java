@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -748,13 +748,19 @@ public class RestfulServerUtils {
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (theRequestDetails.getRequestType() == RequestTypeEnum.GET) {
-				if (fullId != null && fullId.hasVersionIdPart()) {
-					String versionIdPart = fullId.getVersionIdPart();
-					response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
-				} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
-					String versionId = theResource.getMeta().getVersionId();
-					response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+			if (theRequestDetails.getRestOperationType() != null) {
+				switch (theRequestDetails.getRestOperationType()) {
+					case CREATE:
+					case UPDATE:
+					case READ:
+					case VREAD:
+						if (fullId != null && fullId.hasVersionIdPart()) {
+							String versionIdPart = fullId.getVersionIdPart();
+							response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
+						} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
+							String versionId = theResource.getMeta().getVersionId();
+							response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+						}
 				}
 			}
 		}
