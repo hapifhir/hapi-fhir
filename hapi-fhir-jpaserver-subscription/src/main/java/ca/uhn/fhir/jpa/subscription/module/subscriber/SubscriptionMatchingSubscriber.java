@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -103,6 +104,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
+		Boolean isXml = false, isJson = false, isText = false;
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -134,10 +136,25 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+
+			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+				isXml = subscription.getPayloadString().equals(Constants.CT_XML) || subscription.getPayloadString().equals(Constants.CT_FHIR_XML_NEW);
+				isJson = subscription.getPayloadString().equals(Constants.CT_JSON) || subscription.getPayloadString().equals(Constants.CT_FHIR_JSON_NEW);
+				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
+			}
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(myFhirContext, payload);
-			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
+
+			// Only include the payload if either XML or JSON was specified in the subscription's payload property
+			// See http://hl7.org/fhir/subscription-definitions.html#Subscription.channel.payload
+			if (isXml || isJson) {
+				deliveryMsg.setPayload(myFhirContext, payload, isXml);
+			} else if (isText) {
+				// TODO: Handle payload mimetype of text/plain (for just the .text representation of the resource being updated?)
+			}
+
+			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
 			if (payload == null) {
