@@ -2272,6 +2272,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
+                <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-test-utilities</module>
