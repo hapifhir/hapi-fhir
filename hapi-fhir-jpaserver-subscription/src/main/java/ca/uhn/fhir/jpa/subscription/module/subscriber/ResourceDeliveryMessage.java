@@ -73,6 +73,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return retVal;
 	}
 
+	public String getPayloadString() {
+		if (this.myPayloadString != null) {
+			return this.myPayloadString;
+		}
+
+		return "";
+	}
+
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
 		if (myPayloadId != null) {
@@ -89,9 +97,15 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		mySubscription = theSubscription;
 	}
 
-	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload, Boolean isXml) {
 		myPayload = thePayload;
-		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+
+		if (isXml) {
+			myPayloadString = theCtx.newXmlParser().encodeResourceToString(thePayload);
+		} else {
+			myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+		}
+
 		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
 

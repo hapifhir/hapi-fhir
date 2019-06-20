@@ -112,9 +112,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		return observation;
 	}
 
+	/**
+	 * Tests an email subscription with payload set to XML. The email sent must include content in the body of the email that is formatted as XML.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionNormal() throws Exception {
-		String payload = "This is the body";
+		String payload = "application/fhir+xml";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -138,13 +142,21 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+
+		// Expect the body of the email subscription to be an Observation formatted as XML
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
+	/**
+	 * Tests an email subscription with payload set to JSON. The email sent must include content in the body of the email that is formatted as JSON.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionWithCustom() throws Exception {
-		String payload = "This is the body";
+		String payload = "application/fhir+json";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -185,13 +197,21 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
+
+		// Expect the body of the email subscription to be an Observation formatted as JSON
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
+	/**
+	 * Tests an email subscription with no payload. When the email is sent, the body of the email must be empty.
+	 * @throws Exception
+	 */
 	@Test
 	public void testEmailSubscriptionWithCustomNoMailtoOnFrom() throws Exception {
-		String payload = "This is the body";
+		String payload = "";
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
@@ -231,7 +251,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
 		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
 		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
-		assertEquals("This is the body", received.get(0).getContent().toString().trim());
+		assertEquals("", received.get(0).getContent().toString().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		ourLog.info("Subscription: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ourClient.history().onInstance(id).andReturnBundle(Bundle.class).execute()));

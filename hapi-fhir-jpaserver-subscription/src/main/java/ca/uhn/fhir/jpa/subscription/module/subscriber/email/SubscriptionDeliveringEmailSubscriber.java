@@ -72,7 +72,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
-		details.setBodyTemplate(subscription.getPayloadString());
+		details.setBodyTemplate(theMessage.getPayloadString());
 		details.setSubjectTemplate(subjectTemplate);
 		details.setSubscription(subscription.getIdElement(myFhirContext));
 
