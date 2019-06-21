@@ -165,12 +165,14 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testRestHookSubscription() throws Exception {
 		String code = "1000000050";
-		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111&_format=xml";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code;
+		String criteria2 = "Observation?code=SNOMED-CT|" + code + "111";
 
 		createSubscription(criteria1, null, ourNotificationListenerServer,
 			Collections.singletonList(new StringType("Authorization: abc-def")));
 		createSubscription(criteria2, null, ourNotificationListenerServer);
+
+		ourLog.debug("Sending first observation");
 
 		sendObservation(code, "SNOMED-CT");
 

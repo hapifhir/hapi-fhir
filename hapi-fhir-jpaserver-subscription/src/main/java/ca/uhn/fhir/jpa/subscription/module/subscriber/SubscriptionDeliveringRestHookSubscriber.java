@@ -57,10 +57,8 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
-		if (payloadResource == null) {
-			return;
-		}
 
+		// Regardless of whether we have a payload, the rest-hook should be sent.
 		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
 	}
 
@@ -117,8 +115,13 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
 			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+
 			try {
-				payloadResource = myResourceRetriever.getResource(payloadId.toVersionless());
+				if (payloadId != null) {
+					payloadResource = myResourceRetriever.getResource(payloadId.toVersionless());
+				} else {
+					return null;
+				}
 			} catch (ResourceGoneException e) {
 				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
 				return null;
