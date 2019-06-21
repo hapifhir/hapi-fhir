@@ -23,12 +23,12 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	SearchParamMatcher mySearchParamMatcher;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
-		assertFalse(mySearchParamMatcher.match(criteria, resource).supported());
+		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(criteria));
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
-		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource);
+		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
 		assertTrue(result.supported());
 		assertTrue(result.matched());
@@ -40,7 +40,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	}
 
 	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
-		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource);
+		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
 		assertTrue(result.supported());
 		assertFalse(result.matched());

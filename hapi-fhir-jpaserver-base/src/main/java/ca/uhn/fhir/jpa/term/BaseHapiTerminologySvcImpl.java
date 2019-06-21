@@ -1197,12 +1197,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource);
 
-		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
+		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId, theRequest);
 		Long codeSystemResourcePid = resource.getId();
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());

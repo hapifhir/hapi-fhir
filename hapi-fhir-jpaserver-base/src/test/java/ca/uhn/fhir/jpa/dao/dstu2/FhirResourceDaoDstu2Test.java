@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +19,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3Test;
@@ -39,7 +37,6 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 
 @SuppressWarnings("unchecked")
@@ -82,7 +79,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private List<String> extractNames(IBundleProvider theSearch) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (IBaseResource next : theSearch.getResources(0, theSearch.size())) {
 			Patient nextPt = (Patient) next;
 			retVal.add(nextPt.getNameFirstRep().getNameAsSingleString());
@@ -99,7 +96,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	private void sort(TagList thePublished) {
-		ArrayList<Tag> tags = new ArrayList<Tag>(thePublished);
+		ArrayList<Tag> tags = new ArrayList<>(thePublished);
 		Collections.sort(tags, new Comparator<Tag>() {
 			@Override
 			public int compare(Tag theO1, Tag theO2) {
@@ -225,7 +222,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertThat(toUnqualifiedVersionlessIdValues(found), hasItem(id2.getValue()));
 		}
 		{
-			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")));
+			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
 			assertThat(found, not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -1583,13 +1580,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 				"}\n";
 		//@formatter:on
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		assertEquals(initial + 1, val.size());
 
 	}
@@ -2716,19 +2713,19 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		assertEquals(initial + 0, val.size());
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))), null);
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))));
+			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
@@ -2747,12 +2744,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		tagList.addTag("http://foo", "Cat", "Kittens");
 		ResourceMetadataKeyEnum.TAG_LIST.put(patient, tagList);
 
-		List<BaseCodingDt> securityLabels = new ArrayList<BaseCodingDt>();
+		List<BaseCodingDt> securityLabels = new ArrayList<>();
 		securityLabels.add(new CodingDt().setSystem("seclabel:sys:1").setCode("seclabel:code:1").setDisplay("seclabel:dis:1"));
 		securityLabels.add(new CodingDt().setSystem("seclabel:sys:2").setCode("seclabel:code:2").setDisplay("seclabel:dis:2"));
 		ResourceMetadataKeyEnum.SECURITY_LABELS.put(patient, securityLabels);
 
-		List<IdDt> profiles = new ArrayList<IdDt>();
+		List<IdDt> profiles = new ArrayList<>();
 		profiles.add(new IdDt("http://profile/1"));
 		profiles.add(new IdDt("http://profile/2"));
 		ResourceMetadataKeyEnum.PROFILES.put(patient, profiles);
@@ -2817,8 +2814,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens");
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves");
+		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens", null);
+		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves", null);
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
@@ -2864,23 +2861,23 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(longStr1, subStr2)));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(longStr1, subStr2)), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
 		}
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, longStr2)));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, longStr2)), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok

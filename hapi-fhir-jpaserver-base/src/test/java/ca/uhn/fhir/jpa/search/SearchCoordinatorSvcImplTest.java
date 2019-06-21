@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
@@ -151,9 +152,9 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), any())).thenReturn(iter);
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -172,8 +173,8 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuider.createQuery(any(), any())).thenReturn(iter);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		when(mySearchBuider.createQuery(any(), any(), nullable(RequestDetails.class))).thenReturn(iter);
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
 		when(mySearchResultDao.findWithSearchUuid(any(), any())).thenAnswer(t -> {
 			List<Long> returnedValues = iter.getReturnedValues();
@@ -186,7 +187,7 @@ public class SearchCoordinatorSvcImplTest {
 			return new PageImpl<>(returnedValues.subList(offset, end));
 		});
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -229,11 +230,11 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -257,11 +258,11 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(iter);
 		when(mySearchDao.save(any())).thenAnswer(t -> t.getArguments()[0]);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(null, result.size());
 
@@ -285,7 +286,7 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(result.getUuid(), myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
@@ -301,11 +302,11 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
 		assertEquals(90, result.size().intValue());
 
@@ -332,7 +333,7 @@ public class SearchCoordinatorSvcImplTest {
 		search.setResourceType("Patient");
 
 		when(mySearchDao.findByUuid(eq(uuid))).thenReturn(search);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(List.class), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
 		PersistedJpaBundleProvider provider;
 		List<IBaseResource> resources;
@@ -368,13 +369,13 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -390,11 +391,11 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
 		assertEquals(790, result.size().intValue());
 
@@ -411,12 +412,12 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(Mockito.same(params), any())).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(10, 110);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao));
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(List.class), any(Set.class), anyBoolean(), any(EntityManager.class), any(FhirContext.class), same(myCallingDao), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective());
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
 		assertEquals(100, result.size().intValue());
 

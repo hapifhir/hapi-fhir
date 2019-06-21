@@ -61,8 +61,8 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
-		ResourceTable entity = readEntityLatestVersion(theId);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
+		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;

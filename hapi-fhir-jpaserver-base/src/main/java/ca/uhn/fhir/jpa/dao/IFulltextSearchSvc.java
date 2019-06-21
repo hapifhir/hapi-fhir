@@ -24,14 +24,15 @@ import java.util.List;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 public interface IFulltextSearchSvc {
 
-	List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText);
+	List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest);
 	
 	List<Long> search(String theResourceName, SearchParameterMap theParams);
 
-	List<Long> everything(String theResourceName, SearchParameterMap theParams);
+	List<Long> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest);
 
 	boolean isDisabled();
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -40,7 +41,7 @@ public class FifoMemoryPagingProvider extends BasePagingProvider implements IPag
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(String theId) {
+	public synchronized IBundleProvider retrieveResultList(String theId, RequestDetails theRequest) {
 		return myBundleProviders.get(theId);
 	}
 

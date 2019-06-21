@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.LogicUtil;
@@ -50,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -67,9 +67,9 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 	private ValidationSupportChain myValidationSupport;
 
 	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
+		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
 		valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdType("CodeSystem", next));

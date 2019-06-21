@@ -92,9 +92,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 //	}
 
 	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)));
+		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest );
 		valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdType("CodeSystem", next));

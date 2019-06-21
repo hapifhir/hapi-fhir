@@ -23,6 +23,21 @@
 				</ul>
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The
+				<code>IPagingProvider</code>
+				interface has been
+				modified so that the
+				<code>retrieveResultList</code>
+				method now takes one additional parameter of type
+				<code>RequestDetails</code>. If you have created a custom
+				implementation of this interface, you can add this parameter and
+				ignore it if needed. The use of the method has not changed, so this
+				should be an easy fix to existing code.
+				]]>
+			</action>
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow

@@ -54,13 +54,13 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 
-	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
 
 		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 
 		ExpungeOutcome outcome;
 		if (theIdParam != null) {
-			outcome = getDao().expunge(theIdParam, options);
+			outcome = getDao().expunge(theIdParam, options, theRequest);
 		} else {
 			outcome = getDao().expunge(options);
 		}
