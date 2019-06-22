@@ -36,9 +36,9 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
@@ -298,7 +298,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
-	private FhirValidator myValidator;
 
 	@After()
 	public void afterCleanupDao() {
@@ -392,13 +391,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	protected void validate(IBaseResource theResource) {
-		if (myValidator == null) {
-			myValidator = myFhirCtx.newValidator();
-			FhirInstanceValidator validator = new FhirInstanceValidator();
-			validator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
-			myValidator.registerValidatorModule(validator);
-		}
-		ValidationResult result = myValidator.validateWithResult(theResource);
+		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
+		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		validatorModule.registerValidatorModule(instanceValidator);
+		ValidationResult result = validatorModule.validateWithResult(theResource);
 		if (!result.isSuccessful()) {
 			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
@@ -406,7 +403,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 
 	@AfterClass
-	public static void afterClassClearContextBaseJpaR4Test() throws Exception {
+	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();

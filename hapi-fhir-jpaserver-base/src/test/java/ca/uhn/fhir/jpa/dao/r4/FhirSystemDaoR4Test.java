@@ -876,6 +876,22 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		validate(outcome);
 	}
 
+	@Test
+	public void testBatchMissingUrlForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setResource(new Patient().setActive(true))
+			.getRequest()
+			.setMethod(HTTPVerb.POST);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		validate(outcome);
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
