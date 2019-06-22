@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.graphql;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,10 +24,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -92,6 +93,9 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 					case QUANTITY:
 						param = new QuantityParam(value);
 						break;
+					case SPECIAL:
+						param = new SpecialParam().setValue(value);
+						break;
 					case URI:
 						break;
 					case HAS:
@@ -117,10 +121,13 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
+		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+		assert requestDetails != null;
+
 		IIdType refId = getContext().getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
-		BaseHasResource id = dao.readEntity(refId);
+		BaseHasResource id = dao.readEntity(refId, requestDetails);
 
 		return (Resource) toResource(id, false);
 	}

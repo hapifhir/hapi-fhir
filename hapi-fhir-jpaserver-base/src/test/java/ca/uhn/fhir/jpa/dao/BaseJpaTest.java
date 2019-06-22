@@ -256,7 +256,7 @@ public abstract class BaseJpaTest {
 		if (theFirstCall) {
 			bundleProvider = theFound;
 		} else {
-			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid());
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid(), null);
 		}
 
 		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
@@ -267,7 +267,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (Entry next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
@@ -310,7 +310,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<? extends IBaseResource> theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -326,7 +326,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
@@ -336,7 +336,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.r4.model.Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
@@ -346,11 +346,11 @@ public abstract class BaseJpaTest {
 	}
 
 	protected String[] toValues(IIdType... theValues) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (IIdType next : theValues) {
 			retVal.add(next.getValue());
 		}
-		return retVal.toArray(new String[retVal.size()]);
+		return retVal.toArray(new String[0]);
 	}
 
 	@BeforeClass
@@ -379,8 +379,7 @@ public abstract class BaseJpaTest {
 		if (bundleRes == null) {
 			throw new NullPointerException("Can not load " + resource);
 		}
-		String bundleStr = IOUtils.toString(bundleRes);
-		return bundleStr;
+		return IOUtils.toString(bundleRes, Constants.CHARSET_UTF8);
 	}
 
 	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {

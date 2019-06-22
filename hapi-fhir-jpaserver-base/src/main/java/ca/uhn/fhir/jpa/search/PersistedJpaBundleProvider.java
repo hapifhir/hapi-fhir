@@ -30,13 +30,13 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -52,6 +52,7 @@ import java.util.*;
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
+	private final RequestDetails myRequest;
 	private FhirContext myContext;
 	private IDao myDao;
 	private EntityManager myEntityManager;
@@ -62,7 +63,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private String myUuid;
 	private boolean myCacheHit;
 
-	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao) {
+	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid, IDao theDao) {
+		myRequest = theRequest;
 		myUuid = theSearchUuid;
 		myDao = theDao;
 	}
@@ -135,7 +137,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 
-		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex);
+		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -287,7 +289,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
-		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao);
+		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao, myRequest);
 
 		return resources;
 	}

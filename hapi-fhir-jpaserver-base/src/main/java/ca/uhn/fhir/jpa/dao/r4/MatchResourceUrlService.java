@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -43,7 +44,7 @@ public class MatchResourceUrlService {
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 
-	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType) {
+	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
@@ -58,7 +59,7 @@ public class MatchResourceUrlService {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		return dao.searchForIds(paramMap);
+		return dao.searchForIds(paramMap, theRequest);
 	}
 
 

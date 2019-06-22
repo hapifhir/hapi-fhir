@@ -214,8 +214,8 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 	public Parameters suggestKeywords(
 		@OperationParam(name = "context", min = 1, max = 1) String theContext,
 		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
-		@OperationParam(name = "text", min = 1, max = 1) String theText
-	) {
+		@OperationParam(name = "text", min = 1, max = 1) String theText,
+		RequestDetails theRequest) {
 		JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
 
 		if (isBlank(theContext)) {
@@ -228,7 +228,7 @@ public class JpaSystemProviderDstu2 extends BaseJpaSystemProviderDstu2Plus<Bundl
 			throw new InvalidRequestException("Parameter 'text' must be provided");
 		}
 
-		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText);
+		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText, theRequest);
 
 		Parameters retVal = new Parameters();
 		for (Suggestion next : keywords) {

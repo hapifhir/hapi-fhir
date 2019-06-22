@@ -30,7 +30,9 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -60,33 +62,33 @@ public class DeleteConflictService {
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
+	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
 
-		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
+		boolean tryAgain = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
 		while (tryAgain && retryCount < MAX_RETRY_ATTEMPTS) {
 			newConflicts = new DeleteConflictList();
-			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
+			tryAgain = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
 		return retryCount;
 	}
 
-	private boolean findAndHandleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
+	private boolean findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
 		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
 		if (resultList.isEmpty()) {
 			return false;
 		}
-		return handleConflicts(theDeleteConflicts, theEntity, theForValidate, resultList);
+		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
 	}
 
-	private boolean handleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
+	private boolean handleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
 		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
 			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", theResultList.size());
 			myResourceLinkDao.deleteAll(theResultList);
@@ -98,7 +100,7 @@ public class DeleteConflictService {
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
 			.add(DeleteConflictList.class, theDeleteConflicts);
-		return myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+		return JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
 	private void addConflictsToList(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, List<ResourceLink> theResultList) {

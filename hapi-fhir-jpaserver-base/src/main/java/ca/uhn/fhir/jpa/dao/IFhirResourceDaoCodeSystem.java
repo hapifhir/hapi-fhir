@@ -41,7 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
-	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem);
+	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest);
 
 	LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
 

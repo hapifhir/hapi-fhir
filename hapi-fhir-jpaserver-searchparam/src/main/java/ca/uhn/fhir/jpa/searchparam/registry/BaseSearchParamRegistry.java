@@ -187,9 +187,11 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 						.collect(Collectors.joining(", "));
 					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
 					ourLog.warn(message);
-					StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
-					HookParams params = new HookParams(msg);
-					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
+
+					// Interceptor broadcast: JPA_PERFTRACE_WARNING
+					HookParams params = new HookParams();
+					params.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 				}
 			}
 

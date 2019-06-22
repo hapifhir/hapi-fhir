@@ -52,7 +52,7 @@ import java.util.Set;
 
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
-	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
+	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest);
 
 	/**
 	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -110,7 +110,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions);
 
-	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions);
+	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
@@ -152,7 +152,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
 
-	Set<Long> processMatchUrl(String theMatchUrl);
+	Set<Long> processMatchUrl(String theMatchUrl, RequestDetails theRequest);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -178,13 +178,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
 
-	BaseHasResource readEntity(IIdType theId);
+	BaseHasResource readEntity(IIdType theId, RequestDetails theRequest);
 
 	/**
 	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
 	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
-	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId);
+	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
@@ -203,7 +203,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
-	Set<Long> searchForIds(SearchParameterMap theParams);
+	Set<Long> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into
