@@ -147,19 +147,19 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		myMediaDao.create(med, mockSrd());
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
 		
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press");
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("Pressure", output.get(0).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("Pressure", output.get(0).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("syst", output.get(0).getTerm());
@@ -167,7 +167,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertEquals("Systolic", output.get(2).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(3).getTerm());
 		
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
 	}
@@ -206,7 +206,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		obs2.getCode().setText("ZXCVBNMZZ");
 		myObservationDao.create(obs2, mockSrd());
 
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM");
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("ZXCVBNM", output.get(0).getTerm());
@@ -214,7 +214,7 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertEquals("ZXC", output.get(2).getTerm());
 		assertEquals("ZXC HELLO", output.get(3).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("ZXC", output.get(0).getTerm());
@@ -222,17 +222,17 @@ public class FhirResourceDaoDstu3SearchFtTest extends BaseJpaDstu3Test {
 		assertEquals("ZXCVBNM", output.get(2).getTerm());
 		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(3).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("HELLO", output.get(0).getTerm());
 		assertEquals("ZXC HELLO", output.get(1).getTerm());
 		
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("ZXC", output.get(0).getTerm());

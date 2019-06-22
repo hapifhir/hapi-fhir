@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 /*
  * #%L
@@ -11,9 +12,9 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,13 +31,23 @@ public interface IPagingProvider {
 
 	/**
 	 * Retrieve a result list by ID
+	 * <p>
+	 * Note that the <code>theRequest</code> parameter was added to this
+	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
+	 * add this parameter and not use it if needed.
+	 * </p>
 	 */
-	IBundleProvider retrieveResultList(String theSearchId);
+	IBundleProvider retrieveResultList(String theSearchId, RequestDetails theRequest);
 
 	/**
 	 * Retrieve a result list by ID
+	 * <p>
+	 * Note that the <code>theRequest</code> parameter was added to this
+	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
+	 * add this parameter and not use it if needed.
+	 * </p>
 	 */
-	default IBundleProvider retrieveResultList(String theSearchId, String thePageId) {
+	default IBundleProvider retrieveResultList(String theSearchId, String thePageId, RequestDetails theRequest) {
 		return null;
 	}
 

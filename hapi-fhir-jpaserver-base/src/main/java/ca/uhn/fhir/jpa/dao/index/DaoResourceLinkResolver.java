@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -57,11 +58,11 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	protected EntityManager myEntityManager;
 
 	@Override
-	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId) {
+	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
 		ResourceTable target;
 		Long valueOf;
 		try {
-			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId);
+			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId, theRequest);
 			ourLog.trace("Translated {}/{} to resource PID {}", theType, theId, valueOf);
 		} catch (ResourceNotFoundException e) {
 			if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {

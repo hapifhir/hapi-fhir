@@ -82,7 +82,7 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 		}
 
 		StopWatch w = new StopWatch();
-		IBundleProvider retVal = super.history(null, null, theSince, theUntil);
+		IBundleProvider retVal = super.history(theRequestDetails, null, null, theSince, theUntil);
 		ourLog.info("Processed global history in {}ms", w.getMillisAndRestart());
 		return retVal;
 	}

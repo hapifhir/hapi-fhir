@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -25,6 +26,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IFhirResourceDaoSubscription<T extends IBaseResource> extends IFhirResourceDao<T> {
 
-	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId);
+	Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest);
 
 }

@@ -75,21 +75,21 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 
 
 	@Override
-	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theResource, null, theId);
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {
 			if (theId == null || theId.hasIdPart() == false) {
 				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
 			}
-			final ResourceTable entity = readEntityLatestVersion(theId);
+			final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
 			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
-				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true);
+				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest);
 			}
 			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
@@ -108,7 +108,7 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
 			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
 			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
-			resourceToValidateById = dao.read(theId, theRequestDetails);
+			resourceToValidateById = dao.read(theId, theRequest);
 		}
 
 		ValidationResult result;

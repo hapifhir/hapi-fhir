@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,13 +41,13 @@ public class IndexedSearchParamExtractor {
 	@Autowired
 	private InlineResourceLinkResolver myInlineResourceLinkResolver;
 
-	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource) {
+	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
 		ResourceTable entity = new ResourceTable();
 		String resourceType = myContext.getResourceDefinition(theResource).getName();
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
 		mySearchParamExtractorService.extractFromResource(resourceIndexedSearchParams, entity, theResource);
-		myResourceLinkExtractor.extractResourceLinks(resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false);
+		myResourceLinkExtractor.extractResourceLinks(resourceIndexedSearchParams, entity, theResource, theResource.getMeta().getLastUpdated(), myInlineResourceLinkResolver, false, theRequest);
 		return resourceIndexedSearchParams;
 	}
 }

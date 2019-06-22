@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.search;
 
 import java.util.List;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	private Search mySearch;
 	private PlatformTransactionManager myTxManager;
 
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager) {
-		super(theSearch.getUuid(), theDao);
+	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequest) {
+		super(theRequest, theSearch.getUuid(), theDao);
 		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;

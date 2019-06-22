@@ -67,6 +67,7 @@ public class OperationServerR4Test {
 		ourLastParamMoney1 = null;
 		ourLastId = null;
 		ourLastMethod = "";
+		ourNextResponse = null;
 
 		myFhirClient = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort);
 	}
@@ -137,18 +138,44 @@ public class OperationServerR4Test {
 	}
 
 	@Test
+	public void testElementsFilterOnOperationResponse() throws Exception {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.COLLECTION);
+		ourNextResponse = bundle;
+
+		Patient patient = new Patient();
+		patient.addName().setFamily("FAMILY").addGiven("GIVEN");
+		patient.addIdentifier().setSystem("SYSTEM").setValue("VALUE");
+		bundle.addEntry().setResource(patient);
+
+		HttpGet httpPost = new HttpGet("http://localhost:" + ourPort + "/Patient/$OP_TYPE_RETURNING_BUNDLE"
+		+ "?_pretty=true&_elements=identifier");
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info("Response: {}", response);
+			Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+			Patient pt = (Patient) resp.getEntry().get(0).getResource();
+			assertEquals(0, pt.getName().size());
+			assertEquals(1, pt.getIdentifier().size());
+		}
+
+	}
+
+
+	@Test
 	public void testInstanceEverythingGet() throws Exception {
 
 		// Try with a GET
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123/$everything");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			assertThat(response, startsWith("<Bundle"));
+		}
 
 		assertEquals("instance $everything", ourLastMethod);
-		assertThat(response, startsWith("<Bundle"));
 		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
@@ -590,21 +617,21 @@ public class OperationServerR4Test {
 		}
 	}
 
+	private static IBaseResource ourNextResponse;
 	public static class PatientProvider implements IResourceProvider {
+
 
 		@Override
 		public Class<Patient> getResourceType() {
 			return Patient.class;
 		}
 
-		//@formatter:off
 		@Operation(name = "$OP_INSTANCE")
 		public Parameters opInstance(
 			@IdParam IdType theId,
 			@OperationParam(name = "PARAM1") StringType theParam1,
 			@OperationParam(name = "PARAM2") Patient theParam2
 		) {
-			//@formatter:on
 
 			ourLastMethod = "$OP_INSTANCE";
 			ourLastId = theId;
@@ -634,6 +661,14 @@ public class OperationServerR4Test {
 			retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
 			return retVal;
 		}
+
+		@Operation(name = "$OP_TYPE_RETURNING_BUNDLE", idempotent = true)
+		public IBaseResource opTypeReturningBundle(
+		) {
+			ourLastMethod = "$OP_TYPE_RETURNING_BUNDLE";
+			return ourNextResponse;
+		}
+
 
 		@Operation(name = "$OP_PROFILE_DT2", idempotent = true)
 		public Bundle opProfileType(
