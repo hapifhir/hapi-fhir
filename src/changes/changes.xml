@@ -127,6 +127,11 @@
 				should not be populated. This has been corrected. Thanks to GitHub user
 				@gitrust for reporting!
 			</action>
+			<action type="fix" issue="1352">
+				Creating R4 Observation resources with a value type of SampledData failed in the
+				JPA server because of an indexing error. Thanks to Brian Reinhold for
+				reporting!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

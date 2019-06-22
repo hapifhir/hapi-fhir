@@ -238,7 +238,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
             break;
         }
       }
-      
+
       // Populate Bundle.entry.search
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
       if (searchMode != null) {

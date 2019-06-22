@@ -76,6 +76,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * See #1352
+	 */
+	@Test
+	public void testCreateWithSampledDataInObservation() {
+		Observation o = new Observation();
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		SampledData sampledData = new SampledData();
+		sampledData.setData("2 3 4 5 6");
+		o.setValue(sampledData);
+		assertTrue(myObservationDao.create(o).getCreated());
+	}
+
 	@Test
 	public void testCreateWithClientAssignedIdDisallowed() {
 		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
