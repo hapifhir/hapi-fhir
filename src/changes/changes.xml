@@ -132,6 +132,11 @@
 				JPA server because of an indexing error. Thanks to Brian Reinhold for
 				reporting!
 			</action>
+			<action type="add">
+				The JPA server now rejects subscriptions being submitted with no value in
+				Subscription.status (this field is mandatory, but the subscription was previously ignored
+				if no value was provided)
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

@@ -103,7 +103,11 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 	@Nullable
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), Subscription.SubscriptionStatus.OFF)) {
+		if (theResource.getStatus() == null) {
+			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated");
+		}
+
+		switch (theResource.getStatus()) {
 			case REQUESTED:
 			case ACTIVE:
 				break;
