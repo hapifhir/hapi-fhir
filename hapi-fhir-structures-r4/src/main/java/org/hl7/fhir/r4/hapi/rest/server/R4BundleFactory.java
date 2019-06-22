@@ -224,19 +224,21 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
 
       // Populate Bundle.entry.response
-      switch (theBundleType) {
-        case BATCH_RESPONSE:
-        case TRANSACTION_RESPONSE:
-        case HISTORY:
-          if ("1".equals(id.getVersionIdPart())) {
-            entry.getResponse().setStatus("201 Created");
-          } else if (isNotBlank(id.getVersionIdPart())) {
-            entry.getResponse().setStatus("200 OK");
-          }
-          if (isNotBlank(id.getVersionIdPart())) {
-            entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
-          }
-          break;
+      if (theBundleType != null) {
+        switch (theBundleType) {
+          case BATCH_RESPONSE:
+          case TRANSACTION_RESPONSE:
+          case HISTORY:
+            if ("1".equals(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("201 Created");
+            } else if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("200 OK");
+            }
+            if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            }
+            break;
+        }
       }
 
       // Populate Bundle.entry.search
