@@ -111,6 +111,10 @@
 				<![CDATA[<code>$subsumes</code>]]>
 				operation.
 			</action>
+			<action type="fix">
+				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
+				due to case sensitivity. This has been corrected.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
