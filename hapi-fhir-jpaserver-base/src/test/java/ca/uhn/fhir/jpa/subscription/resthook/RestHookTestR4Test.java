@@ -886,7 +886,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			ourClient.create().resource(subscription).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated"));
+			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
 		}
 	}
 

@@ -107,7 +107,7 @@ public class FhirResourceDaoSubscriptionDstu3 extends FhirResourceDaoDstu3<Subsc
 
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
 		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated");
+			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}
 
 		switch (theResource.getStatus()) {

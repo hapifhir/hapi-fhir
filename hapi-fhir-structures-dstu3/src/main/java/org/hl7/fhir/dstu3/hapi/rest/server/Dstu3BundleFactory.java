@@ -226,7 +226,6 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
         switch (theBundleType) {
           case BATCH_RESPONSE:
           case TRANSACTION_RESPONSE:
-          case HISTORY:
             if ("1".equals(id.getVersionIdPart())) {
               entry.getResponse().setStatus("201 Created");
             } else if (isNotBlank(id.getVersionIdPart())) {
