@@ -100,6 +100,12 @@
 				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
 				due to case sensitivity. This has been corrected.
 			</action>
+			<action type="fix" issue="1355">
+				Invoking the transaction or batch operation on the JPA server would fail
+				with a NullPointerException if the Bundle passed in did not contain 
+				a resource in an entry that required a resource (e.g. a POST). Thanks to
+				GitHub user @lytvynenko-dmitriy for reporting!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
