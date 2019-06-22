@@ -106,6 +106,12 @@
 				a resource in an entry that required a resource (e.g. a POST). Thanks to
 				GitHub user @lytvynenko-dmitriy for reporting!
 			</action>
+			<action type="fix" issue="1250">
+				HAPI FHIR Server (plain, JPA, and JAX-RS) all populated Bundle.entry.result
+				on search result bundles, even though the FHIR specification states that this
+				should not be populated. This has been corrected. Thanks to GitHub user
+				@gitrust for reporting!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
