@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import ca.uhn.fhir.util.UrlUtil;
 import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
 import java.util.ArrayList;
@@ -39,6 +40,10 @@ public class SqlQuery {
 	}
 
 	public String getSql(boolean theInlineParams, boolean theFormat) {
+		return getSql(theInlineParams, theFormat, false);
+	}
+
+	public String getSql(boolean theInlineParams, boolean theFormat, boolean theSanitizeParams) {
 		String retVal = mySql;
 		if (theFormat) {
 			retVal = new BasicFormatterImpl().format(retVal);
@@ -57,7 +62,11 @@ public class SqlQuery {
 				if (idx == -1) {
 					break;
 				}
-				String nextSubstitution = "'" + nextParams.remove(0) + "'";
+				String nextParamValue = nextParams.remove(0);
+				if (theSanitizeParams) {
+					nextParamValue = UrlUtil.sanitizeUrlPart(nextParamValue);
+				}
+				String nextSubstitution = "'" + nextParamValue + "'";
 				retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
 				idx += nextSubstitution.length();
 			}
