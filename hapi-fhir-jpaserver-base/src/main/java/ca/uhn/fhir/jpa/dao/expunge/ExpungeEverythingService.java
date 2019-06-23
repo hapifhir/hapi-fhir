@@ -139,7 +139,7 @@ public class ExpungeEverythingService {
 	private int doExpungeEverythingQuery(String theQuery) {
 		StopWatch sw = new StopWatch();
 		int outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-		ourLog.debug("Query affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
+		ourLog.debug("SqlQuery affected {} rows in {}: {}", outcome, sw.toString(), theQuery);
 		return outcome;
 	}
 

@@ -9,9 +9,9 @@ package ca.uhn.fhir.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -680,7 +680,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 	/**
 	 * Invoked before a resource will be created, immediately before the transaction
@@ -717,7 +717,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 	/**
 	 * Invoked before a resource will be created
@@ -750,7 +750,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 
 	/**
@@ -790,7 +790,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 	/**
 	 * Invoked before a resource will be updated, immediately before the resource
@@ -828,7 +828,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 	/**
 	 * Invoked before a resource will be created, immediately before the resource
@@ -863,7 +863,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-		),
+	),
 
 	/**
 	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
@@ -897,6 +897,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.StorageProcessingMessage - Contains the message
 	 * </li>
 	 * </ul>
@@ -905,8 +912,9 @@ public enum Pointcut {
 	 * </p>
 	 */
 	JPA_PERFTRACE_WARNING(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
-		),
+	),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -919,6 +927,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -927,7 +942,10 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -942,6 +960,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -950,7 +975,10 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_SELECT_COMPLETE(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_SELECT_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -962,6 +990,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -970,7 +1005,10 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_FAILED(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_FAILED(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -984,6 +1022,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -992,7 +1037,10 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -1005,6 +1053,13 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -1013,7 +1068,40 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	JPA_PERFTRACE_SEARCH_COMPLETE(void.class, "ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"),
+	JPA_PERFTRACE_SEARCH_COMPLETE(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
+	),
+
+
+	/**
+	 * Note that this is a performance tracing hook. Use with caution in production
+	 * systems, since calling it may (or may not) carry a cost.
+	 * <p>
+	 * This hook is invoked when a query has executed, and includes the raw SQL
+	 * statements that were executed against the database.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.util.SqlQueryList - Contains details about the raw SQL queries.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	JPA_PERFTRACE_RAW_SQL(void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.jpa.util.SqlQueryList"
+	),
 
 	/**
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or

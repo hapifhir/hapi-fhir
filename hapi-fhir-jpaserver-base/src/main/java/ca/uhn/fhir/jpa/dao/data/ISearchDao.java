@@ -39,7 +39,7 @@ public interface ISearchDao extends JpaRepository<Search, Long> {
 	@Query("SELECT s.myId FROM Search s WHERE s.mySearchLastReturned < :cutoff")
 	Slice<Long> findWhereLastReturnedBefore(@Param("cutoff") Date theCutoff, Pageable thePage);
 
-//	@Query("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
+//	@SqlQuery("SELECT s FROM Search s WHERE s.myCreated < :cutoff")
 //	public Collection<Search> findWhereCreatedBefore(@Param("cutoff") Date theCutoff);
 
 	@Query("SELECT s FROM Search s WHERE s.myResourceType = :type AND mySearchQueryStringHash = :hash AND s.myCreated > :cutoff AND s.myDeleted = false")

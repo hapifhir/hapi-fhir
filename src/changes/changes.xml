@@ -115,6 +115,11 @@
 				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
 				due to case sensitivity. This has been corrected.
 			</action>
+			<action type="add">
+				A new pointcut has been added to the JPA server called
+				<![CDATA[<code>JPA_PERFTRACE_RAW_SQL</code>]]>
+				that can be used to capture the raw SQL statements that are sent to the underlying database.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

@@ -719,10 +719,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
 				if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
-					HookParams params = new HookParams().add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 				} else {
-					HookParams params = new HookParams().add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, myRequest)
+						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 				}
 

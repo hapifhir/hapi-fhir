@@ -105,6 +105,7 @@ public class IdHelperService {
 				StorageProcessingMessage msg = new StorageProcessingMessage()
 					.setMessage("This search uses unqualified resource IDs (an ID without a resource type). This is less efficient than using a qualified type.");
 				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
 					.add(StorageProcessingMessage.class, msg);
 				JpaInterceptorBroadcaster.doCallHooks(theInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_WARNING, params);
 

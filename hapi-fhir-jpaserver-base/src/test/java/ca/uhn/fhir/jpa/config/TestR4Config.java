@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -107,6 +108,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(singleQueryCountHolder())
 			.build();
 

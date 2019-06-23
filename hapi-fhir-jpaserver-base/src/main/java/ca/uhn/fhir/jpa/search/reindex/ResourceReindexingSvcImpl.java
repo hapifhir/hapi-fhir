@@ -305,7 +305,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		Date low = theJob.getThresholdLow() != null ? theJob.getThresholdLow() : BEGINNING_OF_TIME;
 		Date high = theJob.getThresholdHigh();
 
-		// Query for resources within threshold
+		// SqlQuery for resources within threshold
 		StopWatch pageSw = new StopWatch();
 		Slice<Long> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);

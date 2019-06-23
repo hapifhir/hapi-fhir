@@ -21,4 +21,11 @@ public class JpaInterceptorBroadcaster {
 		}
 		return retVal;
 	}
+
+	public static boolean hasHooks(Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
+		if (theInterceptorBroadcaster != null && theInterceptorBroadcaster.hasHooks(thePointcut)) {
+			return true;
+		}
+		return theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
+	}
 }

@@ -195,7 +195,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		Query luceneQuery = bool.createQuery();
 
-		// wrap Lucene query in a javax.persistence.Query
+		// wrap Lucene query in a javax.persistence.SqlQuery
 		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
 		jpaQuery.setProjection("myId");
 
