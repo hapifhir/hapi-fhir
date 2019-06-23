@@ -24,6 +24,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -104,6 +106,18 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
 														 List<StringType> headers) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint, headers);
+
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		waitForQueueToDrain();
+
+		return (Subscription) methodOutcome.getResource();
+	}
+
+	@NotNull
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -117,13 +131,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			channel.setHeader(headers);
 		}
 		subscription.setChannel(channel);
-
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		mySubscriptionIds.add(methodOutcome.getId());
-
-		waitForQueueToDrain();
-
-		return (Subscription) methodOutcome.getResource();
+		return subscription;
 	}
 
 	private Observation sendObservation(String code, String system) {
@@ -513,6 +521,20 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.create().resource(cr).execute();
 		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
 	}
+
+	@Test
+	public void testSubscriptionWithNoStatusIsRejected() {
+		Subscription subscription = newSubscription("Observation?", "application/json", null, null);
+		subscription.setStatus(null);
+
+		try {
+			ourClient.create().resource(subscription).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+		}
+	}
+
 
 	public static class ObservationListener implements IResourceProvider {
 

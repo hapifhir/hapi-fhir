@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
+import org.hl7.fhir.dstu3.model.codesystems.IssueType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -65,7 +66,10 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 	@Override
 	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(theCaughtEx.getMessage());
+		oo.addIssue()
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 

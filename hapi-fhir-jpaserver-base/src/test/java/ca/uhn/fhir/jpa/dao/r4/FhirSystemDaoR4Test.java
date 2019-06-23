@@ -14,9 +14,13 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.*;
@@ -795,6 +799,99 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - No resources match this search", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testTransactionMissingResourceForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		request
+			.addEntry()
+			.setFullUrl("Patient/")
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTransactionMissingResourceForPut() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		request
+			.addEntry()
+			.setFullUrl("Patient/123")
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/123");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testBatchMissingResourceForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setFullUrl("Patient/")
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		validate(outcome);
+	}
+
+	@Test
+	public void testBatchMissingResourceForPut() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setFullUrl("Patient/123")
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/123");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		validate(outcome);
+	}
+
+	@Test
+	public void testBatchMissingUrlForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setResource(new Patient().setActive(true))
+			.getRequest()
+			.setMethod(HTTPVerb.POST);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		validate(outcome);
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {

@@ -9,9 +9,9 @@ package ca.uhn.fhir.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -680,7 +680,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 	/**
 	 * Invoked before a resource will be created, immediately before the transaction
@@ -717,7 +717,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 	/**
 	 * Invoked before a resource will be created
@@ -750,7 +750,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 
 	/**
@@ -790,7 +790,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 	/**
 	 * Invoked before a resource will be updated, immediately before the resource
@@ -828,7 +828,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 	/**
 	 * Invoked before a resource will be created, immediately before the resource
@@ -863,7 +863,7 @@ public enum Pointcut {
 		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
-	),
+		),
 
 	/**
 	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
@@ -914,7 +914,7 @@ public enum Pointcut {
 	JPA_PERFTRACE_WARNING(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
-	),
+		),
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production

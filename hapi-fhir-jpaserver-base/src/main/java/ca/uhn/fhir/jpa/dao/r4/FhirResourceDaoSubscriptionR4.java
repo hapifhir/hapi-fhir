@@ -103,7 +103,11 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 	@Nullable
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), Subscription.SubscriptionStatus.OFF)) {
+		if (theResource.getStatus() == null) {
+			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
+		}
+
+		switch (theResource.getStatus()) {
 			case REQUESTED:
 			case ACTIVE:
 				break;
@@ -160,11 +164,6 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 		if (theResource.getChannel().getType() == null) {
 			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
-		SubscriptionStatus status = theResource.getStatus();
-		if (status == null) {
-			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
 		}
 
 	}

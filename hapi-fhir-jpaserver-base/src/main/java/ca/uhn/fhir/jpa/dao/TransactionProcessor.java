@@ -246,16 +246,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
 
-			TransactionCallback<BUNDLE> callback = theStatus -> {
+			try {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
-			};
-
-			try {
-				// FIXME: this doesn't need to be a callback
-				BUNDLE nextResponseBundle = callback.doInTransaction(null);
+				BUNDLE nextResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 
 				BUNDLEENTRY subResponseEntry = myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myVersionAdapter.addEntry(resp, subResponseEntry);
@@ -362,7 +357,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				placeholderIds.add(fullUrl);
 			}
 		}
-		Collections.sort(entries, new TransactionSorter(placeholderIds));
+		entries.sort(new TransactionSorter(placeholderIds));
 
 		/*
 		 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
@@ -638,6 +633,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				switch (verb) {
 					case "POST": {
 						// CREATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						res.setId((String) null);
@@ -695,6 +691,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					}
 					case "PUT": {
 						// UPDATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
@@ -905,6 +902,13 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			if (theRequest != null) {
 				theRequest.stopDeferredRequestOperationCallbackAndRunDeferredItems();
 			}
+		}
+	}
+
+	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
+		if (theResource == null) {
+			String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
+			throw new InvalidRequestException(msg);
 		}
 	}
 
