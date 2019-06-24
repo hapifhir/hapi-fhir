@@ -345,18 +345,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				 * individually for pages as we return them to clients
 				 */
 				final Set<Long> includedPids = new HashSet<>();
-				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)"));
-				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)"));
+				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
 				List<Long> includedPidsList = new ArrayList<>(includedPids);
-
-				// Interceptor call: STORAGE_PREACCESS_RESOURCES
-				// This can be used to remove results from the search result details before
-				// the user has a chance to know that they were in the results
-				if (theRequestDetails != null) {
-					IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
-					callInterceptorStoragePreAccessResources(interceptorBroadcaster, theRequestDetails, sb, pids);
-					callInterceptorStoragePreAccessResources(interceptorBroadcaster, theRequestDetails, sb, includedPidsList);
-				}
 
 				List<IBaseResource> resources = new ArrayList<>();
 				sb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
@@ -668,7 +659,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					// This can be used to remove results from the search result details before
 					// the user has a chance to know that they were in the results
 					if (mySearchRuntimeDetails.getRequestDetails() != null) {
-						IInterceptorBroadcaster interceptorBroadcaster = mySearchRuntimeDetails.getRequestDetails().getInterceptorBroadcaster();
 						JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
 						HookParams params = new HookParams()
 							.add(IPreResourceAccessDetails.class, accessDetails)

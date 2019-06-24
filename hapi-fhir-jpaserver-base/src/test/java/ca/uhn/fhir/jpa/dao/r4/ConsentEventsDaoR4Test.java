@@ -316,7 +316,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
 			List<String> currentPassIds = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
-				currentPassIds.add(accessDetails.getResource(i).getIdElement().toUnqualifiedVersionless().getValue());
+				IBaseResource nextResource = accessDetails.getResource(i);
+				if (nextResource != null) {
+					currentPassIds.add(nextResource.getIdElement().toUnqualifiedVersionless().getValue());
+				}
 			}
 
 			ourLog.info("Call to STORAGE_PREACCESS_RESOURCES with {} IDs: {}", currentPassIds.size(), currentPassIds);
@@ -337,13 +340,19 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
 			List<String> nonBlocked = new ArrayList<>();
-			for (int i = 0; i < accessDetails.size(); i++) {
+			int count = accessDetails.size();
+
+			ourLog.info("Invoking {} for {} results", thePointcut, count);
+
+			for (int i = 0; i < count; i++) {
 				IBaseResource resource = accessDetails.getResource(i);
-				long idPart = resource.getIdElement().getIdPartAsLong();
-				if (resource.getIdElement().getResourceType().equals("Observation") && idPart % 2 == 1) {
-					accessDetails.setDontReturnResourceAtIndex(i);
-				} else {
-					nonBlocked.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
+				if (resource != null) {
+					long idPart = resource.getIdElement().getIdPartAsLong();
+					if (resource.getIdElement().getResourceType().equals("Observation") && idPart % 2 == 1) {
+						accessDetails.setDontReturnResourceAtIndex(i);
+					} else {
+						nonBlocked.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
+					}
 				}
 			}
 

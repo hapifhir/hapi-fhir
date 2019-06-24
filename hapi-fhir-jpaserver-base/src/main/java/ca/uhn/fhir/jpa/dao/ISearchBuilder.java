@@ -45,7 +45,7 @@ public interface ISearchBuilder {
 	void loadResourcesByPid(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails);
 
 	Set<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes, boolean theReverseMode,
-								  DateRangeParam theLastUpdated, String theSearchIdOrDescription);
+								  DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest);
 
 	/**
 	 * How many results may be fetched at once

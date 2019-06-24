@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
+import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
@@ -51,7 +52,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -1881,17 +1881,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCE
-			SimplePreResourceAccessDetails details = new SimplePreResourceAccessDetails(resource);
-			HookParams params = new HookParams()
-				.add(IPreResourceAccessDetails.class, details)
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-			if (details.isDontReturnResourceAtIndex(0) == false) {
-				theResourceListToPopulate.set(index, resource);
-			}
+			theResourceListToPopulate.set(index, resource);
 		}
 	}
 
@@ -1972,7 +1962,7 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	@Override
 	public HashSet<Long> loadIncludes(FhirContext theContext, EntityManager theEntityManager, Collection<Long> theMatches, Set<Include> theRevIncludes,
-												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription) {
+												 boolean theReverseMode, DateRangeParam theLastUpdated, String theSearchIdOrDescription, RequestDetails theRequest) {
 		if (theMatches.size() == 0) {
 			return new HashSet<>();
 		}
@@ -2103,6 +2093,30 @@ public class SearchBuilder implements ISearchBuilder {
 		} while (includes.size() > 0 && nextRoundMatches.size() > 0 && addedSomeThisRound);
 
 		ourLog.info("Loaded {} {} in {} rounds and {} ms for search {}", allAdded.size(), theReverseMode ? "_revincludes" : "_includes", roundCounts, w.getMillisAndRestart(), theSearchIdOrDescription);
+
+		// Interceptor call: STORAGE_PREACCESS_RESOURCES
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (allAdded.size() > 0) {
+			List<Long> includedPidList = new ArrayList<>(allAdded);
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, ()->this);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = includedPidList.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					Long value = includedPidList.remove(i);
+					if (value != null) {
+						theMatches.remove(value);
+					}
+				}
+			}
+
+			allAdded = new HashSet<>(includedPidList);
+		}
 
 		return allAdded;
 	}
@@ -2423,16 +2437,18 @@ public class SearchBuilder implements ISearchBuilder {
 
 	public class IncludesIterator extends BaseIterator<Long> implements Iterator<Long> {
 
+		private final RequestDetails myRequest;
 		private Iterator<Long> myCurrentIterator;
 		private int myCurrentOffset;
 		private ArrayList<Long> myCurrentPids;
 		private Long myNext;
 		private int myPageSize = myDaoConfig.getEverythingIncludesFetchPageSize();
 
-		IncludesIterator(Set<Long> thePidSet) {
+		IncludesIterator(Set<Long> thePidSet, RequestDetails theRequest) {
 			myCurrentPids = new ArrayList<>(thePidSet);
 			myCurrentIterator = EMPTY_LONG_LIST.iterator();
 			myCurrentOffset = 0;
+			myRequest = theRequest;
 		}
 
 		private void fetchNext() {
@@ -2455,7 +2471,7 @@ public class SearchBuilder implements ISearchBuilder {
 				myCurrentOffset = end;
 				Collection<Long> pidsToScan = myCurrentPids.subList(start, end);
 				Set<Include> includes = Collections.singleton(new Include("*", true));
-				Set<Long> newPids = loadIncludes(myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid);
+				Set<Long> newPids = loadIncludes(myContext, myEntityManager, pidsToScan, includes, false, myParams.getLastUpdated(), mySearchUuid, myRequest);
 				myCurrentIterator = newPids.iterator();
 
 			}
@@ -2559,7 +2575,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 				if (myNext == null) {
 					if (myStillNeedToFetchIncludes) {
-						myIncludesIterator = new IncludesIterator(myPidSet);
+						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
 						myStillNeedToFetchIncludes = false;
 					}
 					if (myIncludesIterator != null) {
