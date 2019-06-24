@@ -15,6 +15,7 @@ import ca.uhn.fhir.jpa.util.BaseIterator;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
@@ -28,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
@@ -99,13 +101,14 @@ public class SearchCoordinatorSvcImplTest {
 		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuider);
 
 		doAnswer(theInvocation -> {
-			PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theInvocation.getArguments()[0];
-			provider.setSearchCoordinatorSvc(mySvc);
-			provider.setPlatformTransactionManager(myTxManager);
-			provider.setSearchDao(mySearchDao);
-			provider.setEntityManager(myEntityManager);
-			provider.setContext(ourCtx);
-			return null;
+				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theInvocation.getArguments()[0];
+				provider.setSearchCoordinatorSvc(mySvc);
+				provider.setPlatformTransactionManager(myTxManager);
+				provider.setSearchDao(mySearchDao);
+				provider.setEntityManager(myEntityManager);
+				provider.setContext(ourCtx);
+				provider.setInterceptorBroadcaster(myInterceptorBroadcaster);
+				return null;
 		}).when(myCallingDao).injectDependenciesIntoBundleProvider(any(PersistedJpaBundleProvider.class));
 	}
 
@@ -119,14 +122,14 @@ public class SearchCoordinatorSvcImplTest {
 
 	private Answer<Void> loadPids() {
 		return theInvocation -> {
-			List<Long> pids = (List<Long>) theInvocation.getArguments()[0];
+				List<Long> pids = (List<Long>) theInvocation.getArguments()[0];
 			List<IBaseResource> resources = (List<IBaseResource>) theInvocation.getArguments()[2];
-			for (Long nextPid : pids) {
-				Patient pt = new Patient();
-				pt.setId(nextPid.toString());
-				resources.add(pt);
-			}
-			return null;
+				for (Long nextPid : pids) {
+					Patient pt = new Patient();
+					pt.setId(nextPid.toString());
+					resources.add(pt);
+				}
+				return null;
 		};
 	}
 
@@ -137,7 +140,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), any())).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -158,8 +161,8 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 1);
-		when(mySearchBuider.createQuery(any(), any())).thenReturn(iter);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		when(mySearchBuider.createQuery(any(), any(), any())).thenReturn(iter);
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		when(mySearchResultDao.findWithSearchUuid(any(), any())).thenAnswer(t -> {
 			List<Long> returnedValues = iter.getReturnedValues();
@@ -215,9 +218,9 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(same(params), any(), any())).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -243,9 +246,9 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(same(params), any(), any())).thenReturn(iter);
 		when(mySearchDao.save(any())).thenAnswer(t -> t.getArguments()[0]);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -271,7 +274,7 @@ public class SearchCoordinatorSvcImplTest {
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(result.getUuid(), myCallingDao, null);
+		provider = new PersistedJpaBundleProvider(null, result.getUuid(), myCallingDao);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
@@ -287,9 +290,9 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 2);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(iter);
+		when(mySearchBuider.createQuery(same(params), any(), any())).thenReturn(iter);
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -318,43 +321,43 @@ public class SearchCoordinatorSvcImplTest {
 		search.setResourceType("Patient");
 
 		when(mySearchDao.findByUuid(eq(uuid))).thenReturn(search);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		PersistedJpaBundleProvider provider;
 		List<IBaseResource> resources;
 
 		new Thread(() -> {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// ignore
-			}
-
-			when(mySearchResultDao.findWithSearchUuid(any(Search.class), any(Pageable.class))).thenAnswer(theInvocation -> {
-				Pageable page = (Pageable) theInvocation.getArguments()[1];
-
-				ArrayList<Long> results = new ArrayList<>();
-				int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
-				for (long i = page.getOffset(); i < max; i++) {
-					results.add(i + 10L);
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// ignore
 				}
 
+			when(mySearchResultDao.findWithSearchUuid(any(Search.class), any(Pageable.class))).thenAnswer(theInvocation -> {
+						Pageable page = (Pageable) theInvocation.getArguments()[1];
+
+				ArrayList<Long> results = new ArrayList<>();
+						int max = (page.getPageNumber() * page.getPageSize()) + page.getPageSize();
+						for (long i = page.getOffset(); i < max; i++) {
+							results.add(i + 10L);
+						}
+
 				return new PageImpl<>(results);
-			});
-			search.setStatus(SearchStatusEnum.FINISHED);
+				});
+				search.setStatus(SearchStatusEnum.FINISHED);
 		}).start();
 
 		/*
 		 * Now call from a new bundle provider. This simulates a separate HTTP
 		 * client request coming in.
 		 */
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao, null);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
 		resources = provider.getResources(10, 20);
 		assertEquals(10, resources.size());
 		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
-		provider = new PersistedJpaBundleProvider(uuid, myCallingDao, null);
+		provider = new PersistedJpaBundleProvider(null, uuid, myCallingDao);
 		resources = provider.getResources(20, 40);
 		assertEquals(20, resources.size());
 		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
@@ -370,9 +373,9 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuider.createQuery(same(params), any(), any())).thenReturn(new ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
@@ -391,12 +394,12 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuider.createQuery(same(params), any())).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuider.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(10, 110);
-		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean());
+		doAnswer(loadPids()).when(mySearchBuider).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));
 
-		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(),null );
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
 		assertEquals(100, result.size().intValue());
 

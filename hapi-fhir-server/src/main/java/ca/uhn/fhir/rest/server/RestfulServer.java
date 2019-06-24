@@ -350,7 +350,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	private void findResourceMethods(Object theProvider) {
 
-		ourLog.info("Scanning type for RESTful methods: {}", theProvider.getClass());
+		ourLog.debug("Scanning type for RESTful methods: {}", theProvider.getClass());
 		int count = 0;
 
 		Class<?> clazz = theProvider.getClass();
@@ -1431,7 +1431,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		try {
 			if (!myStarted) {
 				for (Object provider : theProviders) {
-					ourLog.info("Registration of provider [" + provider.getClass().getName() + "] will be delayed until FHIR server startup");
+					ourLog.debug("Registration of provider [" + provider.getClass().getName() + "] will be delayed until FHIR server startup");
 					if (provider instanceof IResourceProvider) {
 						myResourceProviders.add((IResourceProvider) provider);
 					} else {

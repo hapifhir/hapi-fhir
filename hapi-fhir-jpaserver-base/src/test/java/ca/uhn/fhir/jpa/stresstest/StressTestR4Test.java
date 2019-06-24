@@ -390,11 +390,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withBundle(input).execute();
 
-		CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"));
-		try {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(getMeta);
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();

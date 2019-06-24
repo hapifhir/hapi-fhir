@@ -34,15 +34,21 @@ public interface IPagingProvider {
 
 	/**
 	 * Retrieve a result list by ID
-	 *
-	 * @param theRequestDetails The server request being made (may be null)
+	 * <p>
+	 * Note that the <code>theRequest</code> parameter was added to this
+	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
+	 * add this parameter and not use it if needed.
+	 * </p>
 	 */
 	IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId);
 
 	/**
 	 * Retrieve a result list by ID
-	 *
-	 * @param theRequestDetails The server request being made (may be null)
+	 * <p>
+	 * Note that the <code>theRequest</code> parameter was added to this
+	 * method in HAPI FHIR 4.0.0. Existing implementations may choose to
+	 * add this parameter and not use it if needed.
+	 * </p>
 	 */
 	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;

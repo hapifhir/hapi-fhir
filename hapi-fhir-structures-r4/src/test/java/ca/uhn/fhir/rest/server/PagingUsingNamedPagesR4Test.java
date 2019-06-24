@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
@@ -38,8 +39,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class PagingUsingNamedPagesR4Test {
 
@@ -145,7 +144,7 @@ public class PagingUsingNamedPagesR4Test {
 	@Test
 	public void testPagingLinkUnknownPage() throws Exception {
 
-		when(myPagingProvider.retrieveResultList(any(), nullable(String.class))).thenReturn(null);
+		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), any())).thenReturn(null);
 		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class))).thenReturn(null);
 
 		// With ID

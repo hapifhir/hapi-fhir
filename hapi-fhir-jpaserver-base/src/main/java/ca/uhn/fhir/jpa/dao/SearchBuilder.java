@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchViewDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.BaseIterator;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.model.api.*;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
@@ -50,7 +51,9 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SimplePreResourceAccessDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -210,7 +213,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 	}
 
-	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters) {
+	private void addPredicateHas(List<List<IQueryParameterType>> theHasParameters, RequestDetails theRequest) {
 
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -261,7 +264,7 @@ public class SearchBuilder implements ISearchBuilder {
 				orValues.addAll(next.getValuesAsQueryTokens());
 			}
 
-			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues);
+			Subquery<Long> subQ = createLinkSubquery(true, parameterName, targetResourceType, orValues, theRequest);
 
 			Join<ResourceTable, ResourceLink> join = myResourceTableRoot.join("myResourceLinksAsTarget", JoinType.LEFT);
 			Predicate pathPredicate = createResourceLinkPathPredicate(targetResourceType, paramReference, join);
@@ -379,7 +382,7 @@ public class SearchBuilder implements ISearchBuilder {
 	/**
 	 * Add reference predicate to the current search
 	 */
-	private void addPredicateReference(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList) {
+	private void addPredicateReference(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, RequestDetails theRequest) {
 		assert theParamName.contains(".") == false;
 
 		if (theList.get(0).getMissing() != null) {
@@ -423,7 +426,7 @@ public class SearchBuilder implements ISearchBuilder {
 					 * Handle chained search, e.g. Patient?organization.name=Kwik-e-mart
 					 */
 
-					addPredicateReferenceWithChain(theResourceName, theParamName, theList, join, new ArrayList<>(), ref);
+					addPredicateReferenceWithChain(theResourceName, theParamName, theList, join, new ArrayList<>(), ref, theRequest);
 					return;
 
 				}
@@ -437,7 +440,7 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		// Resources by ID
-		List<Long> targetPids = myIdHelperService.translateForcedIdToPids(targetIds);
+		List<Long> targetPids = myIdHelperService.translateForcedIdToPids(targetIds, theRequest);
 		if (!targetPids.isEmpty()) {
 			ourLog.debug("Searching for resource link with target PIDs: {}", targetPids);
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, join);
@@ -463,7 +466,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theRef) {
+	private void addPredicateReferenceWithChain(String theResourceName, String theParamName, List<? extends IQueryParameterType> theList, Join<ResourceTable, ResourceLink> theJoin, List<Predicate> theCodePredicates, ReferenceParam theRef, RequestDetails theRequest) {
 		final List<Class<? extends IBaseResource>> resourceTypes;
 		String resourceId;
 		if (!theRef.getValue().matches("[a-zA-Z]+/.*")) {
@@ -587,7 +590,7 @@ public class SearchBuilder implements ISearchBuilder {
 				orValues.add(chainValue);
 			}
 
-			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues);
+			Subquery<Long> subQ = createLinkSubquery(foundChainMatch, chain, subResourceName, orValues, theRequest);
 
 			Predicate pathPredicate = createResourceLinkPathPredicate(theResourceName, theParamName, theJoin);
 			Predicate pidPredicate = theJoin.get("myTargetResourcePid").in(subQ);
@@ -603,7 +606,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myPredicates.add(myBuilder.or(toArray(theCodePredicates)));
 	}
 
-	private Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues) {
+	private Subquery<Long> createLinkSubquery(boolean theFoundChainMatch, String theChain, String theSubResourceName, List<IQueryParameterType> theOrValues, RequestDetails theRequest) {
 		Subquery<Long> subQ = myResourceTableQuery.subquery(Long.class);
 		Root<ResourceTable> subQfrom = subQ.from(ResourceTable.class);
 		subQ.select(subQfrom.get("myId").as(Long.class));
@@ -628,7 +631,7 @@ public class SearchBuilder implements ISearchBuilder {
 		myPredicates.add(myBuilder.isNull(myResourceTableRoot.get("myDeleted")));
 
 		if (theFoundChainMatch) {
-			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams);
+			searchForIdsWithAndOr(theSubResourceName, theChain, andOrParams, theRequest);
 			subQ.where(toArray(myPredicates));
 		}
 
@@ -663,7 +666,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return chainValue;
 	}
 
-	private void addPredicateResourceId(List<List<IQueryParameterType>> theValues) {
+	private void addPredicateResourceId(List<List<IQueryParameterType>> theValues, RequestDetails theRequest) {
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<>();
 			for (IQueryParameterType next : nextValue) {
@@ -675,7 +678,7 @@ public class SearchBuilder implements ISearchBuilder {
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
 					try {
-						Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart());
+						Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart(), theRequest);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
@@ -1521,12 +1524,12 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid) {
+	public Iterator<Long> createCountQuery(SearchParameterMap theParams, String theSearchUuid, RequestDetails theRequest) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchUuid;
 
-		TypedQuery<Long> query = createQuery(null, null, true);
+		TypedQuery<Long> query = createQuery(null, null, true, theRequest);
 		return new CountQueryIterator(query);
 	}
 
@@ -1539,7 +1542,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails) {
+	public IResultIterator createQuery(SearchParameterMap theParams, SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 		myParams = theParams;
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchRuntimeDetails.getSearchUuid();
@@ -1554,10 +1557,10 @@ public class SearchBuilder implements ISearchBuilder {
 			myPidSet = new HashSet<>();
 		}
 
-		return new QueryIterator(theSearchRuntimeDetails);
+		return new QueryIterator(theSearchRuntimeDetails, theRequest);
 	}
 
-	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount) {
+	private TypedQuery<Long> createQuery(SortSpec sort, Integer theMaximumResults, boolean theCount, RequestDetails theRequest) {
 		myPredicates = new ArrayList<>();
 
 		CriteriaQuery<Long> outerQuery;
@@ -1605,7 +1608,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			if (myParams.get(IAnyResource.SP_RES_ID) != null) {
 				StringParam idParm = (StringParam) myParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
-				Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue());
+				Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, idParm.getValue(), theRequest);
 				if (myAlsoIncludePids == null) {
 					myAlsoIncludePids = new ArrayList<>(1);
 				}
@@ -1619,7 +1622,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else {
 			// Normal search
-			searchForIdsWithAndOr(myParams);
+			searchForIdsWithAndOr(myParams, theRequest);
 		}
 
 		/*
@@ -1636,7 +1639,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 			List<Long> pids;
 			if (myParams.getEverythingMode() != null) {
-				pids = myFulltextSearchSvc.everything(myResourceName, myParams);
+				pids = myFulltextSearchSvc.everything(myResourceName, myParams, theRequest);
 			} else {
 				pids = myFulltextSearchSvc.search(myResourceName, myParams);
 			}
@@ -1840,7 +1843,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private void doLoadPids(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation,
-									Map<Long, Integer> thePosition) {
+									Map<Long, Integer> thePosition, RequestDetails theRequest) {
 
 		// -- get the resource from the searchView
 		Collection<ResourceSearchView> resourceSearchViewList = myResourceSearchViewDao.findByResourceIds(thePids);
@@ -1880,7 +1883,17 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 			}
 
-			theResourceListToPopulate.set(index, resource);
+			// Interceptor broadcast: STORAGE_PREACCESS_RESOURCE
+			SimplePreResourceAccessDetails details = new SimplePreResourceAccessDetails(resource);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, details)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			if (details.isDontReturnResourceAtIndex(0) == false) {
+				theResourceListToPopulate.set(index, resource);
+			}
 		}
 	}
 
@@ -1923,7 +1936,7 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	@Override
-	public void loadResourcesByPid(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation) {
+	public void loadResourcesByPid(Collection<Long> thePids, Collection<Long> theIncludedPids, List<IBaseResource> theResourceListToPopulate, boolean theForHistoryOperation, RequestDetails theDetails) {
 		if (thePids.isEmpty()) {
 			ourLog.debug("The include pids are empty");
 			// return;
@@ -1950,7 +1963,7 @@ public class SearchBuilder implements ISearchBuilder {
 			int to = i + MAXIMUM_PAGE_SIZE;
 			to = Math.min(to, pids.size());
 			List<Long> pidsSubList = pids.subList(i, to);
-			doLoadPids(pidsSubList, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position);
+			doLoadPids(pidsSubList, theIncludedPids, theResourceListToPopulate, theForHistoryOperation, position, theDetails);
 		}
 
 	}
@@ -2120,7 +2133,7 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams) {
+	private void searchForIdsWithAndOr(@Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		myParams = theParams;
 
 		// Remove any empty parameters
@@ -2200,7 +2213,7 @@ public class SearchBuilder implements ISearchBuilder {
 		for (Entry<String, List<List<IQueryParameterType>>> nextParamEntry : myParams.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
 			List<List<IQueryParameterType>> andOrParams = nextParamEntry.getValue();
-			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams);
+			searchForIdsWithAndOr(myResourceName, nextParamName, andOrParams, theRequest);
 		}
 
 	}
@@ -2227,7 +2240,7 @@ public class SearchBuilder implements ISearchBuilder {
 		theParams.clean();
 	}
 
-	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
+	private void searchForIdsWithAndOr(String theResourceName, String theParamName, List<List<IQueryParameterType>> theAndOrParams, RequestDetails theRequest) {
 
 		if (theAndOrParams.isEmpty()) {
 			return;
@@ -2235,7 +2248,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (theParamName.equals(IAnyResource.SP_RES_ID)) {
 
-			addPredicateResourceId(theAndOrParams);
+			addPredicateResourceId(theAndOrParams, theRequest);
 
 		} else if (theParamName.equals(IAnyResource.SP_RES_LANGUAGE)) {
 
@@ -2243,7 +2256,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		} else if (theParamName.equals(Constants.PARAM_HAS)) {
 
-			addPredicateHas(theAndOrParams);
+			addPredicateHas(theAndOrParams, theRequest);
 
 		} else if (theParamName.equals(Constants.PARAM_TAG) || theParamName.equals(Constants.PARAM_PROFILE) || theParamName.equals(Constants.PARAM_SECURITY)) {
 
@@ -2266,7 +2279,7 @@ public class SearchBuilder implements ISearchBuilder {
 						break;
 					case REFERENCE:
 						for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-							addPredicateReference(theResourceName, theParamName, nextAnd);
+							addPredicateReference(theResourceName, theParamName, nextAnd, theRequest);
 						}
 						break;
 					case STRING:
@@ -2469,6 +2482,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private final class QueryIterator extends BaseIterator<Long> implements IResultIterator {
 
 		private final SearchRuntimeDetails mySearchRuntimeDetails;
+		private final RequestDetails myRequest;
 		private boolean myFirst = true;
 		private IncludesIterator myIncludesIterator;
 		private Long myNext;
@@ -2478,9 +2492,10 @@ public class SearchBuilder implements ISearchBuilder {
 		private boolean myStillNeedToFetchIncludes;
 		private int mySkipCount = 0;
 
-		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails) {
+		private QueryIterator(SearchRuntimeDetails theSearchRuntimeDetails, RequestDetails theRequest) {
 			mySearchRuntimeDetails = theSearchRuntimeDetails;
 			mySort = myParams.getSort();
+			myRequest = theRequest;
 
 			// Includes are processed inline for $everything query
 			if (myParams.getEverythingMode() != null) {
@@ -2496,7 +2511,7 @@ public class SearchBuilder implements ISearchBuilder {
 					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
 				}
 
-				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false);
+				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false, myRequest);
 
 				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
@@ -2567,14 +2582,14 @@ public class SearchBuilder implements ISearchBuilder {
 			if (myFirst) {
 				HookParams params = new HookParams();
 				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED, params);
 				myFirst = false;
 			}
 
 			if (NO_MORE.equals(myNext)) {
 				HookParams params = new HookParams();
 				params.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
-				myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE, params);
 			}
 
 		}

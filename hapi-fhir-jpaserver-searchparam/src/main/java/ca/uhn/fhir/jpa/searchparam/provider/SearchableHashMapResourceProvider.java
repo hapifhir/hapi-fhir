@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,13 +47,13 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 		mySearchParamMatcher = theSearchParamMatcher;
 	}
 
-	public List<T> searchByCriteria(String theCriteria) {
-		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource));
+	public List<T> searchByCriteria(String theCriteria, RequestDetails theRequest) {
+		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource, theRequest));
 
 	}
 
-	public List<T> searchByParams(SearchParameterMap theSearchParams) {
-		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource));
+	public List<T> searchByParams(SearchParameterMap theSearchParams, RequestDetails theRequest) {
+		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest));
 	}
 
 	private List<T> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher) {

@@ -20,13 +20,12 @@ package ca.uhn.fhir.rest.server;
  * #L%
  */
 
-import java.util.LinkedHashMap;
-import java.util.UUID;
-
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.apache.commons.lang3.Validate;
 
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import java.util.LinkedHashMap;
+import java.util.UUID;
 
 public class FifoMemoryPagingProvider extends BasePagingProvider implements IPagingProvider {
 
@@ -41,7 +40,7 @@ public class FifoMemoryPagingProvider extends BasePagingProvider implements IPag
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
+	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequest, String theId) {
 		return myBundleProviders.get(theId);
 	}
 

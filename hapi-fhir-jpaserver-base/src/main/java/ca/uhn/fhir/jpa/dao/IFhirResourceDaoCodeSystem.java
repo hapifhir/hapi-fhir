@@ -1,12 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,9 +41,36 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource, CD, CC> extends IFhirResourceDao<T> {
 
-	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem);
+	List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest);
 
 	LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CD theCoding, RequestDetails theRequestDetails);
+
+	SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CD theCodingA, CD theCodingB, RequestDetails theRequestDetails);
+
+	class SubsumesResult {
+
+		private final ConceptSubsumptionOutcome myOutcome;
+
+		public SubsumesResult(ConceptSubsumptionOutcome theOutcome) {
+			myOutcome = theOutcome;
+		}
+
+		public ConceptSubsumptionOutcome getOutcome() {
+			return myOutcome;
+		}
+
+		@SuppressWarnings("unchecked")
+		public IBaseParameters toParameters(FhirContext theFhirContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theFhirContext);
+
+			IPrimitiveType<String> outcomeValue = (IPrimitiveType<String>) theFhirContext.getElementDefinition("code").newInstance();
+			outcomeValue.setValueAsString(getOutcome().toCode());
+			ParametersUtil.addParameterToParameters(theFhirContext, retVal, "outcome", outcomeValue);
+
+			return retVal;
+		}
+	}
+
 
 	class LookupCodeResult {
 

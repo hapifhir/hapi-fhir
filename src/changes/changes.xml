@@ -23,6 +23,21 @@
 				</ul>
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The
+				<code>IPagingProvider</code>
+				interface has been
+				modified so that the
+				<code>retrieveResultList</code>
+				method now takes one additional parameter of type
+				<code>RequestDetails</code>. If you have created a custom
+				implementation of this interface, you can add this parameter and
+				ignore it if needed. The use of the method has not changed, so this
+				should be an easy fix to existing code.
+				]]>
+			</action>
 			<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
@@ -117,6 +132,37 @@
 				<a href="https://github.com/crate-metadata/json-patch">crate-metadata.json-patch</a>.
 				]]>
 				Thanks to Jens Villadsen for the suggestion and pull request!
+			</action>
+			<action type="add" issue="1343">
+				Support has been implemented in the JPA server for the CodeSystem
+				<![CDATA[<code>$subsumes</code>]]>
+				operation.
+			</action>
+			<action type="fix">
+				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
+				due to case sensitivity. This has been corrected.
+			</action>
+			<action type="fix" issue="1355">
+				Invoking the transaction or batch operation on the JPA server would fail
+				with a NullPointerException if the Bundle passed in did not contain 
+				a resource in an entry that required a resource (e.g. a POST). Thanks to
+				GitHub user @lytvynenko-dmitriy for reporting!
+			</action>
+			<action type="fix" issue="1250">
+				HAPI FHIR Server (plain, JPA, and JAX-RS) all populated Bundle.entry.result
+				on search result bundles, even though the FHIR specification states that this
+				should not be populated. This has been corrected. Thanks to GitHub user
+				@gitrust for reporting!
+			</action>
+			<action type="fix" issue="1352">
+				Creating R4 Observation resources with a value type of SampledData failed in the
+				JPA server because of an indexing error. Thanks to Brian Reinhold for
+				reporting!
+			</action>
+			<action type="add">
+				The JPA server now rejects subscriptions being submitted with no value in
+				Subscription.status (this field is mandatory, but the subscription was previously ignored
+				if no value was provided)
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">

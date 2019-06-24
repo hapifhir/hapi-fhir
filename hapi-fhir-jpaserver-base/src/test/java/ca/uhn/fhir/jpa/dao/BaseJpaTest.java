@@ -257,7 +257,7 @@ public abstract class BaseJpaTest {
 		if (theFirstCall) {
 			bundleProvider = theFound;
 		} else {
-			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(mySrd, theFound.getUuid());
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, theFound.getUuid());
 		}
 
 		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
@@ -380,7 +380,7 @@ public abstract class BaseJpaTest {
 		if (bundleRes == null) {
 			throw new NullPointerException("Can not load " + resource);
 		}
-		return IOUtils.toString(bundleRes, Charsets.UTF_8);
+		return IOUtils.toString(bundleRes, Constants.CHARSET_UTF8);
 	}
 
 	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {

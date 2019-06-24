@@ -1041,7 +1041,7 @@ public enum Pointcut {
 	 * Hooks should return <code>void</code>.
 	 * </p>
 	 */
-	STORAGE_PROCESSING_MESSAGE(void.class,
+	JPA_PERFTRACE_WARNING(void.class,
 		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
 	),
 

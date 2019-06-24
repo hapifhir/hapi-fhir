@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -57,7 +58,7 @@ import java.util.stream.Collectors;
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(PersistedJpaBundleProvider.class);
-	private final RequestDetails myRequestDetails;
+	private final RequestDetails myRequest;
 	private FhirContext myContext;
 	private IDao myDao;
 	private EntityManager myEntityManager;
@@ -67,11 +68,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public PersistedJpaBundleProvider(String theSearchUuid, IDao theDao, RequestDetails theRequestDetails) {
+	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid, IDao theDao) {
+		myRequest = theRequest;
 		myUuid = theSearchUuid;
 		myDao = theDao;
-		myRequestDetails = theRequestDetails;
 	}
 
 	/**
@@ -134,14 +136,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
-		if (myRequestDetails != null) {
-			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+		{
 			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
 			HookParams params = new HookParams()
 				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, myRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 			for (int i = retVal.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -151,13 +152,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
-		if (myRequestDetails != null) {
+		{
 			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
 			HookParams params = new HookParams()
 				.add(IPreResourceShowDetails.class, showDetails)
-				.add(RequestDetails.class, myRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			myRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 		}
 
 
@@ -171,7 +172,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		Class<? extends IBaseResource> resourceType = myContext.getResourceDefinition(resourceName).getImplementingClass();
 		sb.setType(resourceType, resourceName);
 
-		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequestDetails);
+		final List<Long> pidsSubList = mySearchCoordinatorSvc.getResources(myUuid, theFromIndex, theToIndex, myRequest);
 
 		TransactionTemplate template = new TransactionTemplate(myPlatformTransactionManager);
 		template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
@@ -327,14 +328,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// Interceptor call: STORAGE_PREACCESS_RESOURCES
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
-		if (myRequestDetails != null && includedPidList.size() > 0) {
-			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+		if (includedPidList.size() > 0) {
 			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(thePids, () -> theSearchBuilder);
 			HookParams params = new HookParams()
 				.add(IPreResourceAccessDetails.class, accessDetails)
-				.add(RequestDetails.class, myRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
 
 			for (int i = thePids.size() - 1; i >= 0; i--) {
 				if (accessDetails.isDontReturnResourceAtIndex(i)) {
@@ -345,19 +345,18 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
-		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false);
+		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
 		// Interceptor call: STORAGE_PRESHOW_RESOURCE
 		// This can be used to remove results from the search result details before
 		// the user has a chance to know that they were in the results
-		if (myRequestDetails != null && resources.size() > 0) {
-			IInterceptorBroadcaster interceptorBroadcaster = myRequestDetails.getInterceptorBroadcaster();
+		if (resources.size() > 0) {
 			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resources);
 			HookParams params = new HookParams()
 				.add(IPreResourceShowDetails.class, accessDetails)
-				.add(RequestDetails.class, myRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
 
 			resources = resources
 				.stream()
@@ -368,4 +367,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return resources;
 	}
 
+	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
 }

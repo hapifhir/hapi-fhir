@@ -43,8 +43,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	private Search mySearch;
 	private PlatformTransactionManager myTxManager;
 
-	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequestDetails) {
-		super(theSearch.getUuid(), theDao, theRequestDetails);
+	public PersistedJpaSearchFirstPageBundleProvider(Search theSearch, IDao theDao, SearchTask theSearchTask, ISearchBuilder theSearchBuilder, PlatformTransactionManager theTxManager, RequestDetails theRequest) {
+		super(theRequest, theSearch.getUuid(), theDao);
 		setSearchEntity(theSearch);
 		mySearchTask = theSearchTask;
 		mySearchBuilder = theSearchBuilder;

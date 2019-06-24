@@ -137,4 +137,9 @@ public class JpaConstants {
 	 * Trigger a subscription manually for a given resource
 	 */
 	public static final String OPERATION_TRIGGER_SUBSCRIPTION = "$trigger-subscription";
+
+	/**
+	 * Operation name for the "$subsumes" operation
+	 */
+	public static final String OPERATION_SUBSUMES = "$subsumes";
 }

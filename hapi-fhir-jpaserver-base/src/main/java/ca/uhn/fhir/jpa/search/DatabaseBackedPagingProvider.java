@@ -55,7 +55,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	@Override
 	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
 		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, systemDao, theRequestDetails);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}

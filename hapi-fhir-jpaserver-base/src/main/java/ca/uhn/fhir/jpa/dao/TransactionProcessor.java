@@ -247,16 +247,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
 
-			TransactionCallback<BUNDLE> callback = theStatus -> {
+			try {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
-			};
-
-			try {
-				// FIXME: this doesn't need to be a callback
-				BUNDLE nextResponseBundle = callback.doInTransaction(null);
+				BUNDLE nextResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 
 				BUNDLEENTRY subResponseEntry = myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myVersionAdapter.addEntry(resp, subResponseEntry);
@@ -363,7 +358,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				placeholderIds.add(fullUrl);
 			}
 		}
-		Collections.sort(entries, new TransactionSorter(placeholderIds));
+		entries.sort(new TransactionSorter(placeholderIds));
 
 		/*
 		 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
@@ -504,11 +499,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 
-	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
+	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
 																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
 
-		if (theRequestDetails != null) {
-			theRequestDetails.startDeferredOperationCallback();
+		if (theRequest != null) {
+			theRequest.startDeferredOperationCallback();
 		}
 		try {
 
@@ -643,15 +638,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				switch (verb) {
 					case "POST": {
 						// CREATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						res.setId((String) null);
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequestDetails);
+						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequest);
 						if (nextResourceId != null) {
-							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						if (outcome.getCreated() == false) {
@@ -673,7 +669,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
 							if (!deletedResources.contains(deleteId.getValueAsString())) {
-								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequest);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
 									entriesToProcess.put(nextRespEntry, outcome.getEntity());
@@ -682,7 +678,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequestDetails);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
 							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 							for (ResourceTable deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
@@ -700,6 +696,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					}
 					case "PUT": {
 						// UPDATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
@@ -713,7 +710,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, false, theRequestDetails);
+							outcome = resourceDao.update(res, null, false, false, theRequest);
 						} else {
 							res.setId((String) null);
 							String matchUrl;
@@ -723,7 +720,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome = resourceDao.update(res, matchUrl, false, false, theRequestDetails);
+							outcome = resourceDao.update(res, matchUrl, false, false, theRequest);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
@@ -737,7 +734,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 							}
 						}
 
-						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						break;
 					}
@@ -851,9 +848,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					myDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+					myDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 				}
 			}
 
@@ -884,7 +881,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Class<? extends IBaseResource> resType = nextEntry.getValue();
 				if (isNotBlank(matchUrl)) {
 					IFhirResourceDao<?> resourceDao = myDao.getDao(resType);
-					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
+					Set<Long> val = resourceDao.processMatchUrl(matchUrl, theRequest);
 					if (val.size() > 1) {
 						throw new InvalidRequestException(
 							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
@@ -907,9 +904,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return entriesToProcess;
 
 		} finally {
-			if (theRequestDetails != null) {
-				theRequestDetails.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			if (theRequest != null) {
+				theRequest.stopDeferredRequestOperationCallbackAndRunDeferredItems();
 			}
+		}
+	}
+
+	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
+		if (theResource == null) {
+			String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
+			throw new InvalidRequestException(msg);
 		}
 	}
 

@@ -17,9 +17,9 @@ import java.util.List;
 public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 
 	private final List<Long> myResourcePids;
-	private List<IBaseResource> myResources;
 	private final boolean[] myBlocked;
 	private final ICallable<ISearchBuilder> mySearchBuilderSupplier;
+	private List<IBaseResource> myResources;
 
 	public JpaPreResourceAccessDetails(List<Long> theResourcePids, ICallable<ISearchBuilder> theSearchBuilderSupplier) {
 		myResourcePids = theResourcePids;
@@ -36,7 +36,8 @@ public class JpaPreResourceAccessDetails implements IPreResourceAccessDetails {
 	public IBaseResource getResource(int theIndex) {
 		if (myResources == null) {
 			myResources = new ArrayList<>(myResourcePids.size());
-			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false);
+			// FIXME: JA don't call interceptors for this query
+			mySearchBuilderSupplier.call().loadResourcesByPid(myResourcePids, Collections.emptySet(), myResources, false, null);
 		}
 		return myResources.get(theIndex);
 	}
