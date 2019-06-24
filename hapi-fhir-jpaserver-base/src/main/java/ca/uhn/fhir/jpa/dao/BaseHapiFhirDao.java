@@ -490,6 +490,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
 		theProvider.setSearchDao(mySearchDao);
 		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
+		theProvider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
 
 	public boolean isLogicalReference(IIdType theId) {

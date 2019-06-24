@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -60,7 +61,6 @@ public class SearchCountParamDstu2Test {
 			assertEquals("search", ourLastMethod);
 			assertEquals(new Integer(2), ourLastParam);
 			
-			//@formatter:off
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>", 
 				"<relation value=\"self\"/>", 
@@ -70,8 +70,7 @@ public class SearchCountParamDstu2Test {
 				"<relation value=\"next\"/>", 
 				"<url value=\"http://localhost:" + ourPort + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>", 
 				"</link>"));
-			//@formatter:on
-			
+
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -125,8 +124,9 @@ public class SearchCountParamDstu2Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		servlet.setResourceProviders(patientProvider);
+
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

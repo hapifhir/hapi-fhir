@@ -110,7 +110,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private IInterceptorService myInterceptorService;
 	private BundleInclusionRule myBundleInclusionRule = BundleInclusionRule.BASED_ON_INCLUDES;
 	private boolean myDefaultPrettyPrint = false;
-	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.XML;
+	private EncodingEnum myDefaultResponseEncoding = EncodingEnum.JSON;
 	private ETagSupportEnum myETagSupport = DEFAULT_ETAG_SUPPORT;
 	private FhirContext myFhirContext;
 	private boolean myIgnoreServerParsedRequestParameters = true;
@@ -965,7 +965,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			BaseMethodBinding<?> resourceMethod = determineResourceMethod(requestDetails, requestPath);
 
-			requestDetails.setRestOperationType(resourceMethod.getRestOperationType());
+			RestOperationTypeEnum operation = resourceMethod.getRestOperationType(requestDetails);
+			requestDetails.setRestOperationType(operation);
 
 			// Handle server interceptors
 			HookParams postProcessedParams = new HookParams();

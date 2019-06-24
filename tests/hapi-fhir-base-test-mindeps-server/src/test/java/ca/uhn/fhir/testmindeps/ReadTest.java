@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -124,6 +125,7 @@ public class ReadTest {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);

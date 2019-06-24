@@ -291,6 +291,11 @@ public interface IServerInterceptor {
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated This class doesn't bring anything that can't be done with {@link RequestDetails}. That
+	 * class should be used instead. Deprecated in 4.0.0
+	 */
+	@Deprecated
 	class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
@@ -428,12 +433,20 @@ public interface IServerInterceptor {
 				return;
 			}
 
+			IIdType previousRequestId = requestDetails.getId();
+			requestDetails.setId(getId());
+
 			IInterceptorService interceptorService = server.getInterceptorService();
 
 			HookParams params = new HookParams();
 			params.add(RestOperationTypeEnum.class, theOperationType);
 			params.add(this);
+			params.add(RequestDetails.class, this.getRequestDetails());
+			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
 			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
+
+			// Reset the request ID
+			requestDetails.setId(previousRequestId);
 
 		}
 

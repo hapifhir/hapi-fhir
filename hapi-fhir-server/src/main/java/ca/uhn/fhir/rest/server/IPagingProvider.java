@@ -3,6 +3,9 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 /*
  * #%L
  * HAPI FHIR - Server Framework
@@ -37,7 +40,7 @@ public interface IPagingProvider {
 	 * add this parameter and not use it if needed.
 	 * </p>
 	 */
-	IBundleProvider retrieveResultList(String theSearchId, RequestDetails theRequest);
+	IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId);
 
 	/**
 	 * Retrieve a result list by ID
@@ -47,13 +50,15 @@ public interface IPagingProvider {
 	 * add this parameter and not use it if needed.
 	 * </p>
 	 */
-	default IBundleProvider retrieveResultList(String theSearchId, String thePageId, RequestDetails theRequest) {
+	default IBundleProvider retrieveResultList(@Nullable RequestDetails theRequestDetails, @Nonnull String theSearchId, String thePageId) {
 		return null;
 	}
 
 	/**
 	 * Stores a result list and returns an ID with which that list can be returned
+	 *
+	 * @param theRequestDetails The server request being made (may be null)
 	 */
-	String storeResultList(IBundleProvider theList);
+	String storeResultList(@Nullable RequestDetails theRequestDetails, IBundleProvider theList);
 
 }

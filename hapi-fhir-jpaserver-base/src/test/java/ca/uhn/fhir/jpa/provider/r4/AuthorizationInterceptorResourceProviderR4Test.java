@@ -23,6 +23,8 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,6 +34,8 @@ import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
 public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderR4Test.class);
 
 	@Override
 	public void before() throws Exception {
@@ -193,6 +197,60 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 		} finally {
 			ourClient.unregisterInterceptor(interceptor);
+		}
+
+	}
+
+	@Test
+	public void testReadWithSubjectMasked() {
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs = new Observation();
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setSubject(new Reference(patientId));
+		IIdType observationId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
+
+		Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType observationId2 = ourClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().resourcesOfType(Observation.class).inCompartment("Patient", patientId)
+					.build();
+			}
+		});
+
+		Bundle bundle;
+		Observation response;
+
+		// Read (no masking)
+		response = ourClient.read().resource(Observation.class).withId(observationId).execute();
+		assertEquals(ObservationStatus.FINAL, response.getStatus());
+		assertEquals(patientId.getValue(), response.getSubject().getReference());
+
+		// Read (with _elements masking)
+		response = ourClient
+			.read()
+			.resource(Observation.class)
+			.withId(observationId)
+			.elementsSubset("status")
+			.execute();
+		assertEquals(ObservationStatus.FINAL, response.getStatus());
+		assertEquals(null, response.getSubject().getReference());
+
+		// Read a non-allowed observation
+		try {
+			ourClient.read().resource(Observation.class).withId(observationId2).execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
 		}
 
 	}
@@ -472,6 +530,68 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
+
+	@Test
+	public void testTransactionResponses() {
+
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					// Allow write but not read
+					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.allow("write patient").write().resourcesOfType(Encounter.class).withAnyId().andThen()
+					.denyAll("deny all")
+					.build();
+			}
+		});
+
+		// Create a bundle that will be used as a transaction
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+
+		Encounter encounter = new Encounter();
+		encounter.addIdentifier(new Identifier().setSystem("http://foo").setValue("123"));
+		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
+		bundle.addEntry()
+			.setFullUrl("Encounter")
+			.setResource(encounter)
+			.getRequest()
+			.setUrl("Encounter")
+			.setMethod(Bundle.HTTPVerb.POST);
+
+		// return=minimal - should succeed
+		Bundle resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		assertNull(resp.getEntry().get(0).getResource());
+
+		// return=OperationOutcome - should succeed
+		resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+			.execute();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+		assertNull(resp.getEntry().get(0).getResource());
+
+		// return=Representation - should fail
+		try {
+			ourClient
+				.transaction()
+				.withBundle(bundle)
+				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.execute();
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
+
 	/**
 	 * See #762
 	 */
@@ -553,9 +673,13 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			.setMethod(Bundle.HTTPVerb.POST);
 
 
-		Bundle resp = ourClient.transaction().withBundle(bundle).execute();
+		Bundle resp = ourClient
+			.transaction()
+			.withBundle(bundle)
+			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+			.execute();
 		assertEquals(3, resp.getEntry().size());
-
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
 	@Test

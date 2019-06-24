@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainDstu3;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -86,10 +87,9 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
-
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
-
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);

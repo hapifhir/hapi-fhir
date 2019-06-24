@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -180,9 +180,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
+				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer);
 				if (preferReturn != null) {
 					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+						outcome.fireResourceViewCallbacks();
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
 					}
 				}
@@ -438,7 +439,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
 			try {
-				IBaseResource resource = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
+
+				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
+				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+
+				IBaseResource resource = methodBinding.doInvokeServer(theRequestDetails.getServer(), requestDetails);
 				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 					resource = filterNestedBundle(requestDetails, resource);
 				}
@@ -778,7 +783,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
 					boolean sourceStillReferencesTarget = referencesInSource
 						.stream()
-						.anyMatch(t-> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
+						.anyMatch(t -> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
 					if (!sourceStillReferencesTarget) {
 						iter.remove();
 					}

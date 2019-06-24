@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -35,9 +36,6 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 
-/**
- * Created by dsotnikov on 2/25/2014.
- */
 public class ETagServerTest {
 
 	private static CloseableHttpClient ourClient;
@@ -200,6 +198,7 @@ public class ETagServerTest {
 		RestfulServer servlet = new RestfulServer(FhirContext.forDstu2());
 		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);

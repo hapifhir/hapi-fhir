@@ -36,6 +36,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
@@ -106,7 +107,8 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			}
 		}
 
-		IBundleProvider response = dao.search(params);
+		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+		IBundleProvider response = dao.search(params, requestDetails);
 		int size = response.size();
 		if (response.preferredPageSize() != null && response.preferredPageSize() < size) {
 			size = response.preferredPageSize();
@@ -121,20 +123,26 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
 	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
-		RequestDetails requestDetails = (RequestDetails) theAppInfo;
-		assert requestDetails != null;
-
 		IIdType refId = getContext().getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
-		BaseHasResource id = dao.readEntity(refId, requestDetails);
-
-		return (Resource) toResource(id, false);
+		return lookup(theAppInfo, refId);
 	}
 
-	@Override
-	public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
+	private Resource lookup(Object theAppInfo, IIdType theRefId) {
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
+		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+		return (Resource) dao.read(theRefId, requestDetails, false);
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
+    @Override
+	public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
+		IdType refId = new IdType(theReference.getReference());
+		Resource outcome = lookup(theAppInfo, refId);
+		if (outcome == null) {
 		return null;
+	}
+		return new ReferenceResolution(theContext, outcome);
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
