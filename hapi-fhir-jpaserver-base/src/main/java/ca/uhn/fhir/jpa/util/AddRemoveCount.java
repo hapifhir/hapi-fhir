@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.model.search;
+package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,21 +20,26 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
-public class StorageProcessingMessage {
+public class AddRemoveCount {
 
-	private String myMessage;
+	private int myAddCount;
+	private int myRemoveCount;
 
-	public String getMessage() {
-		return myMessage;
+
+	public void addToAddCount(int theCount) {
+		myAddCount += theCount;
 	}
 
-	public StorageProcessingMessage setMessage(String theMessage) {
-		myMessage = theMessage;
-		return this;
+	public void addToRemoveCount(int theCount) {
+		myRemoveCount += theCount;
 	}
 
-	@Override
-	public String toString() {
-		return myMessage;
+	public int getAddCount() {
+		return myAddCount;
 	}
+
+	public int getRemoveCount() {
+		return myRemoveCount;
+	}
+
 }

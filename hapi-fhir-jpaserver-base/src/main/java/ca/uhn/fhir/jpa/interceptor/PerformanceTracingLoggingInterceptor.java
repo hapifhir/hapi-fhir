@@ -24,6 +24,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +77,16 @@ public class PerformanceTracingLoggingInterceptor {
 	@Hook(value = Pointcut.JPA_PERFTRACE_SEARCH_FAILED)
 	public void searchFailed(SearchRuntimeDetails theOutcome) {
 		log("SqlQuery {} failed in {} - Found {} matches", theOutcome.getSearchUuid(), theOutcome.getQueryStopwatch(), theOutcome.getFoundMatchesCount());
+	}
+
+	@Hook(value = Pointcut.JPA_PERFTRACE_INFO)
+	public void info(StorageProcessingMessage theMessage) {
+		log("[INFO] " + theMessage);
+	}
+
+	@Hook(value = Pointcut.JPA_PERFTRACE_WARNING)
+	public void warning(StorageProcessingMessage theMessage) {
+		log("[WARNING] " + theMessage);
 	}
 
 	private void log(String theMessage, Object... theArgs) {
