@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
@@ -99,7 +100,9 @@ public class DeleteConflictService {
 
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
-			.add(DeleteConflictList.class, theDeleteConflicts);
+			.add(DeleteConflictList.class, theDeleteConflicts)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
 		return JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 

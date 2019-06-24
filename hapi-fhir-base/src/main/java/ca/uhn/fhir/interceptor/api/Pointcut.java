@@ -873,6 +873,19 @@ public enum Pointcut {
 	 * Hooks may accept the following parameters:
 	 * <ul>
 	 * <li>ca.uhn.fhir.jpa.delete.DeleteConflictList - The list of delete conflicts</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
 	 * </ul>
 	 * <p>
 	 * Hooks should return <code>boolean</code>.  If the method returns <code>true</code> then the caller
@@ -883,7 +896,11 @@ public enum Pointcut {
 	 * {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MAX_RETRY_COUNT} conflicts to the hook.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class, "ca.uhn.fhir.jpa.delete.DeleteConflictList"),
+	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class,
+		"ca.uhn.fhir.jpa.delete.DeleteConflictList",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
 
 
 	/**
@@ -904,6 +921,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.StorageProcessingMessage - Contains the message
 	 * </li>
 	 * </ul>
@@ -913,6 +936,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_WARNING(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
 		),
 
@@ -934,6 +958,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -944,6 +974,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
 
@@ -967,6 +998,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -977,6 +1014,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_SELECT_COMPLETE(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
 
@@ -997,6 +1035,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -1007,6 +1051,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_FAILED(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
 
@@ -1029,6 +1074,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -1039,6 +1090,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_PASS_COMPLETE(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
 
@@ -1060,6 +1112,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails - Contains details about the search being
 	 * performed. Hooks should not modify this object.
 	 * </li>
@@ -1070,6 +1128,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_SEARCH_COMPLETE(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
 
@@ -1091,6 +1150,12 @@ public enum Pointcut {
 	 * exception occurred.
 	 * </li>
 	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
 	 * ca.uhn.fhir.jpa.util.SqlQueryList - Contains details about the raw SQL queries.
 	 * </li>
 	 * </ul>
@@ -1100,6 +1165,7 @@ public enum Pointcut {
 	 */
 	JPA_PERFTRACE_RAW_SQL(void.class,
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.util.SqlQueryList"
 	),
 

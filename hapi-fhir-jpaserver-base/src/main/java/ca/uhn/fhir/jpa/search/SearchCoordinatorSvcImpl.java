@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
@@ -721,11 +722,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (mySearch.getStatus() == SearchStatusEnum.FINISHED) {
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE, params);
 				} else {
 					HookParams params = new HookParams()
 						.add(RequestDetails.class, myRequest)
+						.addIfMatchesType(ServletRequestDetails.class, myRequest)
 						.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_PASS_COMPLETE, params);
 				}
@@ -768,7 +771,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				mySearch.setStatus(SearchStatusEnum.FAILED);
 
 				mySearchRuntimeDetails.setSearchStatus(mySearch.getStatus());
-				HookParams params = new HookParams().add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, myRequest)
+					.addIfMatchesType(ServletRequestDetails.class, myRequest)
+					.add(SearchRuntimeDetails.class, mySearchRuntimeDetails);
 				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.JPA_PERFTRACE_SEARCH_FAILED, params);
 
 				saveSearch();
