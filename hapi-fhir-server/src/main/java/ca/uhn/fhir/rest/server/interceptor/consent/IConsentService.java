@@ -11,15 +11,18 @@ public interface IConsentService {
 	 * significant processing occurs. The service may use this method to decide
 	 * whether the request needs to be reviewed further or not.
 	 *
-	 * @param theRequestDetails Contains details about the operation that is
-	 *                          beginning, including details about the request type,
-	 *                          URL, etc. Note that the RequestDetails has a generic
-	 *                          Map (see {@link RequestDetails#getUserData()}) that
-	 *                          can be used to store information and state to be
-	 *                          passed between methods in the consent service.
+	 * @param theRequestDetails  Contains details about the operation that is
+	 *                           beginning, including details about the request type,
+	 *                           URL, etc. Note that the RequestDetails has a generic
+	 *                           Map (see {@link RequestDetails#getUserData()}) that
+	 *                           can be used to store information and state to be
+	 *                           passed between methods in the consent service.
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome startOperation(RequestDetails theRequestDetails);
+	ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
 
 	/**
 	 * This method is called if a user may potentially see a resource via READ
@@ -28,7 +31,7 @@ public interface IConsentService {
 	 * <p>
 	 * Implementations should make no attempt to modify the returned result within
 	 * this method. For modification use cases (e.g. masking for consent rules) the
-	 * user should use the {@link #seeResource(RequestDetails, IBaseResource)}
+	 * user should use the {@link #seeResource(RequestDetails, IBaseResource, IConsentContextServices)}
 	 * method to actually make changes. This method is intended to only
 	 * to make decisions.
 	 * </p>
@@ -45,9 +48,12 @@ public interface IConsentService {
 	 *                          can be used to store information and state to be
 	 *                          passed between methods in the consent service.
 	 * @param theResource       The resource that will be exposed
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
 	 * @return An outcome object. See {@link ConsentOutcome}
 	 */
-	ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource);
+	ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
 
 	/**
 	 * This method is called if a user may potentially see a resource, either completely
@@ -61,13 +67,13 @@ public interface IConsentService {
 	 * resource property on the {@link ConsentOutcome}.
 	 * </p>
 	 * <p>
-	 *     In addition, the {@link ConsentOutcome} must return one of the following
-	 *     statuses:
+	 * In addition, the {@link ConsentOutcome} must return one of the following
+	 * statuses:
 	 * </p>
 	 * <ul>
-	 *     <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client.</li>
-	 *     <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #seeResource(RequestDetails, IBaseResource)}.</li>
-	 *     <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
+	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client.</li>
+	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #seeResource(RequestDetails, IBaseResource, IConsentContextServices)}.</li>
+	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
 	 * </ul>
 	 *
 	 * @param theRequestDetails Contains details about the operation that is
@@ -77,32 +83,53 @@ public interface IConsentService {
 	 *                          can be used to store information and state to be
 	 *                          passed between methods in the consent service.
 	 * @param theResource       The resource that will be exposed
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
 	 * @return An outcome object. See method documentation for a description.
 	 */
-	ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource);
+	ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
 	 * any necessary cleanup, flush audit events, etc.
 	 * <p>
-	 * This method is not called if the request failed. {@link #completeOperationFailure(RequestDetails, BaseServerResponseException)}
+	 * This method is not called if the request failed. {@link #completeOperationFailure(RequestDetails, BaseServerResponseException, IConsentContextServices)}
 	 * will be called instead in that case.
 	 * </p>
 	 *
-	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException)
+	 * @param theRequestDetails Contains details about the operation that is
+	 *                          beginning, including details about the request type,
+	 *                          URL, etc. Note that the RequestDetails has a generic
+	 *                          Map (see {@link RequestDetails#getUserData()}) that
+	 *                          can be used to store information and state to be
+	 *                          passed between methods in the consent service.
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
+	 * @see #completeOperationFailure(RequestDetails, BaseServerResponseException, IConsentContextServices)
 	 */
-	void completeOperationSuccess(RequestDetails theRequestDetails);
+	void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices);
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform
 	 * any necessary cleanup, flush audit events, etc.
 	 * <p>
 	 * This method will be called if the request did not complete successfully, instead of
-	 * {@link #completeOperationSuccess(RequestDetails)}. Typically this means that
+	 * {@link #completeOperationSuccess(RequestDetails, IConsentContextServices)}. Typically this means that
 	 * the operation failed and a failure is being returned to the client.
 	 * </p>
 	 *
-	 * @see #completeOperationSuccess(RequestDetails)
+	 * @param theRequestDetails Contains details about the operation that is
+	 *                          beginning, including details about the request type,
+	 *                          URL, etc. Note that the RequestDetails has a generic
+	 *                          Map (see {@link RequestDetails#getUserData()}) that
+	 *                          can be used to store information and state to be
+	 *                          passed between methods in the consent service.
+	 * @param theContextServices An object passed in by the consent framework that
+	 *                           provides utility functions relevant to acting on
+	 *                           consent directives.
+	 * @see #completeOperationSuccess(RequestDetails, IConsentContextServices)
 	 */
-	void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException);
+	void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices);
 }

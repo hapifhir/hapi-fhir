@@ -14,28 +14,28 @@ public class DelegatingConsentService implements IConsentService {
 	private IConsentService myTarget;
 
 	@Override
-	public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
-		return myTarget.startOperation(theRequestDetails);
+	public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		return myTarget.startOperation(theRequestDetails, theContextServices);
 	}
 
 	@Override
-	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
-		return myTarget.canSeeResource(theRequestDetails, theResource);
+	public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.canSeeResource(theRequestDetails, theResource, theContextServices);
 	}
 
 	@Override
-	public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
-		return myTarget.seeResource(theRequestDetails, theResource);
+	public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.seeResource(theRequestDetails, theResource ,theContextServices);
 	}
 
 	@Override
-	public void completeOperationSuccess(RequestDetails theRequestDetails) {
-		myTarget.completeOperationSuccess(theRequestDetails);
+	public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+		myTarget.completeOperationSuccess(theRequestDetails, theContextServices);
 	}
 
 	@Override
-	public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
-		myTarget.completeOperationFailure(theRequestDetails, theException);
+	public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+		myTarget.completeOperationFailure(theRequestDetails, theException, theContextServices);
 	}
 
 	public void setTarget(IConsentService theTarget) {

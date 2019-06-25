@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -49,6 +50,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
 
+	private final StopWatch myRequestStopwatch = new StopWatch();
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	private String myTenantId;
 	private String myCompartmentName;
@@ -76,6 +78,10 @@ public abstract class RequestDetails {
 	 */
 	public RequestDetails(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	public StopWatch getRequestStopwatch() {
+		return myRequestStopwatch;
 	}
 
 	/**

@@ -1122,17 +1122,19 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					}
 				}
 			}
-			mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
+			AddRemoveCount presenceCount = mySearchParamPresenceSvc.updatePresence(theEntity, presentSearchParams);
 
 			// Interceptor broadcast: JPA_PERFTRACE_INFO
-			if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
-				StorageProcessingMessage message = new StorageProcessingMessage();
-				message.setMessage("Stored " + presentSearchParams.size() + " resource presence index entries");
-				HookParams params = new HookParams()
-					.add(RequestDetails.class, theRequest)
-					.addIfMatchesType(ServletRequestDetails.class, theRequest)
-					.add(StorageProcessingMessage.class, message);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+			if (!presenceCount.isEmpty()) {
+				if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+					StorageProcessingMessage message = new StorageProcessingMessage();
+					message.setMessage("For " + theEntity.getIdDt().toUnqualifiedVersionless().getValue() + " added " + presenceCount.getAddCount() + " and removed " + presenceCount.getRemoveCount() + " resource search parameter presence entries");
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(StorageProcessingMessage.class, message);
+					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+				}
 			}
 
 		}
@@ -1149,14 +1151,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				AddRemoveCount searchParamAddRemoveCount = myDaoSearchParamSynchronizer.synchronizeSearchParamsToDatabase(newParams, theEntity, existingParams);
 
 				// Interceptor broadcast: JPA_PERFTRACE_INFO
-				if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
-					StorageProcessingMessage message = new StorageProcessingMessage();
-					message.setMessage("Added " + searchParamAddRemoveCount.getAddCount() + " and removed " + searchParamAddRemoveCount.getRemoveCount() + " resource search parameter index entries");
-					HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(StorageProcessingMessage.class, message);
-					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+				if (!searchParamAddRemoveCount.isEmpty()) {
+					if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+						StorageProcessingMessage message = new StorageProcessingMessage();
+						message.setMessage("For " + theEntity.getIdDt().toUnqualifiedVersionless().getValue() + " added " + searchParamAddRemoveCount.getAddCount() + " and removed " + searchParamAddRemoveCount.getRemoveCount() + " resource search parameter index entries");
+						HookParams params = new HookParams()
+							.add(RequestDetails.class, theRequest)
+							.addIfMatchesType(ServletRequestDetails.class, theRequest)
+							.add(StorageProcessingMessage.class, message);
+						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+					}
 				}
 
 				// Syncrhonize composite params

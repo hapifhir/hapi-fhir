@@ -124,7 +124,9 @@ public class ResourceParameter implements IParameter {
 		return new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 	}
 
-	private static Reader createRequestReader(RequestDetails theRequest) {
+	// Do not make private
+	@SuppressWarnings("WeakerAccess")
+	public static Reader createRequestReader(RequestDetails theRequest) {
 		return createRequestReader(theRequest, determineRequestCharset(theRequest));
 	}
 

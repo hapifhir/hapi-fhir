@@ -64,7 +64,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private List<String> myObservationIdsOddOnly;
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsEvenOnlyBackwards;
-	private List<String> myObservationIdsBackwards;
 	private ConsentInterceptor myConsentInterceptor;
 	@Autowired
 	@Qualifier(BaseConfig.GRAPHQL_PROVIDER_NAME)
@@ -93,7 +92,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
@@ -131,7 +130,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		ourClient.registerInterceptor(capture);
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search and only allow even
@@ -223,7 +222,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		ConsentSvcMaskObservationSubjects consentService = new ConsentSvcMaskObservationSubjects();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
@@ -260,7 +259,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Perform a search
@@ -281,7 +280,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		IConsentService consentService = new ConsentSvcCantSeeOddNumbered();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		ourClient.read().resource("Observation").withId(new IdType(myObservationIdsEvenOnly.get(0))).execute();
@@ -307,7 +306,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		create50Observations();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		Patient patient = new Patient();
@@ -353,7 +352,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		IIdType id = ourClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Reject output
@@ -400,7 +399,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Proceed everything
@@ -426,12 +425,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
-		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.canSeeResource(any(), any())).thenReturn(ConsentOutcome.REJECT);
+		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.REJECT);
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
@@ -458,19 +457,19 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
-		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t -> {
+		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
 			IBaseResource resource = t.getArgument(1, IBaseResource.class);
 			if (resource instanceof Organization) {
 				return ConsentOutcome.REJECT;
 			}
 			return ConsentOutcome.PROCEED;
 		});
-		when(svc.seeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.seeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
@@ -497,13 +496,13 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
-		myConsentInterceptor = new ConsentInterceptor(consentService);
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		IConsentService svc = mock(IConsentService.class);
-		when(svc.startOperation(any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.canSeeResource(any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.seeResource(any(RequestDetails.class), any(IBaseResource.class))).thenAnswer(t -> {
+		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
 			IBaseResource resource = t.getArgument(1, IBaseResource.class);
 			if (resource instanceof Organization) {
 				Organization org = new Organization();
@@ -571,7 +570,6 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 				.collect(Collectors.toList());
 
 		myObservationIdsOddOnly = ListUtils.removeAll(myObservationIds, myObservationIdsEvenOnly);
-		myObservationIdsBackwards = Lists.reverse(myObservationIds);
 		myObservationIdsEvenOnlyBackwards = Lists.reverse(myObservationIdsEvenOnly);
 	}
 
@@ -586,21 +584,21 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		private int mySeeCount = 0;
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
-		public int getSeeCount() {
+		int getSeeCount() {
 			return mySeeCount;
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			mySeeCount++;
 			String resourceId = theResource.getIdElement().toUnqualifiedVersionless().getValue();
 			ourLog.info("** SEE: {}", resourceId);
@@ -613,12 +611,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
@@ -628,12 +626,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private static class ConsentSvcCantSeeOddNumbered implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			Long resIdLong = theResource.getIdElement().getIdPartAsLong();
 			if (resIdLong % 2 == 1) {
 				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
@@ -642,17 +640,17 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
@@ -662,12 +660,12 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private static class ConsentSvcCantSeeEvenNumbered implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			Long resIdLong = theResource.getIdElement().getIdPartAsLong();
 			if (resIdLong % 2 == 0) {
 				return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
@@ -676,17 +674,17 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
@@ -702,27 +700,27 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(myOperationStatus);
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
@@ -732,27 +730,27 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 	private static class ConsentSvcRejectSeeingAnything implements IConsentService {
 
 		@Override
-		public ConsentOutcome startOperation(RequestDetails theRequestDetails) {
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.REJECT;
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource) {
+		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
 		@Override
-		public void completeOperationSuccess(RequestDetails theRequestDetails) {
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
 			// nothing
 		}
 
 		@Override
-		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException) {
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
 			// nothing
 		}
 

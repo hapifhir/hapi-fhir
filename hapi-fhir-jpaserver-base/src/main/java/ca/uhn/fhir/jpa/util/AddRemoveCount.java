@@ -42,4 +42,7 @@ public class AddRemoveCount {
 		return myRemoveCount;
 	}
 
+	public boolean isEmpty() {
+		return myAddCount > 0 || myRemoveCount > 0;
+	}
 }
