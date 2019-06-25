@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.lang3.StringUtils.leftPad;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
@@ -238,7 +238,32 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
-		assertEquals(2, hitCount.get());
+
+		// This should probably be 4
+		assertEquals(5, hitCount.get());
+
+	}
+
+	@Test
+	public void testSearchAndBlockNoneOnIncludes() {
+		create50Observations();
+
+		AtomicInteger hitCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCounting(hitCount, interceptedResourceIds);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.addInclude(IBaseResource.INCLUDE_ALL);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 10 (don't cross a fetch boundary)
+		List<IBaseResource> resources = outcome.getResources(0, 100);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
+		assertEquals(4, hitCount.get());
 
 	}
 
@@ -388,6 +413,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			myHitCount.incrementAndGet();
 
 			IPreResourceAccessDetails accessDetails = theArgs.get(IPreResourceAccessDetails.class);
+
+			assertThat(accessDetails.size(), greaterThan(0));
+
 			List<String> currentPassIds = new ArrayList<>();
 			for (int i = 0; i < accessDetails.size(); i++) {
 				IBaseResource nextResource = accessDetails.getResource(i);
@@ -416,7 +444,11 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			List<String> nonBlocked = new ArrayList<>();
 			int count = accessDetails.size();
 
-			ourLog.info("Invoking {} for {} results", thePointcut, count);
+			List<String> ids = new ArrayList<>();
+			for (int i = 0; i < accessDetails.size(); i++) {
+				ids.add(accessDetails.getResource(i).getIdElement().toUnqualifiedVersionless().getValue());
+			}
+			ourLog.info("Invoking {} for {} results: {}", thePointcut, count, ids);
 
 			for (int i = 0; i < count; i++) {
 				IBaseResource resource = accessDetails.getResource(i);
@@ -431,6 +463,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 
 			ourLog.info("Allowing IDs: {}", nonBlocked);
+
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				ourLog.error("Trace", e);
+			}
+
 		}
 	}
 

@@ -671,7 +671,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
 					// This can be used to remove results from the search result details before
 					// the user has a chance to know that they were in the results
-					if (mySearchRuntimeDetails.getRequestDetails() != null) {
+					if (mySearchRuntimeDetails.getRequestDetails() != null && unsyncedPids.isEmpty() == false) {
 						JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(unsyncedPids, () -> newSearchBuilder());
 						HookParams params = new HookParams()
 							.add(IPreResourceAccessDetails.class, accessDetails)
