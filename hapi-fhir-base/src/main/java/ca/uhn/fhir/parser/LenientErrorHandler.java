@@ -158,6 +158,13 @@ public class LenientErrorHandler implements IParserErrorHandler {
 		}
 	}
 
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
+		if (myLogErrors) {
+			ourLog.warn("Extension contains both a value and nested extensions: {}", theLocation);
+		}
+	}
+
 	public static String createIncorrectJsonTypeMessage(String theElementName, ValueType theExpected, ScalarType theExpectedScalarType, ValueType theFound, ScalarType theFoundScalarType) {
 		StringBuilder b = new StringBuilder();
 		b.append("Found incorrect type for element ");

@@ -68,4 +68,8 @@ public class ErrorHandlerAdapter implements IParserErrorHandler {
 		// NOP
 	}
 
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLoc) {
+		// NOP
+	}
 }
