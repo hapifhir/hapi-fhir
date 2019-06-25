@@ -7,7 +7,6 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,15 +32,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
+@SuppressWarnings("unchecked")
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
 public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
@@ -54,6 +56,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsEvenOnlyBackwards;
 	private List<String> myObservationIdsBackwards;
+	private List<String> myPatientIdsEvenOnly;
 
 	@After
 	public void after() {
@@ -168,6 +171,30 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
+	public void testSearchAndBlockSomeOnRevIncludes() {
+		create50Observations();
+
+		AtomicInteger hitCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
+		map.addRevInclude(IBaseResource.INCLUDE_ALL);
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 10 (don't cross a fetch boundary)
+		List<IBaseResource> resources = outcome.getResources(0, 100);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
+		assertEquals(2, hitCount.get());
+
+	}
+
+	@Test
 	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() {
 		create50Observations();
 
@@ -187,13 +214,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(ListUtils.union(myPatientIds, myObservationIdsEvenOnly), returnedIdValues);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
 
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnRevIncludes() {
+	public void testSearchAndBlockSomeOnIncludes() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -203,15 +230,38 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		// Perform a search
 		SearchParameterMap map = new SearchParameterMap();
-		map.setSort(new SortSpec(Observation.SP_IDENTIFIER, SortOrderEnum.ASC));
-		map.addRevInclude(IBaseResource.INCLUDE_ALL);
-		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		map.addInclude(IBaseResource.INCLUDE_ALL);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(ListUtils.union(myPatientIds, myObservationIdsEvenOnly), returnedIdValues);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
+		assertEquals(2, hitCount.get());
+
+	}
+
+	@Test
+	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() {
+		create50Observations();
+
+		AtomicInteger hitCount = new AtomicInteger(0);
+		List<String> interceptedResourceIds = new ArrayList<>();
+		IAnonymousInterceptor interceptor = new PreAccessInterceptorCountingAndBlockOdd(hitCount, interceptedResourceIds);
+		myInterceptorService.registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+
+		// Perform a search
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.addInclude(IBaseResource.INCLUDE_ALL);
+		IBundleProvider outcome = myObservationDao.search(map, mySrd);
+		ourLog.info("Search UUID: {}", outcome.getUuid());
+
+		// Fetch the first 10 (don't cross a fetch boundary)
+		List<IBaseResource> resources = outcome.getResources(0, 100);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 		assertEquals(2, hitCount.get());
 
 	}
@@ -234,12 +284,15 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
+		/*
+		 * Note: Each observation in the observation list will appear twice in the actual
+		 * returned results because we create it then update it in create50Observations()
+		 */
+		assertEquals(sort(myObservationIdsEvenOnlyBackwards.subList(0, 3), myObservationIdsEvenOnlyBackwards.subList(0, 3)), sort(returnedIdValues));
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIdsBackwards.subList(0, 10), interceptedResourceIds);
+		assertEquals(sort(myObservationIdsBackwards.subList(0, 5), myObservationIdsBackwards.subList(0, 5)), sort(interceptedResourceIds));
 
 	}
-
 
 	@Test
 	public void testReadAndBlockSome() {
@@ -268,24 +321,45 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-
 	private void create50Observations() {
 		myPatientIds = new ArrayList<>();
 		myObservationIds = new ArrayList<>();
 
 		Patient p = new Patient();
 		p.setActive(true);
-		String pid = myPatientDao.create(p).getId().toUnqualifiedVersionless().getValue();
-		myPatientIds.add(pid);
+		IIdType pid0 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		myPatientIds.add(pid0.getValue());
+
+		p = new Patient();
+		p.setActive(true);
+		IIdType pid1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+		myPatientIds.add(pid1.getValue());
+
+		assertTrue((pid0.getIdPartAsLong() % 2) != (pid1.getIdPartAsLong() % 2));
+		String evenPid = pid0.getIdPartAsLong() % 2 == 0 ? pid0.getValue() : pid1.getValue();
+		String oddPid = pid0.getIdPartAsLong() % 2 == 0 ? pid1.getValue() : pid0.getValue();
 
 		for (int i = 0; i < 50; i++) {
 			final Observation obs1 = new Observation();
 			obs1.setStatus(Observation.ObservationStatus.FINAL);
 			obs1.addIdentifier().setSystem("urn:system").setValue("I" + leftPad("" + i, 5, '0'));
-			obs1.getSubject().setReference(pid);
 			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
+
+			obs1.setId(obs1id);
+			if (obs1id.getIdPartAsLong() % 2 == 0) {
+				obs1.getSubject().setReference(evenPid);
+			} else {
+				obs1.getSubject().setReference(oddPid);
+			}
+			myObservationDao.update(obs1);
 		}
+
+		myPatientIdsEvenOnly =
+			myPatientIds
+				.stream()
+				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
+				.collect(Collectors.toList());
 
 		myObservationIdsEvenOnly =
 			myObservationIds
@@ -348,7 +422,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				IBaseResource resource = accessDetails.getResource(i);
 				if (resource != null) {
 					long idPart = resource.getIdElement().getIdPartAsLong();
-					if (resource.getIdElement().getResourceType().equals("Observation") && idPart % 2 == 1) {
+					if (idPart % 2 == 1) {
 						accessDetails.setDontReturnResourceAtIndex(i);
 					} else {
 						nonBlocked.add(resource.getIdElement().toUnqualifiedVersionless().getValue());
@@ -358,6 +432,19 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			ourLog.info("Allowing IDs: {}", nonBlocked);
 		}
+	}
+
+	private static List<String> sort(List<String>... theLists) {
+		ArrayList<String> retVal = new ArrayList<>();
+		for (List<String> next : theLists) {
+			retVal.addAll(next);
+		}
+		retVal.sort((o0, o1) -> {
+			long i0 = Long.parseLong(o0.substring(o0.indexOf('/') + 1));
+			long i1 = Long.parseLong(o1.substring(o1.indexOf('/') + 1));
+			return (int) (i0 - i1);
+		});
+		return retVal;
 	}
 
 
