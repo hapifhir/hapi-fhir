@@ -31,9 +31,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
 
 public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
@@ -140,18 +140,26 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
 		try {
 
+			ourLog.info("Composition ID: {}", compId);
+			List<String> returnedClasses = new ArrayList<>();
+			doAnswer(t->{
+				HookParams param = t.getArgument(1, HookParams.class);
+				IPreResourceAccessDetails nextPreResourceAccessDetails = param.get(IPreResourceAccessDetails.class);
+				for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
+					String className = nextPreResourceAccessDetails.getResource(i).getClass().getSimpleName();
+					ourLog.info("* Preaccess called on {}", nextPreResourceAccessDetails.getResource(i).getIdElement().getValue());
+					returnedClasses.add(className);
+				}
+				return null;
+			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
+
 			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
-			fetchBundle(theUrl, EncodingEnum.JSON);
+			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
+				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
+			}
 
 			Mockito.verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
-
-			List<String> returnedClasses = new ArrayList<>();
-			for (HookParams nextParams : myHookParamsCaptor.getAllValues()) {
-				IPreResourceAccessDetails nextPreResourceAccessDetails = nextParams.get(IPreResourceAccessDetails.class);
-				for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
-					returnedClasses.add(nextPreResourceAccessDetails.getResource(i).getClass().getSimpleName());
-				}
-			}
 
 			ourLog.info("Returned classes: {}", returnedClasses);
 
