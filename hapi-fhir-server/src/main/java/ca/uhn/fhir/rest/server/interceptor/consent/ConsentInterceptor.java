@@ -148,7 +148,19 @@ public class ConsentInterceptor {
 				case AUTHORIZED:
 					break;
 				case REJECT:
-					theRequestDetails.getFhirContext().newTerser().clear(nextResource);
+					if (nextOutcome.getResource() != null) {
+						IBaseResource newResource = nextOutcome.getResource();
+						thePreResourceShowDetails.setResource(i, newResource);
+						alreadySeenResources.put(newResource, true);
+					} else if (nextOutcome.getOperationOutcome() != null) {
+						IBaseOperationOutcome newOperationOutcome = nextOutcome.getOperationOutcome();
+						thePreResourceShowDetails.setResource(i, newOperationOutcome);
+						alreadySeenResources.put(newOperationOutcome, true);
+					} else {
+						String resourceId = nextResource.getIdElement().getValue();
+						theRequestDetails.getFhirContext().newTerser().clear(nextResource);
+						nextResource.setId(resourceId);
+					}
 					break;
 			}
 		}

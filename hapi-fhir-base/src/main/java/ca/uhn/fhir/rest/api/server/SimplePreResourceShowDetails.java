@@ -15,8 +15,9 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 		this(Lists.newArrayList(theResource));
 	}
 
-	public SimplePreResourceShowDetails(List<IBaseResource> theResources) {
-		myResources = theResources;
+	public <T extends IBaseResource> SimplePreResourceShowDetails(List<T> theResources) {
+		//noinspection unchecked
+		myResources = (List<IBaseResource>) theResources;
 		mySubSets = new boolean[myResources.size()];
 	}
 

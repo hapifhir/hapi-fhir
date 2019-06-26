@@ -14,8 +14,9 @@ public class SimplePreResourceAccessDetails implements IPreResourceAccessDetails
 		this(Collections.singletonList(theResource));
 	}
 
-	public SimplePreResourceAccessDetails(List<IBaseResource> theResources) {
-		myResources = theResources;
+	public <T extends IBaseResource> SimplePreResourceAccessDetails(List<T> theResources) {
+		//noinspection unchecked
+		myResources = (List<IBaseResource>) theResources;
 		myBlocked = new boolean[myResources.size()];
 	}
 
@@ -36,5 +37,16 @@ public class SimplePreResourceAccessDetails implements IPreResourceAccessDetails
 
 	public boolean isDontReturnResourceAtIndex(int theIndex) {
 		return myBlocked[theIndex];
+	}
+
+	/**
+	 * Remove any blocked resources from the list that was passed into the constructor
+	 */
+	public void applyFilterToList() {
+		for (int i = size() - 1; i >= 0; i--) {
+			if (isDontReturnResourceAtIndex(i)) {
+				myResources.remove(i);
+			}
+		}
 	}
 }

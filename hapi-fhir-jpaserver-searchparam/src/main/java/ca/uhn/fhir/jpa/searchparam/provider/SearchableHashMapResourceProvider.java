@@ -48,16 +48,16 @@ public class SearchableHashMapResourceProvider<T extends IBaseResource> extends 
 	}
 
 	public List<T> searchByCriteria(String theCriteria, RequestDetails theRequest) {
-		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource, theRequest));
+		return searchBy(resource -> mySearchParamMatcher.match(theCriteria, resource, theRequest), theRequest);
 
 	}
 
 	public List<T> searchByParams(SearchParameterMap theSearchParams, RequestDetails theRequest) {
-		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest));
+		return searchBy(resource -> mySearchParamMatcher.match(theSearchParams.toNormalizedQueryString(getFhirContext()), resource, theRequest), theRequest);
 	}
 
-	private List<T> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher) {
-		List<T> allEResources = searchAll();
+	private List<T> searchBy(Function<IBaseResource, InMemoryMatchResult> theMatcher, RequestDetails theRequest) {
+		List<T> allEResources = searchAll(theRequest);
 		List<T> matches = new ArrayList<>();
 		for (T resource : allEResources) {
 			InMemoryMatchResult result = theMatcher.apply(resource);

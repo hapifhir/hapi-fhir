@@ -40,6 +40,13 @@
 					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>animal-sniffer-maven-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 		</plugins>
 		<resources>
 			<resource>
