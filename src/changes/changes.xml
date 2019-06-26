@@ -141,6 +141,11 @@
 				Fix a build failure thanks to Maven pom errors. Thanks to Gary Teichrow for
 				the pull request!
 			</action>
+			<action type="fix" issue="1362">
+				The JPA server did not correctly process searches with a
+				<![CDATA[<code>_tag:not</code>]]>
+				expression containing more than one comma separated value.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
