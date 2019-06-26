@@ -1857,7 +1857,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		String p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
 
 		{
-
 			String criteria = "_tag:not=http://system|tag0";
 			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
 
