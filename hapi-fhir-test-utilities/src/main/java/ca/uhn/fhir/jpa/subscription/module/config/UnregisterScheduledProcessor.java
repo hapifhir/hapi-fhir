@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.config;
+package ca.uhn.fhir.jpa.subscription.module.config;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -16,6 +16,7 @@ import org.springframework.scheduling.concurrent.ExecutorConfigurationSupport;
 public class UnregisterScheduledProcessor implements BeanFactoryPostProcessor {
 
 	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
+	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = "scheduling_disabled=true";
 
 	private final Environment myEnvironment;
 

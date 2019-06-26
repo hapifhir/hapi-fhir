@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.subscription.module.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -45,7 +46,7 @@ import static org.junit.Assert.*;
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	"scheduling_disabled=true"
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE
 })
 public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
