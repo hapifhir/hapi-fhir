@@ -90,42 +90,6 @@ public abstract class BaseMethodBinding<T> {
 		myMethod.setAccessible(true);
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
-		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
-		if (encoding == null) {
-			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
-			populateException(ex, theResponseReader);
-			throw ex;
-		}
-
-		IParser parser = encoding.newParser(getContext());
-
-		parser.setPreferTypes(thePreferTypes);
-
-		return parser;
-	}
-
-	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
-		String contentTypeHeader = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-		EncodingEnum encoding;
-		if (isBlank(contentTypeHeader)) {
-			encoding = EncodingEnum.XML;
-		} else {
-			int semicolon = contentTypeHeader.indexOf(';');
-			if (semicolon != -1) {
-				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
-			}
-			encoding = EncodingEnum.forContentType(contentTypeHeader);
-		}
-
-		if (encoding == null) {
-			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
-		}
-
-		IParser parser = encoding.newParser(getContext());
-		return parser;
-	}
-
 	protected Object[] createMethodParams(RequestDetails theRequest) {
 		Object[] params = new Object[getParameters().size()];
 		for (int i = 0; i < getParameters().size(); i++) {

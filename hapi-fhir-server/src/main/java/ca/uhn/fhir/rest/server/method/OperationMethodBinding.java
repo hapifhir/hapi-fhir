@@ -285,6 +285,8 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
+//		populateActionRequestDetailsForInterceptor(theRequest); AAAAAA
+
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 		return retVal;
@@ -309,7 +311,11 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
 		super.populateActionRequestDetailsForInterceptor(theRequestDetails, theDetails, theMethodParams);
-		theDetails.setResource((IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY));
+		IBaseResource resource = (IBaseResource) theRequestDetails.getUserData().get(OperationParameter.REQUEST_CONTENTS_USERDATA_KEY);
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
+		}
 	}
 
 	public static class ReturnType {

@@ -238,6 +238,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		Object[] params = createMethodParams(theRequest);
 
+
+
 		Object resultObj = invokeServer(theServer, theRequest, params);
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);

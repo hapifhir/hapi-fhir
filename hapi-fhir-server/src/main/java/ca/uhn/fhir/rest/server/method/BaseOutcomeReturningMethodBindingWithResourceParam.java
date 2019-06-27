@@ -128,10 +128,16 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myResourceParameterIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myResourceParameterIndex]);
+			resource = (IBaseResource) theMethodParams[myResourceParameterIndex];
 		} else {
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}
