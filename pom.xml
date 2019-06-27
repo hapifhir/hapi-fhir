@@ -526,6 +526,10 @@
 			<id>srdo</id>
 			<name>Stig Døssing</name>
 		</developer>
+		<developer>
+			<id>gteichrow</id>
+			<name>Gary Teichrow</name>
+		</developer>
 	</developers>
 
 	<licenses>

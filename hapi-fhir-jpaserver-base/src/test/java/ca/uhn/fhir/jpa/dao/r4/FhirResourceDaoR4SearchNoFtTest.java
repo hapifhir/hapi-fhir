@@ -1840,6 +1840,52 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchNotTag() {
+		Patient p0 = new Patient();
+		p0.getMeta().addTag("http://system", "tag0", "Tag 0");
+		p0.setActive(true);
+		String p0id = myPatientDao.create(p0).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p1 = new Patient();
+		p1.getMeta().addTag("http://system", "tag1", "Tag 1");
+		p1.setActive(true);
+		String p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.getMeta().addTag("http://system", "tag2", "Tag 2");
+		p2.setActive(true);
+		String p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			String criteria = "_tag:not=http://system|tag0";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+			assertThat(ids, containsInAnyOrder(p1id, p2id));
+		}
+		{
+			String criteria = "_tag:not=http://system|tag0,http://system|tag1";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+			assertThat(ids, containsInAnyOrder(p2id));
+		}
+	}
+
+
+	@Test
 	public void testSearchNumberParam() {
 		RiskAssessment e1 = new RiskAssessment();
 		e1.addIdentifier().setSystem("foo").setValue("testSearchNumberParam01");

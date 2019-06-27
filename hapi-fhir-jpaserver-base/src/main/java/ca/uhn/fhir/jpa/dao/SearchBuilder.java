@@ -828,8 +828,8 @@ public class SearchBuilder implements ISearchBuilder {
 
 				subQ.where(subQfrom.get("myTagId").as(Long.class).in(defJoin));
 
-				List<Predicate> orPredicates = createPredicateTagList(defJoinFrom, myBuilder, tagType, tokens);
-				defJoin.where(toArray(orPredicates));
+				Predicate tagListPredicate = createPredicateTagList(defJoinFrom, myBuilder, tagType, tokens);
+				defJoin.where(tagListPredicate);
 
 				continue;
 			}
@@ -837,8 +837,8 @@ public class SearchBuilder implements ISearchBuilder {
 			Join<ResourceTable, ResourceTag> tagJoin = myResourceTableRoot.join("myTags", JoinType.LEFT);
 			From<ResourceTag, TagDefinition> defJoin = tagJoin.join("myTag");
 
-			List<Predicate> orPredicates = createPredicateTagList(defJoin, myBuilder, tagType, tokens);
-			myPredicates.add(myBuilder.or(toArray(orPredicates)));
+			Predicate tagListPredicate = createPredicateTagList(defJoin, myBuilder, tagType, tokens);
+			myPredicates.add(tagListPredicate);
 
 		}
 
@@ -1328,20 +1328,21 @@ public class SearchBuilder implements ISearchBuilder {
 		}
 	}
 
-	private List<Predicate> createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
-		Predicate typePrediate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
+	private Predicate createPredicateTagList(Path<TagDefinition> theDefJoin, CriteriaBuilder theBuilder, TagTypeEnum theTagType, List<Pair<String, String>> theTokens) {
+		Predicate typePredicate = theBuilder.equal(theDefJoin.get("myTagType"), theTagType);
 
 		List<Predicate> orPredicates = Lists.newArrayList();
 		for (Pair<String, String> next : theTokens) {
-			Predicate codePrediate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
+			Predicate codePredicate = theBuilder.equal(theDefJoin.get("myCode"), next.getRight());
 			if (isNotBlank(next.getLeft())) {
-				Predicate systemPrediate = theBuilder.equal(theDefJoin.get("mySystem"), next.getLeft());
-				orPredicates.add(theBuilder.and(typePrediate, systemPrediate, codePrediate));
+				Predicate systemPredicate = theBuilder.equal(theDefJoin.get("mySystem"), next.getLeft());
+				orPredicates.add(theBuilder.and(typePredicate, systemPredicate, codePredicate));
 			} else {
-				orPredicates.add(theBuilder.and(typePrediate, codePrediate));
+				orPredicates.add(theBuilder.and(typePredicate, codePredicate));
 			}
 		}
-		return orPredicates;
+
+		return theBuilder.or(toArray(orPredicates));
 	}
 
 	private List<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters, String theResourceName, String theParamName, CriteriaBuilder theBuilder,

@@ -93,12 +93,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Java -->
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
-
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.springframework</groupId>
