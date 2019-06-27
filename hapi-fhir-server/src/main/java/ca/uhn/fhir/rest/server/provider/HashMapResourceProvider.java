@@ -32,7 +32,6 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.*;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -404,14 +403,17 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * This is a utility method that can be used to store a resource without
 	 * having to use the outside API. In this case, the storage happens without
 	 * any interaction with interceptors, etc.
+	 *
 	 * @param theResource The resource to store. If the resource has an ID, that ID is updated.
+	 * @return Return the ID assigned to the stored resource
 	 */
-	public void store(T theResource) {
+	public IIdType store(T theResource) {
 		if (theResource.getIdElement().hasIdPart()) {
 			updateInternal(theResource);
 		} else {
 			createInternal(theResource);
 		}
+		return theResource.getIdElement();
 	}
 
 	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {
