@@ -39,9 +39,28 @@
 				]]>
 			</action>
 			<action type="add">
+				A new interceptor called
+				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				JPA based servers to make appropriate consent decisions related to resources that
+				and operations that are being returned. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>]]>
+				for more information.
+			</action>
+			<action type="add">
+				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
+				<![CDATA[
+				<ul>
+				<li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook,
+				which allows it to successfully authorize JPA operations that don't actually return resource content,
+				such as GraphQL responses.</li>
+				<li>
+				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
+				]]>
+			</action>
+			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
-				for the operation to succeed without timing out in larger system.
+				for the operation to succeed without timing out in larger systems.
 			</action>
 			<action type="fix">
 				The JPA server did not correctly index Timing fields where the timing contained
@@ -85,10 +104,18 @@
 				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
 			</action>
+			<action type="change">
+				The default RestfulServer encoding has been changed from XML to JSON in order to
+				reflect the most common usage.
+			</action>
 			<action type="add" issue="1336">
 				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
 				assign a free port. This should theoretically result in fewer failed builds resulting from
 				port conflicts. Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="fix">
+				AuthorizationInterceptor sometimes failed with a 500 error when checking compartment
+				membership on a resource that has a contained subject (Patient).
 			</action>
 			<action type="add" issue="1348">
 				JPA server now supports conditional PATCH operation (i.e. performing a patch
@@ -114,6 +141,11 @@
 			<action type="fix">
 				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
 				due to case sensitivity. This has been corrected.
+			</action>
+			<action type="add">
+				A new pointcut has been added to the JPA server called
+				<![CDATA[<code>JPA_PERFTRACE_RAW_SQL</code>]]>
+				that can be used to capture the raw SQL statements that are sent to the underlying database.
 			</action>
 			<action type="fix" issue="1355">
 				Invoking the transaction or batch operation on the JPA server would fail
@@ -146,11 +178,23 @@
 				<![CDATA[<code>_tag:not</code>]]>
 				expression containing more than one comma separated value.
 			</action>
+			<action type="add">
+				The JSON and XML parsers will now raise a warning or error with the Parser Error Handler
+				if an extension is being encoded that is missing a URL, or has both a value and nested
+				extensions on the same parent extension.
+			</action>
+			<action type="fix">
+				FHIR model classes have a method called
+				<![CDATA[<code>hasPrimitiveValue()</code>]]>
+				which previously returned true if the type was a primitive datatype (e.g. StringType).
+				This method now only returns true if the type is a primitive datatype AND
+				the type actually has a value.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
 				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
-				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
+				parameter was not being correctly escaped, leading to a potential XSS vulnerability. A big thanks to
 				Mudit Punia and Dushyant Garg for reporting this.
 			</action>
 			<action type="add">
@@ -333,7 +377,8 @@
 				are caught and not just silently ignored.
 			</action>
 			<action type="add">
-				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				Expunges are now done in batches in multiple threads. Both the number of expunge threads and batch size are
+				configurable
 				in DaoConfig.
 			</action>
 			<action type="fix">
@@ -341,7 +386,8 @@
 				contains sub-items.
 			</action>
 			<action type="fix">
-				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly
+				reported
 				the target instead of the source with the reference.
 			</action>
 			<action type="add">

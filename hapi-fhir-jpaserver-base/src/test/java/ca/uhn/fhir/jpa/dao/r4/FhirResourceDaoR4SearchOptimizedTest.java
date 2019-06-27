@@ -89,7 +89,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 	}
 
 	@Test
@@ -119,7 +119,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
-		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		// Seach with total expicitly requested
 		params = new SearchParameterMap();
@@ -131,7 +131,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
-		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		// Seach with count only
 		params = new SearchParameterMap();
@@ -143,7 +143,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
-		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 	}
 
@@ -164,7 +164,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 
-//		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid).size().intValue());
+//		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(mySrd, uuid).size().intValue());
 		assertEquals(200, results.size().intValue());
 		ourLog.info("** Asking for results");
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
@@ -172,7 +172,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00004", ids.get(4));
 
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
-		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(uuid, null);
+		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer search2Size = search2.size();
 		assertEquals(200, search2Size.intValue());
 	}
@@ -194,7 +194,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		// Try the same query again. This time the same thing should come back, but
 		// from the cache...
@@ -210,7 +210,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 	}
 
@@ -229,7 +229,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(null, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertEquals(null, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		// Try the same query again. This time we'll request _total=accurate as well
 		// which means the total should be calculated no matter what.
@@ -244,7 +244,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid2, null).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue());
 		assertNotEquals(uuid, uuid2);
 
 	}
@@ -267,7 +267,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 200, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00199", ids.get(199));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -322,7 +322,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -347,7 +347,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 10, 15, false);
 		assertEquals("Patient/PT00010", ids.get(0));
 		assertEquals("Patient/PT00014", ids.get(4));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * Search should be untouched
@@ -387,7 +387,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 25, 30, false);
 		assertEquals("Patient/PT00025", ids.get(0));
 		assertEquals("Patient/PT00029", ids.get(4));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * Search should be untouched
@@ -425,7 +425,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(10, ids.size());
 		assertEquals("Patient/PT00180", ids.get(0));
 		assertEquals("Patient/PT00189", ids.get(9));
-		assertEquals(190, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(190, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 
 	}
@@ -449,7 +449,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 50, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00049", ids.get(49));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -484,7 +484,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size());
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -509,7 +509,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 15, 25, false);
 		assertEquals("Patient/PT00015", ids.get(0));
 		assertEquals("Patient/PT00024", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		/*
 		 * Search should be untouched
@@ -619,7 +619,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(1, search.getVersion().intValue());
 		});
 
-		assertEquals(1, myDatabaseBackedPagingProvider.retrieveResultList(uuid, null).size().intValue());
+		assertEquals(1, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 	}
 

@@ -41,4 +41,26 @@ public class JpaInterceptorBroadcaster {
 		}
 		return retVal;
 	}
+
+	/**
+	 * Broadcast hooks to both the interceptor service associated with the request, as well
+	 * as the one associated with the JPA module.
+	 */
+	public static Object doCallHooksAndReturnObject(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {
+		Object retVal = true;
+		if (theInterceptorBroadcaster != null) {
+			retVal = theInterceptorBroadcaster.callHooksAndReturnObject(thePointcut, theParams);
+		}
+		if (theRequestDetails != null && retVal == null) {
+			retVal = theRequestDetails.getInterceptorBroadcaster().callHooksAndReturnObject(thePointcut, theParams);
+		}
+		return retVal;
+	}
+
+	public static boolean hasHooks(Pointcut thePointcut, IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails) {
+		if (theInterceptorBroadcaster != null && theInterceptorBroadcaster.hasHooks(thePointcut)) {
+			return true;
+		}
+		return theRequestDetails != null && theRequestDetails.getInterceptorBroadcaster().hasHooks(thePointcut);
+	}
 }

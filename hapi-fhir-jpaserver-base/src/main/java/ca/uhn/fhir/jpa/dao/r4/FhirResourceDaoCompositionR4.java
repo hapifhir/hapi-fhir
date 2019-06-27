@@ -49,8 +49,7 @@ public class FhirResourceDaoCompositionR4 extends FhirResourceDaoR4<Composition>
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider bundleProvider = search(paramMap);
-		return bundleProvider;
+		return search(paramMap, theRequestDetails);
 	}
 }
 

@@ -25,12 +25,12 @@ public class BlockLargeNumbersOfParamsListener implements ProxyDataSourceBuilder
 
 	@Override
 	public void execute(ExecutionInfo theExecInfo, List<QueryInfo> theQueryInfoList) {
-		ourLog.trace("Query with {} queries", theQueryInfoList.size());
+		ourLog.trace("SqlQuery with {} queries", theQueryInfoList.size());
 		for (QueryInfo next : theQueryInfoList) {
 			ourLog.trace("Have {} param lists", next.getParametersList().size());
 			for (List<ParameterSetOperation> nextParamsList : next.getParametersList()) {
 				ourLog.trace("Have {} sub-param lists", nextParamsList.size());
-				Validate.isTrue(nextParamsList.size() < 1000, "Query has %s parameters: %s", nextParamsList.size(), next.getQuery());
+				Validate.isTrue(nextParamsList.size() < 1000, "SqlQuery has %s parameters: %s", nextParamsList.size(), next.getQuery());
 			}
 		}
 	}

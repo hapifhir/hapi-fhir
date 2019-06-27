@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -93,7 +94,7 @@ public abstract class BaseJpaTest {
 
 	@After
 	public void afterPerformCleanup() {
-		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
@@ -256,7 +257,7 @@ public abstract class BaseJpaTest {
 		if (theFirstCall) {
 			bundleProvider = theFound;
 		} else {
-			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid(), null);
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, theFound.getUuid());
 		}
 
 		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
@@ -382,7 +383,7 @@ public abstract class BaseJpaTest {
 		return IOUtils.toString(bundleRes, Constants.CHARSET_UTF8);
 	}
 
-	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
+	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 
@@ -411,7 +412,7 @@ public abstract class BaseJpaTest {
 		theSearchParamRegistry.forceRefresh();
 	}
 
-	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
+	protected static Set<String> toCodes(Set<TermConcept> theConcepts) {
 		HashSet<String> retVal = new HashSet<>();
 		for (TermConcept next : theConcepts) {
 			retVal.add(next.getCode());
@@ -419,8 +420,8 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	public static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
-		HashSet<String> retVal = new HashSet<String>();
+	protected static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
+		HashSet<String> retVal = new HashSet<>();
 		for (VersionIndependentConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}
@@ -450,20 +451,6 @@ public abstract class BaseJpaTest {
 				})
 				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
-		}
-	}
-
-	public static void waitForTrue(Supplier<Boolean> theList) {
-		StopWatch sw = new StopWatch();
-		while (!theList.get() && sw.getMillis() <= 16000) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= 16000) {
-			fail("Waited " + sw.toString() + " and is still false");
 		}
 	}
 

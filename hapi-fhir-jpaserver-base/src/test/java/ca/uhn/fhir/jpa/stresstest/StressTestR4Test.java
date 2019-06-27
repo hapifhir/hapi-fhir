@@ -139,7 +139,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 0; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid(), null);
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count, ids.size());
 		assertEquals(count, Sets.newHashSet(ids).size());
@@ -152,7 +152,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 1000; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid(), null);
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count - 1000, ids.size());
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
@@ -390,11 +390,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withBundle(input).execute();
 
-		CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"));
-		try {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(getMeta);
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();

@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -406,7 +406,20 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 					BaseRuntimeElementDefinition<?> childDef = childNameAndDef.getChildDef();
 					String extensionUrl = getExtensionUrl(nextChild.getExtensionUrl());
 
-					if (extensionUrl != null && childName.equals("extension") == false) {
+					boolean isExtension = childName.equals("extension") || childName.equals("modifierExtension");
+					if (isExtension && nextValue instanceof IBaseExtension) {
+						IBaseExtension<?, ?> ext = (IBaseExtension<?, ?>) nextValue;
+						if (isBlank(ext.getUrl())) {
+							ParseLocation loc = new ParseLocation(theEncodeContext.toString() + "." + childName);
+							getErrorHandler().missingRequiredElement(loc, "url");
+						}
+						if (ext.getValue() != null && ext.getExtension().size() > 0) {
+							ParseLocation loc = new ParseLocation(theEncodeContext.toString() + "." + childName);
+							getErrorHandler().extensionContainsValueAndNestedExtensions(loc);
+						}
+					}
+
+					if (extensionUrl != null && isExtension == false) {
 						encodeExtension(theResource, theEventWriter, theContainedResource, nextChildElem, nextChild, nextValue, childName, extensionUrl, childDef, theEncodeContext);
 					} else if (nextChild instanceof RuntimeChildExtension) {
 						IBaseExtension<?, ?> extension = (IBaseExtension<?, ?>) nextValue;
@@ -439,6 +452,11 @@ public class XmlParser extends BaseParser /* implements IParser */ {
 		String elementId = getCompositeElementId(nextValue);
 		if (isNotBlank(elementId)) {
 			theEventWriter.writeAttribute("id", elementId);
+		}
+
+		if (isBlank(extensionUrl)) {
+			ParseLocation loc = new ParseLocation(theEncodeContext.toString());
+			getErrorHandler().missingRequiredElement(loc, "url");
 		}
 
 		theEventWriter.writeAttribute("url", extensionUrl);

@@ -53,9 +53,9 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(String theId, RequestDetails theRequest) {
+	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
 		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequest, theId, systemDao);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}
@@ -63,7 +63,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	}
 
 	@Override
-	public synchronized String storeResultList(IBundleProvider theList) {
+	public synchronized String storeResultList(RequestDetails theRequestDetails, IBundleProvider theList) {
 		String uuid = theList.getUuid();
 		return uuid;
 	}

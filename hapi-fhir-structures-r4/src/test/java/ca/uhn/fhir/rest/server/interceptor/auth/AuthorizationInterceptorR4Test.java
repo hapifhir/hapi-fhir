@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server.interceptor;
+package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -17,11 +17,11 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.auth.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -34,13 +34,10 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -56,13 +53,13 @@ import static org.junit.Assert.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
-public class AuthorizationInterceptorDstu3Test {
+public class AuthorizationInterceptorR4Test {
 
 	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"Access denied by default policy (no applicable rules)\"}]}";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorDstu3Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorR4Test.class);
 	private static CloseableHttpClient ourClient;
 	private static String ourConditionalCreateId;
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static boolean ourHitMethod;
 	private static int ourPort;
 	private static List<Resource> ourReturn;
@@ -112,6 +109,14 @@ public class AuthorizationInterceptorDstu3Test {
 		}
 		retVal.getCode().setText("OBS");
 		retVal.setSubject(new Reference(theSubjectId));
+
+		if (theSubjectId != null && theSubjectId.startsWith("#")) {
+			Patient p = new Patient();
+			p.setId(theSubjectId);
+			p.setActive(true);
+			retVal.addContained(p);
+		}
+
 		return retVal;
 	}
 
@@ -187,7 +192,7 @@ public class AuthorizationInterceptorDstu3Test {
 		encounter.addDiagnosis(dc);
 		CodeableConcept reason = new CodeableConcept();
 		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
-		encounter.addReason(reason);
+		encounter.addReasonCode(reason);
 
 		// add encounter to input so its created
 		input.addEntry()
@@ -2458,6 +2463,55 @@ public class AuthorizationInterceptorDstu3Test {
 	}
 
 	@Test
+	public void testReadByCompartmentDoesntAllowContained() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1"))
+					.build();
+			}
+		}.setFlags());
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		// Read with allowed subject
+		ourReturn = Lists.newArrayList(createObservation(10, "Patient/1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Read with contained
+		ourReturn = Lists.newArrayList(createObservation(10, "#1"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Read with contained
+		Observation obs = (Observation) createObservation(10, null);
+		obs.setSubject(new Reference(new Patient().setActive(true)));
+		ourReturn = Lists.newArrayList(obs);
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation/10");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	@Test
 	public void testReadByInstance() throws Exception {
 		ourConditionalCreateId = "1";
 
@@ -2611,9 +2665,9 @@ public class AuthorizationInterceptorDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(10, respBundle.getTotal());
-		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		Assert.assertEquals(5, respBundle.getEntry().size());
+		Assert.assertEquals(10, respBundle.getTotal());
+		Assert.assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
@@ -2625,9 +2679,9 @@ public class AuthorizationInterceptorDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(10, respBundle.getTotal());
-		assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		Assert.assertEquals(5, respBundle.getEntry().size());
+		Assert.assertEquals(10, respBundle.getTotal());
+		Assert.assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNull(respBundle.getLink("next"));
 
 	}
@@ -2663,9 +2717,9 @@ public class AuthorizationInterceptorDstu3Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(10, respBundle.getTotal());
-		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		Assert.assertEquals(5, respBundle.getEntry().size());
+		Assert.assertEquals(10, respBundle.getTotal());
+		Assert.assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
@@ -3201,9 +3255,9 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
+		assertTrue(ourHitMethod);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertEquals(ERR403, response);
-		assertTrue(ourHitMethod);
 
 	}
 

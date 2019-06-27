@@ -32,6 +32,8 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -189,8 +191,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					ourLog.warn(message);
 
 					// Interceptor broadcast: JPA_PERFTRACE_WARNING
-					HookParams params = new HookParams();
-					params.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, null)
+						.add(ServletRequestDetails.class, null)
+						.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
 					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 				}
 			}

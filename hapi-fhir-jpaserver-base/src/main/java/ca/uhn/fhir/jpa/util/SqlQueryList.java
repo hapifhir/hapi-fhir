@@ -1,8 +1,8 @@
-package ca.uhn.fhir.rest.api.server;
+package ca.uhn.fhir.jpa.util;
 
 /*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,16 +20,15 @@ package ca.uhn.fhir.rest.api.server;
  * #L%
  */
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Queue;
 
-import ca.uhn.fhir.context.FhirContext;
+public class SqlQueryList extends ArrayList<SqlQuery> {
+	public SqlQueryList() {
+		super();
+	}
 
-public interface IRequestDetails {
-
-	Map<String, String[]> getParameters();
-
-	Map<String, List<String>> getUnqualifiedToQualifiedNames();
-
-	FhirContext getFhirContext();
-
+	public SqlQueryList(Queue<SqlQuery> theList) {
+		super(theList);
+	}
 }

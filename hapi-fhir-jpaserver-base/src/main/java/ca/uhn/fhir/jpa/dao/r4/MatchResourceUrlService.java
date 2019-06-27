@@ -22,14 +22,22 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Request;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +51,12 @@ public class MatchResourceUrlService {
 	private FhirContext myContext;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public <R extends IBaseResource> Set<Long> processMatchUrl(String theMatchUrl, Class<R> theResourceType, RequestDetails theRequest) {
+		StopWatch sw = new StopWatch();
+
 		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 
 		SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(theMatchUrl, resourceDef);
@@ -59,7 +71,20 @@ public class MatchResourceUrlService {
 			throw new InternalErrorException("No DAO for resource type: " + theResourceType.getName());
 		}
 
-		return dao.searchForIds(paramMap, theRequest);
+		Set<Long> retVal = dao.searchForIds(paramMap, theRequest);
+
+		// Interceptor broadcast: JPA_PERFTRACE_INFO
+		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequest)) {
+			StorageProcessingMessage message = new StorageProcessingMessage();
+			message.setMessage("Processed conditional resource URL with " + retVal.size() + " result(s) in " + sw.toString());
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest)
+				.add(StorageProcessingMessage.class, message);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+		}
+
+		return retVal;
 	}
 
 

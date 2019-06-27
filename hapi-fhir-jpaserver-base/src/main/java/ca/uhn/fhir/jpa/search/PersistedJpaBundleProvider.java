@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,16 +21,20 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.*;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +52,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -62,6 +67,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public PersistedJpaBundleProvider(RequestDetails theRequest, String theSearchUuid, IDao theDao) {
 		myRequest = theRequest;
@@ -105,7 +111,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		}
 
 		if (predicates.size() > 0) {
-			q.where(predicates.toArray(new Predicate[predicates.size()]));
+			q.where(predicates.toArray(new Predicate[0]));
 		}
 
 		q.orderBy(cb.desc(from.get("myUpdated")));
@@ -126,6 +132,34 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 			retVal.add(myDao.toResource(resource, true));
 		}
+
+
+		// Interceptor call: STORAGE_PREACCESS_RESOURCES
+		{
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = retVal.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					retVal.remove(i);
+				}
+			}
+		}
+
+		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
+		{
+			SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, showDetails)
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+		}
+
 
 		return retVal;
 	}
@@ -280,18 +314,41 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
-	protected List<IBaseResource> toResourceList(ISearchBuilder sb, List<Long> pidsSubList) {
+	protected List<IBaseResource> toResourceList(ISearchBuilder theSearchBuilder, List<Long> thePids) {
 		Set<Long> includedPids = new HashSet<>();
+
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.SEARCH) {
-			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid));
-			includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pidsSubList, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid));
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toRevIncludesList(), true, mySearchEntity.getLastUpdated(), myUuid, myRequest));
+			includedPids.addAll(theSearchBuilder.loadIncludes(myContext, myEntityManager, thePids, mySearchEntity.toIncludesList(), false, mySearchEntity.getLastUpdated(), myUuid, myRequest));
 		}
+
+		List<Long> includedPidList = new ArrayList<>(includedPids);
 
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
-		sb.loadResourcesByPid(pidsSubList, resources, includedPids, false, myEntityManager, myContext, myDao, myRequest);
+		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
+
+		// Interceptor call: STORAGE_PRESHOW_RESOURCE
+		// This can be used to remove results from the search result details before
+		// the user has a chance to know that they were in the results
+		if (resources.size() > 0) {
+			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resources);
+			HookParams params = new HookParams()
+				.add(IPreResourceShowDetails.class, accessDetails)
+				.add(RequestDetails.class, myRequest)
+				.addIfMatchesType(ServletRequestDetails.class, myRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
+
+			resources = resources
+				.stream()
+				.filter(t -> t != null)
+				.collect(Collectors.toList());
+		}
 
 		return resources;
 	}
 
+	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
 }

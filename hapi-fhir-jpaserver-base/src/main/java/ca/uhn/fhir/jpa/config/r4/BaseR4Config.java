@@ -86,7 +86,7 @@ public class BaseR4Config extends BaseConfig {
 		return new TransactionProcessor<>();
 	}
 
-	@Bean(name = "myGraphQLProvider")
+	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
 		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());

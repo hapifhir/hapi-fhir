@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -17,6 +18,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,7 @@ import javax.annotation.Nonnull;
 public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
+	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 
 	@Autowired
 	protected Environment myEnv;
@@ -197,6 +200,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	private static HapiFhirHibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
+	}
+
+	@Bean
+	public IConsentContextServices consentContextServices() {
+		return new JpaConsentContextServices();
 	}
 
 }

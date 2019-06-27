@@ -39,4 +39,12 @@ public interface IInterceptorBroadcaster {
 	 */
 	Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams);
 
+	/**
+	 * Does this broadcaster have any hooks for the given pointcut?
+	 *
+	 * @param thePointcut The poointcut
+	 * @return Does this broadcaster have any hooks for the given pointcut?
+	 * @since 4.0.0
+	 */
+	boolean hasHooks(Pointcut thePointcut);
 }

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.SearchBuilder;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
@@ -676,9 +675,10 @@ public class FhirResourceDaoR4UniqueSearchParamTest extends BaseJpaR4Test {
 
 		assertEquals(1, mySearchParamRegistry.getActiveUniqueSearchParams("Observation").size());
 
-		myResourceReindexingSvc.markAllResourcesForReindexing();
-		myResourceReindexingSvc.forceReindexingPass();
-		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.markAllResourcesForReindexing("Observation");
+		assertEquals(1, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
+		assertEquals(0, myResourceReindexingSvc.forceReindexingPass());
 
 		uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		assertEquals(uniques.toString(), 1, uniques.size());

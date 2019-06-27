@@ -23,6 +23,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -126,7 +127,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
+			if (theLimit == null || theLimit.equals(0)) {
 				numToReturn = pagingProvider.getDefaultPageSize();
 			} else {
 				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
@@ -151,7 +152,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				searchId = theSearchId;
 			} else {
 				if (numTotalResults == null || numTotalResults > numToReturn) {
-					searchId = pagingProvider.storeResultList(theResult);
+					searchId = pagingProvider.storeResultList(theRequest, theResult);
 					if (isBlank(searchId)) {
 						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
 						searchId = null;
@@ -181,7 +182,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		 */
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-				if (!(next instanceof BaseOperationOutcome)) {
+				if (!(next instanceof IBaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
