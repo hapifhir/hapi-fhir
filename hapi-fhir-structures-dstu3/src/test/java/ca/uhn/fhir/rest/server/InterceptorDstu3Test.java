@@ -1,6 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -28,9 +31,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.OperationOutcome;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
@@ -40,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
@@ -80,6 +82,38 @@ public class InterceptorDstu3Test {
 			"   \"active\":true\n" +
 			"}";
 	}
+
+
+	@Test
+	public void testServerPreHandledOnOperationCapturesResource() throws IOException {
+
+		AtomicReference<IBaseResource> resource = new AtomicReference<>();
+		IAnonymousInterceptor interceptor = new IAnonymousInterceptor() {
+			@Override
+			public void invoke(Pointcut thePointcut, HookParams theArgs) {
+				RequestDetails requestDetails = theArgs.get(RequestDetails.class);
+				resource.set(requestDetails.getResource());
+			}
+		};
+
+		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
+		try {
+			Parameters p = new Parameters();
+			p.addParameter().setName("limit").setValue(new IntegerType(123));
+			String input = ourCtx.newJsonParser().encodeResourceToString(p);
+
+			HttpPost post = new HttpPost("http://localhost:" + ourPort + "/Patient/$postOperation");
+			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
+			try (CloseableHttpResponse status = ourClient.execute(post)) {
+				assertEquals(200, status.getStatusLine().getStatusCode());
+			}
+		} finally {
+			ourServlet.unregisterInterceptor(interceptor);
+		}
+
+		assertNotNull(resource.get());
+	}
+
 
 	@Test
 	public void testModifyResponse() throws IOException {
@@ -269,6 +303,13 @@ public class InterceptorDstu3Test {
 		public MethodOutcome create(@ResourceParam Patient theResource) {
 			ourLastPatient = theResource;
 			return new MethodOutcome();
+		}
+
+		@Operation(name="$postOperation")
+		public Parameters postOperation(
+			@OperationParam(name = "limit") IntegerType theLimit
+			) {
+			return new Parameters();
 		}
 
 		@Override
