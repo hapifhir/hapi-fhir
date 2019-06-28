@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.util;
  */
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class DeleteConflict {
 
@@ -44,6 +46,15 @@ public class DeleteConflict {
 
 	public IdDt getTargetId() {
 		return myTargetId;
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("sourceId", mySourceId)
+			.append("sourcePath", mySourcePath)
+			.append("targetId", myTargetId)
+			.toString();
 	}
 
 }

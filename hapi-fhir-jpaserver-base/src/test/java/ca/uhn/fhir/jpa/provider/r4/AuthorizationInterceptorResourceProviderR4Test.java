@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -422,6 +423,134 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 		patient = ourClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
 		assertEquals(id.getValue(), patient.getId());
+	}
+
+	@Test
+	public void testDeleteCascadeBlocked() {
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		try {
+
+			// Create Patient, and Observation that refers to it
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.setStatus(ObservationStatus.FINAL);
+			obs.getSubject().setReferenceElement(patientId);
+			ourClient.create().resource(obs).execute();
+
+			// Allow any deletes, but don't allow cascade
+			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().delete().allResources().withAnyId().andThen()
+						.build();
+				}
+			});
+
+			try {
+				ourClient
+					.delete()
+					.resourceById(patientId)
+					.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+					.execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				// good
+			}
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+		}
+	}
+
+
+	@Test
+	public void testDeleteCascadeAllowed() {
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		try {
+
+			// Create Patient, and Observation that refers to it
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.setStatus(ObservationStatus.FINAL);
+			obs.getSubject().setReferenceElement(patientId);
+			ourClient.create().resource(obs).execute();
+
+			// Allow any deletes, but don't allow cascade
+			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().delete().allResources().withAnyId().andThen()
+						.allow().delete().onCascade().allResources().withAnyId().andThen()
+						.build();
+				}
+			});
+
+			ourClient
+				.delete()
+				.resourceById(patientId)
+				.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+				.execute();
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+		}
+	}
+
+	@Test
+	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
+		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
+		try {
+
+			// Create Patient, and Observation that refers to it
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+			Observation obs = new Observation();
+			obs.setStatus(ObservationStatus.FINAL);
+			obs.getSubject().setReferenceElement(patientId);
+			ourClient.create().resource(obs).execute();
+
+			// Allow any deletes, but don't allow cascade
+			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().delete().resourcesOfType(Patient.class).withAnyId().andThen()
+						.allow().delete().resourcesOfType(Observation.class).withAnyId().andThen()
+						.allow().delete().onCascade().resourcesOfType(Patient.class).withAnyId().andThen()
+						.build();
+				}
+			});
+
+			try {
+				ourClient
+					.delete()
+					.resourceById(patientId)
+					.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+					.execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				// good
+			}
+
+		} finally {
+			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
+		}
 	}
 
 	@Test

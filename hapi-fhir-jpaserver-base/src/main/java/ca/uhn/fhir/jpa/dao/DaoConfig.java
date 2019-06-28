@@ -968,6 +968,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -981,6 +982,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
