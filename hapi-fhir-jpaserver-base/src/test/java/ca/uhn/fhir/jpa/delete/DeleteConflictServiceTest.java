@@ -1,6 +1,9 @@
 package ca.uhn.fhir.jpa.delete;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.junit.Test;
@@ -25,6 +28,18 @@ public class DeleteConflictServiceTest {
 
 	@MockBean
 	private DeleteConflictFinderService myDeleteConflictFinderService;
+	/**
+	 * This is needed, don't remove
+	 */
+	@SuppressWarnings("unused")
+	@MockBean
+	private IResourceLinkDao myResourceLinkDao;
+	@SuppressWarnings("unused")
+	@MockBean
+	private FhirContext myFhirContext;
+	@MockBean
+	@SuppressWarnings("unused")
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	private DeleteConflictService myDeleteConflictService;
