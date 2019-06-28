@@ -285,13 +285,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
 			String nextFilename = nextZipBytes.getFilename();
 
-			if(!IMGTHLA_HLA_NOM_TXT.equals(nextFilename)
-				&& !IMGTHLA_HLA_XML.equals(nextFilename)) {
+			if(!IMGTHLA_HLA_NOM_TXT.equals(nextFilename) && !nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)
+				&& !IMGTHLA_HLA_XML.equals(nextFilename) && !nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
 				ourLog.info("Skipping unexpected file {}", nextFilename);
 				continue;
 			}
 
-			if(IMGTHLA_HLA_NOM_TXT.equals(nextFilename)) {
+			if(IMGTHLA_HLA_NOM_TXT.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)) {
 				// process colon-delimited hla_nom.txt file
 				ourLog.info("Processing file {}", nextFilename);
 
@@ -322,7 +322,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				foundHlaNom = true;
 			}
 
-			if(IMGTHLA_HLA_XML.equals(nextFilename)) {
+			if(IMGTHLA_HLA_XML.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
 				// process hla.xml file
 				ourLog.info("Processing file {}", nextFilename);
 
