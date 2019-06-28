@@ -1,0 +1,4 @@
+# file: hla_nom.txt
+# version: IPD-IMGT/HLA 3.26.0
+#
+# THIS IS A FABRICATED TEST INPUT FILE
