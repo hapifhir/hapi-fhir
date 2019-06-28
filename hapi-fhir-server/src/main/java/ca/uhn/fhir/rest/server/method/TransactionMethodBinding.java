@@ -167,11 +167,17 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myTransactionParamIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myTransactionParamIndex]);
+			resource = (IBaseResource) theMethodParams[myTransactionParamIndex];
 		} else {
 			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}

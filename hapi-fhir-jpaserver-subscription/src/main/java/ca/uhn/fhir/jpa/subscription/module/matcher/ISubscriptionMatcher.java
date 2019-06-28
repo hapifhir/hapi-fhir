@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 
 public interface ISubscriptionMatcher {
-	SubscriptionMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
+	InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
 }

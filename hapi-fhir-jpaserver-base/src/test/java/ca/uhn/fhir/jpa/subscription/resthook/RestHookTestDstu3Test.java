@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.util.PortUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -25,6 +24,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.NotNull;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,7 +36,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 /**
  * Test the rest-hook subscriptions
@@ -103,6 +106,18 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private Subscription createSubscription(String theCriteria, String thePayload, String theEndpoint,
 														 List<StringType> headers) throws InterruptedException {
+		Subscription subscription = newSubscription(theCriteria, thePayload, theEndpoint, headers);
+
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		waitForQueueToDrain();
+
+		return (Subscription) methodOutcome.getResource();
+	}
+
+	@NotNull
+	private Subscription newSubscription(String theCriteria, String thePayload, String theEndpoint, List<StringType> headers) {
 		Subscription subscription = new Subscription();
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
@@ -116,13 +131,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			channel.setHeader(headers);
 		}
 		subscription.setChannel(channel);
-
-		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
-		mySubscriptionIds.add(methodOutcome.getId());
-
-		waitForQueueToDrain();
-
-		return (Subscription) methodOutcome.getResource();
+		return subscription;
 	}
 
 	private Observation sendObservation(String code, String system) {
@@ -153,9 +162,10 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testMemorytrategyMeta() throws InterruptedException {
+	public void testMemoryStrategyMeta() throws InterruptedException {
 		String inMemoryCriteria = "Observation?code=17861-6";
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
 		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
@@ -513,6 +523,20 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue("Timed out waiting for subscription to match", communicationRequestListenerLatch.await(10, TimeUnit.SECONDS));
 	}
 
+	@Test
+	public void testSubscriptionWithNoStatusIsRejected() {
+		Subscription subscription = newSubscription("Observation?", "application/json", null, null);
+		subscription.setStatus(null);
+
+		try {
+			ourClient.create().resource(subscription).execute();
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), containsString("Can not process submitted Subscription - Subscription.status must be populated on this server"));
+		}
+	}
+
+
 	public static class ObservationListener implements IResourceProvider {
 
 		@Create
@@ -571,16 +595,13 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu3());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 
 		ObservationListener obsListener = new ObservationListener();
 		CommunicationRequestListener crListener = new CommunicationRequestListener();
 		ourListenerRestServer.setResourceProviders(obsListener, crListener);
 
-		ourListenerServer = new Server(ourListenerPort);
+		ourListenerServer = new Server(0);
 		ourNotificationServlet = new NotificationServlet();
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
@@ -594,11 +615,14 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		proxyHandler.addServlet(servletHolder, "/fhir/subscription");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+        ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 	}
 
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 	}
 }

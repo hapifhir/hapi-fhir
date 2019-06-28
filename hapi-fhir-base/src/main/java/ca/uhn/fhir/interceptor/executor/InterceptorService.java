@@ -234,10 +234,21 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	@Override
 	public Object callHooksAndReturnObject(Pointcut thePointcut, HookParams theParams) {
 		assert haveAppropriateParams(thePointcut, theParams);
-		assert thePointcut.getReturnType() != void.class && thePointcut.getReturnType() != boolean.class;
+		assert thePointcut.getReturnType() != void.class;
 
-		Object retVal = doCallHooks(thePointcut, theParams, null);
-		return retVal;
+		return doCallHooks(thePointcut, theParams, null);
+	}
+
+	@Override
+	public boolean hasHooks(Pointcut thePointcut) {
+		return myGlobalInvokers.containsKey(thePointcut)
+			|| myAnonymousInvokers.containsKey(thePointcut)
+			|| hasThreadLocalHooks(thePointcut);
+	}
+
+	private boolean hasThreadLocalHooks(Pointcut thePointcut) {
+		ListMultimap<Pointcut, BaseInvoker> hooks = myThreadlocalInvokersEnabled ? myThreadlocalInvokers.get() : null;
+		return hooks != null && hooks.containsKey(thePointcut);
 	}
 
 	@Override

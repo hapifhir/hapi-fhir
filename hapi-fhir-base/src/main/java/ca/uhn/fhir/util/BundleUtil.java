@@ -1,5 +1,20 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -22,20 +37,35 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-
 /**
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+
+	public static class BundleEntryParts {
+		private final RequestTypeEnum myRequestType;
+		private final IBaseResource myResource;
+		private final String myUrl;
+
+		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
+			super();
+			myRequestType = theRequestType;
+			myUrl = theUrl;
+			myResource = theResource;
+		}
+
+		public RequestTypeEnum getRequestType() {
+			return myRequestType;
+		}
+
+		public IBaseResource getResource() {
+			return myResource;
+		}
+
+		public String getUrl() {
+			return myUrl;
+		}
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -137,6 +167,14 @@ public class BundleUtil {
 		return null;
 	}
 
+	public static void setTotal(FhirContext theContext, IBaseBundle theBundle, Integer theTotal) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
+		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) entryChild.getChildByName("total").newInstance();
+		value.setValue(theTotal);
+		entryChild.getMutator().setValue(theBundle, value);
+	}
+
 	/**
 	 * Extract all of the resources from a given bundle
 	 */
@@ -215,30 +253,5 @@ public class BundleUtil {
 			}
 		}
 		return retVal;
-	}
-
-	public static class BundleEntryParts {
-		private final RequestTypeEnum myRequestType;
-		private final IBaseResource myResource;
-		private final String myUrl;
-
-		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
-			super();
-			myRequestType = theRequestType;
-			myUrl = theUrl;
-			myResource = theResource;
-		}
-
-		public RequestTypeEnum getRequestType() {
-			return myRequestType;
-		}
-
-		public IBaseResource getResource() {
-			return myResource;
-		}
-
-		public String getUrl() {
-			return myUrl;
-		}
 	}
 }

@@ -20,7 +20,10 @@ package ca.uhn.fhir.jpa.model.search;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
+
+import javax.annotation.Nullable;
 
 /**
  * This class contains a runtime in-memory description of a search operation,
@@ -28,14 +31,20 @@ import ca.uhn.fhir.util.StopWatch;
  */
 public class SearchRuntimeDetails {
 	private final String mySearchUuid;
+	private final RequestDetails myRequestDetails;
 	private StopWatch myQueryStopwatch;
 	private int myFoundMatchesCount;
 	private boolean myLoadSynchronous;
 	private String myQueryString;
 	private SearchStatusEnum mySearchStatus;
-
-	public SearchRuntimeDetails(String theSearchUuid) {
+	public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
+		myRequestDetails = theRequestDetails;
 		mySearchUuid = theSearchUuid;
+	}
+
+	@Nullable
+	public RequestDetails getRequestDetails() {
+		return myRequestDetails;
 	}
 
 	public String getSearchUuid() {
@@ -50,28 +59,28 @@ public class SearchRuntimeDetails {
 		myQueryStopwatch = theQueryStopwatch;
 	}
 
-	public void setFoundMatchesCount(int theFoundMatchesCount) {
-		myFoundMatchesCount = theFoundMatchesCount;
-	}
-
 	public int getFoundMatchesCount() {
 		return myFoundMatchesCount;
 	}
 
-	public void setLoadSynchronous(boolean theLoadSynchronous) {
-		myLoadSynchronous = theLoadSynchronous;
+	public void setFoundMatchesCount(int theFoundMatchesCount) {
+		myFoundMatchesCount = theFoundMatchesCount;
 	}
 
 	public boolean getLoadSynchronous() {
 		return myLoadSynchronous;
 	}
 
-	public void setQueryString(String theQueryString) {
-		myQueryString = theQueryString;
+	public void setLoadSynchronous(boolean theLoadSynchronous) {
+		myLoadSynchronous = theLoadSynchronous;
 	}
 
 	public String getQueryString() {
 		return myQueryString;
+	}
+
+	public void setQueryString(String theQueryString) {
+		myQueryString = theQueryString;
 	}
 
 	public SearchStatusEnum getSearchStatus() {

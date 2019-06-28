@@ -35,7 +35,9 @@ public enum BundleTypeEnum {
 	DOCUMENT("document", "http://hl7.org/fhir/bundle-type"),
 	
 	MESSAGE("message", "http://hl7.org/fhir/bundle-type"),
-	
+
+	BATCH_RESPONSE("batch-response", "http://hl7.org/fhir/bundle-type"),
+
 	TRANSACTION_RESPONSE("transaction-response", "http://hl7.org/fhir/bundle-type"),
 	
 	HISTORY("history", "http://hl7.org/fhir/bundle-type"),

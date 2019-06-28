@@ -60,7 +60,6 @@ class ActiveSubscriptionCache {
 		}
 
 		activeSubscription.close();
-		activeSubscription.removeChannel();
 		myCache.remove(theSubscriptionId);
 	}
 

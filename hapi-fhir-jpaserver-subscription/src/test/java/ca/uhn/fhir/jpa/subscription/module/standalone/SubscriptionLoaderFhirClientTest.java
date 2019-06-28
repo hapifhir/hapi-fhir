@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.Test;
 
@@ -12,6 +10,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
+    
 	@Test
 	public void testSubscriptionLoaderFhirClient() throws InterruptedException {
 		String payload = "application/fhir+json";
@@ -23,10 +22,13 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
-		IBundleProvider bundle = new SimpleBundleProvider(new ArrayList<>(subs), "uuid");
-		initSubscriptionLoader(bundle);
+        mySubscriptionActivatedPost.setExpectedCount(2);
+		initSubscriptionLoader(subs, "uuid");
+        mySubscriptionActivatedPost.awaitExpected();
 
+        ourObservationListener.setExpectedCount(1);
 		sendObservation(myCode, "SNOMED-CT");
+        ourObservationListener.awaitExpected();
 
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
@@ -44,8 +46,7 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase).setStatus(Subscription.SubscriptionStatus.REQUESTED));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase).setStatus(Subscription.SubscriptionStatus.REQUESTED));
 
-		IBundleProvider bundle = new SimpleBundleProvider(new ArrayList<>(subs), "uuid");
-		initSubscriptionLoader(bundle);
+		initSubscriptionLoader(subs, "uuid");
 
 		sendObservation(myCode, "SNOMED-CT");
 

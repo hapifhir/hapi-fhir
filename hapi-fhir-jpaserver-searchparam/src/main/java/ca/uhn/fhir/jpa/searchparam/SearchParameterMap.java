@@ -419,12 +419,20 @@ public class SearchParameterMap implements Serializable {
 			b.append(getCount());
 		}
 
-		// Summary
+		// Summary mode (_summary)
 		if (getSummaryMode() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_SUMMARY);
 			b.append('=');
 			b.append(getSummaryMode().getCode());
+		}
+
+		// Search count mode (_total)
+		if (getSearchTotalMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_SEARCH_TOTAL_MODE);
+			b.append('=');
+			b.append(getSearchTotalMode().getCode());
 		}
 
 		if (b.length() == 0) {

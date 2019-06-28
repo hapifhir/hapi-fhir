@@ -8,15 +8,193 @@
 	<body>
 		<release version="4.0.0" date="TBD" description="Igloo">
 			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Commons Codec (Core): 1.11 -&gt; 1.12</li>
+					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.8</li>
+					<li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li>
+					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.7.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
+<!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
+					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
+					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
+				</ul>
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The
+				<code>IPagingProvider</code>
+				interface has been
+				modified so that the
+				<code>retrieveResultList</code>
+				method now takes one additional parameter of type
+				<code>RequestDetails</code>. If you have created a custom
+				implementation of this interface, you can add this parameter and
+				ignore it if needed. The use of the method has not changed, so this
+				should be an easy fix to existing code.
+				]]>
+			</action>
+			<action type="add">
+				A new interceptor called
+				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				JPA based servers to make appropriate consent decisions related to resources that
+				and operations that are being returned. See
+				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>]]>
+				for more information.
+			</action>
+			<action type="add">
+				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
+				<![CDATA[
+				<ul>
+				<li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook,
+				which allows it to successfully authorize JPA operations that don't actually return resource content,
+				such as GraphQL responses.</li>
+				<li>
+				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
+				]]>
+			</action>
+			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
-				for the operation to succeed without timing out in larger system.
+				for the operation to succeed without timing out in larger systems.
+			</action>
+			<action type="fix">
+				The JPA server did not correctly index Timing fields where the timing contained
+				a period but no individual events. This has been corrected.
+			</action>
+			<action type="fix" issue="1320">
+				The HAPI FHIR CLI import-csv-to-conceptmap command was not accounting for byte order marks in
+				CSV files (e.g. some Excel CSV files). This has been fixed.
+			</action>
+			<action type="fix" issue="1241">
+				A bug was fixed where deleting resources within a transaction did not always correctly
+				enforce referential integrity even if referential integrity was enabled. Thanks to
+				Tuomo Ala-Vannesluoma for reporting!
+			</action>
+			<action type="fix">
+				In the JPA server, the
+				<![CDATA[<code>_total=accurate</code>]]>
+				was not always respected if a previous search already existed
+				in the query cache that matched the same search parameters.
+			</action>
+			<action type="fix" issue="1337">
+				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="change">
+				Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type
+				from SubscriptionMatchResult to InMemoryMatchResult.
+			</action>
+			<action type="add">
+				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any.  They permit
+				writing code that is version independent.
+			</action>
+			<action type="add">
+				Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the
+				in-memory matcher to search the HashMap (using a full table scan).  This allows rudimentary testing
+				without a database.
+			</action>
+			<action type="add">
+				Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a
+				resource delete operation is about to fail due to referential integrity conflicts.
+				Hooks have access to the list of resources that have references to the resource being deleted and
+				can delete them.  The boolean return value of the hook indicates whether the server should try
+				checking for conflicts again (true means try again).
+			</action>
+			<action type="change">
+				The default RestfulServer encoding has been changed from XML to JSON in order to
+				reflect the most common usage.
+			</action>
+			<action type="add" issue="1336">
+				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
+				assign a free port. This should theoretically result in fewer failed builds resulting from
+				port conflicts. Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="fix">
+				AuthorizationInterceptor sometimes failed with a 500 error when checking compartment
+				membership on a resource that has a contained subject (Patient).
+			</action>
+			<action type="add" issue="1348">
+				JPA server now supports conditional PATCH operation (i.e. performing a patch
+				with a syntax such as
+				<![CDATA[<code>/Patient?identifier=sys|val</code>]]>)
+			</action>
+			<action type="add" issue="1347">
+				The json-patch library used in the JPA server has been changed from
+				<![CDATA[
+				<a href="https://github.com/java-json-tools/json-patch">java-json-tools.json-patch</a>
+				]]>
+				to a more active fork of the same project:
+				<![CDATA[
+				<a href="https://github.com/crate-metadata/json-patch">crate-metadata.json-patch</a>.
+				]]>
+				Thanks to Jens Villadsen for the suggestion and pull request!
+			</action>
+			<action type="add" issue="1343">
+				Support has been implemented in the JPA server for the CodeSystem
+				<![CDATA[<code>$subsumes</code>]]>
+				operation.
+			</action>
+			<action type="fix">
+				Uploading the LOINC/RSNA Radiology Playbook would occasionally fail when evaluating part type names
+				due to case sensitivity. This has been corrected.
+			</action>
+			<action type="add">
+				A new pointcut has been added to the JPA server called
+				<![CDATA[<code>JPA_PERFTRACE_RAW_SQL</code>]]>
+				that can be used to capture the raw SQL statements that are sent to the underlying database.
+			</action>
+			<action type="fix" issue="1355">
+				Invoking the transaction or batch operation on the JPA server would fail
+				with a NullPointerException if the Bundle passed in did not contain 
+				a resource in an entry that required a resource (e.g. a POST). Thanks to
+				GitHub user @lytvynenko-dmitriy for reporting!
+			</action>
+			<action type="fix" issue="1250">
+				HAPI FHIR Server (plain, JPA, and JAX-RS) all populated Bundle.entry.result
+				on search result bundles, even though the FHIR specification states that this
+				should not be populated. This has been corrected. Thanks to GitHub user
+				@gitrust for reporting!
+			</action>
+			<action type="fix" issue="1352">
+				Creating R4 Observation resources with a value type of SampledData failed in the
+				JPA server because of an indexing error. Thanks to Brian Reinhold for
+				reporting!
+			</action>
+			<action type="add">
+				The JPA server now rejects subscriptions being submitted with no value in
+				Subscription.status (this field is mandatory, but the subscription was previously ignored
+				if no value was provided)
+			</action>
+			<action type="fix" issue="1361">
+				Fix a build failure thanks to Maven pom errors. Thanks to Gary Teichrow for
+				the pull request!
+			</action>
+			<action type="fix" issue="1362">
+				The JPA server did not correctly process searches with a
+				<![CDATA[<code>_tag:not</code>]]>
+				expression containing more than one comma separated value.
+			</action>
+			<action type="add">
+				The JSON and XML parsers will now raise a warning or error with the Parser Error Handler
+				if an extension is being encoded that is missing a URL, or has both a value and nested
+				extensions on the same parent extension.
+			</action>
+			<action type="fix">
+				FHIR model classes have a method called
+				<![CDATA[<code>hasPrimitiveValue()</code>]]>
+				which previously returned true if the type was a primitive datatype (e.g. StringType).
+				This method now only returns true if the type is a primitive datatype AND
+				the type actually has a value.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
 				A potential security vulnerability in the hapi-fhir-testpage-overlay project was corrected: A URL
-				parameter was not being correctly escaped, leading to a potential XSS vulnerabnility. A big thanks to
+				parameter was not being correctly escaped, leading to a potential XSS vulnerability. A big thanks to
 				Mudit Punia and Dushyant Garg for reporting this.
 			</action>
 			<action type="add">
@@ -199,7 +377,8 @@
 				are caught and not just silently ignored.
 			</action>
 			<action type="add">
-				Expunges are now done in batches in multiple threads.  Both the number of expunge threads and batch size are configurable
+				Expunges are now done in batches in multiple threads. Both the number of expunge threads and batch size are
+				configurable
 				in DaoConfig.
 			</action>
 			<action type="fix">
@@ -207,7 +386,8 @@
 				contains sub-items.
 			</action>
 			<action type="fix">
-				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly reported
+				Fixed "because at least one resource has a reference to this resource" delete error message that mistakingly
+				reported
 				the target instead of the source with the reference.
 			</action>
 			<action type="add">
@@ -3351,7 +3531,7 @@ Bundle bundle = client.search().forResource(Patient.class)
 			<action type="fix">
 				In server, when returning a list of resources, the server sometimes failed to add
 				<![CDATA[<code>_include</code>]]> resources to the response bundle if they were
-				referred to by a contained reosurce. Thanks to Neal Acharya for reporting!
+				referred to by a contained resource. Thanks to Neal Acharya for reporting!
 			</action>
 			<action type="fix">
 				Fix regression in web testing UI where "prev" and "next" buttons don't work

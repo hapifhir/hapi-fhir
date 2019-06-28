@@ -22,6 +22,8 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.parser.IParserErrorHandler.IParseLocation;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 class ParseLocation implements IParseLocation {
 
 	private String myParentElementName;
@@ -29,8 +31,15 @@ class ParseLocation implements IParseLocation {
 	/**
 	 * Constructor
 	 */
-	public ParseLocation() {
+	ParseLocation() {
 		super();
+	}
+
+	/**
+	 * Constructor
+	 */
+	ParseLocation(String theParentElementName) {
+		setParentElementName(theParentElementName);
 	}
 
 	@Override
@@ -38,9 +47,13 @@ class ParseLocation implements IParseLocation {
 		return myParentElementName;
 	}
 
-	public ParseLocation setParentElementName(String theParentElementName) {
+	ParseLocation setParentElementName(String theParentElementName) {
 		myParentElementName = theParentElementName;
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return defaultString(myParentElementName);
+	}
 }

@@ -44,10 +44,7 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 	/**
 	 * Composition/123/$document
-	 *
-	 * @param theRequestDetails
 	 */
-	//@formatter:off
 	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
 	public IBaseBundle getDocumentForComposition(
 
@@ -69,7 +66,6 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {

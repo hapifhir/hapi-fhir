@@ -21,11 +21,12 @@ package ca.uhn.fhir.jpa.sp;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.AddRemoveCount;
 
 import java.util.Map;
 
 public interface ISearchParamPresenceSvc {
 
-	void updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence);
+	AddRemoveCount updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence);
 
 }

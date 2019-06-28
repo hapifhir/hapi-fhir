@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -87,7 +88,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams) {
+	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		mySearchParamExtractorService.extractFromResource(theParams, theEntity, theResource);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
@@ -97,9 +98,9 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		theParams.setUpdatedTime(theUpdateTime);
 
-		extractInlineReferences(theResource);
+		extractInlineReferences(theResource, theRequest);
 
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true);
+		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true, theRequest);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
@@ -206,7 +207,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
 	 */
-	public void extractInlineReferences(IBaseResource theResource) {
+	public void extractInlineReferences(IBaseResource theResource, RequestDetails theRequest) {
 		if (!myDaoConfig.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
@@ -237,7 +238,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-				Set<Long> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType);
+				Set<Long> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
 				if (matches.isEmpty()) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 					throw new ResourceNotFoundException(msg);

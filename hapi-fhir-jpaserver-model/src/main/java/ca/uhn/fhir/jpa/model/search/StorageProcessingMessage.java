@@ -33,4 +33,8 @@ public class StorageProcessingMessage {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return myMessage;
+	}
 }

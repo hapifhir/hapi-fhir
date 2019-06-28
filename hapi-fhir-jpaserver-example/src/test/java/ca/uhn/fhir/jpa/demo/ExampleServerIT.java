@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -41,7 +42,7 @@ public class ExampleServerIT {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 	}
 
 	@BeforeClass
@@ -56,9 +57,6 @@ public class ExampleServerIT {
 
 		ourLog.info("Project base path is: {}", path);
 
-		if (ourPort == 0) {
-			ourPort = RandomServerPortProvider.findFreePort();
-		}
 		ourServer = new Server(ourPort);
 
 		WebAppContext webAppContext = new WebAppContext();
@@ -68,7 +66,8 @@ public class ExampleServerIT {
 		webAppContext.setParentLoaderPriority(true);
 
 		ourServer.setHandler(webAppContext);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);

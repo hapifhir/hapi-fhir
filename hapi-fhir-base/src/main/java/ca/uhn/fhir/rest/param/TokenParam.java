@@ -25,6 +25,8 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -218,6 +220,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return this;
 	}
 
+
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -230,6 +233,30 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 			builder.append(":missing", getMissing());
 		}
 		return builder.toString();
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		TokenParam that = (TokenParam) theO;
+
+		return new EqualsBuilder()
+			.append(myModifier, that.myModifier)
+			.append(mySystem, that.mySystem)
+			.append(myValue, that.myValue)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myModifier)
+			.append(mySystem)
+			.append(myValue)
+			.toHashCode();
 	}
 
 	private static String toSystemValue(UriDt theSystem) {

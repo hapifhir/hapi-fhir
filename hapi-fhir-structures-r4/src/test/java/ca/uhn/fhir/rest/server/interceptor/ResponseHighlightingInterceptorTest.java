@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -47,10 +46,13 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 public class ResponseHighlightingInterceptorTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResponseHighlightingInterceptorTest.class);
 	private static ResponseHighlighterInterceptor ourInterceptor = new ResponseHighlighterInterceptor();
+    private static Server ourServer;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forR4();
 	private static int ourPort;
@@ -384,7 +386,9 @@ public class ResponseHighlightingInterceptorTest {
 
 		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		// This can be null depending on the exception type
@@ -504,7 +508,9 @@ public class ResponseHighlightingInterceptorTest {
 		ServletRequestDetails reqDetails = new TestServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		reqDetails.setRequestType(RequestTypeEnum.GET);
 		reqDetails.setParameters(new HashMap<>());
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
@@ -535,7 +541,9 @@ public class ResponseHighlightingInterceptorTest {
 		HashMap<String, String[]> params = new HashMap<>();
 		params.put(Constants.PARAM_PRETTY, new String[]{Constants.PARAM_PRETTY_VALUE_TRUE});
 		reqDetails.setParameters(params);
-		reqDetails.setServer(new RestfulServer(ourCtx));
+		RestfulServer server = new RestfulServer(ourCtx);
+		server.setDefaultResponseEncoding(EncodingEnum.XML);
+		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
 		assertFalse(ic.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
@@ -741,20 +749,20 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@AfterClass
-	public static void afterClassClearContext() {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourLog.info("Using port: {}", ourPort);
-		Server ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		/*
 		 * Enable CORS
@@ -780,7 +788,8 @@ public class ResponseHighlightingInterceptorTest {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

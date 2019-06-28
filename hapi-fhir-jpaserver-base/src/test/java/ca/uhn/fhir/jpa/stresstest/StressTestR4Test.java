@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.module.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -52,7 +52,7 @@ import static org.junit.Assert.fail;
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=true",
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE,
 	"max_db_connections=10"
 })
 public class StressTestR4Test extends BaseResourceProviderR4Test {
@@ -139,7 +139,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 0; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid());
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count, ids.size());
 		assertEquals(count, Sets.newHashSet(ids).size());
@@ -152,7 +152,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 1000; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid());
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count - 1000, ids.size());
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
@@ -390,11 +390,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withBundle(input).execute();
 
-		CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"));
-		try {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(getMeta);
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();

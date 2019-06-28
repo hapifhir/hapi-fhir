@@ -49,8 +49,7 @@ public class FhirResourceDaoCompositionDstu3 extends FhirResourceDaoDstu3<Compos
 		if (theId != null) {
 			paramMap.add("_id", new StringParam(theId.getIdPart()));
 		}
-		IBundleProvider bundleProvider = search(paramMap);
-		return bundleProvider;
+		return search(paramMap, theRequestDetails);
 	}
 }
 

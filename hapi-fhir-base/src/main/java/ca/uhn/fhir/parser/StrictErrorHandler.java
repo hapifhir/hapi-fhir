@@ -83,4 +83,9 @@ public class StrictErrorHandler implements IParserErrorHandler {
 		throw new DataFormatException("Resource has invalid reference: " + theReference);
 	}
 
+	@Override
+	public void extensionContainsValueAndNestedExtensions(IParseLocation theLocation) {
+		throw new DataFormatException("Extension contains both a value and nested extensions: " + theLocation);
+	}
+
 }
