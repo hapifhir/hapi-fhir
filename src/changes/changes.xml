@@ -190,6 +190,13 @@
 				This method now only returns true if the type is a primitive datatype AND
 				the type actually has a value.
 			</action>
+			<action type="add" issue="1330">
+				Support in the JPA Terminology Service terminology uploader has been added for
+				uploading the IMGT
+				<![CDATA[<a href="http://hla.alleles.org/nomenclature/index.html">HLA Nomenclature</a>]]>
+				distribution files as a FHIR CodeSystem. Thanks to Joel Schneider for the
+				contribution!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
