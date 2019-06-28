@@ -115,12 +115,18 @@ public abstract class BaseTerminologyUploaderProvider extends BaseJpaProvider {
 			url = defaultString(url);
 
 			UploadStatistics stats;
-			if (IHapiTerminologyLoaderSvc.SCT_URI.equals(url)) {
-				stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-			} else if (IHapiTerminologyLoaderSvc.LOINC_URI.equals(url)) {
-				stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-			} else {
-				throw new InvalidRequestException("Unknown URL: " + url);
+			switch(url) {
+				case IHapiTerminologyLoaderSvc.SCT_URI:
+					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+					break;
+				case IHapiTerminologyLoaderSvc.LOINC_URI:
+					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+					break;
+				case IHapiTerminologyLoaderSvc.IMGTHLA_URI:
+					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+					break;
+				default:
+					throw new InvalidRequestException("Unknown URL: " + url);
 			}
 
 			Parameters retVal = new Parameters();

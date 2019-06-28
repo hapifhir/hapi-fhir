@@ -1,0 +1,216 @@
+<!--
+Links to additional information on HLA nomenclature:
+
+http://hla.alleles.org/nomenclature/
+http://www.ebi.ac.uk/ipd/imgt/hla
+
+New releases of the IPD-IMGT/HLA database are published periodically,
+typically once every 3 months.
+
+https://www.ebi.ac.uk/ipd/imgt/hla/docs/release.html
+
+In some cases, a new database release may delete or modify the definition
+of concepts introduced in a previous release.  For that reason, the HLA
+nomenclature is a versioned code system, using the IPD-IMGT/HLA release
+as its CodeSystem.version.
+
+Note that the following set of codes constitute the IMGTHLA code system:
+ - "allele" names, including ...
+   - allele-group names, e.g. HLA-A*01
+   - protein-level names, e.g. HLA-A*01:01
+   - exomic (coding-region level) names, e.g. HLA-A*01:01:01
+   - genomic (coding plus non-coding-region level) names, e.g. HLA-A*01:01:01:01
+ - P group names, e.g. HLA-A*01:01:01G
+ - G group names, e.g. HLA-A*01:01P
+ - serotype names, e.g. HLA-A1
+
+-->
+<!--
+Version History of this specification
+0.1 | published 2019-05-08
+-->
+<CodeSystem xmlns="http://hl7.org/fhir">
+  <id value="imgthla"/>
+
+  <!-- This url is unchanged for all versions of IMGTHLA. There
+    can only be one correct Code System resource for each value of the
+    version attribute (at least, only one per server) -->
+  <url value="http://www.ebi.ac.uk/ipd/imgt/hla"/>
+
+  <!-- the HL7 v3 OID assigned to IPD-IMGT/HLA nomenclature -->
+  <identifier>
+    <system value="urn:ietf:rfc:3986"/>
+    <value value="urn:oid:2.16.840.1.113883.6.341"/>
+  </identifier>
+
+  <!--
+  // if a version is specified:
+  <version value="2.59"/>
+  -->
+
+  <!-- if a specific version is specified, this information should be in the name (e.g. IMGTHLA_3360) and title -->
+  <name value="IMGTHLA"/>
+  <title value="HLA Nomenclature"/>
+  <status value="active"/>
+  <experimental value="true"/>
+
+  <publisher value="WHO Nomenclature Committee for Factors of the HLA System"/>
+  <contact>
+    <telecom>
+      <system value="url"/>
+      <value value="http://hla.alleles.org/nomenclature/committee.html"/>
+    </telecom>
+    <telecom>
+      <system value="url"/>
+      <value value="https://www.ebi.ac.uk/ipd/imgt/hla/"/>
+    </telecom>
+    <telecom>
+      <system value="url"/>
+      <value value="https://github.com/ANHIG/IMGTHLA"/>
+    </telecom>
+    <telecom>
+      <system value="other"/>
+      <value value="Professor Steven G. E. Marsh"/>
+    </telecom>
+    <telecom>
+      <system value="other"/>
+      <value value="hla [at] alleles [dot] org"/>
+    </telecom>
+  </contact>
+
+  <!--
+  <date value=[date for this version]"/>
+  -->
+  <description value="The IPD-IMGT/HLA Database provides a specialist database
+for sequences of the human major histocompatibility complex (MHC) and includes
+the official sequences named by the WHO Nomenclature Committee For Factors of
+the HLA System. The IPD-IMGT/HLA Database is part of the international
+ImMunoGeneTics project (IMGT).
+
+The IPD and IMGT/HLA database is described in the following publications.
+
+Robinson J, Halliwell JA, Hayhurst JD, Flicek P, Parham P, Marsh SGE:  
+The IPD and IMGT/HLA database: allele variant databases.  
+Nucleic Acids Research (2014) 43 Suppl 1:D423-31  
+&lt;https://doi.org/10.1093/nar/gku1161&gt;
+
+Robinson J, Malik A, Parham P, Bodmer JG, Marsh SGE:  
+IMGT/HLA - a sequence database for the human major histocompatibility complex  
+Tissue Antigens (2000), 55:280-287  
+&lt;https://doi.org/10.1034/j.1399-0039.2000.550314.x&gt;
+"/>
+  <copyright value="This content from the IPD-IMGT/HLA database is copyright © 2003 Anthony Nolan Research Institute and the WHO Nomenclature Committee for Factors of the HLA System, and available at no cost under a Creative Commons Attribution-NoDerivs License."/>
+  <caseSensitive  value="true"/>
+
+  <valueSet value="http://www.ebi.ac.uk/ipd/imgt/hla/vs"/>
+
+  <hierarchyMeaning value="grouped-by"/>
+  <compositional value="false"/> <!-- no compositional grammar defined by IPD-IMGT/HLA -->
+  <versionNeeded value="true"/>
+
+  <content value="complete"/>
+
+<!-- <count value="65000"/>... if working with a specific version, you could nominate a count of the total number of concepts -->
+
+  <!-- properties. There are 3 kinds of properties:
+    fhir: display, designation; these are not described here since they are inherent in the specification
+    infrastructural: defined by FHIR, but documented here for IMGTHLA
+    IMGTHLA properties: defined by the HLA nomenclature
+  -->
+  <!-- first, the infrastructural properties - inherited from FHIR, but documented here -->
+  <property>
+    <code value="inactive"/>
+    <uri value="http://hl7.org/fhir/concept-properties#inactive"/>
+    <description value="True if the concept is not considered active - e.g. not a valid concept any more. Property type is boolean, default value is false"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="deprecated"/>
+    <uri value="http://hl7.org/fhir/concept-properties#deprecated"/>
+    <description value="The date at which a concept was deprecated. Concepts that are deprecated but not inactive can still be used, but their use is discouraged, and they should be expected to be made inactive in a future release. Property type is dateTime"/>
+    <type value="dateTime"/>
+  </property>
+  <property>
+    <code value="parent"/>
+    <uri value="http://hl7.org/fhir/concept-properties#parent"/>
+    <description value="The concept identified in this property is a parent of the concept on which it is a property. The property type will be 'code'. The meaning of 'parent' is defined by the hierarchyMeaning attribute"/>
+    <type value="code"/>
+  </property>
+  <!--
+    IMGTHLA concept properties.
+  -->
+  <property>
+    <code value="expression_suffix"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/expression_suffix"/>
+    <description value="Expression suffix (if any) assigned to the concept.  See http://hla.alleles.org/nomenclature/naming.html"/>
+    <type value="string"/>
+  </property>
+  <property>
+    <code value="hla_g_group"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/hla_g_group"/>
+    <description value="HLA G group containing this concept.  See http://hla.alleles.org/alleles/g_groups.html"/>
+    <type value="code"/>
+  </property>
+  <property>
+    <code value="hla_p_group"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/hla_p_group"/>
+    <description value="HLA P group containing this concept.  See http://hla.alleles.org/alleles/p_groups.html"/>
+    <type value="code"/>
+  </property>
+  <property>
+    <code value="is_allele_group_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_allele_group_concept"/>
+    <description value="True if the concept is an allele group.  See http://hla.alleles.org/nomenclature/naming.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_dna_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_dna_concept"/>
+    <description value="True if the concept is DNA-level (as opposed to serology)."/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_exomic_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_exomic_concept"/>
+    <description value="True if the concept represents a distinct (within this CodeSystem.version) nucleotide sequence across all coding regions of the full gene.  See http://hla.alleles.org/nomenclature/naming.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_hla_g_group_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_hla_g_group_concept"/>
+    <description value="True if the concept is a HLA G group.  See http://hla.alleles.org/alleles/g_groups.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_hla_p_group_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_hla_p_group_concept"/>
+    <description value="True if the concept is a HLA P group.  See http://hla.alleles.org/alleles/p_groups.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_genomic_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_genomic_concept"/>
+    <description value="True if the concept represents a distinct (within this CodeSystem.version) nucleotide sequence across all coding and non-coding regions of the full gene.  See http://hla.alleles.org/nomenclature/naming.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_protein_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_protein_concept"/>
+    <description value="True if the concept represents a distinct amino acid sequence across the full gene.  See http://hla.alleles.org/nomenclature/naming.html"/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="is_serology_concept"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/is_serology_concept"/>
+    <description value="True if the concept is serology-level (as opposed to DNA)."/>
+    <type value="boolean"/>
+  </property>
+  <property>
+    <code value="locus_name"/>
+    <uri value="http://www.ebi.ac.uk/ipd/imgt/hla/property/locus_name"/>
+    <description value="DNA or serology locus name, e.g. HLA-A, HLA-DR"/>
+    <type value="string"/>
+  </property>
+
+</CodeSystem>
+
