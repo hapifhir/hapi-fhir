@@ -11,7 +11,7 @@ public class DeleteConflictOutcome {
 	}
 
 	public DeleteConflictOutcome setShouldRetryCount(int theShouldRetryCount) {
-		Validate.isTrue(theShouldRetryCount > 0, "theShouldRetryCount must not be negative");
+		Validate.isTrue(theShouldRetryCount >= 0, "theShouldRetryCount must not be negative");
 		myShouldRetryCount = theShouldRetryCount;
 		return this;
 	}

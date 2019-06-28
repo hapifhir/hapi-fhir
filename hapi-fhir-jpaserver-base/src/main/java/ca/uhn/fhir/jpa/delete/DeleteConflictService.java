@@ -72,7 +72,9 @@ public class DeleteConflictService {
 		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
-		while (outcome != null && retryCount < outcome.getShouldRetryCount()) {
+		while (outcome != null) {
+			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
+			if (!(retryCount < shouldRetryCount)) break;
 			newConflicts = new DeleteConflictList();
 			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
 			++retryCount;
