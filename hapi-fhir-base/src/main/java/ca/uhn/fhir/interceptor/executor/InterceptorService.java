@@ -482,9 +482,13 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 			Object[] args = new Object[myParameterTypes.length];
 			for (int i = 0; i < myParameterTypes.length; i++) {
 				Class<?> nextParamType = myParameterTypes[i];
-				int nextParamIndex = myParameterIndexes[i];
-				Object nextParamValue = theParams.get(nextParamType, nextParamIndex);
-				args[i] = nextParamValue;
+				if (nextParamType.equals(Pointcut.class)) {
+					args[i] = myPointcut;
+				} else {
+					int nextParamIndex = myParameterIndexes[i];
+					Object nextParamValue = theParams.get(nextParamType, nextParamIndex);
+					args[i] = nextParamValue;
+				}
 			}
 
 			// Invoke the method

@@ -195,7 +195,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
-		public IAuthRuleBuilderRuleOp delete() {
+		public IAuthRuleBuilderRuleOpDelete delete() {
 			return new RuleBuilderRuleOp(RuleOpEnum.DELETE);
 		}
 
@@ -300,10 +300,11 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		}
 
-		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
+		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp, IAuthRuleBuilderRuleOpDelete {
 
 			private final RuleOpEnum myRuleOp;
 			private RuleBuilderRuleOpClassifier myInstancesBuilder;
+			private boolean myOnCascade;
 
 			public RuleBuilderRuleOp(RuleOpEnum theRuleOp) {
 				myRuleOp = theRuleOp;
@@ -350,6 +351,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderRuleOpClassifier(AppliesTypeEnum.TYPES, Collections.singleton(theType));
 			}
 
+			@Override
+			public IAuthRuleBuilderRuleOp onCascade() {
+				myOnCascade = true;
+				return this;
+			}
+
 			private class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
 
 				private final AppliesTypeEnum myAppliesTo;
@@ -389,6 +396,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRule.setClassifierType(myClassifierType);
 					myRule.setClassifierCompartmentName(myInCompartmentName);
 					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
+					myRule.setAppliesToDeleteCascade(myOnCascade);
 					myRules.add(myRule);
 
 					return new RuleBuilderFinished(myRule);

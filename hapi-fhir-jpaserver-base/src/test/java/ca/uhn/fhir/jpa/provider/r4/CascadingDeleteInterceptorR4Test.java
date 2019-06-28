@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.rest.api.Constants;
@@ -32,9 +33,10 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private IIdType myPatientId;
-
 	private CascadingDeleteInterceptor myDeleteInterceptor;
 	private IIdType myObservationId;
 
@@ -43,7 +45,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	public void before() throws Exception {
 		super.before();
 
-		myDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry);
+		myDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorBroadcaster);
 	}
 
 	@Override
@@ -93,7 +95,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		} catch (ResourceVersionConflictException e) {
 			String output = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
-			assertThat(output, containsString("AAA"));
+			assertThat(output, containsString("Note that cascading deletes are not active for this request. You can enable cascading deletes"));
 		}
 	}
 

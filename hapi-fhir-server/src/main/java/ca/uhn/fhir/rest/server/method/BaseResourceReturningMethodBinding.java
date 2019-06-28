@@ -415,7 +415,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		RESOURCE
 	}
 
-	static boolean callOutgoingResponseHook(RequestDetails theRequest, ResponseDetails theResponseDetails) {
+	public static boolean callOutgoingResponseHook(RequestDetails theRequest, ResponseDetails theResponseDetails) {
 		HttpServletRequest servletRequest = null;
 		HttpServletResponse servletResponse = null;
 		if (theRequest instanceof ServletRequestDetails) {
@@ -438,4 +438,14 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		return true;
 	}
 
+	public static void callOutgoingFailureOperationOutcomeHook(RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
+		HookParams responseParams = new HookParams();
+		responseParams.add(RequestDetails.class, theRequestDetails);
+		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
+
+		if (theRequestDetails.getInterceptorBroadcaster() != null) {
+			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
+		}
+	}
 }

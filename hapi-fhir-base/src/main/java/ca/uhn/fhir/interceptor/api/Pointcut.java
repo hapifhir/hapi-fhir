@@ -373,6 +373,43 @@ public enum Pointcut {
 		"javax.servlet.http.HttpServletResponse"
 	),
 
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called when an OperationOutcome is being returned in response to a failure.
+	 * Hook methods may use this hook to modify the OperationOutcome being returned.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseOperationOutcome - The OperationOutcome resource that will be
+	 * returned.
+	 * </ul>
+	 * <p>
+	 * Hook methods must return <code>void</code>
+	 * </p>
+	 */
+	SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME(
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"org.hl7.fhir.instance.model.api.IBaseOperationOutcome"
+	),
+
+
 	/**
 	 * <b>Server Hook:</b>
 	 * This method is called after all processing is completed for a request, but only if the
@@ -453,7 +490,6 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_RESOURCE_MATCHED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage", "ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult"),
 
-
 	/**
 	 * Invoked whenever a persisted resource was checked against all active subscriptions, and did not
 	 * match any.
@@ -505,6 +541,7 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_DELIVERY(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
+
 
 	/**
 	 * Invoked immediately after the attempted delivery of a subscription, if the delivery
@@ -565,7 +602,6 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY(boolean.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription", "ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage"),
 
-
 	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) is about to be checked for whether any subscriptions
@@ -584,6 +620,7 @@ public enum Pointcut {
 	 */
 	SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED(boolean.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
 
+
 	/**
 	 * Invoked whenever a persisted resource (a resource that has just been stored in the
 	 * database via a create/update/patch/etc.) has been checked for whether any subscriptions
@@ -599,6 +636,7 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED(void.class, "ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage"),
+
 
 	/**
 	 * Invoked immediately after an active subscription is "registered". In HAPI FHIR, when
@@ -617,6 +655,48 @@ public enum Pointcut {
 	 * </p>
 	 */
 	SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED(void.class, "ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription"),
+
+
+	/**
+	 * Invoked when one or more resources may are about to be cascading a delete.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.util.DeleteConflictList - Contains the details about the delete conflicts that are
+	 * being resolved via deletion. The source resource is the resource that will be deleted, and
+	 * is a cascade because the target resource is already being deleted.
+	 * </li>
+	 * <li>
+	 * org.hl7.fhir.instance.model.api.IBaseResource - The actual resource that is about to be deleted via a cascading delete
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_CASCADE_DELETE(
+		void.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"ca.uhn.fhir.jpa.delete.DeleteConflictList",
+		"org.hl7.fhir.instance.model.api.IBaseResource"
+	),
 
 	/**
 	 * Invoked when one or more resources may be returned to the user, whether as a part of a READ,
@@ -664,7 +744,6 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
-
 	/**
 	 * Invoked when the storage engine is about to check for the existence of a pre-cached search
 	 * whose results match the given search parameters.
@@ -702,7 +781,6 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
-
 	/**
 	 * Invoked when a search is starting, prior to creating a record for the search.
 	 * <p>
@@ -737,7 +815,6 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
-
 
 	/**
 	 * Invoked when one or more resources may be returned to the user, whether as a part of a READ,
@@ -859,6 +936,7 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
 	/**
 	 * Invoked before a resource will be created, immediately before the resource
 	 * is persisted to the database.
@@ -893,6 +971,8 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
+
 	/**
 	 * Invoked before a resource will be created, immediately before the transaction
 	 * is committed (after all validation and other business rules have successfully
@@ -968,6 +1048,8 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
+
+
 	/**
 	 * Invoked before a resource will be created
 	 * <p>
@@ -1000,7 +1082,6 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
-
 
 	/**
 	 * Invoked when a resource delete operation is about to fail due to referential integrity conflicts.
@@ -1075,7 +1156,6 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.StorageProcessingMessage"
 	),
-
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
@@ -1191,6 +1271,7 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails"
 	),
+
 
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production

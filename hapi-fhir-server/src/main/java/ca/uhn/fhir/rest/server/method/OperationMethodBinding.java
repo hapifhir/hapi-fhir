@@ -285,8 +285,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			theMethodParams[myIdParamIndex] = theRequest.getId();
 		}
 
-//		populateActionRequestDetailsForInterceptor(theRequest); AAAAAA
-
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
 		return retVal;

@@ -1,15 +1,10 @@
 package ca.uhn.fhir.jpa.delete;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -27,16 +22,9 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {DeleteConflictServiceTest.SpringConfig.class})
 public class DeleteConflictServiceTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(DeleteConflictServiceTest.class);
 
 	@MockBean
 	private DeleteConflictFinderService myDeleteConflictFinderService;
-	@MockBean
-	private IResourceLinkDao myResourceLinkDao;
-	@MockBean
-	private FhirContext myFhirContext;
-	@MockBean
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	private DeleteConflictService myDeleteConflictService;

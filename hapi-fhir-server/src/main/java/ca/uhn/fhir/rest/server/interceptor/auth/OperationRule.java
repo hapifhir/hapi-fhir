@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
@@ -80,7 +81,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 	}
 
 	@Override
-	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
 
 		if (isOtherTenant(theRequestDetails)) {

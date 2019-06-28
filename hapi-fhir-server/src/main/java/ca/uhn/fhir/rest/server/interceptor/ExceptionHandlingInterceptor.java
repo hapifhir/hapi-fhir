@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -93,7 +94,8 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 				statusMessage = sm;
 			}
 		}
-		
+
+		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
 		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
 		
 	}
