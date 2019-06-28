@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
 
 /**
  * Interceptor that allows for cascading deletes (deletes that resolve constraint issues).
@@ -56,11 +59,11 @@ public class CascadingDeleteInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS)
-	public boolean delete(DeleteConflictList theConflictList, RequestDetails theRequest) {
+	public DeleteConflictOutcome handleDeleteConflicts(DeleteConflictList theConflictList, RequestDetails theRequest) {
 		ourLog.debug("Have delete conflicts: {}", theConflictList);
 
 		if (!shouldCascade(theRequest)) {
-			return false;
+			return null;
 		}
 
 		List<String> cascadedDeletes = getCascadedDeletesMapOrNull(theRequest);
@@ -81,10 +84,11 @@ public class CascadingDeleteInterceptor {
 			cascadedDeletes.add(nextSource.getValue());
 		}
 
-		return true;
+		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 
 	private List<String> getCascadedDeletesMapOrNull(RequestDetails theRequest) {
+		//noinspection unchecked
 		return (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
 	}
 

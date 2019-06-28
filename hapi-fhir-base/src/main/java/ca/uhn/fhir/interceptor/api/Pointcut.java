@@ -241,7 +241,7 @@ public enum Pointcut {
 	 * ca.uhn.fhir.rest.api.RestOperationTypeEnum - The type of operation that the FHIR server has determined that the client is trying to invoke
 	 * </li>
 	 * <li>
-	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - This parameter is provided for legacy reasons only and will be removed in the fututre. Do not use.
+	 * ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails - This parameter is provided for legacy reasons only and will be removed in the future. Do not use.
 	 * </li>
 	 * </ul>
 	 * </p>
@@ -1025,15 +1025,15 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>boolean</code>.  If the method returns <code>true</code> then the caller
-	 * will retry checking for delete conflicts.  If there are still conflicts, then the hook will be invoked again,
-	 * repeatedly up to a maximum of {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MAX_RETRIES} retries.
-	 * The first time the hook is invoked, there will be a maximum of {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MIN_QUERY_RESULT_COUNT}
-	 * conflicts passed to the method.  Subsequent hook invocations will pass a maximum of
-	 * {@value ca.uhn.fhir.jpa.delete.DeleteConflictService#MAX_RETRY_COUNT} conflicts to the hook.
+	 * Hooks should return <code>ca.uhn.fhir.jpa.delete.DeleteConflictOutcome</code>.
+	 * If the interceptor returns a non-null result, the DeleteConflictOutcome can be
+	 * used to indicate a number of times to retry.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_DELETE_CONFLICTS(boolean.class,
+	STORAGE_PRESTORAGE_DELETE_CONFLICTS(
+		// Return type
+		"ca.uhn.fhir.jpa.delete.DeleteConflictOutcome",
+		// Params
 		"ca.uhn.fhir.jpa.delete.DeleteConflictList",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
@@ -1363,14 +1363,18 @@ public enum Pointcut {
 	private final Class<?> myReturnType;
 	private final ExceptionHandlingSpec myExceptionHandlingSpec;
 
-	Pointcut(@Nonnull Class<?> theReturnType, String... theParameterTypes) {
-		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
+	Pointcut(@Nonnull String theReturnType, String... theParameterTypes) {
+		this(toReturnTypeClass(theReturnType), new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
 	Pointcut(@Nonnull Class<?> theReturnType, @Nonnull ExceptionHandlingSpec theExceptionHandlingSpec, String... theParameterTypes) {
 		myReturnType = theReturnType;
 		myExceptionHandlingSpec = theExceptionHandlingSpec;
 		myParameterTypes = Collections.unmodifiableList(Arrays.asList(theParameterTypes));
+	}
+
+	Pointcut(@Nonnull Class<?> theReturnType, String... theParameterTypes) {
+		this(theReturnType, new ExceptionHandlingSpec(), theParameterTypes);
 	}
 
 	public boolean isShouldLogAndSwallowException(@Nonnull Throwable theException) {
@@ -1392,6 +1396,9 @@ public enum Pointcut {
 		return myParameterTypes;
 	}
 
+	private class UnknownType {
+	}
+
 	private static class ExceptionHandlingSpec {
 
 		private final Set<Class<? extends Throwable>> myTypesToLogAndSwallow = new HashSet<>();
@@ -1401,6 +1408,14 @@ public enum Pointcut {
 			return this;
 		}
 
+	}
+
+	private static Class<?> toReturnTypeClass(String theReturnType) {
+		try {
+			return Class.forName(theReturnType);
+		} catch (ClassNotFoundException theE) {
+			return UnknownType.class;
+		}
 	}
 
 }
