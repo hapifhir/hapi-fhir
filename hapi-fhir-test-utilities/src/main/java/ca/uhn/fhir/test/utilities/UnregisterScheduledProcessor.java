@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.config;
+package ca.uhn.fhir.test.utilities;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
