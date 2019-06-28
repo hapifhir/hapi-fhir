@@ -36,6 +36,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	private IIdType myPatientId;
 
 	private CascadingDeleteInterceptor myDeleteInterceptor;
+	private IIdType myObservationId;
 
 	@Override
 	@Before
@@ -60,11 +61,11 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.getSubject().setReference(myPatientId.getValue());
-		IIdType oid = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
+		myObservationId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 
 		DiagnosticReport dr = new DiagnosticReport();
 		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
-		dr.addResult().setReference(oid.getValue());
+		dr.addResult().setReference(myObservationId.getValue());
 		myDiagnosticReportId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
 	}
 
@@ -80,6 +81,21 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		}
 	}
 
+	@Test
+	public void testDeleteWithInterceptorAndConstraints() {
+		createResources();
+
+		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
+
+		try {
+			ourClient.delete().resourceById(myPatientId).execute();
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			String output = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			ourLog.info(output);
+			assertThat(output, containsString("AAA"));
+		}
+	}
 
 	@Test
 	public void testDeleteCascading() throws IOException {
@@ -93,7 +109,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to 2 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationDao + "/_history/1]"));
+			assertThat(deleteResponse, containsString("Cascaded delete to 2 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1]"));
 		}
 
 		try {

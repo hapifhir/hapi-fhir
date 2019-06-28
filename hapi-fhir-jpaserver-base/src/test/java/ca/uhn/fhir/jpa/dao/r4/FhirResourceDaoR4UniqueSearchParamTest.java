@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.subscription.module.config.UnregisterScheduledProcessor;
+import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;

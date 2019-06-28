@@ -268,14 +268,15 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 		 */
 		for (BaseInvoker nextInvoker : invokers) {
 			Object nextOutcome = nextInvoker.invoke(theParams);
-			if (thePointcut.getReturnType() == boolean.class) {
+			Class<?> pointcutReturnType = thePointcut.getReturnType();
+			if (pointcutReturnType.equals(boolean.class)) {
 				Boolean nextOutcomeAsBoolean = (Boolean) nextOutcome;
 				if (Boolean.FALSE.equals(nextOutcomeAsBoolean)) {
 					ourLog.trace("callHooks({}) for invoker({}) returned false", thePointcut, nextInvoker);
 					theRetVal = false;
 					break;
 				}
-			} else if (thePointcut.getReturnType() != void.class) {
+			} else if (pointcutReturnType.equals(void.class) == false) {
 				if (nextOutcome != null) {
 					theRetVal = nextOutcome;
 					break;

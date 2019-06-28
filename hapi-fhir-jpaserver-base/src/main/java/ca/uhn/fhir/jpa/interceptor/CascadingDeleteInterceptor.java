@@ -27,6 +27,8 @@ import java.util.List;
 
 import static ca.uhn.fhir.jpa.delete.DeleteConflictService.MAX_RETRY_ATTEMPTS;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Interceptor that allows for cascading deletes (deletes that resolve constraint issues).
  * <p>
@@ -45,6 +47,7 @@ public class CascadingDeleteInterceptor {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CascadingDeleteInterceptor.class);
 	private static final String CASCADED_DELETES_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_KEY";
+	private static final String CASCADED_DELETES_FAILED_KEY = CascadingDeleteInterceptor.class.getName() + "_CASCADED_DELETES_FAILED_KEY";
 
 	private final DaoRegistry myDaoRegistry;
 
@@ -66,11 +69,7 @@ public class CascadingDeleteInterceptor {
 			return null;
 		}
 
-		List<String> cascadedDeletes = getCascadedDeletesMapOrNull(theRequest);
-		if (cascadedDeletes == null) {
-			cascadedDeletes = new ArrayList<>();
-			theRequest.getUserData().put(CASCADED_DELETES_KEY, cascadedDeletes);
-		}
+		List<String> cascadedDeletes = getCascadedDeletesMap(theRequest, true);
 
 		for (Iterator<DeleteConflict> iter = theConflictList.iterator(); iter.hasNext(); ) {
 			DeleteConflict next = iter.next();
@@ -87,25 +86,47 @@ public class CascadingDeleteInterceptor {
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
 	}
 
-	private List<String> getCascadedDeletesMapOrNull(RequestDetails theRequest) {
-		//noinspection unchecked
-		return (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
+	@SuppressWarnings("unchecked")
+	private List<String> getCascadedDeletesMap(RequestDetails theRequest, boolean theCreate) {
+		List<String> retVal = (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
+		if (retVal == null) {
+			retVal = new ArrayList<>();
+			theRequest.getUserData().put(CASCADED_DELETES_KEY, retVal);
+		}
+		return retVal;
 	}
 
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public void outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, IBaseResource theResponse) {
-		List<String> deleteList = getCascadedDeletesMapOrNull(theRequestDetails);
-		if (deleteList != null) {
-			if (theResponseDetails.getResponseCode() == 200) {
+		if (theRequestDetails != null) {
+
+			// Successful delete list
+			List<String> deleteList = getCascadedDeletesMap(theRequestDetails, false);
+			if (deleteList != null) {
+				if (theResponseDetails.getResponseCode() == 200) {
+					if (theResponse instanceof IBaseOperationOutcome) {
+						FhirContext ctx = theRequestDetails.getFhirContext();
+						IBaseOperationOutcome oo = (IBaseOperationOutcome) theResponse;
+						String severity = OperationOutcome.IssueSeverity.INFORMATION.toCode();
+						String code = OperationOutcome.IssueType.INFORMATIONAL.toCode();
+						String details = ctx.getLocalizer().getMessage(CascadingDeleteInterceptor.class, "successMsg", deleteList.size(), deleteList);
+						OperationOutcomeUtil.addIssue(ctx, oo, severity, details, null, code);
+					}
+				}
+			}
+
+			String failedDeleteMessage = (String) theRequestDetails.getUserData().get(CASCADED_DELETES_FAILED_KEY);
+			if (isNotBlank(failedDeleteMessage)) {
 				if (theResponse instanceof IBaseOperationOutcome) {
 					FhirContext ctx = theRequestDetails.getFhirContext();
 					IBaseOperationOutcome oo = (IBaseOperationOutcome) theResponse;
 					String severity = OperationOutcome.IssueSeverity.INFORMATION.toCode();
 					String code = OperationOutcome.IssueType.INFORMATIONAL.toCode();
-					String details = "Cascaded delete to " + deleteList.size() + " resources: " + deleteList;
+					String details = failedDeleteMessage;
 					OperationOutcomeUtil.addIssue(ctx, oo, severity, details, null, code);
 				}
 			}
+
 		}
 	}
 
@@ -122,6 +143,10 @@ public class CascadingDeleteInterceptor {
 			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains("true")) {
 				return true;
 			}
+
+			// Add a message to the response
+			String message = theRequest.getFhirContext().getLocalizer().getMessage(CascadingDeleteInterceptor.class, "noParam");
+			theRequest.getUserData().put(CASCADED_DELETES_FAILED_KEY, message);
 		}
 
 		return false;
