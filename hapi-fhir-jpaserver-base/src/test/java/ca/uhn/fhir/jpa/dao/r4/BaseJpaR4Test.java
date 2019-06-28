@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -160,7 +161,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR4")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
@@ -298,6 +298,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
+	protected IServerInterceptor myInterceptor;
 
 	@After()
 	public void afterCleanupDao() {
