@@ -201,7 +201,7 @@
 				A BOM POM has been added to the HAPI FHIR distribution, allowing users to import
 				the HAPI FHIR library with all of its submodules automatically sharing the same
 				version. Thanks to Stig Døssing for the pull request!
-			</action>>
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
