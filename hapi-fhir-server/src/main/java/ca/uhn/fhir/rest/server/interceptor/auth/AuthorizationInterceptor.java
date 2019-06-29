@@ -159,7 +159,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 			case DELETE:
 				// Delete is a special case
-				return OperationExamineDirection.NONE;
+				return OperationExamineDirection.IN;
 
 			case CREATE:
 			case UPDATE:

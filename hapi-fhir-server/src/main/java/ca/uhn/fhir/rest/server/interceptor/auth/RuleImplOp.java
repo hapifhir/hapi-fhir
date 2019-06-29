@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
+import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -215,6 +216,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						return newVerdict();
 					}
 					appliesToResource = theInputResource;
+					appliesToResourceId = Collections.singleton(theInputResourceId);
 				} else {
 					return null;
 				}

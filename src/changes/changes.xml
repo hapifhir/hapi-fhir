@@ -210,6 +210,11 @@
 				RuleBuilder, in order to ensure that cascading deletes are only available
 				to users with sufficient permission.
 			</action>
+			<action type="add">
+				AuthorizationInterceptor will now try to block delete operations sooner
+				in the processing lifecycle if there is no chance they will be permitted
+				later (i.e. because the type is not authorized at all)
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
