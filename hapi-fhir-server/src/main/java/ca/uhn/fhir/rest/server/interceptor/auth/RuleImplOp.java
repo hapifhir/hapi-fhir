@@ -3,16 +3,17 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
+import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -59,11 +60,12 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private Collection<IIdType> myAppliesToInstances;
+	private boolean myAppliesToDeleteCascade;
 
 	/**
 	 * Constructor
 	 */
-	public RuleImplOp(String theRuleName) {
+	RuleImplOp(String theRuleName) {
 		super(theRuleName);
 	}
 
@@ -72,13 +74,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return myAppliesToInstances;
 	}
 
-	public void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
+	void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
 		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
 		if (isOtherTenant(theRequestDetails)) {
 			return null;
@@ -207,10 +209,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
+					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
+						return null;
+					}
 					if (theInputResource == null) {
 						return newVerdict();
 					}
 					appliesToResource = theInputResource;
+					appliesToResourceId = Collections.singleton(theInputResourceId);
 				} else {
 					return null;
 				}
@@ -264,7 +270,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 						}
 
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null, thePointcut);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -292,7 +298,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						if (nextResource == null) {
 							continue;
 						}
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -582,6 +588,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);
 		return builder.toString();
+	}
+
+	public void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
+		myAppliesToDeleteCascade = theAppliesToDeleteCascade;
 	}
 
 }

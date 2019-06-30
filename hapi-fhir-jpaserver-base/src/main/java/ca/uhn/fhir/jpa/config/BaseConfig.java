@@ -192,6 +192,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
 	}
 
+	@Bean
+	public IConsentContextServices consentContextServices() {
+		return new JpaConsentContextServices();
+	}
+
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));
 		theFactory.setPackagesToScan("ca.uhn.fhir.jpa.model.entity", "ca.uhn.fhir.jpa.entity");
@@ -202,9 +207,5 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
 
-	@Bean
-	public IConsentContextServices consentContextServices() {
-		return new JpaConsentContextServices();
-	}
 
 }

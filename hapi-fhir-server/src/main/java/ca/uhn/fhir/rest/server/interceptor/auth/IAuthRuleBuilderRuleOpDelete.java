@@ -20,16 +20,14 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.api.Pointcut;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
+public interface IAuthRuleBuilderRuleOpDelete extends IAuthRuleBuilderRuleOp {
 
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
-
-public interface IRuleApplier {
-
-	Verdict applyRulesAndReturnDecision(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, Pointcut thePointcut);
+	/**
+	 * Specifies that this rule applies to cascading deletes as opposed to regular
+	 * deletes. Note that if you want to allow cascading deletes, you will typically
+	 * require at least two separate rules: one for the original source resource, and
+	 * one for the cascade.
+	 */
+	IAuthRuleBuilderRuleOp onCascade();
 
 }

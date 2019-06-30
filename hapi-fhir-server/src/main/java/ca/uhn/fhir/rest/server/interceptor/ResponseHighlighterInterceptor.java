@@ -16,15 +16,16 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -235,8 +236,7 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) {
 		/*
 		 * It's not a browser...
 		 */
@@ -260,11 +260,17 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		if (theException.getOperationOutcome() == null) {
+		IBaseOperationOutcome oo = theException.getOperationOutcome();
+		if (oo == null) {
 			return true;
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
+		ResponseDetails responseDetails = new ResponseDetails();
+		responseDetails.setResponseResource(oo);
+		responseDetails.setResponseCode(theException.getStatusCode());
+
+		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), theServletRequest, responseDetails.getResponseCode());
 
 		return false;
 	}

@@ -3033,22 +3033,34 @@ public class AuthorizationInterceptorR4Test {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
-					.allow("Rule 2").deleteConditional().resourcesOfType(Patient.class)
+					.allow("Rule 2").deleteConditional().resourcesOfType(Patient.class).andThen()
+					.allow().delete().instance(new IdType("Patient/2")).andThen()
 					.build();
 			}
 		});
 
 		HttpDelete httpDelete;
 		HttpResponse status;
+		String response;
 
-		ourReturn = Collections.singletonList(createPatient(1));
+//		// Wrong resource
+//		ourReturn = Collections.singletonList(createPatient(1));
+//		ourHitMethod = false;
+//		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
+//		status = ourClient.execute(httpDelete);
+//		response = extractResponseAndClose(status);
+//		ourLog.info(response);
+//		assertEquals(403, status.getStatusLine().getStatusCode());
+//		assertTrue(ourHitMethod);
 
+		// Right resource
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
 		status = ourClient.execute(httpDelete);
-		String response = extractResponseAndClose(status);
+		response = extractResponseAndClose(status);
 		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
 	}
@@ -3074,7 +3086,7 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(1));
@@ -3082,7 +3094,7 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 	}
 
 	@Test

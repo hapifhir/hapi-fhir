@@ -2,7 +2,9 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -12,6 +14,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -25,6 +28,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -45,8 +49,6 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ResponseHighlightingInterceptorTest {
 
@@ -403,6 +405,34 @@ public class ResponseHighlightingInterceptorTest {
 		ourLog.info(output);
 		assertThat(output, containsString("<span class='hlTagName'>OperationOutcome</span>"));
 	}
+
+	@Test
+	public void testHighlightExceptionInvokesOutgoingFailureOperationOutcome() throws Exception {
+		IAnonymousInterceptor outgoingResponseInterceptor = (thePointcut, theArgs) -> {
+			OperationOutcome oo = (OperationOutcome) theArgs.get(IBaseOperationOutcome.class);
+			oo.addIssue().setDiagnostics("HELP IM A BUG");
+		};
+		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, outgoingResponseInterceptor);
+		try {
+
+			HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Foobar/123");
+			httpGet.addHeader("Accept", "text/html");
+			CloseableHttpResponse status = ourClient.execute(httpGet);
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			status.close();
+
+			ourLog.info("Resp: {}", responseContent);
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, stringContainsInOrder("HELP IM A BUG"));
+
+		} finally {
+
+			ourServlet.getInterceptorService().unregisterInterceptor(outgoingResponseInterceptor);
+
+		}
+	}
+
+
 
 	/**
 	 * See #346

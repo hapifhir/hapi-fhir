@@ -53,4 +53,9 @@ public class DeleteConflictList {
 	public int size() {
 		return myList.size();
 	}
+
+	@Override
+	public String toString() {
+		return myList.toString();
+	}
 }

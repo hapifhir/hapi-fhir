@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
@@ -40,7 +41,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
 		if (isOtherTenant(theRequestDetails)) {
 			return null;
@@ -51,19 +52,27 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 		}
 
 		if (theOperation == myOperationType) {
+			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
+				return null;
+			}
+
 			switch (myAppliesTo) {
 				case ALL_RESOURCES:
 				case INSTANCES:
 					break;
 				case TYPES:
-					if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
-						return null;
+					if (myOperationType == RestOperationTypeEnum.DELETE) {
+						String resourceName = theRequestDetails.getResourceName();
+						Class<? extends IBaseResource> resourceType = theRequestDetails.getFhirContext().getResourceDefinition(resourceName).getImplementingClass();
+						if (!myAppliesToTypes.contains(resourceType)) {
+							return null;
+						}
+					} else {
+						if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
+							return null;
+						}
 					}
 					break;
-			}
-
-			if (theRequestDetails.getConditionalUrl(myOperationType) == null) {
-				return null;
 			}
 
 			if (getTenantApplicabilityChecker() != null) {

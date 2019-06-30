@@ -88,12 +88,9 @@ public class InterceptorDstu3Test {
 	public void testServerPreHandledOnOperationCapturesResource() throws IOException {
 
 		AtomicReference<IBaseResource> resource = new AtomicReference<>();
-		IAnonymousInterceptor interceptor = new IAnonymousInterceptor() {
-			@Override
-			public void invoke(Pointcut thePointcut, HookParams theArgs) {
-				RequestDetails requestDetails = theArgs.get(RequestDetails.class);
-				resource.set(requestDetails.getResource());
-			}
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			RequestDetails requestDetails = theArgs.get(RequestDetails.class);
+			resource.set(requestDetails.getResource());
 		};
 
 		ourServlet.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);

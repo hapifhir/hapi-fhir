@@ -202,6 +202,19 @@
 				the HAPI FHIR library with all of its submodules automatically sharing the same
 				version. Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="add">
+				A new interceptor called CascadingDeleteInterceptor has been added to the
+				JPA project. This interceptor allows deletes to cascade when a specific
+				URL parameter or header is added to the request. Cascading deletes
+				can also be controlled by a new flag in the AuthorizationIntereptor
+				RuleBuilder, in order to ensure that cascading deletes are only available
+				to users with sufficient permission.
+			</action>
+			<action type="add">
+				AuthorizationInterceptor will now try to block delete operations sooner
+				in the processing lifecycle if there is no chance they will be permitted
+				later (i.e. because the type is not authorized at all)
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

@@ -39,7 +39,7 @@ public interface IAuthRuleBuilderRule {
 	/**
 	 * This rule applies to the FHIR delete operation
 	 */
-	IAuthRuleBuilderRuleOp delete();
+	IAuthRuleBuilderRuleOpDelete delete();
 
 	/**
 	 * This rule applies to <code>create</code> operations with a <code>conditional</code>
