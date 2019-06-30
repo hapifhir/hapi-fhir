@@ -747,6 +747,11 @@
 				<version>1.18</version>
 			</dependency>
 			<dependency>
+				<groupId>org.fhir</groupId>
+				<artifactId>ucum</artifactId>
+				<version>1.0.2</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
 				<version>17.0.0</version>

@@ -20,15 +20,21 @@
 			<artifactId>hapi-fhir-base</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-utilities</artifactId>
-			<version>${project.version}</version>
+			<artifactId>org.hl7.fhir.r4</artifactId>
+			<version>3.8.9-SNAPSHOT</version>
 		</dependency>
 
 		<!-- 
 		Optional dependencies from RI codebase
 		-->
+		<dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
 			<artifactId>woodstox-core-asl</artifactId>

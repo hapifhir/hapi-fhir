@@ -28,7 +28,6 @@ import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationDefinitionParameterComponent;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
-import org.hl7.fhir.r4.model.codesystems.UnknownContentCode;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
