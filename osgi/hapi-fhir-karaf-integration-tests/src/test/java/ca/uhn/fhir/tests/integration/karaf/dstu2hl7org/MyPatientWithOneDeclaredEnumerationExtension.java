@@ -4,7 +4,7 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.instance.model.Address.AddressUse;
 import org.hl7.fhir.instance.model.Enumeration;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Patient;
 
 @ResourceDef(name = "Patient")
 public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {

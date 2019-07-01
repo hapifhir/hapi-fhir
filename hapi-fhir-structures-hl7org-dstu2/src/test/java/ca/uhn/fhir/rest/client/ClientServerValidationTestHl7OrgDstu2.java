@@ -1,21 +1,12 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.HttpResponse;
@@ -24,8 +15,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.instance.model.Conformance;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Conformance;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,12 +26,14 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class ClientServerValidationTestHl7OrgDstu2 {
 

@@ -22,8 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-utilities</artifactId>
-			<version>${project.version}</version>
+			<artifactId>org.hl7.fhir.dstu2</artifactId>
 		</dependency>
 
 		<!--

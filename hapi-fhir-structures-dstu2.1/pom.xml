@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -22,18 +22,40 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-utilities</artifactId>
-			<version>${project.version}</version>
+			<artifactId>org.hl7.fhir.dstu2016may</artifactId>
 		</dependency>
-		
+
+		<!--
+	  Optional dependencies from RI codebase
+	  -->
+		<dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3_xpath</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3_min</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
 		<!--
 		Test dependencies on other optional parts of HAPI 
 		-->
-      <dependency>
-         <groupId>org.codehaus.woodstox</groupId>
-         <artifactId>woodstox-core-asl</artifactId>
-         <scope>test</scope>
-      </dependency>
+		<dependency>
+			<groupId>org.codehaus.woodstox</groupId>
+			<artifactId>woodstox-core-asl</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2.1</artifactId>
@@ -52,7 +74,7 @@
 			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<!-- 
 		The JPA project uses a newer API but we'll try to hold to this version
 		as much as possible. See #283.
@@ -130,12 +152,12 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 
 		<!-- UNIT TEST DEPENDENCIES -->
@@ -161,8 +183,8 @@
 		</dependency>
 		<dependency>
 			<artifactId>commons-lang</artifactId>
-			<groupId>commons-lang</groupId>	
-			<version>2.5</version>			
+			<groupId>commons-lang</groupId>
+			<version>2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -221,14 +243,14 @@
 			<scope>test</scope>
 		</dependency>
 		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-core</artifactId>-->
-			<!--<scope>test</scope>-->
+		<!--<groupId>com.sun.xml.bind</groupId>-->
+		<!--<artifactId>jaxb-core</artifactId>-->
+		<!--<scope>test</scope>-->
 		<!--</dependency>-->
 		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-impl</artifactId>-->
-			<!--<scope>test</scope>-->
+		<!--<groupId>com.sun.xml.bind</groupId>-->
+		<!--<artifactId>jaxb-impl</artifactId>-->
+		<!--<scope>test</scope>-->
 		<!--</dependency>-->
 		<dependency>
 			<groupId>org.glassfish.jaxb</groupId>

@@ -1,17 +1,17 @@
 package ca.uhn.fhir.model;
 
+import org.hl7.fhir.dstu2.model.DomainResource;
+import org.hl7.fhir.dstu2.model.Narrative;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Patient;
-import org.junit.Test;
-
 public class DomainResourceHL7_Dstu2Test {
     /**
-     * Ensuring that fields defined in {@link org.hl7.fhir.instance.model.DomainResource} and {@link org.hl7.fhir.instance.model.Resource}
-     * the {@link org.hl7.fhir.instance.model.DomainResource#copy()} method is called
+     * Ensuring that fields defined in {@link org.hl7.fhir.dstu2.model.DomainResource} and {@link org.hl7.fhir.dstu2.model.Resource}
+     * the {@link org.hl7.fhir.dstu2.model.DomainResource#copy()} method is called
      */
     @Test
     public void testPatientCopy() {

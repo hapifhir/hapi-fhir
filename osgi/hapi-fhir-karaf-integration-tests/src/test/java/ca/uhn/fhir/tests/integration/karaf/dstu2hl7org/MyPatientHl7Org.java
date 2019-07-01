@@ -7,7 +7,7 @@ import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.StringType;
 

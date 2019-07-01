@@ -1,14 +1,14 @@
 package org.hl7.fhir.convertors;
 
-import static org.junit.Assert.assertEquals;
-
+import ca.uhn.hapi.converters.advisor.NullVersionConverterAdvisor30;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.Resource;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Date;
+
+import static org.junit.Assert.assertEquals;
 
 public class VersionConvertor_10_30Test {
 
@@ -18,8 +18,8 @@ public class VersionConvertor_10_30Test {
 		NullVersionConverterAdvisor30 advisor = new NullVersionConverterAdvisor30();
 		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
 		
-		org.hl7.fhir.instance.model.Observation input = new org.hl7.fhir.instance.model.Observation();
-		input.setEncounter(new org.hl7.fhir.instance.model.Reference("Encounter/123"));
+		org.hl7.fhir.dstu2.model.Observation input = new org.hl7.fhir.dstu2.model.Observation();
+		input.setEncounter(new org.hl7.fhir.dstu2.model.Reference("Encounter/123"));
 		
 		org.hl7.fhir.dstu3.model.Observation output = converter.convertObservation(input);
 		String context = output.getContext().getReference();
@@ -57,7 +57,7 @@ public class VersionConvertor_10_30Test {
 		Specimen.SpecimenContainerComponent specimenContainerComponent = new Specimen.SpecimenContainerComponent();
 		specimenContainerComponent.getExtension().add(new Extension().setUrl("some_url").setValue(new StringType("some_value")));
 		spec.setContainer(Collections.singletonList(specimenContainerComponent));
-		Resource resource = converter.convertResource(spec);
+		org.hl7.fhir.dstu2.model.Resource resource = converter.convertResource(spec);
 	}
 
 	

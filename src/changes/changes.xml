@@ -26,6 +26,21 @@
 			<action type="change">
 				<![CDATA[
 				<b>Breaking Change</b>:
+				The hl7org DSTU2 structures (the HAPI FHIR strructures for DSTU2 resources that
+				are in the org.hl7 package instead of the ca.uhn package) have been moved from the
+				package
+				<code>org.hl7.fhir.instance.model</code>
+				to the package 
+				<code>org.hl7.fhir.dstu2.model</code>.
+				Note that this affects structure classes (e.g. Patient) but does not
+				affect interfaces such as IBaseResource, which remains in the
+				<code>org.hl7.fhir.instance.model.api</code>
+				package.
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
 				The
 				<code>IPagingProvider</code>
 				interface has been

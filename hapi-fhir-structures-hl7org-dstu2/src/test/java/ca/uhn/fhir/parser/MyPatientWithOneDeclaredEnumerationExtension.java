@@ -1,11 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.instance.model.Enumeration;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-
 import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
+import org.hl7.fhir.dstu2.model.Address;
+import org.hl7.fhir.dstu2.model.Enumeration;
+import org.hl7.fhir.dstu2.model.Patient;
 
 @ResourceDef(name = "Patient")
 public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
@@ -14,13 +13,13 @@ public class MyPatientWithOneDeclaredEnumerationExtension extends Patient {
 
 	@Child(order = 0, name = "foo")
 	@ca.uhn.fhir.model.api.annotation.Extension(url = "urn:foo", definedLocally = true, isModifier = false)
-	private Enumeration<AddressUse> myFoo;
+	private Enumeration<Address.AddressUse> myFoo;
 
-	public Enumeration<AddressUse> getFoo() {
+	public Enumeration<Address.AddressUse> getFoo() {
 		return myFoo;
 	}
 
-	public void setFoo(Enumeration<AddressUse> theFoo) {
+	public void setFoo(Enumeration<Address.AddressUse> theFoo) {
 		myFoo = theFoo;
 	}
 

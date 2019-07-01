@@ -1,10 +1,12 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -15,20 +17,18 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Bundle.HTTPVerb;
-import org.hl7.fhir.instance.model.Conformance.SystemInteractionComponent;
-import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
-import org.junit.*;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.Bundle.HTTPVerb;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.Transaction;
-import ca.uhn.fhir.rest.annotation.TransactionParam;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
@@ -57,9 +57,9 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		client.registerInterceptor(new LoggingInterceptor(true));
 		Conformance rest = client.fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		boolean supportsTransaction = false;
-		for (SystemInteractionComponent next : rest.getRest().get(0).getInteraction()) {
+		for (Conformance.SystemInteractionComponent next : rest.getRest().get(0).getInteraction()) {
 			ourLog.info("Supports interaction: {}");
-			if (next.getCodeElement().getValue() == SystemRestfulInteraction.TRANSACTION) {
+			if (next.getCodeElement().getValue() == Conformance.SystemRestfulInteraction.TRANSACTION) {
 				supportsTransaction = true;
 			}
 		}

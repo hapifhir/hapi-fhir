@@ -18,8 +18,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.Binary;
-import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.dstu2.model.Binary;
+import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -122,7 +122,7 @@ public class BinaryHl7OrgDstu2Test {
 
     ourLog.info(responseContent);
 
-    org.hl7.fhir.instance.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, responseContent);
+    org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
     assertEquals("text/plain", bin.getContentType());
@@ -140,7 +140,7 @@ public class BinaryHl7OrgDstu2Test {
 
     ourLog.info(responseContent);
 
-    org.hl7.fhir.instance.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, responseContent);
+    org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
     assertEquals("text/plain", bin.getContentType());

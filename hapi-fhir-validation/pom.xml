@@ -22,13 +22,12 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-utilities</artifactId>
+			<artifactId>hapi-fhir-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-converter</artifactId>
-			<version>${project.version}</version>
+			<artifactId>org.hl7.fhir.validation</artifactId>
 		</dependency>
 
 		<dependency>

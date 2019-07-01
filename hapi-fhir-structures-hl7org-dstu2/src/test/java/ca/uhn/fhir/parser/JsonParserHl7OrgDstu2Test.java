@@ -11,18 +11,10 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Patient.ContactComponent;
-import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionAnswerComponent;
-import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -118,9 +110,9 @@ public class JsonParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newJsonParser();
 
     Patient patient = new Patient();
-    patient.addAddress().setUse(AddressUse.HOME);
-    EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
+    EnumFactory<Address.AddressUse> fact = new Address.AddressUseEnumFactory();
+    PrimitiveType<Address.AddressUse> enumeration = new Enumeration<Address.AddressUse>(fact).setValue(Address.AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
     String val = parser.encodeResourceToString(patient);
@@ -128,8 +120,8 @@ public class JsonParserHl7OrgDstu2Test {
     assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
 
     MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-    Enumeration<AddressUse> ref = actual.getFoo();
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
+    Enumeration<Address.AddressUse> ref = actual.getFoo();
     assertEquals("home", ref.getValue().toCode());
 
   }
@@ -157,7 +149,7 @@ public class JsonParserHl7OrgDstu2Test {
   public void testEncodeAndParseExtensions() throws Exception {
 
     Patient patient = new Patient();
-    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+    patient.addIdentifier().setUse(Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
     Extension ext = new Extension();
     ext.setUrl("http://example.com/extensions#someext");
@@ -509,7 +501,7 @@ public class JsonParserHl7OrgDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
-		patient.addAddress().setUse(AddressUse.HOME);
+		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.setFoo(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
@@ -517,7 +509,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
@@ -528,7 +520,7 @@ public class JsonParserHl7OrgDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
-		patient.addAddress().setUse(AddressUse.HOME);
+		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.setFoo(new Reference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
@@ -536,7 +528,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
 
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
-		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
 		assertEquals("Organization/123", ref.getReference());
 
@@ -548,8 +540,8 @@ public class JsonParserHl7OrgDstu2Test {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setId("123456");
 
-		ValueSetCodeSystemComponent define = valueSet.getCodeSystem();
-		ConceptDefinitionComponent code = define.addConcept();
+		ValueSet.ValueSetCodeSystemComponent define = valueSet.getCodeSystem();
+		ValueSet.ConceptDefinitionComponent code = define.addConcept();
 		code.setCode("someCode");
 		code.setDisplay("someDisplay");
 		code.addExtension().setUrl("urn:alt").setValue( new StringType("alt name"));
@@ -599,7 +591,7 @@ public class JsonParserHl7OrgDstu2Test {
 		ourLog.info("---------------");
 
 		c = new Conformance();
-		c.getAcceptUnknownElement().setValue(UnknownContentCode.EXTENSIONS);
+		c.getAcceptUnknownElement().setValue(Conformance.UnknownContentCode.EXTENSIONS);
 		c.getAcceptUnknownElement().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(c);
@@ -644,7 +636,7 @@ public class JsonParserHl7OrgDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
-		patient.addAddress().setUse(AddressUse.HOME);
+		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue( new Reference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
@@ -652,7 +644,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
-		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
 		Reference ref = (Reference) ext.get(0).getValue();
@@ -696,7 +688,7 @@ public class JsonParserHl7OrgDstu2Test {
 	public void testEncodeNarrativeBlockInBundle() throws Exception {
 		Patient p = new Patient();
 		p.addIdentifier().setSystem("foo").setValue("bar");
-		p.getText().setStatus(NarrativeStatus.GENERATED);
+		p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.getText().setDivAsString("<div>AAA</div>");
 
 		Bundle b = new Bundle();
@@ -811,7 +803,7 @@ public class JsonParserHl7OrgDstu2Test {
 		IParser parser = ourCtx.newJsonParser();
 
 		Patient patient = new Patient();
-		patient.addAddress().setUse(AddressUse.HOME);
+		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
 		String val = parser.encodeResourceToString(patient);
@@ -819,7 +811,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Address ref = actual.getFoo();
 		assertEquals("line1", ref.getLine().get(0).getValue());
 
@@ -918,7 +910,7 @@ public class JsonParserHl7OrgDstu2Test {
   public void testMoreExtensions() throws Exception {
 
     Patient patient = new Patient();
-    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+    patient.addIdentifier().setUse(Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
     Extension ext = new Extension();
     ext.setUrl("http://example.com/extensions#someext");
@@ -1218,8 +1210,8 @@ public class JsonParserHl7OrgDstu2Test {
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
 		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
 
-		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		List<org.hl7.fhir.dstu2.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		org.hl7.fhir.dstu2.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		IParser xmlParser = ourCtx.newXmlParser();
@@ -1264,7 +1256,7 @@ public class JsonParserHl7OrgDstu2Test {
     String response = "{\"resourceType\":\"QuestionnaireResponse\",\"group\":{\"question\":[{\"answer\": [{\"valueReference\": {\"reference\": \"Observation/testid\"}}]}]}}";
     QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
 
-    QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
+    QuestionnaireResponse.QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
     assertNotNull(answer);
     assertNotNull(answer.getValueReference());
     assertEquals("Observation/testid", answer.getValueReference().getReference());

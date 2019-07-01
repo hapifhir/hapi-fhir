@@ -1,46 +1,5 @@
 package ca.uhn.fhir.parser;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
-import java.io.*;
-import java.nio.charset.Charset;
-import java.util.*;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.IsNot;
-import org.hamcrest.core.StringContains;
-import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Address.AddressUse;
-import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Enumeration;
-import org.hl7.fhir.instance.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
-import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.PrimitiveType;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.SimpleQuantity;
-import org.hl7.fhir.instance.model.Specimen;
-import org.hl7.fhir.instance.model.StringType;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-import org.xmlunit.builder.DiffBuilder;
-import org.xmlunit.builder.Input;
-import org.xmlunit.diff.*;
-
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -51,6 +10,35 @@ import ca.uhn.fhir.parser.JsonParserHl7OrgDstu2Test.MyPatientWithOneDeclaredExte
 import ca.uhn.fhir.rest.api.Constants;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.IsNot;
+import org.hamcrest.core.StringContains;
+import org.hamcrest.text.StringContainsInOrder;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.junit.*;
+import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.ComparisonControllers;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.Diff;
+import org.xmlunit.diff.ElementSelectors;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class XmlParserHl7OrgDstu2Test {
 
@@ -251,7 +239,7 @@ public class XmlParserHl7OrgDstu2Test {
   public void testEncodeAndParseExtensions() throws Exception {
 
     Patient patient = new Patient();
-    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+    patient.addIdentifier().setUse(Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
     Extension ext = new Extension();
     ext.setUrl("http://example.com/extensions#someext");
@@ -649,9 +637,9 @@ public class XmlParserHl7OrgDstu2Test {
   public void testEncodeBoundCode() {
 
     Patient patient = new Patient();
-    patient.addAddress().setUse(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
 
-    patient.getGenderElement().setValue(AdministrativeGender.MALE);
+    patient.getGenderElement().setValue(Enumerations.AdministrativeGender.MALE);
 
     String val = ourCtx.newXmlParser().encodeResourceToString(patient);
     ourLog.info(val);
@@ -792,7 +780,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     MyPatientWithOneDeclaredAddressExtension patient = new MyPatientWithOneDeclaredAddressExtension();
-    patient.addAddress().setUse(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
     patient.setFoo(new Address().addLine("line1"));
 
     String val = parser.encodeResourceToString(patient);
@@ -802,7 +790,7 @@ public class XmlParserHl7OrgDstu2Test {
 
     MyPatientWithOneDeclaredAddressExtension actual = parser
         .parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
     Address ref = actual.getFoo();
     assertEquals("line1", ref.getLine().get(0).getValue());
 
@@ -813,7 +801,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
-    patient.addAddress().setUse(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
     patient.setFoo(new Reference("Organization/123"));
 
     String val = parser.encodeResourceToString(patient);
@@ -822,7 +810,7 @@ public class XmlParserHl7OrgDstu2Test {
         "<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
 
     MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
     Reference ref = actual.getFoo();
     assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
@@ -979,7 +967,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     Patient patient = new Patient();
-    patient.addAddress().setUse(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(new Reference().setReference("Organization/123"));
 
     String val = parser.encodeResourceToString(patient);
@@ -988,7 +976,7 @@ public class XmlParserHl7OrgDstu2Test {
         "<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
 
     Patient actual = parser.parseResource(Patient.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
     List<Extension> ext = actual.getExtension();
     assertEquals(1, ext.size());
     Reference ref = (Reference) ext.get(0).getValue();
@@ -1015,7 +1003,7 @@ public class XmlParserHl7OrgDstu2Test {
   public void testEncodeNarrativeBlockInBundle() throws Exception {
     Patient p = new Patient();
     p.addIdentifier().setSystem("foo").setValue("bar");
-    p.getText().setStatus(NarrativeStatus.GENERATED);
+    p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
     p.getText().setDivAsString("<div>hello</div>");
 
     Bundle b = new Bundle();
@@ -1199,7 +1187,7 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     Patient patient = new Patient();
-    patient.addAddress().setUse(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
     String val = parser.encodeResourceToString(patient);
@@ -1209,7 +1197,7 @@ public class XmlParserHl7OrgDstu2Test {
 
     MyPatientWithOneDeclaredAddressExtension actual = parser
         .parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
     Address ref = actual.getFoo();
     assertEquals("line1", ref.getLine().get(0).getValue());
 
@@ -1220,9 +1208,9 @@ public class XmlParserHl7OrgDstu2Test {
     IParser parser = ourCtx.newXmlParser();
 
     Patient patient = new Patient();
-    patient.addAddress().setUse(AddressUse.HOME);
-    EnumFactory<AddressUse> fact = new AddressUseEnumFactory();
-    PrimitiveType<AddressUse> enumeration = new Enumeration<AddressUse>(fact).setValue(AddressUse.HOME);
+    patient.addAddress().setUse(Address.AddressUse.HOME);
+    EnumFactory<Address.AddressUse> fact = new Address.AddressUseEnumFactory();
+    PrimitiveType<Address.AddressUse> enumeration = new Enumeration<Address.AddressUse>(fact).setValue(Address.AddressUse.HOME);
     patient.addExtension().setUrl("urn:foo").setValue(enumeration);
 
     String val = parser.encodeResourceToString(patient);
@@ -1232,8 +1220,8 @@ public class XmlParserHl7OrgDstu2Test {
 
     MyPatientWithOneDeclaredEnumerationExtension actual = parser
         .parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
-    assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
-    Enumeration<AddressUse> ref = actual.getFoo();
+    assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
+    Enumeration<Address.AddressUse> ref = actual.getFoo();
     assertEquals("home", ref.getValue().toCode());
 
   }
@@ -1351,7 +1339,7 @@ public class XmlParserHl7OrgDstu2Test {
 
     Patient patient = ourCtx.newXmlParser().parseResource(Patient.class, msg);
 
-    assertEquals(NarrativeStatus.GENERATED, patient.getText().getStatus());
+    assertEquals(Narrative.NarrativeStatus.GENERATED, patient.getText().getStatus());
     assertThat(patient.getText().getDiv().getValueAsString(), containsString(">John Cardinal:            444333333 <"));
     assertEquals("PRP1660", patient.getIdentifier().get(0).getValue());
 
@@ -1448,7 +1436,7 @@ public class XmlParserHl7OrgDstu2Test {
   public void testMoreExtensions() throws Exception {
 
     Patient patient = new Patient();
-    patient.addIdentifier().setUse(IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+    patient.addIdentifier().setUse(Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
     Extension ext = new Extension();
     ext.setUrl("http://example.com/extensions#someext");
@@ -1558,7 +1546,7 @@ public class XmlParserHl7OrgDstu2Test {
     manifest.setType(cc);
     manifest.setMasterIdentifier(new Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
     manifest.addContent().setP(new Reference(binary));
-    manifest.setStatus(org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus.CURRENT);
+    manifest.setStatus(org.hl7.fhir.dstu2.model.Enumerations.DocumentReferenceStatus.CURRENT);
 
     String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
     ourLog.info(encoded);

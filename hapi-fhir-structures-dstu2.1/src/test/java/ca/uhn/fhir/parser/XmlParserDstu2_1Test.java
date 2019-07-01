@@ -2667,7 +2667,8 @@ public class XmlParserDstu2_1Test {
 		String refVal = "http://my.org/FooBar";
 
 		Patient fhirPat = new Patient();
-		fhirPat.addExtension().setUrl("x1").setValue(new Reference(refVal));
+		Reference value = new Reference(refVal);
+		fhirPat.addExtension().setUrl("x1").setValue(value);
 
 		IParser parser = ourCtx.newXmlParser();
 

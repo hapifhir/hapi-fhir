@@ -1,19 +1,15 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.math.BigDecimal;
-
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Reference;
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.Reference;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
+import java.math.BigDecimal;
+
+import static org.junit.Assert.*;
 
 public class IdTypeTest {
 

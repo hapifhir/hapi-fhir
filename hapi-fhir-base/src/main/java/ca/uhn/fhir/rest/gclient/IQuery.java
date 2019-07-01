@@ -77,7 +77,7 @@ public interface IQuery<Y> extends IBaseQuery<IQuery<Y>>, IClientExecutable<IQue
 	IQuery<Y> limitTo(int theLimitTo);
 
 	/**
-	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.instance.model.Bundle.class</code>
+	 * Request that the client return the specified bundle type, e.g. <code>org.hl7.fhir.dstu2.model.Bundle.class</code>
 	 * or <code>ca.uhn.fhir.model.dstu2.resource.Bundle.class</code>
 	 */
 	<B extends IBaseBundle> IQuery<B> returnBundle(Class<B> theClass);

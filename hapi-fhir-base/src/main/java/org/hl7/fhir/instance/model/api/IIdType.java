@@ -28,7 +28,7 @@ package org.hl7.fhir.instance.model.api;
  * <p>
  * <b>Concrete Implementations:</b> This interface is often returned and/or accepted by methods in HAPI's API
  * where either {@link ca.uhn.fhir.model.primitive.IdDt} (the HAPI structure ID type) or 
- * <code>org.hl7.fhir.instance.model.IdType</code> (the RI structure ID type) will be used, depending on 
+ * <code>org.hl7.fhir.dstu2.model.IdType</code> (the RI structure ID type) will be used, depending on
  * which version of the strctures your application is using.   
  * </p>
  */

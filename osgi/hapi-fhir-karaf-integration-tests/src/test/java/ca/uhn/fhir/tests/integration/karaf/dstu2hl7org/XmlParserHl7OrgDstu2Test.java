@@ -31,7 +31,7 @@ import org.hl7.fhir.instance.model.Enumeration;
 import org.hl7.fhir.instance.model.InstantType;
 import org.hl7.fhir.instance.model.Narrative;
 import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.hl7.fhir.instance.model.PrimitiveType;
 import org.hl7.fhir.instance.model.Reference;
 import org.hl7.fhir.instance.model.Resource;
@@ -100,10 +100,10 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlEnabled() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
-			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
+			org.hl7.fhir.dstu2.model.Patient o1 = (org.hl7.fhir.dstu2.model.Patient) bundle.getEntry().get(0).getResource();
 			IIdType o1Id = o1.getIdElement();
 			assertEquals("http://lalaland.org", o1Id.getBaseUrl());
 			assertEquals("patient", o1Id.getResourceType());
@@ -116,10 +116,10 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnFhirContext() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
 		ourCtx.getParserOptions().setOverrideResourceIdWithBundleEntryFullUrl(false);
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
-			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
+			org.hl7.fhir.dstu2.model.Patient o1 = (org.hl7.fhir.dstu2.model.Patient) bundle.getEntry().get(0).getResource();
 			IIdType o1Id = o1.getIdElement();
 			assertFalse(o1Id.hasBaseUrl());
 			assertEquals("Patient", o1Id.getResourceType());
@@ -131,10 +131,10 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testOverrideResourceIdWithBundleEntryFullUrlDisabled_ConfiguredOnParser() {
 		String tmp = "<Bundle xmlns=\"http://hl7.org/fhir\"><entry><fullUrl value=\"http://lalaland.org/patient/pat1\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"patxuzos\"/></Patient></resource></entry></Bundle>";
-		org.hl7.fhir.instance.model.Bundle bundle = (org.hl7.fhir.instance.model.Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
+		org.hl7.fhir.dstu2.model.Bundle bundle = (org.hl7.fhir.dstu2.model.Bundle) ourCtx.newXmlParser().setOverrideResourceIdWithBundleEntryFullUrl(false).parseResource(tmp);
 		assertEquals(1, bundle.getEntry().size());
 		{
-			org.hl7.fhir.instance.model.Patient o1 = (org.hl7.fhir.instance.model.Patient) bundle.getEntry().get(0).getResource();
+			org.hl7.fhir.dstu2.model.Patient o1 = (org.hl7.fhir.dstu2.model.Patient) bundle.getEntry().get(0).getResource();
 			IIdType o1Id = o1.getIdElement();
 			assertFalse(o1Id.hasBaseUrl());
 			assertEquals("Patient", o1Id.getResourceType());
@@ -160,7 +160,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testContainedResourceInExtensionUndeclared() {
-		org.hl7.fhir.instance.model.Patient p = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p = new org.hl7.fhir.dstu2.model.Patient();
 		p.addName().addFamily("PATIENT");
 
 		Organization o = new Organization();
@@ -170,7 +170,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String str = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
 
-		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, str);
+		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, str);
 		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
 
 		List<org.hl7.fhir.instance.model.Extension> exts = p.getExtension();
@@ -210,7 +210,7 @@ public class XmlParserHl7OrgDstu2Test {
 		org.getNameElement().setValue("Contained Test Organization");
 
 		// Create a patient
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 
@@ -223,7 +223,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
 
 		// Create a bundle with just the patient resource
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.addEntry().setResource(patient);
 
 		// Encode the bundle
@@ -235,7 +235,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
 
 		// Re-parse the bundle
-		patient = (org.hl7.fhir.instance.model.Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
+		patient = (org.hl7.fhir.dstu2.model.Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
 		assertEquals("#1", patient.getManagingOrganization().getReferenceElement().getValue());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
@@ -277,7 +277,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeAndParseExtensions() throws Exception {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addIdentifier().setUse(org.hl7.fhir.instance.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
 		org.hl7.fhir.instance.model.Extension ext = new org.hl7.fhir.instance.model.Extension();
@@ -329,7 +329,7 @@ public class XmlParserHl7OrgDstu2Test {
      * Now parse this back
      */
 
-		org.hl7.fhir.instance.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, enc);
+		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, enc);
 		ext = parsed.getExtension().get(0);
 		assertEquals("http://example.com/extensions#someext", ext.getUrl());
 		assertEquals("2011-01-02T11:13:15", ((org.hl7.fhir.instance.model.DateTimeType) ext.getValue()).getValueAsString());
@@ -366,7 +366,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeBinaryResource() {
 
-		org.hl7.fhir.instance.model.Binary patient = new org.hl7.fhir.instance.model.Binary();
+		org.hl7.fhir.dstu2.model.Binary patient = new org.hl7.fhir.dstu2.model.Binary();
 		patient.setContentType("foo");
 		patient.setContent(new byte[] { 1, 2, 3, 4 });
 
@@ -379,7 +379,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeBinaryWithNoContentType() {
-		org.hl7.fhir.instance.model.Binary b = new org.hl7.fhir.instance.model.Binary();
+		org.hl7.fhir.dstu2.model.Binary b = new org.hl7.fhir.dstu2.model.Binary();
 		b.setContent(new byte[] { 1, 2, 3, 4 });
 
 		String output = ourCtx.newXmlParser().encodeResourceToString(b);
@@ -391,7 +391,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeBoundCode() {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
 
 		patient.getGenderElement().setValue(org.hl7.fhir.instance.model.Enumerations.AdministrativeGender.MALE);
@@ -405,20 +405,20 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeBundle() throws InterruptedException {
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.getMeta().addTag().setSystem("http://hl7.org/fhir/tag").setCode("http://hl7.org/fhir/tag/message")
 			.setDisplay("Message");
 
 		InstantType pub = InstantType.withCurrentTime();
 		b.getMeta().setLastUpdatedElement(pub);
 
-		org.hl7.fhir.instance.model.Patient p1 = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p1 = new org.hl7.fhir.dstu2.model.Patient();
 		p1.addName().addFamily("Family1");
-		org.hl7.fhir.instance.model.Bundle.BundleEntryComponent entry = b.addEntry();
+		org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent entry = b.addEntry();
 		p1.getIdElement().setValue("1");
 		entry.setResource(p1);
 
-		org.hl7.fhir.instance.model.Patient p2 = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p2 = new org.hl7.fhir.dstu2.model.Patient();
 		p2.addName().addFamily("Family2");
 		entry = b.addEntry();
 		p2.getIdElement().setValue("2");
@@ -439,9 +439,9 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeBundleCategory() {
 
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
-		org.hl7.fhir.instance.model.Bundle.BundleEntryComponent e = b.addEntry();
-		e.setResource(new org.hl7.fhir.instance.model.Patient());
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent e = b.addEntry();
+		e.setResource(new org.hl7.fhir.dstu2.model.Patient());
 		e.getResource().getMeta().addTag().setSystem("scheme").setCode("term").setDisplay("label");
 
 		String val = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
@@ -452,7 +452,7 @@ public class XmlParserHl7OrgDstu2Test {
 			"<display value=\"label\"/>", "</tag>"));
 		// @formatter:on
 
-		b = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, val);
+		b = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, val);
 		assertEquals(1, b.getEntry().size());
 		assertEquals(1, b.getEntry().get(0).getResource().getMeta().getTag().size());
 		assertEquals("scheme", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getSystem());
@@ -519,7 +519,7 @@ public class XmlParserHl7OrgDstu2Test {
 		org.getText().setDivAsString("<div>FOOBAR</div>");
 
 		// Create a patient
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getText().setDivAsString("<div>BARFOO</div>");
@@ -584,7 +584,7 @@ public class XmlParserHl7OrgDstu2Test {
 	 */
 	@Test
 	public void testEncodeEmptyTag() {
-		org.hl7.fhir.instance.model.Patient p = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p = new org.hl7.fhir.dstu2.model.Patient();
 		p.getMeta().addTag();
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
@@ -592,7 +592,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		// With tag
 
-		p = new org.hl7.fhir.instance.model.Patient();
+		p = new org.hl7.fhir.dstu2.model.Patient();
 		p.getMeta().addTag().setSystem("sys").setCode("code");
 
 		encoded = ourCtx.newXmlParser().encodeResourceToString(p);
@@ -602,16 +602,16 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeEscapedChars() {
 
-		org.hl7.fhir.instance.model.Patient p = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p = new org.hl7.fhir.dstu2.model.Patient();
 		p.addName().addFamily("and <>&ü");
 
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(enc);
 
-		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, enc);
+		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, enc);
 		assertEquals("and <>&ü", p.getName().get(0).getFamily().get(0).getValue());
 
-		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class,
+		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class,
 			"<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"quot &quot;\"/></name></Patient>");
 		assertEquals("quot \"", p.getName().get(0).getFamily().get(0).getValue());
 
@@ -619,7 +619,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeEscapedExtendedChars() {
-		org.hl7.fhir.instance.model.Patient p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class,
+		org.hl7.fhir.dstu2.model.Patient p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class,
 			"<Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"uuml &uuml;\"/></name></Patient>");
 		assertEquals("uuml ü", p.getName().get(0).getFamily().get(0).getValue());
 	}
@@ -729,7 +729,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeExtensionWithResourceContent() {
 		IParser parser = ourCtx.newXmlParser();
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(new org.hl7.fhir.instance.model.Reference().setReference("Organization/123"));
 
@@ -738,7 +738,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString(
 			"<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>"));
 
-		org.hl7.fhir.instance.model.Patient actual = parser.parseResource(org.hl7.fhir.instance.model.Patient.class, val);
+		org.hl7.fhir.dstu2.model.Patient actual = parser.parseResource(org.hl7.fhir.dstu2.model.Patient.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<org.hl7.fhir.instance.model.Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
@@ -763,7 +763,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeNarrativeSuppressed() throws Exception {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
 		patient.addName().addFamily("FAMILY");
@@ -790,7 +790,7 @@ public class XmlParserHl7OrgDstu2Test {
 		org.getNameElement().setValue("Contained Test Organization");
 
 		// Create a patient
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1333");
 		patient.addIdentifier().setSystem("urn:mrns").setValue("253345");
 		patient.getManagingOrganization().setResource(org);
@@ -803,7 +803,7 @@ public class XmlParserHl7OrgDstu2Test {
 		resources.add(patient);
 
 		// Create a bundle with both
-		org.hl7.fhir.instance.model.Bundle b = new org.hl7.fhir.instance.model.Bundle();
+		org.hl7.fhir.dstu2.model.Bundle b = new org.hl7.fhir.dstu2.model.Bundle();
 		b.addEntry().setResource(org);
 		b.addEntry().setResource(patient);
 
@@ -825,7 +825,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodePrettyPrint() throws Exception {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.getText().setDivAsString("<div>\n  <i>  hello     <pre>\n  LINE1\n  LINE2</pre></i>\n\n\n\n</div>");
 		patient.addName().addFamily("Family").addGiven("Given");
 
@@ -858,7 +858,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodeResourceRef() throws DataFormatException {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setManagingOrganization(new org.hl7.fhir.instance.model.Reference());
 
 		IParser p = ourCtx.newXmlParser();
@@ -883,7 +883,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeSummary() throws Exception {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
 		patient.addName().addFamily("FAMILY");
@@ -902,7 +902,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeSummary2() throws Exception {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.setId("Patient/1/_history/1");
 		patient.getText().setDivAsString("<div>THE DIV</div>");
 		patient.addName().addFamily("FAMILY");
@@ -926,7 +926,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeUndeclaredExtensionWithAddressContent() {
 		IParser parser = ourCtx.newXmlParser();
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
 		patient.addExtension().setUrl("urn:foo").setValue(new Address().addLine("line1"));
 
@@ -947,7 +947,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeUndeclaredExtensionWithEnumerationContent() {
 		IParser parser = ourCtx.newXmlParser();
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
 		EnumFactory<Address.AddressUse> fact = new Address.AddressUseEnumFactory();
 		PrimitiveType<Address.AddressUse> enumeration = new Enumeration<Address.AddressUse>(fact).setValue(Address.AddressUse.HOME);
@@ -968,7 +968,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodingNullExtension() {
-		org.hl7.fhir.instance.model.Patient p = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient p = new org.hl7.fhir.dstu2.model.Patient();
 		org.hl7.fhir.instance.model.Extension extension = new org.hl7.fhir.instance.model.Extension().setUrl("http://foo#bar");
 		p.getExtension().add(extension);
 		String str = ourCtx.newXmlParser().encodeResourceToString(p);
@@ -990,7 +990,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testExtensionOnComposite() throws Exception {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 
 		org.hl7.fhir.instance.model.HumanName name = patient.addName();
 		name.addFamily("Shmoe");
@@ -1004,7 +1004,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(enc, containsString(
 			"<name><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension><family value=\"Shmoe\"/><given value=\"Joe\"/></name>"));
 
-		org.hl7.fhir.instance.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, new StringReader(enc));
+		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
 		org.hl7.fhir.instance.model.Extension ext = parsed.getName().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
@@ -1014,7 +1014,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testExtensionOnPrimitive() throws Exception {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 
 		org.hl7.fhir.instance.model.HumanName name = patient.addName();
 		org.hl7.fhir.instance.model.StringType family = name.addFamilyElement();
@@ -1029,7 +1029,7 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(enc, containsString(
 			"<name><family value=\"Shmoe\"><extension url=\"http://examples.com#givenext\"><valueString value=\"Hello\"/></extension></family></name>"));
 
-		org.hl7.fhir.instance.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, new StringReader(enc));
+		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
 		org.hl7.fhir.instance.model.Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
@@ -1077,7 +1077,7 @@ public class XmlParserHl7OrgDstu2Test {
 			+ "</Patient>";
 		// @formatter:on
 
-		org.hl7.fhir.instance.model.Patient patient = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, msg);
+		org.hl7.fhir.dstu2.model.Patient patient = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, msg);
 
 		assertEquals(Narrative.NarrativeStatus.GENERATED, patient.getText().getStatus());
 		assertThat(patient.getText().getDiv().getValueAsString(), containsString(">John Cardinal:            444333333 <"));
@@ -1153,7 +1153,7 @@ public class XmlParserHl7OrgDstu2Test {
 			+ "</Patient>";
 		// @formatter:on
 
-		org.hl7.fhir.instance.model.Patient resource = (org.hl7.fhir.instance.model.Patient) p.parseResource(msg);
+		org.hl7.fhir.dstu2.model.Patient resource = (org.hl7.fhir.dstu2.model.Patient) p.parseResource(msg);
 		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 		assertEquals("Foo1Value", ((IPrimitiveType<?>) resource.getExtension().get(0).getValue()).getValueAsString());
 		assertEquals("Foo1Value2", ((IPrimitiveType<?>) resource.getExtension().get(1).getValue()).getValueAsString());
@@ -1175,7 +1175,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testMoreExtensions() throws Exception {
 
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addIdentifier().setUse(org.hl7.fhir.instance.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
 		org.hl7.fhir.instance.model.Extension ext = new org.hl7.fhir.instance.model.Extension();
@@ -1261,7 +1261,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testParseBinaryResource() {
 
-		org.hl7.fhir.instance.model.Binary val = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Binary.class,
+		org.hl7.fhir.dstu2.model.Binary val = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Binary.class,
 			"<Binary xmlns=\"http://hl7.org/fhir\"><contentType value=\"foo\"/><content value=\"AQIDBA==\"/></Binary>");
 		assertEquals("foo", val.getContentType());
 		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, val.getContent());
@@ -1274,7 +1274,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testParseContainedBinaryResource() throws Exception {
 		byte[] bin = new byte[] { 0, 1, 2, 3, 4 };
-		final org.hl7.fhir.instance.model.Binary binary = new org.hl7.fhir.instance.model.Binary();
+		final org.hl7.fhir.dstu2.model.Binary binary = new org.hl7.fhir.dstu2.model.Binary();
 		binary.setContentType("PatientConsent").setContent(bin);
 		// binary.setId(UUID.randomUUID().toString());
 
@@ -1331,7 +1331,7 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testParseLanguage() {
 		String input = "<Patient xmlns=\"http://hl7.org/fhir\"><language value=\"zh-CN\"/><text><status value=\"generated\"/><div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"> 海生 <b>王 </b></div><table class=\"hapiPropertyTable\"><tbody><tr><td>Identifier</td><td>URNo</td></tr><tr><td>Address</td><td><span>99 Houston Road </span><br/><span>BENTLEIGH </span><span>Victoria </span></td></tr><tr><td>Date of birth</td><td><span>01 January 1997</span></td></tr></tbody></table></div></text><identifier><use value=\"usual\"/><label value=\"URNo\"/><value value=\"89532\"/></identifier><name><text value=\"王海生\"/><family value=\"王\"/><given value=\"海生\"/></name><telecom><system value=\"phone\"/><value value=\"9899 9878\"/><use value=\"home\"/></telecom><telecom><system value=\"email\"/><value value=\"zimmerman@datacorp.com.au\"/><use value=\"home\"/></telecom><gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\"/><code value=\"M\"/><display value=\"Male\"/></coding><text value=\"Male\"/></gender><birthDate value=\"1997-01-01\"/><address><use value=\"home\"/><text value=\"99 Houston Road, BENTLEIGH, 3204\"/><line value=\"99 Houston Road\"/><city value=\"BENTLEIGH\"/><state value=\"Victoria\"/><zip value=\"3204\"/><period><start value=\"2006-06-16\"/></period></address><active value=\"true\"/></Patient>";
-		org.hl7.fhir.instance.model.Patient pt = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, input);
+		org.hl7.fhir.dstu2.model.Patient pt = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, input);
 
 		assertEquals("zh-CN", pt.getLanguage());
 	}
@@ -1345,7 +1345,7 @@ public class XmlParserHl7OrgDstu2Test {
 			+ "	<identifier>\n" + "		<value value=\"IdentifierLabel\"/>\n" + "	</identifier>\n" + "</Patient>";
 		// @formatter:on
 
-		org.hl7.fhir.instance.model.Patient resource = (org.hl7.fhir.instance.model.Patient) p.parseResource(msg);
+		org.hl7.fhir.dstu2.model.Patient resource = (org.hl7.fhir.dstu2.model.Patient) p.parseResource(msg);
 		assertEquals("IdentifierLabel", resource.getIdentifier().get(0).getValue());
 	}
 
@@ -1358,7 +1358,7 @@ public class XmlParserHl7OrgDstu2Test {
 			+ "</Patient>";
 		// @formatter:on
 
-		org.hl7.fhir.instance.model.Patient patient1 = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Patient.class, msg);
+		org.hl7.fhir.dstu2.model.Patient patient1 = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, msg);
 		String encoded1 = ourCtx.newXmlParser().encodeResourceToString(patient1);
 
 		ourLog.info("Expected: {}", msg);
@@ -1373,7 +1373,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String xmlString = IOUtils.toString(
 			XmlParserHl7OrgDstu2Test.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"),
 			Charset.forName("UTF-8"));
-		org.hl7.fhir.instance.model.Patient obs = ourCtx.newJsonParser().parseResource(org.hl7.fhir.instance.model.Patient.class, xmlString);
+		org.hl7.fhir.dstu2.model.Patient obs = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, xmlString);
 
 		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
 		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
@@ -1399,7 +1399,7 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 
-		org.hl7.fhir.instance.model.Patient fhirPat = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient fhirPat = new org.hl7.fhir.dstu2.model.Patient();
 		fhirPat.addExtension().setUrl("x1").setValue(new org.hl7.fhir.instance.model.Reference(refVal));
 
 		IParser parser = ourCtx.newXmlParser();
@@ -1408,7 +1408,7 @@ public class XmlParserHl7OrgDstu2Test {
 		System.out.println("output: " + output);
 
 		// Deserialize then check that valueReference value is still correct
-		fhirPat = parser.parseResource(org.hl7.fhir.instance.model.Patient.class, output);
+		fhirPat = parser.parseResource(org.hl7.fhir.dstu2.model.Patient.class, output);
 
 		List<org.hl7.fhir.instance.model.Extension> extlst = fhirPat.getExtension();
 		Assert.assertEquals(1, extlst.size());

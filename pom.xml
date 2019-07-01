@@ -550,6 +550,7 @@
 		<scmPubCheckoutDirectory>${user.home}/sites/scm/hapi-fhir</scmPubCheckoutDirectory>
 
 		<!-- Dependency Versions -->
+		<org_hl7_fhir_core_version>3.8.10-SNAPSHOT</org_hl7_fhir_core_version>
 		<activation_api_version>1.2.0</activation_api_version>
 		<apache_karaf_version>4.2.5</apache_karaf_version>
 		<aries_spifly_version>1.2</aries_spifly_version>
@@ -1209,6 +1210,46 @@
 				<groupId>org.hibernate</groupId>
 				<artifactId>hibernate-search-elasticsearch</artifactId>
 				<version>${hibernate_search_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.utilities</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu3</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r4</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r5</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.validation</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.convertors</artifactId>
+				<version>${org_hl7_fhir_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.javassist</groupId>
@@ -2285,7 +2326,6 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-test-utilities</module>
-				<module>hapi-fhir-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>

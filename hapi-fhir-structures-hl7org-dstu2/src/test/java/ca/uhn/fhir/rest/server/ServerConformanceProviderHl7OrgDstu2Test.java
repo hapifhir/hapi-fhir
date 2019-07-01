@@ -1,35 +1,34 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.util.*;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
-
-import org.hl7.fhir.instance.conf.ServerConformanceProvider;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Conformance.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.*;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenOrListParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import org.hl7.fhir.dstu2.conf.ServerConformanceProvider;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.junit.Test;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ServerConformanceProviderHl7OrgDstu2Test {
 
@@ -66,11 +65,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
+		Conformance.ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 		
 		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
+		assertEquals(Conformance.ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
 	}
 	
@@ -132,7 +131,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + Conformance.TypeRestfulInteraction.HISTORYINSTANCE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -183,7 +182,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
+		Conformance.ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertEquals("Patient", res.getType());
 		
 		assertNull(res.getConditionalCreateElement().getValue());
@@ -277,8 +276,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		ConformanceRestComponent rest = conformance.getRest().get(0);
-		ConformanceRestResourceComponent res = rest.getResource().get(0);
+		Conformance.ConformanceRestComponent rest = conformance.getRest().get(0);
+		Conformance.ConformanceRestResourceComponent res = rest.getResource().get(0);
 		assertEquals("DiagnosticReport", res.getType());
 
 		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
@@ -381,7 +380,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + Conformance.SystemRestfulInteraction.HISTORYSYSTEM.toCode() + "\"/></interaction>"));
 	}
 
 	@Test
@@ -400,7 +399,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		conf = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(conformance);
-		assertThat(conf, containsString("<interaction><code value=\"" + TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
+		assertThat(conf, containsString("<interaction><code value=\"" + Conformance.TypeRestfulInteraction.HISTORYTYPE.toCode() + "\"/></interaction>"));
 	}
 
 	@Test

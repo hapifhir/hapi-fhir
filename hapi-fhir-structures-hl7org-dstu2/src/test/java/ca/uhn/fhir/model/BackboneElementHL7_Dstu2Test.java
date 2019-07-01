@@ -1,16 +1,16 @@
 package ca.uhn.fhir.model;
 
+import org.hl7.fhir.dstu2.model.BackboneElement;
+import org.hl7.fhir.dstu2.model.Patient.PatientCommunicationComponent;
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.Patient.PatientCommunicationComponent;
-import org.junit.Test;
 
 public class BackboneElementHL7_Dstu2Test {
     /**
      * Ensuring that IDs of subtypes of BackboneElement get copied when
-     * the {@link org.hl7.fhir.instance.model.BackboneElement#copy()} method is called
+     * the {@link org.hl7.fhir.dstu2.model.BackboneElement#copy()} method is called
      */
     @Test
     public void testPatientCommunicationComponentIdCopy() {

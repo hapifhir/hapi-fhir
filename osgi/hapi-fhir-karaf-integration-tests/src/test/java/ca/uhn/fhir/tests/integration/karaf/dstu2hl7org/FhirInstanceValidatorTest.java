@@ -8,7 +8,7 @@ import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.DateType;
 import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.instance.model.StringType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -94,7 +94,7 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testParametersWithTwoParameters() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
@@ -117,7 +117,7 @@ public class FhirInstanceValidatorTest {
 
 	@Test
 	public void testParametersHl7OrgDstu2() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 

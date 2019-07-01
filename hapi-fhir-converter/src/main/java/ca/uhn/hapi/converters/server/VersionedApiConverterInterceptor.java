@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.hapi.converters.advisor.NullVersionConverterAdvisor30;
+import ca.uhn.hapi.converters.advisor.NullVersionConverterAdvisor40;
 import org.hl7.fhir.convertors.*;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -121,11 +123,11 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 		return true;
 	}
 
-	private org.hl7.fhir.instance.model.Resource toDstu2(IBaseResource theResponseResource) {
+	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
 		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.instance.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
+			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
 		}
-		return (org.hl7.fhir.instance.model.Resource) theResponseResource;
+		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
 	}
 
 	private Resource toDstu3(IBaseResource theResponseResource) {
