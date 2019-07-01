@@ -40,10 +40,12 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class is a base class for interceptors which can be used to
@@ -299,6 +301,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			case BOTH:
 				inputResource = theRequest.getResource();
 				inputResourceId = theRequest.getId();
+				if (inputResourceId == null && isNotBlank(theRequest.getResourceName())) {
+					inputResourceId = theRequest.getFhirContext().getVersion().newIdType();
+					inputResourceId.setParts(null, theRequest.getResourceName(), null, null);
+				}
 				break;
 			case OUT:
 				// inputResource = null;
@@ -330,8 +336,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		checkPointcutAndFailIfDeny(theRequestDetails, thePointcut, theResourceToDelete);
 	}
 
-	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, IBaseResource theInputResource) {
-		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, null, null, thePointcut);
+	private void checkPointcutAndFailIfDeny(RequestDetails theRequestDetails, Pointcut thePointcut, @Nonnull IBaseResource theInputResource) {
+		applyRulesAndFailIfDeny(theRequestDetails.getRestOperationType(), theRequestDetails, theInputResource, theInputResource.getIdElement(), null, thePointcut);
 	}
 
 	private void checkOutgoingResourceAndFailIfDeny(RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {

@@ -42,8 +42,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class DeleteConflictService {
@@ -88,6 +91,15 @@ public class DeleteConflictService {
 		if (resultList.isEmpty()) {
 			return null;
 		}
+
+		// Don't send two conflict events for the same source resource
+		Set<Long> sourceIds = new HashSet<>();
+		resultList = resultList
+			.stream()
+			.filter(t -> sourceIds.add(t.getSourceResourcePid()))
+			.collect(Collectors.toList());
+
+
 		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
 	}
 

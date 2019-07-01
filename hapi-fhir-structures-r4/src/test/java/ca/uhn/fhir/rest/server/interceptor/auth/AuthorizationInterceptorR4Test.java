@@ -255,7 +255,7 @@ public class AuthorizationInterceptorR4Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$validate");
@@ -299,7 +299,7 @@ public class AuthorizationInterceptorR4Test {
 		ourLog.info(response);
 		assertThat(response, containsString("Access denied by rule: Rule 1"));
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/TENANTA/Patient/1/$validate");
@@ -626,12 +626,13 @@ public class AuthorizationInterceptorR4Test {
 
 		Bundle responseBundle = new Bundle();
 		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
 
 		ourHitMethod = false;
-		Bundle bundle = new Bundle();
+		bundle.getEntry().clear();
 		ourReturn = Collections.singletonList(responseBundle);
 		ourDeleted = Collections.singletonList(createPatient(2));
-		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
 		httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
@@ -640,6 +641,7 @@ public class AuthorizationInterceptorR4Test {
 		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
 
+		ourHitMethod = false;
 		bundle.getEntry().clear();
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/1");
 		ourReturn = Collections.singletonList(responseBundle);
@@ -674,6 +676,40 @@ public class AuthorizationInterceptorR4Test {
 		responseString = extractResponseAndClose(status);
 		assertEquals(responseString, 200, status.getStatusLine().getStatusCode());
 		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testDeleteByType() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").delete().resourcesOfType(Patient.class).withAnyId().andThen()
+					.build();
+			}
+		});
+
+		HttpDelete httpDelete;
+		HttpResponse status;
+		String responseString;
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createPatient(2));
+		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient/1");
+		status = ourClient.execute(httpDelete);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 204, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createPatient(2));
+		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Observation/1");
+		status = ourClient.execute(httpDelete);
+		responseString = extractResponseAndClose(status);
+		assertEquals(responseString, 403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+
 	}
 
 	/**
@@ -2575,52 +2611,52 @@ public class AuthorizationInterceptorR4Test {
 		HttpGet httpGet;
 		ourReturn = Collections.singletonList(createPatient(900));
 
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900");
-//		status = ourClient.execute(httpGet);
-//		extractResponseAndClose(status);
-//		assertEquals(200, status.getStatusLine().getStatusCode());
-//		assertTrue(ourHitMethod);
-//
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900");
-//		status = ourClient.execute(httpGet);
-//		extractResponseAndClose(status);
-//		assertEquals(200, status.getStatusLine().getStatusCode());
-//		assertTrue(ourHitMethod);
-//
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=901");
-//		status = ourClient.execute(httpGet);
-//		response = extractResponseAndClose(status);
-//		assertEquals(403, status.getStatusLine().getStatusCode());
-//		assertEquals(ERR403, response);
-//		assertFalse(ourHitMethod);
-//
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/901");
-//		status = ourClient.execute(httpGet);
-//		response = extractResponseAndClose(status);
-//		assertEquals(403, status.getStatusLine().getStatusCode());
-//		assertEquals(ERR403, response);
-//		assertFalse(ourHitMethod);
-//
-//		ourHitMethod = false;
-//		// technically this is invalid, but just in case..
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=Patient/901");
-//		status = ourClient.execute(httpGet);
-//		response = extractResponseAndClose(status);
-//		assertEquals(403, status.getStatusLine().getStatusCode());
-//		assertEquals(ERR403, response);
-//		assertFalse(ourHitMethod);
-//
-//		ourHitMethod = false;
-//		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=901");
-//		status = ourClient.execute(httpGet);
-//		response = extractResponseAndClose(status);
-//		assertEquals(403, status.getStatusLine().getStatusCode());
-//		assertEquals(ERR403, response);
-//		assertFalse(ourHitMethod);
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=900");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=901");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/901");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		// technically this is invalid, but just in case..
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=Patient/901");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Observation?_id=901");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=Patient/900,Patient/700");
@@ -3043,15 +3079,15 @@ public class AuthorizationInterceptorR4Test {
 		HttpResponse status;
 		String response;
 
-//		// Wrong resource
-//		ourReturn = Collections.singletonList(createPatient(1));
-//		ourHitMethod = false;
-//		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
-//		status = ourClient.execute(httpDelete);
-//		response = extractResponseAndClose(status);
-//		ourLog.info(response);
-//		assertEquals(403, status.getStatusLine().getStatusCode());
-//		assertTrue(ourHitMethod);
+		// Wrong resource
+		ourReturn = Collections.singletonList(createPatient(1));
+		ourHitMethod = false;
+		httpDelete = new HttpDelete("http://localhost:" + ourPort + "/Patient?foo=bar");
+		status = ourClient.execute(httpDelete);
+		response = extractResponseAndClose(status);
+		ourLog.info(response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		// Right resource
 		ourReturn = Collections.singletonList(createPatient(2));

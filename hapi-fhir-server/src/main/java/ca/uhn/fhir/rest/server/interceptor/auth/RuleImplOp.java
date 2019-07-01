@@ -13,8 +13,8 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
-import ca.uhn.fhir.util.CollectionUtil;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -53,7 +53,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	private AppliesTypeEnum myAppliesTo;
-	private Set<?> myAppliesToTypes;
+	private Set<String> myAppliesToTypes;
 	private String myClassifierCompartmentName;
 	private Collection<? extends IIdType> myClassifierCompartmentOwners;
 	private ClassifierTypeEnum myClassifierType;
@@ -212,9 +212,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
 					}
-					if (theInputResource == null) {
+					if (theInputResourceId == null) {
+						return null;
+					}
+					if (theInputResourceId.hasIdPart() == false) {
+						// This is a conditional DELETE, so we'll authorize it using STORAGE events instead
+						// so just let it through for now..
 						return newVerdict();
 					}
+					if (theInputResource== null && myClassifierCompartmentOwners != null && myClassifierCompartmentOwners.size() > 0) {
+						return newVerdict();
+					}
+
 					appliesToResource = theInputResource;
 					appliesToResourceId = Collections.singleton(theInputResourceId);
 				} else {
@@ -242,6 +251,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					for (BundleEntryParts nextPart : inputResources) {
 
 						IBaseResource inputResource = nextPart.getResource();
+						IIdType inputResourceId = null;
+						if (isNotBlank(nextPart.getUrl())) {
+
+							UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
+
+								inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
+								inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
+						}
+
 						RestOperationTypeEnum operation;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
 							continue;
@@ -270,7 +288,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 						}
 
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null, thePointcut);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -377,7 +395,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case TYPES:
 				if (appliesToResource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						if (myAppliesToTypes.contains(appliesToResource.getClass()) == false) {
+						String type = theRequestDetails.getFhirContext().getResourceDefinition(appliesToResource).getName();
+						if (myAppliesToTypes.contains(type) == false) {
 							return null;
 						}
 					}
@@ -385,21 +404,20 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (appliesToResourceId != null) {
 					for (IIdType nextRequestAppliesToResourceId : appliesToResourceId) {
 						if (nextRequestAppliesToResourceId.hasResourceType()) {
-							Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(nextRequestAppliesToResourceId.getResourceType()).getImplementingClass();
-							if (myAppliesToTypes.contains(type) == false) {
+							String nextRequestAppliesToResourceIdType = nextRequestAppliesToResourceId.getResourceType();
+							if (myAppliesToTypes.contains(nextRequestAppliesToResourceIdType) == false) {
 								return null;
 							}
 						}
 					}
 				}
 				if (appliesToResourceType != null) {
-					Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceType).getImplementingClass();
-					if (myAppliesToTypes.contains(type)) {
+					if (myAppliesToTypes.contains(appliesToResourceType)) {
 						if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
 							return null;
 						}
 						if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-							return new Verdict(PolicyEnum.ALLOW, this);
+							return newVerdict();
 						} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
 							// ok we'll check below
 						}
@@ -554,19 +572,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myAppliesTo = theAppliesTo;
 	}
 
-	public void setAppliesToTypes(Set<?> theAppliesToTypes) {
+	void setAppliesToTypes(Set<String> theAppliesToTypes) {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
-	public void setClassifierCompartmentName(String theClassifierCompartmentName) {
+	void setClassifierCompartmentName(String theClassifierCompartmentName) {
 		myClassifierCompartmentName = theClassifierCompartmentName;
 	}
 
-	public void setClassifierCompartmentOwners(Collection<? extends IIdType> theInCompartmentOwners) {
+	void setClassifierCompartmentOwners(Collection<? extends IIdType> theInCompartmentOwners) {
 		myClassifierCompartmentOwners = theInCompartmentOwners;
 	}
 
-	public void setClassifierType(ClassifierTypeEnum theClassifierType) {
+	void setClassifierType(ClassifierTypeEnum theClassifierType) {
 		myClassifierType = theClassifierType;
 	}
 
@@ -590,7 +608,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return builder.toString();
 	}
 
-	public void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
+	void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
 		myAppliesToDeleteCascade = theAppliesToDeleteCascade;
 	}
 

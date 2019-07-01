@@ -12,9 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.DiagnosticReport;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,6 +37,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	private IIdType myPatientId;
 	private CascadingDeleteInterceptor myDeleteInterceptor;
 	private IIdType myObservationId;
+	private IIdType myConditionId;
 
 	@Override
 	@Before
@@ -69,6 +68,11 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		dr.addResult().setReference(myObservationId.getValue());
 		myDiagnosticReportId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
+
+		Condition condition = new Condition();
+		condition.setSubject(new Reference(myPatientId));
+		condition.setAsserter(new Reference(myPatientId));
+		myConditionId = ourClient.create().resource(condition).execute().getId().toUnqualifiedVersionless();
 	}
 
 	@Test
@@ -106,13 +110,38 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
-		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPatientId.getValue() + "?_cascade=true&_pretty=true");
+		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to 2 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1]"));
+			assertThat(deleteResponse, containsString("Cascaded delete to 3 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1, " + myConditionId + "/_history/1]"));
+		}
+
+		try {
+			ourLog.info("Reading {}", myPatientId);
+			ourClient.read().resource(Patient.class).withId(myPatientId).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+	@Test
+	public void testDeleteCascadingByHeader() throws IOException {
+		createResources();
+
+		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
+
+		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPatientId.getValue() + "?_pretty=true");
+		delete.addHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE);
+		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", deleteResponse);
+			assertThat(deleteResponse, containsString("Cascaded delete to 3 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1, " + myConditionId + "/_history/1]"));
 		}
 
 		try {

@@ -577,10 +577,10 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 			</p>
 			<ul>
 				<li>The request may include the following parameter:
-					<code>_cascade=true</code>
+					<code>_cascade=delete</code>
 				</li>
 				<li>The request may include the following header:
-					<code>X-Cascade-Delete: true</code>
+					<code>X-Cascade: delete</code>
 				</li>
 			</ul>
 		</section>

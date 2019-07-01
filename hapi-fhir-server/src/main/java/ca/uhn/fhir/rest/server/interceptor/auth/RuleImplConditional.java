@@ -32,7 +32,7 @@ import java.util.Set;
 public class RuleImplConditional extends BaseRule implements IAuthRule {
 
 	private AppliesTypeEnum myAppliesTo;
-	private Set<?> myAppliesToTypes;
+	private Set<String> myAppliesToTypes;
 	private RestOperationTypeEnum myOperationType;
 
 	RuleImplConditional(String theRuleName) {
@@ -47,7 +47,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 			return null;
 		}
 
-		if (theInputResourceId != null) {
+		if (theInputResourceId != null && theInputResourceId.hasIdPart()) {
 			return null;
 		}
 
@@ -63,12 +63,12 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 				case TYPES:
 					if (myOperationType == RestOperationTypeEnum.DELETE) {
 						String resourceName = theRequestDetails.getResourceName();
-						Class<? extends IBaseResource> resourceType = theRequestDetails.getFhirContext().getResourceDefinition(resourceName).getImplementingClass();
-						if (!myAppliesToTypes.contains(resourceType)) {
+						if (!myAppliesToTypes.contains(resourceName)) {
 							return null;
 						}
 					} else {
-						if (theInputResource == null || !myAppliesToTypes.contains(theInputResource.getClass())) {
+						String inputResourceName = theRequestDetails.getFhirContext().getResourceDefinition(theInputResource).getName();
+						if (theInputResource == null || !myAppliesToTypes.contains(inputResourceName)) {
 							return null;
 						}
 					}
@@ -95,7 +95,7 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 		myAppliesTo = theAppliesTo;
 	}
 
-	void setAppliesToTypes(Set<?> theAppliesToTypes) {
+	void setAppliesToTypes(Set<String> theAppliesToTypes) {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 

@@ -456,7 +456,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 				ourClient
 					.delete()
 					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+					.withAdditionalHeader(Constants.HEADER_CASCADE, "true")
 					.execute();
 				fail();
 			} catch (ForbiddenOperationException e) {
@@ -500,7 +500,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			ourClient
 				.delete()
 				.resourceById(patientId)
-				.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+				.withAdditionalHeader(Constants.HEADER_CASCADE, "true")
 				.execute();
 
 		} finally {
@@ -541,7 +541,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 				ourClient
 					.delete()
 					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE_DELETE, "true")
+					.withAdditionalHeader(Constants.HEADER_CASCADE, "true")
 					.execute();
 				fail();
 			} catch (ForbiddenOperationException e) {

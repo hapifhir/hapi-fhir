@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
@@ -16,7 +17,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.function.Function;
 
 import static org.junit.Assert.*;
@@ -149,6 +152,35 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			assertEquals("Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
 		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
+	}
+
+	@Test
+	public void testNoDuplicateConstraintReferences() {
+		Patient patient = new Patient();
+		patient.setActive(true);
+		IIdType patientId = myPatientDao.create(patient).getId().toUnqualifiedVersionless();
+
+		Condition condition = new Condition();
+		condition.setSubject(new Reference(patientId));
+		condition.setAsserter(new Reference(patientId));
+		myConditionDao.create(condition);
+
+		List<DeleteConflict> conflicts = new ArrayList<>();
+		myDeleteInterceptor.deleteConflictFunction = t -> {
+			for (DeleteConflict next : t) {
+				conflicts.add(next);
+			}
+			return new DeleteConflictOutcome().setShouldRetryCount(0);
+		};
+
+		try {
+			myPatientDao.delete(patientId);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good
+		}
+
+		assertEquals(1, conflicts.size());
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {

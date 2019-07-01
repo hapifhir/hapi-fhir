@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class DeleteConflictList {
+public class DeleteConflictList implements Iterable<DeleteConflict> {
 	private final List<DeleteConflict> myList = new ArrayList<>();
 
 	public void add(DeleteConflict theDeleteConflict) {
@@ -38,6 +38,7 @@ public class DeleteConflictList {
 		return myList.isEmpty();
 	}
 
+	@Override
 	public Iterator<DeleteConflict> iterator() {
 		return myList.iterator();
 	}

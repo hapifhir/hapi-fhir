@@ -177,12 +177,12 @@ public class CascadingDeleteInterceptor {
 	protected boolean shouldCascade(RequestDetails theRequest) {
 		if (theRequest != null) {
 			String[] cascadeParameters = theRequest.getParameters().get(Constants.PARAMETER_CASCADE_DELETE);
-			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains("true")) {
+			if (cascadeParameters != null && Arrays.asList(cascadeParameters).contains(Constants.CASCADE_DELETE)) {
 				return true;
 			}
 
-			String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE_DELETE);
-			if ("true".equals(cascadeHeader)) {
+			String cascadeHeader = theRequest.getHeader(Constants.HEADER_CASCADE);
+			if (Constants.CASCADE_DELETE.equals(cascadeHeader)) {
 				return true;
 			}
 
