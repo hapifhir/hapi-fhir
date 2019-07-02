@@ -658,7 +658,10 @@ public enum Pointcut {
 
 
 	/**
-	 * Invoked when one or more resources may are about to be cascading a delete.
+	 * Invoked when a resource is being deleted in a cascaded delete. This means that
+	 * some other resource is being deleted, but per use request or other
+	 * policy, the given resource (the one supplied as a parameter to this hook)
+	 * is also being deleted.
 	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
@@ -687,7 +690,8 @@ public enum Pointcut {
 	 * </li>
 	 * </ul>
 	 * <p>
-	 * Hooks should return <code>void</code>.
+	 * Hooks should return <code>void</code>. They may choose to throw an exception however, in
+	 * which case the delete should be rolled back.
 	 * </p>
 	 */
 	STORAGE_CASCADE_DELETE(

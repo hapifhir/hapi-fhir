@@ -92,14 +92,6 @@ public class DeleteConflictService {
 			return null;
 		}
 
-		// Don't send two conflict events for the same source resource
-		Set<Long> sourceIds = new HashSet<>();
-		resultList = resultList
-			.stream()
-			.filter(t -> sourceIds.add(t.getSourceResourcePid()))
-			.collect(Collectors.toList());
-
-
 		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
 	}
 
