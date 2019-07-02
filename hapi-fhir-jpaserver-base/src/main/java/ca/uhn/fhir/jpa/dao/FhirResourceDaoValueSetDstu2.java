@@ -29,9 +29,9 @@ import javax.annotation.PostConstruct;
 
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.codec.binary.StringUtils;
-import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
-import org.hl7.fhir.instance.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.dstu2.hapi.validation.CachingValidationSupport;
+import org.hl7.fhir.dstu2.hapi.validation.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu2.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -158,12 +158,12 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
 		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/")) {
-			return Collections.singletonList((IIdType) new IdDt(theSystem));
+			return Collections.singletonList(new IdDt(theSystem));
 		}
 
 		List<IIdType> valueSetIds;
 		Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
-		valueSetIds = new ArrayList<IIdType>();
+		valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdDt("ValueSet", next));
 		}

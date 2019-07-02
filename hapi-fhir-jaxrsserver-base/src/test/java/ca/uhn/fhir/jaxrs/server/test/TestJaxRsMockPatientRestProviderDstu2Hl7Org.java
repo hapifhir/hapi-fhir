@@ -1,27 +1,27 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
-import java.util.List;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.param.StringAndListParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.mockito.Mockito;
 
 import javax.ejb.Stateless;
 import javax.interceptor.Interceptors;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.mockito.Mockito;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsExceptionInterceptor;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.StringAndListParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
-import ca.uhn.fhir.rest.server.IPagingProvider;
+import java.util.List;
 
 /**
  * A test server delegating each call to a mock
@@ -58,7 +58,7 @@ public class TestJaxRsMockPatientRestProviderDstu2Hl7Org extends AbstractJaxRsRe
 	}
 
 	@Update
-	public MethodOutcome update(@IdParam final IdType theId, @ResourceParam final Patient patient,@ConditionalUrlParam final String theConditional) throws Exception {
+	public MethodOutcome update(@IdParam final IdType theId, @ResourceParam final Patient patient, @ConditionalUrlParam final String theConditional) throws Exception {
 		return mock.update(theId, patient, theConditional);
 	}
 

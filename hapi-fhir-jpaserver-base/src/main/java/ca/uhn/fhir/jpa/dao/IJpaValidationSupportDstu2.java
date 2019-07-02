@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu2.hapi.validation.IValidationSupport;
 
 public interface IJpaValidationSupportDstu2 extends IValidationSupport {
 

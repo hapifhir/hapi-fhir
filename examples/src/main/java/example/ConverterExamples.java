@@ -1,6 +1,8 @@
 package example;
 
-import org.hl7.fhir.convertors.*;
+import ca.uhn.hapi.converters.advisor.NullVersionConverterAdvisor30;
+import org.hl7.fhir.convertors.VersionConvertor_10_30;
+import org.hl7.fhir.convertors.VersionConvertor_14_30;
 import org.hl7.fhir.exceptions.FHIRException;
 
 public class ConverterExamples {
@@ -13,8 +15,8 @@ public class ConverterExamples {
 		VersionConvertor_10_30 converter = new VersionConvertor_10_30(advisor);
 		
 		// Create an input resource to convert
-		org.hl7.fhir.instance.model.Observation input = new org.hl7.fhir.instance.model.Observation();
-		input.setEncounter(new org.hl7.fhir.instance.model.Reference("Encounter/123"));
+		org.hl7.fhir.dstu2.model.Observation input = new org.hl7.fhir.dstu2.model.Observation();
+		input.setEncounter(new org.hl7.fhir.dstu2.model.Reference("Encounter/123"));
 		
 		// Convert the resource
 		org.hl7.fhir.dstu3.model.Observation output = converter.convertObservation(input);

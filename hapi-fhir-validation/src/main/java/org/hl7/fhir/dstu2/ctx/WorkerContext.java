@@ -1,8 +1,6 @@
 package org.hl7.fhir.dstu2.ctx;
 
-import ca.uhn.fhir.model.dstu2.resource.*;
-import org.hl7.fhir.dstu2.model.ElementDefinition;
-import org.hl7.fhir.dstu2.model.StructureDefinition;
+import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.dstu2.terminologies.ITerminologyServices;
 import org.hl7.fhir.dstu2.terminologies.ValueSetExpander;
 
@@ -32,16 +30,16 @@ import java.util.Map;
 public class WorkerContext implements NameResolver {
 
 	private ITerminologyServices terminologyServices = new NullTerminologyServices();
-	private Map<String, ValueSet> codeSystems = new HashMap<String, ValueSet>();
-	private Map<String, DataElement> dataElements = new HashMap<String, DataElement>();
-	private Map<String, ValueSet> valueSets = new HashMap<String, ValueSet>();
-	private Map<String, ConceptMap> maps = new HashMap<String, ConceptMap>();
-	private Map<String, StructureDefinition> profiles = new HashMap<String, StructureDefinition>();
-	private Map<String, SearchParameter> searchParameters = new HashMap<String, SearchParameter>();
-	private Map<String, StructureDefinition> extensionDefinitions = new HashMap<String, StructureDefinition>();
+	private Map<String, ValueSet> codeSystems = new HashMap<>();
+	private Map<String, DataElement> dataElements = new HashMap<>();
+	private Map<String, ValueSet> valueSets = new HashMap<>();
+	private Map<String, ConceptMap> maps = new HashMap<>();
+	private Map<String, StructureDefinition> profiles = new HashMap<>();
+	private Map<String, SearchParameter> searchParameters = new HashMap<>();
+	private Map<String, StructureDefinition> extensionDefinitions = new HashMap<>();
 	private String version;
-	private List<String> resourceNames = new ArrayList<String>();
-	private Map<String, Questionnaire> questionnaires = new HashMap<String, Questionnaire>();
+	private List<String> resourceNames = new ArrayList<>();
+	private Map<String, Questionnaire> questionnaires = new HashMap<>();
 
 	public WorkerContext() {
 		super();
@@ -118,14 +116,14 @@ public class WorkerContext implements NameResolver {
 	public void seeQuestionnaire(String url, Questionnaire theQuestionnaire) throws Exception {
 		if (questionnaires.get(theQuestionnaire.getId()) != null)
 			throw new Exception("duplicate extension definition: " + theQuestionnaire.getId());
-		questionnaires.put(theQuestionnaire.getId().getValue(), theQuestionnaire);
+		questionnaires.put(theQuestionnaire.getId(), theQuestionnaire);
 		questionnaires.put(url, theQuestionnaire);
 	}
 
 	public void seeValueSet(String url, ValueSet vs) throws Exception {
 		if (valueSets.containsKey(vs.getUrl()))
 			throw new Exception("Duplicate Profile " + vs.getUrl());
-		valueSets.put(vs.getId().getValue(), vs);
+		valueSets.put(vs.getId(), vs);
 		valueSets.put(url, vs);
 		valueSets.put(vs.getUrl(), vs);
 		if (vs.getCodeSystem().isEmpty() == false) {
@@ -209,11 +207,6 @@ public class WorkerContext implements NameResolver {
 
 		@Override
 		public org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionComponent expandVS(org.hl7.fhir.dstu2.model.ValueSet.ConceptSetComponent inc) throws Exception {
-			throw new Error("call to NullTerminologyServices");
-		}
-
-		@Override
-		public ValueSetExpander.ValueSetExpansionOutcome expand(org.hl7.fhir.dstu2.model.ValueSet theValueSet) {
 			throw new Error("call to NullTerminologyServices");
 		}
 

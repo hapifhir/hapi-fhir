@@ -142,7 +142,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
   @Override
   public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-    return new ArrayList<StructureDefinition>(myStructureDefinitions.values());
+    return new ArrayList<>(myStructureDefinitions.values());
   }
 
   @Override

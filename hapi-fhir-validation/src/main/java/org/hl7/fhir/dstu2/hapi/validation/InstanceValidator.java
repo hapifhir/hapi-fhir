@@ -1,26 +1,27 @@
-package org.hl7.fhir.instance.validation;
+package org.hl7.fhir.dstu2.hapi.validation;
 
 import com.google.gson.*;
+import org.hl7.fhir.dstu2016may.utils.XmlLocationData;
 import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
-import org.hl7.fhir.instance.formats.FormatUtilities;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.ElementDefinition.ConstraintSeverity;
-import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.instance.model.ElementDefinition.ElementDefinitionConstraintComponent;
-import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.instance.model.Enumerations.BindingStrength;
+import org.hl7.fhir.dstu2.formats.FormatUtilities;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.ElementDefinition.ConstraintSeverity;
+import org.hl7.fhir.dstu2.model.ElementDefinition.ElementDefinitionBindingComponent;
+import org.hl7.fhir.dstu2.model.ElementDefinition.ElementDefinitionConstraintComponent;
+import org.hl7.fhir.dstu2.model.ElementDefinition.TypeRefComponent;
+import org.hl7.fhir.dstu2.model.Enumerations.BindingStrength;
 import org.hl7.fhir.dstu2.model.StructureDefinition.ExtensionContext;
 import org.hl7.fhir.dstu2.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu2.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.instance.utils.FHIRPathEngine;
-import org.hl7.fhir.instance.utils.IResourceValidator;
+import org.hl7.fhir.dstu2.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu2.utils.IResourceValidator;
 import org.hl7.fhir.dstu2.utils.IWorkerContext;
 import org.hl7.fhir.dstu2.utils.IWorkerContext.ValidationResult;
-import org.hl7.fhir.instance.utils.ProfileUtilities;
+import org.hl7.fhir.dstu2.utils.ProfileUtilities;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -354,7 +355,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       throw new Error("Unknown context type");
   }
 
-  private void checkFixedValue(List<ValidationMessage> errors, String path, WrapperElement focus, org.hl7.fhir.instance.model.Element fixed, String propName) {
+  private void checkFixedValue(List<ValidationMessage> errors, String path, WrapperElement focus, org.hl7.fhir.dstu2.model.Element fixed, String propName) {
     if (fixed == null && focus == null)
       ; // this is all good
     else if (fixed == null && focus != null)
@@ -363,42 +364,42 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, false, "Mising element " + propName);
     else {
       String value = focus.getAttribute("value");
-      if (fixed instanceof org.hl7.fhir.instance.model.BooleanType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.BooleanType) fixed).asStringValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.BooleanType) fixed).asStringValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.IntegerType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.IntegerType) fixed).asStringValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.IntegerType) fixed).asStringValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.DecimalType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.DecimalType) fixed).asStringValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.DecimalType) fixed).asStringValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.Base64BinaryType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.Base64BinaryType) fixed).asStringValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.Base64BinaryType) fixed).asStringValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.InstantType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.InstantType) fixed).getValue().toString(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.InstantType) fixed).asStringValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.StringType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.StringType) fixed).getValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.StringType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.UriType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.UriType) fixed).getValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.UriType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.DateType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.DateType) fixed).getValue().toString(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.DateType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.DateTimeType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.DateTimeType) fixed).getValue().toString(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.DateTimeType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.OidType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.OidType) fixed).getValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.OidType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.UuidType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.UuidType) fixed).getValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.UuidType) fixed).getValue() + "'");
-      else if (fixed instanceof org.hl7.fhir.instance.model.CodeType)
-        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.instance.model.CodeType) fixed).getValue(), value),
-            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.instance.model.CodeType) fixed).getValue() + "'");
+      if (fixed instanceof org.hl7.fhir.dstu2.model.BooleanType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.BooleanType) fixed).asStringValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.BooleanType) fixed).asStringValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.IntegerType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.IntegerType) fixed).asStringValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.IntegerType) fixed).asStringValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.DecimalType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.DecimalType) fixed).asStringValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.DecimalType) fixed).asStringValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.Base64BinaryType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.Base64BinaryType) fixed).asStringValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.Base64BinaryType) fixed).asStringValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.InstantType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.InstantType) fixed).getValue().toString(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.InstantType) fixed).asStringValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.StringType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.StringType) fixed).getValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.StringType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.UriType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.UriType) fixed).getValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.UriType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.DateType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.DateType) fixed).getValue().toString(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.DateType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.DateTimeType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.DateTimeType) fixed).getValue().toString(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.DateTimeType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.OidType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.OidType) fixed).getValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.OidType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.UuidType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.UuidType) fixed).getValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.UuidType) fixed).getValue() + "'");
+      else if (fixed instanceof org.hl7.fhir.dstu2.model.CodeType)
+        rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.CodeType) fixed).getValue(), value),
+            "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.CodeType) fixed).getValue() + "'");
       else if (fixed instanceof org.hl7.fhir.dstu2.model.IdType)
         rule(errors, IssueType.VALUE, focus.line(), focus.col(), path, check(((org.hl7.fhir.dstu2.model.IdType) fixed).getValue(), value),
             "Value is '" + value + "' but must be '" + ((org.hl7.fhir.dstu2.model.IdType) fixed).getValue() + "'");
@@ -787,6 +788,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return Utilities.appendSlash(base) + type + "/" + id;
   }
 
+  @Override
   public BestPracticeWarningLevel getBasePracticeWarningLevel() {
     return bpWarnings;
   }
@@ -941,10 +943,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + type);
   }
 
+	@Override
 	public IdStatus getResourceIdRule() {
 		return resourceIdRule;
 	}
 
+	@Override
 	public void setResourceIdRule(IdStatus resourceIdRule) {
 		this.resourceIdRule = resourceIdRule;
 	}
@@ -1209,6 +1213,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return sd.getSnapshot().getElement().get(0);
   }
 
+  @Override
   public void setBestPracticeWarningLevel(BestPracticeWarningLevel value) {
     bpWarnings = value;
   }
@@ -2071,6 +2076,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			this.typeProfile = typeProfile;
 		}
 
+		@Override
 		public boolean equalsDeep(Base other) {
 			if (!super.equalsDeep(other) || !fhirType().equals(other.fhirType()))
 			  return false;
@@ -2153,6 +2159,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	  	return true;
 		}
 
+		@Override
 		public boolean isPrimitive() {
 			String t = fhirType();
 			return t.equalsIgnoreCase("boolean") || t.equalsIgnoreCase("integer") || t.equalsIgnoreCase("string") || t.equalsIgnoreCase("decimal") || t.equalsIgnoreCase("uri") || t.equalsIgnoreCase("base64Binary") ||
@@ -2188,6 +2195,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			return list;
 		}
 
+		@Override
 		public String primitiveValue() {
 			return wrapper.getAttribute("value");
 		}

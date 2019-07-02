@@ -32,7 +32,7 @@ POSSIBILITY OF SUCH DAMAGE.
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.exceptions.FHIRFormatError;
 import org.hl7.fhir.instance.formats.IParser;
-import org.hl7.fhir.instance.model.OperationOutcome;
+import org.hl7.fhir.dstu2.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.terminologies.ValueSetExpander;

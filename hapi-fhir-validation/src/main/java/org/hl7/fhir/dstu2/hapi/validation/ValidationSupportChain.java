@@ -18,7 +18,7 @@ public class ValidationSupportChain implements IValidationSupport {
    * Constructor
    */
   public ValidationSupportChain() {
-    myChain = new ArrayList<IValidationSupport>();
+    myChain = new ArrayList<>();
   }
 
   /**

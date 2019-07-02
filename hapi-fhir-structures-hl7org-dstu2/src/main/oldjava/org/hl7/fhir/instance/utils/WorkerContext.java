@@ -16,7 +16,7 @@ import org.hl7.fhir.instance.model.ConceptMap;
 import org.hl7.fhir.instance.model.Conformance;
 import org.hl7.fhir.instance.model.DataElement;
 import org.hl7.fhir.instance.model.ElementDefinition.TypeRefComponent;
-import org.hl7.fhir.instance.model.OperationOutcome;
+import org.hl7.fhir.dstu2.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.dstu2.model.Questionnaire;
 import org.hl7.fhir.instance.model.Resource;

@@ -1,13 +1,5 @@
 package ca.uhn.fhir.tests.integration.karaf.dstu2hl7org;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -22,20 +14,7 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.instance.model.Address;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.Composition;
-import org.hl7.fhir.instance.model.DiagnosticReport;
-import org.hl7.fhir.instance.model.EnumFactory;
-import org.hl7.fhir.instance.model.Enumeration;
-import org.hl7.fhir.instance.model.InstantType;
-import org.hl7.fhir.instance.model.Narrative;
-import org.hl7.fhir.instance.model.Organization;
-import org.hl7.fhir.dstu2.model.Patient;
-import org.hl7.fhir.instance.model.PrimitiveType;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.Resource;
-import org.hl7.fhir.instance.model.Specimen;
+import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -55,21 +34,20 @@ import org.xmlunit.diff.DefaultNodeMatcher;
 import org.xmlunit.diff.Diff;
 import org.xmlunit.diff.ElementSelectors;
 
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.HAPI_FHIR_HL7ORG_DSTU2;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.KARAF;
-import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.WRAP;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import static ca.uhn.fhir.tests.integration.karaf.PaxExamOptions.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.ops4j.pax.exam.CoreOptions.mavenBundle;
-import static org.ops4j.pax.exam.CoreOptions.options;
-import static org.ops4j.pax.exam.CoreOptions.when;
+import static org.junit.Assert.*;
+import static org.ops4j.pax.exam.CoreOptions.*;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.debugConfiguration;
 
 
@@ -165,7 +143,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		Organization o = new Organization();
 		o.setName("ORG");
-		p.addExtension().setUrl("urn:foo").setValue(new org.hl7.fhir.instance.model.Reference(o));
+		p.addExtension().setUrl("urn:foo").setValue(new org.hl7.fhir.dstu2.model.Reference(o));
 
 		String str = ourCtx.newXmlParser().encodeResourceToString(p);
 		ourLog.info(str);
@@ -173,9 +151,9 @@ public class XmlParserHl7OrgDstu2Test {
 		p = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, str);
 		assertEquals("PATIENT", p.getName().get(0).getFamily().get(0).getValue());
 
-		List<org.hl7.fhir.instance.model.Extension> exts = p.getExtension();
+		List<org.hl7.fhir.dstu2.model.Extension> exts = p.getExtension();
 		assertEquals(1, exts.size());
-		org.hl7.fhir.instance.model.Reference rr = (org.hl7.fhir.instance.model.Reference) exts.get(0).getValue();
+		org.hl7.fhir.dstu2.model.Reference rr = (org.hl7.fhir.dstu2.model.Reference) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
 		assertEquals("ORG", o.getName());
 	}
@@ -183,13 +161,13 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testDuplicateContainedResources() {
 
-		org.hl7.fhir.instance.model.Observation resA = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation resA = new org.hl7.fhir.dstu2.model.Observation();
 		resA.getCode().setText("A");
 
-		org.hl7.fhir.instance.model.Observation resB = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation resB = new org.hl7.fhir.dstu2.model.Observation();
 		resB.getCode().setText("B");
-		resB.addRelated().setTarget(new org.hl7.fhir.instance.model.Reference(resA));
-		resB.addRelated().setTarget(new org.hl7.fhir.instance.model.Reference(resA));
+		resB.addRelated().setTarget(new org.hl7.fhir.dstu2.model.Reference(resA));
+		resB.addRelated().setTarget(new org.hl7.fhir.dstu2.model.Reference(resA));
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resB);
 		ourLog.info(encoded);
@@ -278,37 +256,37 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeAndParseExtensions() throws Exception {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
-		patient.addIdentifier().setUse(org.hl7.fhir.instance.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+		patient.addIdentifier().setUse(org.hl7.fhir.dstu2.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
-		org.hl7.fhir.instance.model.Extension ext = new org.hl7.fhir.instance.model.Extension();
+		org.hl7.fhir.dstu2.model.Extension ext = new org.hl7.fhir.dstu2.model.Extension();
 		ext.setUrl("http://example.com/extensions#someext");
-		ext.setValue(new org.hl7.fhir.instance.model.DateTimeType("2011-01-02T11:13:15"));
+		ext.setValue(new org.hl7.fhir.dstu2.model.DateTimeType("2011-01-02T11:13:15"));
 		patient.getExtension().add(ext);
 
-		org.hl7.fhir.instance.model.Extension parent = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#parent");
+		org.hl7.fhir.dstu2.model.Extension parent = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#parent");
 		patient.getExtension().add(parent);
-		org.hl7.fhir.instance.model.Extension child1 = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.instance.model.StringType("value1"));
+		org.hl7.fhir.dstu2.model.Extension child1 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.dstu2.model.StringType("value1"));
 		parent.getExtension().add(child1);
-		org.hl7.fhir.instance.model.Extension child2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.instance.model.StringType("value2"));
+		org.hl7.fhir.dstu2.model.Extension child2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.dstu2.model.StringType("value2"));
 		parent.getExtension().add(child2);
 
-		org.hl7.fhir.instance.model.Extension modExt = new org.hl7.fhir.instance.model.Extension();
+		org.hl7.fhir.dstu2.model.Extension modExt = new org.hl7.fhir.dstu2.model.Extension();
 		modExt.setUrl("http://example.com/extensions#modext");
-		modExt.setValue(new org.hl7.fhir.instance.model.DateType("1995-01-02"));
+		modExt.setValue(new org.hl7.fhir.dstu2.model.DateType("1995-01-02"));
 		patient.getModifierExtension().add(modExt);
 
-		org.hl7.fhir.instance.model.HumanName name = patient.addName();
+		org.hl7.fhir.dstu2.model.HumanName name = patient.addName();
 		name.addFamily("Blah");
-		org.hl7.fhir.instance.model.StringType given = name.addGivenElement();
+		org.hl7.fhir.dstu2.model.StringType given = name.addGivenElement();
 		given.setValue("Joe");
-		org.hl7.fhir.instance.model.Extension ext2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.instance.model.StringType("given"));
+		org.hl7.fhir.dstu2.model.Extension ext2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.dstu2.model.StringType("given"));
 		given.getExtension().add(ext2);
 
-		org.hl7.fhir.instance.model.StringType given2 = name.addGivenElement();
+		org.hl7.fhir.dstu2.model.StringType given2 = name.addGivenElement();
 		given2.setValue("Shmoe");
-		org.hl7.fhir.instance.model.Extension given2ext = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext_parent");
+		org.hl7.fhir.dstu2.model.Extension given2ext = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext_parent");
 		given2.getExtension().add(given2ext);
-		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new org.hl7.fhir.instance.model.StringType("CHILD"));
+		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new org.hl7.fhir.dstu2.model.StringType("CHILD"));
 
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
@@ -332,34 +310,34 @@ public class XmlParserHl7OrgDstu2Test {
 		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, enc);
 		ext = parsed.getExtension().get(0);
 		assertEquals("http://example.com/extensions#someext", ext.getUrl());
-		assertEquals("2011-01-02T11:13:15", ((org.hl7.fhir.instance.model.DateTimeType) ext.getValue()).getValueAsString());
+		assertEquals("2011-01-02T11:13:15", ((org.hl7.fhir.dstu2.model.DateTimeType) ext.getValue()).getValueAsString());
 
 		parent = patient.getExtension().get(1);
 		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
 		assertEquals("http://example.com#child", child1.getUrl());
-		assertEquals("value1", ((org.hl7.fhir.instance.model.StringType) child1.getValue()).getValueAsString());
+		assertEquals("value1", ((org.hl7.fhir.dstu2.model.StringType) child1.getValue()).getValueAsString());
 		child2 = parent.getExtension().get(1);
 		assertEquals("http://example.com#child", child2.getUrl());
-		assertEquals("value2", ((org.hl7.fhir.instance.model.StringType) child2.getValue()).getValueAsString());
+		assertEquals("value2", ((org.hl7.fhir.dstu2.model.StringType) child2.getValue()).getValueAsString());
 
 		modExt = parsed.getModifierExtension().get(0);
 		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
-		assertEquals("1995-01-02", ((org.hl7.fhir.instance.model.DateType) modExt.getValue()).getValueAsString());
+		assertEquals("1995-01-02", ((org.hl7.fhir.dstu2.model.DateType) modExt.getValue()).getValueAsString());
 
 		name = parsed.getName().get(0);
 
 		ext2 = name.getGiven().get(0).getExtension().get(0);
 		assertEquals("http://examples.com#givenext", ext2.getUrl());
-		assertEquals("given", ((org.hl7.fhir.instance.model.StringType) ext2.getValue()).getValueAsString());
+		assertEquals("given", ((org.hl7.fhir.dstu2.model.StringType) ext2.getValue()).getValueAsString());
 
 		given2ext = name.getGiven().get(1).getExtension().get(0);
 		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
-		org.hl7.fhir.instance.model.Extension given2ext2 = given2ext.getExtension().get(0);
+		org.hl7.fhir.dstu2.model.Extension given2ext2 = given2ext.getExtension().get(0);
 		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
-		assertEquals("CHILD", ((org.hl7.fhir.instance.model.StringType) given2ext2.getValue()).getValue());
+		assertEquals("CHILD", ((org.hl7.fhir.dstu2.model.StringType) given2ext2.getValue()).getValue());
 
 	}
 
@@ -394,7 +372,7 @@ public class XmlParserHl7OrgDstu2Test {
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
 
-		patient.getGenderElement().setValue(org.hl7.fhir.instance.model.Enumerations.AdministrativeGender.MALE);
+		patient.getGenderElement().setValue(org.hl7.fhir.dstu2.model.Enumerations.AdministrativeGender.MALE);
 
 		String val = ourCtx.newXmlParser().encodeResourceToString(patient);
 		ourLog.info(val);
@@ -565,7 +543,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		MyPatientWithOneDeclaredExtension patient = new MyPatientWithOneDeclaredExtension();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
-		patient.setFoo(new org.hl7.fhir.instance.model.Reference("Organization/123"));
+		patient.setFoo(new org.hl7.fhir.dstu2.model.Reference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -574,7 +552,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
-		org.hl7.fhir.instance.model.Reference ref = actual.getFoo();
+		org.hl7.fhir.dstu2.model.Reference ref = actual.getFoo();
 		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
@@ -626,11 +604,11 @@ public class XmlParserHl7OrgDstu2Test {
 
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifier() {
-		org.hl7.fhir.instance.model.Observation obs = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation obs = new org.hl7.fhir.dstu2.model.Observation();
 		obs.setId("1");
 		obs.getMeta().addProfile("http://profile");
-		org.hl7.fhir.instance.model.Extension ext = obs.addExtension();
-		ext.setUrl("http://exturl").setValue(new org.hl7.fhir.instance.model.StringType("ext_url_value"));
+		org.hl7.fhir.dstu2.model.Extension ext = obs.addExtension();
+		ext.setUrl("http://exturl").setValue(new org.hl7.fhir.dstu2.model.StringType("ext_url_value"));
 
 		obs.getCode().setText("CODE");
 
@@ -645,22 +623,22 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(output, not(stringContainsInOrder("<url value=\"http://exturl\"/>")));
 		// @formatter:on
 
-		obs = parser.parseResource(org.hl7.fhir.instance.model.Observation.class, output);
+		obs = parser.parseResource(org.hl7.fhir.dstu2.model.Observation.class, output);
 		assertEquals(1, obs.getExtension().size());
 		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
-		assertEquals("ext_url_value", ((org.hl7.fhir.instance.model.StringType) obs.getExtension().get(0).getValue()).getValue());
+		assertEquals("ext_url_value", ((org.hl7.fhir.dstu2.model.StringType) obs.getExtension().get(0).getValue()).getValue());
 	}
 
 	@Test
 	public void testEncodeExtensionUndeclaredNonModifierWithChildExtension() {
-		org.hl7.fhir.instance.model.Observation obs = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation obs = new org.hl7.fhir.dstu2.model.Observation();
 		obs.setId("1");
 		obs.getMeta().addProfile("http://profile");
-		org.hl7.fhir.instance.model.Extension ext = obs.addExtension();
+		org.hl7.fhir.dstu2.model.Extension ext = obs.addExtension();
 		ext.setUrl("http://exturl");
 
-		org.hl7.fhir.instance.model.Extension subExt = ext.addExtension();
-		subExt.setUrl("http://subext").setValue(new org.hl7.fhir.instance.model.StringType("sub_ext_value"));
+		org.hl7.fhir.dstu2.model.Extension subExt = ext.addExtension();
+		subExt.setUrl("http://subext").setValue(new org.hl7.fhir.dstu2.model.StringType("sub_ext_value"));
 
 		obs.getCode().setText("CODE");
 
@@ -677,12 +655,12 @@ public class XmlParserHl7OrgDstu2Test {
 		assertThat(output, not(stringContainsInOrder("<url value=\"http://exturl\"/>")));
 		// @formatter:on
 
-		obs = parser.parseResource(org.hl7.fhir.instance.model.Observation.class, output);
+		obs = parser.parseResource(org.hl7.fhir.dstu2.model.Observation.class, output);
 		assertEquals(1, obs.getExtension().size());
 		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
 		assertEquals(1, obs.getExtension().get(0).getExtension().size());
 		assertEquals("http://subext", obs.getExtension().get(0).getExtension().get(0).getUrl());
-		assertEquals("sub_ext_value", ((org.hl7.fhir.instance.model.StringType) obs.getExtension().get(0).getExtension().get(0).getValue()).getValue());
+		assertEquals("sub_ext_value", ((org.hl7.fhir.dstu2.model.StringType) obs.getExtension().get(0).getExtension().get(0).getValue()).getValue());
 	}
 
 	/**
@@ -692,12 +670,12 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeExtensionWithContainedResource() {
 
 		TestPatientFor327 patient = new TestPatientFor327();
-		patient.setBirthDateElement(new org.hl7.fhir.instance.model.DateType("2016-04-14"));
+		patient.setBirthDateElement(new org.hl7.fhir.dstu2.model.DateType("2016-04-14"));
 
-		List<org.hl7.fhir.instance.model.Reference> conditions = new ArrayList<org.hl7.fhir.instance.model.Reference>();
-		org.hl7.fhir.instance.model.Condition condition = new org.hl7.fhir.instance.model.Condition();
+		List<org.hl7.fhir.dstu2.model.Reference> conditions = new ArrayList<org.hl7.fhir.dstu2.model.Reference>();
+		org.hl7.fhir.dstu2.model.Condition condition = new org.hl7.fhir.dstu2.model.Condition();
 		condition.addBodySite().setText("BODY SITE");
-		conditions.add(new org.hl7.fhir.instance.model.Reference(condition));
+		conditions.add(new org.hl7.fhir.dstu2.model.Reference(condition));
 		patient.setCondition(conditions);
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
@@ -731,7 +709,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addAddress().setUse(Address.AddressUse.HOME);
-		patient.addExtension().setUrl("urn:foo").setValue(new org.hl7.fhir.instance.model.Reference().setReference("Organization/123"));
+		patient.addExtension().setUrl("urn:foo").setValue(new org.hl7.fhir.dstu2.model.Reference().setReference("Organization/123"));
 
 		String val = parser.encodeResourceToString(patient);
 		ourLog.info(val);
@@ -740,17 +718,17 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient actual = parser.parseResource(org.hl7.fhir.dstu2.model.Patient.class, val);
 		assertEquals(Address.AddressUse.HOME, patient.getAddress().get(0).getUse());
-		List<org.hl7.fhir.instance.model.Extension> ext = actual.getExtension();
+		List<org.hl7.fhir.dstu2.model.Extension> ext = actual.getExtension();
 		assertEquals(1, ext.size());
-		org.hl7.fhir.instance.model.Reference ref = (org.hl7.fhir.instance.model.Reference) ext.get(0).getValue();
+		org.hl7.fhir.dstu2.model.Reference ref = (org.hl7.fhir.dstu2.model.Reference) ext.get(0).getValue();
 		assertEquals("Organization/123", ref.getReferenceElement().getValue());
 
 	}
 
 	@Test
 	public void testEncodeInvalidChildGoodException() {
-		org.hl7.fhir.instance.model.Observation obs = new org.hl7.fhir.instance.model.Observation();
-		obs.setValue(new org.hl7.fhir.instance.model.DecimalType(112.22));
+		org.hl7.fhir.dstu2.model.Observation obs = new org.hl7.fhir.dstu2.model.Observation();
+		obs.setValue(new org.hl7.fhir.dstu2.model.DecimalType(112.22));
 
 		IParser p = ourCtx.newJsonParser();
 
@@ -859,13 +837,13 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testEncodeResourceRef() throws DataFormatException {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
-		patient.setManagingOrganization(new org.hl7.fhir.instance.model.Reference());
+		patient.setManagingOrganization(new org.hl7.fhir.dstu2.model.Reference());
 
 		IParser p = ourCtx.newXmlParser();
 		String str = p.encodeResourceToString(patient);
 		assertThat(str, IsNot.not(StringContains.containsString("managingOrganization")));
 
-		org.hl7.fhir.instance.model.Reference ref = new org.hl7.fhir.instance.model.Reference();
+		org.hl7.fhir.dstu2.model.Reference ref = new org.hl7.fhir.dstu2.model.Reference();
 		ref.setReference("Organization/123");
 		ref.setDisplay("DISPLAY!");
 		patient.setManagingOrganization(ref);
@@ -875,7 +853,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		Organization org = new Organization();
 		org.addIdentifier().setSystem("foo").setValue("bar");
-		patient.setManagingOrganization(new org.hl7.fhir.instance.model.Reference(org));
+		patient.setManagingOrganization(new org.hl7.fhir.dstu2.model.Reference(org));
 		str = p.encodeResourceToString(patient);
 		assertThat(str, StringContains.containsString("<contained><Organization"));
 
@@ -969,18 +947,18 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testEncodingNullExtension() {
 		org.hl7.fhir.dstu2.model.Patient p = new org.hl7.fhir.dstu2.model.Patient();
-		org.hl7.fhir.instance.model.Extension extension = new org.hl7.fhir.instance.model.Extension().setUrl("http://foo#bar");
+		org.hl7.fhir.dstu2.model.Extension extension = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://foo#bar");
 		p.getExtension().add(extension);
 		String str = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"/>", str);
 
-		extension.setValue(new org.hl7.fhir.instance.model.StringType());
+		extension.setValue(new org.hl7.fhir.dstu2.model.StringType());
 
 		str = ourCtx.newXmlParser().encodeResourceToString(p);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"/>", str);
 
-		extension.setValue(new org.hl7.fhir.instance.model.StringType(""));
+		extension.setValue(new org.hl7.fhir.dstu2.model.StringType(""));
 
 		str = ourCtx.newXmlParser().encodeResourceToString(p);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"/>", str);
@@ -992,10 +970,10 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 
-		org.hl7.fhir.instance.model.HumanName name = patient.addName();
+		org.hl7.fhir.dstu2.model.HumanName name = patient.addName();
 		name.addFamily("Shmoe");
-		org.hl7.fhir.instance.model.HumanName given = name.addGiven("Joe");
-		org.hl7.fhir.instance.model.Extension ext2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.instance.model.StringType("Hello"));
+		org.hl7.fhir.dstu2.model.HumanName given = name.addGiven("Joe");
+		org.hl7.fhir.dstu2.model.Extension ext2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.dstu2.model.StringType("Hello"));
 		given.getExtension().add(ext2);
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
@@ -1006,7 +984,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getExtension().size());
-		org.hl7.fhir.instance.model.Extension ext = parsed.getName().get(0).getExtension().get(0);
+		org.hl7.fhir.dstu2.model.Extension ext = parsed.getName().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
@@ -1016,11 +994,11 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 
-		org.hl7.fhir.instance.model.HumanName name = patient.addName();
-		org.hl7.fhir.instance.model.StringType family = name.addFamilyElement();
+		org.hl7.fhir.dstu2.model.HumanName name = patient.addName();
+		org.hl7.fhir.dstu2.model.StringType family = name.addFamilyElement();
 		family.setValue("Shmoe");
 
-		org.hl7.fhir.instance.model.Extension ext2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.instance.model.StringType("Hello"));
+		org.hl7.fhir.dstu2.model.Extension ext2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.dstu2.model.StringType("Hello"));
 		family.getExtension().add(ext2);
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(output);
@@ -1031,7 +1009,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		org.hl7.fhir.dstu2.model.Patient parsed = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, new StringReader(enc));
 		assertEquals(1, parsed.getName().get(0).getFamily().get(0).getExtension().size());
-		org.hl7.fhir.instance.model.Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
+		org.hl7.fhir.dstu2.model.Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
 		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
@@ -1040,9 +1018,9 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testExtensions() throws DataFormatException {
 
 		MyPatientHl7Org patient = new MyPatientHl7Org();
-		patient.setPetName(new org.hl7.fhir.instance.model.StringType("Fido"));
-		patient.getImportantDates().add(new org.hl7.fhir.instance.model.DateTimeType("2010-01-02"));
-		patient.getImportantDates().add(new org.hl7.fhir.instance.model.DateTimeType("2014-01-26T11:11:11"));
+		patient.setPetName(new org.hl7.fhir.dstu2.model.StringType("Fido"));
+		patient.getImportantDates().add(new org.hl7.fhir.dstu2.model.DateTimeType("2010-01-02"));
+		patient.getImportantDates().add(new org.hl7.fhir.dstu2.model.DateTimeType("2014-01-26T11:11:11"));
 
 		patient.addName().addFamily("Smith");
 
@@ -1176,39 +1154,39 @@ public class XmlParserHl7OrgDstu2Test {
 	public void testMoreExtensions() throws Exception {
 
 		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
-		patient.addIdentifier().setUse(org.hl7.fhir.instance.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
+		patient.addIdentifier().setUse(org.hl7.fhir.dstu2.model.Identifier.IdentifierUse.OFFICIAL).setSystem("urn:example").setValue("7000135");
 
-		org.hl7.fhir.instance.model.Extension ext = new org.hl7.fhir.instance.model.Extension();
+		org.hl7.fhir.dstu2.model.Extension ext = new org.hl7.fhir.dstu2.model.Extension();
 		ext.setUrl("http://example.com/extensions#someext");
-		ext.setValue(new org.hl7.fhir.instance.model.DateTimeType("2011-01-02T11:13:15"));
+		ext.setValue(new org.hl7.fhir.dstu2.model.DateTimeType("2011-01-02T11:13:15"));
 
 		// Add the extension to the resource
 		patient.getExtension().add(ext);
 		// END SNIPPET: resourceExtension
 
 		// START SNIPPET: resourceStringExtension
-		org.hl7.fhir.instance.model.HumanName name = patient.addName();
+		org.hl7.fhir.dstu2.model.HumanName name = patient.addName();
 		name.addFamily("Shmoe");
-		org.hl7.fhir.instance.model.StringType given = name.addGivenElement();
+		org.hl7.fhir.dstu2.model.StringType given = name.addGivenElement();
 		given.setValue("Joe");
-		org.hl7.fhir.instance.model.Extension ext2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.instance.model.StringType("given"));
+		org.hl7.fhir.dstu2.model.Extension ext2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext").setValue(new org.hl7.fhir.dstu2.model.StringType("given"));
 		given.getExtension().add(ext2);
 
-		org.hl7.fhir.instance.model.StringType given2 = name.addGivenElement();
+		org.hl7.fhir.dstu2.model.StringType given2 = name.addGivenElement();
 		given2.setValue("Shmoe");
-		org.hl7.fhir.instance.model.Extension given2ext = new org.hl7.fhir.instance.model.Extension().setUrl("http://examples.com#givenext_parent");
+		org.hl7.fhir.dstu2.model.Extension given2ext = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://examples.com#givenext_parent");
 		given2.getExtension().add(given2ext);
-		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new org.hl7.fhir.instance.model.StringType("CHILD"));
+		given2ext.addExtension().setUrl("http://examples.com#givenext_child").setValue(new org.hl7.fhir.dstu2.model.StringType("CHILD"));
 		// END SNIPPET: resourceStringExtension
 
 		// START SNIPPET: subExtension
-		org.hl7.fhir.instance.model.Extension parent = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#parent");
+		org.hl7.fhir.dstu2.model.Extension parent = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#parent");
 		patient.getExtension().add(parent);
 
-		org.hl7.fhir.instance.model.Extension child1 = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.instance.model.StringType("value1"));
+		org.hl7.fhir.dstu2.model.Extension child1 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.dstu2.model.StringType("value1"));
 		parent.getExtension().add(child1);
 
-		org.hl7.fhir.instance.model.Extension child2 = new org.hl7.fhir.instance.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.instance.model.StringType("value1"));
+		org.hl7.fhir.dstu2.model.Extension child2 = new org.hl7.fhir.dstu2.model.Extension().setUrl("http://example.com#child").setValue(new org.hl7.fhir.dstu2.model.StringType("value1"));
 		parent.getExtension().add(child2);
 		// END SNIPPET: subExtension
 
@@ -1229,16 +1207,16 @@ public class XmlParserHl7OrgDstu2Test {
 	@Test
 	public void testNestedContainedResources() {
 
-		org.hl7.fhir.instance.model.Observation A = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation A = new org.hl7.fhir.dstu2.model.Observation();
 		A.getCode().setText("A");
 
-		org.hl7.fhir.instance.model.Observation B = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation B = new org.hl7.fhir.dstu2.model.Observation();
 		B.getCode().setText("B");
-		A.addRelated().setTarget(new org.hl7.fhir.instance.model.Reference(B));
+		A.addRelated().setTarget(new org.hl7.fhir.dstu2.model.Reference(B));
 
-		org.hl7.fhir.instance.model.Observation C = new org.hl7.fhir.instance.model.Observation();
+		org.hl7.fhir.dstu2.model.Observation C = new org.hl7.fhir.dstu2.model.Observation();
 		C.getCode().setText("C");
-		B.addRelated().setTarget(new org.hl7.fhir.instance.model.Reference(C));
+		B.addRelated().setTarget(new org.hl7.fhir.dstu2.model.Reference(C));
 
 		String str = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(A);
 		ourLog.info(str);
@@ -1247,13 +1225,13 @@ public class XmlParserHl7OrgDstu2Test {
 			stringContainsInOrder(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
 		assertThat(str, stringContainsInOrder(Arrays.asList("<contained>", "</contained>", "<contained>", "</contained>")));
 
-		org.hl7.fhir.instance.model.Observation obs = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.Observation.class, str);
+		org.hl7.fhir.dstu2.model.Observation obs = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Observation.class, str);
 		assertEquals("A", obs.getCode().getText());
 
-		org.hl7.fhir.instance.model.Observation obsB = (org.hl7.fhir.instance.model.Observation) obs.getRelated().get(0).getTarget().getResource();
+		org.hl7.fhir.dstu2.model.Observation obsB = (org.hl7.fhir.dstu2.model.Observation) obs.getRelated().get(0).getTarget().getResource();
 		assertEquals("B", obsB.getCode().getText());
 
-		org.hl7.fhir.instance.model.Observation obsC = (org.hl7.fhir.instance.model.Observation) obsB.getRelated().get(0).getTarget().getResource();
+		org.hl7.fhir.dstu2.model.Observation obsC = (org.hl7.fhir.dstu2.model.Observation) obsB.getRelated().get(0).getTarget().getResource();
 		assertEquals("C", obsC.getCode().getText());
 
 	}
@@ -1278,21 +1256,21 @@ public class XmlParserHl7OrgDstu2Test {
 		binary.setContentType("PatientConsent").setContent(bin);
 		// binary.setId(UUID.randomUUID().toString());
 
-		org.hl7.fhir.instance.model.DocumentManifest manifest = new org.hl7.fhir.instance.model.DocumentManifest();
+		org.hl7.fhir.dstu2.model.DocumentManifest manifest = new org.hl7.fhir.dstu2.model.DocumentManifest();
 		// manifest.setId(UUID.randomUUID().toString());
 		CodeableConcept cc = new CodeableConcept();
 		cc.addCoding().setSystem("mySystem").setCode("PatientDocument");
 		manifest.setType(cc);
-		manifest.setMasterIdentifier(new org.hl7.fhir.instance.model.Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
-		manifest.addContent().setP(new org.hl7.fhir.instance.model.Reference(binary));
-		manifest.setStatus(org.hl7.fhir.instance.model.Enumerations.DocumentReferenceStatus.CURRENT);
+		manifest.setMasterIdentifier(new org.hl7.fhir.dstu2.model.Identifier().setSystem("mySystem").setValue(UUID.randomUUID().toString()));
+		manifest.addContent().setP(new org.hl7.fhir.dstu2.model.Reference(binary));
+		manifest.setStatus(org.hl7.fhir.dstu2.model.Enumerations.DocumentReferenceStatus.CURRENT);
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(manifest);
 		ourLog.info(encoded);
 		assertThat(encoded,
 			StringContainsInOrder.stringContainsInOrder(Arrays.asList("contained>", "<Binary", "</contained>")));
 
-		org.hl7.fhir.instance.model.DocumentManifest actual = ourCtx.newXmlParser().parseResource(org.hl7.fhir.instance.model.DocumentManifest.class, encoded);
+		org.hl7.fhir.dstu2.model.DocumentManifest actual = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.DocumentManifest.class, encoded);
 		assertEquals(1, actual.getContained().size());
 		assertEquals(1, actual.getContent().size());
 
@@ -1375,8 +1353,8 @@ public class XmlParserHl7OrgDstu2Test {
 			Charset.forName("UTF-8"));
 		org.hl7.fhir.dstu2.model.Patient obs = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Patient.class, xmlString);
 
-		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		List<org.hl7.fhir.dstu2.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		org.hl7.fhir.dstu2.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(obs, new OutputStreamWriter(System.out));
@@ -1400,7 +1378,7 @@ public class XmlParserHl7OrgDstu2Test {
 		String refVal = "http://my.org/FooBar";
 
 		org.hl7.fhir.dstu2.model.Patient fhirPat = new org.hl7.fhir.dstu2.model.Patient();
-		fhirPat.addExtension().setUrl("x1").setValue(new org.hl7.fhir.instance.model.Reference(refVal));
+		fhirPat.addExtension().setUrl("x1").setValue(new org.hl7.fhir.dstu2.model.Reference(refVal));
 
 		IParser parser = ourCtx.newXmlParser();
 
@@ -1410,9 +1388,9 @@ public class XmlParserHl7OrgDstu2Test {
 		// Deserialize then check that valueReference value is still correct
 		fhirPat = parser.parseResource(org.hl7.fhir.dstu2.model.Patient.class, output);
 
-		List<org.hl7.fhir.instance.model.Extension> extlst = fhirPat.getExtension();
+		List<org.hl7.fhir.dstu2.model.Extension> extlst = fhirPat.getExtension();
 		Assert.assertEquals(1, extlst.size());
-		Assert.assertEquals(refVal, ((org.hl7.fhir.instance.model.Reference) extlst.get(0).getValue()).getReference());
+		Assert.assertEquals(refVal, ((org.hl7.fhir.dstu2.model.Reference) extlst.get(0).getValue()).getReference());
 	}
 
 	@ResourceDef(name = "Patient")
@@ -1422,13 +1400,13 @@ public class XmlParserHl7OrgDstu2Test {
 
 		@Child(name = "testCondition")
 		@ca.uhn.fhir.model.api.annotation.Extension(url = "testCondition", definedLocally = true, isModifier = false)
-		private List<org.hl7.fhir.instance.model.Reference> testConditions = null;
+		private List<org.hl7.fhir.dstu2.model.Reference> testConditions = null;
 
-		public List<org.hl7.fhir.instance.model.Reference> getConditions() {
+		public List<org.hl7.fhir.dstu2.model.Reference> getConditions() {
 			return this.testConditions;
 		}
 
-		public void setCondition(List<org.hl7.fhir.instance.model.Reference> ref) {
+		public void setCondition(List<org.hl7.fhir.dstu2.model.Reference> ref) {
 			this.testConditions = ref;
 		}
 	}

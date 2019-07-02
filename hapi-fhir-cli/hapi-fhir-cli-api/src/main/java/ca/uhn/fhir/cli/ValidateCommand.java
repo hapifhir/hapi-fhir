@@ -151,15 +151,15 @@ public class ValidateCommand extends BaseCommand {
 		if (theCommandLine.hasOption("p")) {
 			switch (ctx.getVersion().getVersion()) {
 				case DSTU2: {
-					org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator();
+					org.hl7.fhir.dstu2.hapi.validation.FhirInstanceValidator instanceValidator = new org.hl7.fhir.dstu2.hapi.validation.FhirInstanceValidator();
 					val.registerValidatorModule(instanceValidator);
-					org.hl7.fhir.instance.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.instance.hapi.validation.ValidationSupportChain(
-						new org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport());
+					org.hl7.fhir.dstu2.hapi.validation.ValidationSupportChain validationSupport = new org.hl7.fhir.dstu2.hapi.validation.ValidationSupportChain(
+						new org.hl7.fhir.dstu2.hapi.validation.DefaultProfileValidationSupport());
 					if (igPack != null) {
 						FhirContext hl7orgCtx = FhirContext.forDstu2Hl7Org();
 						hl7orgCtx.setParserErrorHandler(new LenientErrorHandler(false));
 						IgPackParserDstu2 parser = new IgPackParserDstu2(hl7orgCtx);
-						org.hl7.fhir.instance.hapi.validation.IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
+						org.hl7.fhir.dstu2.hapi.validation.IValidationSupport igValidationSupport = parser.parseIg(igPack, igpackFilename);
 						validationSupport.addValidationSupport(igValidationSupport);
 					}
 

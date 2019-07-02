@@ -20,17 +20,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import javax.annotation.PostConstruct;
-
-import org.hl7.fhir.instance.hapi.validation.FhirQuestionnaireResponseValidator;
-import org.hl7.fhir.instance.hapi.validation.HapiWorkerContext;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
@@ -42,6 +31,16 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.dstu2.hapi.validation.FhirQuestionnaireResponseValidator;
+import org.hl7.fhir.dstu2.hapi.validation.HapiWorkerContext;
+import org.hl7.fhir.dstu2.hapi.validation.IValidationSupport;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+
+import javax.annotation.PostConstruct;
 
 public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDstu2<QuestionnaireResponse> {
 

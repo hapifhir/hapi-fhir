@@ -7,18 +7,16 @@ import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
+import org.hl7.fhir.dstu2.ctx.WorkerContext;
 import org.hl7.fhir.dstu2.model.Questionnaire;
 import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
 import org.hl7.fhir.dstu2.model.ValueSet;
+import org.hl7.fhir.dstu2.utils.IWorkerContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.dstu2.utils.IWorkerContext;
-import org.hl7.fhir.instance.utils.WorkerContext;
-import org.hl7.fhir.instance.validation.QuestionnaireResponseValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
-import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,14 +64,14 @@ public class FhirQuestionnaireResponseValidator extends BaseValidatorBridge impl
 					theWorkerCtx.getQuestionnaires().put(nextRef.getValue(), (Questionnaire) resource);
 					newResources.add(resource);
 				} else if (resource == null) {
-					theMessages.add(new ValidationMessage(Source.QuestionnaireResponseValidator,
+					theMessages.add(new ValidationMessage(ValidationMessage.Source.QuestionnaireResponseValidator,
 						IssueType.INVALID,
 						"",
 						"Invalid reference '" + nextRef.getValue() + "' - No contained resource with this ID found",
 						IssueSeverity.FATAL));
 				}
 			} else if (isBlank(resourceType)) {
-				theMessages.add(new ValidationMessage(Source.QuestionnaireResponseValidator,
+				theMessages.add(new ValidationMessage(ValidationMessage.Source.QuestionnaireResponseValidator,
 					IssueType.INVALID,
 					"",
 					"Invalid reference '" + nextRef.getValue() + "' - Does not identify resource type", IssueSeverity.FATAL));

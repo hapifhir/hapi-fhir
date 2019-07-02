@@ -2,7 +2,7 @@ package ca.uhn.fhir.validator;
 
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.dstu2.hapi.validation.FhirInstanceValidator;
 import org.junit.AfterClass;
 import org.junit.Test;
 

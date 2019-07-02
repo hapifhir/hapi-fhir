@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.dstu2.model.Subscription;
+import org.hl7.fhir.r4.model.Subscription;
 
 import java.util.Arrays;
 import java.util.Collections;

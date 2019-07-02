@@ -36,7 +36,7 @@ import java.util.Map;
 
 import org.hl7.fhir.dstu2.model.Bundle;
 import org.hl7.fhir.instance.model.Conformance;
-import org.hl7.fhir.instance.model.OperationOutcome;
+import org.hl7.fhir.dstu2.model.OperationOutcome;
 import org.hl7.fhir.instance.model.Parameters;
 import org.hl7.fhir.instance.model.Resource;
 import org.hl7.fhir.dstu2.model.ValueSet;

@@ -1,6 +1,6 @@
 package org.hl7.fhir.instance.utils;
 
-import org.hl7.fhir.instance.model.OperationOutcome;
+import org.hl7.fhir.dstu2.model.OperationOutcome;
 
 public class EOperationOutcome extends Exception {
 

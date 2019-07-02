@@ -23,7 +23,7 @@ package ca.uhn.fhir.igpacks.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
+import org.hl7.fhir.dstu2.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -35,10 +35,12 @@ public class IgPackParserDstu2 extends BaseIgPackParser<IValidationSupport> {
 		super(massage(theCtx));
 	}
 
+	@Override
 	protected IValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
 		return new IgPackValidationSupportDstu2(theIgResources);
 	}
 
+	@Override
 	protected FhirVersionEnum provideExpectedVersion() {
 		return FhirVersionEnum.DSTU2_HL7ORG;
 	}
