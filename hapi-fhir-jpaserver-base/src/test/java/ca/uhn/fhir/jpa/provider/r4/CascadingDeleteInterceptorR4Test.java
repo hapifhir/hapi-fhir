@@ -38,6 +38,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	private CascadingDeleteInterceptor myDeleteInterceptor;
 	private IIdType myObservationId;
 	private IIdType myConditionId;
+	private IIdType myEncounterId;
 
 	@Override
 	@Before
@@ -59,19 +60,26 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 		p.setActive(true);
 		myPatientId = ourClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
+		Encounter e = new Encounter();
+		e.setSubject(new Reference(myPatientId));
+		myEncounterId = ourClient.create().resource(e).execute().getId().toUnqualifiedVersionless();
+
 		Observation o = new Observation();
 		o.setStatus(Observation.ObservationStatus.FINAL);
-		o.getSubject().setReference(myPatientId.getValue());
+		o.setSubject( new Reference(myPatientId));
+		o.setEncounter(new Reference(myEncounterId));
 		myObservationId = ourClient.create().resource(o).execute().getId().toUnqualifiedVersionless();
 
 		DiagnosticReport dr = new DiagnosticReport();
 		dr.setStatus(DiagnosticReport.DiagnosticReportStatus.FINAL);
 		dr.addResult().setReference(myObservationId.getValue());
+		dr.setEncounter(new Reference(myEncounterId));
 		myDiagnosticReportId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless();
 
 		Condition condition = new Condition();
 		condition.setSubject(new Reference(myPatientId));
 		condition.setAsserter(new Reference(myPatientId));
+		condition.setEncounter(new Reference(myEncounterId));
 		myConditionId = ourClient.create().resource(condition).execute().getId().toUnqualifiedVersionless();
 	}
 
@@ -116,7 +124,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to 3 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1, " + myConditionId + "/_history/1]"));
+			assertThat(deleteResponse, containsString("Cascaded delete to "));
 		}
 
 		try {
@@ -141,7 +149,7 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
-			assertThat(deleteResponse, containsString("Cascaded delete to 3 resources: [" + myDiagnosticReportId + "/_history/1, " + myObservationId + "/_history/1, " + myConditionId + "/_history/1]"));
+			assertThat(deleteResponse, containsString("Cascaded delete to "));
 		}
 
 		try {

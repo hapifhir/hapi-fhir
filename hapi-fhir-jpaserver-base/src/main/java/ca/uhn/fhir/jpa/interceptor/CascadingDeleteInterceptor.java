@@ -96,22 +96,28 @@ public class CascadingDeleteInterceptor {
 		for (Iterator<DeleteConflict> iter = theConflictList.iterator(); iter.hasNext(); ) {
 			DeleteConflict next = iter.next();
 			IdDt nextSource = next.getSourceId();
-			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
+			String nextSourceId = nextSource.toUnqualifiedVersionless().getValue();
 
-			// Interceptor call: STORAGE_CASCADE_DELETE
-			IBaseResource resource = dao.read(nextSource);
-			HookParams params = new HookParams()
-				.add(RequestDetails.class, theRequest)
-				.addIfMatchesType(ServletRequestDetails.class, theRequest)
-				.add(DeleteConflictList.class, theConflictList)
-				.add(IBaseResource.class, resource);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+			if (!cascadedDeletes.contains(nextSourceId)) {
 
-			// Actually perform the delete
-			ourLog.info("Have delete conflict {} - Cascading delete", next);
-			dao.delete(nextSource, theRequest);
+				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
-			cascadedDeletes.add(nextSource.getValue());
+				// Interceptor call: STORAGE_CASCADE_DELETE
+				IBaseResource resource = dao.read(nextSource);
+				HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(DeleteConflictList.class, theConflictList)
+					.add(IBaseResource.class, resource);
+				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_CASCADE_DELETE, params);
+
+				// Actually perform the delete
+				ourLog.info("Have delete conflict {} - Cascading delete", next);
+				dao.delete(nextSource, theRequest);
+
+				cascadedDeletes.add(nextSourceId);
+
+			}
 		}
 
 		return new DeleteConflictOutcome().setShouldRetryCount(MAX_RETRY_ATTEMPTS);
@@ -120,7 +126,7 @@ public class CascadingDeleteInterceptor {
 	@SuppressWarnings("unchecked")
 	private List<String> getCascadedDeletesMap(RequestDetails theRequest, boolean theCreate) {
 		List<String> retVal = (List<String>) theRequest.getUserData().get(CASCADED_DELETES_KEY);
-		if (retVal == null) {
+		if (retVal == null && theCreate) {
 			retVal = new ArrayList<>();
 			theRequest.getUserData().put(CASCADED_DELETES_KEY, retVal);
 		}
