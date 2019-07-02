@@ -81,4 +81,18 @@ public enum TemporalPrecisionEnum {
 		return myCalendarConstant;
 	}
 
+	/**
+	 * Given the standard string representation - YYYY-DD-MMTHH:NN:SS.SSS - how long is the string for the stated precision?
+	 */
+	public int stringLength() {
+		switch (this) {
+			case YEAR: return 4;
+			case MONTH: return 7;
+			case DAY: return 10;
+			case MINUTE: return 16;
+			case SECOND: return 19;
+			case MILLI: return 23;
+		}
+		return 0; // ??
+	}
 }
