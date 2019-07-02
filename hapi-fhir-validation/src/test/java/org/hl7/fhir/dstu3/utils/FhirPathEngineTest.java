@@ -74,8 +74,6 @@ public class FhirPathEngineTest {
 	public static void beforeClass() {
 		HapiWorkerContext ctx = new HapiWorkerContext(ourCtx, new DefaultProfileValidationSupport());
 		ourEngine = new FHIRPathEngine(ctx);
-		FHIRPathEngine.IEvaluationContext svcs;
-		ourEngine.setHostServices(svcs);
 	}
 
 }
