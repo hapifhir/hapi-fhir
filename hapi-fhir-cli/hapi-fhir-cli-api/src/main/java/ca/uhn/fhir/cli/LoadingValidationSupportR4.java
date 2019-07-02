@@ -27,6 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
@@ -55,6 +56,11 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+		return null;
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 		return null;
 	}
 

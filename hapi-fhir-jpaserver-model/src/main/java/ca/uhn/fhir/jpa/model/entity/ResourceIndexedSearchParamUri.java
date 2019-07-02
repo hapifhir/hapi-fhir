@@ -30,6 +30,8 @@ import org.hibernate.search.annotations.Field;
 
 import javax.persistence.*;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 @Embeddable
 @Entity
 @Table(name = "HFJ_SPIDX_URI", indexes = {
@@ -188,7 +190,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			return false;
 		}
 		UriParam uri = (UriParam) theParam;
-		return getUri().equalsIgnoreCase(uri.getValueNotNull());
+		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
 	}
 
 	public static long calculateHashUri(String theResourceType, String theParamName, String theUri) {

@@ -1,14 +1,16 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -20,24 +22,30 @@ import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
+import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -54,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
@@ -99,6 +108,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myCommunicationDaoR4")
 	protected IFhirResourceDao<Communication> myCommunicationDao;
+	@Autowired
+	@Qualifier("myCommunicationRequestDaoR4")
+	protected IFhirResourceDao<CommunicationRequest> myCommunicationRequestDao;
 	@Autowired
 	@Qualifier("myCarePlanDaoR4")
 	protected IFhirResourceDao<CarePlan> myCarePlanDao;
@@ -149,9 +161,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR4")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
-	protected IInterceptorRegistry myInterceptorRegistry;
+	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
 	@Qualifier("myLocationDaoR4")
 	protected IFhirResourceDao<Location> myLocationDao;
@@ -168,8 +179,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myMedicationRequestDaoR4")
 	protected IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
 	@Autowired
+	@Qualifier("myProcedureDaoR4")
+	protected IFhirResourceDao<Procedure> myProcedureDao;
+	@Autowired
 	@Qualifier("myNamingSystemDaoR4")
 	protected IFhirResourceDao<NamingSystem> myNamingSystemDao;
+	@Autowired
+	@Qualifier("myChargeItemDaoR4")
+	protected IFhirResourceDao<ChargeItem> myChargeItemDao;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	protected IFhirResourceDao<Observation> myObservationDao;
@@ -210,7 +227,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
 	@Autowired
 	@Qualifier("myResourceProvidersR4")
-	protected Object myResourceProviders;
+	protected ResourceProviderFactory myResourceProviders;
 	@Autowired
 	protected IResourceTagDao myResourceTagDao;
 	@Autowired
@@ -276,9 +293,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	@Autowired
-	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
-	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
+	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
+	private List<Object> mySystemInterceptors;
+	protected IServerInterceptor myInterceptor;
 
 	@After()
 	public void afterCleanupDao() {
@@ -289,7 +309,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		myDaoConfig.setSuppressUpdatesWithNoChange(new DaoConfig().isSuppressUpdatesWithNoChange());
 		myDaoConfig.setAllowContainsSearches(new DaoConfig().isAllowContainsSearches());
 
-		myInterceptorRegistry.clearAnonymousHookForUnitTest();
+		myPagingProvider.setDefaultPageSize(BasePagingProvider.DEFAULT_DEFAULT_PAGE_SIZE);
+		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
+	}
+
+	@After
+	public void afterResetInterceptors() {
+		myInterceptorRegistry.unregisterAllInterceptors();
 	}
 
 	@After
@@ -310,8 +336,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	public void beforeCreateInterceptor() {
+		mySystemInterceptors = myInterceptorRegistry.getAllRegisteredInterceptors();
+
 		myInterceptor = mock(IServerInterceptor.class);
-		myDaoConfig.setInterceptors(myInterceptor);
+
+		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
+		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
 	}
 
 	@Before
@@ -329,8 +359,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 	@Before
 	@Transactional()
-	public void beforePurgeDatabase() throws InterruptedException {
-		final EntityManager entityManager = this.myEntityManager;
+	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
 	}
 
@@ -362,8 +391,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
+	protected void validate(IBaseResource theResource) {
+		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
+		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		validatorModule.registerValidatorModule(instanceValidator);
+		ValidationResult result = validatorModule.validateWithResult(theResource);
+		if (!result.isSuccessful()) {
+			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		}
+	}
+
+
 	@AfterClass
-	public static void afterClassClearContextBaseJpaR4Test() throws Exception {
+	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();

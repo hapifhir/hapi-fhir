@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresent;
 import ca.uhn.fhir.util.VersionEnum;
@@ -69,19 +70,6 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	}
 
-	private static class TestUpdateTasks extends BaseMigrationTasks<VersionEnum> {
-
-		public TestUpdateTasks() {
-			Builder v = forVersion(VersionEnum.V3_5_0);
-			v
-				.addTableRawSql("A")
-				.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
-		}
-
-
-	}
-
-
 	@Test
 	public void testUpdateTask() {
 		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
@@ -90,7 +78,37 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
 		assertEquals(1, rows.size());
 
-		TestUpdateTasks migrator = new TestUpdateTasks();
+		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
+		};
+		migrator
+			.forVersion(VersionEnum.V3_5_0)
+			.addTableRawSql("A")
+			.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
+
+		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		getMigrator().migrate();
+
+		rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(0, rows.size());
+
+	}
+
+	@Test
+	public void testArbitrarySql() {
+		executeSql("create table TEST_UPDATE_TASK (PID bigint not null, RES_TYPE varchar(255), PARAM_NAME varchar(255))");
+		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
+		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Encounter', 'identifier')");
+
+		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
+		assertEquals(2, rows.size());
+
+		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
+		};
+		migrator
+			.forVersion(VersionEnum.V3_5_0)
+			.executeRawSql(DriverTypeEnum.DERBY_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
+			.executeRawSql(DriverTypeEnum.DERBY_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
+
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 

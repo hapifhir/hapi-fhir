@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -74,6 +76,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * See #1352
+	 */
+	@Test
+	public void testCreateWithSampledDataInObservation() {
+		Observation o = new Observation();
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		SampledData sampledData = new SampledData();
+		sampledData.setData("2 3 4 5 6");
+		o.setValue(sampledData);
+		assertTrue(myObservationDao.create(o).getCreated());
+	}
+
 	@Test
 	public void testCreateWithClientAssignedIdDisallowed() {
 		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
@@ -136,7 +151,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.create(p).getId();
 			fail();
-		} catch (DataIntegrityViolationException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 

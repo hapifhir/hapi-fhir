@@ -206,6 +206,10 @@ public class Constants {
 	 */
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
+	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
+	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
+	public static final String HEADER_CASCADE = "X-Cascade";
+	public static final String CASCADE_DELETE = "delete";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

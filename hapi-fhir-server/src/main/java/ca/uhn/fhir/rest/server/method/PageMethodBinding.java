@@ -101,13 +101,13 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId != null) {
 			// This is a page request by Search ID and Page ID
 
-			resultList = pagingProvider.retrieveResultList(thePagingAction, pageId);
+			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
 			validateHaveBundleProvider(thePagingAction, resultList);
 
 		} else {
 			// This is a page request by Search ID and Offset
 
-			resultList = pagingProvider.retrieveResultList(thePagingAction);
+			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction);
 			validateHaveBundleProvider(thePagingAction, resultList);
 
 			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);

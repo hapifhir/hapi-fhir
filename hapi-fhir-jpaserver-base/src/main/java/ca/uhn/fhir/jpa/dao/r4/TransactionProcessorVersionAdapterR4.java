@@ -65,7 +65,10 @@ public class TransactionProcessorVersionAdapterR4 implements TransactionProcesso
 	@Override
 	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
-		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR).setDiagnostics(theCaughtEx.getMessage());
+		oo.addIssue()
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setDiagnostics(theCaughtEx.getMessage())
+			.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 

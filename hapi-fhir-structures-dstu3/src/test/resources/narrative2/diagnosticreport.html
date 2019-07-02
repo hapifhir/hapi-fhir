@@ -1,0 +1,61 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+      <table>
+      <tbody>
+      <tr th:if="${not resource.statusElement.empty}">
+         <td>Status</td>
+         <td th:text="${resource.statusElement.value}"></td>
+      </tr>
+      <tr th:if="${not resource.issuedElement.empty}">
+         <td>Issued</td>
+         <td><th:narrative th:element="${resource.issuedElement}"/></td>
+      </tr>
+      <tr th:if="${not resource.conclusionElement.empty}">
+         <td>Conclusion</td>
+         <td><th:narrative th:element="${resource.conclusionElement}"/></td>
+      </tr>
+      </tbody>
+   </table>
+
+   <table th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
+      <thead>
+      <tr>
+         <td>Name</td>
+         <td>Value</td>
+         <td>Interpretation</td>
+         <td>Reference Range</td>
+         <td>Status</td>
+      </tr>
+      </thead>
+      <tbody>
+      <th:block th:each="result,rowStat : ${resource.result}">
+         <tr>
+            <td>
+               <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+               <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+               <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+            </td>
+            <td><th:narrative th:element="${result.resource.value}"/></td>
+            <td>
+               <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+               <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+            </td>
+            <td>
+               <th:block th:if="${not result.resource.referenceRange.empty} and ${not result.resource.referenceRange[0].empty}">
+                  <th:narrative th:element="${result.resource.referenceRange[0].low}"/>
+                  -
+                  <th:narrative th:element="${result.resource.referenceRange[0].high}"/>
+               </th:block>
+            </td>
+            <td th:text="${result.resource.statusElement.value}"></td>
+         </tr>
+
+         <tr th:if="${not result.resource.commentElement.empty}">
+            <td th:text="${result.resource.commentElement.value}" colspan="5"></td>
+         </tr>
+
+      </th:block>
+      </tbody>
+   </table>
+
+</th:block>

@@ -70,6 +70,16 @@ public class XmlParserDstu3Test {
 	}
 
 	@Test
+	public void testEncodeInvalidMetaTime() {
+
+		Patient p = new Patient();
+		p.getMeta().getLastUpdatedElement().setValueAsString("2019-01-01");
+		String output = ourCtx.newXmlParser().encodeResourceToString(p);
+		assertThat(output, containsString("lastUpdated value=\"2019-01-01\""));
+
+	}
+
+	@Test
 	public void testBaseUrlFooResourceCorrectlySerializedInExtensionValueReference() {
 		String refVal = "http://my.org/FooBar";
 
@@ -1326,6 +1336,62 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionMissingUrl() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setValue(new StringType("ROOT_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("ROOT_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
+		}
+
+	}
+
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+		}
+
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.util.CoverageIgnore;
 
 /*
@@ -30,11 +31,14 @@ public class StringAndListParam  extends BaseAndListParam<StringOrListParam> {
 		return new StringOrListParam();
 	}
 
-	@CoverageIgnore
 	@Override
 	public StringAndListParam addAnd(StringOrListParam theValue) {
 		addValue(theValue);
 		return this;
 	}
 
+	public StringAndListParam addAnd(StringParam theValue) {
+		addValue(new StringOrListParam().addOr(theValue));
+		return this;
+	}
 }

@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -35,7 +34,6 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -47,7 +45,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
@@ -214,11 +211,11 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IIdType id2 = myObservationDao.create(o2, mySrd).getId();
 
 		{
-			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")));
+			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2001-01-02")), null);
 			assertThat(found, hasItem(id2.getIdPartAsLong()));
 		}
 		{
-			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")));
+			Set<Long> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
 			assertThat(found, not(hasItem(id2.getIdPartAsLong())));
 		}
 	}
@@ -673,58 +670,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		p.setId("Patient/ABC");
 		String id = myPatientDao.create(p, mySrd).getId().getIdPart();
 		assertNotEquals("ABC", id);
-	}
-
-	@Test
-	public void testCreateWithIfNoneExistBasic() {
-		String methodName = "testCreateWithIfNoneExistBasic";
-		MethodOutcome results;
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id = myPatientDao.create(p, mySrd).getId();
-		ourLog.info("Created patient, got it: {}", id);
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		reset(myInterceptor);
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		results = myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
-		assertEquals(id.getIdPart(), results.getId().getIdPart());
-		assertFalse(results.getCreated().booleanValue());
-
-		verifyNoMoreInteractions(myInterceptor);
-
-		// Now create a second one
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		results = myPatientDao.create(p, mySrd);
-		assertNotEquals(id.getIdPart(), results.getId().getIdPart());
-		assertTrue(results.getCreated().booleanValue());
-
-		// Now try to create one with the original match URL and it should fail
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().setFamily("Hello");
-		try {
-			myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
-			fail();
-		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("Failed to CREATE"));
-		}
-
 	}
 
 	@Test
@@ -1788,7 +1733,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		try {
 			myEncounterDao.read(outcome.getId(), mySrd);
 			fail();
-		} catch (IllegalArgumentException e) {
+		} catch (InvalidRequestException e) {
 			// expected
 		}
 		try {
@@ -2082,13 +2027,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				"}\n";
 		//@formatter:on
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		Organization org = myFhirCtx.newJsonParser().parseResource(Organization.class, inputStr);
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		assertEquals(initial + 1, val.size());
 
 	}
@@ -2278,43 +2223,6 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testRead() {
-		Observation o1 = new Observation();
-		o1.getCode().addCoding().setSystem("foo").setCode("testRead");
-		IIdType id1 = myObservationDao.create(o1, mySrd).getId();
-
-		/*
-		 * READ
-		 */
-
-		reset(myInterceptor);
-		Observation obs = myObservationDao.read(id1.toUnqualifiedVersionless(), mySrd);
-		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualifiedVersionless().getValue(), details.getId().toUnqualifiedVersionless().getValue());
-		assertEquals("Observation", details.getResourceType());
-
-		/*
-		 * VREAD
-		 */
-		assertTrue(id1.hasVersionIdPart()); // just to make sure..
-		reset(myInterceptor);
-		obs = myObservationDao.read(id1, mySrd);
-		assertEquals(o1.getCode().getCoding().get(0).getCode(), obs.getCode().getCoding().get(0).getCode());
-
-		// Verify interceptor
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(id1.toUnqualified().getValue(), details.getId().toUnqualified().getValue());
-		assertEquals("Observation", details.getResourceType());
-
-	}
 
 	@Test
 	public void testReadForcedIdVersionHistory() {
@@ -3316,19 +3224,19 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		assertThat(str.length(), greaterThan(ResourceIndexedSearchParamString.MAX_LENGTH));
 
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
 		assertEquals(initial + 0, val.size());
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))), null);
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))));
+			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
@@ -3417,8 +3325,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("http://profile/1", profiles.get(0).getValue());
 		assertEquals("http://profile/2", profiles.get(1).getValue());
 
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens");
-		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves");
+		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cat", "Kittens", null);
+		myPatientDao.addTag(patientId, TagTypeEnum.TAG, "http://foo", "Cow", "Calves", null);
 
 		retrieved = myPatientDao.read(patientId, mySrd);
 		published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -3495,23 +3403,23 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		String subStr1 = longStr1.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
 		String subStr2 = longStr2.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)));
+		Set<Long> val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		int initial = val.size();
 
 		myOrganizationDao.create(org, mySrd);
 
-		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)));
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
 		assertEquals(initial + 1, val.size());
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, subStr2)));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, subStr2)), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok
 		}
 
 		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, longStr2)));
+			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, longStr2)), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			// ok

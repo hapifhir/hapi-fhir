@@ -40,6 +40,7 @@ public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGen
 	 *            </ul>
 	 */
 	public CustomThymeleafNarrativeGenerator(String... thePropertyFile) {
+		super();
 		setPropertyFile(thePropertyFile);
 	}
 

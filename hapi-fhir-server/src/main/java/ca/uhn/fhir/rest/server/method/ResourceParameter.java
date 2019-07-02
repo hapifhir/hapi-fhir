@@ -120,11 +120,12 @@ public class ResourceParameter implements IParameter {
 		BODY, BODY_BYTE_ARRAY, ENCODING, RESOURCE
 	}
 
-	public static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
-		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
-		return requestReader;
+	private static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
+		return new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
 	}
 
+	// Do not make private
+	@SuppressWarnings("WeakerAccess")
 	public static Reader createRequestReader(RequestDetails theRequest) {
 		return createRequestReader(theRequest, determineRequestCharset(theRequest));
 	}
@@ -138,7 +139,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
+	static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
@@ -198,7 +199,11 @@ public class ResourceParameter implements IParameter {
 		return retVal;
 	}
 
-	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+	static IBaseResource parseResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
+		if (theRequest.getResource() != null) {
+			return theRequest.getResource();
+		}
+
 		IBaseResource retVal = null;
 
 		if (theResourceType != null && IBaseBinary.class.isAssignableFrom(theResourceType)) {
@@ -227,6 +232,9 @@ public class ResourceParameter implements IParameter {
 		if (retVal == null) {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
+
+		theRequest.setResource(retVal);
+
 		return retVal;
 	}
 

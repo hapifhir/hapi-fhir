@@ -10,12 +10,14 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Parameters.ParametersParameterComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -201,8 +203,8 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 	public Parameters suggestKeywords(
 		@OperationParam(name = "context", min = 1, max = 1) String theContext,
 		@OperationParam(name = "searchParam", min = 1, max = 1) String theSearchParam,
-		@OperationParam(name = "text", min = 1, max = 1) String theText
-	) {
+		@OperationParam(name = "text", min = 1, max = 1) String theText,
+		RequestDetails theRequest) {
 		ca.uhn.fhir.jpa.provider.dstu3.JpaSystemProviderDstu3.validateFulltextSearchEnabled(mySearchDao);
 
 		if (isBlank(theContext)) {
@@ -215,7 +217,7 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 			throw new InvalidRequestException("Parameter 'text' must be provided");
 		}
 
-		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText);
+		List<Suggestion> keywords = mySearchDao.suggestKeywords(theContext, theSearchParam, theText, theRequest);
 
 		Parameters retVal = new Parameters();
 		for (Suggestion next : keywords) {
@@ -227,6 +229,28 @@ public class JpaSystemProviderR4 extends BaseJpaSystemProviderDstu2Plus<Bundle, 
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * /$process-message
+	 */
+	@Operation(name = JpaConstants.OPERATION_PROCESS_MESSAGE, idempotent = false)
+	public IBaseBundle processMessage(
+		HttpServletRequest theServletRequest,
+		RequestDetails theRequestDetails,
+
+		@OperationParam(name = "content", min = 1, max = 1)
+		@Description(formalDefinition = "The message to process (or, if using asynchronous messaging, it may be a response message to accept)")
+			Bundle theMessageToProcess
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			return getDao().processMessage(theRequestDetails, theMessageToProcess);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
 	}
 
 	@Transaction

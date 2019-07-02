@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,6 +46,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseParser implements IParser {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseParser.class);
+
+	private static final Set<String> notEncodeForContainedResource = new HashSet<>(Arrays.asList("security", "versionId", "lastUpdated"));
 
 	private ContainedResources myContainedResources;
 	private boolean myEncodeElementsAppliesToChildResourcesOnly;
@@ -161,7 +163,7 @@ public abstract class BaseParser implements IParser {
 							 */
 							if (myNext.getDef().getElementName().equals("id")) {
 								myNext = null;
-							} else if (!myNext.shouldBeEncoded()) {
+							} else if (!myNext.shouldBeEncoded(theContainedResource)) {
 								myNext = null;
 							} else if (isSummaryMode() && !myNext.getDef().isSummary()) {
 								myNext = null;
@@ -176,7 +178,6 @@ public abstract class BaseParser implements IParser {
 									myNext = null;
 								}
 							}
-
 						} while (myNext == null);
 
 						myHasNext = true;
@@ -649,7 +650,7 @@ public abstract class BaseParser implements IParser {
 
 	@Override
 	public <T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException {
-		return parseResource(theResourceType, new InputStreamReader(theInputStream, Charsets.UTF_8));
+		return parseResource(theResourceType, new InputStreamReader(theInputStream, Constants.CHARSET_UTF8));
 	}
 
 	@Override
@@ -901,9 +902,7 @@ public abstract class BaseParser implements IParser {
 			}
 
 			String currentResourceName = theEncodeContext.getResourcePath().get(theEncodeContext.getResourcePath().size() - 1).getName();
-			if (myEncodeElementsAppliesToResourceTypes == null || myEncodeElementsAppliesToResourceTypes.contains(currentResourceName)) {
-				return true;
-			}
+			return myEncodeElementsAppliesToResourceTypes == null || myEncodeElementsAppliesToResourceTypes.contains(currentResourceName);
 		}
 
 		return false;
@@ -943,9 +942,7 @@ public abstract class BaseParser implements IParser {
 			String resourceName = myContext.getResourceDefinition(theResource).getName();
 			if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath(resourceName + "." + thePath))) {
 				return false;
-			} else if (myDontEncodeElements.stream().anyMatch(t -> t.equalsPath("*." + thePath))) {
-				return false;
-			}
+			} else return myDontEncodeElements.stream().noneMatch(t -> t.equalsPath("*." + thePath));
 		}
 		return true;
 	}
@@ -1157,13 +1154,16 @@ public abstract class BaseParser implements IParser {
 			return myParent;
 		}
 
-		public boolean shouldBeEncoded() {
+		public boolean shouldBeEncoded(boolean theContainedResource) {
 			boolean retVal = true;
 			if (myEncodeElements != null) {
 				retVal = checkIfParentShouldBeEncodedAndBuildPath();
 			}
 			if (retVal && myDontEncodeElements != null) {
 				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath();
+			}
+			if (theContainedResource) {
+				retVal = !notEncodeForContainedResource.contains(myDef.getElementName());
 			}
 
 			return retVal;
@@ -1183,7 +1183,7 @@ public abstract class BaseParser implements IParser {
 
 		@Override
 		public String toString() {
-			return myPath.toString();
+			return myPath.stream().map(t->t.toString()).collect(Collectors.joining("."));
 		}
 
 		protected List<EncodeContextPathElement> getPath() {
@@ -1324,10 +1324,7 @@ public abstract class BaseParser implements IParser {
 					return true;
 				}
 			}
-			if (myName.equals("*")) {
-				return true;
-			}
-			return false;
+			return myName.equals("*");
 		}
 
 		@Override

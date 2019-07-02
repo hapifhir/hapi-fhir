@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import org.springframework.context.annotation.Bean;
@@ -30,12 +30,15 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.searchparam", "ca.uhn.fhir.jpa.subscription.module"})
+@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.subscription.module"})
 public abstract class BaseSubscriptionConfig {
-	public abstract FhirContext fhirContext();
-
 	@Bean
 	public ISubscribableChannelFactory blockingQueueSubscriptionDeliveryChannelFactory() {
 		return new LinkedBlockingQueueSubscribableChannelFactory();
+	}
+
+	@Bean
+	public InterceptorService interceptorRegistry() {
+		return new InterceptorService("hapi-fhir-jpa-subscription");
 	}
 }

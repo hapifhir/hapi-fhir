@@ -17,6 +17,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
@@ -254,7 +255,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	}
 	
 	/**
-	 * Sets a customized {@link IEnableWhenEvaluator} which is injected to created InstanceValidators 
+	 * Sets a function which creates {@link IEnableWhenEvaluator} instance which is injected to the InstanceValidator created during validation 
 	 */
 	public void setEnableWhenEvaluatorSupplier(
 			Function<IWorkerContext, IEnableWhenEvaluator> enableWhenEvaluatorSupplier) {

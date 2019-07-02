@@ -1,29 +1,26 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-
-import java.util.*;
-
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-import org.mockito.ArgumentCaptor;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.util.*;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3UpdateTest.class);
@@ -202,7 +199,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		{
 			Patient patient = new Patient();
-			patient.setId(id);
+			patient.setId(id.getValue());
 			patient.setActive(true);
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val1");
 			patient.getMeta().addTag().setSystem("http://foo").setCode("bar").setDisplay("Val2");
@@ -294,76 +291,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 	}
 
-	@Test
-	public void testUpdateAndGetHistoryResource() throws InterruptedException {
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("urn:system").setValue("001");
-		patient.addName().setFamily("Tester").addGiven("Joe");
 
-		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertNotNull(outcome.getId());
-		assertFalse(outcome.getId().isEmpty());
-
-		assertEquals("1", outcome.getId().getVersionIdPart());
-
-		ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick();
-		Date now = new Date();
-		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
-		InstantType updated = retrieved.getMeta().getLastUpdatedElement().copy();
-		assertTrue(updated.before(now));
-
-		Thread.sleep(1000);
-
-		reset(myInterceptor);
-		retrieved.getIdentifier().get(0).setValue("002");
-		MethodOutcome outcome2 = myPatientDao.update(retrieved, mySrd);
-		assertEquals(outcome.getId().getIdPart(), outcome2.getId().getIdPart());
-		assertNotEquals(outcome.getId().getVersionIdPart(), outcome2.getId().getVersionIdPart());
-		assertEquals("2", outcome2.getId().getVersionIdPart());
-
-		// Verify interceptor
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertNotNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-		Date now2 = new Date();
-
-		Patient retrieved2 = myPatientDao.read(outcome.getId().toVersionless(), mySrd);
-
-		assertEquals("2", retrieved2.getIdElement().getVersionIdPart());
-		assertEquals("002", retrieved2.getIdentifier().get(0).getValue());
-		InstantType updated2 = retrieved2.getMeta().getLastUpdatedElement();
-		assertTrue(updated2.after(now));
-		assertTrue(updated2.before(now2));
-
-		Thread.sleep(2000);
-
-		/*
-		 * Get history
-		 */
-
-		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
-
-		assertEquals(2, historyBundle.size().intValue());
-
-		List<IBaseResource> history = historyBundle.getResources(0, 2);
-
-		ourLog.info("updated : {}", updated.getValueAsString());
-		ourLog.info("  * Exp : {}", ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
-		ourLog.info("updated2: {}", updated2.getValueAsString());
-		ourLog.info("  * Exp : {}", ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
-
-		assertEquals("1", history.get(1).getIdElement().getVersionIdPart());
-		assertEquals("2", history.get(0).getIdElement().getVersionIdPart());
-		assertEquals(updated.getValueAsString(), ((Resource) history.get(1)).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("001", ((Patient) history.get(1)).getIdentifier().get(0).getValue());
-		assertEquals(updated2.getValueAsString(), ((Resource) history.get(0)).getMeta().getLastUpdatedElement().getValueAsString());
-		assertEquals("002", ((Patient) history.get(0)).getIdentifier().get(0).getValue());
-
-	}
 
 	@Test
 	public void testUpdateByUrl() {
@@ -519,7 +447,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
+		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
@@ -528,10 +456,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		MethodOutcome update2 = myPatientDao.update(p1, mySrd);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")), null);
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
@@ -563,7 +491,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		}
 		{
 			Patient p1 = new Patient();
-			p1.setId(p1id);
+			p1.setId(p1id.getValue());
 			p1.addName().setFamily(methodName);
 
 			p1.getMeta().addTag("tag_scheme2", "tag_term2", null);
@@ -581,7 +509,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			}
 			assertThat(secListValues, containsInAnyOrder("tag_scheme1|tag_term1", "tag_scheme2|tag_term2"));
 			List<Coding> secList = p1.getMeta().getSecurity();
-			secListValues = new HashSet<String>();
+			secListValues = new HashSet<>();
 			for (Coding next : secList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}

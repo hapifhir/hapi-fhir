@@ -34,4 +34,11 @@ public interface IAuthRuleBuilderAppliesTo<T> {
 	 */
 	T resourcesOfType(Class<? extends IBaseResource> theType);
 
+	/**
+	 * Rule applies to resources of the given type
+	 *
+	 * @param theType E.g. "Patient"
+	 */
+	T resourcesOfType(String theType);
+
 }

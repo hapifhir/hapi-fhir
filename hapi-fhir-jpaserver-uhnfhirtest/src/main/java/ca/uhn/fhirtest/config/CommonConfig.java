@@ -1,22 +1,24 @@
 package ca.uhn.fhirtest.config;
 
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 
 @Configuration
+@Import(WebsocketDispatcherConfig.class)
 public class CommonConfig {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
+	 * @return
 	 */
 	@Bean
-	public IServerInterceptor accessLoggingInterceptor() {
+	public LoggingInterceptor accessLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -50,7 +52,7 @@ public class CommonConfig {
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
 	 */
 	@Bean
-	public IServerInterceptor requestLoggingInterceptor() {
+	public LoggingInterceptor requestLoggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.request");
 		retVal.setMessageFormat("${requestVerb} ${servletPath} -\n${requestBodyFhir}");

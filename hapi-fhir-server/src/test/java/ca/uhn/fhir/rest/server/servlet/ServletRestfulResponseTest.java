@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,11 +13,11 @@ import org.mockito.junit.MockitoRule;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests of {@link ServletRestfulResponse}.
@@ -42,7 +43,7 @@ public class ServletRestfulResponseTest {
 	public void init() throws IOException {
 		Mockito.when(servletResponse.getOutputStream()).thenReturn(servletOutputStream);
 
-		requestDetails = new ServletRequestDetails();
+		requestDetails = new ServletRequestDetails(mock(IInterceptorBroadcaster.class));
 		requestDetails.setServer(server);
 		requestDetails.setServletResponse(servletResponse);
 		response = new ServletRestfulResponse(requestDetails);

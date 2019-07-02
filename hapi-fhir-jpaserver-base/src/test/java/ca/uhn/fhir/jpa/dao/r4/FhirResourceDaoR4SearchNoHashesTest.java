@@ -1,9 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -387,6 +389,42 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchTokenListLike() {
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("FOO");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAR");
+		myPatientDao.create(p);
+		p = new Patient();
+		p.addIdentifier().setSystem("SYS").setValue("BAZ");
+		myPatientDao.create(p);
+
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_IDENTIFIER, new TokenOrListParam().addOr(new TokenParam("FOO")).addOr(new TokenParam("BAR")));
+		map.setLoadSynchronous(true);
+		IBundleProvider search = myPatientDao.search(map);
+
+		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
+		List<String> queries = myCaptureQueriesListener
+			.getSelectQueriesForCurrentThread()
+			.stream()
+			.map(t -> t.getSql(true, false))
+			.collect(Collectors.toList());
+		String resultingQueryNotFormatted = queries.get(0);
+
+		assertEquals(resultingQueryNotFormatted, 1, StringUtils.countMatches(resultingQueryNotFormatted, "SP_VALUE"));
+		assertThat(resultingQueryNotFormatted, containsString("SP_VALUE in ('BAR' , 'FOO')"));
+
+		// Ensure that the search actually worked
+		assertEquals(2, search.size().intValue());
+
+	}
+
+
+	@Test
 	public void testHasParameter() {
 		IIdType pid0;
 		{
@@ -456,10 +494,12 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 
 		SearchParameterMap params;
 
-		params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
-		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
+// KHS JA When we switched _has from two queries to a nested subquery, we broke support for chains within _has
+// We have decided for now to prefer the performance optimization of the subquery over the slower full capability
+//		params = new SearchParameterMap();
+//		params.setLoadSynchronous(true);
+//		params.add("_has", new HasParam("Observation", "subject", "device.identifier", "urn:system|DEVICEID"));
+//		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), contains(pid0.getValue()));
 
 		// No targets exist
 		params = new SearchParameterMap();
@@ -616,7 +656,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 				expect1.setResource(resource);
 				expect1.calculateHashes();
 
-				assertThat("Got: \"" + results.toString()+"\"", results, containsInAnyOrder(expect0, expect1));
+				assertThat("Got: \"" + results.toString() + "\"", results, containsInAnyOrder(expect0, expect1));
 			}
 		});
 	}
@@ -1059,7 +1099,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			QuantityParam v1 = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, 150, "http://bar", "code1");
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, v1);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id1.getValue()));
 		}
 	}
 
@@ -1091,7 +1131,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			CompositeParam<TokenParam, QuantityParam> val = new CompositeParam<>(v0, v1);
 			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(param, val);
 			IBundleProvider result = myObservationDao.search(map);
-			assertThat("Got: "+ toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
+			assertThat("Got: " + toUnqualifiedVersionlessIdValues(result), toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(id2.getValue()));
 		}
 		{
 			TokenParam v0 = new TokenParam("http://foo", "code1");
@@ -2246,17 +2286,24 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 		myPatientDao.create(patient, mySrd);
 
 		patient = new Patient();
+		patient.addIdentifier().setSystem("urn:system").setValue(null);
+		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
+		myPatientDao.create(patient, mySrd);
+
+		patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system2").setValue("testSearchTokenParam002");
 		patient.addName().setFamily("Tester").addGiven("testSearchTokenParam2");
 		myPatientDao.create(patient, mySrd);
 
 		{
+			// Match system="urn:system" and value = *
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", null));
 			IBundleProvider retrieved = myPatientDao.search(map);
 			assertEquals(2, retrieved.size().intValue());
 		}
 		{
+			// Match system="urn:system" and value = ""
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", ""));
 			IBundleProvider retrieved = myPatientDao.search(map);
@@ -3288,7 +3335,7 @@ public class FhirResourceDaoR4SearchNoHashesTest extends BaseJpaR4Test {
 			"Observation/YES21",
 			"Observation/YES22",
 			"Observation/YES23"
-			));
+		));
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {

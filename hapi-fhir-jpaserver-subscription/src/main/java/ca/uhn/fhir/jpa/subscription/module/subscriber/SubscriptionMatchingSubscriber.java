@@ -1,13 +1,15 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -72,21 +74,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-
-		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, theMsg)) {
-			return;
-		}
-
-		try {
-			doMatchActiveSubscriptionsAndDeliver(theMsg);
-		} finally {
-			// Interceptor call: SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, theMsg);
-		}
-	}
-
-	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
 			case UPDATE:
@@ -99,6 +86,22 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				return;
 		}
 
+		// Interceptor call: SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, theMsg);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED, params)) {
+			return;
+		}
+
+		try {
+			doMatchActiveSubscriptionsAndDeliver(theMsg);
+		} finally {
+			// Interceptor call: SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED, params);
+		}
+	}
+
+	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
@@ -121,7 +124,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 
-			SubscriptionMatchResult matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
+			InMemoryMatchResult matchResult = mySubscriptionMatcher.match(nextActiveSubscription.getSubscription(), theMsg);
 			if (!matchResult.matched()) {
 				continue;
 			}
@@ -142,7 +145,11 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			}
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, deliveryMsg, nextActiveSubscription.getSubscription(), matchResult)) {
+			HookParams params = new HookParams()
+				.add(CanonicalSubscription.class, nextActiveSubscription.getSubscription())
+				.add(ResourceDeliveryMessage.class, deliveryMsg)
+				.add(InMemoryMatchResult.class, matchResult);
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED, params)) {
 				return;
 			}
 
@@ -158,7 +165,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 		if (!resourceMatched) {
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, theMsg);
+			HookParams params = new HookParams()
+				.add(ResourceModifiedMessage.class, theMsg);
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);
 		}
 	}
 

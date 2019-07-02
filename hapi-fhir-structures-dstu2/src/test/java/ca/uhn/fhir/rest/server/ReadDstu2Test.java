@@ -1,25 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.IResource;
@@ -31,15 +11,40 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.DateUtils;
+import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ReadDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static boolean ourInitializeProfileList;
 	private static IdDt ourLastId;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
@@ -68,7 +73,7 @@ public class ReadDstu2Test {
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
-		
+
 		// Fixture was last modified at 2012-01-01T12:12:12Z
 		// thus it has changed at the same time of 2012-01-01T12:12:12Z
 		// so we expect a 304
@@ -101,7 +106,7 @@ public class ReadDstu2Test {
 	@Test
 	public void testAddProfile() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
@@ -111,9 +116,9 @@ public class ReadDstu2Test {
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
-		
+
 		ourLog.info(responseContent);
-		
+
 		assertEquals("Patient/123", ourLastId.getValue());
 	}
 
@@ -124,12 +129,12 @@ public class ReadDstu2Test {
 	public void testAddProfileToExistingList() throws Exception {
 		ourInitializeProfileList = true;
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123&_format=xml");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
+
 		ourLog.info(responseContent);
 
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -144,7 +149,7 @@ public class ReadDstu2Test {
 	@Test
 	public void testReadJson() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
-		
+
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/123?_format=json");
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
@@ -156,7 +161,7 @@ public class ReadDstu2Test {
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertThat(responseContent, containsString("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}"));
 	}
-	
+
 	/**
 	 * In DSTU2+ the resource ID appears in the resource body
 	 */
@@ -170,10 +175,10 @@ public class ReadDstu2Test {
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
-		
+
 		ourLog.info(responseContent);
 	}
-	
+
 	@Test
 	public void testVread() throws Exception {
 		ourCtx.setAddProfileTagWhenEncoding(AddProfileTagEnum.ONLY_FOR_CUSTOM);
@@ -187,42 +192,12 @@ public class ReadDstu2Test {
 		assertThat(responseContent, containsString("p1ReadValue"));
 		assertThat(responseContent, containsString("p1ReadId"));
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
-		
+
 		ourLog.info(responseContent);
-		
+
 		assertEquals("Patient/123/_history/1", ourLastId.getValue());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("1", ourLastId.getVersionIdPart());
-	}
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ourServlet = new RestfulServer(ourCtx);
-		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patientProvider);
-		ServletHolder servletHolder = new ServletHolder(ourServlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {
@@ -232,7 +207,7 @@ public class ReadDstu2Test {
 			return Patient.class;
 		}
 
-		@Read(version=true)
+		@Read(version = true)
 		public Patient read(@IdParam IdDt theId) {
 			ourLastId = theId;
 			Patient p1 = new MyPatient();
@@ -254,6 +229,37 @@ public class ReadDstu2Test {
 	public static class MyPatient extends Patient {
 
 		private static final long serialVersionUID = 1L;
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		ourServlet = new RestfulServer(ourCtx);
+		ourServlet.setFhirContext(ourCtx);
+		ourServlet.setResourceProviders(patientProvider);
+		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
+
+		ServletHolder servletHolder = new ServletHolder(ourServlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

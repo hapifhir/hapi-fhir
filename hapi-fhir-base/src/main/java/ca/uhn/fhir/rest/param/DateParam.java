@@ -23,30 +23,27 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.model.api.annotation.SimpleSetter;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.model.primitive.DateDt;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQueryParameterType , */IQueryParameterOr<DateParam> {
 
 	private static final long serialVersionUID = 1L;
-	
+
 	private final DateParamDateTimeHolder myValue = new DateParamDateTimeHolder();
 
 	/**
@@ -119,9 +116,7 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 			b.append(ParameterUtil.escapeWithDefault(getPrefix().getValue()));
 		}
 		
-		if (myValue != null) {
-			b.append(ParameterUtil.escapeWithDefault(myValue.getValueAsString()));
-		}
+		b.append(ParameterUtil.escapeWithDefault(myValue.getValueAsString()));
 
 		return b.toString();
 	}
@@ -132,38 +127,15 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 	}
 
 	public TemporalPrecisionEnum getPrecision() {
-		if (myValue != null) {
 			return myValue.getPrecision();
-		}
-		return null;
 	}
 
 	public Date getValue() {
-		if (myValue != null) {
 			return myValue.getValue();
-		}
-		return null;
-	}
-
-	public DateTimeDt getValueAsDateTimeDt() {
-		if (myValue == null) {
-			return null;
-		}
-		return new DateTimeDt(myValue.getValue());
-	}
-
-	public InstantDt getValueAsInstantDt() {
-		if (myValue == null) {
-			return null;
-		}
-		return new InstantDt(myValue.getValue());
 	}
 
 	public String getValueAsString() {
-		if (myValue != null) {
 			return myValue.getValueAsString();
-		}
-		return null;
 	}
 
 	@Override
@@ -260,6 +232,8 @@ public class DateParam extends BaseParamWithPrefix<DateParam> implements /*IQuer
 		/**
 		 * Constructor
 		 */
+		// LEAVE THIS AS PUBLIC!!
+		@SuppressWarnings("WeakerAccess")
 		public DateParamDateTimeHolder() {
 			super();
 		}

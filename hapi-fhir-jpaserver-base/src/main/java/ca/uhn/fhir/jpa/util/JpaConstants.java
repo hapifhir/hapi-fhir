@@ -29,6 +29,11 @@ public class JpaConstants {
 	public static final String OPERATION_EXPUNGE = "$expunge";
 
 	/**
+	 * Operation name for the $match operation
+	 */
+	public static final String OPERATION_MATCH = "$match";
+
+	/**
 	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
 	 */
 	@Deprecated
@@ -132,4 +137,9 @@ public class JpaConstants {
 	 * Trigger a subscription manually for a given resource
 	 */
 	public static final String OPERATION_TRIGGER_SUBSCRIPTION = "$trigger-subscription";
+
+	/**
+	 * Operation name for the "$subsumes" operation
+	 */
+	public static final String OPERATION_SUBSUMES = "$subsumes";
 }

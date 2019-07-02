@@ -19,7 +19,7 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -69,7 +69,7 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		ourCreatedObservations.clear();
 		ourUpdatedObservations.clear();
 
-		mySubscriptionLoader.syncSubscriptions();
+		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
@@ -286,14 +286,12 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		ourListenerPort = PortUtil.findFreePort();
 		ourListenerRestServer = new RestfulServer(FhirContext.forDstu2());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
-		ourListenerServer = new Server(ourListenerPort);
+		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -303,12 +301,14 @@ public class RestHookTestWithInterceptorRegisteredToDaoConfigDstu2Test extends B
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 	}
 
 }

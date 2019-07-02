@@ -24,10 +24,11 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -35,6 +36,7 @@ import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
@@ -61,6 +63,7 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronousUpTo(500);
 
 		for (Argument nextArgument : theSearchParams) {
 
@@ -91,6 +94,9 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 					case QUANTITY:
 						param = new QuantityParam(value);
 						break;
+					case SPECIAL:
+						param = new SpecialParam().setValue(value);
+						break;
 					case URI:
 						break;
 					case HAS:
@@ -101,7 +107,8 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			}
 		}
 
-		IBundleProvider response = dao.search(params);
+		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+		IBundleProvider response = dao.search(params, requestDetails);
 		int size = response.size();
 		if (response.preferredPageSize() != null && response.preferredPageSize() < size) {
 			size = response.preferredPageSize();
@@ -118,15 +125,24 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
 		IIdType refId = getContext().getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(theType);
-		BaseHasResource id = dao.readEntity(refId);
-
-		return (Resource) toResource(id, false);
+		return lookup(theAppInfo, refId);
 	}
 
-	@Override
-	public ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) throws FHIRException {
+	private Resource lookup(Object theAppInfo, IIdType theRefId) {
+		IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
+		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+		return (Resource) dao.read(theRefId, requestDetails, false);
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED)
+    @Override
+	public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
+		IdType refId = new IdType(theReference.getReference());
+		Resource outcome = lookup(theAppInfo, refId);
+		if (outcome == null) {
 		return null;
+	}
+		return new ReferenceResolution(theContext, outcome);
 	}
 
 	@Transactional(propagation = Propagation.NEVER)

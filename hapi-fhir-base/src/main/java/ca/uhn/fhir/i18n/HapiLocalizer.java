@@ -1,6 +1,7 @@
 package ca.uhn.fhir.i18n;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.util.UrlUtil;
 
 import java.text.MessageFormat;
 import java.util.*;
@@ -92,6 +93,20 @@ public class HapiLocalizer {
 		return getMessage(toKey(theType, theKey), theParameters);
 	}
 
+	/**
+	 * Create the message and sanitize parameters using {@link }
+	 */
+	public String getMessageSanitized(Class<?> theType, String theKey, Object... theParameters) {
+		if (theParameters != null) {
+			for (int i = 0; i < theParameters.length; i++) {
+				if (theParameters[i] instanceof CharSequence) {
+					theParameters[i] = UrlUtil.sanitizeUrlPart((CharSequence) theParameters[i]);
+				}
+			}
+		}
+		return getMessage(toKey(theType, theKey), theParameters);
+	}
+
 	public String getMessage(String theQualifiedKey, Object... theParameters) {
 		if (theParameters != null && theParameters.length > 0) {
 			MessageFormat format = myKeyToMessageFormat.get(theQualifiedKey);
@@ -101,11 +116,34 @@ public class HapiLocalizer {
 
 			String formatString = getFormatString(theQualifiedKey);
 
-			format = new MessageFormat(formatString.trim());
+			format = newMessageFormat(formatString);
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters);
 		}
 		return getFormatString(theQualifiedKey);
+	}
+
+	MessageFormat newMessageFormat(String theFormatString) {
+		StringBuilder pattern = new StringBuilder(theFormatString.trim());
+
+
+		for (int i = 0; i < (pattern.length()-1); i++) {
+			if (pattern.charAt(i) == '{') {
+				char nextChar = pattern.charAt(i+1);
+				if (nextChar >= '0' && nextChar <= '9') {
+					continue;
+				}
+
+				pattern.replace(i, i+1, "'{'");
+				int closeBraceIndex = pattern.indexOf("}", i);
+				if (closeBraceIndex > 0) {
+					i = closeBraceIndex;
+					pattern.replace(i, i+1, "'}'");
+				}
+			}
+		}
+
+		return new MessageFormat(pattern.toString());
 	}
 
 	protected void init() {

@@ -86,7 +86,7 @@ public class BaseR4Config extends BaseConfig {
 		return new TransactionProcessor<>();
 	}
 
-	@Bean(name = "myGraphQLProvider")
+	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
 		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
@@ -121,7 +121,7 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
-		retVal.setCacheMillis(10 * DateUtils.MILLIS_PER_MINUTE);
+		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
 		return retVal;
 	}
 

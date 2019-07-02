@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -204,6 +205,12 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return null;
 	}
 
+	@CoverageIgnore
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+		return null;
+	}
+
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
 		return null;
@@ -275,9 +282,10 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	@CoverageIgnore
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TermConcept code = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (code != null) {
+		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+		if (codeOpt.isPresent()) {
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+			TermConcept code = codeOpt.get();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
 			CodeValidationResult retVal = new CodeValidationResult(def);

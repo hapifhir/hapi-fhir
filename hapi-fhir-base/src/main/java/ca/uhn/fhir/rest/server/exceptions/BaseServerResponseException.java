@@ -1,10 +1,10 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 
 /*
@@ -32,7 +32,7 @@ import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
  * subclasses of this exception type.
  * <p>
  * HAPI provides a number of subclasses of BaseServerResponseException, and each one corresponds to a specific
- * HTTP status code. For example, if a IResourceProvider method throws 
+ * HTTP status code. For example, if a IResourceProvider method throws
  * {@link ResourceNotFoundException}, this is a signal to the server that an <code>HTTP 404</code> should
  * be returned to the client.
  * </p>
@@ -69,28 +69,25 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	private Map<String, List<String>> myResponseHeaders;
 	private String myResponseMimeType;
 	private int myStatusCode;
+	private boolean myErrorMessageTrusted;
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
+	 *
+	 * @param theStatusCode The HTTP status code corresponding to this problem
+	 * @param theMessage    The message
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage) {
 		super(theMessage);
 		myStatusCode = theStatusCode;
 		myBaseOperationOutcome = null;
 	}
-	
+
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theMessages
-	 *            The messages
+	 *
+	 * @param theStatusCode The HTTP status code corresponding to this problem
+	 * @param theMessages   The messages
 	 */
 	public BaseServerResponseException(int theStatusCode, String... theMessages) {
 		super(theMessages != null && theMessages.length > 0 ? theMessages[0] : null);
@@ -100,16 +97,13 @@ public abstract class BaseServerResponseException extends RuntimeException {
 			myAdditionalMessages = Arrays.asList(Arrays.copyOfRange(theMessages, 1, theMessages.length, String[].class));
 		}
 	}
-	
+
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
-	 * @param theBaseOperationOutcome
-	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+	 *
+	 * @param theStatusCode           The HTTP status code corresponding to this problem
+	 * @param theMessage              The message
+	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage);
@@ -119,13 +113,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
-	 * @param theCause
-	 *            The cause
+	 *
+	 * @param theStatusCode The HTTP status code corresponding to this problem
+	 * @param theMessage    The message
+	 * @param theCause      The cause
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause) {
 		super(theMessage, theCause);
@@ -135,15 +126,11 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theMessage
-	 *            The message
-	 * @param theCause
-	 *            The underlying cause exception
-	 * @param theBaseOperationOutcome
-	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+	 *
+	 * @param theStatusCode           The HTTP status code corresponding to this problem
+	 * @param theMessage              The message
+	 * @param theCause                The underlying cause exception
+	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
 	public BaseServerResponseException(int theStatusCode, String theMessage, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theMessage, theCause);
@@ -153,11 +140,9 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theCause
-	 *            The underlying cause exception
+	 *
+	 * @param theStatusCode The HTTP status code corresponding to this problem
+	 * @param theCause      The underlying cause exception
 	 */
 	public BaseServerResponseException(int theStatusCode, Throwable theCause) {
 		super(theCause.getMessage(), theCause);
@@ -167,13 +152,10 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Constructor
-	 * 
-	 * @param theStatusCode
-	 *            The HTTP status code corresponding to this problem
-	 * @param theCause
-	 *            The underlying cause exception
-	 * @param theBaseOperationOutcome
-	 *            An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
+	 *
+	 * @param theStatusCode           The HTTP status code corresponding to this problem
+	 * @param theCause                The underlying cause exception
+	 * @param theBaseOperationOutcome An BaseOperationOutcome resource to return to the calling client (in a server) or the BaseOperationOutcome that was returned from the server (in a client)
 	 */
 	public BaseServerResponseException(int theStatusCode, Throwable theCause, IBaseOperationOutcome theBaseOperationOutcome) {
 		super(theCause.toString(), theCause);
@@ -182,9 +164,28 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * This flag can be used to signal to server infrastructure that the message supplied
+	 * to this exception (ie to the constructor) is considered trusted and is safe to
+	 * return to the calling client.
+	 */
+	public boolean isErrorMessageTrusted() {
+		return myErrorMessageTrusted;
+	}
+
+	/**
+	 * This flag can be used to signal to server infrastructure that the message supplied
+	 * to this exception (ie to the constructor) is considered trusted and is safe to
+	 * return to the calling client.
+	 */
+	public BaseServerResponseException setErrorMessageTrusted(boolean theErrorMessageTrusted) {
+		myErrorMessageTrusted = theErrorMessageTrusted;
+		return this;
+	}
+
+	/**
 	 * Add a header which will be added to any responses
-	 * 
-	 * @param theName The header name
+	 *
+	 * @param theName  The header name
 	 * @param theValue The header value
 	 * @return Returns a reference to <code>this</code> for easy method chaining
 	 * @since 2.0
@@ -193,7 +194,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 		Validate.notBlank(theName, "theName must not be null or empty");
 		Validate.notBlank(theValue, "theValue must not be null or empty");
 		if (getResponseHeaders().containsKey(theName) == false) {
-			getResponseHeaders().put(theName, new ArrayList<String>());
+			getResponseHeaders().put(theName, new ArrayList<>());
 		}
 		getResponseHeaders().get(theName).add(theValue);
 		return this;
@@ -211,6 +212,17 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include with the HTTP response. In client
+	 * implementations you should not call this method.
+	 *
+	 * @param theBaseOperationOutcome The BaseOperationOutcome resource Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include
+	 *                                with the HTTP response. In client implementations you should not call this method.
+	 */
+	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
+		myBaseOperationOutcome = theBaseOperationOutcome;
+	}
+
+	/**
 	 * In a RESTful client, this method will be populated with the body of the HTTP respone if one was provided by the server, or <code>null</code> otherwise.
 	 * <p>
 	 * In a restful server, this method is currently ignored.
@@ -221,16 +233,23 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * This method is currently only called internally by HAPI, it should not be called by user code.
+	 */
+	public void setResponseBody(String theResponseBody) {
+		myResponseBody = theResponseBody;
+	}
+
+	/**
 	 * Returns a map containing any headers which should be added to the outgoing
 	 * response. This methos creates the map if none exists, so it will never
 	 * return <code>null</code>
-	 * 
+	 *
 	 * @since 2.0 (note that this method existed in previous versions of HAPI but the method
-	 * signature has been changed from <code>Map&lt;String, String[]&gt;</code> to <code>Map&lt;String, List&lt;String&gt;&gt;</code> 
+	 * signature has been changed from <code>Map&lt;String, String[]&gt;</code> to <code>Map&lt;String, List&lt;String&gt;&gt;</code>
 	 */
 	public Map<String, List<String>> getResponseHeaders() {
 		if (myResponseHeaders == null) {
-			myResponseHeaders = new HashMap<String, List<String>>();
+			myResponseHeaders = new HashMap<>();
 		}
 		return myResponseHeaders;
 	}
@@ -246,6 +265,13 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	}
 
 	/**
+	 * This method is currently only called internally by HAPI, it should not be called by user code.
+	 */
+	public void setResponseMimeType(String theResponseMimeType) {
+		myResponseMimeType = theResponseMimeType;
+	}
+
+	/**
 	 * Returns the HTTP status code corresponding to this problem
 	 */
 	public int getStatusCode() {
@@ -254,38 +280,12 @@ public abstract class BaseServerResponseException extends RuntimeException {
 
 	/**
 	 * Does the exception have any headers which should be added to the outgoing response?
-	 * 
+	 *
 	 * @see #getResponseHeaders()
 	 * @since 2.0
 	 */
 	public boolean hasResponseHeaders() {
 		return myResponseHeaders != null && myResponseHeaders.isEmpty() == false;
-	}
-
-	/**
-	 * Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include with the HTTP response. In client
-	 * implementations you should not call this method.
-	 * 
-	 * @param theBaseOperationOutcome
-	 *            The BaseOperationOutcome resource Sets the BaseOperationOutcome resource associated with this exception. In server implementations, this is the OperartionOutcome resource to include
-	 *            with the HTTP response. In client implementations you should not call this method.
-	 */
-	public void setOperationOutcome(IBaseOperationOutcome theBaseOperationOutcome) {
-		myBaseOperationOutcome = theBaseOperationOutcome;
-	}
-
-	/**
-	 * This method is currently only called internally by HAPI, it should not be called by user code.
-	 */
-	public void setResponseBody(String theResponseBody) {
-		myResponseBody = theResponseBody;
-	}
-
-	/**
-	 * This method is currently only called internally by HAPI, it should not be called by user code.
-	 */
-	public void setResponseMimeType(String theResponseMimeType) {
-		myResponseMimeType = theResponseMimeType;
 	}
 
 	/**
@@ -298,7 +298,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	public static BaseServerResponseException newInstance(int theStatusCode, String theMessage) {
 		if (ourStatusCodeToExceptionType.containsKey(theStatusCode)) {
 			try {
-				return ourStatusCodeToExceptionType.get(theStatusCode).getConstructor(new Class[] { String.class }).newInstance(theMessage);
+				return ourStatusCodeToExceptionType.get(theStatusCode).getConstructor(new Class[]{String.class}).newInstance(theMessage);
 			} catch (InstantiationException e) {
 				throw new InternalErrorException(e);
 			} catch (IllegalAccessException e) {

@@ -23,10 +23,10 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 // Note: this class is not annotated with @Service because we want to
 // explicitly define it in BaseConfig.java. This is done so that
@@ -53,9 +53,9 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	}
 
 	@Override
-	public synchronized IBundleProvider retrieveResultList(String theId) {
+	public synchronized IBundleProvider retrieveResultList(RequestDetails theRequestDetails, String theId) {
 		IFhirSystemDao<?, ?> systemDao = myDaoRegistry.getSystemDao();
-		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theId, systemDao);
+		PersistedJpaBundleProvider provider = new PersistedJpaBundleProvider(theRequestDetails, theId, systemDao);
 		if (!provider.ensureSearchEntityLoaded()) {
 			return null;
 		}
@@ -63,7 +63,7 @@ public class DatabaseBackedPagingProvider extends BasePagingProvider implements 
 	}
 
 	@Override
-	public synchronized String storeResultList(IBundleProvider theList) {
+	public synchronized String storeResultList(RequestDetails theRequestDetails, IBundleProvider theList) {
 		String uuid = theList.getUuid();
 		return uuid;
 	}

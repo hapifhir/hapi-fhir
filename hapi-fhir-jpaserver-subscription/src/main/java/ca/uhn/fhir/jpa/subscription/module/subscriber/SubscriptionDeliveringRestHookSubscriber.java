@@ -20,10 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorRegistry;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.client.api.*;
@@ -97,7 +97,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			operation.encoded(thePayloadType);
 		}
 
-		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), thePayloadResource.getIdElement().toUnqualified().getValue(), theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
+		String payloadId = null;
+		if (thePayloadResource != null) {
+			payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
+		}
+		ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
 
 		try {
 			operation.execute();
@@ -134,7 +138,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		CanonicalSubscription subscription = theMessage.getSubscription();
 
 		// Interceptor call: SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, theMessage, subscription)) {
+		HookParams params = new HookParams()
+			.add(CanonicalSubscription.class, subscription)
+			.add(ResourceDeliveryMessage.class, theMessage);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
 			return;
 		}
 
@@ -170,7 +177,10 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		deliverPayload(theMessage, subscription, payloadType, client);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, theMessage, subscription)) {
+		params = new HookParams()
+			.add(CanonicalSubscription.class, subscription)
+			.add(ResourceDeliveryMessage.class, theMessage);
+		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}

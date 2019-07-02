@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -31,6 +30,8 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class HashMapResourceProviderTest {
 
@@ -205,6 +206,7 @@ public class HashMapResourceProviderTest {
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
+			ourClient.registerInterceptor(new LoggingInterceptor(true));
 			IIdType id = ourClient.create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());
@@ -305,19 +307,15 @@ public class HashMapResourceProviderTest {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		int ourListenerPort = PortUtil.findFreePort();
 		ourRestServer = new MyRestfulServer();
-		String ourBase = "http://localhost:" + ourListenerPort + "/";
-		ourListenerServer = new Server(ourListenerPort);
-
-		ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
+		
+		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -327,7 +325,11 @@ public class HashMapResourceProviderTest {
 		proxyHandler.addServlet(servletHolder, "/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+        int ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        String ourBase = "http://localhost:" + ourListenerPort + "/";
+        ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 	}
 
 	private static class MyRestfulServer extends RestfulServer {

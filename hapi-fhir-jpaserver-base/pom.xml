@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -126,21 +126,14 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!--
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 		</dependency>
-		-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -153,6 +146,10 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<dependency>
@@ -185,19 +182,19 @@
 		<dependency>
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.javolution</groupId>
+					<artifactId>javolution</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>net.riotopsys</groupId>
-			<artifactId>json_patch</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>com.google.code.gson</artifactId>
-					<groupId>gson</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+           	<groupId>io.dogote</groupId>
+           	<artifactId>json-patch</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
@@ -227,10 +224,10 @@
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>javax.xml.bind</groupId>
-			<artifactId>jaxb-api</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>javax.xml.bind</groupId>-->
+<!--			<artifactId>jaxb-api</artifactId>-->
+<!--		</dependency>-->
 		<!--<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
@@ -244,6 +241,16 @@
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!--		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbyshared</artifactId>
+			<scope>test</scope>
+		</dependency>-->
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -262,6 +269,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-test-utilities</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -359,6 +372,10 @@
 				<exclusion>
 					<artifactId>xml-apis</artifactId>
 					<groupId>xml-apis</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
 				<!--<exclusion>-->
 					<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
@@ -460,6 +477,10 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -502,8 +523,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -523,11 +544,6 @@
 			<artifactId>greenmail-spring</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -538,6 +554,12 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>16.0.3</version>
+			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>
@@ -639,6 +661,7 @@
 					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
 					<forkCount>0.6C</forkCount>
+					<excludes>*StressTest*</excludes>
 				</configuration>
 			</plugin>
 			<plugin>

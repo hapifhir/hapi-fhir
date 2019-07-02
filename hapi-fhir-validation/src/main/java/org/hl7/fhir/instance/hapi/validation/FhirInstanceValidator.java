@@ -725,7 +725,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public String getVersion() {
-			throw new UnsupportedOperationException();
+			return FhirVersionEnum.DSTU2.getFhirVersionString();
 		}
 
 		@Override

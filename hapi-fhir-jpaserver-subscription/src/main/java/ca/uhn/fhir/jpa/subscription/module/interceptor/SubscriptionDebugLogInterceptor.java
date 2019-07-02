@@ -20,11 +20,12 @@ package ca.uhn.fhir.jpa.subscription.module.interceptor;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
@@ -102,7 +103,7 @@ public class SubscriptionDebugLogInterceptor {
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_RESOURCE_MATCHED)
-	public void step30_subscriptionMatched(ResourceDeliveryMessage theMessage, SubscriptionMatchResult theResult) {
+	public void step30_subscriptionMatched(ResourceDeliveryMessage theMessage, InMemoryMatchResult theResult) {
 		log(EventCodeEnum.SUBS3, "Resource {} matched by subscription {} (memory match={})", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theResult.isInMemory());
 	}
 
@@ -118,7 +119,21 @@ public class SubscriptionDebugLogInterceptor {
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED)
 	public void step45_deliveryFailed(ResourceDeliveryMessage theMessage, Exception theFailure) {
-		log(EventCodeEnum.SUBS6, "Delivery of resource {} for subscription {} to channel of type {} - Failure: {}", theMessage.getPayloadId(), theMessage.getSubscription().getIdElementString(), theMessage.getSubscription().getChannelType(), theFailure.toString());
+		String payloadId = null;
+		String subscriptionId = null;
+		CanonicalSubscriptionChannelType channelType = null;
+		String failureString = null;
+		if (theMessage != null) {
+			payloadId = theMessage.getPayloadId();
+			if (theMessage.getSubscription() != null) {
+				subscriptionId = theMessage.getSubscription().getIdElementString();
+				channelType = theMessage.getSubscription().getChannelType();
+			}
+		}
+		if (theFailure != null) {
+			failureString = theFailure.toString();
+		}
+		log(EventCodeEnum.SUBS6, "Delivery of resource {} for subscription {} to channel of type {} - Failure: {}", payloadId, subscriptionId, channelType, failureString);
 	}
 
 	@Hook(Pointcut.SUBSCRIPTION_AFTER_DELIVERY)

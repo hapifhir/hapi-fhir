@@ -82,7 +82,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void addTag(ResourceHistoryTag theTag) {
 		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().equals(theTag)) {
+			if (next.equals(theTag)) {
 				return;
 			}
 		}
@@ -122,16 +122,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setId(Long theId) {
 		myId = theId;
-	}
-
-	@Override
-	public IdDt getIdDt() {
-		if (getForcedId() == null) {
-			Long id = myResourceId;
-			return new IdDt(myResourceType + '/' + id + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		} else {
-			return new IdDt(getForcedId().getResourceType() + '/' + getForcedId().getForcedId() + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
-		}
 	}
 
 	public byte[] getResource() {

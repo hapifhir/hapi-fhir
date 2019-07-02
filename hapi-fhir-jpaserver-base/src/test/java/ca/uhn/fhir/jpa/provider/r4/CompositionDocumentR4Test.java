@@ -1,22 +1,25 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.codesystems.EncounterStatus;
-import org.hl7.fhir.r4.model.codesystems.ObservationStatus;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +31,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 
@@ -38,6 +44,8 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	private String encId;
 	private String listId;
 	private String compId;
+	@Captor
+	private ArgumentCaptor<HookParams> myHookParamsCaptor;
 
 	@Before
 	public void beforeDisableResultReuse() {
@@ -77,7 +85,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		ListResource listResource = new ListResource();
 
 		ArrayList<Observation> myObs = new ArrayList<>();
-		myObsIds = new ArrayList<String>();
+		myObsIds = new ArrayList<>();
 		for (int i = 0; i < 5; i++) {
 			Observation obs = new Observation();
 			obs.getSubject().setReference(patId);
@@ -125,14 +133,54 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual, hasItems(myObsIds.toArray(new String[0])));
 	}
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException, ClientProtocolException {
+	@Test
+	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
+		try {
+
+			ourLog.info("Composition ID: {}", compId);
+			List<String> returnedClasses = new ArrayList<>();
+			doAnswer(t->{
+				HookParams param = t.getArgument(1, HookParams.class);
+				IPreResourceAccessDetails nextPreResourceAccessDetails = param.get(IPreResourceAccessDetails.class);
+				for (int i = 0; i < nextPreResourceAccessDetails.size(); i++) {
+					String className = nextPreResourceAccessDetails.getResource(i).getClass().getSimpleName();
+					ourLog.info("* Preaccess called on {}", nextPreResourceAccessDetails.getResource(i).getIdElement().getValue());
+					returnedClasses.add(className);
+				}
+				return null;
+			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
+
+			String theUrl = ourServerBase + "/" + compId + "/$document?_format=json";
+			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
+				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
+			}
+
+			Mockito.verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), myHookParamsCaptor.capture());
+
+			ourLog.info("Returned classes: {}", returnedClasses);
+
+			assertThat(returnedClasses, hasItem("Composition"));
+			assertThat(returnedClasses, hasItem("Organization"));
+
+		} finally {
+
+			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
+
+		}
+	}
+
+	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
 		Bundle bundle;
 		HttpGet get = new HttpGet(theUrl);
 
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			bundle = theEncoding.newParser(myFhirCtx).parseResource(Bundle.class, resourceString);
-		} 
+		}
 		return bundle;
 	}
 

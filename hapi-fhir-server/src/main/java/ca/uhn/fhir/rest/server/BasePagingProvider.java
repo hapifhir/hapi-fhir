@@ -24,8 +24,11 @@ import org.apache.commons.lang3.Validate;
 
 public abstract class BasePagingProvider implements IPagingProvider {
 
-	private int myDefaultPageSize = 10;
-	private int myMaximumPageSize = 50;
+	public static final int DEFAULT_DEFAULT_PAGE_SIZE = 10;
+	public static final int DEFAULT_MAX_PAGE_SIZE = 50;
+
+	private int myDefaultPageSize = DEFAULT_DEFAULT_PAGE_SIZE;
+	private int myMaximumPageSize = DEFAULT_MAX_PAGE_SIZE;
 
 	public BasePagingProvider() {
 		super();

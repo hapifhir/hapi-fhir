@@ -47,6 +47,7 @@ public class ModelConfig {
 		"http://hl7.org/fhir/codesystem-*",
 		"http://hl7.org/fhir/StructureDefinition/*")));
 
+	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -58,6 +59,7 @@ public class ModelConfig {
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private boolean mySubscriptionMatchingEnabled = true;
+	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -363,6 +365,22 @@ public class ModelConfig {
 		myEmailFromAddress = theEmailFromAddress;
 	}
 
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myWebsocketContextPath;
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myWebsocketContextPath = theWebsocketContextPath;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
@@ -374,5 +392,4 @@ public class ModelConfig {
 		}
 
 	}
-
 }

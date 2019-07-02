@@ -37,7 +37,7 @@ public interface ITenantIdentificationStrategy {
 
 	/**
 	 * Implementations may use this method to tweak the server base URL
-	 * if neccesary based on the tenant ID
+	 * if necessary based on the tenant ID
 	 */
 	String massageServerBaseUrl(String theFhirServerBase, RequestDetails theRequestDetails);
 }

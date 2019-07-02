@@ -109,7 +109,7 @@ public class WebsocketWithSubscriptionIdDstu2Test extends BaseResourceProviderDs
 		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
 
 		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket");
+		URI echoUri = new URI("ws://localhost:" + ourPort + myModelConfig.getWebsocketContextPath());
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);

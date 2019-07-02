@@ -86,7 +86,7 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return getList(); // indexes are ignored for this provider type
+		return (List<IBaseResource>) getList(); // indexes are ignored for this provider type
 	}
 
 	@Override

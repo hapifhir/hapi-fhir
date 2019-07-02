@@ -76,4 +76,5 @@ public interface IAuthRuleBuilderRuleOp extends IAuthRuleBuilderAppliesTo<IAuthR
 	 * @throws NullPointerException     If theId is null
 	 */
 	IAuthRuleFinished instances(Collection<IIdType> theIds);
+
 }

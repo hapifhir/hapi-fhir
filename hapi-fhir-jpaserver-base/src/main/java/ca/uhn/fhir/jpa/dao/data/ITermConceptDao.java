@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 /*
  * #%L
@@ -38,7 +39,7 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
-	TermConcept findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
+	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Slice<TermConcept> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);

@@ -33,6 +33,9 @@ import java.util.List;
 
 public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<CodeSystem> {
 
+	/**
+	 * $lookup operation
+	 */
 	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters= {
 		@OperationParam(name="name", type=StringType.class, min=1),
@@ -59,5 +62,31 @@ public class BaseJpaResourceProviderCodeSystemR4 extends JpaResourceProviderR4<C
 			endRequest(theServletRequest);
 		}
 	}
-	
+
+
+	/**
+	 * $subsumes operation
+	 */
+	@Operation(name = JpaConstants.OPERATION_SUBSUMES, idempotent = true, returnParameters= {
+		@OperationParam(name="outcome", type=CodeType.class, min=1),
+	})
+	public Parameters subsumes(
+		HttpServletRequest theServletRequest,
+		@OperationParam(name="codeA", min=0, max=1) CodeType theCodeA,
+		@OperationParam(name="codeB", min=0, max=1) CodeType theCodeB,
+		@OperationParam(name="system", min=0, max=1) UriType theSystem,
+		@OperationParam(name="codingA", min=0, max=1) Coding theCodingA,
+		@OperationParam(name="codingB", min=0, max=1) Coding theCodingB,
+		RequestDetails theRequestDetails
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
+			IFhirResourceDaoCodeSystem.SubsumesResult result = dao.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB, theRequestDetails);
+			return (Parameters) result.toParameters(theRequestDetails.getFhirContext());
+		} finally {
+			endRequest(theServletRequest);
+		}
+	}
 }

@@ -1,6 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -13,15 +16,16 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +64,8 @@ import static org.apache.commons.lang3.StringUtils.*;
  *
  * @since 1.0
  */
-public class ResponseHighlighterInterceptor extends InterceptorAdapter {
+@Interceptor
+public class ResponseHighlighterInterceptor {
 
 	/**
 	 * TODO: As of HAPI 1.6 (2016-06-10) this parameter has been replaced with simply
@@ -230,15 +235,14 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		return lineCount;
 	}
 
-	@Override
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws ServletException, IOException {
+	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) {
 		/*
 		 * It's not a browser...
 		 */
 		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!accept.contains(Constants.CT_HTML)) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		/*
@@ -246,21 +250,27 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		 */
 		String requestedWith = theServletRequest.getHeader("X-Requested-With");
 		if (requestedWith != null) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		/*
 		 * Not a GET
 		 */
 		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+			return true;
 		}
 
-		if (theException.getOperationOutcome() == null) {
-			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
+		IBaseOperationOutcome oo = theException.getOperationOutcome();
+		if (oo == null) {
+			return true;
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
+		ResponseDetails responseDetails = new ResponseDetails();
+		responseDetails.setResponseResource(oo);
+		responseDetails.setResponseCode(theException.getStatusCode());
+
+		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), theServletRequest, responseDetails.getResponseCode());
 
 		return false;
 	}
@@ -305,7 +315,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		return this;
 	}
 
-	@Override
+	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException {
 
@@ -315,7 +325,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
 		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
 			ourLog.warn("Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		boolean force = false;
@@ -337,7 +347,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 				force = true;
 				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
 			} else {
-				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+				return true;
 			}
 		}
 
@@ -346,34 +356,34 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 		 */
 		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!force && highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
 		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
 		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		/*
 		 * Not a GET
 		 */
 		if (!force && theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		/*
 		 * Not binary
 		 */
 		if (!force && (theResponseObject.getResponseResource() instanceof IBaseBinary)) {
-			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
+			return true;
 		}
 
 		streamResponse(theRequestDetails, theServletResponse, theResponseObject.getResponseResource(), theServletRequest, 200);
@@ -665,7 +675,7 @@ public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 	}
 
 	private void writeLength(HttpServletResponse theServletResponse, int theLength) throws IOException {
-		double kb = ((double)theLength) / FileUtils.ONE_KB;
+		double kb = ((double) theLength) / FileUtils.ONE_KB;
 		if (kb <= 1000) {
 			theServletResponse.getWriter().append(String.format("%.1f", kb)).append(" KB");
 		} else {

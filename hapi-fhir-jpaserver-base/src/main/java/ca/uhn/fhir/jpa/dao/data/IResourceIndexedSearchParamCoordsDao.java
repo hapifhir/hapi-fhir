@@ -23,7 +23,12 @@ package ca.uhn.fhir.jpa.dao.data;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface IResourceIndexedSearchParamCoordsDao extends JpaRepository<ResourceIndexedSearchParamCoords, Long> {
-	// nothing yet
+	@Modifying
+	@Query("delete from ResourceIndexedSearchParamCoords t WHERE t.myResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 }

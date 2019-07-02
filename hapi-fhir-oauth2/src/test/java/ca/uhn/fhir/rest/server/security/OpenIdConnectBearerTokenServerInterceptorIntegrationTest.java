@@ -127,7 +127,7 @@ public class OpenIdConnectBearerTokenServerInterceptorIntegrationTest {
 		servlet.registerInterceptor(myInterceptor);
 
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

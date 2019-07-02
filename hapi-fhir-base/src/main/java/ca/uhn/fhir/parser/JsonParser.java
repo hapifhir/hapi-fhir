@@ -360,7 +360,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						narr = null;
 					}
 					if (narr != null && narr.isEmpty()) {
-						gen.generateNarrative(myContext, theResource, narr);
+						gen.populateResourceNarrative(myContext, theResource);
 						if (!narr.isEmpty()) {
 							RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 							String childName = nextChild.getChildNameByDatatype(child.getDatatype());
@@ -378,7 +378,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 
 			List<? extends IBase> values = nextChild.getAccessor().getValues(theElement);
-			values = super.preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
+			values = preProcessValues(nextChild, theResource, values, nextChildElem, theEncodeContext);
 
 			if (values == null || values.isEmpty()) {
 				continue;
@@ -1277,18 +1277,22 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	private void writeExtensionsAsDirectChild(IBaseResource theResource, JsonLikeWriter theEventWriter, RuntimeResourceDefinition resDef, List<HeldExtension> extensions,
 															List<HeldExtension> modifierExtensions, EncodeContext theEncodeContext) throws IOException {
 		if (extensions.isEmpty() == false) {
+			theEncodeContext.pushPath("extension", false);
 			beginArray(theEventWriter, "extension");
 			for (HeldExtension next : extensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 		if (modifierExtensions.isEmpty() == false) {
+			theEncodeContext.pushPath("modifierExtension", false);
 			beginArray(theEventWriter, "modifierExtension");
 			for (HeldExtension next : modifierExtensions) {
 				next.write(resDef, theResource, theEventWriter, theEncodeContext);
 			}
 			theEventWriter.endArray();
+			theEncodeContext.popPath();
 		}
 	}
 
@@ -1430,42 +1434,65 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 				JsonParser.write(theEventWriter, "id", getCompositeElementId(ext));
 			}
 
+			if (isBlank(extensionUrl)) {
+				ParseLocation loc = new ParseLocation(theEncodeContext.toString());
+				getErrorHandler().missingRequiredElement(loc, "url");
+			}
+
 			JsonParser.write(theEventWriter, "url", extensionUrl);
 
 			boolean noValue = value == null || value.isEmpty();
 			if (noValue && ext.getExtension().isEmpty()) {
+
+				ParseLocation loc = new ParseLocation(theEncodeContext.toString());
+				getErrorHandler().missingRequiredElement(loc, "value");
 				ourLog.debug("Extension with URL[{}] has no value", extensionUrl);
-			} else if (noValue) {
 
-				if (myModifier) {
-					beginArray(theEventWriter, "modifierExtension");
-				} else {
-					beginArray(theEventWriter, "extension");
-				}
-
-				for (Object next : ext.getExtension()) {
-					writeUndeclaredExtension(theResDef, theResource, theEventWriter, (IBaseExtension<?, ?>) next, theEncodeContext);
-				}
-				theEventWriter.endArray();
 			} else {
 
-				/*
-				 * Pre-process value - This is called in case the value is a reference
-				 * since we might modify the text
-				 */
-				value = JsonParser.super.preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
+				if (!noValue && !ext.getExtension().isEmpty()) {
+					ParseLocation loc = new ParseLocation(theEncodeContext.toString());
+					getErrorHandler().extensionContainsValueAndNestedExtensions(loc);
+				}
 
-				RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
-				String childName = extDef.getChildNameByDatatype(value.getClass());
-				if (childName == null) {
-					childName = "value" + WordUtils.capitalize(myContext.getElementDefinition(value.getClass()).getName());
+				// Write child extensions
+				if (!ext.getExtension().isEmpty()) {
+
+					if (myModifier) {
+						beginArray(theEventWriter, "modifierExtension");
+					} else {
+						beginArray(theEventWriter, "extension");
+					}
+
+					for (Object next : ext.getExtension()) {
+						writeUndeclaredExtension(theResDef, theResource, theEventWriter, (IBaseExtension<?, ?>) next, theEncodeContext);
+					}
+					theEventWriter.endArray();
+
 				}
-				BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
-				if (childDef == null) {
-					throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+
+				// Write value
+				if (!noValue) {
+
+					/*
+					 * Pre-process value - This is called in case the value is a reference
+					 * since we might modify the text
+					 */
+					value = preProcessValues(myDef, theResource, Collections.singletonList(value), myChildElem, theEncodeContext).get(0);
+
+					RuntimeChildUndeclaredExtensionDefinition extDef = myContext.getRuntimeChildUndeclaredExtensionDefinition();
+					String childName = extDef.getChildNameByDatatype(value.getClass());
+					if (childName == null) {
+						childName = "value" + WordUtils.capitalize(myContext.getElementDefinition(value.getClass()).getName());
+					}
+					BaseRuntimeElementDefinition<?> childDef = extDef.getChildElementDefinitionByDatatype(value.getClass());
+					if (childDef == null) {
+						throw new ConfigurationException("Unable to encode extension, unrecognized child element type: " + value.getClass().getCanonicalName());
+					}
+					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent,false, theEncodeContext);
+					managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext);
+
 				}
-				encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, true, myParent,false, theEncodeContext);
-				managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext);
 			}
 
 			// theEventWriter.name(myUndeclaredExtension.get);

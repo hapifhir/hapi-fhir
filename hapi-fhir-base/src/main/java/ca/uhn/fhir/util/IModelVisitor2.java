@@ -20,30 +20,32 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import java.util.List;
-
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
+import java.util.List;
 
 /**
+ * THIS API IS EXPERIMENTAL IN HAPI FHIR - USE WITH CAUTION AS THE PUBLISHED API MAY
+ * CHANGE
+ *
  * @see FhirTerser#visit(IBaseResource, IModelVisitor2)
  */
 public interface IModelVisitor2 {
 
 	/**
-	 * @param theElement The element being visited
-	 * @param theContainingElementPath The elements in the path leading up to the actual element being accepted. The first element in this path will be the outer resource being visited, and the last element will be the saem object as the object passed as <code>theElement</code> 
+	 * @param theElement               The element being visited
+	 * @param theContainingElementPath The elements in the path leading up to the actual element being accepted. The first element in this path will be the outer resource being visited, and the last element will be the saem object as the object passed as <code>theElement</code>
 	 */
 	boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
 
 	/**
+	 *
 	 */
 	boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath);
 
-	
-	
+
 }
