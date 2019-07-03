@@ -44,8 +44,8 @@ public class DelegatingConsentService implements IConsentService {
 	}
 
 	@Override
-	public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
-		return myTarget.seeResource(theRequestDetails, theResource ,theContextServices);
+	public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		return myTarget.willSeeResource(theRequestDetails, theResource ,theContextServices);
 	}
 
 	@Override

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -77,8 +77,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("WeakerAccess")
 public class RestfulServer extends HttpServlet implements IRestfulServer<ServletRequestDetails> {
@@ -105,6 +104,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
+	private static final Random RANDOM = new Random();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 	private IInterceptorService myInterceptorService;
@@ -171,6 +171,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		if (isNotBlank(poweredByHeader)) {
 			theHttpResponse.addHeader(Constants.POWERED_BY_HEADER, poweredByHeader);
 		}
+
+
 	}
 
 	private void addLocationHeader(RequestDetails theRequest, HttpServletResponse theResponse, MethodOutcome response, String headerLocation, String resourceName) {
@@ -561,6 +563,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Returns a list of all registered server interceptors
+	 *
 	 * @deprecated As of HAPI FHIR 3.8.0, use {@link #getInterceptorService()} to access the interceptor service. You can register and unregister interceptors using this service.
 	 */
 	@Deprecated
@@ -577,6 +580,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 	/**
 	 * Returns the interceptor registry for this service. Use this registry to register and unregister
+	 *
 	 * @since 3.8.0
 	 */
 	@Override
@@ -850,6 +854,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		requestDetails.setServletRequest(theRequest);
 		requestDetails.setServletResponse(theResponse);
 
+		String requestId = getOrCreateRequestId(theRequest);
+		requestDetails.setRequestId(requestId);
+		addRequestIdToResponse(requestDetails, requestId);
+
 		theRequest.setAttribute(SERVLET_CONTEXT_ATTRIBUTE, getServletContext());
 
 		try {
@@ -1064,6 +1072,40 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 
 		}
+	}
+
+	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
+		theRequestDetails.getResponse().addHeader(Constants.HEADER_REQUEST_ID, theRequestId);
+	}
+
+	/**
+	 * Reads a requet ID from the request headers via the {@link Constants#HEADER_REQUEST_ID}
+	 * header, or generates one if none is supplied.
+	 * <p>
+	 * Note that the generated request ID is a random 64-bit long integer encoded as
+	 * hexadecimal. It is not generated using any cryptographic algorithms or a secure
+	 * PRNG, so it should not be used for anything other than troubleshooting purposes.
+	 * </p>
+	 */
+	protected String getOrCreateRequestId(HttpServletRequest theRequest) {
+		String requestId = theRequest.getHeader(Constants.HEADER_REQUEST_ID);
+		if (isNotBlank(requestId)) {
+			for (char nextChar : requestId.toCharArray()) {
+				if (!Character.isLetterOrDigit(nextChar)) {
+					if (nextChar != '.' && nextChar != '-' && nextChar != '_' && nextChar != ' ') {
+						requestId = null;
+						break;
+					}
+				}
+			}
+		}
+
+		if (isBlank(requestId)) {
+			requestId = Long.toHexString(RANDOM.nextLong());
+			requestId = leftPad(requestId, 16, '0');
+		}
+
+		return requestId;
 	}
 
 	protected void validateRequest(ServletRequestDetails theRequestDetails) {

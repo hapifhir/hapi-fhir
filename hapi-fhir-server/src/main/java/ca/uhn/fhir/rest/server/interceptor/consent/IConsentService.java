@@ -51,7 +51,7 @@ public interface IConsentService {
 	 * <p>
 	 * Implementations should make no attempt to modify the returned result within
 	 * this method. For modification use cases (e.g. masking for consent rules) the
-	 * user should use the {@link #seeResource(RequestDetails, IBaseResource, IConsentContextServices)}
+	 * user should use the {@link #willSeeResource(RequestDetails, IBaseResource, IConsentContextServices)}
 	 * method to actually make changes. This method is intended to only
 	 * to make decisions.
 	 * </p>
@@ -76,7 +76,7 @@ public interface IConsentService {
 	ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
 
 	/**
-	 * This method is called if a user may potentially see a resource, either completely
+	 * This method is called if a user is about to see a resource, either completely
 	 * or partially. In other words, if the user is going to see any part of this resource
 	 * via READ operations, SEARCH operations, etc., this method is
 	 * called. This method may modify the resource in order to filter/mask aspects of
@@ -92,7 +92,7 @@ public interface IConsentService {
 	 * </p>
 	 * <ul>
 	 * <li>{@link ConsentOperationStatusEnum#AUTHORIZED}: The resource will be returned to the client.</li>
-	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #seeResource(RequestDetails, IBaseResource, IConsentContextServices)}.</li>
+	 * <li>{@link ConsentOperationStatusEnum#PROCEED}: The resource will be returned to the client. Any embedded resources contained within the resource will also be checked by {@link #willSeeResource(RequestDetails, IBaseResource, IConsentContextServices)}.</li>
 	 * <li>{@link ConsentOperationStatusEnum#REJECT}: The resource will not be returned to the client. If the resource supplied to the </li>
 	 * </ul>
 	 *
@@ -108,7 +108,7 @@ public interface IConsentService {
 	 *                           consent directives.
 	 * @return An outcome object. See method documentation for a description.
 	 */
-	ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
+	ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices);
 
 	/**
 	 * This method is called when an operation is complete. It can be used to perform

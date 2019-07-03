@@ -32,7 +32,6 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,8 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -362,6 +360,38 @@ public class SearchR4Test {
 			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 		}
 
+	}
+
+	@Test
+	public void testRequestIdGeneratedAndReturned() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+		}
+	}
+
+	@Test
+	public void testRequestIdSuppliedAndReturned() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
+		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			assertThat(requestId, matchesPattern("help im a bug"));
+		}
+	}
+
+	@Test
+	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
+		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
+			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+		}
 	}
 
 	@Test

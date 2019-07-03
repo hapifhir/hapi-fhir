@@ -40,6 +40,9 @@ import ca.uhn.fhir.rest.server.RestfulResponse;
 
 public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetails> {
 
+	/**
+	 * Constructor
+	 */
 	public ServletRestfulResponse(ServletRequestDetails servletRequestDetails) {
 		super(servletRequestDetails);
 	}

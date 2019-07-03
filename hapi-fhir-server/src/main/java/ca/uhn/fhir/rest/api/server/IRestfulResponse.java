@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.api.server;
  */
 import java.io.*;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hl7.fhir.instance.model.api.*;
@@ -47,6 +49,8 @@ public interface IRestfulResponse {
 	Object sendAttachmentResponse(IBaseBinary bin, int stausCode, String contentType) throws IOException;
 
 	void setOperationResourceLastUpdated(IPrimitiveType<Date> theOperationResourceLastUpdated);
+
+	Map<String, List<String>> getHeaders();
 
 	void setOperationResourceId(IIdType theOperationResourceId);
 

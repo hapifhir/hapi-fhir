@@ -215,6 +215,11 @@
 				in the processing lifecycle if there is no chance they will be permitted
 				later (i.e. because the type is not authorized at all)
 			</action>
+			<action type="add">
+				The HAPI FHIR server will now generate a random transaction ID to every
+				request and add it to the response headers. Clients may supply the transaction
+				header via the <![CDATA[<code>X-Request-ID</code>]]> header.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

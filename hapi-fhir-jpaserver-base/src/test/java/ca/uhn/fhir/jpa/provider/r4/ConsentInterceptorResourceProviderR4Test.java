@@ -469,7 +469,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			}
 			return ConsentOutcome.PROCEED;
 		});
-		when(svc.seeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(svc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
@@ -502,7 +502,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		IConsentService svc = mock(IConsentService.class);
 		when(svc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(svc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(svc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
+		when(svc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t -> {
 			IBaseResource resource = t.getArgument(1, IBaseResource.class);
 			if (resource instanceof Organization) {
 				Organization org = new Organization();
@@ -598,7 +598,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			mySeeCount++;
 			String resourceId = theResource.getIdElement().toUnqualifiedVersionless().getValue();
 			ourLog.info("** SEE: {}", resourceId);
@@ -640,7 +640,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
@@ -674,7 +674,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
@@ -710,7 +710,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 
@@ -740,7 +740,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		}
 
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			return ConsentOutcome.PROCEED;
 		}
 

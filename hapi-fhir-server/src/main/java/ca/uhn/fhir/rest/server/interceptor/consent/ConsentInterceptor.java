@@ -158,7 +158,7 @@ public class ConsentInterceptor {
 				continue;
 			}
 
-			ConsentOutcome nextOutcome = myConsentService.seeResource(theRequestDetails, nextResource, myContextConsentServices);
+			ConsentOutcome nextOutcome = myConsentService.willSeeResource(theRequestDetails, nextResource, myContextConsentServices);
 			switch (nextOutcome.getStatus()) {
 				case PROCEED:
 					if (nextOutcome.getResource() != null) {
@@ -203,7 +203,7 @@ public class ConsentInterceptor {
 
 		// See outer resource
 		if (alreadySeenResources.putIfAbsent(theResource.getResponseResource(), Boolean.TRUE) == null) {
-			final ConsentOutcome outcome = myConsentService.seeResource(theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
+			final ConsentOutcome outcome = myConsentService.willSeeResource(theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
 			if (outcome.getResource() != null) {
 				theResource.setResponseResource(outcome.getResource());
 			}
@@ -245,7 +245,7 @@ public class ConsentInterceptor {
 					if (alreadySeenResources.putIfAbsent((IBaseResource) theElement, Boolean.TRUE) != null) {
 						return true;
 					}
-					ConsentOutcome childOutcome = myConsentService.seeResource(theRequestDetails, (IBaseResource) theElement, myContextConsentServices);
+					ConsentOutcome childOutcome = myConsentService.willSeeResource(theRequestDetails, (IBaseResource) theElement, myContextConsentServices);
 
 					IBaseResource replacementResource = null;
 					boolean shouldReplaceResource = false;

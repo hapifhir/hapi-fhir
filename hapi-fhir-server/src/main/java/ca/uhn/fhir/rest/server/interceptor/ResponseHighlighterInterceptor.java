@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -31,10 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -402,10 +400,7 @@ public class ResponseHighlighterInterceptor {
 				Enumeration<String> headerValuesEnum = sr.getHeaders(nextHeaderName);
 				while (headerValuesEnum.hasMoreElements()) {
 					String nextHeaderValue = headerValuesEnum.nextElement();
-					b.append("<div class=\"headersRow\">");
-					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
-					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
-					b.append("</div>");
+					appendHeader(b, nextHeaderName, nextHeaderValue);
 				}
 			}
 			b.append("</div>");
@@ -701,14 +696,26 @@ public class ResponseHighlighterInterceptor {
 							nextHeaderValue = responseEncoding.getResourceContentType() + ";charset=utf-8";
 						}
 					}
-					b.append("<div class=\"headersRow\">");
-					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
-					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
-					b.append("</div>");
+					appendHeader(b, nextHeaderName, nextHeaderValue);
 				}
 			}
+			IRestfulResponse response = theRequestDetails.getResponse();
+			for (Map.Entry<String, List<String>> next : response.getHeaders().entrySet()) {
+				String name = next.getKey();
+				for (String nextValue : next.getValue()) {
+					appendHeader(b, name, nextValue);
+				}
+			}
+
 			b.append("</div>");
 		}
+	}
+
+	private void appendHeader(StringBuilder theBuilder, String theHeaderName, String theHeaderValue) {
+		theBuilder.append("<div class=\"headersRow\">");
+		theBuilder.append("<span class=\"headerName\">").append(theHeaderName).append(": ").append("</span>");
+		theBuilder.append("<span class=\"headerValue\">").append(theHeaderValue).append("</span>");
+		theBuilder.append("</div>");
 	}
 
 }

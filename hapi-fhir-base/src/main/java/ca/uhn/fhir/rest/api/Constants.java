@@ -25,6 +25,7 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";

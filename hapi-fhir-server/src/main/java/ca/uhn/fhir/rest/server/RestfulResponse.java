@@ -49,6 +49,7 @@ public abstract class RestfulResponse<T extends RequestDetails> implements IRest
 	 * Get the http headers
 	 * @return the headers
 	 */
+	@Override
 	public Map<String, List<String>> getHeaders() {
 		return theHeaders;
 	}

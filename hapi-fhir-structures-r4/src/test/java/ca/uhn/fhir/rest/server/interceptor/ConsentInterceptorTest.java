@@ -97,7 +97,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 
@@ -131,7 +131,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
+		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 
 		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_total=accurate");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
@@ -159,7 +159,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.AUTHORIZED);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient");
 
@@ -172,7 +172,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).seeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -186,7 +186,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setDiagnostics("A DIAG");
 			return new ConsentOutcome(ConsentOperationStatusEnum.REJECT, oo);
@@ -203,7 +203,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).seeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -216,7 +216,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> {
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> {
 			return ConsentOutcome.REJECT;
 		});
 
@@ -230,7 +230,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).seeResource(any(), any(), any()); // the two patients + the bundle
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any()); // the two patients + the bundle
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -243,7 +243,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
 			if ("PTA".equals(resource.getIdElement().getIdPart())) {
 				OperationOutcome oo = new OperationOutcome();
@@ -268,7 +268,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).seeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -281,7 +281,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
 			if (resource.getIdElement().getIdPart().equals("PTA")) {
 				Patient replacement = new Patient();
@@ -308,7 +308,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(4)).seeResource(any(), any(), any());
+		verify(myConsentSvc, times(4)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
@@ -321,7 +321,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
-		when(myConsentSvc.seeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
 			if (resource.getIdElement().getIdPart().equals("PTA")) {
 				((Patient)resource).addIdentifier().setSystem("REPLACEMENT");
@@ -345,7 +345,7 @@ public class ConsentInterceptorTest {
 
 		verify(myConsentSvc, times(1)).startOperation(any(), any());
 		verify(myConsentSvc, times(2)).canSeeResource(any(), any(), any());
-		verify(myConsentSvc, times(3)).seeResource(any(), any(), any());
+		verify(myConsentSvc, times(3)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, times(1)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, times(0)).completeOperationFailure(any(), any(), any());
 		verifyNoMoreInteractions(myConsentSvc);
