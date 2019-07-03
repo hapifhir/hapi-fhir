@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -70,8 +71,8 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	private void createLatch(int count) {
-		myFailures.set(new ArrayList<>());
-		myCalledWith.set(new ArrayList<>());
+		myFailures.set(Collections.synchronizedList(new ArrayList<>()));
+		myCalledWith.set(Collections.synchronizedList(new ArrayList<>()));
 		myCountdownLatch.set(new CountDownLatch(count));
 		myInitialCount = count;
 	}
@@ -102,16 +103,17 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 				throw new AssertionError(getName() + " timed out waiting " + timeoutSecond + " seconds for latch to countdown from " + myInitialCount + " to 0.  Is " + latch.getCount() + ".");
 			}
 
-			List<String> failures = myFailures.get();
+			// Defend against ConcurrentModificationException
 			String error = getName();
-			if (failures != null && failures.size() > 0) {
+			if (myFailures.get() != null && myFailures.get().size() > 0) {
+				List<String> failures = new ArrayList<>(myFailures.get());
 				if (failures.size() > 1) {
 					error += " ERRORS: \n";
 				} else {
 					error += " ERROR: ";
 				}
-				error += failures.stream().collect(Collectors.joining("\n"));
-				error += "\nLatch called with values: " + myCalledWithString();
+				error += String.join("\n", failures);
+				error += "\nLatch called with values: " + toCalledWithString();
 				throw new AssertionError(error);
 			}
 		} finally {
@@ -126,11 +128,12 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 		myCountdownLatch.set(null);
 	}
 
-	private String myCalledWithString() {
+	private String toCalledWithString() {
 		if (myCalledWith.get() == null) {
 			return "[]";
 		}
-		List<HookParams> calledWith = myCalledWith.get();
+		// Defend against ConcurrentModificationException
+		List<HookParams> calledWith = new ArrayList<>(myCalledWith.get());
 		if (calledWith.isEmpty()) {
 			return "[]";
 		}
@@ -162,11 +165,13 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 	}
 
 	private class PointcutLatchException extends IllegalStateException {
-		public PointcutLatchException(String message, HookParams theArgs) {
+		private static final long serialVersionUID = 1372636272233536829L;
+
+		PointcutLatchException(String message, HookParams theArgs) {
 			super(getName() + ": " + message + " called with values: " + hookParamsToString(theArgs));
 		}
 
-		public PointcutLatchException(String message) {
+		PointcutLatchException(String message) {
 			super(getName() + ": " + message);
 		}
 	}
