@@ -375,6 +375,34 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+
+	}
+
+	@Test
+	public void testResourceGoneIncludesVersion() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM").addGiven("GIV");
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourClient
+			.delete()
+			.resourceById(id)
+			.execute();
+
+		CapturingInterceptor captureInterceptor = new CapturingInterceptor();
+		ourClient.registerInterceptor(captureInterceptor);
+
+		try {
+			ourClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		List<String> locationHeader = captureInterceptor.getLastResponse().getHeaders(Constants.HEADER_LOCATION);
+		assertEquals(1, locationHeader.size());
+		assertThat(locationHeader.get(0), containsString(id.getValue() + "/_history/2"));
 	}
 
 	@Test

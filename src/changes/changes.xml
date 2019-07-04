@@ -220,6 +220,11 @@
 				request and add it to the response headers. Clients may supply the transaction
 				header via the <![CDATA[<code>X-Request-ID</code>]]> header.
 			</action>
+			<action type="add">
+				When attempting to read a resource that is deleted, a Location header is now
+				returned that includes the resource ID and the version ID for the deleted
+				resource.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

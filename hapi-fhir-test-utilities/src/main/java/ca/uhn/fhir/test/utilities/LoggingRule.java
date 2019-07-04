@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.test.utilities;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -40,19 +40,22 @@ public class LoggingRule implements TestRule {
      * @param description A description of the test implemented in <code>statement</code>.
      * @return The modified statement.
      */
-    public Statement apply(final Statement statement, final Description description) {
+    @Override
+	 public Statement apply(final Statement statement, final Description description) {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
                 final Logger logger = LoggerFactory.getLogger(description.getTestClass());
                 logger.info(MessageFormat.format("Starting test case [{0}]", description.getDisplayName()));
+                boolean success = false;
                 try {
                     statement.evaluate();
+                    success = true;
                 } catch (final Throwable e) {
                     logger.error(MessageFormat.format("Exception thrown in test case [{0}]: {1}", description.getDisplayName(), e.toString()), e);
                     throw e;
                 } finally {
-                    logger.info(MessageFormat.format("Finished test case [{0}]", description.getDisplayName()));
+                    logger.info(MessageFormat.format("Finished test case [{0}] (success={1})", description.getDisplayName(), success));
                 }
             }
         };

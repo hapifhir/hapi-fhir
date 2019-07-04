@@ -171,7 +171,7 @@ public class PointcutLatch implements IAnonymousInterceptor, IPointcutLatch {
 			super(getName() + ": " + message + " called with values: " + hookParamsToString(theArgs));
 		}
 
-		PointcutLatchException(String message) {
+		public PointcutLatchException(String message) {
 			super(getName() + ": " + message);
 		}
 	}
