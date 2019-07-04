@@ -53,10 +53,4 @@ public class SearchParamR4Config extends BaseSearchParamConfig {
 	public SearchParamExtractorR4 searchParamExtractor() {
 		return new SearchParamExtractorR4();
 	}
-
-	@Primary
-	@Bean(autowire = Autowire.BY_NAME, name = "myJpaValidationSupportChainR4")
-	public IValidationSupport validationSupportChainR4() {
-		return new DefaultProfileValidationSupport();
-	}
 }
