@@ -115,7 +115,6 @@ public class TermConceptMap implements Serializable {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 			.append("myId", myId)
-			.append("myResource", myResource.toString())
 			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
 			.append("myResourcePid", myResourcePid)
 			.append("mySource", mySource)

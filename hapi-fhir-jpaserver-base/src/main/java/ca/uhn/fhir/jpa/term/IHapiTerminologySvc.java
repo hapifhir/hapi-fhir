@@ -81,7 +81,11 @@ public interface IHapiTerminologySvc {
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 
+	void deleteValueSetAndChildren(ResourceTable theResourceTable);
+
 	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
+
+	void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet);
 
 	boolean supportsSystem(String theCodeSystem);
 

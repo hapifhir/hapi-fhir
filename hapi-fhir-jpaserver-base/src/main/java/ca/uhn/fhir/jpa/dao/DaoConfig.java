@@ -145,6 +145,10 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 */
+	private boolean myPreExpandValueSetsExperimental = false;
 
 	/**
 	 * Constructor
@@ -1598,6 +1602,34 @@ public class DaoConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSetsExperimental() {
+		return myPreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
+		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
 	}
 
 	public enum IndexEnabledEnum {

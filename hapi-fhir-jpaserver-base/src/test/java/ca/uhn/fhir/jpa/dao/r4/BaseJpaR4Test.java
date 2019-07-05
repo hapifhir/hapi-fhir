@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -117,6 +116,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
@@ -286,6 +289,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Autowired
+	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected ITermValueSetCodeDao myTermValueSetCodeDao;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
