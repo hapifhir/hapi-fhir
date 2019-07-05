@@ -144,6 +144,6 @@ public interface IBundleProvider {
 	 * _include's or OperationOutcome). May return {@literal null} if the total size is not
 	 * known or would be too expensive to calculate.
 	 */
-	Integer size();
+	int size();
 
 }

@@ -165,21 +165,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(1, myOrganizationDao.search(map).size().intValue());
+		assertEquals(1, myOrganizationDao.search(map).size());
 
 		map = new SearchParameterMap();
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(1, myOrganizationDao.search(map).size().intValue());
+		assertEquals(1, myOrganizationDao.search(map).size());
 
 		myOrganizationDao.delete(orgId, mySrd);
 
 		map = new SearchParameterMap();
 		map.add("_language", new StringParam("EN_ca"));
-		assertEquals(0, myOrganizationDao.search(map).size().intValue());
+		assertEquals(0, myOrganizationDao.search(map).size());
 
 		map = new SearchParameterMap();
 		map.add("_tag", new TokenParam(methodName, methodName));
-		assertEquals(0, myOrganizationDao.search(map).size().intValue());
+		assertEquals(0, myOrganizationDao.search(map).size());
 	}
 
 	@Test
@@ -191,7 +191,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -205,7 +205,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_DATE, new DateParam("2001")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id2, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -236,53 +236,53 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam(">100", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("gt100", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("<100", "foo", "bar")));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.size());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("lt100", "foo", "bar")));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.size());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("123.0001", "foo", "bar")));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.size());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("~120", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("ap120", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq123", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("eq120", "foo", "bar")));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.size());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne120", "foo", "bar")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id3, found.getResources(0, 1).get(0).getIdElement());
 		}
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_QUANTITY, new QuantityParam("ne123", "foo", "bar")));
-			assertEquals(0, found.size().intValue());
+			assertEquals(0, found.size());
 		}
 	}
 
@@ -296,7 +296,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_STRING, new StringParam("testChoiceParam04Str")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id4, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -483,7 +483,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		{
 			IBundleProvider found = myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_VALUE_CONCEPT, new TokenParam("testChoiceParam01CCS", "testChoiceParam01CCV")));
-			assertEquals(1, found.size().intValue());
+			assertEquals(1, found.size());
 			assertEquals(id1, found.getResources(0, 1).get(0).getIdElement());
 		}
 	}
@@ -771,7 +771,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		IBundleProvider history = myPatientDao.history(null, null, mySrd);
-		assertEquals(4 + initialHistory, history.size().intValue());
+		assertEquals(4 + initialHistory, history.size());
 		List<IBaseResource> resources = history.getResources(0, 4);
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) resources.get(0)));
 
@@ -874,7 +874,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, history.size().intValue());
+		assertEquals(2, history.size());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)).getValue());
@@ -1139,7 +1139,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By instance
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1148,7 +1148,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By type
 		history = myPatientDao.history(null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1157,7 +1157,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By server
 		history = mySystemDao.history(null, null, mySrd);
-		assertEquals(fullSize + 1, history.size().intValue());
+		assertEquals(fullSize + 1, history.size());
 		for (int i = 0; i < fullSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1170,7 +1170,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By instance
 		history = myPatientDao.history(id, middleDate, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1179,7 +1179,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By type
 		history = myPatientDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1188,7 +1188,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		// By server
 		history = mySystemDao.history(middleDate, null, mySrd);
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 		for (int i = 0; i < halfSize; i++) {
 			String expected = id.withVersion(Integer.toString(fullSize + 1 - i)).getValue();
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
@@ -1211,7 +1211,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(log(history), fullSize + 1, history.size().intValue());
+		assertEquals(log(history), fullSize + 1, history.size());
 
 		// By type
 		history = myPatientDao.history(null, null, mySrd);
@@ -1221,8 +1221,8 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			assertEquals(expected, actual);
 		}
 		ourLog.info(log(history));
-		ourLog.info("Want {} but got {}", fullSize + 1, history.size().intValue());
-		assertEquals(log(history), fullSize + 1, history.size().intValue()); // fails?
+		ourLog.info("Want {} but got {}", fullSize + 1, history.size());
+		assertEquals(log(history), fullSize + 1, history.size()); // fails?
 
 		// By server
 		history = mySystemDao.history(null, null, mySrd);
@@ -1231,7 +1231,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(log(history), fullSize + 1, history.size().intValue());
+		assertEquals(log(history), fullSize + 1, history.size());
 
 		/*
 		 * With since date
@@ -1244,7 +1244,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 
 		// By type
 		history = myPatientDao.history(middleDate, null, mySrd);
@@ -1253,7 +1253,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 
 		// By server
 		history = mySystemDao.history(middleDate, null, mySrd);
@@ -1262,7 +1262,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			String actual = history.getResources(i, i + 1).get(0).getIdElement().getValue();
 			assertEquals(expected, actual);
 		}
-		assertEquals(halfSize, history.size().intValue());
+		assertEquals(halfSize, history.size());
 
 	}
 
@@ -1279,7 +1279,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.update(patient, mySrd);
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(3, history.size().intValue());
+		assertEquals(3, history.size());
 		List<IBaseResource> entries = history.getResources(0, 3);
 		ourLog.info("" + ResourceMetadataKeyEnum.UPDATED.get((IResource) entries.get(0)));
 		ourLog.info("" + ResourceMetadataKeyEnum.UPDATED.get((IResource) entries.get(1)));
@@ -1769,7 +1769,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IIdType qid2 = myQuestionnaireDao.create(q, mySrd).getId().toUnqualifiedVersionless();
 
 		IBundleProvider results = myQuestionnaireDao.search(new SearchParameterMap().setLoadSynchronous(true).add("title", new StringParam("testQuestionnaireTitleGetsIndexedQ_TITLE")));
-		assertEquals(1, results.size().intValue());
+		assertEquals(1, results.size());
 		assertEquals(qid1, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		assertNotEquals(qid2, results.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 
@@ -2124,7 +2124,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		map.add(Organization.SP_NAME, new StringParam("X" + methodName + "X"));
 		map.setRevIncludes(Collections.singleton(Patient.INCLUDE_ORGANIZATION));
 		IBundleProvider resultsP = myOrganizationDao.search(map);
-		assertEquals(1, resultsP.size().intValue());
+		assertEquals(1, resultsP.size());
 
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
 		assertEquals(2, results.size());

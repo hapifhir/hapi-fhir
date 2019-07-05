@@ -433,7 +433,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			params.add("subject", new ReferenceParam("Patient1063259"));
 			params.setLoadSynchronous(true);
 			IBundleProvider result = myDiagnosticReportDao.search(params);
-			assertEquals(1, result.size().intValue());
+			assertEquals(1, result.size());
 
 			deleteAllOfType("Binary");
 			deleteAllOfType("Location");
@@ -452,7 +452,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			}
 
 			result = myDiagnosticReportDao.search(params);
-			assertEquals(0, result.size().intValue());
+			assertEquals(0, result.size());
 
 		}
 

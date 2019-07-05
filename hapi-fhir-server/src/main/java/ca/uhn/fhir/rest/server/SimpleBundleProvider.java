@@ -34,7 +34,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	private final List<? extends IBaseResource> myList;
 	private final String myUuid;
 	private Integer myPreferredPageSize;
-	private Integer mySize;
+	private int mySize;
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
 	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
 		this(theList, null);
@@ -114,7 +114,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	}
 
 	@Override
-	public Integer size() {
+	public int size() {
 		return mySize;
 	}
 

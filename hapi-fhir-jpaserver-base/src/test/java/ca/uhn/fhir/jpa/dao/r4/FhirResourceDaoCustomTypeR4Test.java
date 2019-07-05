@@ -30,7 +30,7 @@ public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 		assertEquals("blue", read.getEyeColour().getValue());
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertEquals(1, found.size().intValue());
+		assertEquals(1, found.size());
 		CustomObservationR4 search = (CustomObservationR4) found.getResources(0, 1).get(0);
 		assertEquals("blue", search.getEyeColour().getValue());
 		

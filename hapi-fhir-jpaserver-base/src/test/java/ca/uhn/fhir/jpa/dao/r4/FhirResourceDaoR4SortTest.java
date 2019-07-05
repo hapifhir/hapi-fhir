@@ -41,7 +41,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IBundleProvider results = myObservationDao.search(criteriaUrl);
-		assertEquals(0, results.size().intValue());
+		assertEquals(0, results.size());
 	}
 
 	@Test

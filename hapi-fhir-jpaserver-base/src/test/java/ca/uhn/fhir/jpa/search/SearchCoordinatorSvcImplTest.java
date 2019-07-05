@@ -296,7 +296,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
-		assertEquals(90, result.size().intValue());
+		assertEquals(90, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertEquals(30, resources.size());
@@ -379,7 +379,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
-		assertEquals(790, result.size().intValue());
+		assertEquals(790, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 10000);
 		assertEquals(790, resources.size());
@@ -401,7 +401,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNull(result.getUuid());
-		assertEquals(100, result.size().intValue());
+		assertEquals(100, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 10000);
 		assertEquals(100, resources.size());

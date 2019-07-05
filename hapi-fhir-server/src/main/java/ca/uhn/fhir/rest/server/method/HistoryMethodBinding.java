@@ -199,7 +199,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 
 			@Override
-			public Integer size() {
+			public int size() {
 				return resources.size();
 			}
 		};

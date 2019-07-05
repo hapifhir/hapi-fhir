@@ -567,7 +567,7 @@ public class SearchDstu2Test {
 				}
 
 				@Override
-				public Integer size() {
+				public int size() {
 					return 0;
 				}
 

@@ -301,13 +301,13 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	}
 
 	@Override
-	public Integer size() {
+	public int size() {
 		ensureSearchEntityLoaded();
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 
 		Integer size = mySearchEntity.getTotalCount();
 		if (size == null) {
-			return null;
+			return 0;
 		}
 		return Math.max(0, size);
 	}

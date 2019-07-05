@@ -158,7 +158,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add("_id", new TokenParam("999999999999999"));
 		IBundleProvider outcome = myPatientDao.search(map);
-		assertEquals(1, outcome.size().intValue());
+		assertEquals(1, outcome.size());
 		assertEquals("Patient/999999999999999", outcome.getResources(0,1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 

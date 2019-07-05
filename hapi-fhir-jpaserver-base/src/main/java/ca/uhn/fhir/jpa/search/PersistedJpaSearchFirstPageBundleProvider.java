@@ -110,7 +110,7 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	}
 
 	@Override
-	public Integer size() {
+	public int size() {
 		ourLog.trace("Waiting for initial sync");
 		Integer size = mySearchTask.awaitInitialSync();
 		ourLog.trace("Finished waiting for local sync");

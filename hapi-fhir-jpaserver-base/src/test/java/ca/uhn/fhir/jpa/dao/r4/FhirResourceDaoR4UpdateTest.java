@@ -402,7 +402,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, mySrd);
 
-		assertEquals(2, historyBundle.size().intValue());
+		assertEquals(2, historyBundle.size());
 
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
 

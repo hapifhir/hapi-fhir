@@ -340,7 +340,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
-		assertEquals(2, search.size().intValue());
+		assertEquals(2, search.size());
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
@@ -370,7 +370,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		createStandardPatients();
 
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
-		assertEquals(2, search.size().intValue());
+		assertEquals(2, search.size());
 		List<IBaseResource> resources = search.getResources(0, 2);
 		myPatientDao.delete(resources.get(0).getIdElement());
 

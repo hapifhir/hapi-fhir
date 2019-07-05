@@ -714,7 +714,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, history.size().intValue());
+		assertEquals(2, history.size());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IResource) history.getResources(0, 1).get(0)).getValue());

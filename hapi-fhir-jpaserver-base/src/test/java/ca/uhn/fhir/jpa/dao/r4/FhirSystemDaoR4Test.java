@@ -566,7 +566,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap searchParamMap = new SearchParameterMap();
 		searchParamMap.setLoadSynchronous(true);
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
-		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+		assertEquals(1, myPatientDao.search(searchParamMap).size());
 
 		runInTransaction(()->{
 			ResourceHistoryTable historyEntry = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 3);
@@ -581,7 +581,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		searchParamMap.setLoadSynchronous(true);
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family2"));
 		IBundleProvider search = myPatientDao.search(searchParamMap);
-		assertEquals(1, search.size().intValue());
+		assertEquals(1, search.size());
 		p = (Patient) search.getResources(0, 1).get(0);
 		assertEquals("3", p.getIdElement().getVersionIdPart());
 	}
@@ -596,7 +596,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap searchParamMap = new SearchParameterMap();
 		searchParamMap.setLoadSynchronous(true);
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
-		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+		assertEquals(1, myPatientDao.search(searchParamMap).size());
 
 		runInTransaction(()->{
 			myEntityManager
@@ -604,12 +604,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				.executeUpdate();
 		});
 
-		assertEquals(0, myPatientDao.search(searchParamMap).size().intValue());
+		assertEquals(0, myPatientDao.search(searchParamMap).size());
 
 		myResourceReindexingSvc.markAllResourcesForReindexing();
 		myResourceReindexingSvc.forceReindexingPass();
 
-		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+		assertEquals(1, myPatientDao.search(searchParamMap).size());
 	}
 
 	@Test
@@ -621,7 +621,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap searchParamMap = new SearchParameterMap();
 		searchParamMap.setLoadSynchronous(true);
 		searchParamMap.add(Patient.SP_FAMILY, new StringParam("family1"));
-		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());
+		assertEquals(1, myPatientDao.search(searchParamMap).size());
 
 		runInTransaction(()->{
 			Long i = myEntityManager
@@ -1810,7 +1810,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		}
 
 		IBundleProvider history = myPatientDao.history(id, null, null, mySrd);
-		assertEquals(2, history.size().intValue());
+		assertEquals(2, history.size());
 
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)));
 		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) history.getResources(0, 1).get(0)).getValue());
@@ -2368,7 +2368,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		IBundleProvider allPatients = myPatientDao.search(new SearchParameterMap());
-		assertEquals(1, allPatients.size().intValue());
+		assertEquals(1, allPatients.size());
 	}
 
 	@Test
@@ -3430,7 +3430,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		params.setLoadSynchronous(true);
 		params.add("subject", new ReferenceParam(patientId));
 		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
+		assertEquals(1, found.size());
 	}
 
 	@Test
@@ -3510,7 +3510,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		params.setLoadSynchronous(true);
 		params.add("subject", new ReferenceParam(patientId));
 		IBundleProvider found = myObservationDao.search(params);
-		assertEquals(1, found.size().intValue());
+		assertEquals(1, found.size());
 	}
 
 	@Test
@@ -3775,13 +3775,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
 		IBundleProvider res = myOrganizationDao.search(map);
-		assertEquals(1, res.size().intValue());
+		assertEquals(1, res.size());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size().intValue());
+		assertEquals(1, res.size());
 		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		/*
@@ -3814,13 +3814,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id1.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size().intValue());
+		assertEquals(1, res.size());
 		assertEquals(id1.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 		map = new SearchParameterMap();
 		map.add(Organization.SP_PARTOF, new ReferenceParam(id2.toUnqualifiedVersionless().getValue()));
 		res = myOrganizationDao.search(map);
-		assertEquals(1, res.size().intValue());
+		assertEquals(1, res.size());
 		assertEquals(id2.toUnqualifiedVersionless().getValue(), res.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 
 	}
