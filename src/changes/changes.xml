@@ -225,6 +225,20 @@
 				returned that includes the resource ID and the version ID for the deleted
 				resource.
 			</action>
+			<action type="fix">
+				A number of columns in the JPA Terminology Services ConceptMap tables were not
+				explicitly annotated with @Column, so the DB columns that were generated had
+				Java ugly field names as their SQL column names. These have been renamed, and
+				entries in the JPA migrator tool have been added for anyone upgrading.
+			</action>
+			<action type="fix">
+				Field values with a datatype of <![CDATA[<code>canonical</code>]]> were indexed as
+				though they were explicit resource references by the JPA server. This led to
+				errors about external references not being supported when uploading various
+				resources (e.g. Questionnaires with HL7-defined ValueSet references). This has
+				been corrected. Note that at this time, we do not index canonical references
+				at all (as we were previously doing it incorrectly). This will be improved soon.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

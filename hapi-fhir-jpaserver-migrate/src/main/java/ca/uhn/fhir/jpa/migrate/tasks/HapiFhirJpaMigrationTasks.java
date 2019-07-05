@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,13 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -53,8 +53,29 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init340();
 		init350();
 		init360();
+		init400();
 	}
 
+	private void init400() {
+		Builder version = forVersion(VersionEnum.V4_0_0);
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySourceValueSet", "SOURCE_VS")
+			.renameColumn("myTargetValueSet", "TARGET_VS");
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySystem", "SYSTEM_URL")
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
+			.renameColumn("myValueSet", "VALUESET_URL");
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySystem", "SYSTEM_URL")
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
+			.renameColumn("myValueSet", "VALUESET_URL");
+	}
 
 
 	private void init360() {

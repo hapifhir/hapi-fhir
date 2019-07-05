@@ -167,6 +167,15 @@ public class BaseMigrationTasks<T extends Enum> {
 				return new BuilderAddForeignKey(theForeignKeyName);
 			}
 
+			public BuilderWithTableName renameColumn(String theOldName, String theNewName) {
+				RenameColumnTask task = new RenameColumnTask();
+				task.setTableName(myTableName);
+				task.setOldName(theOldName);
+				task.setNewName(theNewName);
+				addTask(task);
+				return this;
+			}
+
 			public class BuilderAddIndexWithName {
 				private final String myIndexName;
 

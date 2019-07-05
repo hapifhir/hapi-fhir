@@ -60,6 +60,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 	@SuppressWarnings("unused")
+
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 

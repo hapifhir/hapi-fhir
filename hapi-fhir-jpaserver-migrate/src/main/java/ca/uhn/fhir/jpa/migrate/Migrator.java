@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public class Migrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(Migrator.class);
@@ -83,7 +85,12 @@ public class Migrator {
 				try {
 					next.execute();
 				} catch (SQLException e) {
-					throw new InternalErrorException("Failure executing task \"" + next.getDescription() + "\", aborting! Cause: " + e.toString(), e);
+					String description = next.getDescription();
+					if (isBlank(description)) {
+						description = next.getClass().getSimpleName();
+					}
+					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
+					throw new InternalErrorException(prefix + e.toString(), e);
 				}
 
 				myChangesCount += next.getChangesCount();

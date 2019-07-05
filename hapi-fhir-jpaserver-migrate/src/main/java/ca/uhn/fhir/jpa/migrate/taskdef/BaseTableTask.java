@@ -30,6 +30,7 @@ public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	}
 
 	public T setTableName(String theTableName) {
+		Validate.notBlank(theTableName);
 		myTableName = theTableName;
 		return (T) this;
 	}

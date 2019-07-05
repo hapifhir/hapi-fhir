@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -13,7 +11,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -416,21 +413,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(encoded, containsString("No issues detected"));
 		}
 	}
-
-	@SuppressWarnings("unchecked")
-	private void upload(String theClasspath) throws IOException {
-		String resource = loadResource(theClasspath);
-		IBaseResource resourceParsed = myFhirCtx.newJsonParser().parseResource(resource);
-		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
-		dao.update(resourceParsed);
-	}
-
-	private String loadResource(String theClasspath) throws IOException {
-		return IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
-	}
-
-	@Autowired
-	private DaoRegistry myDaoRegistry;
 
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;

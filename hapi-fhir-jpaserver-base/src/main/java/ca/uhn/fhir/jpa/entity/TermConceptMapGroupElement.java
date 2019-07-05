@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -54,9 +55,16 @@ public class TermConceptMapGroupElement implements Serializable {
 	@OneToMany(mappedBy = "myConceptMapGroupElement")
 	private List<TermConceptMapGroupElementTarget> myConceptMapGroupElementTargets;
 
+	@Column(name = "CONCEPT_MAP_URL", length = 200)
 	private String myConceptMapUrl;
+
+	@Column(name = "SYSTEM_URL", length = 200)
 	private String mySystem;
+
+	@Column(name = "SYSTEM_VERSION", length = 200)
 	private String mySystemVersion;
+
+	@Column(name = "VALUESET_URL", length = 200)
 	private String myValueSet;
 
 	public String getCode() {
@@ -64,6 +72,7 @@ public class TermConceptMapGroupElement implements Serializable {
 	}
 
 	public void setCode(String theCode) {
+		Validate.notBlank(theCode, "theCode must not be blank");
 		myCode = theCode;
 	}
 

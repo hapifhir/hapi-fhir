@@ -54,9 +54,13 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 	@Column(name = "TARGET_EQUIVALENCE", length = 50)
 	private ConceptMapEquivalence myEquivalence;
 
+	@Column(name = "CONCEPT_MAP_URL", length = 200)
 	private String myConceptMapUrl;
+	@Column(name = "SYSTEM_URL", length = 200)
 	private String mySystem;
+	@Column(name = "SYSTEM_VERSION", length = 200)
 	private String mySystemVersion;
+	@Column(name = "VALUESET_URL", length = 200)
 	private String myValueSet;
 
 	public String getCode() {

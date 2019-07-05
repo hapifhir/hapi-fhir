@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -34,6 +33,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
@@ -294,11 +294,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+	protected IServerInterceptor myInterceptor;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
-	protected IServerInterceptor myInterceptor;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 
 	@After()
 	public void afterCleanupDao() {
@@ -400,6 +402,19 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		if (!result.isSuccessful()) {
 			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void upload(String theClasspath) throws IOException {
+		String resource = loadResource(theClasspath);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IBaseResource resourceParsed = parser.parseResource(resource);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
+		dao.update(resourceParsed);
+	}
+
+	protected String loadResource(String theClasspath) throws IOException {
+		return IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
 	}
 
 
