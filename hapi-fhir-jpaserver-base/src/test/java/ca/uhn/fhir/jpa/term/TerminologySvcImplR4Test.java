@@ -381,7 +381,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testStoreTermValueSetAndValueSetCode() throws Exception {
+	public void testStoreTermValueSetAndChildren() throws Exception {
 		myDaoConfig.setPreExpandValueSetsExperimental(true);
 
 		loadAndPersistCodeSystemAndValueSet();
