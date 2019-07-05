@@ -240,6 +240,7 @@
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
+									<trimHeaderLine>true</trimHeaderLine>
 									<roots>
 										<root>src/main/java</root>
 									</roots>
