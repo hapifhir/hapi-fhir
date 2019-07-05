@@ -1173,7 +1173,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
 					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
