@@ -168,6 +168,7 @@ public class HistoryMethodBinding extends BaseResourceReturningMethodBinding {
 				return resources.getPublished();
 			}
 
+			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 				List<IBaseResource> retVal = resources.getResources(theFromIndex, theToIndex);

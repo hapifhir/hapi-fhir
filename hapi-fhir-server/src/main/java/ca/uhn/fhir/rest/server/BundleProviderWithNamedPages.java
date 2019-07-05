@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -84,6 +85,7 @@ public class BundleProviderWithNamedPages extends SimpleBundleProvider {
 		return this;
 	}
 
+	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		return (List<IBaseResource>) getList(); // indexes are ignored for this provider type

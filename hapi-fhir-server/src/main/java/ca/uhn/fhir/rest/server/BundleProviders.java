@@ -29,6 +29,8 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 
+import javax.annotation.Nonnull;
+
 /**
  * Utility methods for working with {@link IBundleProvider}
  */
@@ -46,6 +48,7 @@ public class BundleProviders {
 	public static IBundleProvider newEmptyList() {
 		final InstantDt published = InstantDt.withCurrentTime();
 		return new IBundleProvider() {
+			@Nonnull
 			@Override
 			public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 				return Collections.emptyList();

@@ -44,6 +44,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -222,6 +223,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		return new InstantDt(mySearchEntity.getCreated());
 	}
 
+	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(final int theFromIndex, final int theToIndex) {
 		ensureDependenciesInjected();

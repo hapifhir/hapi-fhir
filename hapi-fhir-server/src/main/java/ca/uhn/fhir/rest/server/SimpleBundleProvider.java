@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -78,6 +79,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 		myPublished = thePublished;
 	}
 
+	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));

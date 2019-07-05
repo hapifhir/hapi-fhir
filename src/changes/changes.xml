@@ -239,6 +239,11 @@
 				been corrected. Note that at this time, we do not index canonical references
 				at all (as we were previously doing it incorrectly). This will be improved soon.
 			</action>
+			<action type="add">
+				IBundleProvider now has an isEmpty() method that can be used to check whether any
+				results exist. A default implementation has been provided, so this is not
+				a breaking change.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

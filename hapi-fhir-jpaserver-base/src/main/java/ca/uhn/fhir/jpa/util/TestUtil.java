@@ -99,6 +99,7 @@ public class TestUtil {
 			if (!isTransient) {
 				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
 				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
 				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
 				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
 				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
@@ -107,7 +108,8 @@ public class TestUtil {
 					hasColumn ||
 						hasJoinColumn ||
 						isOtherSideOfOneToManyMapping ||
-						isOtherSideOfOneToOneMapping, "Non-transient has no @Column or @JoinColumn: " + nextField);
+						isOtherSideOfOneToOneMapping ||
+						hasEmbeddedId, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
 			}
 
 
