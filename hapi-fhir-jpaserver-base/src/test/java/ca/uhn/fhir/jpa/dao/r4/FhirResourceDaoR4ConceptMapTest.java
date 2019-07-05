@@ -1055,7 +1055,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		request.setTargetSystem(new UriType("http://hl7.org/fhir/sid/icd-10-us"));
 		TranslationResult outcome = myConceptMapDao.translate(request, mySrd);
 
-		assertEquals("S52.209A", outcome.getMatches().get(1).getConcept().getCode());
+		assertEquals("S52.209A", outcome.getMatches().get(0).getConcept().getCode());
 	}
 
 
