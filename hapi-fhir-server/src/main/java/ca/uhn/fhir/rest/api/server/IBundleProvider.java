@@ -158,7 +158,7 @@ public interface IBundleProvider {
 	default boolean isEmpty() {
 		Integer size = size();
 		if (size != null) {
-			return size > 0;
+			return size == 0;
 		}
 		return getResources(0, 1).isEmpty();
 	}
