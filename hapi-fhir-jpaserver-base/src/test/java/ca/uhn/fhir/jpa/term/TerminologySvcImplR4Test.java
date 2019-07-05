@@ -174,7 +174,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		loadAndPersistCodeSystem();
 
 		expectedException.expect(UnprocessableEntityException.class);
-		expectedException.expectMessage("Can not create multiple code systems with URI \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
+		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
 
 		loadAndPersistCodeSystem();
 	}
