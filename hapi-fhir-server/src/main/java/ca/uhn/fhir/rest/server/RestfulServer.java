@@ -1047,6 +1047,20 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			/*
+			 * If it's a 410 Gone, we want to include a location header inthe response
+			 * if we can, since that can include the resource version which is nice
+			 * for the user.
+			 */
+			if (exception instanceof ResourceGoneException) {
+				IIdType resourceId = ((ResourceGoneException) exception).getResourceId();
+				if (resourceId != null && resourceId.hasResourceType() && resourceId.hasIdPart()) {
+					String baseUrl = myServerAddressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+					resourceId = resourceId.withServerBase(baseUrl, resourceId.getResourceType());
+					requestDetails.getResponse().addHeader(Constants.HEADER_LOCATION, resourceId.getValue());
+				}
+			}
+
+			/*
 			 * Next, interceptors get a shot at handling the exception
 			 */
 			HookParams handleExceptionParams = new HookParams();

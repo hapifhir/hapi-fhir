@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,6 +54,7 @@ import ca.uhn.fhir.util.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -863,12 +864,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException("No resource found with PID " + thePid);
 		}
 		if (entity.get().getDeleted() != null) {
-			throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.get().getDeleted()).getValueAsString());
+			throw newResourceGoneException(entity.get());
 		}
 
 		T retVal = toResource(myResourceType, entity.get(), null, false);
 
 		ourLog.debug("Processed read on {} in {}ms", thePid, w.getMillis());
+		return retVal;
+	}
+
+	@NotNull
+	private ResourceGoneException newResourceGoneException(BaseHasResource theResourceEntity) {
+		StringBuilder b = new StringBuilder();
+		b.append("Resource was deleted at ");
+		b.append(new InstantType(theResourceEntity.getDeleted()).getValueAsString());
+		ResourceGoneException retVal = new ResourceGoneException(b.toString());
+		retVal.setResourceId(theResourceEntity.getIdDt());
 		return retVal;
 	}
 
@@ -902,22 +913,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		if (theDeletedOk == false) {
 			if (entity.getDeleted() != null) {
-				throw new ResourceGoneException("Resource was deleted at " + new InstantType(entity.getDeleted()).getValueAsString());
+				throw newResourceGoneException(entity);
 			}
 		}
 
 		// Interceptor broadcast: STORAGE_PREACCESS_RESOURCES
 		{
-		SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
-		HookParams params = new HookParams()
-			.add(IPreResourceAccessDetails.class, accessDetails)
-			.add(RequestDetails.class, theRequest)
-			.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-		if (accessDetails.isDontReturnResourceAtIndex(0)) {
-			throw new ResourceNotFoundException(theId);
+			SimplePreResourceAccessDetails accessDetails = new SimplePreResourceAccessDetails(retVal);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequest)
+				.addIfMatchesType(ServletRequestDetails.class, theRequest);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			if (accessDetails.isDontReturnResourceAtIndex(0)) {
+				throw new ResourceNotFoundException(theId);
+			}
 		}
-	}
 
 		// Interceptor broadcast: STORAGE_PRESHOW_RESOURCES
 		{
@@ -1183,7 +1194,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		outcome.setId(id);
 		if (theEntity.getDeleted() == null) {
-		outcome.setResource(theResource);
+			outcome.setResource(theResource);
 		}
 		outcome.setEntity(theEntity);
 
@@ -1204,7 +1215,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Note that this will only fire if someone actually goes to use the
 		// resource in a response (it's their responsibility to call
 		// outcome.fireResourceViewCallback())
-		outcome.registerResourceViewCallback(()->{
+		outcome.registerResourceViewCallback(() -> {
 			if (outcome.getResource() != null) {
 				SimplePreResourceShowDetails showDetails = new SimplePreResourceShowDetails(outcome.getResource());
 				HookParams params = new HookParams()
