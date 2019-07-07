@@ -13,10 +13,10 @@
 				<![CDATA[
 				<ul>
 					<li>Commons Codec (Core): 1.11 -&gt; 1.12</li>
-					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.8</li>
+					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.9</li>
 					<li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li>
-					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.7.RELEASE</li>
-					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
+					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.8.RELEASE</li>
+					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.9.RELEASE</li>
 <!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
 					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
@@ -25,6 +25,8 @@
 					<li>commons-dbcp2 (JPA): 2.5.0 -&gt; 2.6.0</li>
 					<li>commons-lang3 (Core): 3.8.1 -&gt; 3.9</li>
 					<li>commons-text (Core): 1.6 -&gt; 1.7</li>
+					<li>Guava (JPA): 27.1-jre -&gt; 28.0-jre</li>
+					<li>
 				</ul>
 				]]>
 			</action>
