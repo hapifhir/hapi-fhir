@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Required;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
+public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJpaSystemProvider {
 
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
