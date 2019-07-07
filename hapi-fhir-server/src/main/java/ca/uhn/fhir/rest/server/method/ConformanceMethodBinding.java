@@ -74,6 +74,11 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		IBaseResource conf;
 
 		conf = myCachedResponse.get();
+
+		if ("true".equals(System.getProperty("test"))) {
+			conf = null;
+		}
+
 		if (conf != null) {
 			long expires = myCachedResponseExpires.get();
 			if (expires < System.currentTimeMillis()) {
