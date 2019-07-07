@@ -34,6 +34,10 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
   private static int ourPort;
   private static Server ourServer;
 
+  static {
+    System.setProperty("test", "true");
+  }
+
   @Test
   public void testOperationsAreCollapsed() throws Exception {
     // Metadata

@@ -35,7 +35,11 @@ import ca.uhn.fhir.rest.server.method.SearchParameter;
 
 public class ServerConformanceProviderHl7OrgDstu2Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  static {
+    System.setProperty("test", "true");
+  }
+
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderHl7OrgDstu2Test.class);
 
 	private HttpServletRequest createHttpServletRequest() {
