@@ -24,6 +24,10 @@ import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -74,15 +78,31 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 		IBaseResource conf;
 
 		conf = myCachedResponse.get();
-
 		if ("true".equals(System.getProperty("test"))) {
 			conf = null;
 		}
-
 		if (conf != null) {
 			long expires = myCachedResponseExpires.get();
 			if (expires < System.currentTimeMillis()) {
 				conf = null;
+			}
+		}
+		if (conf != null) {
+			// Handle server action interceptors
+			RestOperationTypeEnum operationType = getRestOperationType(theRequest);
+			if (operationType != null) {
+				IServerInterceptor.ActionRequestDetails details = new IServerInterceptor.ActionRequestDetails(theRequest);
+				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+				HookParams preHandledParams = new HookParams();
+				preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
+				preHandledParams.add(RequestDetails.class, theRequest);
+				preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
+				preHandledParams.add(IServerInterceptor.ActionRequestDetails.class, details);
+				if (theRequest.getInterceptorBroadcaster() != null) {
+					theRequest
+						.getInterceptorBroadcaster()
+						.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+				}
 			}
 		}
 
