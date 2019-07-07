@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.*;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -78,7 +79,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 	}
 
 	@Override
-	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
+	public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		CapabilityStatement retVal = myCachedValue;
 
 		Map<String, Long> counts = null;
@@ -87,7 +88,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		}
 		counts = defaultIfNull(counts, Collections.emptyMap());
 
-		retVal = super.getServerConformance(theRequest);
+		retVal = super.getServerConformance(theRequest, theRequestDetails);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
 
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {

@@ -251,6 +251,12 @@
 				results exist. A default implementation has been provided, so this is not
 				a breaking change.
 			</action>
+			<action type="change">
+				Server CapabilityStatement/Conformance repsonses from the /metadata endpoint will
+				now be cached for 60 seconds always. This was previously a configurable setting on
+				the ServerConformanceProvider, but it is now handled directly by the method
+				binding so the provider now has no responsibility for caching.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

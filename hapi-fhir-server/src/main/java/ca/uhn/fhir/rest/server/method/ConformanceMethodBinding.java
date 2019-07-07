@@ -21,6 +21,8 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -40,13 +42,20 @@ import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import javax.annotation.Nonnull;
 
 public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding {
+	private static final long CACHE_MILLIS = 60 * 1000;
 
-	public ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
+	/*
+	 * Note: This caching mechanism should probably be configurable and maybe
+	 * even applicable to other bindings. It's particularly important for this
+	 * operation though, so a one-off is fine for now
+	 */
+	private final AtomicReference<IBaseResource> myCachedResponse = new AtomicReference<>();
+	private final AtomicLong myCachedResponseExpires = new AtomicLong(0L);
+
+
+	ConformanceMethodBinding(Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theMethod.getReturnType(), theMethod, theContext, theProvider);
 
-		// if (Modifier.isAbstract(theMethod.getReturnType().getModifiers())) {
-		// throw new ConfigurationException("Conformance resource provider method '" + theMethod.getName() + "' must not be abstract");
-		// }
 		MethodReturnTypeEnum methodReturnType = getMethodReturnType();
 		Class<?> genericReturnType = (Class<?>) theMethod.getGenericReturnType();
 		if (methodReturnType != MethodReturnTypeEnum.RESOURCE || !IBaseConformance.class.isAssignableFrom(genericReturnType)) {
@@ -62,7 +71,22 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 
 	@Override
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
-		IBaseResource conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
+		IBaseResource conf;
+
+		conf = myCachedResponse.get();
+		if (conf != null) {
+			long expires = myCachedResponseExpires.get();
+			if (expires < System.currentTimeMillis()) {
+				conf = null;
+			}
+		}
+
+		if (conf == null) {
+			conf = (IBaseResource) invokeServerMethod(theServer, theRequest, theMethodParams);
+			myCachedResponse.set(conf);
+			myCachedResponseExpires.set(System.currentTimeMillis() + CACHE_MILLIS);
+		}
+
 		return new SimpleBundleProvider(conf);
 	}
 
