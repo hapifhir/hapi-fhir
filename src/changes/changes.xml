@@ -20,6 +20,11 @@
 <!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
 					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
+					<li>Jackson-Databind (JPA): 2.9.9 -&gt; 2.9.9.1 (due to a Jackson vulnerability CVE-2019-12384)</li>
+					<li>commons-collections4 (Server/JPA): 4.1 -&gt; 4.3</li>
+					<li>commons-dbcp2 (JPA): 2.5.0 -&gt; 2.6.0</li>
+					<li>commons-lang3 (Core): 3.8.1 -&gt; 3.9</li>
+					<li>commons-text (Core): 1.6 -&gt; 1.7</li>
 				</ul>
 				]]>
 			</action>
