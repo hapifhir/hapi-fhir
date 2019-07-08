@@ -42,4 +42,18 @@ public class OkHttpRestfulClientFactoryTest {
         assertSame(okHttpClient, clientFactory.getNativeClient());
     }
 
+	@Test
+	public void testSocketTimeout() {
+		clientFactory.setSocketTimeout(1515);
+
+		assertEquals(1515, ((OkHttpClient)clientFactory.getNativeClient()).readTimeoutMillis());
+		assertEquals(1515, ((OkHttpClient)clientFactory.getNativeClient()).writeTimeoutMillis());
+	}
+
+	@Test
+	public void testConnectTimeout() {
+		clientFactory.setConnectTimeout(1516);
+
+		assertEquals(1516, ((OkHttpClient)clientFactory.getNativeClient()).connectTimeoutMillis());
+	}
 }
