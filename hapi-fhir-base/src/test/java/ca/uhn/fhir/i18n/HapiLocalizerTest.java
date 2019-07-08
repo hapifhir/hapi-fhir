@@ -1,7 +1,6 @@
 package ca.uhn.fhir.i18n;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -30,6 +29,13 @@ public class HapiLocalizerTest {
 		for (String next : allKeys) {
 			svc.getMessage(next);
 		}
+	}
+
+	@Test
+	public void testGetVersion() {
+		HapiLocalizer svc = new HapiLocalizer();
+		String version = svc.getMessage("hapi.version");
+		assertThat(version, matchesPattern("[0-9]+.*"));
 	}
 	
 }
