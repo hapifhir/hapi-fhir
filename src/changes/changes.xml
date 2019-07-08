@@ -257,6 +257,11 @@
 				the ServerConformanceProvider, but it is now handled directly by the method
 				binding so the provider now has no responsibility for caching.
 			</action>
+			<action type="fix" issue="1370">
+				The OkHttp client did not correctly apply the connection timeout and
+				socket timeout settings to client requests. Thanks to Petro Mykhailyshyn
+				for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
