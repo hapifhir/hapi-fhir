@@ -449,6 +449,45 @@ public enum Pointcut {
 	),
 
 	/**
+	 * <b>Server Hook:</b>
+	 * This method is called after all processing is completed for a request, regardless of whether
+	 * the request completed successfully or not. It is called after {@link #SERVER_PROCESSING_COMPLETED_NORMALLY}
+	 * in the case of successful operations.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the request. This will be null if the server is not deployed to a RestfulServer environment.
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * This method must return <code>void</code>
+	 * </p>
+	 * <p>
+	 * This method should not throw any exceptions. Any exception that is thrown by this
+	 * method will be logged, but otherwise not acted upon (i.e. even if a hook method
+	 * throws an exception, processing will continue and other interceptors will be
+	 * called). Therefore it is considered a bug to throw an exception from hook methods using this
+	 * pointcut.
+	 * </p>
+	 */
+	SERVER_PROCESSING_COMPLETED(
+		void.class,
+		new ExceptionHandlingSpec()
+			.addLogAndSwallow(Throwable.class),
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
 	 * Invoked whenever a persisted resource has been modified and is being submitted to the
 	 * subscription processing pipeline. This method is called before the resource is placed
 	 * on any queues for processing and executes synchronously during the resource modification
@@ -1442,7 +1481,9 @@ public enum Pointcut {
 	 * This pointcut is used only for unit tests. Do not use in production code as it may be changed or
 	 * removed at any time.
 	 */
-	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName());
+	TEST_RO(BaseServerResponseException.class, String.class.getName(), String.class.getName())
+
+	;
 
 	private final List<String> myParameterTypes;
 	private final Class<?> myReturnType;

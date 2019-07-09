@@ -262,6 +262,10 @@
 				socket timeout settings to client requests. Thanks to Petro Mykhailyshyn
 				for the pull request!
 			</action>
+			<action type="add">
+				A new server interceptor hook called PROCESSING_COMPLETED has been added. This
+				hook is called by the server at the end of processing every request (success and failure).
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

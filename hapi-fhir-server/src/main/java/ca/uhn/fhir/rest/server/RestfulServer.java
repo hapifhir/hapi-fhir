@@ -58,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -1084,6 +1085,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
 			 */
 			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
+
+		} finally {
+
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, requestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, requestDetails);
+			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED, params);
 
 		}
 	}
