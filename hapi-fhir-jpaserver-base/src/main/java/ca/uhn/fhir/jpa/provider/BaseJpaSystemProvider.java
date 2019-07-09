@@ -55,9 +55,9 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJp
 		return myResourceReindexingSvc;
 	}
 
-	protected Parameters doExpunge(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected Parameters doExpunge(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequestDetails) {
 		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
-		ExpungeOutcome outcome = getDao().expunge(options);
+		ExpungeOutcome outcome = getDao().expunge(options, theRequestDetails);
 		return createExpungeResponse(outcome);
 	}
 

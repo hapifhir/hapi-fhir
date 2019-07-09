@@ -20,8 +20,16 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictOutcome;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +53,23 @@ public class ExpungeEverythingService {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeEverythingService.class);
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+	// FIXME KHS remove?
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	void expungeEverything() {
+	void expungeEverything(RequestDetails theRequest) {
 
 		final AtomicInteger counter = new AtomicInteger();
+
+		// Notify Interceptors about pre-action call
+		HookParams hooks = new HookParams()
+			.add(AtomicInteger.class, counter)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING, hooks);
+
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);

@@ -49,8 +49,8 @@ public abstract class BaseHapiFhirSystemDao<T, MT> extends BaseHapiFhirDao<IBase
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
-		return myExpungeService.expunge(null, null, null, theExpungeOptions);
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+		return myExpungeService.expunge(null, null, null, theExpungeOptions, theRequestDetails);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

@@ -1124,6 +1124,15 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
+	STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING(
+		// Return type
+		Void.class,
+		// Params
+		"java.util.concurrent.atomic.AtomicInteger",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
 	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
