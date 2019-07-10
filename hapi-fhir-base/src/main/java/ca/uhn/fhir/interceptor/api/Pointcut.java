@@ -1126,7 +1126,7 @@ public enum Pointcut {
 
 	STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING(
 		// Return type
-		Void.class,
+		void.class,
 		// Params
 		"java.util.concurrent.atomic.AtomicInteger",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
