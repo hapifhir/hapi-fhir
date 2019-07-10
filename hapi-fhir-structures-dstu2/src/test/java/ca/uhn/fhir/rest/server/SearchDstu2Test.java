@@ -457,6 +457,19 @@ public class SearchDstu2Test {
 	}
 
 	@Test
+	public void testSearchByIdString() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_id=aaa&stringParam=value");
+		HttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
+		IOUtils.closeQuietly(status.getEntity().getContent());
+		ourLog.info(responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertEquals("stringParam:false:false", ourLastMethod);
+	}
+
+
+	@Test
 	public void testSearchWhitelist01Failing() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_query=searchWhitelist01&ref=value");
 		HttpResponse status = ourClient.execute(httpGet);
