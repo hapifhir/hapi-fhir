@@ -33,7 +33,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	/** the resource bindings */
 	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
 	/** the server configuration */
-	private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
+	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
 
 	/** the conformance. It is created once during startup */
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
@@ -135,28 +134,23 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		switch (fhirContextVersion) {
 			case R4:
 				org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
-				r4ServerCapabilityStatementProvider.initializeOperations();
-				myR4CapabilityStatement = r4ServerCapabilityStatementProvider.getServerConformance(null);
+				myR4CapabilityStatement = r4ServerCapabilityStatementProvider.getServerConformance(null, null);
 				break;
 			case DSTU3:
 				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
-				dstu3ServerCapabilityStatementProvider.initializeOperations();
-				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null);
+				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null, null);
 				break;
 			case DSTU2_1:
 				org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider dstu2_1ServerConformanceProvider = new org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider(serverConfiguration);
-				dstu2_1ServerConformanceProvider.initializeOperations();
-				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null);
+				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null, null);
 				break;
 			case DSTU2_HL7ORG:
 				org.hl7.fhir.instance.conf.ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new org.hl7.fhir.instance.conf.ServerConformanceProvider(serverConfiguration);
-				dstu2Hl7OrgServerConformanceProvider.initializeOperations();
-				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null);
+				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null, null);
 				break;
 			case DSTU2:
 				ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider dstu2ServerConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(serverConfiguration);
-				dstu2ServerConformanceProvider.initializeOperations();
-				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null);
+				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null, null);
 				break;
 			default:
 				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
@@ -228,14 +222,14 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods }
+	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object, Class)}  }
 	 * 
 	 * @param theProvider
 	 *           an instance of the provider interface
 	 * @param theProviderInterface
 	 *           the class describing the providers interface
 	 * @return the numbers of basemethodbindings added
-	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods
+	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
 	 */
 	public int addProvider(IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface) throws ConfigurationException {
 		int count = 0;

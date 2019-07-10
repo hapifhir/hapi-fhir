@@ -13,13 +13,20 @@
 				<![CDATA[
 				<ul>
 					<li>Commons Codec (Core): 1.11 -&gt; 1.12</li>
-					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.8</li>
+					<li>Apache HTTPClient (Client): 4.5.3 -&gt; 4.5.9</li>
 					<li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li>
-					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.7.RELEASE</li>
+					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.8.RELEASE</li>
 					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
 <!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
 					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
+					<li>Jackson-Databind (JPA): 2.9.9 -&gt; 2.9.9.1 (due to a Jackson vulnerability CVE-2019-12384)</li>
+					<li>commons-collections4 (Server/JPA): 4.1 -&gt; 4.3</li>
+					<li>commons-dbcp2 (JPA): 2.5.0 -&gt; 2.6.0</li>
+					<li>commons-lang3 (Core): 3.8.1 -&gt; 3.9</li>
+					<li>commons-text (Core): 1.6 -&gt; 1.7</li>
+					<li>Guava (JPA): 27.1-jre -&gt; 28.0-jre</li>
+					<li>
 				</ul>
 				]]>
 			</action>
@@ -243,6 +250,21 @@
 				IBundleProvider now has an isEmpty() method that can be used to check whether any
 				results exist. A default implementation has been provided, so this is not
 				a breaking change.
+			</action>
+			<action type="change">
+				Server CapabilityStatement/Conformance repsonses from the /metadata endpoint will
+				now be cached for 60 seconds always. This was previously a configurable setting on
+				the ServerConformanceProvider, but it is now handled directly by the method
+				binding so the provider now has no responsibility for caching.
+			</action>
+			<action type="fix" issue="1370">
+				The OkHttp client did not correctly apply the connection timeout and
+				socket timeout settings to client requests. Thanks to Petro Mykhailyshyn
+				for the pull request!
+			</action>
+			<action type="add">
+				A new server interceptor hook called PROCESSING_COMPLETED has been added. This
+				hook is called by the server at the end of processing every request (success and failure).
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">

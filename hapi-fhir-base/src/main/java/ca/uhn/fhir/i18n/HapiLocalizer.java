@@ -2,13 +2,13 @@ package ca.uhn.fhir.i18n;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.VersionUtil;
 
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -41,6 +41,7 @@ public class HapiLocalizer {
 	private static boolean ourFailOnMissingMessage;
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
 	private List<ResourceBundle> myBundle = new ArrayList<>();
+	private final Map<String, String> myHardcodedMessages = new HashMap<>();
 	private String[] myBundleNames;
 
 	public HapiLocalizer() {
@@ -50,6 +51,15 @@ public class HapiLocalizer {
 	public HapiLocalizer(String... theBundleNames) {
 		myBundleNames = theBundleNames;
 		init();
+		addMessage("hapi.version", VersionUtil.getVersion());
+	}
+
+	/**
+	 * Subclasses may use this to add hardcoded messages
+	 */
+	@SuppressWarnings("WeakerAccess")
+	protected void addMessage(String theKey, String theMessage) {
+		myHardcodedMessages.put(theKey, theMessage);
 	}
 
 	public Set<String> getAllKeys() {
@@ -68,14 +78,16 @@ public class HapiLocalizer {
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public String getFormatString(String theQualifiedKey) {
-		String formatString = null;
-		for (ResourceBundle nextBundle : myBundle) {
-			if (nextBundle.containsKey(theQualifiedKey)) {
-				formatString = nextBundle.getString(theQualifiedKey);
-				formatString = trim(formatString);
-			}
-			if (isNotBlank(formatString)) {
-				break;
+		String formatString = myHardcodedMessages.get(theQualifiedKey);
+		if (isBlank(formatString)) {
+			for (ResourceBundle nextBundle : myBundle) {
+				if (nextBundle.containsKey(theQualifiedKey)) {
+					formatString = nextBundle.getString(theQualifiedKey);
+					formatString = trim(formatString);
+				}
+				if (isNotBlank(formatString)) {
+					break;
+				}
 			}
 		}
 

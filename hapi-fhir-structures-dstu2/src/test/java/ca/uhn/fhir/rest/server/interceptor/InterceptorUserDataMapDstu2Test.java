@@ -78,7 +78,7 @@ public class InterceptorUserDataMapDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException"));
+		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 		
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
+		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
@@ -254,6 +254,12 @@ public class InterceptorUserDataMapDstu2Test {
 		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
 			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
 			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
+		}
+
+		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
+		public void processingCompleted(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "processingCompleted");
+			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompleted");
 		}
 
 		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)

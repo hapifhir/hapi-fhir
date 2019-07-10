@@ -25,9 +25,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.model.api.ExtensionDt;
-import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -80,7 +79,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	}
 
 	@Override
-	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
+	public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		CapabilityStatement retVal = myCachedValue;
 
 		Map<String, Long> counts = null;
@@ -89,7 +88,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		}
 		counts = defaultIfNull(counts, Collections.emptyMap());
 
-		retVal = super.getServerConformance(theRequest);
+		retVal = super.getServerConformance(theRequest, theRequestDetails);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
 
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {

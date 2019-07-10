@@ -55,7 +55,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Column(name = "SP_NAME", length = MAX_SP_NAME, nullable = false)
 	private String myParamName;
 
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY, cascade = {})
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID")
 	@ContainedIn
 	private ResourceTable myResource;

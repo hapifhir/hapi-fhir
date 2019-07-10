@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /*
  * #%L
@@ -62,7 +63,12 @@ public class OkHttpRestfulClientFactory extends RestfulClientFactory {
 
     public synchronized Call.Factory getNativeClient() {
         if (myNativeClient == null) {
-            myNativeClient = new OkHttpClient();
+            myNativeClient = new OkHttpClient()
+				.newBuilder()
+				.connectTimeout(getConnectTimeout(), TimeUnit.MILLISECONDS)
+					.readTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+					.writeTimeout(getSocketTimeout(), TimeUnit.MILLISECONDS)
+				.build();
         }
 
         return myNativeClient;

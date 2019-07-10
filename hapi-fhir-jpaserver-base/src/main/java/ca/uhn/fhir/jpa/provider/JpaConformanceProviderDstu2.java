@@ -29,7 +29,6 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
-import ca.uhn.fhir.jpa.util.SingleItemLoadingCache;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -44,12 +43,12 @@ import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.DecimalDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 import org.hl7.fhir.instance.model.Subscription;
-import org.hl7.fhir.r4.model.Extension;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -87,7 +86,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	}
 
 	@Override
-	public Conformance getServerConformance(HttpServletRequest theRequest) {
+	public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		Conformance retVal = myCachedValue;
 
 		Map<String, Long> counts = null;
@@ -98,7 +97,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 		FhirContext ctx = myRestfulServer.getFhirContext();
 
-		retVal = super.getServerConformance(theRequest);
+		retVal = super.getServerConformance(theRequest, theRequestDetails);
 		for (Rest nextRest : retVal.getRest()) {
 
 			for (RestResource nextResource : nextRest.getResource()) {

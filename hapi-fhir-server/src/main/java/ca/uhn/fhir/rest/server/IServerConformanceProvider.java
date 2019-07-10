@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.server;
 
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public interface IServerConformanceProvider<T extends IBaseResource> {
@@ -31,7 +32,7 @@ public interface IServerConformanceProvider<T extends IBaseResource> {
 	 * 
 	 * See the class documentation for an important note if you are extending this class
 	 */
-	T getServerConformance(HttpServletRequest theRequest);
+	T getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails);
 
 	/**
 	 * This setter is needed in implementation classes (along with
