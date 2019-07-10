@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -10,6 +11,7 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -21,6 +23,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
@@ -29,6 +35,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private IIdType myConceptMapId;
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
+
+	@Mock
+	IValueSetCodeAccumulator myValueSetCodeAccumulator;
 
 	@Before
 	public void before() {
@@ -39,6 +48,57 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
 		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+	}
+
+	private IIdType createCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAAA.addPropertyString("propA", "valueAAA");
+		childAAA.addPropertyString("propB", "foo");
+		childAA.addChild(childAAA, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAAB.addPropertyString("propA", "valueAAB");
+		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
+		childAA.addChild(childAAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+
+		return id;
 	}
 	
 	private void createAndPersistConceptMap() {
@@ -200,6 +260,18 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		expectedException.expectMessage("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
 
 		loadAndPersistValueSet();
+	}
+
+	@Test
+	public void testExpandValueSetWithValueSetCodeAccumulator() {
+		createCodeSystem();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+
+		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
+		verify(myValueSetCodeAccumulator, times(9)).addCode(anyString(), anyString(), nullable(String.class));
 	}
 
 	@Test
