@@ -266,6 +266,10 @@
 				A new server interceptor hook called PROCESSING_COMPLETED has been added. This
 				hook is called by the server at the end of processing every request (success and failure).
 			</action>
+			<action type="fix">
+				The <![CDATA[<code>_summary</code>]]> element was not always respected when encoding
+				JSON resources.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

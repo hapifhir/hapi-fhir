@@ -715,13 +715,26 @@ public class JsonParserDstu3Test {
 			.setValue(new Reference("Practitioner/A"));
 
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
-		parser.setDontEncodeElements(new HashSet<String>(Arrays.asList("*.id", "*.meta")));
+		parser.setDontEncodeElements(new HashSet<>(Arrays.asList("*.id", "*.meta")));
 
 		String encoded = parser.encodeResourceToString(p);
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("http://foo"));
 		assertThat(encoded, containsString("Practitioner/A"));
+
+		// Now with exclude
+
+		parser = ourCtx.newJsonParser().setPrettyPrint(true);
+		parser.setDontEncodeElements(new HashSet<>(Arrays.asList("*.id", "*.meta", "*.extension")));
+
+		encoded = parser.encodeResourceToString(p);
+		ourLog.info(encoded);
+
+		assertThat(encoded, (containsString("http://foo")));
+		assertThat(encoded, (containsString("Practitioner/A")));
+
+
 	}
 
 	@Test
@@ -1062,6 +1075,57 @@ public class JsonParserDstu3Test {
 		assertThat(encoded, not(containsString("THE DIV")));
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, not(containsString("maritalStatus")));
+	}
+
+	/**
+	 * We specifically include extensions on CapabilityStatment even in
+	 * summary mode, since this is behaviour that people depend on
+	 */
+	@Test
+	public void testEncodeSummaryCapabilityStatementExtensions() {
+
+		CapabilityStatement cs = new CapabilityStatement();
+		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
+		rest.setMode(CapabilityStatement.RestfulCapabilityMode.CLIENT);
+		rest.getSecurity()
+			.addExtension()
+			.setUrl("http://foo")
+			.setValue(new StringType("bar"));
+
+		cs.getVersionElement().addExtension()
+			.setUrl("http://goo")
+			.setValue(new StringType("ber"));
+
+		String encoded = ourCtx.newJsonParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
+		ourLog.info(encoded);
+
+		assertThat(encoded, (containsString("http://foo")));
+		assertThat(encoded, (containsString("bar")));
+		assertThat(encoded, (containsString("http://goo")));
+		assertThat(encoded, (containsString("ber")));
+	}
+
+	@Test
+	public void testEncodeSummaryPatientExtensions() {
+
+		Patient cs = new Patient();
+		Address address = cs.addAddress();
+		address.setCity("CITY");
+		address
+			.addExtension()
+			.setUrl("http://foo")
+			.setValue(new StringType("bar"));
+		address.getCityElement().addExtension()
+			.setUrl("http://goo")
+			.setValue(new StringType("ber"));
+
+		String encoded = ourCtx.newJsonParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
+		ourLog.info(encoded);
+
+		assertThat(encoded, not(containsString("http://foo")));
+		assertThat(encoded, not(containsString("bar")));
+		assertThat(encoded, not(containsString("http://goo")));
+		assertThat(encoded, not(containsString("ber")));
 	}
 
 	@Test
