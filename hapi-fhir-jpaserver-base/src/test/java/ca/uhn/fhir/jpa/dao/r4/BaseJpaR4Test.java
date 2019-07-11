@@ -118,6 +118,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 	@Autowired
+	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
@@ -286,6 +290,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
+	@Autowired
+	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected ITermValueSetCodeDao myTermValueSetCodeDao;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired

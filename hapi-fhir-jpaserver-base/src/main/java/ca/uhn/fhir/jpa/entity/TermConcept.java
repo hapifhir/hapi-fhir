@@ -1,25 +1,5 @@
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
-import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
-import ca.uhn.fhir.util.ValidateUtil;
-import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.search.annotations.*;
-import org.hl7.fhir.r4.model.Coding;
-
-import javax.annotation.Nonnull;
-import javax.persistence.*;
-import javax.persistence.Index;
-import java.io.Serializable;
-import java.util.*;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
@@ -40,6 +20,27 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.search.annotations.*;
+import org.hl7.fhir.r4.model.Coding;
+
+import javax.annotation.Nonnull;
+import javax.persistence.Index;
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
+
 @Entity
 @Indexed(interceptor = DeferConceptIndexingInterceptor.class)
 @Table(name = "TRM_CONCEPT", uniqueConstraints = {
@@ -49,16 +50,17 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
-	public static final int CODE_LENGTH = 500;
-	protected static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 
 	private static final long serialVersionUID = 1L;
 
+	static final int MAX_CODE_LENGTH = 500;
+	static final int MAX_DESC_LENGTH = 400;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private Collection<TermConceptParentChildLink> myChildren;
 
-	@Column(name = "CODE", length = CODE_LENGTH, nullable = false)
+	@Column(name = "CODE", nullable = false, length = MAX_CODE_LENGTH)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -70,7 +72,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
-	@Column(name = "DISPLAY", length = MAX_DESC_LENGTH, nullable = true)
+	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
 	@Fields({
 		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
 		@Field(name = "myDisplayEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
@@ -187,20 +189,24 @@ public class TermConcept implements Serializable {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "Code must not be null or empty");
+	public TermConcept setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, MAX_CODE_LENGTH,
+			"Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
 		myCode = theCode;
+		return this;
 	}
 
 	public TermCodeSystemVersion getCodeSystemVersion() {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+	public TermConcept setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystem = theCodeSystemVersion;
 		if (theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
+		return this;
 	}
 
 	public List<Coding> getCodingProperties(String thePropertyName) {
@@ -231,10 +237,7 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setDisplay(String theDisplay) {
-		myDisplay = theDisplay;
-		if (isNotBlank(theDisplay) && theDisplay.length() > MAX_DESC_LENGTH) {
-			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
-		}
+		myDisplay = left(theDisplay, MAX_DESC_LENGTH);
 		return this;
 	}
 
@@ -246,8 +249,9 @@ public class TermConcept implements Serializable {
 		return myIndexStatus;
 	}
 
-	public void setIndexStatus(Long theIndexStatus) {
+	public TermConcept setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
+		return this;
 	}
 
 	public String getParentPidsAsString() {
@@ -272,8 +276,9 @@ public class TermConcept implements Serializable {
 		return mySequence;
 	}
 
-	public void setSequence(Integer theSequence) {
+	public TermConcept setSequence(Integer theSequence) {
 		mySequence = theSequence;
+		return this;
 	}
 
 	public List<String> getStringProperties(String thePropertyName) {
@@ -300,8 +305,9 @@ public class TermConcept implements Serializable {
 		return myUpdated;
 	}
 
-	public void setUpdated(Date theUpdated) {
+	public TermConcept setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
+		return this;
 	}
 
 	@Override
@@ -355,8 +361,9 @@ public class TermConcept implements Serializable {
 		myParentPids = b.toString();
 	}
 
-	public void setParentPids(String theParentPids) {
+	public TermConcept setParentPids(String theParentPids) {
 		myParentPids = theParentPids;
+		return this;
 	}
 
 	@Override
