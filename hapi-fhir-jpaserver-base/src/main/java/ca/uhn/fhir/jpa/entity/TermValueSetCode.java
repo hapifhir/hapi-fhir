@@ -62,7 +62,7 @@ public class TermValueSetCode implements Serializable {
 	@Column(name = "CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
-	@Column(name = "DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
+	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
 	public Long getId() {

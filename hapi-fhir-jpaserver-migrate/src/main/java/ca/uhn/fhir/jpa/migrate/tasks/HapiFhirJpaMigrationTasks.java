@@ -75,6 +75,41 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("mySystem", "SYSTEM_URL")
 			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
 			.renameColumn("myValueSet", "VALUESET_URL");
+
+		// TermValueSet
+		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		version.addIdGenerator("SEQ_VALUESET_PID");
+		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("TRM_VALUESET", "PID");
+		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
+		termValueSetTable
+			.addIndex("IDX_VALUESET_URL")
+			.unique(true)
+			.withColumns("URL");
+		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable
+			.addForeignKey("FK_TRMVALUESET_RES")
+			.toColumn("RES_ID")
+			.references("HFJ_RESOURCE", "RES_ID");
+		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
+
+		// TermValueSetCode
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CODE");
+		version.addIdGenerator("SEQ_VALUESET_CODE_PID");
+		Builder.BuilderAddTableByColumns termValueSetCodeTable = version.addTableByColumns("TRM_VALUESET_CODE", "PID");
+		termValueSetCodeTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetCodeTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetCodeTable
+			.addForeignKey("FK_TRM_VALUESET_PID")
+			.toColumn("VALUESET_PID")
+			.references("TRM_VALUESET", "PID");
+		termValueSetCodeTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
+		termValueSetCodeTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
+		termValueSetCodeTable
+			.addIndex("IDX_VALUESET_CODE_CS_CD")
+			.unique(false)
+			.withColumns("SYSTEM", "CODE");
+		termValueSetCodeTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING);
 	}
 
 
