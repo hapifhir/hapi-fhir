@@ -446,7 +446,7 @@ public class SearchParameterMap implements Serializable {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		if (isEmpty() == false) {
-			b.append("params", super.toString());
+			b.append("params", mySearchParameterMap);
 		}
 		if (getIncludes().isEmpty() == false) {
 			b.append("includes", getIncludes());
