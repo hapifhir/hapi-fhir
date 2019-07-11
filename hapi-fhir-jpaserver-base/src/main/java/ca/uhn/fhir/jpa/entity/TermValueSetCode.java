@@ -102,11 +102,6 @@ public class TermValueSetCode implements Serializable {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theSystem, "theSystem must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystem, TermCodeSystem.MAX_URL_LENGTH,
 			"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
-
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "theSystem must not be null or empty");
-		if (theSystem.length() > TermCodeSystem.MAX_URL_LENGTH) {
-			throw new IllegalArgumentException();
-		}
 		mySystem = theSystem;
 		return this;
 	}
@@ -119,7 +114,6 @@ public class TermValueSetCode implements Serializable {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
 			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
-
 		myCode = theCode;
 		return this;
 	}
