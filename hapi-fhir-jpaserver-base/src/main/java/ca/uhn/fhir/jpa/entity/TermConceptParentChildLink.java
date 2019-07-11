@@ -20,20 +20,8 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import javax.persistence.*;
 import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 @Entity
 @Table(name = "TRM_CONCEPT_PC_LINK")
@@ -136,20 +124,24 @@ public class TermConceptParentChildLink implements Serializable {
 		return result;
 	}
 
-	public void setChild(TermConcept theChild) {
+	public TermConceptParentChildLink setChild(TermConcept theChild) {
 		myChild = theChild;
+		return this;
 	}
 
-	public void setCodeSystem(TermCodeSystemVersion theCodeSystem) {
+	public TermConceptParentChildLink setCodeSystem(TermCodeSystemVersion theCodeSystem) {
 		myCodeSystem = theCodeSystem;
+		return this;
 	}
 
-	public void setParent(TermConcept theParent) {
+	public TermConceptParentChildLink setParent(TermConcept theParent) {
 		myParent = theParent;
+		return this;
 	}
 
-	public void setRelationshipType(RelationshipTypeEnum theRelationshipType) {
+	public TermConceptParentChildLink setRelationshipType(RelationshipTypeEnum theRelationshipType) {
 		myRelationshipType = theRelationshipType;
+		return this;
 	}
 
 	public enum RelationshipTypeEnum {

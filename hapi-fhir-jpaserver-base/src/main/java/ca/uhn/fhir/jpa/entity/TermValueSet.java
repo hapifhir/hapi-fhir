@@ -21,17 +21,20 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET", uniqueConstraints = {
 	@UniqueConstraint(name = "IDX_VALUESET_URL", columnNames = {"URL"})
@@ -40,7 +43,8 @@ import static org.apache.commons.lang3.StringUtils.left;
 public class TermValueSet implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int NAME_LENGTH = 200;
+	private static final int MAX_NAME_LENGTH = 200;
+	static final int MAX_URL_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
@@ -48,7 +52,7 @@ public class TermValueSet implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@Column(name = "URL", nullable = false)
+	@Column(name = "URL", nullable = false, length = MAX_URL_LENGTH)
 	private String myUrl;
 
 	@OneToOne()
@@ -58,7 +62,7 @@ public class TermValueSet implements Serializable {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Column(name = "NAME")
+	@Column(name = "NAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
 	@OneToMany(mappedBy = "myValueSet")
@@ -72,24 +76,30 @@ public class TermValueSet implements Serializable {
 		return myUrl;
 	}
 
-	public void setUrl(String theUrl) {
+	public TermValueSet setUrl(@Nonnull String theUrl) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theUrl, "theUrl must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUrl, MAX_URL_LENGTH,
+			"URL exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theUrl));
 		myUrl = theUrl;
+		return this;
 	}
 
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
-	public void setResource(ResourceTable theResource) {
+	public TermValueSet setResource(ResourceTable theResource) {
 		myResource = theResource;
+		return this;
 	}
 
 	public String getName() {
 		return myName;
 	}
 
-	public void setName(String theName) {
-		myName = left(theName, NAME_LENGTH);
+	public TermValueSet setName(String theName) {
+		myName = left(theName, MAX_NAME_LENGTH);
+		return this;
 	}
 
 	public List<TermValueSetCode> getCodes() {
@@ -122,7 +132,7 @@ public class TermValueSet implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append("myUrl", myUrl)
 			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))

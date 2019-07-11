@@ -20,15 +20,18 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET_CODE", indexes = {
 	@Index(name = "IDX_VALUESET_CODE_CS_CD", columnList = "SYSTEM, CODE")
@@ -36,8 +39,6 @@ import static org.apache.commons.lang3.StringUtils.left;
 @Entity()
 public class TermValueSetCode implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-	private static final int SYSTEM_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_CODE_PID", sequenceName = "SEQ_VALUESET_CODE_PID")
@@ -49,13 +50,16 @@ public class TermValueSetCode implements Serializable {
 	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
+	@Transient
 	private String myValueSetUrl;
+
+	@Transient
 	private String myValueSetName;
 
-	@Column(name = "SYSTEM", nullable = false, length = SYSTEM_LENGTH)
+	@Column(name = "SYSTEM", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
 
-	@Column(name = "CODE", nullable = false, length = TermConcept.CODE_LENGTH)
+	@Column(name = "CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
 	@Column(name = "DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
@@ -69,8 +73,9 @@ public class TermValueSetCode implements Serializable {
 		return myValueSet;
 	}
 
-	public void setValueSet(TermValueSet theValueSet) {
+	public TermValueSetCode setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		return this;
 	}
 
 	public String getValueSetUrl() {
@@ -93,24 +98,39 @@ public class TermValueSetCode implements Serializable {
 		return mySystem;
 	}
 
-	public void setSystem(String theSystem) {
+	public TermValueSetCode setSystem(@Nonnull String theSystem) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theSystem, "theSystem must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystem, TermCodeSystem.MAX_URL_LENGTH,
+			"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
+
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "theSystem must not be null or empty");
+		if (theSystem.length() > TermCodeSystem.MAX_URL_LENGTH) {
+			throw new IllegalArgumentException();
+		}
 		mySystem = theSystem;
+		return this;
 	}
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public void setCode(String theCode) {
+	public TermValueSetCode setCode(@Nonnull String theCode) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
+			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
+
 		myCode = theCode;
+		return this;
 	}
 
 	public String getDisplay() {
 		return myDisplay;
 	}
 
-	public void setDisplay(String theDisplay) {
+	public TermValueSetCode setDisplay(String theDisplay) {
 		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
+		return this;
 	}
 
 	@Override
@@ -139,7 +159,7 @@ public class TermValueSetCode implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
 			.append("myValueSetUrl", this.getValueSetUrl())
