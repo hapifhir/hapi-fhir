@@ -1648,9 +1648,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		termValueSet.setUrl(theValueSet.getUrl());
 		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
 
-		/*
-		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
-		 */
+		// We delete old versions; we don't support versioned ValueSets.
 		deleteValueSet(theResourceTable);
 
 		/*

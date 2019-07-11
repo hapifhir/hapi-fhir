@@ -23,7 +23,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class ValidateUtil {
 
@@ -37,10 +37,16 @@ public class ValidateUtil {
 	}
 
 	/**
-	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 * Throws {@link IllegalArgumentException} if theValue is < theMinimum
 	 */
 	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
 		if (theValue < theMinimum) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
+	public static void isNotBlankOrThrowIllegalArgument(String theString, String theMessage) {
+		if (isBlank(theString)) {
 			throw new IllegalArgumentException(theMessage);
 		}
 	}
@@ -54,6 +60,12 @@ public class ValidateUtil {
 	public static void isNotBlankOrThrowUnprocessableEntity(String theString, String theMessage) {
 		if (isBlank(theString)) {
 			throw new UnprocessableEntityException(theMessage);
+		}
+	}
+
+	public static void isNotTooLongOrThrowIllegalArgument(String theString, int theMaxLength, String theMessage) {
+		if (length(theString) > theMaxLength) {
+			throw new IllegalArgumentException(theMessage);
 		}
 	}
 
