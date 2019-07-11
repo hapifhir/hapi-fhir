@@ -74,6 +74,8 @@ public class ExpungeEverythingService {
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, ResourceLink.class));
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, SearchResult.class));
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, SearchInclude.class));
+		counter.addAndGet(doExpungeEverythingQuery(txTemplate, TermValueSetCode.class));
+		counter.addAndGet(doExpungeEverythingQuery(txTemplate, TermValueSet.class));
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, TermConceptParentChildLink.class));
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, TermConceptMapGroupElementTarget.class));
 		counter.addAndGet(doExpungeEverythingQuery(txTemplate, TermConceptMapGroupElement.class));
