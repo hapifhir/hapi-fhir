@@ -61,6 +61,14 @@ public class IdHelperService {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
+	public Long translateForcedIdToPid(IIdType theId, RequestDetails theRequestDetails) {
+		return translateForcedIdToPid(theId.getResourceType(), theId.getIdPart(), theRequestDetails);
+	}
+
+	/**
+	 * @throws ResourceNotFoundException If the ID can not be found
+	 */
+	@Nonnull
 	public Long translateForcedIdToPid(String theResourceName, String theResourceId, RequestDetails theRequestDetails) throws ResourceNotFoundException {
 		// We only pass 1 input in so only 0..1 will come back
 		IdDt id = new IdDt(theResourceName, theResourceId);

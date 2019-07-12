@@ -42,7 +42,7 @@ public class TermCodeSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static final int MAX_NAME_LENGTH = 200;
-	static final int MAX_URL_LENGTH = 200;
+	public static final int MAX_URL_LENGTH = 200;
 
 	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;

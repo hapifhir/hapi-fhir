@@ -54,8 +54,8 @@ public class TermConcept implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	static final int MAX_CODE_LENGTH = 500;
-	static final int MAX_DESC_LENGTH = 400;
+	public static final int MAX_CODE_LENGTH = 500;
+	public static final int MAX_DESC_LENGTH = 400;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private Collection<TermConceptParentChildLink> myChildren;

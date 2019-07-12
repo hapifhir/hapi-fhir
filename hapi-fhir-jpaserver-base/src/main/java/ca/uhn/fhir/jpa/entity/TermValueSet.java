@@ -43,8 +43,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermValueSet implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_NAME_LENGTH = 200;
-	static final int MAX_URL_LENGTH = 200;
+	public static final int MAX_NAME_LENGTH = 200;
+	public static final int MAX_URL_LENGTH = 200;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_PID", sequenceName = "SEQ_VALUESET_PID")
