@@ -2,17 +2,12 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.UriType;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
@@ -21,6 +16,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +27,8 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	private IIdType myConceptMapId;
+	private IIdType myExtensionalCsId;
+	private IIdType myExtensionalVsId;
 
 	@Before
 	public void before() {
@@ -40,6 +38,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
 	}
 	
 	private void createAndPersistConceptMap() {
@@ -52,6 +51,39 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				myConceptMapId = myConceptMapDao.create(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
+	}
+
+	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
+		loadAndPersistCodeSystem();
+		loadAndPersistValueSet();
+	}
+
+	private void loadAndPersistCodeSystem() throws IOException {
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		persistCodeSystem(codeSystem);
+	}
+
+	private void persistCodeSystem(CodeSystem theCodeSystem) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
+	}
+
+	private void loadAndPersistValueSet() throws IOException {
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		persistValueSet(valueSet);
+	}
+
+	private void persistValueSet(ValueSet theValueSet) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
 	}
@@ -138,6 +170,16 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDuplicateCodeSystemUrls() throws Exception {
+		loadAndPersistCodeSystem();
+
+		expectedException.expect(UnprocessableEntityException.class);
+		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
+
+		loadAndPersistCodeSystem();
+	}
+
+	@Test
 	public void testDuplicateConceptMapUrls() {
 		createAndPersistConceptMap();
 
@@ -145,6 +187,19 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
 
 		createAndPersistConceptMap();
+	}
+
+	@Test
+	public void testDuplicateValueSetUrls() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
+		loadAndPersistCodeSystemAndValueSet();
+
+		expectedException.expect(UnprocessableEntityException.class);
+		expectedException.expectMessage("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
+
+		loadAndPersistValueSet();
 	}
 
 	@Test
@@ -321,6 +376,63 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(ConceptMapEquivalence.NARROWER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
+			}
+		});
+	}
+
+	@Test
+	public void testStoreTermValueSetAndChildren() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSet();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+				assertTrue(optionalValueSetByResourcePid.isPresent());
+
+				Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+				assertTrue(optionalValueSetByUrl.isPresent());
+
+				TermValueSet valueSet = optionalValueSetByUrl.get();
+				assertSame(optionalValueSetByResourcePid.get(), valueSet);
+				ourLog.info("ValueSet:\n" + valueSet.toString());
+				assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", valueSet.getUrl());
+				assertEquals("Terminology Services Connectation #1 Extensional case #2", valueSet.getName());
+				assertEquals(codeSystem.getConcept().size(), valueSet.getCodes().size());
+
+				TermValueSetCode code = valueSet.getCodes().get(0);
+				ourLog.info("Code:\n" + code.toString());
+				assertEquals("http://acme.org", code.getSystem());
+				assertEquals("8450-9", code.getCode());
+				assertEquals("Systolic blood pressure--expiration", code.getDisplay());
+
+				code = valueSet.getCodes().get(1);
+				ourLog.info("Code:\n" + code.toString());
+				assertEquals("http://acme.org", code.getSystem());
+				assertEquals("11378-7", code.getCode());
+				assertEquals("Systolic blood pressure at First encounter", code.getDisplay());
+
+				// ...
+
+				code = valueSet.getCodes().get(22);
+				ourLog.info("Code:\n" + code.toString());
+				assertEquals("http://acme.org", code.getSystem());
+				assertEquals("8491-3", code.getCode());
+				assertEquals("Systolic blood pressure 1 hour minimum", code.getDisplay());
+
+				code = valueSet.getCodes().get(23);
+				ourLog.info("Code:\n" + code.toString());
+				assertEquals("http://acme.org", code.getSystem());
+				assertEquals("8492-1", code.getCode());
+				assertEquals("Systolic blood pressure 8 hour minimum", code.getDisplay());
 			}
 		});
 	}

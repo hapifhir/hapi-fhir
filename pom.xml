@@ -1023,6 +1023,25 @@
 				<version>2.0</version>
 			</dependency>
 			<dependency>
+				<groupId>org.awaitility</groupId>
+				<artifactId>awaitility</artifactId>
+				<version>3.1.6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>java-hamcrest</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-compiler-api</artifactId>
 				<version>${plexus_compiler_api_version}</version>
@@ -1793,23 +1812,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>update-project-license</id>
-						<phase>package</phase>
-						<goals>
-							<goal>update-project-license</goal>
-						</goals>
-						<configuration>
-							<licenseName>apache_v2</licenseName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
@@ -2196,9 +2198,27 @@
 	<profiles>
 		<profile>
 			<id>DIST</id>
-			<modules>
-				<!--<module>hapi-fhir-osgi-core</module>-->
-			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>update-project-license</id>
+								<phase>package</phase>
+								<goals>
+									<goal>update-project-license</goal>
+								</goals>
+								<configuration>
+									<licenseName>apache_v2</licenseName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>ROOT</id>

@@ -20,23 +20,24 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-
 import java.util.Optional;
 
-public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long> {
+public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 
-	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCodeSystemUri = :code_system_uri")
-	TermCodeSystem findByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);
+	@Query("DELETE FROM TermValueSet vs WHERE vs.myId = :pid")
+	@Modifying
+	void deleteTermValueSetById(@Param("pid") Long theId);
 
-	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myResourcePid = :resource_pid")
-	TermCodeSystem findByResourcePid(@Param("resource_pid") Long theResourcePid);
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
+	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
-	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCurrentVersion.myId = :csv_pid")
-	Optional<TermCodeSystem> findWithCodeSystemVersionAsCurrentVersion(@Param("csv_pid") Long theCodeSystemVersionPid);
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url")
+	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
 
 }

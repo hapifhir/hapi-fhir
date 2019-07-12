@@ -22,7 +22,7 @@ package org.hl7.fhir.instance.model.api;
 
 import java.util.List;
 
-public interface IBaseHasExtensions {
+public interface IBaseHasExtensions extends IBase {
 
 	IBaseExtension<?, ?> addExtension();
 

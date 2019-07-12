@@ -276,7 +276,7 @@ public DaoConfig daoConfig() {
 					If the client knows that they will only want a small number of results
 					(for example, a UI containing 20 results is being shown and the client
 					knows that they will never load the next page of results) the client
-					may also use the <code>nostore</code> directive along with a HAPI FHIR
+					may also use the <code>no-store</code> directive along with a HAPI FHIR
 					extension called <code>max-results</code> in order to specify that
 					only the given number of results should be fetched. This directive
 					disabled paging entirely for the request and causes the request to
@@ -285,7 +285,7 @@ public DaoConfig daoConfig() {
 				</p>
 				<div class="source">
 					<pre>
-						Cache-Control: nostore, max-results=20
+						Cache-Control: no-store, max-results=20
 					</pre>
 				</div>
 

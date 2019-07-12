@@ -119,6 +119,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
+	protected ITermValueSetDao myValueSetDao;
+	@Autowired
+	protected ITermValueSetCodeDao myValueSetCodeDao;
+	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -386,6 +390,31 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Transactional
 	public void deleteConceptMapAndChildren(ResourceTable theResourceTable) {
 		deleteConceptMap(theResourceTable);
+	}
+
+	public void deleteValueSet(ResourceTable theResourceTable) {
+		// Get existing entity so it can be deleted.
+		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
+
+		if (optionalExistingTermValueSetById.isPresent()) {
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
+
+			ourLog.info("Deleting existing TermValueSet {} and its children...", existingTermValueSet.getId());
+			myValueSetCodeDao.deleteTermValueSetCodesByValueSetId(existingTermValueSet.getId());
+			myValueSetDao.deleteTermValueSetById(existingTermValueSet.getId());
+			ourLog.info("Done deleting existing TermValueSet {} and its children.", existingTermValueSet.getId());
+
+			ourLog.info("Flushing...");
+			myValueSetCodeDao.flush();
+			myValueSetDao.flush();
+			ourLog.info("Done flushing.");
+		}
+	}
+
+	@Override
+	@Transactional
+	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
+		deleteValueSet(theResourceTable);
 	}
 
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
@@ -690,7 +719,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void expandWithoutHibernateSearch(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
 		ourLog.trace("Hibernate search is not enabled");
-		Validate.isTrue(theExpansionComponent.getParameter().isEmpty(), "Can not exapnd ValueSet with parameters - Hibernate Search is not enabled on this server.");
+		Validate.isTrue(theExpansionComponent.getParameter().isEmpty(), "Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
 		Validate.isTrue(theInclude.getFilter().isEmpty(), "Can not expand ValueSet with filters - Hibernate Search is not enabled on this server.");
 		Validate.isTrue(isNotBlank(theSystem), "Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
 
@@ -1144,7 +1173,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
 					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
@@ -1310,7 +1339,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 									if (codesSaved++ % 250 == 0) {
-										ourLog.info("Have saved {} codes in conceptmap", codesSaved);
+										ourLog.info("Have saved {} codes in ConceptMap", codesSaved);
 										myConceptMapGroupElementTargetDao.flush();
 									}
 								}
@@ -1332,6 +1361,69 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		ourLog.info("Done storing TermConceptMap.");
+	}
+
+	@Override
+	@Transactional
+	public void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet) {
+		ourLog.info("Storing TermValueSet {}", theValueSet.getIdElement().getValue());
+
+		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
+
+		TermValueSet termValueSet = new TermValueSet();
+		termValueSet.setResource(theResourceTable);
+		termValueSet.setUrl(theValueSet.getUrl());
+		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
+
+		// We delete old versions; we don't support versioned ValueSets.
+		deleteValueSet(theResourceTable);
+
+		/*
+		 * Do the upload.
+		 */
+		String url = termValueSet.getUrl();
+		Optional<TermValueSet> optionalExistingTermValueSetByUrl = myValueSetDao.findByUrl(url);
+		if (!optionalExistingTermValueSetByUrl.isPresent()) {
+			myValueSetDao.save(termValueSet);
+			int codesSaved = 0;
+
+			ValueSet expandedValueSet = expandValueSet(theValueSet);
+			if (expandedValueSet.hasExpansion()) {
+				if (expandedValueSet.getExpansion().hasTotal() && expandedValueSet.getExpansion().getTotal() > 0) {
+					TermValueSetCode code;
+					for (ValueSet.ValueSetExpansionContainsComponent contains : expandedValueSet.getExpansion().getContains()) {
+						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getSystem(), "ValueSet contains a code with no system value");
+						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getCode(), "ValueSet contains a code with no code value");
+
+						code = new TermValueSetCode();
+						code.setValueSet(termValueSet);
+						code.setSystem(contains.getSystem());
+						code.setCode(contains.getCode());
+						code.setDisplay(contains.hasDisplay() ? contains.getDisplay() : null);
+						myValueSetCodeDao.save(code);
+
+						if (codesSaved++ % 250 == 0) {
+							ourLog.info("Have pre-expanded {} codes in ValueSet", codesSaved);
+							myValueSetCodeDao.flush();
+						}
+					}
+				}
+			}
+
+		} else {
+			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
+
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"cannotCreateDuplicateValueSetUrl",
+				url,
+				existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+
+			throw new UnprocessableEntityException(msg);
+		}
+
+		ourLog.info("Done storing TermValueSet.");
 	}
 
 	@Override
@@ -1581,9 +1673,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodesystemValue is null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodeSystemVersion is null");
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, "CodeSystems are not equal");
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "CodeSystem contains a code with no code value");
 
 		if (theConceptsStack.contains(theConcept.getCode())) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
