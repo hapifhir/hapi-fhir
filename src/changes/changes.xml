@@ -274,10 +274,6 @@
 				Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of
 				the expungeEverything operation.
 			</action>
-			<action type="change">
-				Added RequestDetails to all Expunge operations.
-			</action>
-
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
