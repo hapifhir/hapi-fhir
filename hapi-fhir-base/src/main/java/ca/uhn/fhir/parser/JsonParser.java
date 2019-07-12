@@ -851,7 +851,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 	}
 
 	private boolean isEncodeExtension(CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theElement) {
-		theEncodeContext.pushPath("extension", false);
+//		theEncodeContext.pushPath("extension", false);
 		BaseRuntimeElementDefinition<?> runtimeElementDefinition = myContext.getElementDefinition(theElement.getClass());
 		boolean retVal = true;
 		if (runtimeElementDefinition instanceof BaseRuntimeElementCompositeDefinition) {
@@ -859,8 +859,8 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			BaseRuntimeChildDefinition childDef = definition.getChildByName("extension");
 			CompositeChildElement c = new CompositeChildElement(theParent, childDef, theEncodeContext);
 			retVal = c.shouldBeEncoded(theContainedResource);
-			theEncodeContext.popPath();
 		}
+//		theEncodeContext.popPath();
 		return retVal;
 	}
 
@@ -1516,6 +1516,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 				// Write value
 				if (!noValue) {
+					theEncodeContext.pushPath("value", false);
 
 					/*
 					 * Pre-process value - This is called in case the value is a reference
@@ -1535,6 +1536,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 					encodeChildElementToStreamWriter(theResDef, theResource, theEventWriter, value, childDef, childName, false, myParent,false, theEncodeContext);
 					managePrimitiveExtension(value, theResDef, theResource, theEventWriter, childDef, childName, theEncodeContext, theContainedResource);
 
+					theEncodeContext.popPath();
 				}
 			}
 
