@@ -1793,23 +1793,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>update-project-license</id>
-						<phase>package</phase>
-						<goals>
-							<goal>update-project-license</goal>
-						</goals>
-						<configuration>
-							<licenseName>apache_v2</licenseName>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<artifactId>maven-antrun-plugin</artifactId>
 				<inherited>false</inherited>
 				<executions>
@@ -2196,9 +2179,27 @@
 	<profiles>
 		<profile>
 			<id>DIST</id>
-			<modules>
-				<!--<module>hapi-fhir-osgi-core</module>-->
-			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>update-project-license</id>
+								<phase>package</phase>
+								<goals>
+									<goal>update-project-license</goal>
+								</goals>
+								<configuration>
+									<licenseName>apache_v2</licenseName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>ROOT</id>

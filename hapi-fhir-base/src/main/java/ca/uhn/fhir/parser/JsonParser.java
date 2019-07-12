@@ -852,10 +852,15 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 
 	private boolean isEncodeExtension(CompositeChildElement theParent, EncodeContext theEncodeContext, boolean theContainedResource, IBase theElement) {
 		theEncodeContext.pushPath("extension", false);
-		BaseRuntimeChildDefinition childDef = ((BaseRuntimeElementCompositeDefinition)  myContext.getElementDefinition(theElement.getClass())).getChildByName("extension");
-		CompositeChildElement c = new CompositeChildElement(theParent, childDef, theEncodeContext);
-		boolean retVal = c.shouldBeEncoded(theContainedResource);
-		theEncodeContext.popPath();
+		BaseRuntimeElementDefinition<?> runtimeElementDefinition = myContext.getElementDefinition(theElement.getClass());
+		boolean retVal = true;
+		if (runtimeElementDefinition instanceof BaseRuntimeElementCompositeDefinition) {
+			BaseRuntimeElementCompositeDefinition definition = (BaseRuntimeElementCompositeDefinition) runtimeElementDefinition;
+			BaseRuntimeChildDefinition childDef = definition.getChildByName("extension");
+			CompositeChildElement c = new CompositeChildElement(theParent, childDef, theEncodeContext);
+			retVal = c.shouldBeEncoded(theContainedResource);
+			theEncodeContext.popPath();
+		}
 		return retVal;
 	}
 
