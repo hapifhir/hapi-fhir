@@ -1,0 +1,26 @@
+{
+	"resourceType": "ValueSet",
+	"id": "FMCBinderRecommendation",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-05-02T16:58:46.423+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/vs/FMCBinderRecommendation",
+	"identifier": [
+		{
+			"value": "FMCBinderRecommendation"
+		}
+	],
+	"name": "FMCBinderRecommendation",
+	"title": "Binder recommendation",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "ValueSet for Binder recommendation.",
+	"compose": {
+		"include": [
+			{
+				"system": "http://fkcfhir.org/fhir/cs/FMCBinderRecommendation"
+			}
+		]
+	}
+}

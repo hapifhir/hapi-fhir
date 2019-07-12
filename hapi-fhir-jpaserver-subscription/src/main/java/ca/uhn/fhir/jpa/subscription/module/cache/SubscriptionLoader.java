@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,7 +74,10 @@ public class SubscriptionLoader {
 
 	@VisibleForTesting
 	public int doSyncSubscriptionsForUnitTest() {
-		return doSyncSubscriptionsWithRetry();
+		// Two passes for delete flag to take effect
+		int first = doSyncSubscriptionsWithRetry();
+		int second = doSyncSubscriptionsWithRetry();
+		return first + second;
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
@@ -87,6 +90,10 @@ public class SubscriptionLoader {
 			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				// TODO KHS Ideally we should only be pulling ACTIVE subscriptions here, but this class is overloaded so that
+				// the @Scheduled task also activates requested subscriptions if their type was enabled after they were requested
+				// There should be a separate @Scheduled task that looks for requested subscriptions that need to be activated
+				// independent of the registry loading process.
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);

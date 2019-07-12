@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -19,6 +19,8 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ import static org.junit.Assert.*;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -66,7 +69,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertStillThere(IIdType theId) {
 		getDao(theId).read(theId);
 	}
-
 
 	public void createStandardPatients() {
 		Patient p = new Patient();
@@ -142,7 +144,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -183,7 +185,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testExpungeInstanceVersionCurrentVersion() {
 		createStandardPatients();
@@ -191,7 +192,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
-				.setExpungeOldVersions(true));
+				.setExpungeOldVersions(true), null);
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals("Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
@@ -211,7 +212,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -338,11 +339,13 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		createStandardPatients();
 
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
 		assertEquals(2, search.size().intValue());
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
-			assertEquals(2, mySearchResultDao.count());
+			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
+			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());
 		});
 
 		mySystemDao.expunge(new ExpungeOptions()

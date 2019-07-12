@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -27,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
 import static org.junit.Assert.assertEquals;
 
 public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
@@ -51,13 +51,20 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
 
+		ourLog.info("Before re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
+
 		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
 
 		mySubscriptionTestUtil.registerEmailInterceptor();
+
+		ourLog.info("After re-registering interceptors");
+		logAllInterceptors(myInterceptorRegistry);
 	}
 
 	private Subscription createSubscription(String criteria, String payload, String endpoint) throws InterruptedException {
@@ -146,11 +153,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
+        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.r4;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -48,9 +48,6 @@ import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.r4.model.OperationOutcome.OperationOutcomeIssueComponent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -78,23 +75,23 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 
 
 	@Override
-	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequestDetails) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequestDetails, theResource, null, theId);
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
 		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
 
 		if (theMode == ValidationModeEnum.DELETE) {
 			if (theId == null || theId.hasIdPart() == false) {
 				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
 			}
-			final ResourceTable entity = readEntityLatestVersion(theId);
+			final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 
 			// Validate that there are no resources pointing to the candidate that
 			// would prevent deletion
-			List<DeleteConflict> deleteConflicts = new ArrayList<DeleteConflict>();
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
-				validateOkToDelete(deleteConflicts, entity, true);
+				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest);
 			}
-			validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			OperationOutcome oo = new OperationOutcome();
 			oo.addIssue().setSeverity(IssueSeverity.INFORMATION).setDiagnostics("Ok to delete");
@@ -111,7 +108,7 @@ public class FhirResourceDaoR4<T extends IAnyResource> extends BaseHapiFhirResou
 		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
 			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
 			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
-			resourceToValidateById = dao.read(theId, theRequestDetails);
+			resourceToValidateById = dao.read(theId, theRequest);
 		}
 
 		ValidationResult result;

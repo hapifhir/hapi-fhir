@@ -48,7 +48,6 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
 
     protected EnableWhenResult evaluateCondition(QuestionnaireItemEnableWhenComponent enableCondition,
             Element questionnaireResponse, String linkId) {
-        //TODO: Fix EnableWhenResult stuff
         List<Element> answerItems = findQuestionAnswers(questionnaireResponse,
                 enableCondition.getQuestion());        
         QuestionnaireItemOperator operator = enableCondition.getOperator();
@@ -66,7 +65,10 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         return new EnableWhenResult(result, linkId, enableCondition, questionnaireResponse);
     }
     
-    public Type convertToType(Element element)  {
+    private Type convertToType(Element element) throws FHIRException {
+    		if (element.fhirType().equals("BackboneElement")) {
+    			return null;
+			}
         Type b = new Factory().create(element.fhirType());
         if (b instanceof PrimitiveType) {
           ((PrimitiveType<?>) b).setValueAsString(element.primitiveValue());
@@ -92,6 +94,9 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
         }
         try {
         	actualAnswer = convertToType(answer);
+        	if (actualAnswer == null) {
+        		return false;
+			}
         } catch (FHIRException e) {
             throw new UnprocessableEntityException("Unexpected answer type", e);
         }
@@ -117,7 +122,7 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
     
 	private boolean comparePrimitiveAnswer(PrimitiveType<?> actualAnswer, PrimitiveType<?> expectedAnswer, QuestionnaireItemOperator questionnaireItemOperator) {                
         if (actualAnswer.getValue() instanceof Comparable){            
-           return compareComparable((Comparable)actualAnswer.getValue(), (Comparable) expectedAnswer.getValue(), questionnaireItemOperator);                  
+           return compareComparable((Comparable<?>)actualAnswer.getValue(), (Comparable<?>) expectedAnswer.getValue(), questionnaireItemOperator);                  
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.EQUAL){
             return actualAnswer.equalsShallow(expectedAnswer);
         } else if (questionnaireItemOperator == QuestionnaireItemOperator.NOT_EQUAL){
@@ -149,16 +154,22 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
 
 	}
 
+	/**
+	 * Recursively look for answers to questions with the given link id
+	 */
     private List<Element> findQuestionAnswers(Element questionnaireResponse, String question) {
-        List<Element> matchingItems = questionnaireResponse.getChildren(ITEM_ELEMENT)
-                .stream()
-                .flatMap(i -> findSubItems(i).stream())
-                .filter(i -> hasLinkId(i, question))
-                .collect(Collectors.toList());        
-        return matchingItems
-                .stream()
-                .flatMap(e -> extractAnswer(e).stream())
-                .collect(Collectors.toList());        
+		 List<Element> retVal = new ArrayList<>();
+
+		 List<Element> items = questionnaireResponse.getChildren(ITEM_ELEMENT);
+		 for (Element next : items) {
+		 	if (hasLinkId(next, question)) {
+				List<Element> answers = extractAnswer(next);
+				retVal.addAll(answers);
+			}
+			retVal.addAll(findQuestionAnswers(next, question));
+		 }
+
+		 return retVal;
     }
     
     private List<Element> extractAnswer(Element item) {
@@ -196,14 +207,6 @@ public class DefaultEnableWhenEvaluator implements IEnableWhenEvaluator {
             return expectedCoding.getSystem().equals(value.getSystem());
         }
         return true;
-    }
-    private List<Element> findSubItems(Element item) {
-        List<Element> results = item.getChildren(LINKID_ELEMENT)
-                .stream()
-                .flatMap(i -> findSubItems(i).stream())
-                .collect(Collectors.toList());
-        results.add(item);
-        return results;
     }
 
     private boolean hasLinkId(Element item, String linkId) {

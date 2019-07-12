@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -29,6 +28,8 @@ import java.util.function.Consumer;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ElementsParamR4Test {
 
@@ -264,6 +265,16 @@ public class ElementsParamR4Test {
 			});
 
 		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
+				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
 			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
@@ -479,14 +490,13 @@ public class ElementsParamR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
@@ -498,7 +508,8 @@ public class ElementsParamR4Test {
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

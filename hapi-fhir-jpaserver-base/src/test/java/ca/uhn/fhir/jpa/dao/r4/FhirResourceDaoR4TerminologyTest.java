@@ -223,7 +223,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
 	}
 

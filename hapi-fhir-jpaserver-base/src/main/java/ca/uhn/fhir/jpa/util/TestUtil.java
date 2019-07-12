@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,12 +27,12 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
-import org.hl7.fhir.r4.model.Patient;
 
 import javax.persistence.*;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -54,6 +54,7 @@ public class TestUtil {
 	/**
 	 * This is really only useful for unit tests, do not call otherwise
 	 */
+	@SuppressWarnings("UnstableApiUsage")
 	public static void scanEntities(String packageName) throws IOException, ClassNotFoundException {
 		ImmutableSet<ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClasses(packageName);
 		Set<String> names = new HashSet<String>();
@@ -80,6 +81,10 @@ public class TestUtil {
 		scan(theClazz, theNames, theIsSuperClass);
 
 		for (Field nextField : theClazz.getDeclaredFields()) {
+			if (Modifier.isStatic(nextField.getModifiers())) {
+				continue;
+			}
+
 			ourLog.info(" * Scanning field: {}", nextField.getName());
 			scan(nextField, theNames, theIsSuperClass);
 
@@ -89,6 +94,24 @@ public class TestUtil {
 					//Validate.isTrue(false);
 				}
 			}
+
+			boolean isTransient = nextField.getAnnotation(Transient.class) != null;
+			if (!isTransient) {
+				boolean hasColumn = nextField.getAnnotation(Column.class) != null;
+				boolean hasJoinColumn = nextField.getAnnotation(JoinColumn.class) != null;
+				boolean hasEmbeddedId = nextField.getAnnotation(EmbeddedId.class) != null;
+				OneToMany oneToMany = nextField.getAnnotation(OneToMany.class);
+				OneToOne oneToOne = nextField.getAnnotation(OneToOne.class);
+				boolean isOtherSideOfOneToManyMapping = oneToMany != null && isNotBlank(oneToMany.mappedBy());
+				boolean isOtherSideOfOneToOneMapping = oneToOne != null && isNotBlank(oneToOne.mappedBy());
+				Validate.isTrue(
+					hasColumn ||
+						hasJoinColumn ||
+						isOtherSideOfOneToManyMapping ||
+						isOtherSideOfOneToOneMapping ||
+						hasEmbeddedId, "Non-transient has no @Column or @JoinColumn or @EmbeddedId: " + nextField);
+			}
+
 
 		}
 

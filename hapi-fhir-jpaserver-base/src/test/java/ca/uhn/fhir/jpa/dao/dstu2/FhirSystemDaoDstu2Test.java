@@ -402,42 +402,6 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 	}
 
 	@Test
-	public void testTransactionCreateNoMatchUrl() {
-		String methodName = "testTransactionCreateNoMatchUrl";
-		Bundle request = new Bundle();
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.setId("Patient/" + methodName);
-		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerbEnum.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-		assertEquals(1, resp.getEntry().size());
-
-		Entry respEntry = resp.getEntry().get(0);
-		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
-		String patientId = respEntry.getResponse().getLocation();
-		assertThat(patientId, not(containsString("test")));
-
-		/*
-		 * Interceptor should have been called once for the transaction, and once for the embedded operation
-		 */
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals("Bundle", details.getResourceType());
-		assertEquals(Bundle.class, details.getResource().getClass());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertNull(details.getId());
-		assertEquals("Patient", details.getResourceType());
-		assertEquals(Patient.class, details.getResource().getClass());
-
-	}
-
-	@Test
 	public void testTransactionCreateWithDuplicateMatchUrl01() {
 		String methodName = "testTransactionCreateWithDuplicateMatchUrl01";
 		Bundle request = new Bundle();
@@ -1180,76 +1144,6 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		assertEquals(1, respGetBundle.getEntry().size());
 		assertEquals("testTransactionOrdering" + pass, ((Patient) respGetBundle.getEntry().get(0).getResource()).getNameFirstRep().getFamilyFirstRep().getValue());
 		assertThat(respGetBundle.getLink("self").getUrl(), endsWith("/Patient?identifier=testTransactionOrdering"));
-	}
-
-	@Test
-	public void testTransactionReadAndSearch() {
-		String methodName = "testTransactionReadAndSearch";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.setId("Patient/" + methodName);
-		IIdType idv1 = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Created patient, got id: {}", idv1);
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		p.addName().addFamily("Family Name");
-		p.setId("Patient/" + methodName);
-		IIdType idv2 = myPatientDao.update(p, mySrd).getId();
-		ourLog.info("Updated patient, got id: {}", idv2);
-
-		Bundle request = new Bundle();
-		request.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl(idv1.toUnqualifiedVersionless().getValue());
-		request.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl(idv1.toUnqualified().getValue());
-		request.addEntry().getRequest().setMethod(HTTPVerbEnum.GET).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
-
-		Bundle resp = mySystemDao.transaction(mySrd, request);
-
-		assertEquals(3, resp.getEntry().size());
-
-		Entry nextEntry;
-
-		nextEntry = resp.getEntry().get(0);
-		assertEquals(Patient.class, nextEntry.getResource().getClass());
-		assertEquals(idv2.toUnqualified(), nextEntry.getResource().getId().toUnqualified());
-
-		nextEntry = resp.getEntry().get(1);
-		assertEquals(Patient.class, nextEntry.getResource().getClass());
-		assertEquals(idv1.toUnqualified(), nextEntry.getResource().getId().toUnqualified());
-
-		nextEntry = resp.getEntry().get(2);
-		assertEquals(Bundle.class, nextEntry.getResource().getClass());
-		Bundle respBundle = (Bundle) nextEntry.getResource();
-		assertEquals(1, respBundle.getTotal().intValue());
-
-		/*
-		 * Interceptor should have been called once for the transaction, and once for the embedded operation
-		 */
-		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
-		ActionRequestDetails details = detailsCapt.getValue();
-		assertEquals("Bundle", details.getResourceType());
-		assertEquals(Bundle.class, details.getResource().getClass());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualifiedVersionless(), details.getId());
-		assertEquals("Patient", details.getResourceType());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals(idv1.toUnqualified(), details.getId());
-		assertEquals("Patient", details.getResourceType());
-
-		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
-		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.SEARCH_TYPE), detailsCapt.capture());
-		details = detailsCapt.getValue();
-		assertEquals("Patient", details.getResourceType());
-
-
 	}
 
 	@Test

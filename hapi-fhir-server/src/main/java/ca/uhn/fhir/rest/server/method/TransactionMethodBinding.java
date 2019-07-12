@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -167,11 +167,17 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myTransactionParamIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myTransactionParamIndex]);
+			resource = (IBaseResource) theMethodParams[myTransactionParamIndex];
 		} else {
 			Class<? extends IBaseResource> resourceType = getContext().getResourceDefinition("Bundle").getImplementingClass();
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, resourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}

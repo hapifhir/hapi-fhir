@@ -13,6 +13,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,19 +22,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.in;
 import static org.junit.Assert.*;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu2Test.class);
+	private SubscriptionsRequireManualActivationInterceptorDstu2 myInterceptor;
 
-	@Override
+	@Before
 	public void beforeCreateInterceptor() {
-		super.beforeCreateInterceptor();
+		myInterceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
+		myInterceptor.setDao(mySubscriptionDao);
+		myInterceptorRegistry.registerInterceptor(myInterceptor);
+	}
 
-		SubscriptionsRequireManualActivationInterceptorDstu2 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu2();
-		interceptor.setDao(mySubscriptionDao);
-		myDaoConfig.getInterceptors().add(interceptor);
+	@After
+	public void afterDestroyInterceptor() {
+		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
 	}
 
 	@Before

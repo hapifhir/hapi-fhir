@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,11 @@ public class JpaConstants {
 	 * Operation name for the $expunge operation
 	 */
 	public static final String OPERATION_EXPUNGE = "$expunge";
+
+	/**
+	 * Operation name for the $match operation
+	 */
+	public static final String OPERATION_MATCH = "$match";
 
 	/**
 	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
@@ -132,4 +137,9 @@ public class JpaConstants {
 	 * Trigger a subscription manually for a given resource
 	 */
 	public static final String OPERATION_TRIGGER_SUBSCRIPTION = "$trigger-subscription";
+
+	/**
+	 * Operation name for the "$subsumes" operation
+	 */
+	public static final String OPERATION_SUBSUMES = "$subsumes";
 }

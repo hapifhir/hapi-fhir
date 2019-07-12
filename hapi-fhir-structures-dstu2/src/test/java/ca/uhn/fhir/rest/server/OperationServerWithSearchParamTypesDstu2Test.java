@@ -14,6 +14,9 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -144,7 +147,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -169,7 +172,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient--andlist"));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -315,15 +318,14 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
@@ -335,7 +337,8 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -403,5 +406,12 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		}
 
 	}
+
+	private RequestDetails createRequestDetails(RestfulServer theServer) {
+		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		retVal.setServer(theServer);
+		return retVal;
+	}
+
 
 }

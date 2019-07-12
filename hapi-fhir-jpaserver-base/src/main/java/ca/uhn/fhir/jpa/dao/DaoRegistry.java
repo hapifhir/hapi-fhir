@@ -30,17 +30,24 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component("myDaoRegistry")
 public class DaoRegistry implements ApplicationContextAware {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
 	private FhirContext myContext;
+
+	/**
+	 * Constructor
+	 */
+	public DaoRegistry() {
+		super();
+	}
+
 
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
@@ -70,6 +77,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
+	/**
+	 * @throws InvalidRequestException If the given resource type is not supported
+	 */
 	public IFhirResourceDao getResourceDao(String theResourceName) {
 		init();
 		IFhirResourceDao retVal = myResourceNameToResourceDao.get(theResourceName);
@@ -90,9 +100,39 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
+	/**
+	 * Use getResourceDaoOrNull
+	 */
+	@Deprecated
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
+		return getResourceDaoOrNull(theResourceType);
+	}
+
+	@Nullable
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
 		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
-		return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(resourceName);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Use getResourceDaoOrNull
+	 */
+	@Deprecated
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(String theResourceType) {
+		return getResourceDaoOrNull(theResourceType);
+	}
+
+	@Nullable
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceType) {
+		try {
+			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
 	}
 
 	private void init() {
@@ -115,6 +155,12 @@ public class DaoRegistry implements ApplicationContextAware {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}
 		}
+	}
+
+	public void register(IFhirResourceDao theResourceDao) {
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceDao.getResourceType());
+		String resourceName = resourceDef.getName();
+		myResourceNameToResourceDao.put(resourceName, theResourceDao);
 	}
 
 	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
@@ -149,5 +195,9 @@ public class DaoRegistry implements ApplicationContextAware {
 			retVal = Arrays.asList(theResourceTypes);
 		}
 		return retVal;
+	}
+
+	public Set<String> getRegisteredDaoTypes() {
+		return Collections.unmodifiableSet(myResourceNameToResourceDao.keySet());
 	}
 }

@@ -3,12 +3,12 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -66,18 +68,12 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 	
 		if (ourServer == null) {
-			ourPort = RandomServerPortProvider.findFreePort();
-	
 			ourRestServer = new RestfulServer(myFhirCtx);
-	
-			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
-	
-			ourRestServer.setResourceProviders((List)myResourceProviders);
-	
+			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-	
 			ourRestServer.registerProvider(mySystemProvider);
-	
+			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
@@ -114,7 +110,9 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 
 			server.setHandler(proxyHandler);
-			server.start();
+			JettyUtil.startServer(server);
+            ourPort = JettyUtil.getPortForStartedServer(server);
+            ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
 
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor());
@@ -152,7 +150,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;

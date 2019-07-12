@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.util;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,16 +24,17 @@ import net.ttddyy.dsproxy.ExecutionInfo;
 import net.ttddyy.dsproxy.QueryInfo;
 import net.ttddyy.dsproxy.proxy.ParameterSetOperation;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
-import org.hibernate.engine.jdbc.internal.BasicFormatterImpl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuilder.SingleQueryExecution {
 
-	private boolean myCaptureQueryStackTrace;
+	private boolean myCaptureQueryStackTrace = false;
 
 	/**
 	 * This has an impact on performance! Use with caution.
@@ -51,11 +52,17 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 	@Override
 	public void execute(ExecutionInfo theExecutionInfo, List<QueryInfo> theQueryInfoList) {
-		final Queue<Query> queryList = provideQueryList();
+		final Queue<SqlQuery> queryList = provideQueryList();
+		if (queryList == null) {
+			return;
+		}
+
 		for (QueryInfo next : theQueryInfoList) {
 			String sql = trim(next.getQuery());
 			List<String> params;
+			int size = 0;
 			if (next.getParametersList().size() > 0 && next.getParametersList().get(0).size() > 0) {
+				size = next.getParametersList().size();
 				List<ParameterSetOperation> values = next
 					.getParametersList()
 					.get(0);
@@ -74,73 +81,10 @@ public abstract class BaseCaptureQueriesListener implements ProxyDataSourceBuild
 
 			long elapsedTime = theExecutionInfo.getElapsedTime();
 			long startTime = System.currentTimeMillis() - elapsedTime;
-			queryList.add(new Query(sql, params, startTime, elapsedTime, stackTraceElements));
+			queryList.add(new SqlQuery(sql, params, startTime, elapsedTime, stackTraceElements, size));
 		}
 	}
 
-	protected abstract Queue<Query> provideQueryList();
-
-	public static class Query {
-		private final String myThreadName = Thread.currentThread().getName();
-		private final String mySql;
-		private final List<String> myParams;
-		private final long myQueryTimestamp;
-		private final long myElapsedTime;
-		private final StackTraceElement[] myStackTrace;
-
-		Query(String theSql, List<String> theParams, long theQueryTimestamp, long theElapsedTime, StackTraceElement[] theStackTraceElements) {
-			mySql = theSql;
-			myParams = Collections.unmodifiableList(theParams);
-			myQueryTimestamp = theQueryTimestamp;
-			myElapsedTime = theElapsedTime;
-			myStackTrace = theStackTraceElements;
-		}
-
-		public long getQueryTimestamp() {
-			return myQueryTimestamp;
-		}
-
-		public long getElapsedTime() {
-			return myElapsedTime;
-		}
-
-		public String getThreadName() {
-			return myThreadName;
-		}
-
-		public String getSql(boolean theInlineParams, boolean theFormat) {
-			String retVal = mySql;
-			if (theFormat) {
-				retVal = new BasicFormatterImpl().format(retVal);
-
-				// BasicFormatterImpl annoyingly adds a newline at the very start of its output
-				while (retVal.startsWith("\n")) {
-					retVal = retVal.substring(1);
-				}
-			}
-
-			if (theInlineParams) {
-				List<String> nextParams = new ArrayList<>(myParams);
-
-				int idx = 0;
-				while (nextParams.size() > 0) {
-					idx = retVal.indexOf("?", idx);
-					if (idx == -1) {
-						break;
-					}
-					String nextSubstitution = "'" + nextParams.remove(0) + "'";
-					retVal = retVal.substring(0, idx) + nextSubstitution + retVal.substring(idx + 1);
-					idx += nextSubstitution.length();
-				}
-			}
-
-			return trim(retVal);
-
-		}
-
-		public StackTraceElement[] getStackTrace() {
-			return myStackTrace;
-		}
-	}
+	protected abstract Queue<SqlQuery> provideQueryList();
 
 }

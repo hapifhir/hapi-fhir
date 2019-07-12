@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -92,7 +93,6 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		 * starvation
 		 */
 		int maxThreads = (int) (Math.random() * 6.0) + 1;
-		maxThreads = 1;
 		retVal.setMaxTotal(maxThreads);
 
 		return retVal;
@@ -107,6 +107,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(1000, TimeUnit.MILLISECONDS)
 			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery()
 			.build();
 
@@ -139,7 +140,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
 		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
 		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
-		extraProperties.put("hibernate.search.default.directory_provider", "ram");
+		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");
 		extraProperties.put("hibernate.search.autoregister_listeners", "true");
 		return extraProperties;

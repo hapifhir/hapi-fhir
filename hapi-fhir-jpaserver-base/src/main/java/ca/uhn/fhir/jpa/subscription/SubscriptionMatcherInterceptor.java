@@ -1,15 +1,14 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.*;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -33,9 +32,9 @@ import javax.annotation.PreDestroy;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,19 +45,19 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-@Interceptor(manualRegistration = true)
+@Interceptor()
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
-
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
 	protected SubscribableChannel myMatchingChannel;
-
+	@Autowired
+	protected SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
-	protected SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
@@ -85,28 +84,28 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 		}
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
-	public void resourceCreated(IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
-	public void resourceDeleted(IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
+	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, msg)) {
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, msg);
+		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		if (!outcome) {
 			return;
 		}
 

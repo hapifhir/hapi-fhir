@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search.reindex;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -306,7 +306,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		Date low = theJob.getThresholdLow() != null ? theJob.getThresholdLow() : BEGINNING_OF_TIME;
 		Date high = theJob.getThresholdHigh();
 
-		// Query for resources within threshold
+		// SqlQuery for resources within threshold
 		StopWatch pageSw = new StopWatch();
 		Slice<Long> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);

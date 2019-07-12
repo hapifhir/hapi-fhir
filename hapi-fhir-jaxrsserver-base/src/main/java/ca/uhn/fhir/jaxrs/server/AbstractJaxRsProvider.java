@@ -10,9 +10,9 @@ import java.io.IOException;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.core.*;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.apache.commons.lang3.StringUtils;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -72,6 +73,11 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 */
 	protected AbstractJaxRsProvider(final FhirContext ctx) {
 		CTX = ctx;
+	}
+
+	@Override
+	public IInterceptorService getInterceptorService() {
+		return null;
 	}
 
 	/**
@@ -145,10 +151,10 @@ public abstract class AbstractJaxRsProvider implements IRestfulServerDefaults {
 	 * Default: an empty list of interceptors (Interceptors are not yet supported
 	 * in the JAX-RS server). Please get in touch if you'd like to help!
 	 * 
-	 * @see ca.uhn.fhir.rest.server.IRestfulServer#getInterceptors()
+	 * @see ca.uhn.fhir.rest.server.IRestfulServerDefaults#getInterceptors_()
 	 */
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 

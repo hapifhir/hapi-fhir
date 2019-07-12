@@ -1301,6 +1301,28 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		}
 	}
 
+
+	@Test
+	public void testSearchDate_TimingValueUsingPeriod() {
+		ServiceRequest p1 = new ServiceRequest();
+		p1.setOccurrence(new Timing());
+		p1.getOccurrenceTiming().getRepeat().setBounds(new Period());
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getStartElement().setValueAsString("2018-01-01");
+		p1.getOccurrenceTiming().getRepeat().getBoundsPeriod().getEndElement().setValueAsString("2018-02-01");
+		String id1 = myServiceRequestDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			SearchParameterMap map = new SearchParameterMap()
+				.setLoadSynchronous(true)
+				.add(ServiceRequest.SP_OCCURRENCE, new DateParam("lt2019"));
+			IBundleProvider found = myServiceRequestDao.search(map);
+			assertThat(toUnqualifiedVersionlessIdValues(found), containsInAnyOrder(id1));
+			assertEquals(1, found.size().intValue());
+		}
+	}
+
+
+
 	@Test
 	public void testSearchDateWrongParam() {
 		Patient p1 = new Patient();
@@ -1726,6 +1748,31 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSearchByMoneyParam() {
+		ChargeItem ci = new ChargeItem();
+		ci.getPriceOverride().setValue(123).setCurrency("$");
+
+		myChargeItemDao.create(ci);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(ChargeItem.SP_PRICE_OVERRIDE, new QuantityParam().setValue(123));
+		assertEquals(1, myChargeItemDao.search(map).size().intValue());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(ChargeItem.SP_PRICE_OVERRIDE, new QuantityParam().setValue(123).setUnits("$"));
+		assertEquals(1, myChargeItemDao.search(map).size().intValue());
+
+		map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(ChargeItem.SP_PRICE_OVERRIDE, new QuantityParam().setValue(123).setUnits("$").setSystem("urn:iso:std:iso:4217"));
+		assertEquals(1, myChargeItemDao.search(map).size().intValue());
+
+	}
+
+
+	@Test
 	public void testSearchNameParam() {
 		IIdType id1;
 		{
@@ -1791,6 +1838,52 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myLocationDao.create(loc, mySrd);
 		}
 	}
+
+	@Test
+	public void testSearchNotTag() {
+		Patient p0 = new Patient();
+		p0.getMeta().addTag("http://system", "tag0", "Tag 0");
+		p0.setActive(true);
+		String p0id = myPatientDao.create(p0).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p1 = new Patient();
+		p1.getMeta().addTag("http://system", "tag1", "Tag 1");
+		p1.setActive(true);
+		String p1id = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+
+		Patient p2 = new Patient();
+		p2.getMeta().addTag("http://system", "tag2", "Tag 2");
+		p2.setActive(true);
+		String p2id = myPatientDao.create(p2).getId().toUnqualifiedVersionless().getValue();
+
+		{
+			String criteria = "_tag:not=http://system|tag0";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+			assertThat(ids, containsInAnyOrder(p1id, p2id));
+		}
+		{
+			String criteria = "_tag:not=http://system|tag0,http://system|tag1";
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(criteria, myFhirCtx.getResourceDefinition(Patient.class));
+
+			map.setLoadSynchronous(true);
+
+			myCaptureQueriesListener.clear();
+			IBundleProvider results = myPatientDao.search(map);
+			List<String> ids = toUnqualifiedVersionlessIdValues(results);
+			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
+
+			assertThat(ids, containsInAnyOrder(p2id));
+		}
+	}
+
 
 	@Test
 	public void testSearchNumberParam() {

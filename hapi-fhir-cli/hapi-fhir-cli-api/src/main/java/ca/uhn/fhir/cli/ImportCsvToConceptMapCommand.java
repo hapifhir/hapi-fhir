@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,8 +39,6 @@ import org.hl7.fhir.r4.model.UriType;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -166,7 +164,7 @@ public class ImportCsvToConceptMapCommand extends AbstractImportExportCsvConcept
 		ourLog.info("Converting CSV to ConceptMap...");
 		ConceptMap retVal = new ConceptMap();
 		try (
-			Reader reader = Files.newBufferedReader(Paths.get(file));
+			Reader reader = getBufferedReader();
 			CSVParser csvParser = new CSVParser(
 				reader,
 				CSVFormat

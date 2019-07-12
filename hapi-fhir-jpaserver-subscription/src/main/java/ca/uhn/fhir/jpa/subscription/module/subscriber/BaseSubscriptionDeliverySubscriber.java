@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,10 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import org.slf4j.Logger;
@@ -65,14 +66,17 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 		try {
 
 			// Interceptor call: SUBSCRIPTION_BEFORE_DELIVERY
-			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY, msg, msg.getSubscription())) {
+			HookParams params = new HookParams()
+				.add(ResourceDeliveryMessage.class, msg)
+				.add(CanonicalSubscription.class, msg.getSubscription());
+			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY, params)) {
 				return;
 			}
 
 			handleMessage(msg);
 
 			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
-			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY, msg, msg.getSubscription());
+			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY, params);
 
 		} catch (Exception e) {
 
@@ -81,7 +85,8 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 			// Interceptor call: SUBSCRIPTION_AFTER_DELIVERY
 			HookParams hookParams = new HookParams()
-				.add(ResourceDeliveryMessage.class, msg).add(Exception.class, e);
+				.add(ResourceDeliveryMessage.class, msg)
+				.add(Exception.class, e);
 			if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED, hookParams)) {
 				return;
 			}

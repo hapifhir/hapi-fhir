@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -73,6 +74,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p = myPatientDao.read(id);
 		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
+	}
+
+	/**
+	 * See #1352
+	 */
+	@Test
+	public void testCreateWithSampledDataInObservation() {
+		Observation o = new Observation();
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		SampledData sampledData = new SampledData();
+		sampledData.setData("2 3 4 5 6");
+		o.setValue(sampledData);
+		assertTrue(myObservationDao.create(o).getCreated());
 	}
 
 	@Test

@@ -9,9 +9,9 @@ package org.hl7.fhir.convertors;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -5784,8 +5784,8 @@ public class VersionConvertor_10_30 {
     tgt.setEffective(convertType(src.getEffective()));
     tgt.setIssued(src.getIssued());
 //    tgt.setPerformer(convertReference(src.getPerformer()));
-//    for (org.hl7.fhir.instance.model.Reference t : src.getRequest())
-//      tgt.addRequest(convertReference(t));
+    for (org.hl7.fhir.instance.model.Reference t : src.getRequest())
+      tgt.addBasedOn(convertReference(t));
     for (org.hl7.fhir.instance.model.Reference t : src.getSpecimen())
       tgt.addSpecimen(convertReference(t));
     for (org.hl7.fhir.instance.model.Reference t : src.getResult())
@@ -5817,8 +5817,8 @@ public class VersionConvertor_10_30 {
     tgt.setEffective(convertType(src.getEffective()));
     tgt.setIssued(src.getIssued());
 //    tgt.setPerformer(convertReference(src.getPerformer()));
-//    for (org.hl7.fhir.dstu3.model.Reference t : src.getRequest())
-//      tgt.addRequest(convertReference(t));
+    for (org.hl7.fhir.dstu3.model.Reference t : src.getBasedOn())
+      tgt.addRequest(convertReference(t));
     for (org.hl7.fhir.dstu3.model.Reference t : src.getSpecimen())
       tgt.addSpecimen(convertReference(t));
     for (org.hl7.fhir.dstu3.model.Reference t : src.getResult())

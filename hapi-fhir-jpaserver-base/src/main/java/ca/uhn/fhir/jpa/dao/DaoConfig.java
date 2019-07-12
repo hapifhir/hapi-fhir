@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
@@ -26,9 +25,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,6 +72,7 @@ public class DaoConfig {
 		Bundle.BundleType.MESSAGE.toCode()
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
+	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -114,7 +114,6 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	private List<IServerInterceptor> myInterceptors = new ArrayList<>();
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -135,7 +134,9 @@ public class DaoConfig {
 	private IdStrategyEnum myResourceServerIdStrategy = IdStrategyEnum.SEQUENTIAL_NUMERIC;
 	private boolean myMarkResourcesForReindexingUponSearchParameterChange;
 	private boolean myExpungeEnabled;
+	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
 	private int myReindexThreadCount;
+	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
 	private boolean myValidateSearchParameterExpressionsOnSave = true;
 	private List<Integer> mySearchPreFetchThresholds = Arrays.asList(500, 2000, -1);
@@ -144,6 +145,10 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 */
+	private boolean myPreExpandValueSetsExperimental = false;
 
 	/**
 	 * Constructor
@@ -154,6 +159,7 @@ public class DaoConfig {
 		setSubscriptionPurgeInactiveAfterMillis(Long.MAX_VALUE);
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
+		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
 		setBundleTypesAllowedForStorage(DEFAULT_BUNDLE_TYPES_ALLOWED_FOR_STORAGE);
 
 		if ("true".equalsIgnoreCase(System.getProperty(DISABLE_STATUS_BASED_REINDEX))) {
@@ -528,47 +534,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Returns the interceptors which will be notified of operations.
-	 *
-	 * @see #setInterceptors(List)
-	 * @deprecated Marked as deprecated as of HAPI 3.7.0.  Use {@link #registerInterceptor} or {@link #unregisterInterceptor}instead.
-	 */
-
-	@Deprecated
-	public List<IServerInterceptor> getInterceptors() {
-		return myInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(List<IServerInterceptor> theInterceptors) {
-		myInterceptors = theInterceptors;
-	}
-
-	/**
-	 * This may be used to optionally register server interceptors directly against the DAOs.
-	 */
-	public void setInterceptors(IServerInterceptor... theInterceptor) {
-		setInterceptors(new ArrayList<>());
-		if (theInterceptor != null && theInterceptor.length != 0) {
-			getInterceptors().addAll(Arrays.asList(theInterceptor));
-		}
-	}
-
-	public void registerInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		if (!myInterceptors.contains(theInterceptor)) {
-			myInterceptors.add(theInterceptor);
-		}
-	}
-
-	public void unregisterInterceptor(IServerInterceptor theInterceptor) {
-		Validate.notNull(theInterceptor, "Interceptor can not be null");
-		myInterceptors.remove(theInterceptor);
-	}
-
-	/**
 	 * See {@link #setMaximumExpansionSize(int)}
 	 */
 	public int getMaximumExpansionSize() {
@@ -641,6 +606,31 @@ public class DaoConfig {
 	public void setReindexThreadCount(int theReindexThreadCount) {
 		myReindexThreadCount = theReindexThreadCount;
 		myReindexThreadCount = Math.max(myReindexThreadCount, 1); // Minimum of 1
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public int getExpungeThreadCount() {
+		return myExpungeThreadCount;
+	}
+
+	/**
+	 * This setting controls the number of threads allocated to the expunge operation
+	 * <p>
+	 * The default value is set to the number of available processors
+	 * (via <code>Runtime.getRuntime().availableProcessors()</code>). Value
+	 * for this setting must be a positive integer.
+	 * </p>
+	 */
+	public void setExpungeThreadCount(int theExpungeThreadCount) {
+		myExpungeThreadCount = theExpungeThreadCount;
+		myExpungeThreadCount = Math.max(myExpungeThreadCount, 1); // Minimum of 1
 	}
 
 	public ResourceEncodingEnum getResourceEncoding() {
@@ -982,6 +972,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -995,6 +986,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
@@ -1088,6 +1080,22 @@ public class DaoConfig {
 	 */
 	public void setExpungeEnabled(boolean theExpungeEnabled) {
 		myExpungeEnabled = theExpungeEnabled;
+	}
+
+	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
+	 * expunge operation.
+	 */
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
 	}
 
 	/**
@@ -1580,6 +1588,49 @@ public class DaoConfig {
 		myModelConfig.setEmailFromAddress(theEmailFromAddress);
 	}
 
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myModelConfig.getWebsocketContextPath();
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this defines the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSetsExperimental() {
+		return myPreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
+		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
+	}
 
 	public enum IndexEnabledEnum {
 		ENABLED,
