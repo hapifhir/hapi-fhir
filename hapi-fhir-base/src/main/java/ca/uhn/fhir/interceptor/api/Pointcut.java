@@ -1163,6 +1163,34 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
 
+	/**
+	 * Invoked before expungeEverything is called.
+	 * <p>
+	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
+	 * If the hook deletes any records, the hook is expected to increment this counter by the number of records deleted.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>java.util.concurrent.atomic.AtomicInteger - The counter holding the number of records deleted.</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return void.
+	 * </p>
+	 */
+
 	STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING(
 		// Return type
 		void.class,

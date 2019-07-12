@@ -270,6 +270,10 @@
 				The <![CDATA[<code>_summary</code>]]> element was not always respected when encoding
 				JSON resources.
 			</action>
+			<action type="add">
+				Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of
+				the expungeEverything operation.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
