@@ -1138,10 +1138,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";
 
-		int sleep = 100;
-		Thread.sleep(sleep);
-
 		DateTimeType beforeAny = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
+		TestUtil.sleepOneClick();
+
 		IIdType id1a;
 		{
 			Patient patient = new Patient();
@@ -1157,9 +1156,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 		DateTimeType beforeR2 = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 
 		IIdType id2;
 		{
@@ -1220,9 +1219,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void testSearchLastUpdatedParamWithComparator() throws InterruptedException {
+	public void testSearchLastUpdatedParamWithComparator() {
 		IIdType id0;
 		{
 			Patient patient = new Patient();

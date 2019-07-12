@@ -72,6 +72,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
