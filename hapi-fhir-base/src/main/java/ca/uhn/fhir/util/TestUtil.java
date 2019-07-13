@@ -39,6 +39,11 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public class TestUtil {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+	private static boolean ourShouldRandomizeTimezones = true;
+
+	public static void setShouldRandomizeTimezones(boolean theShouldRandomizeTimezones) {
+		ourShouldRandomizeTimezones = theShouldRandomizeTimezones;
+	}
 
 	/**
 	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
@@ -107,7 +112,7 @@ public class TestUtil {
 	 * environment
 	 */
 	public static void randomizeLocale() {
- 		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
+		Locale[] availableLocales = {Locale.CANADA, Locale.GERMANY, Locale.TAIWAN};
 		Locale.setDefault(availableLocales[(int) (Math.random() * availableLocales.length)]);
 		ourLog.info("Tests are running in locale: " + Locale.getDefault().getDisplayName());
 		if (Math.random() < 0.5) {
@@ -119,10 +124,15 @@ public class TestUtil {
 			System.setProperty("file.encoding", "UTF-8");
 			System.setProperty("line.separator", "\n");
 		}
+
+		if (ourShouldRandomizeTimezones) {
+			String availableTimeZones[] = {"GMT+08:00", "GMT-05:00", "GMT+00:00", "GMT+03:30"};
+			String timeZone = availableTimeZones[(int) (Math.random() * availableTimeZones.length)];
+			TimeZone.setDefault(TimeZone.getTimeZone(timeZone));
+		}
+
 		ourLog.info("Tests are using time zone: {}", TimeZone.getDefault().getID());
 	}
-
-
 
 
 	/**
