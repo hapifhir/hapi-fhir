@@ -527,9 +527,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, exts.size());
 	}
 
-	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
+	private List<String> searchAndReturnUnqualifiedIdValues(String theUri) throws IOException {
 		List<String> ids;
-		HttpGet get = new HttpGet(uri);
+		HttpGet get = new HttpGet(theUri);
+
+		ourLog.info("About to perform search for: {}", theUri);
 
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
