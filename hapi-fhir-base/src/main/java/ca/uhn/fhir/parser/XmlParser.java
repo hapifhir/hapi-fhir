@@ -9,9 +9,9 @@ package ca.uhn.fhir.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,15 +51,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * This class is the FHIR XML parser/encoder. Users should not interact with this class directly, but should use
  * {@link FhirContext#newXmlParser()} to get an instance.
  */
-public class XmlParser extends BaseParser /* implements IParser */ {
+public class XmlParser extends BaseParser {
 
-	static final String ATOM_NS = "http://www.w3.org/2005/Atom";
 	static final String FHIR_NS = "http://hl7.org/fhir";
-	static final String OPENSEARCH_NS = "http://a9.com/-/spec/opensearch/1.1/";
-	static final String RESREF_DISPLAY = "display";
-	static final String RESREF_REFERENCE = "reference";
-	static final String TOMBSTONES_NS = "http://purl.org/atompub/tombstones/1.0";
-	static final String XHTML_NS = "http://www.w3.org/1999/xhtml";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(XmlParser.class);
 
 	// private static final Set<String> RESOURCE_NAMESPACES;

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
@@ -60,7 +61,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -113,10 +113,6 @@ public class SearchBuilder implements ISearchBuilder {
 	 */
 	private static final int MAXIMUM_PAGE_SIZE = 800;
 	private static Long NO_MORE = -1L;
-	private static HandlerTypeEnum ourLastHandlerMechanismForUnitTest;
-	private static SearchParameterMap ourLastHandlerParamsForUnitTest;
-	private static String ourLastHandlerThreadForUnitTest;
-	private static boolean ourTrackHandlersForUnitTest;
 	private final boolean myDontUseHashesForSearch;
 	private final DaoConfig myDaoConfig;
 	@Autowired
@@ -1546,12 +1542,6 @@ public class SearchBuilder implements ISearchBuilder {
 		myBuilder = myEntityManager.getCriteriaBuilder();
 		mySearchUuid = theSearchRuntimeDetails.getSearchUuid();
 
-		if (ourTrackHandlersForUnitTest) {
-			ourLastHandlerParamsForUnitTest = theParams;
-			ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.STANDARD_QUERY;
-			ourLastHandlerThreadForUnitTest = Thread.currentThread().getName();
-		}
-
 		if (myPidSet == null) {
 			myPidSet = new HashSet<>();
 		}
@@ -2214,9 +2204,16 @@ public class SearchBuilder implements ISearchBuilder {
 				if (sb != null) {
 					String indexString = sb.toString();
 					ourLog.debug("Checking for unique index for query: {}", indexString);
-					if (ourTrackHandlersForUnitTest) {
-						ourLastHandlerMechanismForUnitTest = HandlerTypeEnum.UNIQUE_INDEX;
-					}
+
+					// Interceptor broadcast: JPA_PERFTRACE_INFO
+					StorageProcessingMessage msg = new StorageProcessingMessage()
+						.setMessage("Using unique index for query for search: " + indexString);
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, theRequest)
+						.addIfMatchesType(ServletRequestDetails.class, theRequest)
+						.add(StorageProcessingMessage.class, msg);
+					JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+
 					addPredicateCompositeStringUnique(theParams, indexString);
 				}
 			}
@@ -2786,24 +2783,6 @@ public class SearchBuilder implements ISearchBuilder {
 		TypedQuery<Long> query = theEntityManager.createQuery(cq);
 
 		return query.getResultList();
-	}
-
-	@VisibleForTesting
-	public static HandlerTypeEnum getLastHandlerMechanismForUnitTest() {
-		return ourLastHandlerMechanismForUnitTest;
-	}
-
-	@VisibleForTesting
-	public static String getLastHandlerParamsForUnitTest() {
-		return ourLastHandlerParamsForUnitTest.toString() + " on thread [" + ourLastHandlerThreadForUnitTest + "]";
-	}
-
-	@VisibleForTesting
-	public static void resetLastHandlerMechanismForUnitTest() {
-		ourLastHandlerMechanismForUnitTest = null;
-		ourLastHandlerParamsForUnitTest = null;
-		ourLastHandlerThreadForUnitTest = null;
-		ourTrackHandlersForUnitTest = true;
 	}
 
 	private static Predicate[] toArray(List<Predicate> thePredicates) {

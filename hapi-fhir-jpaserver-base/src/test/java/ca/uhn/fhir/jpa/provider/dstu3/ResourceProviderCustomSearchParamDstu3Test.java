@@ -120,6 +120,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 				SearchParameter fooSp = new SearchParameter();
 				fooSp.addBase("Patient");
 				fooSp.setCode("foo");
+				fooSp.setName("foo");
 				fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 				fooSp.setTitle("FOO SP");
 				fooSp.setExpression("Patient.gender");
@@ -186,6 +187,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
 		fooSp.setType(org.hl7.fhir.dstu3.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");
@@ -207,7 +209,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		mySearchParamRegistry.forceRefresh();
 
 		conformance = ourClient
-				.fetchConformance()
+				.capabilities()
 				.ofType(CapabilityStatement.class)
 				.execute();
 		map = extractSearchParams(conformance, "Patient");

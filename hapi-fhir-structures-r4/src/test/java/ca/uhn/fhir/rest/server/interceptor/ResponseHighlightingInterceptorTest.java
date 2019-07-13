@@ -258,13 +258,15 @@ public class ResponseHighlightingInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		status.close();
+		ourLog.info(responseContent);
+
 		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertEquals("text/html;charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
 		assertThat(responseContent, containsString("html"));
 		assertThat(responseContent, containsString(">{<"));
 		assertThat(responseContent, not(containsString("&lt;")));
+		assertThat(responseContent, containsString(Constants.HEADER_REQUEST_ID));
 
-		ourLog.info(responseContent);
 	}
 
 	@Test

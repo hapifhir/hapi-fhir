@@ -9,9 +9,9 @@ package ca.uhn.fhir.jaxrs.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,7 +33,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	/** the resource bindings */
 	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
 	/** the server configuration */
-	private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
+	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
 
 	/** the conformance. It is created once during startup */
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
@@ -228,14 +227,14 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods }
+	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object, Class)}  }
 	 * 
 	 * @param theProvider
 	 *           an instance of the provider interface
 	 * @param theProviderInterface
 	 *           the class describing the providers interface
 	 * @return the numbers of basemethodbindings added
-	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods
+	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
 	 */
 	public int addProvider(IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface) throws ConfigurationException {
 		int count = 0;

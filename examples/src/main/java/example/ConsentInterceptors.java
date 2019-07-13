@@ -50,7 +50,7 @@ public class ConsentInterceptors {
 		 * Modify resources that are being shown to the user
 		 */
 		@Override
-		public ConsentOutcome seeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
 			// Don't return the subject for Observation resources
 			if (theResource instanceof Observation) {
 				Observation obs = (Observation)theResource;

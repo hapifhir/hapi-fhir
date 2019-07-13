@@ -265,6 +265,16 @@ public class ElementsParamR4Test {
 			});
 
 		verifyXmlAndJson(
+			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value",
+			bundle -> {
+				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();
+				assertEquals("SUBSETTED", procedure.getMeta().getTag().get(0).getCode());
+				assertEquals(0, procedure.getReasonCode().size());
+				assertEquals("1.1", ((Quantity) procedure.getExtension().get(0).getValue()).getValueElement().getValueAsString());
+				assertEquals("mg", ((Quantity) procedure.getExtension().get(0).getValue()).getCode());
+			});
+
+		verifyXmlAndJson(
 			"http://localhost:" + ourPort + "/Procedure?_elements=Procedure.extension.value.value",
 			bundle -> {
 				Procedure procedure = (Procedure) bundle.getEntry().get(0).getResource();

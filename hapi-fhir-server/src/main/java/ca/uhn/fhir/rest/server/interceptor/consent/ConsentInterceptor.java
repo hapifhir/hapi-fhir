@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.consent;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -158,7 +158,7 @@ public class ConsentInterceptor {
 				continue;
 			}
 
-			ConsentOutcome nextOutcome = myConsentService.seeResource(theRequestDetails, nextResource, myContextConsentServices);
+			ConsentOutcome nextOutcome = myConsentService.willSeeResource(theRequestDetails, nextResource, myContextConsentServices);
 			switch (nextOutcome.getStatus()) {
 				case PROCEED:
 					if (nextOutcome.getResource() != null) {
@@ -203,7 +203,7 @@ public class ConsentInterceptor {
 
 		// See outer resource
 		if (alreadySeenResources.putIfAbsent(theResource.getResponseResource(), Boolean.TRUE) == null) {
-			final ConsentOutcome outcome = myConsentService.seeResource(theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
+			final ConsentOutcome outcome = myConsentService.willSeeResource(theRequestDetails, theResource.getResponseResource(), myContextConsentServices);
 			if (outcome.getResource() != null) {
 				theResource.setResponseResource(outcome.getResource());
 			}
@@ -245,7 +245,7 @@ public class ConsentInterceptor {
 					if (alreadySeenResources.putIfAbsent((IBaseResource) theElement, Boolean.TRUE) != null) {
 						return true;
 					}
-					ConsentOutcome childOutcome = myConsentService.seeResource(theRequestDetails, (IBaseResource) theElement, myContextConsentServices);
+					ConsentOutcome childOutcome = myConsentService.willSeeResource(theRequestDetails, (IBaseResource) theElement, myContextConsentServices);
 
 					IBaseResource replacementResource = null;
 					boolean shouldReplaceResource = false;

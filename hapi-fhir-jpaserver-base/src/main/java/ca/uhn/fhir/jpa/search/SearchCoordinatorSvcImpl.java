@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -410,6 +410,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					PersistedJpaBundleProvider retVal = null;
 					if (searchToUse != null) {
 						ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
+
+						// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
+						params = new HookParams()
+							.add(SearchParameterMap.class, theParams)
+							.add(RequestDetails.class, theRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+
 						searchToUse.setSearchLastReturned(new Date());
 						mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
 

@@ -48,6 +48,10 @@ public class MetadataCapabilityStatementDstu3Test {
 	private static Server ourServer;
 	private static RestfulServer ourServlet;
 
+	static {
+		System.setProperty("test", "true");
+	}
+
 	@After
 	public void after() {
 		ourServlet.setServerAddressStrategy(new IncomingRequestAddressStrategy());

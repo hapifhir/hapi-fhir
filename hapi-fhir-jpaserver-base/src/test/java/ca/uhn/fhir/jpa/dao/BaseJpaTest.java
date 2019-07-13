@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.jpa.util.LoggingRule;
+import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -56,7 +55,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
@@ -78,6 +76,7 @@ public abstract class BaseJpaTest {
 
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
+		System.setProperty("test", "true");
 	}
 
 	@Rule
@@ -392,7 +391,7 @@ public abstract class BaseJpaTest {
 
 		for (int count = 0; ; count++) {
 			try {
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {

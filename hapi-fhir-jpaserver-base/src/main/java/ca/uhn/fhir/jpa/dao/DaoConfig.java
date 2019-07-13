@@ -25,9 +25,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -145,6 +145,10 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 */
+	private boolean myPreExpandValueSetsExperimental = false;
 
 	/**
 	 * Constructor
@@ -1598,6 +1602,34 @@ public class DaoConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSetsExperimental() {
+		return myPreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
+		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
 	}
 
 	public enum IndexEnabledEnum {

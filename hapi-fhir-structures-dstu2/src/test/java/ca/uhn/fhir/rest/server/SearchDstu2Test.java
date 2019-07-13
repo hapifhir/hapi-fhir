@@ -51,6 +51,8 @@ import static org.junit.Assert.*;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
 
+import javax.annotation.Nonnull;
+
 public class SearchDstu2Test {
 
 	private static CloseableHttpClient ourClient;
@@ -556,6 +558,7 @@ public class SearchDstu2Test {
 					return ourReturnPublished;
 				}
 
+				@Nonnull
 				@Override
 				public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 					throw new IllegalStateException();

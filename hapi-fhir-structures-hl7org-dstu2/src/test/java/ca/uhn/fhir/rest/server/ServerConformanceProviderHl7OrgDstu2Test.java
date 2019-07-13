@@ -33,7 +33,11 @@ import ca.uhn.fhir.rest.server.method.SearchParameter;
 
 public class ServerConformanceProviderHl7OrgDstu2Test {
 
-	private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
+  static {
+    System.setProperty("test", "true");
+  }
+
+  private static FhirContext ourCtx = FhirContext.forDstu2Hl7Org();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProviderHl7OrgDstu2Test.class);
 
 	private HttpServletRequest createHttpServletRequest() {
@@ -62,7 +66,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -85,14 +89,14 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
 		assertEquals(1, conformance.getRest().get(0).getOperation().size());
 		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
+		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
 	}
 
 	
@@ -107,7 +111,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/everything"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 				
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
@@ -127,7 +131,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -159,7 +163,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -179,7 +183,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -214,7 +218,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -231,18 +235,18 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		ServerConformanceProvider sc = new ServerConformanceProvider(rs) {
 			@Override
-			public Conformance getServerConformance(HttpServletRequest theRequest) {
-				return super.getServerConformance(theRequest);
+			public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+				return super.getServerConformance(theRequest, theRequestDetails);
 			}
 		};
 		rs.setServerConformanceProvider(sc);
 
 		rs.init(createServletConfig());
 
-		Conformance sconf = sc.getServerConformance(createHttpServletRequest());
-		assertEquals("OperationDefinition/plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference());
+		Conformance sconf = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		assertEquals("OperationDefinition/-is-plain", sconf.getRest().get(0).getOperation().get(0).getDefinition().getReference());
 
-		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/plain"));
+		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/-is-plain"), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
@@ -273,7 +277,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -303,7 +307,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -323,7 +327,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -355,7 +359,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			}
 		}
 		assertTrue(found);
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -376,7 +380,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -395,7 +399,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
@@ -414,7 +418,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
 	}
@@ -596,5 +600,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		}
 
 	}
+
+  private RequestDetails createRequestDetails(RestfulServer theServer) {
+    ServletRequestDetails retVal = new ServletRequestDetails(null);
+    retVal.setServer(theServer);
+    return retVal;
+  }
 
 }

@@ -23,6 +23,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -120,6 +121,7 @@ public class SearchHl7OrgDstu2Test {
           return ourReturnPublished;
         }
 
+        @Nonnull
         @Override
         public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
           throw new IllegalStateException();

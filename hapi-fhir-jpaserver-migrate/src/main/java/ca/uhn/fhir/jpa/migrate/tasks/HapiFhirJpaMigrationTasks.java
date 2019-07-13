@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,16 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -53,8 +56,64 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init340();
 		init350();
 		init360();
+		init400();
 	}
 
+	protected void init400() {
+		Builder version = forVersion(VersionEnum.V4_0_0);
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySourceValueSet", "SOURCE_VS")
+			.renameColumn("myTargetValueSet", "TARGET_VS");
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySystem", "SYSTEM_URL")
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
+			.renameColumn("myValueSet", "VALUESET_URL");
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
+			.renameColumn("mySystem", "SYSTEM_URL")
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
+			.renameColumn("myValueSet", "VALUESET_URL");
+
+		// TermValueSet
+		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		version.addIdGenerator("SEQ_VALUESET_PID");
+		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("TRM_VALUESET", "PID");
+		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_URL_LENGTH);
+		termValueSetTable
+			.addIndex("IDX_VALUESET_URL")
+			.unique(true)
+			.withColumns("URL");
+		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable
+			.addForeignKey("FK_TRMVALUESET_RES")
+			.toColumn("RES_ID")
+			.references("HFJ_RESOURCE", "RES_ID");
+		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
+
+		// TermValueSetCode
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CODE");
+		version.addIdGenerator("SEQ_VALUESET_CODE_PID");
+		Builder.BuilderAddTableByColumns termValueSetCodeTable = version.addTableByColumns("TRM_VALUESET_CODE", "PID");
+		termValueSetCodeTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetCodeTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetCodeTable
+			.addForeignKey("FK_TRM_VALUESET_PID")
+			.toColumn("VALUESET_PID")
+			.references("TRM_VALUESET", "PID");
+		termValueSetCodeTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
+		termValueSetCodeTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
+		termValueSetCodeTable
+			.addIndex("IDX_VALUESET_CODE_CS_CD")
+			.unique(false)
+			.withColumns("SYSTEM", "CODE");
+		termValueSetCodeTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+	}
 
 
 	private void init360() {

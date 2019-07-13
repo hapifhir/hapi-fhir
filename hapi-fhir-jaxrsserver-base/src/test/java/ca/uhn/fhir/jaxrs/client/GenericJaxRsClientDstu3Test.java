@@ -1765,14 +1765,30 @@ public class GenericJaxRsClientDstu3Test {
 	@Test
 	public void testTransactionWithString() {
 
-		org.hl7.fhir.dstu3.model.Bundle req = new org.hl7.fhir.dstu3.model.Bundle();
+		Bundle req = new Bundle();
+		req.setType(BundleType.TRANSACTION);
+
 		Patient patient = new Patient();
-		patient.addName().setFamily("PAT_FAMILY");
-		req.addEntry().setResource(patient);
+		patient.setId("C01");
+		patient.addName().setFamily("Smith").addGiven("John");
+		req.addEntry()
+			.setFullUrl("Patient/C01")
+			.setResource(patient).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/C01");
+
 		Observation observation = new Observation();
-		observation.getCode().setText("OBS_TEXT");
-		req.addEntry().setResource(observation);
-		String reqString = ourCtx.newJsonParser().encodeResourceToString(req);
+		observation.setId("C02");
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.setEffective(new DateTimeType("2019-02-21T13:35:00-05:00"));
+		observation.getSubject().setReference("Patient/C01");
+		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("3141-9").setDisplay("Body Weight Measured");
+		observation.setValue(new Quantity(null, 190, "http://unitsofmeaure.org", "{lb_av}", "{lb_av}"));
+		req.addEntry()
+			.setFullUrl("Observation/C02")
+			.setResource(observation).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/C02");
+		String reqString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(req);
+		ourLog.info(reqString);
+		reqString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(req);
+		ourLog.info(reqString);
 
 		org.hl7.fhir.dstu3.model.Bundle resp = new org.hl7.fhir.dstu3.model.Bundle();
 		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
