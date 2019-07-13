@@ -26,16 +26,12 @@ import org.hl7.fhir.dstu2.model.*;
 import org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode;
 import org.junit.*;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.Include;
-import ca.uhn.fhir.model.api.annotation.Child;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.util.ElementUtil;
-import ca.uhn.fhir.util.PortUtil;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class IncludeHl7OrgDstu2Test {
 

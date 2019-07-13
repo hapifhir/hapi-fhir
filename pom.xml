@@ -541,7 +541,8 @@
 
 	<properties>
 
-		<fhir_core_version>3.8.0-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>3.8.12-SNAPSHOT</fhir_core_version>
+		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
@@ -1138,6 +1139,11 @@
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-server</artifactId>
 				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.fhir</groupId>
+				<artifactId>ucum</artifactId>
+				<version>${ucum_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
@@ -2310,7 +2316,6 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-test-utilities</module>
-				<module>hapi-fhir-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>

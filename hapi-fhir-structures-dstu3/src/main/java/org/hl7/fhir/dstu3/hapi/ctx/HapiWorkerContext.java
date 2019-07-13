@@ -95,7 +95,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public StructureDefinition fetchTypeDefinition(String theCode) {
-    throw new UnsupportedOperationException();
+    return fetchResource(org.hl7.fhir.dstu3.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theCode);
   }
 
   @Override

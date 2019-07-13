@@ -101,7 +101,11 @@
 			<artifactId>org.hl7.fhir.dstu3</artifactId>
 			<version>${fhir_core_version}</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.fhir</groupId>
+			<artifactId>ucum</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<!--
 		Test dependencies on other optional parts of HAPI
 		-->

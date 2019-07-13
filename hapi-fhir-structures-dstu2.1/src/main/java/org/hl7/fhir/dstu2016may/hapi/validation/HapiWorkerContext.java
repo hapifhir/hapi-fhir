@@ -3,6 +3,8 @@ package org.hl7.fhir.dstu2016may.hapi.validation;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,16 +19,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.formats.IParser;
 import org.hl7.fhir.dstu2016may.formats.ParserType;
 import org.hl7.fhir.dstu2016may.hapi.validation.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.CodeType;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.ConceptMap;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.dstu2016may.model.ResourceType;
-import org.hl7.fhir.dstu2016may.model.StructureDefinition;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
@@ -127,18 +120,23 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public IResourceValidator newValidator() {
+	public IParser newXmlParser() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public IParser newXmlParser() {
+	public INarrativeGenerator getNarrativeGenerator(String theS, String theS1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String oid2Uri(String theCode) {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public StructureDefinition fetchTypeDefinition(String typeName) {
+		return fetchResource(org.hl7.fhir.dstu2016may.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + typeName);
 	}
 
 	@Override
@@ -152,9 +150,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public Set<String> typeTails() {
-		return new HashSet<String>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
-				"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
-				"Timing", "Reference", "Annotation", "Signature", "Meta"));
+		return new HashSet<>(Arrays.asList("Integer", "UnsignedInt", "PositiveInt", "Decimal", "DateTime", "Date", "Time", "Instant", "String", "Uri", "Oid", "Uuid", "Id", "Boolean", "Code",
+			"Markdown", "Base64Binary", "Coding", "CodeableConcept", "Attachment", "Identifier", "Quantity", "SampledData", "Range", "Period", "Ratio", "HumanName", "Address", "ContactPoint",
+			"Timing", "Reference", "Annotation", "Signature", "Meta"));
 	}
 
 	@Override
@@ -183,7 +181,10 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (result == null) {
 			return null;
 		}
-		return new ValidationResult(result.getSeverity(), result.getMessage(), result.asConceptDefinition());
+		ConceptDefinitionComponent definition = result.asConceptDefinition();
+		String message = result.getMessage();
+		OperationOutcome.IssueSeverity severity = result.getSeverity();
+		return new ValidationResult(severity, message, definition);
 	}
 
 	@Override
@@ -212,7 +213,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		if (isNotBlank(theSystem)) {
 			CodeSystem system = fetchCodeSystem(theSystem);
 			if (system == null) {
-				return new ValidationResult(IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
+				return new ValidationResult(OperationOutcome.IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
 			}
 
 			if (system.hasCaseSensitive()) {
@@ -261,7 +262,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 			}
 		}
 
-		return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
+		return new ValidationResult(OperationOutcome.IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
 	}
 
 	@Override
