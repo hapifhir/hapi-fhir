@@ -27,6 +27,7 @@ import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -253,12 +254,17 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testConceptTimestamps() {
 		long start = System.currentTimeMillis() - 10;
 
+		runInTransaction(() -> {
+			List<TermConcept> concepts = myTermConceptDao.findAll();
+			assertThat(concepts, empty());
+		});
+
 		createExternalCsDogs();
 
 		runInTransaction(() -> {
 			List<TermConcept> concepts = myTermConceptDao.findAll();
 			for (TermConcept next : concepts) {
-				assertTrue(next.getUpdated().getTime() > start);
+				assertTrue(new InstantType(new Date(next.getUpdated().getTime())) + " <= " + new InstantType(new Date(start)), next.getUpdated().getTime() > start);
 			}
 		});
 	}

@@ -15,6 +15,7 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -161,7 +162,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		InputStreamReader reader = null;
 		if (inputStream != null) {
 			try {
-				reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+				reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
 				Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
 				for (BundleEntryComponent next : bundle.getEntry()) {
@@ -194,7 +195,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
 		InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
 		if (valuesetText != null) {
-			InputStreamReader reader = new InputStreamReader(valuesetText, Charsets.UTF_8);
+			InputStreamReader reader = new InputStreamReader(valuesetText, StandardCharsets.UTF_8);
 
 			Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
 			for (BundleEntryComponent next : bundle.getEntry()) {
