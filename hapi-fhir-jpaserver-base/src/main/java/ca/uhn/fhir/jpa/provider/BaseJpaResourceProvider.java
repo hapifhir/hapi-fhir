@@ -62,7 +62,7 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 		if (theIdParam != null) {
 			outcome = getDao().expunge(theIdParam, options, theRequest);
 		} else {
-			outcome = getDao().expunge(options);
+			outcome = getDao().expunge(options, theRequest);
 		}
 
 		return createExpungeResponse(outcome);

@@ -392,7 +392,7 @@ public abstract class BaseJpaTest {
 
 		for (int count = 0; ; count++) {
 			try {
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {

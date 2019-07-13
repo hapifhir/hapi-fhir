@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import org.slf4j.Logger;
@@ -43,9 +44,9 @@ public abstract class ExpungeService {
 	private IResourceExpungeService myExpungeDaoService;
 
 	@Lookup
-	protected abstract ExpungeRun getExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions);
+	protected abstract ExpungeRun getExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
-	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
 
 		if (!myConfig.isExpungeEnabled()) {
@@ -58,11 +59,11 @@ public abstract class ExpungeService {
 
 		if (theResourceName == null && theResourceId == null && theVersion == null) {
 			if (theExpungeOptions.isExpungeEverything()) {
-				myExpungeEverythingService.expungeEverything();
+				myExpungeEverythingService.expungeEverything(theRequest);
 			}
 		}
 
-		ExpungeRun expungeRun = getExpungeRun(theResourceName, theResourceId, theVersion, theExpungeOptions);
+		ExpungeRun expungeRun = getExpungeRun(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequest);
 		return expungeRun.call();
 	}
 

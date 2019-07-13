@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public interface IFhirSystemDao<T, MT> extends IDao {
 
-	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions);
+	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
 	@SuppressWarnings("unchecked")
 	<R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType);
