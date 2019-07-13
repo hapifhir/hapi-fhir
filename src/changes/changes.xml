@@ -270,6 +270,11 @@
 				The <![CDATA[<code>_summary</code>]]> element was not always respected when encoding
 				JSON resources.
 			</action>
+			<action type="change">
+				The JPA server now uses the H2 database instead of the derby database to run its 
+				unit tests. We are hoping that this cuts down on the number of false test failures 
+				we get due to mysterious derby failures.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
