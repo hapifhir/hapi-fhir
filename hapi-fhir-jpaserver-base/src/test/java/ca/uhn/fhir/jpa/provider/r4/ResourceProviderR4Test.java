@@ -72,6 +72,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -525,9 +527,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, exts.size());
 	}
 
-	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
+	private List<String> searchAndReturnUnqualifiedIdValues(String theUri) throws IOException {
 		List<String> ids;
-		HttpGet get = new HttpGet(uri);
+		HttpGet get = new HttpGet(theUri);
+
+		ourLog.info("About to perform search for: {}", theUri);
 
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
@@ -2320,12 +2324,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
-			Thread.sleep(100);
+			sleepOneClick();
 			preDates.add(new Date());
-			Thread.sleep(100);
+			sleepOneClick();
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
+			sleepOneClick();
 		}
 
 		List<String> idValues;
@@ -3976,7 +3981,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid1));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
-		TestUtil.sleepOneClick();
+		sleepOneClick();
 
 		Bundle result2 = ourClient
 			.search()

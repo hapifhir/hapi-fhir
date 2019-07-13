@@ -3031,23 +3031,24 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4));
+		// Nulls first for H2
+		assertThat(actual, contains(id4, id1, id2, id3));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4));
+		// Nulls first for H2
+		assertThat(actual, contains(id4, id1, id2, id3));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// The first would be better, but JPA doesn't do NULLS LAST
-		// assertThat(actual, contains(id3, id2, id1, id4));
-		assertThat(actual, contains(id4, id3, id2, id1));
+		assertThat(actual, contains(id3, id2, id1, id4));
+//		assertThat(actual, contains(id4, id3, id2, id1));
 
 	}
 
@@ -3119,21 +3120,21 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
+		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(idMethodName, id1, id2, id3, id4));
+		assertThat(actual, contains(id1, id2, id3, id4, idMethodName));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(5, actual.size());
-		assertThat(actual, contains(id4, id3, id2, id1, idMethodName));
+		assertThat(actual, contains(idMethodName, id4, id3, id2, id1));
 	}
 
 	@Test
@@ -3357,23 +3358,22 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4));
+		assertThat(actual, contains(id4, id1, id2, id3));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		assertThat(actual, contains(id1, id2, id3, id4));
+		assertThat(actual, contains(id4, id1, id2, id3));
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
 		assertEquals(4, actual.size());
-		// The first would be better, but JPA doesn't do NULLS LAST
-		// assertThat(actual, contains(id3, id2, id1, id4));
-		assertThat(actual, contains(id4, id3, id2, id1));
+		assertThat(actual, contains(id3, id2, id1, id4));
+//		assertThat(actual, contains(id4, id3, id2, id1));
 	}
 
 	/**

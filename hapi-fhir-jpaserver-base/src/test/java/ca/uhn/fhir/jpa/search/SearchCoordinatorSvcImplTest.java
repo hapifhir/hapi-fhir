@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 
 import javax.persistence.EntityManager;
 import java.util.*;
@@ -99,6 +100,8 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setDaoConfigForUnitTest(myDaoConfig);
 
 		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuider);
+
+		when(myTxManager.getTransaction(any())).thenReturn(mock(TransactionStatus.class));
 
 		doAnswer(theInvocation -> {
 				PersistedJpaBundleProvider provider = (PersistedJpaBundleProvider) theInvocation.getArguments()[0];
