@@ -53,8 +53,11 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 				break;
 			case MSSQL_2012:
 			case ORACLE_12C:
+			case H2_EMBEDDED:
 				sql = "alter table " + getTableName() + " add " + getColumnName() + " " + typeStatement;
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());

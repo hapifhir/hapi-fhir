@@ -84,6 +84,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 			case POSTGRES_9_4:
 			case ORACLE_12C:
 			case MSSQL_2012:
+			case H2_EMBEDDED:
 				break;
 		}
 

@@ -65,6 +65,7 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 				}
 				break;
 			case DERBY_EMBEDDED:
+			case H2_EMBEDDED:
 				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
 				break;
 			case POSTGRES_9_4:
@@ -76,6 +77,8 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 			case MSSQL_2012:
 				sql = "create sequence " + myGeneratorName + " start with 1 increment by 50";
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 		if (isNotBlank(sql)) {

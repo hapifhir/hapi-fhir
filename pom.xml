@@ -703,6 +703,11 @@
 				<version>${guava_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>1.4.199</version>
+			</dependency>
+			<dependency>
 				<groupId>com.helger</groupId>
 				<artifactId>ph-schematron</artifactId>
 				<version>${ph_schematron_version}</version>
@@ -1436,8 +1441,8 @@
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
-					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
-					<version>2.2.0</version>
+					<artifactId>hibernate54-ddl-maven-plugin</artifactId>
+					<version>2.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
