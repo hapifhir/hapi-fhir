@@ -11,7 +11,6 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -274,7 +273,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			}
 		}
 
-		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+		return new CodeValidationResult(OperationOutcome.IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
 }

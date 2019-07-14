@@ -164,7 +164,7 @@ public class ValidateCommand extends BaseCommand {
 					}
 
 					if (localProfileResource != null) {
-						org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
+						org.hl7.fhir.dstu2.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.dstu2.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
 						instanceValidator.setStructureDefintion(convertedSd);
 					}
 					if (theCommandLine.hasOption("r")) {

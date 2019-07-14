@@ -39,6 +39,7 @@ import java.sql.SQLException;
 
 public enum DriverTypeEnum {
 
+	H2_EMBEDDED("org.h2.Driver", false),
 	DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
 	MARIADB_10_1("org.mariadb.jdbc.Driver", false),
 

@@ -65,6 +65,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 				case MARIADB_10_1:
 					sql = "alter table " + getTableName() + " drop index " + myIndexName;
 					break;
+				case H2_EMBEDDED:
 				case DERBY_EMBEDDED:
 					sql = "drop index " + myIndexName;
 					break;
@@ -83,6 +84,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					break;
 				case POSTGRES_9_4:
 				case DERBY_EMBEDDED:
+				case H2_EMBEDDED:
 				case ORACLE_12C:
 					sql = "drop index " + myIndexName;
 					break;

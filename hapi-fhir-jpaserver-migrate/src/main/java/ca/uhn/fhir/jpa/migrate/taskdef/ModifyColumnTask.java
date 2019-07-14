@@ -89,6 +89,18 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
 				break;
+			case H2_EMBEDDED:
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					if (isNullable()) {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+					} else {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+					}
+				}
+				break;
 			default:
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}

@@ -15,11 +15,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.instance.model.Bundle.HTTPVerb;
-import org.hl7.fhir.instance.model.Conformance.SystemInteractionComponent;
-import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2.model.Bundle.HTTPVerb;
+import org.hl7.fhir.dstu2.model.Conformance.SystemInteractionComponent;
+import org.hl7.fhir.dstu2.model.Conformance.SystemRestfulInteraction;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
