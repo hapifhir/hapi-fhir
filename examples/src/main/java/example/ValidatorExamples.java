@@ -263,7 +263,13 @@ public class ValidatorExamples {
 				// TODO: implement
 				return null;
 			}
-      };
+
+			@Override
+			public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+				// TODO: implement
+				return null;
+			}
+		};
       
       /*
        * ValidationSupportChain strings multiple instances of IValidationSupport together. The

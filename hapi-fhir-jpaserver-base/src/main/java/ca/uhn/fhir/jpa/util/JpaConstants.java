@@ -142,4 +142,9 @@ public class JpaConstants {
 	 * Operation name for the "$subsumes" operation
 	 */
 	public static final String OPERATION_SUBSUMES = "$subsumes";
+
+	/**
+	 * Operation name for the "$snapshot" operation
+	 */
+	public static final String OPERATION_SNAPSHOT = "$snapshot";
 }

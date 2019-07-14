@@ -67,6 +67,11 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		return myWrap.generateSnapshot(theInput, theUrl, theProfileName);
+	}
+
+	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		return myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay);
 	}

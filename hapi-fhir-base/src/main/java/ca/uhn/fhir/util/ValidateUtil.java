@@ -75,4 +75,16 @@ public class ValidateUtil {
 		}
 	}
 
+	public static void exactlyOneNotNullOrThrowInvalidRequestException(Object[] theObjects, String theMessage) {
+		int count = 0;
+		for (Object next : theObjects) {
+			if (next != null) {
+				count++;
+			}
+		}
+		if (count != 1) {
+			throw new InvalidRequestException(theMessage);
+		}
+	}
+
 }

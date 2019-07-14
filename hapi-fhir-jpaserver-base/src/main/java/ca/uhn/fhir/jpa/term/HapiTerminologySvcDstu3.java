@@ -297,5 +297,10 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		return null;
+	}
+
 
 }

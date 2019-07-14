@@ -446,6 +446,26 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testValidateUsingDifferentialProfile() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+		myStructureDefinitionDao.create(sd);
+
+		Patient p = new Patient();
+		p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		p.getText().getDiv().setValue("<div>hello</div>");
+		p.getMeta().addProfile("http://example.com/fhir/StructureDefinition/patient-1a-extensions");
+		p.setActive(true);
+
+		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("OO: {}", encoded);
+		assertThat(encoded, containsString("No issues detected"));
+	}
+
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

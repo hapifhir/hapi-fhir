@@ -279,6 +279,11 @@
 				Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of
 				the expungeEverything operation.
 			</action>
+			<action type="add">
+				The JPA server now has the ability to generate snapshot profiles from differential
+				profiles via the $snapshot operation, and will automatically generate a snapshot when
+				needed for validation.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

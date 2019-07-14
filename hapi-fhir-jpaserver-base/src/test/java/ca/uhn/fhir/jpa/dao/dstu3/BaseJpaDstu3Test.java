@@ -221,7 +221,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoDstu3")
-	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
 	@Qualifier("mySubscriptionDaoDstu3")
 	protected IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;

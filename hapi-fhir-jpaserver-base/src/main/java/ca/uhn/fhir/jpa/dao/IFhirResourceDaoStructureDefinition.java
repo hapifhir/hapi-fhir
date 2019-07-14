@@ -1,7 +1,6 @@
-package ca.uhn.fhir.jpa.dao.r4;
+package ca.uhn.fhir.jpa.dao;
 
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /*
  * #%L
@@ -23,6 +22,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
  * #L%
  */
 
-public interface IJpaValidationSupportR4 extends IValidationSupport {
-	// nothing yet
+public interface IFhirResourceDaoStructureDefinition<T extends IBaseResource> extends IFhirResourceDao<T> {
+
+	T generateSnapshot(T theInput, String theUrl, String theName);
+
 }

@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoStructureDefinition;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /*
  * #%L
@@ -23,6 +26,16 @@ import org.hl7.fhir.r4.model.StructureDefinition;
  * #L%
  */
 
-public interface IJpaValidationSupportR4 extends IValidationSupport {
-	// nothing yet
+public class FhirResourceDaoStructureDefinitionR4 extends FhirResourceDaoR4<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
+
+	@Autowired
+	private IValidationSupport myValidationSupport;
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		StructureDefinition output = myValidationSupport.generateSnapshot(theInput, theUrl, theName);
+		Validate.notNull(output);
+		return output;
+	}
+
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.dao;
 
 /*
  * #%L
@@ -10,7 +10,7 @@ package ca.uhn.fhir.jpa.util;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,10 +20,13 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
-/**
- * @deprecated Use {@link ca.uhn.fhir.util.StopWatch} instead
- */
-@Deprecated
-public class StopWatch extends ca.uhn.fhir.util.StopWatch {
-	// this just exists since existing code may depend on it
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+
+public class FhirResourceDaoStructureDefinitionDstu2 extends FhirResourceDaoDstu2<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		// FIXME: implement
+		return null;
+	}
+
 }

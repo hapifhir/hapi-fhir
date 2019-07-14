@@ -1,7 +1,4 @@
-package ca.uhn.fhir.jpa.dao.r4;
-
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.StructureDefinition;
+package ca.uhn.fhir.jpa.provider;
 
 /*
  * #%L
@@ -23,6 +20,10 @@ import org.hl7.fhir.r4.model.StructureDefinition;
  * #L%
  */
 
-public interface IJpaValidationSupportR4 extends IValidationSupport {
+import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
+
+public class BaseJpaResourceProviderStructureDefinitionDstu2 extends JpaResourceProviderDstu2<StructureDefinition> {
+
 	// nothing yet
+
 }

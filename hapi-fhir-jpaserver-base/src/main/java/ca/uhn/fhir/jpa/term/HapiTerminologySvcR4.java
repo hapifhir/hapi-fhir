@@ -225,6 +225,11 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		return null;
+	}
+
 	@CoverageIgnore
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {

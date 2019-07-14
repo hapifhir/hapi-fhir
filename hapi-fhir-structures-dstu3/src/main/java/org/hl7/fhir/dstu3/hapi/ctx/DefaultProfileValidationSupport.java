@@ -293,4 +293,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
+  @Override
+  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+    return null;
+  }
+
 }
