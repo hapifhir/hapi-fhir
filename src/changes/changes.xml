@@ -284,6 +284,11 @@
 				profiles via the $snapshot operation, and will automatically generate a snapshot when
 				needed for validation.
 			</action>
+			<action type="change">
+				The Base64Binary types for DSTU3+ now use a byte array internally to represent their
+				content, which is more efficient than storing base 64 encoded text to represent
+				the binary as was previously done.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
