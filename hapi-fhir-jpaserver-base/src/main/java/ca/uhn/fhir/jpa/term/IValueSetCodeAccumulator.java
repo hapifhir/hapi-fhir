@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.term;
 
 public interface IValueSetCodeAccumulator {
 
-	void addCode(String theSystem, String theCode, String theDisplay);
+	void includeCode(String theSystem, String theCode, String theDisplay);
+
+	void excludeCode(String theSystem, String theCode);
 
 }

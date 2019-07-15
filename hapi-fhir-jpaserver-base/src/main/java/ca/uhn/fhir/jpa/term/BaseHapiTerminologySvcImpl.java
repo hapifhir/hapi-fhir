@@ -196,12 +196,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void addCodeIfNotAlreadyAdded(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, AtomicInteger theCodeCounter, String theCodeSystem, String theCode, String theDisplay) {
 		if (isNotBlank(theCode) && theAdd && theAddedCodes.add(theCode)) {
-			theValueSetCodeAccumulator.addCode(theCodeSystem, theCode, theDisplay);
+			theValueSetCodeAccumulator.includeCode(theCodeSystem, theCode, theDisplay);
 			theCodeCounter.incrementAndGet();
 		}
 
 		if (!theAdd && theAddedCodes.remove(theCode)) {
-			// FIXME: DM 2019-07-10 - Remove code from accumulator!
+			theValueSetCodeAccumulator.excludeCode(theCodeSystem, theCode);
 			theCodeCounter.decrementAndGet();
 		}
 	}
@@ -224,10 +224,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private void addConceptsToList(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (theAdd && theAddedCodes.add(next.getCode())) {
-				theValueSetCodeAccumulator.addCode(theSystem, next.getCode(), next.getDisplay());
+				theValueSetCodeAccumulator.includeCode(theSystem, next.getCode(), next.getDisplay());
 			}
 			if (!theAdd && theAddedCodes.remove(next.getCode())) {
-				// FIXME: DM 2019-07-10 - Remove code from accumulator!
+				theValueSetCodeAccumulator.excludeCode(theSystem, next.getCode());
 			}
 			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
@@ -936,10 +936,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
 							if (code != null) {
 								if (theAdd && theAddedCodes.add(nextCode)) {
-									theValueSetCodeAccumulator.addCode(system, nextCode, code.getDisplay());
+									theValueSetCodeAccumulator.includeCode(system, nextCode, code.getDisplay());
 								}
 								if (!theAdd && theAddedCodes.remove(nextCode)) {
-									// FIXME: DM 2019-07-10 - Remove code from accumulator!
+									theValueSetCodeAccumulator.excludeCode(system, nextCode);
 								}
 							}
 						}
@@ -966,7 +966,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 					}
 					if (!theAdd && theAddedCodes.remove(nextConcept.getCode())) {
-						// FIXME: DM 2019-07-10 - Remove code from accumulator!
+						theValueSetCodeAccumulator.excludeCode(nextConcept.getSystem(), nextConcept.getCode());
 					}
 				}
 
@@ -1590,8 +1590,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 						TermConceptMapGroupElement termConceptMapGroupElement;
 						for (ConceptMap.SourceElementComponent element : group.getElement()) {
 							if (isBlank(element.getCode())) {
-								// FIXME: JA - send this to an interceptor message so it can be
-								// output
+								// FIXME: JA - send this to an interceptor message so it can be output
 								continue;
 							}
 							termConceptMapGroupElement = new TermConceptMapGroupElement();

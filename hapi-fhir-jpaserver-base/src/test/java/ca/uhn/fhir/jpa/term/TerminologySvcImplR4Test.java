@@ -270,7 +270,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).addCode(anyString(), anyString(), nullable(String.class));
+		verify(myValueSetCodeAccumulator, times(9)).includeCode(anyString(), anyString(), nullable(String.class));
 	}
 
 	@Test
