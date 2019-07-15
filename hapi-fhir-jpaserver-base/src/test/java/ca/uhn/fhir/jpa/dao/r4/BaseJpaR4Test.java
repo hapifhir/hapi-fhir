@@ -293,7 +293,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ITermValueSetDao myTermValueSetDao;
 	@Autowired
-	protected ITermValueSetCodeDao myTermValueSetCodeDao;
+	protected ITermValueSetConceptDao myTermValueSetCodeDao;
 	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired

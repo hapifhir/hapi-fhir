@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -22,8 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -270,7 +270,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeCode(anyString(), anyString(), nullable(String.class));
+		verify(myValueSetCodeAccumulator, times(9)).includeCodeWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
 	}
 
 	@Test
@@ -477,15 +477,15 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				ourLog.info("ValueSet:\n" + valueSet.toString());
 				assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", valueSet.getUrl());
 				assertEquals("Terminology Services Connectation #1 Extensional case #2", valueSet.getName());
-				assertEquals(codeSystem.getConcept().size(), valueSet.getCodes().size());
+				assertEquals(codeSystem.getConcept().size(), valueSet.getConcepts().size());
 
-				TermValueSetCode code = valueSet.getCodes().get(0);
+				TermValueSetConcept code = valueSet.getConcepts().get(0);
 				ourLog.info("Code:\n" + code.toString());
 				assertEquals("http://acme.org", code.getSystem());
 				assertEquals("8450-9", code.getCode());
 				assertEquals("Systolic blood pressure--expiration", code.getDisplay());
 
-				code = valueSet.getCodes().get(1);
+				code = valueSet.getConcepts().get(1);
 				ourLog.info("Code:\n" + code.toString());
 				assertEquals("http://acme.org", code.getSystem());
 				assertEquals("11378-7", code.getCode());
@@ -493,13 +493,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 				// ...
 
-				code = valueSet.getCodes().get(22);
+				code = valueSet.getConcepts().get(22);
 				ourLog.info("Code:\n" + code.toString());
 				assertEquals("http://acme.org", code.getSystem());
 				assertEquals("8491-3", code.getCode());
 				assertEquals("Systolic blood pressure 1 hour minimum", code.getDisplay());
 
-				code = valueSet.getCodes().get(23);
+				code = valueSet.getConcepts().get(23);
 				ourLog.info("Code:\n" + code.toString());
 				assertEquals("http://acme.org", code.getSystem());
 				assertEquals("8492-1", code.getCode());

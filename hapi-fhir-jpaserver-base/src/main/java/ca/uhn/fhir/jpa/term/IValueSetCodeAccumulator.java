@@ -20,9 +20,15 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+
+import java.util.Collection;
+
 public interface IValueSetCodeAccumulator {
 
 	void includeCode(String theSystem, String theCode, String theDisplay);
+
+	void includeCodeWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations);
 
 	void excludeCode(String theSystem, String theCode);
 
