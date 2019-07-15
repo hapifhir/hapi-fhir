@@ -29,6 +29,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -64,6 +66,9 @@ public class TermValueSetConcept implements Serializable {
 
 	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
+
+	@OneToMany(mappedBy = "myConcept")
+	private List<TermValueSetConceptDesignation> myDesignations;
 
 	public Long getId() {
 		return myId;
@@ -127,6 +132,14 @@ public class TermValueSetConcept implements Serializable {
 		return this;
 	}
 
+	public List<TermValueSetConceptDesignation> getDesignations() {
+		if (myDesignations == null) {
+			myDesignations = new ArrayList<>();
+		}
+
+		return myDesignations;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -161,6 +174,7 @@ public class TermValueSetConcept implements Serializable {
 			.append("mySystem", mySystem)
 			.append("myCode", myCode)
 			.append("myDisplay", myDisplay)
+			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
 	}
 }

@@ -120,7 +120,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Autowired
 	protected ITermValueSetDao myValueSetDao;
 	@Autowired
-	protected ITermValueSetConceptDao myValueSetCodeDao;
+	protected ITermValueSetConceptDao myValueSetConceptDao;
+	@Autowired
+	protected ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -384,12 +386,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
 
 			ourLog.info("Deleting existing TermValueSet {} and its children...", existingTermValueSet.getId());
-			myValueSetCodeDao.deleteTermValueSetConceptsByValueSetId(existingTermValueSet.getId());
+			myValueSetConceptDesignationDao.deleteTermValueSetConceptDesignationsByValueSetId(existingTermValueSet.getId());
+			myValueSetConceptDao.deleteTermValueSetConceptsByValueSetId(existingTermValueSet.getId());
 			myValueSetDao.deleteTermValueSetById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet {} and its children.", existingTermValueSet.getId());
 
 			ourLog.info("Flushing...");
-			myValueSetCodeDao.flush();
+			myValueSetConceptDesignationDao.flush();
+			myValueSetConceptDao.flush();
 			myValueSetDao.flush();
 			ourLog.info("Done flushing.");
 		}
@@ -1371,31 +1375,50 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl = myValueSetDao.findByUrl(url);
 		if (!optionalExistingTermValueSetByUrl.isPresent()) {
 			myValueSetDao.save(termValueSet);
-			int codesSaved = 0;
+			int conceptsSaved = 0;
+			int designationsSaved = 0;
 
 			// FIXME: DM 2019-07-15 - Here we should call expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator).
 			// FIXME: DM 2019-07-15 - We need an implementation IValueSetCodeAccumulator that saves ValueSetCode records.
 			ValueSet expandedValueSet = expandValueSet(theValueSet);
 			if (expandedValueSet.hasExpansion()) {
 				if (expandedValueSet.getExpansion().hasTotal() && expandedValueSet.getExpansion().getTotal() > 0) {
-					TermValueSetConcept code;
+					TermValueSetConcept concept;
 					for (ValueSet.ValueSetExpansionContainsComponent contains : expandedValueSet.getExpansion().getContains()) {
-						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getSystem(), "ValueSet contains a code with no system value");
-						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getCode(), "ValueSet contains a code with no code value");
+						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getSystem(), "ValueSet contains a concept with no system value");
+						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getCode(), "ValueSet contains a concept with no code value");
 
-						code = new TermValueSetConcept();
-						code.setValueSet(termValueSet);
-						code.setSystem(contains.getSystem());
-						code.setCode(contains.getCode());
-						code.setDisplay(contains.hasDisplay() ? contains.getDisplay() : null);
-						myValueSetCodeDao.save(code);
+						concept = new TermValueSetConcept();
+						concept.setValueSet(termValueSet);
+						concept.setSystem(contains.getSystem());
+						concept.setCode(contains.getCode());
+						concept.setDisplay(contains.hasDisplay() ? contains.getDisplay() : null);
+						myValueSetConceptDao.save(concept);
 
-						// FIXME: DM 2019-07-15 - We need TermValueSetConceptDesignation.
-						// FIXME: DM 2019-07-15 - Store designations (use and value, not language).
+						TermValueSetConceptDesignation designation;
+						for (ValueSet.ConceptReferenceDesignationComponent containedDesignation : contains.getDesignation()) {
+							ValidateUtil.isNotBlankOrThrowInvalidRequest(containedDesignation.getValue(), "ValueSet contains a concept designation with no value");
 
-						if (codesSaved++ % 250 == 0) {
-							ourLog.info("Have pre-expanded {} codes in ValueSet", codesSaved);
-							myValueSetCodeDao.flush();
+							designation = new TermValueSetConceptDesignation();
+							designation.setConcept(concept);
+							designation.setLanguage(containedDesignation.hasLanguage() ? containedDesignation.getLanguage() : null);
+							if (containedDesignation.hasUse()) {
+								designation.setUseSystem(containedDesignation.getUse().hasSystem() ? containedDesignation.getUse().getSystem() : null);
+								designation.setUseSystem(containedDesignation.getUse().hasCode() ? containedDesignation.getUse().getCode() : null);
+								designation.setUseSystem(containedDesignation.getUse().hasDisplay() ? containedDesignation.getUse().getDisplay() : null);
+							}
+							designation.setValue(containedDesignation.getValue());
+							myValueSetConceptDesignationDao.save(designation);
+
+							if (designationsSaved++ % 250 == 0) {
+								ourLog.info("Have pre-expanded {} designations in ValueSet", designationsSaved);
+								myValueSetConceptDesignationDao.flush();
+							}
+						}
+
+						if (conceptsSaved++ % 250 == 0) {
+							ourLog.info("Have pre-expanded {} concepts in ValueSet", conceptsSaved);
+							myValueSetConceptDao.flush();
 						}
 					}
 				}

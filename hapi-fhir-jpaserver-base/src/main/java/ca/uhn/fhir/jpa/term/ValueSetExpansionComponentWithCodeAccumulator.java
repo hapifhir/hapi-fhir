@@ -45,6 +45,7 @@ public class ValueSetExpansionComponentWithCodeAccumulator extends ValueSet.Valu
 				contains
 					.addDesignation()
 					.setValue(termConceptDesignation.getValue())
+					.setLanguage(termConceptDesignation.getLanguage()) // FIXME: DM 2019-07-15 - Add this to changelog.
 					.getUse()
 					.setSystem(termConceptDesignation.getUseSystem())
 					.setCode(termConceptDesignation.getUseCode())

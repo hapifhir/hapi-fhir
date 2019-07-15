@@ -451,6 +451,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		});
 	}
 
+	// FIXME: DM 2019-07-15 - Assert designations in this test!
 	@Test
 	public void testStoreTermValueSetAndChildren() throws Exception {
 		myDaoConfig.setPreExpandValueSetsExperimental(true);
