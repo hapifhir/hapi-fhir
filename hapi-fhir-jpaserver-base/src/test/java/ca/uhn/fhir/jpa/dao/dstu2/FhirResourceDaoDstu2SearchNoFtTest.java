@@ -750,10 +750,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";
 
-		int sleep = 100;
-		Thread.sleep(sleep);
-
 		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		TestUtil.sleepOneClick();
+
 		IIdType id1a;
 		{
 			Patient patient = new Patient();
@@ -769,9 +768,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 
 		IIdType id2;
 		{

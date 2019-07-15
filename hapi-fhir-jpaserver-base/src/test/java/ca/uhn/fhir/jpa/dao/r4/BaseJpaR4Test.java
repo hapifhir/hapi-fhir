@@ -255,7 +255,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR4")
-	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
 	@Qualifier("myConsentDaoR4")
 	protected IFhirResourceDao<Consent> myConsentDao;

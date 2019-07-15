@@ -540,6 +540,10 @@
 	</licenses>
 
 	<properties>
+
+		<fhir_core_version>3.8.12-SNAPSHOT</fhir_core_version>
+		<ucum_version>1.0.2</ucum_version>
+
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
 
@@ -697,6 +701,11 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava-testlib</artifactId>
 				<version>${guava_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>1.4.199</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger</groupId>
@@ -871,7 +880,7 @@
 			<dependency>
 				<groupId>mysql</groupId>
 				<artifactId>mysql-connector-java</artifactId>
-				<version>8.0.12</version>
+				<version>8.0.16</version>
 			</dependency>
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
@@ -1023,6 +1032,25 @@
 				<version>2.0</version>
 			</dependency>
 			<dependency>
+				<groupId>org.awaitility</groupId>
+				<artifactId>awaitility</artifactId>
+				<version>3.1.6</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>java-hamcrest</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-library</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-compiler-api</artifactId>
 				<version>${plexus_compiler_api_version}</version>
@@ -1116,6 +1144,11 @@
 				<groupId>org.eclipse.jetty.websocket</groupId>
 				<artifactId>websocket-server</artifactId>
 				<version>${jetty_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.fhir</groupId>
+				<artifactId>ucum</artifactId>
+				<version>${ucum_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.fusesource.jansi</groupId>
@@ -1408,8 +1441,8 @@
 				</plugin>
 				<plugin>
 					<groupId>de.jpdigital</groupId>
-					<artifactId>hibernate52-ddl-maven-plugin</artifactId>
-					<version>2.2.0</version>
+					<artifactId>hibernate54-ddl-maven-plugin</artifactId>
+					<version>2.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1788,23 +1821,6 @@
 									</message>
 								</requireJavaVersion>
 							</rules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<inherited>false</inherited>
-				<executions>
-					<execution>
-						<id>update-project-license</id>
-						<phase>package</phase>
-						<goals>
-							<goal>update-project-license</goal>
-						</goals>
-						<configuration>
-							<licenseName>apache_v2</licenseName>
 						</configuration>
 					</execution>
 				</executions>
@@ -2196,9 +2212,27 @@
 	<profiles>
 		<profile>
 			<id>DIST</id>
-			<modules>
-				<!--<module>hapi-fhir-osgi-core</module>-->
-			</modules>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>license-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<executions>
+							<execution>
+								<id>update-project-license</id>
+								<phase>package</phase>
+								<goals>
+									<goal>update-project-license</goal>
+								</goals>
+								<configuration>
+									<licenseName>apache_v2</licenseName>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>ROOT</id>
@@ -2287,11 +2321,11 @@
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
 				<module>hapi-fhir-test-utilities</module>
-				<module>hapi-fhir-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
+				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-validation</module>
 				<!--<module>hapi-fhir-narrativegenerator</module>-->
 				<module>hapi-fhir-structures-dstu2</module>
@@ -2317,7 +2351,6 @@
 				<module>hapi-fhir-jpaserver-uhnfhirtest</module>
 				<module>hapi-fhir-client-okhttp</module>
 				<module>hapi-fhir-android</module>
-				<module>hapi-fhir-converter</module>
 				<module>hapi-fhir-cli</module>
 				<module>hapi-fhir-dist</module>
 				<module>examples</module>

@@ -2,7 +2,7 @@ package ca.uhn.fhir.model;
 
 import static org.junit.Assert.assertEquals;
 
-import org.hl7.fhir.instance.model.Narrative;
+import org.hl7.fhir.dstu2.model.Narrative;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.Ignore;
 import org.junit.Test;

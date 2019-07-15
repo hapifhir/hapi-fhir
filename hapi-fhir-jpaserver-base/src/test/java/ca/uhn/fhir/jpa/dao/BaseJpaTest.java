@@ -77,6 +77,7 @@ public abstract class BaseJpaTest {
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
 		System.setProperty("test", "true");
+		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
 	@Rule
@@ -391,7 +392,7 @@ public abstract class BaseJpaTest {
 
 		for (int count = 0; ; count++) {
 			try {
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {

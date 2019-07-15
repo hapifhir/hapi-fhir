@@ -43,6 +43,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.InstantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -376,7 +377,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), newLow);
+		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
 		return counter.get();
 	}
 

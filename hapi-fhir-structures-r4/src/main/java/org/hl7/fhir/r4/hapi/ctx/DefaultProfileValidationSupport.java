@@ -174,6 +174,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
   }
 
+  @Override
+  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+    return null;
+  }
+
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {
     ourLog.info("Loading CodeSystem/ValueSet from classpath: {}", theClasspath);
     InputStream inputStream = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);

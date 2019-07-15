@@ -22,11 +22,9 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Bundle.SearchEntryMode;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Bundle.SearchEntryMode;
+import org.junit.*;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;

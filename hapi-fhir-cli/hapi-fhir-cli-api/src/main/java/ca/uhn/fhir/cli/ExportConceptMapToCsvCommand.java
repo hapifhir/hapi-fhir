@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,9 +121,10 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	}
 
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
-		ourLog.info("Exporting ConceptMap to CSV...");
+		Path path = Paths.get(file);
+		ourLog.info("Exporting ConceptMap to CSV: {}", path);
 		try (
-			Writer writer = Files.newBufferedWriter(Paths.get(file));
+			Writer writer = Files.newBufferedWriter(path);
 			CSVPrinter csvPrinter = new CSVPrinter(
 				writer,
 				CSVFormat

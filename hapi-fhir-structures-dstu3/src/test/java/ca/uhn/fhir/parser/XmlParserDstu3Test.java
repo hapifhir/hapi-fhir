@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -68,6 +69,35 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	/**
+	 * We specifically include extensions on CapabilityStatment even in
+	 * summary mode, since this is behaviour that people depend on
+	 */
+	@Test
+	public void testEncodeSummaryCapabilityStatementExtensions() {
+
+		CapabilityStatement cs = new CapabilityStatement();
+		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
+		rest.setMode(CapabilityStatement.RestfulCapabilityMode.CLIENT);
+		rest.getSecurity()
+			.addExtension()
+			.setUrl("http://foo")
+			.setValue(new StringType("bar"));
+
+		cs.getVersionElement().addExtension()
+			.setUrl("http://goo")
+			.setValue(new StringType("ber"));
+
+		String encoded = ourCtx.newXmlParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
+		ourLog.info(encoded);
+
+		assertThat(encoded, Matchers.containsString("http://foo"));
+		assertThat(encoded, Matchers.containsString("bar"));
+		assertThat(encoded, Matchers.containsString("http://goo"));
+		assertThat(encoded, Matchers.containsString("ber"));
+	}
+
 
 	@Test
 	public void testEncodeInvalidMetaTime() {

@@ -210,6 +210,12 @@
 			<artifactId>spring-web</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-test-utilities</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

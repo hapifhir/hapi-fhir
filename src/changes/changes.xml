@@ -266,6 +266,24 @@
 				A new server interceptor hook called PROCESSING_COMPLETED has been added. This
 				hook is called by the server at the end of processing every request (success and failure).
 			</action>
+			<action type="fix">
+				The <![CDATA[<code>_summary</code>]]> element was not always respected when encoding
+				JSON resources.
+			</action>
+			<action type="change">
+				The JPA server now uses the H2 database instead of the derby database to run its 
+				unit tests. We are hoping that this cuts down on the number of false test failures 
+				we get due to mysterious derby failures.
+			</action>
+			<action type="add">
+				Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of
+				the expungeEverything operation.
+			</action>
+			<action type="add">
+				The JPA server now has the ability to generate snapshot profiles from differential
+				profiles via the $snapshot operation, and will automatically generate a snapshot when
+				needed for validation.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
@@ -510,6 +528,10 @@
 			<action type="add" issue="1303">
 				The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour.
 				Thanks to Anders Havn for the pull request!
+			</action>
+			<action type="add" issue="1179">
+				The DSTU2/3 version converter now converts Specimen resources. Thanks to Gary
+				Graham for the pull request!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

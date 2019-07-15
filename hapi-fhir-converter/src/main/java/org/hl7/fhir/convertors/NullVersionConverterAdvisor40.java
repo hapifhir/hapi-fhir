@@ -21,7 +21,7 @@ package org.hl7.fhir.convertors;
  */
 
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.Resource;
+import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -30,6 +30,11 @@ public class NullVersionConverterAdvisor40 implements VersionConvertorAdvisor40 
 
 	@Override
 	public Resource convertR2(org.hl7.fhir.r4.model.Resource resource) throws FHIRException {
+		return null;
+	}
+
+	@Override
+	public org.hl7.fhir.dstu2016may.model.Resource convertR2016May(org.hl7.fhir.r4.model.Resource theResource) throws FHIRException {
 		return null;
 	}
 

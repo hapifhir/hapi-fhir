@@ -182,7 +182,12 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
     return false;
   }
 
-  @Override
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		return null;
+	}
+
+	@Override
   public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
     return null;
   }

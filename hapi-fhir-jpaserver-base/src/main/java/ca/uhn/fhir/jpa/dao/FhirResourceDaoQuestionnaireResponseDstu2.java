@@ -61,7 +61,7 @@ public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDs
 	@PostConstruct
 	public void initialize() {
 		try {
-			Class.forName("org.hl7.fhir.instance.model.QuestionnaireResponse");
+			Class.forName("org.hl7.fhir.dstu2.model.QuestionnaireResponse");
 			myValidateResponses = true;
 		} catch (ClassNotFoundException e) {
 			myValidateResponses = Boolean.FALSE;

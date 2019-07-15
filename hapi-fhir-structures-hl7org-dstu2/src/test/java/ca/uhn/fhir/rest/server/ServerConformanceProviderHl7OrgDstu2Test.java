@@ -16,9 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import org.hl7.fhir.instance.conf.ServerConformanceProvider;
-import org.hl7.fhir.instance.model.*;
-import org.hl7.fhir.instance.model.Conformance.*;
+import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
+import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.dstu2.model.Conformance.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.Test;
 

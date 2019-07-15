@@ -31,13 +31,10 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import javax.persistence.PersistenceException;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
@@ -73,13 +70,16 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 
 		if (theException instanceof ConstraintViolationException) {
 			String constraintName = ((ConstraintViolationException) theException).getConstraintName();
-			switch (defaultString(constraintName)) {
-				case ResourceHistoryTable.IDX_RESVER_ID_VER:
+			if (isNotBlank(constraintName)) {
+				if (constraintName.contains(ResourceHistoryTable.IDX_RESVER_ID_VER)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceVersionConstraintFailure"));
-				case ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING:
+				}
+				if (constraintName.contains(ResourceIndexedCompositeStringUnique.IDX_IDXCMPSTRUNIQ_STRING)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "resourceIndexedCompositeStringUniqueConstraintFailure"));
-				case ForcedId.IDX_FORCEDID_TYPE_FID:
+				}
+				if (constraintName.contains(ForcedId.IDX_FORCEDID_TYPE_FID)) {
 					throw new ResourceVersionConflictException(messageToPrepend + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, "forcedIdConstraintFailure"));
+				}
 			}
 		}
 

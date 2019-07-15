@@ -78,6 +78,11 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			case ORACLE_12C:
 				sql = "ALTER TABLE " + getTableName() + " RENAME COLUMN " + myOldName + " TO " + myNewName;
 				break;
+			case H2_EMBEDDED:
+				sql = "ALTER TABLE " + getTableName() + " ALTER COLUMN " + myOldName + " RENAME TO " + myNewName;
+				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 		ourLog.info("Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);

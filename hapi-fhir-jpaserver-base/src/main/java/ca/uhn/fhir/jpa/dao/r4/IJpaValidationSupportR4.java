@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.model.StructureDefinition;
 
 /*
  * #%L
@@ -23,5 +24,5 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
  */
 
 public interface IJpaValidationSupportR4 extends IValidationSupport {
-
+	// nothing yet
 }

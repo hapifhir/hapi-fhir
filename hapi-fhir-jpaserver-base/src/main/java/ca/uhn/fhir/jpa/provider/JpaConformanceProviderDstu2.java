@@ -48,7 +48,7 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

@@ -78,7 +78,11 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	public Date getThresholdLow() {
-		return myThresholdLow;
+		Date retVal = myThresholdLow;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 	/**
@@ -100,7 +104,11 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	public Date getThresholdHigh() {
-		return myThresholdHigh;
+		Date retVal = myThresholdHigh;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 	/**

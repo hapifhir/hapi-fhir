@@ -128,7 +128,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-				return null;
+				// Don't allow the core FHIR definitions to be overwritten
+				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (myDstu3Ctx.getElementDefinition(typeName) != null) {
+					return null;
+				}
 			}
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
@@ -186,6 +190,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
 		return null;
 	}
 

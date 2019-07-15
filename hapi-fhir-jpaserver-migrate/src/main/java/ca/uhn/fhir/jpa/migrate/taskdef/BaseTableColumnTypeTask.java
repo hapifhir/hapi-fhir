@@ -39,6 +39,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	 * Constructor
 	 */
 	BaseTableColumnTypeTask() {
+		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.H2_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.DERBY_EMBEDDED, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MARIADB_10_1, "integer");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.MYSQL_5_7, "integer");
@@ -46,6 +47,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.ORACLE_12C, "number(10,0)");
 		setColumnType(ColumnTypeEnum.INT, DriverTypeEnum.POSTGRES_9_4, "int4");
 
+		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.H2_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.DERBY_EMBEDDED, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MARIADB_10_1, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.MYSQL_5_7, "float");
@@ -53,6 +55,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.ORACLE_12C, "float");
 		setColumnType(ColumnTypeEnum.FLOAT, DriverTypeEnum.POSTGRES_9_4, "float");
 
+		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.H2_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.DERBY_EMBEDDED, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MARIADB_10_1, "bigint");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.MYSQL_5_7, "bigint");
@@ -60,6 +63,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.ORACLE_12C, "number(19,0)");
 		setColumnType(ColumnTypeEnum.LONG, DriverTypeEnum.POSTGRES_9_4, "int8");
 
+		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.H2_EMBEDDED, "varchar(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.DERBY_EMBEDDED, "varchar(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.MARIADB_10_1, "varchar(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.MYSQL_5_7, "varchar(?)");
@@ -67,6 +71,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.ORACLE_12C, "varchar2(?)");
 		setColumnType(ColumnTypeEnum.STRING, DriverTypeEnum.POSTGRES_9_4, "varchar(?)");
 
+		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.H2_EMBEDDED, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.DERBY_EMBEDDED, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MARIADB_10_1, "datetime(6)");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.MYSQL_5_7, "datetime(6)");
@@ -74,6 +79,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.ORACLE_12C, "timestamp");
 		setColumnType(ColumnTypeEnum.DATE_TIMESTAMP, DriverTypeEnum.POSTGRES_9_4, "timestamp");
 
+		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.H2_EMBEDDED, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.DERBY_EMBEDDED, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MSSQL_2012, "bit");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MARIADB_10_1, "bit");
@@ -102,7 +108,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		Validate.notNull(myNullable);
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
-			Validate.notNull(myColumnLength);
+			Validate.notNull(myColumnLength, "No length specified for " + ColumnTypeEnum.STRING + " column {}.", getColumnName());
 		} else {
 			Validate.isTrue(myColumnLength == null);
 		}

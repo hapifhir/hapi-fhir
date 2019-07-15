@@ -96,6 +96,11 @@ public class LoadingValidationSupportDstu3 implements IValidationSupport {
 	}
 
 	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		return null;
+	}
+
+	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		return Collections.emptyList();
 	}

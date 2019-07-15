@@ -3,8 +3,8 @@ package ca.uhn.fhir.model;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.Patient.PatientCommunicationComponent;
+import org.hl7.fhir.dstu2.model.BackboneElement;
+import org.hl7.fhir.dstu2.model.Patient.PatientCommunicationComponent;
 import org.junit.Test;
 
 public class BackboneElementHL7_Dstu2Test {

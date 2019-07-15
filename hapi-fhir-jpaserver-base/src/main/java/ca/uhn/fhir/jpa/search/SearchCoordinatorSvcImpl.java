@@ -410,6 +410,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					PersistedJpaBundleProvider retVal = null;
 					if (searchToUse != null) {
 						ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
+
+						// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
+						params = new HookParams()
+							.add(SearchParameterMap.class, theParams)
+							.add(RequestDetails.class, theRequestDetails)
+							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+
 						searchToUse.setSearchLastReturned(new Date());
 						mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
 
