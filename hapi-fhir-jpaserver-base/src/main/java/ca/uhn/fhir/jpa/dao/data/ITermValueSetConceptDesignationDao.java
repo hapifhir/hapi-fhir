@@ -20,16 +20,16 @@ package ca.uhn.fhir.jpa.dao.data;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermValueSetCode;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ITermValueSetCodeDao extends JpaRepository<TermValueSetCode, Long> {
+public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long> {
 
-	@Query("DELETE FROM TermValueSetCode vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myValueSet.myId = :pid")
 	@Modifying
-	void deleteTermValueSetCodesByValueSetId(@Param("pid") Long theValueSetId);
+	void deleteTermValueSetConceptDesignationsByValueSetId(@Param("pid") Long theValueSetId);
 
 }
