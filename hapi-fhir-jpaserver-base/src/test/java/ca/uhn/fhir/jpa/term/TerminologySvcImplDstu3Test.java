@@ -76,6 +76,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
 		childAAB.addDesignation()
+			.setLanguage("D1L")
 			.setUseSystem("D1S")
 			.setUseCode("D1C")
 			.setUseDisplay("D1D")
@@ -546,6 +547,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("childAAB", concept.getCode());
 		assertEquals("http://example.com/my_code_system", concept.getSystem());
 		assertEquals(null, concept.getDisplay());
+		assertEquals("D1L", concept.getDesignation().get(0).getLanguage());
 		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
 		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
 		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
