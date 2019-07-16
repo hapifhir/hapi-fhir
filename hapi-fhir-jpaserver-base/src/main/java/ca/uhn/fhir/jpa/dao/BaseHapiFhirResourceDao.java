@@ -461,6 +461,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// the correct version
 		updateResourceMetadata(entity, theResource);
 
+		// Populate the PID in the resource so it is available to hooks
+		if (theResource instanceof IAnyResource) {
+			IDao.RESOURCE_PID.put((IAnyResource)theResource, entity.getId());
+		}
+
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
