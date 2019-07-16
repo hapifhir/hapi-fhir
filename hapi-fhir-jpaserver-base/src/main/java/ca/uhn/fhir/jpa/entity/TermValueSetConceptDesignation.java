@@ -33,12 +33,14 @@ import java.io.Serializable;
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_C_DESIGNATION")
+@Table(name = "TRM_VALUESET_C_DESIGNATION", indexes = {
+	@Index(name = "IDX_VALUESET_C_DSGNTN_VAL", columnList = "VAL")
+})
 @Entity()
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_LENGTH = 500;
+	public static final int MAX_LENGTH = 500;
 
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")

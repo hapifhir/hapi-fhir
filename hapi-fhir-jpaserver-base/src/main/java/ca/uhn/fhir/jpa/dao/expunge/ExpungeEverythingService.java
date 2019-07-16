@@ -96,6 +96,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceLink.class));
 		counter.addAndGet(expungeEverythingByType(SearchResult.class));
 		counter.addAndGet(expungeEverythingByType(SearchInclude.class));
+		counter.addAndGet(expungeEverythingByType(TermValueSetConceptDesignation.class));
 		counter.addAndGet(expungeEverythingByType(TermValueSetConcept.class));
 		counter.addAndGet(expungeEverythingByType(TermValueSet.class));
 		counter.addAndGet(expungeEverythingByType(TermConceptParentChildLink.class));

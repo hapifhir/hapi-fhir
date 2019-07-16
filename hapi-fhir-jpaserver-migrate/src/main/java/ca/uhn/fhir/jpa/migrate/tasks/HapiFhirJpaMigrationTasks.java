@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -99,20 +100,40 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermValueSetConcept
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
 		version.addIdGenerator("SEQ_VALUESET_CONCEPT_PID");
-		Builder.BuilderAddTableByColumns termValueSetCodeTable = version.addTableByColumns("TRM_VALUESET_CONCEPT", "PID");
-		termValueSetCodeTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetCodeTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetCodeTable
+		Builder.BuilderAddTableByColumns termValueSetConceptTable = version.addTableByColumns("TRM_VALUESET_CONCEPT", "PID");
+		termValueSetConceptTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptTable
 			.addForeignKey("FK_TRM_VALUESET_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
-		termValueSetCodeTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
-		termValueSetCodeTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
-		termValueSetCodeTable
+		termValueSetConceptTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
+		termValueSetConceptTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
+		termValueSetConceptTable
 			.addIndex("IDX_VALUESET_CONCEPT_CS_CD")
 			.unique(false)
 			.withColumns("SYSTEM", "CODE");
-		termValueSetCodeTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+
+		// TermValueSetConceptDesignation
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
+		version.addIdGenerator("SEQ_VALUESET_C_DSGNTN_PID");
+		Builder.BuilderAddTableByColumns termValueSetConceptDesignationTable = version.addTableByColumns("TRM_VALUESET_C_DESIGNATION", "PID");
+		termValueSetConceptDesignationTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable.addColumn("VALUESET_CONCEPT_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable
+			.addForeignKey("FK_TRM_VALUESET_CONCEPT_PID")
+			.toColumn("VALUESET_CONCEPT_PID")
+			.references("TRM_VALUESET_CONCEPT", "PID");
+		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable
+			.addIndex("IDX_VALUESET_C_DSGNTN_VAL")
+			.unique(false)
+			.withColumns("VAL");
 	}
 
 

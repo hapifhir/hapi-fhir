@@ -1134,7 +1134,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
 
 		/*
-		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
+		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
 		 */
 
 		ourLog.info("Deleting old code system versions");
@@ -1379,7 +1379,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			int designationsSaved = 0;
 
 			// FIXME: DM 2019-07-15 - Here we should call expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator).
-			// FIXME: DM 2019-07-15 - We need an implementation IValueSetCodeAccumulator that saves ValueSetCode records.
+			// FIXME: DM 2019-07-15 - We need an implementation IValueSetCodeAccumulator that saves ValueSetConcept records and their children.
 			ValueSet expandedValueSet = expandValueSet(theValueSet);
 			if (expandedValueSet.hasExpansion()) {
 				if (expandedValueSet.getExpansion().hasTotal() && expandedValueSet.getExpansion().getTotal() > 0) {
@@ -1404,8 +1404,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 							designation.setLanguage(containedDesignation.hasLanguage() ? containedDesignation.getLanguage() : null);
 							if (containedDesignation.hasUse()) {
 								designation.setUseSystem(containedDesignation.getUse().hasSystem() ? containedDesignation.getUse().getSystem() : null);
-								designation.setUseSystem(containedDesignation.getUse().hasCode() ? containedDesignation.getUse().getCode() : null);
-								designation.setUseSystem(containedDesignation.getUse().hasDisplay() ? containedDesignation.getUse().getDisplay() : null);
+								designation.setUseCode(containedDesignation.getUse().hasCode() ? containedDesignation.getUse().getCode() : null);
+								designation.setUseDisplay(containedDesignation.getUse().hasDisplay() ? containedDesignation.getUse().getDisplay() : null);
 							}
 							designation.setValue(containedDesignation.getValue());
 							myValueSetConceptDesignationDao.save(designation);
@@ -1415,6 +1415,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 								myValueSetConceptDesignationDao.flush();
 							}
 						}
+
+						// TODO: DM 2019-07-16 - We need TermValueSetConceptProperty, similar to TermConceptProperty.
+						// TODO: DM 2019-07-16 - We should also populate TermValueSetConceptProperty entities here.
 
 						if (conceptsSaved++ % 250 == 0) {
 							ourLog.info("Have pre-expanded {} concepts in ValueSet", conceptsSaved);

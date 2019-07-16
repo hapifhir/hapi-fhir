@@ -130,6 +130,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
 	@Autowired
+	protected ITermConceptDesignationDao myTermConceptDesignationDao;
+	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
 	@Autowired
