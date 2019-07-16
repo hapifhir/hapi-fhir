@@ -284,13 +284,12 @@
 				profiles via the $snapshot operation, and will automatically generate a snapshot when
 				needed for validation.
 			</action>
-			<action type="fix">
-				Creating/updating CodeSystems did not persist <![CDATA[<code>CodeSystem.concept.designation</code>]]> to
-				the terminology tables. This has been corrected.
+			<action type="add">
+				Creating/updating CodeSystems now persist <![CDATA[<code>CodeSystem.concept.designation</code>]]> to
+				the terminology tables.
 			</action>
-			<action type="fix">
-				Expanded ValueSets did not populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
-				This has been corrected.
+			<action type="add">
+				Expanded ValueSets now populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
