@@ -79,6 +79,31 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSTORAGE_PRECOMMIT_RESOURCE_UPDATED_hasPid() {
+		AtomicLong oldPid = new AtomicLong();
+		AtomicLong newPid = new AtomicLong();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, (thePointcut, t) -> {
+
+			IAnyResource oldResource = (IAnyResource) t.get(IBaseResource.class, 0);
+			Long oldResourcePid = (Long) oldResource.getUserData("RESOURCE_PID");
+			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", oldResourcePid);
+			oldPid.set(oldResourcePid);
+
+			IAnyResource newResource = (IAnyResource) t.get(IBaseResource.class, 1);
+			Long newResourcePid = (Long) newResource.getUserData("RESOURCE_PID");
+			assertNotNull("Expecting RESOURCE_PID to be set on resource user data.", newResourcePid);
+			newPid.set(newResourcePid);
+		});
+		Patient patient = new Patient();
+		IIdType id = ourClient.create().resource(patient).execute().getId();
+		patient.setId(id);
+		patient.getNameFirstRep().setFamily("SOMECHANGE");
+		ourClient.update().resource(patient).execute();
+		assertTrue(oldPid.get() > 0);
+		assertTrue(newPid.get() > 0);
+	}
+
+	@Test
 	public void testOP_PRESTORAGE_RESOURCE_UPDATED_ModifyResource() {
 		Patient p = new Patient();
 		p.setActive(true);

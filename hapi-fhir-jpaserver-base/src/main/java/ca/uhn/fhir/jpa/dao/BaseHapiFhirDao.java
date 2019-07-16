@@ -1216,6 +1216,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// Update version/lastUpdated so that interceptors see the correct version
 		updateResourceMetadata(savedEntity, theResource);
 
+		// Populate the PID in the resource so it is available to hooks
+		addPidToResource(savedEntity, theResource);
+
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -1232,6 +1235,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		return savedEntity;
+	}
+
+	protected void addPidToResource(ResourceTable theEntity, IBaseResource theResource) {
+		if (theResource instanceof IAnyResource) {
+			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getId());
+		}
 	}
 
 	protected void doCallHooks(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {

@@ -462,9 +462,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		updateResourceMetadata(entity, theResource);
 
 		// Populate the PID in the resource so it is available to hooks
-		if (theResource instanceof IAnyResource) {
-			IDao.RESOURCE_PID.put((IAnyResource)theResource, entity.getId());
-		}
+		addPidToResource(entity, theResource);
 
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
