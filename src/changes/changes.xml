@@ -289,8 +289,8 @@
 				the terminology tables. This has been corrected.
 			</action>
 			<action type="fix">
-				Expanded ValueSets did not <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>. This
-				has been corrected.
+				Expanded ValueSets did not populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
+				This has been corrected.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
