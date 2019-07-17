@@ -211,6 +211,8 @@ public class Constants {
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
 	public static final String HEADER_CASCADE = "X-Cascade";
 	public static final String CASCADE_DELETE = "delete";
+	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
+	public static final String CACHE_CONTROL_PRIVATE = "private";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

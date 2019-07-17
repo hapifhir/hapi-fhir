@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -131,4 +132,10 @@ public abstract class BasePrimitive<T> extends BaseIdentifiableElement implement
 	public void writeExternal(ObjectOutput theOut) throws IOException {
 		theOut.writeObject(getValueAsString());
 	}
+
+	@Override
+	public boolean hasValue() {
+		return !StringUtils.isBlank(getValueAsString());
+	}
+
 }

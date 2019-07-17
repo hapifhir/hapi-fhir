@@ -89,6 +89,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			myMethodReturnType = MethodReturnTypeEnum.BUNDLE_PROVIDER;
 		} else if (MethodOutcome.class.isAssignableFrom(methodReturnType)) {
 			myMethodReturnType = MethodReturnTypeEnum.METHOD_OUTCOME;
+		} else if (void.class.equals(methodReturnType)) {
+			myMethodReturnType = MethodReturnTypeEnum.VOID;
 		} else {
 			throw new ConfigurationException(
 				"Invalid return type '" + methodReturnType.getCanonicalName() + "' on method '" + theMethod.getName() + "' on type: " + theMethod.getDeclaringClass().getCanonicalName());
@@ -238,9 +240,10 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		Object[] params = createMethodParams(theRequest);
 
-
-
 		Object resultObj = invokeServer(theServer, theRequest, params);
+		if (resultObj == null) {
+			return null;
+		}
 
 		Integer count = RestfulServerUtils.extractCountParameter(theRequest);
 
@@ -375,6 +378,9 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 	public Object invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) throws BaseServerResponseException, IOException {
 
 		IBaseResource response = doInvokeServer(theServer, theRequest);
+		if (response == null) {
+			return null;
+		}
 
 		Set<SummaryEnum> summaryMode = RestfulServerUtils.determineSummaryMode(theRequest);
 
@@ -407,6 +413,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		BUNDLE_RESOURCE,
 		LIST_OF_RESOURCES,
 		METHOD_OUTCOME,
+		VOID,
 		RESOURCE
 	}
 

@@ -210,7 +210,9 @@ public class OperationParameter implements IParameter {
 	public Object translateQueryParametersIntoServerArgument(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding) throws InternalErrorException, InvalidRequestException {
 		List<Object> matchingParamValues = new ArrayList<Object>();
 
-		if (theRequest.getRequestType() == RequestTypeEnum.GET) {
+		OperationMethodBinding method = (OperationMethodBinding) theMethodBinding;
+
+		if (theRequest.getRequestType() == RequestTypeEnum.GET || method.isManualRequestMode()) {
 			translateQueryParametersIntoServerArgumentForGet(theRequest, matchingParamValues);
 		} else {
 			translateQueryParametersIntoServerArgumentForPost(theRequest, matchingParamValues);

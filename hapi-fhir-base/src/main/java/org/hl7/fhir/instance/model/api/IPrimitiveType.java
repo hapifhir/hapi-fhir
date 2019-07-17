@@ -29,6 +29,8 @@ public interface IPrimitiveType<T> extends IBaseDatatype {
 	String getValueAsString();
 
 	T getValue();
+
+	boolean hasValue();
 	
 	IPrimitiveType<T> setValue(T theValue) throws IllegalArgumentException;
 	

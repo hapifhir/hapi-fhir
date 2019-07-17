@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -63,7 +64,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE")
+	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@Column(name = "RES_VERSION")
@@ -96,7 +97,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "forced_pid")
+	@Column(name = "forced_pid", length= ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 
 	public ResourceSearchView() {

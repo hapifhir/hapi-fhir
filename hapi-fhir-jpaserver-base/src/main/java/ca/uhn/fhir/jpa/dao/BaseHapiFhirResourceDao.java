@@ -561,7 +561,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions ,theRequest);
+		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions, theRequest);
 	}
 
 	@Override
@@ -851,6 +851,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
+
 	}
 
 	@Override

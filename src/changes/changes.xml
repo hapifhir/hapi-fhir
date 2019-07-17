@@ -296,6 +296,26 @@
 			<action type="add">
 				Expanded ValueSets now populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
 			</action>
+			<action type="add">
+				@Operation methods can now declare that they will manually process the request
+				body and/or manually generate a response instead of letting the HAPI FHIR
+				framework take care of these things. This is useful for situations where
+				direct access to the low-level servlet streaming API is needed.
+			</action>
+			<action type="add">
+				@Operation methods can now declare that they are global, meaning that they will
+				apply to all resource types (or instances of all resource types) if they
+				are found on a plain provider.
+			</action>
+			<action type="add">
+				A new resource provider for JPA servers called
+				<![CDATA[<code>BinaryAccessProvider</code>]]>
+				has been added. This provider serves two custom operations called
+				<![CDATA[<code>$binary-access-read</code>]]> and
+				<![CDATA[<code>$binary-access-write</code>]]> that can be used to
+				request binary data in Attachments as raw binary content instead of
+				as base 64 encoded content.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
