@@ -20,9 +20,15 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,20 +37,21 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import javax.persistence.Id;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Scope("prototype")
-public class ExpungeRun implements Callable<ExpungeOutcome> {
+public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
 	private PartitionRunner myPartitionRunner;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -53,7 +60,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
 
-	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
 		myResourceId = theResourceId;
 		myVersion = theVersion;
@@ -64,6 +71,15 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 
 	@Override
 	public ExpungeOutcome call() {
+		final IdDt id;
+
+		callHooks();
+
+		if (expungeLimitReached()) {
+			return expungeOutcome();
+		}
+
+
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
 			expungeDeletedResources();
 			if (expungeLimitReached()) {
@@ -79,6 +95,30 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 		}
 
 		return expungeOutcome();
+	}
+
+	private void callHooks() {
+		final AtomicInteger counter = new AtomicInteger();
+
+		if (myResourceId == null) {
+			return;
+		}
+		IdDt id;
+		if (myVersion == null) {
+			id = new IdDt(myResourceName, myResourceId);
+		} else {
+			id = new IdDt(myResourceName, myResourceId.toString(), myVersion.toString());
+		}
+
+		// Notify Interceptors about pre-action call
+		HookParams hooks = new HookParams()
+			.add(AtomicInteger.class, counter)
+			.add(IdDt.class, id)
+			.add(RequestDetails.class, myRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, hooks);
+
+		myRemainingCount.addAndGet(-1 * counter.get());
 	}
 
 	private void expungeDeletedResources() {

@@ -154,8 +154,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 		}
 	}
 
-	private void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
+	private void expungeCurrentVersionOfResource(Long theResourceId, AtomicInteger theRemainingCount) {
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {

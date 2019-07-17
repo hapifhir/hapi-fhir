@@ -1201,6 +1201,45 @@ public enum Pointcut {
 	),
 
 	/**
+	 * Invoked before expunge is called on a resource.
+	 * <p>
+	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
+	 * If the hook deletes any records, the hook is expected to increment this counter by the number of records deleted.
+	 * </p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>java.util.concurrent.atomic.AtomicInteger - The counter holding the number of records deleted.</li>
+	 * <li>ca.uhn.fhir.model.primitive.IdDt - The id of the resource to be deleted.  Note that version may be null.</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return void.
+	 * </p>
+	 */
+
+	STORAGE_PRESTORAGE_EXPUNGE_RESOURCE (
+		// Return type
+		void.class,
+		// Params
+		"java.util.concurrent.atomic.AtomicInteger",
+		"ca.uhn.fhir.model.primitive.IdDt",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
 	 * Note that this is a performance tracing hook. Use with caution in production
 	 * systems, since calling it may (or may not) carry a cost.
 	 * <p>
