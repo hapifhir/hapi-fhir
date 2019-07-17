@@ -59,13 +59,19 @@ public class ExpungeHookTest {
 	public void expungeEverythingHook() throws InterruptedException {
 		IIdType id = myPatientDao.create(new Patient()).getId();
 		assertNotNull(myPatientDao.read(id));
+
 		myEverythingLatch.setExpectedCount(1);
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeEverything(true);
 		myExpungeService.expunge(null, null, null, options, null);
 		myEverythingLatch.awaitExpected();
+
+		assertPatientGone(id);
+	}
+
+	private void assertPatientGone(IIdType theId) {
 		try {
-			myPatientDao.read(id);
+			myPatientDao.read(theId);
 			fail();
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage(), containsString("is not known"));
