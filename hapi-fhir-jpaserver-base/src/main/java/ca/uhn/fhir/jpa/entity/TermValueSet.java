@@ -66,7 +66,7 @@ public class TermValueSet implements Serializable {
 	private String myName;
 
 	@OneToMany(mappedBy = "myValueSet")
-	private List<TermValueSetCode> myCodes;
+	private List<TermValueSetConcept> myConcepts;
 
 	public Long getId() {
 		return myId;
@@ -102,12 +102,12 @@ public class TermValueSet implements Serializable {
 		return this;
 	}
 
-	public List<TermValueSetCode> getCodes() {
-		if (myCodes == null) {
-			myCodes = new ArrayList<>();
+	public List<TermValueSetConcept> getConcepts() {
+		if (myConcepts == null) {
+			myConcepts = new ArrayList<>();
 		}
 
-		return myCodes;
+		return myConcepts;
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class TermValueSet implements Serializable {
 			.append(myResource != null ? ("myResource=" + myResource.toString()) : ("myResource=(null)"))
 			.append("myResourcePid", myResourcePid)
 			.append("myName", myName)
-			.append(myCodes != null ? ("myCodes - size=" + myCodes.size()) : ("myCodes=(null)"))
+			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
 			.toString();
 	}
 }

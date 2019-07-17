@@ -25,8 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -166,6 +165,19 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4);
 			return VersionConvertor_30_40.convertValueSet(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			super.expandValueSet(valueSetToExpandR4, theValueSetCodeAccumulator);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}

@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -19,7 +19,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +34,13 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
-	@Autowired
-	private ITermCodeSystemDao myTermCodeSystemDao;
+
+	private IIdType myExtensionalCsId;
+	private IIdType myExtensionalVsId;
 
 	@After
 	public void after() {
@@ -76,6 +82,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		childAAB.addPropertyString("propA", "valueAAB");
 		childAAB.addPropertyString("propB", "foo");
 		childAAB.addDesignation()
+			.setLanguage("D1L")
 			.setUseSystem("D1S")
 			.setUseCode("D1C")
 			.setUseDisplay("D1D")
@@ -546,12 +553,12 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals("childAAB", concept.getCode());
 		assertEquals("http://example.com/my_code_system", concept.getSystem());
 		assertEquals(null, concept.getDisplay());
+		assertEquals("D1L", concept.getDesignation().get(0).getLanguage());
 		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
 		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
 		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
 		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
-
 
 	@Test
 	public void testStoreCodeSystemInvalidCyclicLoop() {
@@ -583,6 +590,103 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testStoreTermCodeSystemAndNestedChildren() {
+		IIdType codeSystemId = createCodeSystem();
+		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemId.getIdPartAsLong());
+				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
+				assertEquals("SYSTEM NAME", codeSystem.getName());
+
+				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
+				assertEquals(9, codeSystemVersion.getConcepts().size());
+
+				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+
+				TermConcept parentWithNoChildrenA = concepts.get(0);
+				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+				assertNull(parentWithNoChildrenA.getDisplay());
+				assertEquals(0, parentWithNoChildrenA.getChildren().size());
+				assertEquals(0, parentWithNoChildrenA.getParents().size());
+				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+
+				TermConcept parentWithNoChildrenB = concepts.get(1);
+				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+				assertNull(parentWithNoChildrenB.getDisplay());
+				assertEquals(0, parentWithNoChildrenB.getChildren().size());
+				assertEquals(0, parentWithNoChildrenB.getParents().size());
+				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+
+				TermConcept parentWithNoChildrenC = concepts.get(2);
+				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+				assertNull(parentWithNoChildrenC.getDisplay());
+				assertEquals(0, parentWithNoChildrenC.getChildren().size());
+				assertEquals(0, parentWithNoChildrenC.getParents().size());
+				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+
+				TermConcept parentA = concepts.get(3);
+				assertEquals("ParentA", parentA.getCode());
+				assertNull(parentA.getDisplay());
+				assertEquals(2, parentA.getChildren().size());
+				assertEquals(0, parentA.getParents().size());
+				assertEquals(0, parentA.getDesignations().size());
+				assertEquals(0, parentA.getProperties().size());
+
+				TermConcept childAA = concepts.get(4);
+				assertEquals("childAA", childAA.getCode());
+				assertNull(childAA.getDisplay());
+				assertEquals(2, childAA.getChildren().size());
+				assertEquals(1, childAA.getParents().size());
+				assertSame(parentA, childAA.getParents().iterator().next().getParent());
+				assertEquals(0, childAA.getDesignations().size());
+				assertEquals(0, childAA.getProperties().size());
+
+				TermConcept childAAA = concepts.get(5);
+				assertEquals("childAAA", childAAA.getCode());
+				assertNull(childAAA.getDisplay());
+				assertEquals(0, childAAA.getChildren().size());
+				assertEquals(1, childAAA.getParents().size());
+				assertSame(childAA, childAAA.getParents().iterator().next().getParent());
+				assertEquals(0, childAAA.getDesignations().size());
+				assertEquals(2, childAAA.getProperties().size());
+
+				TermConcept childAAB = concepts.get(6);
+				assertEquals("childAAB", childAAB.getCode());
+				assertNull(childAAB.getDisplay());
+				assertEquals(0, childAAB.getChildren().size());
+				assertEquals(1, childAAB.getParents().size());
+				assertSame(childAA, childAAB.getParents().iterator().next().getParent());
+				assertEquals(1, childAAB.getDesignations().size());
+				assertEquals(2, childAAB.getProperties().size());
+
+				TermConcept childAB = concepts.get(7);
+				assertEquals("childAB", childAB.getCode());
+				assertNull(childAB.getDisplay());
+				assertEquals(0, childAB.getChildren().size());
+				assertEquals(1, childAB.getParents().size());
+				assertSame(parentA, childAB.getParents().iterator().next().getParent());
+				assertEquals(0, childAB.getDesignations().size());
+				assertEquals(0, childAB.getProperties().size());
+
+				TermConcept parentB = concepts.get(8);
+				assertEquals("ParentB", parentB.getCode());
+				assertNull(parentB.getDisplay());
+				assertEquals(0, parentB.getChildren().size());
+				assertEquals(0, parentB.getParents().size());
+				assertEquals(0, parentB.getDesignations().size());
+				assertEquals(0, parentB.getProperties().size());
+			}
+		});
 	}
 
 	/**
