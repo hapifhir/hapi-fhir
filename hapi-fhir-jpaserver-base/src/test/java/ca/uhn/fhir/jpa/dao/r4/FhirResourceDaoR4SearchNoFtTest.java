@@ -1354,7 +1354,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		for (int i = 1; i <= 9; i++) {
 			Patient p1 = new Patient();
 			p1.getBirthDateElement().setValueAsString("1980-01-0" + i);
-			String id1 = myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
+			myPatientDao.create(p1).getId().toUnqualifiedVersionless().getValue();
 		}
 
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(3, 6, 10));
