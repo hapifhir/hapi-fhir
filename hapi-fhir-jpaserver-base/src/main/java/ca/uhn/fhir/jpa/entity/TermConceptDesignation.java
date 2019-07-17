@@ -103,7 +103,6 @@ public class TermConceptDesignation implements Serializable {
 	public TermConceptDesignation setUseSystem(String theUseSystem) {
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, MAX_LENGTH,
 			"Use system exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseSystem));
-
 		myUseSystem = theUseSystem;
 		return this;
 	}

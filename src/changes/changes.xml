@@ -289,6 +289,13 @@
 				content, which is more efficient than storing base 64 encoded text to represent
 				the binary as was previously done.
 			</action>
+			<action type="add">
+				Creating/updating CodeSystems now persist <![CDATA[<code>CodeSystem.concept.designation</code>]]> to
+				the terminology tables.
+			</action>
+			<action type="add">
+				Expanded ValueSets now populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
