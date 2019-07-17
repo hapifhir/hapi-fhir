@@ -10,7 +10,7 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.AttachmentBinaryAccessProvider;
+import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -96,7 +96,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myAllergyIntoleranceDaoR4")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
 	@Autowired
-	protected AttachmentBinaryAccessProvider myAttachmentBinaryAccessProvider;
+	protected BinaryAccessProvider myBinaryAccessProvider;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired

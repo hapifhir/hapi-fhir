@@ -32,9 +32,12 @@ import java.util.Optional;
 import static ca.uhn.fhir.util.UrlUtil.sanitizeUrlPart;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
-public class AttachmentBinaryAccessProvider {
-
-	private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+/**
+ * This plain provider class can be registered with a JPA RestfulServer
+ * to provide the <code>$binary-access-read</code> and <code>$binary-access-write</code>
+ * operations that can be used to access attachment data as a raw binary.
+ */
+public class BinaryAccessProvider {
 
 	@Autowired
 	private FhirContext myCtx;
@@ -58,7 +61,7 @@ public class AttachmentBinaryAccessProvider {
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
 
-		ICompositeType attachment = findAttachmentForRequest(resource, thePath, theRequestDetails, dao);
+		ICompositeType attachment = findAttachmentForRequest(resource, thePath, theRequestDetails);
 
 		IBaseHasExtensions attachmentHasExt = (IBaseHasExtensions) attachment;
 		Optional<? extends IBaseExtension<?, ?>> attachmentId = attachmentHasExt
@@ -75,7 +78,7 @@ public class AttachmentBinaryAccessProvider {
 
 			IBinaryStorageSvc.StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
 			if (blobDetails == null) {
-				String msg = myCtx.getLocalizer().getMessage(AttachmentBinaryAccessProvider.class, "unknownBlobId");
+				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 				throw new InvalidRequestException(msg);
 			}
 
@@ -106,7 +109,7 @@ public class AttachmentBinaryAccessProvider {
 			IPrimitiveType<byte[]> dataDt = AttachmentUtil.getOrCreateData(theRequestDetails.getFhirContext(), attachment);
 			byte[] data = dataDt.getValue();
 			if (data == null) {
-				String msg = myCtx.getLocalizer().getMessage(AttachmentBinaryAccessProvider.class, "noAttachmentDataPresent", sanitizeUrlPart(theResourceId), sanitizeUrlPart(thePath));
+				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "noAttachmentDataPresent", sanitizeUrlPart(theResourceId), sanitizeUrlPart(thePath));
 				throw new InvalidRequestException(msg);
 			}
 
@@ -139,7 +142,7 @@ public class AttachmentBinaryAccessProvider {
 		IFhirResourceDao dao = getDaoForRequest(theResourceId);
 		IBaseResource resource = dao.read(theResourceId, theRequestDetails, false);
 
-		ICompositeType attachment = findAttachmentForRequest(resource, thePath, theRequestDetails, dao);
+		ICompositeType attachment = findAttachmentForRequest(resource, thePath, theRequestDetails);
 
 		String requestContentType = theServletRequest.getContentType();
 		if (isBlank(requestContentType)) {
@@ -192,7 +195,7 @@ public class AttachmentBinaryAccessProvider {
 	}
 
 	@Nonnull
-	private ICompositeType findAttachmentForRequest(IBaseResource theResource, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath, ServletRequestDetails theRequestDetails, IFhirResourceDao theDao) {
+	private ICompositeType findAttachmentForRequest(IBaseResource theResource, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath, ServletRequestDetails theRequestDetails) {
 		FhirContext ctx = theRequestDetails.getFhirContext();
 		String path = thePath.getValueAsString();
 

@@ -307,6 +307,15 @@
 				apply to all resource types (or instances of all resource types) if they
 				are found on a plain provider.
 			</action>
+			<action type="add">
+				A new resource provider for JPA servers called
+				<![CDATA[<code>BinaryAccessProvider</code>]]>
+				has been added. This provider serves two custom operations called
+				<![CDATA[<code>$binary-access-read</code>]]> and
+				<![CDATA[<code>$binary-access-write</code>]]> that can be used to
+				request binary data in Attachments as raw binary content instead of
+				as base 64 encoded content.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
