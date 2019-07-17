@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
+import ca.uhn.fhir.jpa.provider.AttachmentBinaryAccessProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -101,6 +102,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
+			ourRestServer.registerProvider(myAttachmentBinaryAccessProvider);
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 

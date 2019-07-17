@@ -6,6 +6,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
+import ca.uhn.fhir.jpa.provider.AttachmentBinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -118,6 +119,12 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean(name = "myAttachmentBinaryAccessProvider")
+	@Lazy
+	public AttachmentBinaryAccessProvider AttachmentBinaryAccessProvider() {
+		return new AttachmentBinaryAccessProvider();
 	}
 
 	@Bean

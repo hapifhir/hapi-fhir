@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.term.TranslationRequest;
 import ca.uhn.fhir.jpa.term.TranslationResult;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;

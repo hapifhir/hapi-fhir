@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Parameters;
@@ -38,7 +38,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.jpa.util.JpaConstants.*;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.*;
 
 public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResourceProvider<T> {
 

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoEncounter;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;

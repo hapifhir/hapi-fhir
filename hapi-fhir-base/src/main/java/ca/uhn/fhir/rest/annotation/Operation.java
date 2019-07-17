@@ -87,4 +87,37 @@ public @interface Operation {
 	 */
 	BundleTypeEnum bundleType() default BundleTypeEnum.COLLECTION;
 
+	/**
+	 * If this is set to <code>true</code> (default is <code>false</code> and this is almost
+	 * always the right choice), the framework will not attempt to generate a response to
+	 * this method.
+	 * <p>
+	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletResponse}
+	 * in your method parameters and create a response yourself directly from your
+	 * <code>@Operation</code> method.
+	 * </p>
+	 * <p>
+	 * Note that this will mean that interceptor methods will not get fired for the
+	 * response, so there are security implications to using this flag.
+	 * </p>
+	 */
+	boolean manualResponse() default false;
+
+	/**
+	 * If this is set to <code>true</code> (default is <code>false</code> and this is almost
+	 * always the right choice), the framework will not attempt to parse the request body,
+	 * but will instead delegate it to the <code>@Operation</code> method.
+	 * <p>
+	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletRequest}
+	 * in your method parameters and parse the request yourself.
+	 * </p>
+	 */
+	boolean manualRequest() default false;
+
+	/**
+	 * If this is set to <code>true</code>, this method will be a <b>global operation</b>
+	 * meaning that it applies to all resource types
+	 */
+	boolean global() default false;
+
 }

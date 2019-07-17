@@ -2,7 +2,7 @@ package ca.uhn.fhirtest.interceptor;
 
 import ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider;
 import ca.uhn.fhir.jpa.provider.BaseTerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;

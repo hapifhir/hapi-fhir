@@ -89,26 +89,26 @@
 				in the query cache that matched the same search parameters.
 			</action>
 			<action type="fix" issue="1337">
-				Improved stability of concurrency test framework.  Thanks to Stig Døssing for the pull request!
+				Improved stability of concurrency test framework. Thanks to Stig Døssing for the pull request!
 			</action>
 			<action type="change">
 				Moved in-memory matcher from Subscription module to SearchParam module and renamed the result type
 				from SubscriptionMatchResult to InMemoryMatchResult.
 			</action>
 			<action type="add">
-				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any.  They permit
+				Added some experimental version-independent model classes to ca.uhn.fhir.jpa.model.any. They permit
 				writing code that is version independent.
 			</action>
 			<action type="add">
 				Added new subclass of HashMapResourceProvider called SearchableHashMapResourceProvider that uses the
-				in-memory matcher to search the HashMap (using a full table scan).  This allows rudimentary testing
+				in-memory matcher to search the HashMap (using a full table scan). This allows rudimentary testing
 				without a database.
 			</action>
 			<action type="add">
 				Added a new interceptor hook called STORAGE_PRESTORAGE_DELETE_CONFLICTS that is invoked when a
 				resource delete operation is about to fail due to referential integrity conflicts.
 				Hooks have access to the list of resources that have references to the resource being deleted and
-				can delete them.  The boolean return value of the hook indicates whether the server should try
+				can delete them. The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
 			</action>
 			<action type="change">
@@ -156,7 +156,7 @@
 			</action>
 			<action type="fix" issue="1355">
 				Invoking the transaction or batch operation on the JPA server would fail
-				with a NullPointerException if the Bundle passed in did not contain 
+				with a NullPointerException if the Bundle passed in did not contain
 				a resource in an entry that required a resource (e.g. a POST). Thanks to
 				GitHub user @lytvynenko-dmitriy for reporting!
 			</action>
@@ -271,8 +271,8 @@
 				JSON resources.
 			</action>
 			<action type="change">
-				The JPA server now uses the H2 database instead of the derby database to run its 
-				unit tests. We are hoping that this cuts down on the number of false test failures 
+				The JPA server now uses the H2 database instead of the derby database to run its
+				unit tests. We are hoping that this cuts down on the number of false test failures
 				we get due to mysterious derby failures.
 			</action>
 			<action type="add">
@@ -288,6 +288,17 @@
 				The Base64Binary types for DSTU3+ now use a byte array internally to represent their
 				content, which is more efficient than storing base 64 encoded text to represent
 				the binary as was previously done.
+			</action>
+			<action type="add">
+				@Operation methods can now declare that they will manually process the request
+				body and/or manually generate a response instead of letting the HAPI FHIR
+				framework take care of these things. This is useful for situations where
+				direct access to the low-level servlet streaming API is needed.
+			</action>
+			<action type="add">
+				@Operation methods can now declare that they are global, meaning that they will
+				apply to all resource types (or instances of all resource types) if they
+				are found on a plain provider.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
@@ -359,7 +370,7 @@
 				a page calculation error. This has been corrected.
 			</action>
 			<action type="add">
-				In the JPA server, a much more readable error message is now returned returned when 
+				In the JPA server, a much more readable error message is now returned returned when
 				two client threads collide while trying to simultaneously create a resource with the
 				same client-assigned ID. In addition, better error messages are now returned
 				when conflicts such as this one are hit within a FHIR transaction operation.
@@ -456,7 +467,7 @@
 				(Before it was hardcoded to "/websocket").
 			</action>
 			<action type="add">
-				Added new IRemovableChannel interface.  If a SubscriptionChannel implements this, then when a subscription
+				Added new IRemovableChannel interface. If a SubscriptionChannel implements this, then when a subscription
 				channel is destroyed (because its subscription is deleted) then the remove() method will be called on that
 				channel.
 			</action>
@@ -491,7 +502,7 @@
 			</action>
 			<action type="add">
 				ValidationSupportChain will now call isCodeSystemSupported() on each entry in the chain before
-				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to 
+				calling fetchCodeSystem() in order to reduce the work required by chain entries. Thanks to
 				Anders Havn for the suggestion!
 			</action>
 			<action type="fix" issue="1299">
@@ -504,7 +515,7 @@
 				This has been corrected.
 			</action>
 			<action type="fix" issue="1311">
-				When encoding resources, profile declarations on contained resources will now be 
+				When encoding resources, profile declarations on contained resources will now be
 				preserved. Thanks to Anders Havn for the pull request!
 			</action>
 			<action type="fix" issue="1305">

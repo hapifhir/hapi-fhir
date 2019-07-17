@@ -25,10 +25,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.validator.constraints.Length;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
 import java.io.IOException;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
@@ -43,6 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TestUtil {
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
+	public static final int MAX_COL_LENGTH = 2000;
 
 	/**
 	 * non instantiable
@@ -154,6 +157,42 @@ public class TestUtil {
 		if (column != null) {
 			assertNotADuplicateName(column.name(), null);
 			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement.toString());
+
+			boolean hasLob = theAnnotatedElement.getAnnotation(Lob.class) != null;
+			Field field = (Field) theAnnotatedElement;
+
+			/*
+			 * For string columns, we want to make sure that an explicit max
+			 * length is always specified, and that this max is always sensible.
+			 * Unfortunately there is no way to differentiate between "explicitly
+			 * set to 255" and "just using the default of 255" so we have banned
+			 * the exact length of 255.
+			 */
+			if (field.getType().equals(String.class)) {
+				if (!hasLob) {
+					if (column.length() == 255) {
+						throw new IllegalStateException("Field does not have an explicit maximum length specified: " + field);
+					}
+					if (column.length() > MAX_COL_LENGTH) {
+						throw new IllegalStateException("Field is too long: " + field);
+					}
+				}
+
+				Size size = theAnnotatedElement.getAnnotation(Size.class);
+				if (size != null) {
+					if (size.max() > MAX_COL_LENGTH) {
+						throw new IllegalStateException("Field is too long: " + field);
+					}
+				}
+
+				Length length = theAnnotatedElement.getAnnotation(Length.class);
+				if (length != null) {
+					if (length.max() > MAX_COL_LENGTH) {
+						throw new IllegalStateException("Field is too long: " + field);
+					}
+				}
+			}
+
 		}
 
 		GeneratedValue gen = theAnnotatedElement.getAnnotation(GeneratedValue.class);
@@ -209,4 +248,7 @@ public class TestUtil {
 	public static void sleepOneClick() {
 		sleepAtLeast(1);
 	}
+
+
+
 }

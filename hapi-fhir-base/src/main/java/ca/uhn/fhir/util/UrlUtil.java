@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -44,6 +45,44 @@ public class UrlUtil {
 	private static final String URL_FORM_PARAMETER_OTHER_SAFE_CHARS = "-_.*";
 	private static final Escaper PARAMETER_ESCAPER = new PercentEscaper(URL_FORM_PARAMETER_OTHER_SAFE_CHARS, false);
 
+	public static class UrlParts {
+		private String myParams;
+		private String myResourceId;
+		private String myResourceType;
+		private String myVersionId;
+
+		public String getParams() {
+			return myParams;
+		}
+
+		public void setParams(String theParams) {
+			myParams = theParams;
+		}
+
+		public String getResourceId() {
+			return myResourceId;
+		}
+
+		public void setResourceId(String theResourceId) {
+			myResourceId = theResourceId;
+		}
+
+		public String getResourceType() {
+			return myResourceType;
+		}
+
+		public void setResourceType(String theResourceType) {
+			myResourceType = theResourceType;
+		}
+
+		public String getVersionId() {
+			return myVersionId;
+		}
+
+		public void setVersionId(String theVersionId) {
+			myVersionId = theVersionId;
+		}
+	}
 
 	/**
 	 * Resolve a relative URL - THIS METHOD WILL NOT FAIL but will log a warning and return theEndpoint if the input is invalid.
@@ -114,7 +153,6 @@ public class UrlUtil {
 		}
 		return PARAMETER_ESCAPER.escape(theUnescaped);
 	}
-
 
 	public static boolean isAbsolute(String theValue) {
 		String value = theValue.toLowerCase();
@@ -284,7 +322,7 @@ public class UrlUtil {
 				}
 				if (nextChar == '?') {
 					if (url.length() > idx + 1) {
-						retVal.setParams(url.substring(idx + 1, url.length()));
+						retVal.setParams(url.substring(idx + 1));
 					}
 					break;
 				}
@@ -294,6 +332,18 @@ public class UrlUtil {
 
 		return retVal;
 
+	}
+
+	/**
+	 * This method specifically HTML-encodes the &quot; and
+	 * &lt; characters in order to prevent injection attacks
+	 */
+	public static String sanitizeUrlPart(IPrimitiveType<?> theString) {
+		String retVal = null;
+		if (theString != null) {
+			retVal = sanitizeUrlPart(theString.getValueAsString());
+		}
+		return retVal;
 	}
 
 	/**
@@ -352,6 +402,8 @@ public class UrlUtil {
 			char nextChar = theString.charAt(i);
 			if (nextChar == '%' || nextChar == '+') {
 				try {
+					// Yes it would be nice to not use a string "UTF-8" but the equivalent
+					// method that takes Charset is JDK10+ only... sigh....
 					return URLDecoder.decode(theString, "UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					throw new Error("UTF-8 not supported, this shouldn't happen", e);
@@ -359,45 +411,6 @@ public class UrlUtil {
 			}
 		}
 		return theString;
-	}
-
-	public static class UrlParts {
-		private String myParams;
-		private String myResourceId;
-		private String myResourceType;
-		private String myVersionId;
-
-		public String getParams() {
-			return myParams;
-		}
-
-		public void setParams(String theParams) {
-			myParams = theParams;
-		}
-
-		public String getResourceId() {
-			return myResourceId;
-		}
-
-		public void setResourceId(String theResourceId) {
-			myResourceId = theResourceId;
-		}
-
-		public String getResourceType() {
-			return myResourceType;
-		}
-
-		public void setResourceType(String theResourceType) {
-			myResourceType = theResourceType;
-		}
-
-		public String getVersionId() {
-			return myVersionId;
-		}
-
-		public void setVersionId(String theVersionId) {
-			myVersionId = theVersionId;
-		}
 	}
 
 }
