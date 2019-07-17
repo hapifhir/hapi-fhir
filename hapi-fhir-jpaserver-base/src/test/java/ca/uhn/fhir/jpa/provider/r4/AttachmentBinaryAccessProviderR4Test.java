@@ -218,7 +218,7 @@ public class AttachmentBinaryAccessProviderR4Test extends BaseResourceProviderR4
 			assertEquals(null, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
 			attachmentId = attachment.getExtensionString(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID);
-			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{200}"));
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
 
