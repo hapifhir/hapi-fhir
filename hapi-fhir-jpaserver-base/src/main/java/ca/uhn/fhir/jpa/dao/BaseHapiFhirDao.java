@@ -1238,7 +1238,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	protected void addPidToResource(ResourceTable theEntity, IBaseResource theResource) {
-		if (theResource instanceof IResource) {
+		if (theResource instanceof IAnyResource) {
+			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getId());
+		} else if (theResource instanceof IResource) {
 			IDao.RESOURCE_PID.put((IResource) theResource, theEntity.getId());
 		}
 	}
