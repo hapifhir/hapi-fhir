@@ -26,8 +26,8 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.LogicUtil;
@@ -52,8 +52,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> implements IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> {
 
@@ -168,6 +167,21 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 				termConcept.setDisplay(next.getDisplay());
 				termConcept.addChildren(toPersistedConcepts(next.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
 				retVal.add(termConcept);
+
+				for (CodeSystem.ConceptDefinitionDesignationComponent designationComponent : next.getDesignation()) {
+					if (isNotBlank(designationComponent.getValue())) {
+						TermConceptDesignation designation = termConcept.addDesignation();
+						designation.setLanguage(designationComponent.hasLanguage() ? designationComponent.getLanguage() : null);
+						if (designationComponent.hasUse()) {
+							designation.setUseSystem(designationComponent.getUse().hasSystem() ? designationComponent.getUse().getSystem() : null);
+							designation.setUseCode(designationComponent.getUse().hasCode() ? designationComponent.getUse().getCode() : null);
+							designation.setUseDisplay(designationComponent.getUse().hasDisplay() ? designationComponent.getUse().getDisplay() : null);
+						}
+						designation.setValue(designationComponent.getValue());
+					}
+				}
+
+				// TODO: DM 2019-07-16 - We should also populate TermConceptProperty entities here.
 			}
 		}
 

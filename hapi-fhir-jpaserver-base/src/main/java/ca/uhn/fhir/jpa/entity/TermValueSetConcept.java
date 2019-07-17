@@ -29,20 +29,22 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
-@Table(name = "TRM_VALUESET_CODE", indexes = {
-	@Index(name = "IDX_VALUESET_CODE_CS_CD", columnList = "SYSTEM, CODE")
+@Table(name = "TRM_VALUESET_CONCEPT", indexes = {
+	@Index(name = "IDX_VALUESET_CONCEPT_CS_CD", columnList = "SYSTEM, CODE")
 })
 @Entity()
-public class TermValueSetCode implements Serializable {
+public class TermValueSetConcept implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id()
-	@SequenceGenerator(name = "SEQ_VALUESET_CODE_PID", sequenceName = "SEQ_VALUESET_CODE_PID")
-	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_CODE_PID")
+	@SequenceGenerator(name = "SEQ_VALUESET_CONCEPT_PID", sequenceName = "SEQ_VALUESET_CONCEPT_PID")
+	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_CONCEPT_PID")
 	@Column(name = "PID")
 	private Long myId;
 
@@ -65,6 +67,9 @@ public class TermValueSetCode implements Serializable {
 	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
+	@OneToMany(mappedBy = "myConcept")
+	private List<TermValueSetConceptDesignation> myDesignations;
+
 	public Long getId() {
 		return myId;
 	}
@@ -73,7 +78,7 @@ public class TermValueSetCode implements Serializable {
 		return myValueSet;
 	}
 
-	public TermValueSetCode setValueSet(TermValueSet theValueSet) {
+	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
 		return this;
 	}
@@ -98,7 +103,7 @@ public class TermValueSetCode implements Serializable {
 		return mySystem;
 	}
 
-	public TermValueSetCode setSystem(@Nonnull String theSystem) {
+	public TermValueSetConcept setSystem(@Nonnull String theSystem) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theSystem, "theSystem must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theSystem, TermCodeSystem.MAX_URL_LENGTH,
 			"System exceeds maximum length (" + TermCodeSystem.MAX_URL_LENGTH + "): " + length(theSystem));
@@ -110,7 +115,7 @@ public class TermValueSetCode implements Serializable {
 		return myCode;
 	}
 
-	public TermValueSetCode setCode(@Nonnull String theCode) {
+	public TermValueSetConcept setCode(@Nonnull String theCode) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
 		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, TermConcept.MAX_CODE_LENGTH,
 			"Code exceeds maximum length (" + TermConcept.MAX_CODE_LENGTH + "): " + length(theCode));
@@ -122,18 +127,26 @@ public class TermValueSetCode implements Serializable {
 		return myDisplay;
 	}
 
-	public TermValueSetCode setDisplay(String theDisplay) {
+	public TermValueSetConcept setDisplay(String theDisplay) {
 		myDisplay = left(theDisplay, TermConcept.MAX_DESC_LENGTH);
 		return this;
+	}
+
+	public List<TermValueSetConceptDesignation> getDesignations() {
+		if (myDesignations == null) {
+			myDesignations = new ArrayList<>();
+		}
+
+		return myDesignations;
 	}
 
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
 
-		if (!(theO instanceof TermValueSetCode)) return false;
+		if (!(theO instanceof TermValueSetConcept)) return false;
 
-		TermValueSetCode that = (TermValueSetCode) theO;
+		TermValueSetConcept that = (TermValueSetConcept) theO;
 
 		return new EqualsBuilder()
 			.append(getValueSetUrl(), that.getValueSetUrl())
@@ -161,6 +174,7 @@ public class TermValueSetCode implements Serializable {
 			.append("mySystem", mySystem)
 			.append("myCode", myCode)
 			.append("myDisplay", myDisplay)
+			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
 	}
 }
