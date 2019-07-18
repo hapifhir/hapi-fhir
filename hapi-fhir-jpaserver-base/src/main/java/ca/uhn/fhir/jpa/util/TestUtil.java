@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.util;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.validator.constraints.Length;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,20 +34,25 @@ import org.hl7.fhir.r4.model.InstantType;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static com.google.common.base.Ascii.toUpperCase;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TestUtil {
+	public static final int MAX_COL_LENGTH = 2000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestUtil.class);
-	public static final int MAX_COL_LENGTH = 2000;
+	private static Set<String> ourReservedWords;
 
 	/**
 	 * non instantiable
@@ -59,6 +66,16 @@ public class TestUtil {
 	 */
 	@SuppressWarnings("UnstableApiUsage")
 	public static void scanEntities(String packageName) throws IOException, ClassNotFoundException {
+
+		try (InputStream is = TestUtil.class.getResourceAsStream("/mysql-reserved-words.txt")) {
+			String contents = IOUtils.toString(is, Constants.CHARSET_UTF8);
+			String[] words = contents.split("\\n");
+			ourReservedWords = Arrays.stream(words)
+				.filter(t -> isNotBlank(t))
+				.map(t -> toUpperCase(t))
+				.collect(Collectors.toSet());
+		}
+
 		ImmutableSet<ClassInfo> classes = ClassPath.from(TestUtil.class.getClassLoader()).getTopLevelClasses(packageName);
 		Set<String> names = new HashSet<String>();
 
@@ -141,7 +158,10 @@ public class TestUtil {
 
 		JoinColumn joinColumn = theAnnotatedElement.getAnnotation(JoinColumn.class);
 		if (joinColumn != null) {
-			assertNotADuplicateName(joinColumn.name(), null);
+			String columnName = joinColumn.name();
+			validateColumnName(columnName, theAnnotatedElement);
+
+			assertNotADuplicateName(columnName, null);
 			ForeignKey fk = joinColumn.foreignKey();
 			if (theIsSuperClass) {
 				Validate.isTrue(isBlank(fk.name()), "Foreign key on " + theAnnotatedElement.toString() + " has a name() and should not as it is a superclass");
@@ -155,7 +175,10 @@ public class TestUtil {
 
 		Column column = theAnnotatedElement.getAnnotation(Column.class);
 		if (column != null) {
-			assertNotADuplicateName(column.name(), null);
+			String columnName = column.name();
+			validateColumnName(columnName, theAnnotatedElement);
+
+			assertNotADuplicateName(columnName, null);
 			Validate.isTrue(column.unique() == false, "Should not use unique attribute on column (use named @UniqueConstraint instead) on " + theAnnotatedElement.toString());
 
 			boolean hasLob = theAnnotatedElement.getAnnotation(Lob.class) != null;
@@ -208,6 +231,15 @@ public class TestUtil {
 
 	}
 
+	private static void validateColumnName(String theColumnName, AnnotatedElement theElement) {
+		if (!theColumnName.equals(theColumnName.toUpperCase())) {
+			throw new IllegalArgumentException("Column name must be all upper case: " + theColumnName + " found on " + theElement);
+		}
+		if (ourReservedWords.contains(theColumnName)) {
+			throw new IllegalArgumentException("Column name is a reserved word: " + theColumnName + " found on " + theElement);
+		}
+	}
+
 	private static void assertEquals(String theGenerator, String theName) {
 		Validate.isTrue(theGenerator.equals(theName));
 	}
@@ -248,7 +280,6 @@ public class TestUtil {
 	public static void sleepOneClick() {
 		sleepAtLeast(1);
 	}
-
 
 
 }

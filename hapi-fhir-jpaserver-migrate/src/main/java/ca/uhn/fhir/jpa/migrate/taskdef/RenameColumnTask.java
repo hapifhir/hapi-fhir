@@ -33,6 +33,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameColumnTask.class);
 	private String myOldName;
 	private String myNewName;
+	private boolean myAllowNeitherColumnToExist;
 
 	public void setOldName(String theOldName) {
 		Validate.notBlank(theOldName);
@@ -53,6 +54,9 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
 		}
 		if (!haveOldName && !haveNewName) {
+			if (isAllowNeitherColumnToExist()) {
+				return;
+			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
 		}
 		if (haveNewName) {
@@ -88,5 +92,13 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 		ourLog.info("Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
 		executeSql(getTableName(), sql);
 
+	}
+
+	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
+		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
+	}
+
+	public boolean isAllowNeitherColumnToExist() {
+		return myAllowNeitherColumnToExist;
 	}
 }

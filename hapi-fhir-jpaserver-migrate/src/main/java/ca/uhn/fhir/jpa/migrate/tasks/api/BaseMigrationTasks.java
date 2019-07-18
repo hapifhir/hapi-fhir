@@ -168,10 +168,15 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			public BuilderWithTableName renameColumn(String theOldName, String theNewName) {
+				return renameColumn(theOldName, theNewName, false);
+			}
+
+			public BuilderWithTableName renameColumn(String theOldName, String theNewName, boolean theAllowNeitherColumnToExist) {
 				RenameColumnTask task = new RenameColumnTask();
 				task.setTableName(myTableName);
 				task.setOldName(theOldName);
 				task.setNewName(theNewName);
+				task.setAllowNeitherColumnToExist(theAllowNeitherColumnToExist);
 				addTask(task);
 				return this;
 			}

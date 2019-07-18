@@ -48,7 +48,7 @@ import java.util.Date;
 	",  h.res_updated       as res_updated    " +
 	",  h.res_text          as res_text       " +
 	",  h.res_encoding      as res_encoding   " +
-	",  f.forced_id         as forced_pid      " +
+	",  f.forced_id         as FORCED_PID      " +
 	"FROM HFJ_RES_VER h "
 	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
 	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
@@ -97,7 +97,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "forced_pid", length= ForcedId.MAX_FORCED_ID_LENGTH)
+	@Column(name = "FORCED_PID", length= ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 
 	public ResourceSearchView() {

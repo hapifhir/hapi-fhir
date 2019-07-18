@@ -316,6 +316,12 @@
 				request binary data in Attachments as raw binary content instead of
 				as base 64 encoded content.
 			</action>
+			<action type="change">
+				A few columns named 'CODE' in the JPA terminology services tables have been
+				renamed to 'CODEVAL' to avoid any possibility of conflicting with reserved
+				words in MySQL. The database migrator tool has been updated to handle this 
+				change.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
