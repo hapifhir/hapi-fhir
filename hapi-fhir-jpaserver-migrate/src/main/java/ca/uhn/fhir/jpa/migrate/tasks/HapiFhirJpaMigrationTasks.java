@@ -80,6 +80,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
 			.renameColumn("myValueSet", "VALUESET_URL");
 
+		version.onTable("TRM_VALUESET")
+			.renameColumn("NAME", "VSNAME", true);
+
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.renameColumn("CODE", "CODEVAL", true)
+			.renameColumn("SYSTEM", "SYSTEM_URL", true);
+
+		version.onTable("TRM_CONCEPT")
+			.renameColumn("CODE", "CODEVAL");
+
 		// TermValueSet
 		version.startSectionWithMessage("Processing table: TRM_VALUESET");
 		version.addIdGenerator("SEQ_VALUESET_PID");

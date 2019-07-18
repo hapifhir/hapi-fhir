@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;

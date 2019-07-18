@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET_CONCEPT", indexes = {
-	@Index(name = "IDX_VALUESET_CONCEPT_CS_CD", columnList = "SYSTEM, CODE")
+	@Index(name = "IDX_VALUESET_CONCEPT_CS_CD", columnList = "SYSTEM, CODEVAL")
 })
 @Entity()
 public class TermValueSetConcept implements Serializable {
@@ -58,10 +58,10 @@ public class TermValueSetConcept implements Serializable {
 	@Transient
 	private String myValueSetName;
 
-	@Column(name = "SYSTEM", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
+	@Column(name = "SYSTEM_URL", nullable = false, length = TermCodeSystem.MAX_URL_LENGTH)
 	private String mySystem;
 
-	@Column(name = "CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
+	@Column(name = "CODEVAL", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
 	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)

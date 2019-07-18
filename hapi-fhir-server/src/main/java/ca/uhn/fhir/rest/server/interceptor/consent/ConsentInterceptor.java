@@ -300,8 +300,12 @@ public class ConsentInterceptor {
 	}
 
 	private boolean isRequestAuthorized(RequestDetails theRequestDetails) {
-		Object authorizedObj = theRequestDetails.getUserData().get(myRequestAuthorizedKey);
-		return Boolean.TRUE.equals(authorizedObj);
+		boolean retVal = false;
+		if (theRequestDetails != null) {
+			Object authorizedObj = theRequestDetails.getUserData().get(myRequestAuthorizedKey);
+			retVal = Boolean.TRUE.equals(authorizedObj);
+		}
+		return retVal;
 	}
 
 	@SuppressWarnings("unchecked")

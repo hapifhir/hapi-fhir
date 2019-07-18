@@ -1048,7 +1048,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			/*
-			 * If it's a 410 Gone, we want to include a location header inthe response
+			 * If it's a 410 Gone, we want to include a location header in the response
 			 * if we can, since that can include the resource version which is nice
 			 * for the user.
 			 */

@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;

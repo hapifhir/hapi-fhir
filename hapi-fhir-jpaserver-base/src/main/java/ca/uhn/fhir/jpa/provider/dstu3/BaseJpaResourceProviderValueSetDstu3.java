@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;

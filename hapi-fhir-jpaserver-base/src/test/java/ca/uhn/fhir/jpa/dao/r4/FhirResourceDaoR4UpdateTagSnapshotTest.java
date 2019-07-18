@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hamcrest.Matchers;

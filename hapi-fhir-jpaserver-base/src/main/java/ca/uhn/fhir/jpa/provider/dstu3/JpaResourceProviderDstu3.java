@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -38,9 +38,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 
 public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
