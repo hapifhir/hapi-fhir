@@ -37,10 +37,7 @@ import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -53,6 +50,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -755,9 +753,50 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						break;
 					}
-					case "GET":
-					default:
+					case "PATCH": {
+						// PATCH
+						validateResourcePresent(res, order, verb);
+
+						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+
+						String matchUrl = toMatchUrl(nextReqEntry);
+						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+						String patchBody = null;
+						String contentType = null;
+
+						if (res instanceof IBaseBinary) {
+							IBaseBinary binary = (IBaseBinary) res;
+							if (binary.getContent() != null && binary.getContent().length > 0) {
+								patchBody = new String(binary.getContent(), Charsets.UTF_8);
+							}
+							contentType = binary.getContentType();
+						}
+
+						if (isBlank(patchBody)) {
+							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchBody");
+							throw new InvalidRequestException(msg);
+						}
+						if (isBlank(contentType)) {
+							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchContentType");
+							throw new InvalidRequestException(msg);
+						}
+
+						ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
+						PatchTypeEnum patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
+						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, theRequest);
+						updatedEntities.add(outcome.getEntity());
+						if (outcome.getResource() != null) {
+							updatedResources.add(outcome.getResource());
+						}
+
 						break;
+					}
+					case "GET":
+						break;
+					default:
+						throw new InvalidRequestException("Unable to handle verb in transaction: " + verb);
 
 				}
 
@@ -1051,6 +1090,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	 * Process any DELETE interactions
 	 * Process any POST interactions
 	 * Process any PUT interactions
+	 * Process any PATCH interactions
 	 * Process any GET interactions
 	 */
 	//@formatter:off
@@ -1107,21 +1147,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return o1 - o2;
 		}
 
-		private String toMatchUrl(BUNDLEENTRY theEntry) {
-			String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
-			if (verb.equals("POST")) {
-				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			}
-			if (verb.equals("PUT") || verb.equals("DELETE")) {
-				String url = extractTransactionUrlOrThrowException(theEntry, verb);
-				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-				if (isBlank(parts.getResourceId())) {
-					return parts.getResourceType() + '?' + parts.getParams();
-				}
-			}
-			return null;
-		}
-
 		private int toOrder(BUNDLEENTRY theO1) {
 			int o1 = 0;
 			if (myVersionAdapter.getEntryRequestVerb(theO1) != null) {
@@ -1135,8 +1160,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					case "PUT":
 						o1 = 3;
 						break;
-					case "GET":
+					case "PATCH":
 						o1 = 4;
+						break;
+					case "GET":
+						o1 = 5;
 						break;
 					default:
 						o1 = 0;
@@ -1169,6 +1197,24 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 	private static String toStatusString(int theStatusCode) {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+	}
+
+	private String toMatchUrl(BUNDLEENTRY theEntry) {
+		String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
+		if (verb.equals("POST")) {
+			return myVersionAdapter.getEntryIfNoneExist(theEntry);
+		}
+		if (verb.equals("PATCH")) {
+			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
+		}
+		if (verb.equals("PUT") || verb.equals("DELETE")) {
+			String url = extractTransactionUrlOrThrowException(theEntry, verb);
+			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+			if (isBlank(parts.getResourceId())) {
+				return parts.getResourceType() + '?' + parts.getParams();
+			}
+		}
+		return null;
 	}
 
 }

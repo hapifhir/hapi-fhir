@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -3183,6 +3184,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 //			assertThat(text, not(containsString("\"text\",\"type\"")));
 //		}
 	}
+
+	@Test
+	public void testEncounterWithReason() {
+		Encounter enc = new Encounter();
+		enc.addReasonCode()
+			.addCoding().setSystem("http://myorg").setCode("hugs").setDisplay("Hugs for better wellness");
+		enc.getPeriod().setStartElement(new DateTimeType("2012"));
+		IIdType id = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
+
+		enc = ourClient.read().resource(Encounter.class).withId(id).execute();
+		assertEquals("hugs", enc.getReasonCodeFirstRep().getCodingFirstRep().getCode());
+	}
+
 
 	@Test
 	public void testTerminologyWithCompleteCs_SearchForConceptIn() throws Exception {

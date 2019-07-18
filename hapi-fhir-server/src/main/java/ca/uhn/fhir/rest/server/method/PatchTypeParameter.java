@@ -45,19 +45,7 @@ class PatchTypeParameter implements IParameter {
 
 	public static PatchTypeEnum getTypeForRequestOrThrowInvalidRequestException(RequestDetails theRequest) {
 		String contentTypeAll = defaultString(theRequest.getHeader(Constants.HEADER_CONTENT_TYPE));
-		String contentType = contentTypeAll;
-		int semiColonIdx = contentType.indexOf(';');
-		if (semiColonIdx != -1) {
-			contentType = contentTypeAll.substring(0, semiColonIdx);
-		}
-		contentType = contentType.trim();
-		if (Constants.CT_JSON_PATCH.equals(contentType)) {
-			return PatchTypeEnum.JSON_PATCH;
-		} else if (Constants.CT_XML_PATCH.equals(contentType)) {
-			return PatchTypeEnum.XML_PATCH;
-		} else {
-			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + contentTypeAll);
-		}
+		return PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentTypeAll);
 	}
 
 }
