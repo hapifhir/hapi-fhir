@@ -1,7 +1,9 @@
 package example;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Parameters;
 
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -18,11 +20,33 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 public class ServerOperations {
+	private static final Logger ourLog = LoggerFactory.getLogger(ServerOperations.class);
 
-   //START SNIPPET: searchParamBasic
+
+	//START SNIPPET: manualInputAndOutput
+	@Operation(name="$manualInputAndOutput", manualResponse=true, manualRequest=true)
+	public void manualInputAndOutput(HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
+		String contentType = theServletRequest.getContentType();
+		byte[] bytes = IOUtils.toByteArray(theServletRequest.getInputStream());
+
+		ourLog.info("Received call with content type {} and {} bytes", contentType, bytes.length);
+
+		theServletResponse.setContentType(contentType);
+		theServletResponse.getOutputStream().write(bytes);
+		theServletResponse.getOutputStream().close();
+	}
+	//END SNIPPET: manualInputAndOutput
+
+
+	//START SNIPPET: searchParamBasic
    @Operation(name="$find-matches", idempotent=true)
    public Parameters findMatchesBasic(
       @OperationParam(name="date") DateParam theDate,

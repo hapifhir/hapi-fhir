@@ -44,7 +44,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 @Entity
 @Indexed(interceptor = DeferConceptIndexingInterceptor.class)
 @Table(name = "TRM_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODE"})
+	@UniqueConstraint(name = "IDX_CONCEPT_CS_CODE", columnNames = {"CODESYSTEM_PID", "CODEVAL"})
 }, indexes = {
 	@Index(name = "IDX_CONCEPT_INDEXSTATUS", columnList = "INDEX_STATUS"),
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
@@ -60,7 +60,7 @@ public class TermConcept implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private Collection<TermConceptParentChildLink> myChildren;
 
-	@Column(name = "CODE", nullable = false, length = MAX_CODE_LENGTH)
+	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
 	@Temporal(TemporalType.TIMESTAMP)

@@ -62,7 +62,7 @@ public class TermValueSet implements Serializable {
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
 
-	@Column(name = "NAME", nullable = true, length = MAX_NAME_LENGTH)
+	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
 	@OneToMany(mappedBy = "myValueSet")

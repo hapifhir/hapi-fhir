@@ -1,8 +1,8 @@
-package ca.uhn.fhir.model.api;
+package ca.uhn.fhir.jpa.util;
 
-/*
+/*-
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,6 +20,21 @@ package ca.uhn.fhir.model.api;
  * #L%
  */
 
-public interface IPrimitiveDatatypeWithPrecision<T, P> extends IPrimitiveDatatype<T> {
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import org.hl7.fhir.dstu3.model.InstantType;
+
+import java.io.IOException;
+import java.util.Date;
+
+public class JsonDateSerializer extends JsonSerializer<Date> {
+
+	@Override
+	public void serialize(Date theValue, JsonGenerator theGen, SerializerProvider theSerializers) throws IOException {
+		if (theValue != null) {
+			theGen.writeString(new InstantType(theValue).getValueAsString());
+		}
+	}
 
 }

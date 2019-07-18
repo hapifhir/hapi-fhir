@@ -47,12 +47,13 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/*
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
-	public static final int MAX_LENGTH = 255;
+	public static final int MAX_LENGTH = 254;
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@Field()
 	public String myUri;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")

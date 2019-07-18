@@ -21,11 +21,14 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.model.api.annotation.Block;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.Collection;
 
+@Block()
 public class ValueSetExpansionComponentWithCodeAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetCodeAccumulator {
+
 	@Override
 	public void includeCode(String theSystem, String theCode, String theDisplay) {
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();

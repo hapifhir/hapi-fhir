@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.util;
+package ca.uhn.fhir.jpa.model.util;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server
+ * HAPI FHIR Model
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -147,4 +147,69 @@ public class JpaConstants {
 	 * Operation name for the "$snapshot" operation
 	 */
 	public static final String OPERATION_SNAPSHOT = "$snapshot";
+
+	/**
+	 * Operation name for the "$binary-access" operation
+	 */
+	public static final String OPERATION_BINARY_ACCESS_READ = "$binary-access-read";
+
+	/**
+	 * Operation name for the "$binary-access" operation
+	 */
+	public static final String OPERATION_BINARY_ACCESS_WRITE = "$binary-access-write";
+
+	/**
+	 * <p>
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Subscription.channel</code> element
+	 * </p>
+	 */
+	public static final String EXT_SUBSCRIPTION_SUBJECT_TEMPLATE = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-subject-template";
+
+	/**
+	 * This extension URL indicates whether a REST HOOK delivery should
+	 * include the version ID when delivering.
+	 * <p>
+	 * This extension should be of type <code>boolean</code> and should be
+	 * placed on the <code>Subscription.channel</code> element.
+	 * </p>
+	 */
+	public static final String EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-strip-version-ids";
+
+	/**
+	 * This extension URL indicates whether a REST HOOK delivery should
+	 * reload the resource and deliver the latest version always. This
+	 * could be useful for example if a resource which triggers a
+	 * subscription gets updated many times in short succession and there
+	 * is no value in delivering the older versions.
+	 * <p>
+	 * Note that if the resource is now deleted, this may cause
+	 * the delivery to be cancelled altogether.
+	 * </p>
+	 *
+	 * <p>
+	 * This extension should be of type <code>boolean</code> and should be
+	 * placed on the <code>Subscription.channel</code> element.
+	 * </p>
+	 */
+	public static final String EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION = "http://hapifhir.io/fhir/StructureDefinition/subscription-resthook-deliver-latest-version";
+
+	/**
+	 * Indicate which strategy will be used to match this subscription
+	 */
+	public static final String EXT_SUBSCRIPTION_MATCHING_STRATEGY = "http://hapifhir.io/fhir/StructureDefinition/subscription-matching-strategy";
+
+	/**
+	 * <p>
+	 * This extension should be of type <code>string</code> and should be
+	 * placed on the <code>Subscription.channel</code> element
+	 * </p>
+	 */
+	public static final String EXT_SUBSCRIPTION_EMAIL_FROM = "http://hapifhir.io/fhir/StructureDefinition/subscription-email-from";
+
+	/**
+	 * Extension ID for external binary references
+	 */
+	public static final String EXT_ATTACHMENT_EXTERNAL_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/attachment-external-binary-id";
+
 }
