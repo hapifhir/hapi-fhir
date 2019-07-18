@@ -36,7 +36,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
 
 @Table(name = "TRM_VALUESET_CONCEPT", indexes = {
-	@Index(name = "IDX_VALUESET_CONCEPT_CS_CD", columnList = "SYSTEM, CODEVAL")
+	@Index(name = "IDX_VALUESET_CONCEPT_CS_CD", columnList = "SYSTEM_URL, CODEVAL")
 })
 @Entity()
 public class TermValueSetConcept implements Serializable {
