@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
@@ -344,6 +345,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
+			await().until(()->mySearchResultDao.count() == 2);
 			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
 			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());
 		});

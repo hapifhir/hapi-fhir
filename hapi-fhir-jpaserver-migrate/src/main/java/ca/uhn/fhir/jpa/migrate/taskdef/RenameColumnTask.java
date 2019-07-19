@@ -34,6 +34,11 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private String myOldName;
 	private String myNewName;
 	private boolean myAllowNeitherColumnToExist;
+	private boolean myDeleteTargetColumnFirstIfBothExist;
+
+	public void setDeleteTargetColumnFirstIfBothExist(boolean theDeleteTargetColumnFirstIfBothExist) {
+		myDeleteTargetColumnFirstIfBothExist = theDeleteTargetColumnFirstIfBothExist;
+	}
 
 	public void setOldName(String theOldName) {
 		Validate.notBlank(theOldName);
@@ -51,15 +56,19 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 		boolean haveOldName = columnNames.contains(myOldName.toUpperCase());
 		boolean haveNewName = columnNames.contains(myNewName.toUpperCase());
 		if (haveOldName && haveNewName) {
-			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
-		}
-		if (!haveOldName && !haveNewName) {
+			if (myDeleteTargetColumnFirstIfBothExist) {
+				ourLog.info("Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+				String sql = DropColumnTask.createSql(getTableName(), myNewName);
+				executeSql(getTableName(), sql);
+			} else {
+				throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
+			}
+		} else if (!haveOldName && !haveNewName) {
 			if (isAllowNeitherColumnToExist()) {
 				return;
 			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
-		}
-		if (haveNewName) {
+		} else if (haveNewName) {
 			ourLog.info("Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
 		}
@@ -94,11 +103,11 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 
 	}
 
-	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
-		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
-	}
-
 	public boolean isAllowNeitherColumnToExist() {
 		return myAllowNeitherColumnToExist;
+	}
+
+	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
+		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
 	}
 }

@@ -327,6 +327,11 @@
 				resource as the resource type in order to hold a JSONPatch or XMLPatch body)
 				has been added to the JPA server.
 			</action>
+			<action type="fix" issue="1390">
+				Two issues in the Thymeleaf Narrative Template which caused an error when generating
+				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
+				user @navyflower for reporting!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

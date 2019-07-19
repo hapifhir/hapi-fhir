@@ -137,6 +137,12 @@ public class BaseMigrationTasks<T extends Enum> {
 				addTask(task);
 			}
 
+			public void dropThisTable() {
+				DropTableTask task = new DropTableTask();
+				task.setTableName(myTableName);
+				addTask(task);
+			}
+
 			public BuilderAddIndexWithName addIndex(String theIndexName) {
 				return new BuilderAddIndexWithName(theIndexName);
 			}
@@ -168,15 +174,16 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			public BuilderWithTableName renameColumn(String theOldName, String theNewName) {
-				return renameColumn(theOldName, theNewName, false);
+				return renameColumn(theOldName, theNewName, false, false);
 			}
 
-			public BuilderWithTableName renameColumn(String theOldName, String theNewName, boolean theAllowNeitherColumnToExist) {
+			public BuilderWithTableName renameColumn(String theOldName, String theNewName, boolean theAllowNeitherColumnToExist, boolean theDeleteTargetColumnFirstIfBothEixst) {
 				RenameColumnTask task = new RenameColumnTask();
 				task.setTableName(myTableName);
 				task.setOldName(theOldName);
 				task.setNewName(theNewName);
 				task.setAllowNeitherColumnToExist(theAllowNeitherColumnToExist);
+				task.setDeleteTargetColumnFirstIfBothExist(theDeleteTargetColumnFirstIfBothEixst);
 				addTask(task);
 				return this;
 			}

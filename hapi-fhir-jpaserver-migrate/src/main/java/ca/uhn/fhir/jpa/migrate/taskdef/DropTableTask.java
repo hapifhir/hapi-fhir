@@ -21,36 +21,37 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.intellij.lang.annotations.Language;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
 
-public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
+public class DropTableTask extends BaseTableTask<DropTableTask> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
-
+	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 
 	@Override
 	public void execute() throws SQLException {
-		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
-		if (!columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} does not exist on table {} - No action performed", getColumnName(), getTableName());
+		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
+		if (!tableNames.contains(getTableName())) {
 			return;
 		}
 
-		String tableName = getTableName();
-		String columnName = getColumnName();
-		String sql = createSql(tableName, columnName);
-		ourLog.info("Dropping column {} on table {}", getColumnName(), getTableName());
+		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
+		for (String nextIndex : indexNames) {
+			String sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
+			ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+			executeSql(getTableName(), sql);
+		}
+
+		ourLog.info("Dropping table: {}", getTableName());
+
+		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
+
 	}
 
-	@Language("SQL")
-	static String createSql(String theTableName, String theColumnName) {
-		return "alter table " + theTableName + " drop column " + theColumnName;
-	}
 
 }

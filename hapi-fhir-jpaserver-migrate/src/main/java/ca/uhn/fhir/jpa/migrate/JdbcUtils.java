@@ -41,10 +41,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static org.thymeleaf.util.StringUtils.toUpperCase;
 
@@ -56,25 +53,37 @@ public class JdbcUtils {
 	 */
 	public static Set<String> getIndexNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 
+		if (!getTableNames(theConnectionProperties).contains(theTableName)) {
+			return Collections.emptySet();
+		}
+
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
 			return theConnectionProperties.getTxTemplate().execute(t -> {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
 
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
-
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-
 						String indexName = indexes.getString("INDEX_NAME");
 						indexName = toUpperCase(indexName, Locale.US);
 						indexNames.add(indexName);
 					}
 
+					indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), true, false);
+					while (indexes.next()) {
+						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
+						String indexName = indexes.getString("INDEX_NAME");
+						indexName = toUpperCase(indexName, Locale.US);
+						indexNames.add(indexName);
+					}
+
+					indexNames.removeIf(i -> i == null);
 					return indexNames;
+
 				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}
