@@ -31,17 +31,6 @@ import java.util.Set;
 public class DropTableTask extends BaseTableTask<DropTableTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
-	private String myIndexName;
-
-	@Override
-	public void validate() {
-		super.validate();
-		Validate.notBlank(myIndexName, "The index name must not be blank");
-
-		if (getDescription() == null) {
-			setDescription("Drop index " + myIndexName + " on table " + getTableName());
-		}
-	}
 
 	@Override
 	public void execute() throws SQLException {
