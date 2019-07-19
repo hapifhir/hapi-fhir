@@ -322,6 +322,11 @@
 				words in MySQL. The database migrator tool has been updated to handle this 
 				change.
 			</action>
+			<action type="add">
+				Support for PATCH operations performed within a transaction (using a Binary
+				resource as the resource type in order to hold a JSONPatch or XMLPatch body)
+				has been added to the JPA server.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

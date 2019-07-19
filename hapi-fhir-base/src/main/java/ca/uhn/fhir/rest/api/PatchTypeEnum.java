@@ -21,13 +21,16 @@ package ca.uhn.fhir.rest.api;
  */
 
 import ca.uhn.fhir.rest.annotation.Patch;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 
 /**
  * Parameter type for methods annotated with {@link Patch}
  */
 public enum PatchTypeEnum {
 
-	JSON_PATCH(Constants.CT_JSON_PATCH), XML_PATCH(Constants.CT_XML_PATCH);
+	JSON_PATCH(Constants.CT_JSON_PATCH),
+	XML_PATCH(Constants.CT_XML_PATCH);
 
 	private final String myContentType;
 
@@ -39,4 +42,19 @@ public enum PatchTypeEnum {
 		return myContentType;
 	}
 
+	public static PatchTypeEnum forContentTypeOrThrowInvalidRequestException(String theContentType) {
+		String contentType = theContentType;
+		int semiColonIdx = contentType.indexOf(';');
+		if (semiColonIdx != -1) {
+			contentType = theContentType.substring(0, semiColonIdx);
+		}
+		contentType = contentType.trim();
+		if (Constants.CT_JSON_PATCH.equals(contentType)) {
+			return JSON_PATCH;
+		} else if (Constants.CT_XML_PATCH.equals(contentType)) {
+			return XML_PATCH;
+		} else {
+			throw new InvalidRequestException("Invalid Content-Type for PATCH operation: " + UrlUtil.sanitizeUrlPart(theContentType));
+		}
+	}
 }
