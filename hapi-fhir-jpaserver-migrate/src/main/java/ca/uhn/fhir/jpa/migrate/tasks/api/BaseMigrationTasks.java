@@ -137,6 +137,12 @@ public class BaseMigrationTasks<T extends Enum> {
 				addTask(task);
 			}
 
+			public void dropThisTable() {
+				DropTableTask task = new DropTableTask();
+				task.setTableName(myTableName);
+				addTask(task);
+			}
+
 			public BuilderAddIndexWithName addIndex(String theIndexName) {
 				return new BuilderAddIndexWithName(theIndexName);
 			}

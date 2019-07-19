@@ -67,6 +67,8 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 			return;
 		}
 
+		ourLog.info("Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
+
 		String unique = myUnique ? "unique " : "";
 		String columns = String.join(", ", myColumns);
 		String sql = "create " + unique + "index " + myIndexName + " on " + getTableName() + "(" + columns + ")";

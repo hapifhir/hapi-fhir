@@ -62,13 +62,19 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
 
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
-
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
+						String indexName = indexes.getString("INDEX_NAME");
+						indexName = toUpperCase(indexName, Locale.US);
+						indexNames.add(indexName);
+					}
 
+					indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), true, false);
+					while (indexes.next()) {
+						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
 						String indexName = indexes.getString("INDEX_NAME");
 						indexName = toUpperCase(indexName, Locale.US);
 						indexNames.add(indexName);
