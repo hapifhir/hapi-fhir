@@ -48,6 +48,28 @@ public class RenameColumnTaskTest extends BaseTest {
 	}
 
 	@Test
+	public void testBothExistDeleteTargetFirstDataExistsInSourceAndTarget() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
+		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
+
+		RenameColumnTask task = new RenameColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setDescription("Drop an index");
+		task.setOldName("myTextCol");
+		task.setNewName("TEXTCOL");
+		task.setDeleteTargetColumnFirstIfBothExist(true);
+		getMigrator().addTask(task);
+
+		try {
+			getMigrator().migrate();
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
+		}
+
+	}
+
+	@Test
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, myTextCol varchar(255))");
 
