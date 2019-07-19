@@ -9,9 +9,9 @@ package org.hl7.fhir.dstu3.hapi.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
+import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
@@ -121,11 +122,15 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         entry.getRequest().getUrlElement().setValue(next.getId());
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
+
     }
 
-		/*
-       * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IBaseResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);
@@ -195,7 +200,7 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
         includedResources.addAll(addedResourcesThisPass);
 
         // Linked resources may themselves have linked resources
-        references = new ArrayList<ResourceReferenceInfo>();
+        references = new ArrayList<>();
         for (IAnyResource iResource : addedResourcesThisPass) {
           List<ResourceReferenceInfo> newReferences = myContext.newTerser().getAllResourceReferences(iResource);
           references.addAll(newReferences);
@@ -212,16 +217,38 @@ public class Dstu3BundleFactory implements IVersionSpecificBundleFactory {
           entry.getRequest().setUrl(id.getValue());
         }
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
 
+      // Populate Bundle.entry.response
+      if (theBundleType != null) {
+        switch (theBundleType) {
+          case BATCH_RESPONSE:
+          case TRANSACTION_RESPONSE:
+            if ("1".equals(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("201 Created");
+            } else if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("200 OK");
+            }
+            if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            }
+            break;
+        }
+      }
+
+      // Populate Bundle.entry.search
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
       if (searchMode != null) {
         entry.getSearch().getModeElement().setValueAsString(searchMode);
       }
+
     }
 
-		/*
-		 * Actually add the resources to the bundle
-		 */
+    /*
+     * Actually add the resources to the bundle
+     */
     for (IAnyResource next : includedResources) {
       BundleEntryComponent entry = myBundle.addEntry();
       entry.setResource((Resource) next).getSearch().setMode(SearchEntryMode.INCLUDE);

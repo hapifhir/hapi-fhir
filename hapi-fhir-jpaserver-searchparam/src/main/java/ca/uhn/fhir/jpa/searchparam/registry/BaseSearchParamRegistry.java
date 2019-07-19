@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.registry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,11 +23,17 @@ package ca.uhn.fhir.jpa.searchparam.registry;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -41,6 +47,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -62,6 +69,9 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private volatile Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> myActiveParamNamesToUniqueSearchParams = Collections.emptyMap();
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 	private volatile long myLastRefresh;
+
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
 	public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
@@ -121,6 +131,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	private void populateActiveSearchParams(Map<String, Map<String, RuntimeSearchParam>> theActiveSearchParams) {
+
 		Map<String, List<JpaRuntimeSearchParam>> activeUniqueSearchParams = new HashMap<>();
 		Map<String, Map<Set<String>, List<JpaRuntimeSearchParam>>> activeParamNamesToUniqueSearchParams = new HashMap<>();
 
@@ -133,7 +144,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextResourceNameToEntries : theActiveSearchParams.entrySet()) {
 			List<JpaRuntimeSearchParam> uniqueSearchParams = activeUniqueSearchParams.computeIfAbsent(nextResourceNameToEntries.getKey(), k -> new ArrayList<>());
 			Collection<RuntimeSearchParam> nextSearchParamsForResourceName = nextResourceNameToEntries.getValue().values();
+
+			ourLog.trace("Resource {} has {} params", nextResourceNameToEntries.getKey(), nextResourceNameToEntries.getValue().size());
+
 			for (RuntimeSearchParam nextCandidate : nextSearchParamsForResourceName) {
+
+				ourLog.trace("Resource {} has parameter {} with ID {}", nextResourceNameToEntries.getKey(), nextCandidate.getName(), nextCandidate.getId());
 
 				if (nextCandidate.getId() != null) {
 					idToRuntimeSearchParam.put(nextCandidate.getId().toUnqualifiedVersionless().getValue(), nextCandidate);
@@ -150,6 +166,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 		}
 
+		ourLog.trace("Have {} search params loaded", idToRuntimeSearchParam.size());
+
 		Set<String> haveSeen = new HashSet<>();
 		for (JpaRuntimeSearchParam next : jpaSearchParams) {
 			if (!haveSeen.add(next.getId().toUnqualifiedVersionless().getValue())) {
@@ -164,17 +182,25 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					next.getCompositeOf().add(componentTarget);
 					paramNames.add(componentTarget.getName());
 				} else {
-					ourLog.warn("Search parameter {} refers to unknown component {}", next.getId().toUnqualifiedVersionless().getValue(), nextRef);
+					String existingParams = idToRuntimeSearchParam
+						.keySet()
+						.stream()
+						.sorted()
+						.collect(Collectors.joining(", "));
+					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
+					ourLog.warn(message);
+
+					// Interceptor broadcast: JPA_PERFTRACE_WARNING
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, null)
+						.add(ServletRequestDetails.class, null)
+						.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 				}
 			}
 
 			if (next.getCompositeOf() != null) {
-				next.getCompositeOf().sort(new Comparator<RuntimeSearchParam>() {
-					@Override
-					public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
-						return StringUtils.compare(theO1.getName(), theO2.getName());
-					}
-				});
+				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
 					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
 						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());
@@ -187,30 +213,16 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			}
 		}
 
+		ourLog.trace("Have {} unique search params", activeParamNamesToUniqueSearchParams.size());
+
 		myActiveUniqueSearchParams = activeUniqueSearchParams;
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
 	}
 
 	@PostConstruct
 	public void postConstruct() {
-		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
-
-		Set<String> resourceNames = myFhirContext.getResourceNames();
-
-		for (String resourceName : resourceNames) {
-			RuntimeResourceDefinition nextResDef = myFhirContext.getResourceDefinition(resourceName);
-			String nextResourceName = nextResDef.getName();
-			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
-			resourceNameToSearchParams.put(nextResourceName, nameToParam);
-
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-				nameToParam.put(nextSp.getName(), nextSp);
-			}
-		}
-
-		myBuiltInSearchParams = Collections.unmodifiableMap(resourceNameToSearchParams);
+		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
 	}
-
 
 	public int doRefresh(long theRefreshInterval) {
 		if (System.currentTimeMillis() - theRefreshInterval > myLastRefresh) {
@@ -230,12 +242,15 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			IBundleProvider allSearchParamsBp = mySearchParamProvider.search(params);
 			int size = allSearchParamsBp.size();
 
+			ourLog.trace("Loaded {} search params from the DB", size);
+
 			// Just in case..
 			if (size >= MAX_MANAGED_PARAM_COUNT) {
 				ourLog.warn("Unable to support >" + MAX_MANAGED_PARAM_COUNT + " search params!");
 				size = MAX_MANAGED_PARAM_COUNT;
 			}
 
+			int overriddenCount = 0;
 			List<IBaseResource> allSearchParams = allSearchParamsBp.getResources(0, size);
 			for (IBaseResource nextResource : allSearchParams) {
 				SP nextSp = (SP) nextResource;
@@ -257,10 +272,13 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 					String name = runtimeSp.getName();
 					if (myModelConfig.isDefaultSearchParamsCanBeOverridden() || !searchParamMap.containsKey(name)) {
 						searchParamMap.put(name, runtimeSp);
+						overriddenCount++;
 					}
 
 				}
 			}
+
+			ourLog.trace("Have overridden {} built-in search parameters", overriddenCount);
 
 			Map<String, Map<String, RuntimeSearchParam>> activeSearchParams = new HashMap<>();
 			for (Map.Entry<String, Map<String, RuntimeSearchParam>> nextEntry : searchParams.entrySet()) {
@@ -328,7 +346,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 	int refreshCacheWithRetry() {
 		Retrier<Integer> refreshCacheRetrier = new Retrier(() -> {
-			synchronized(BaseSearchParamRegistry.this) {
+			synchronized (BaseSearchParamRegistry.this) {
 				return mySearchParamProvider.refreshCache(this, REFRESH_INTERVAL);
 			}
 		}, MAX_RETRIES);
@@ -351,5 +369,23 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
+	}
+
+	public static Map<String, Map<String, RuntimeSearchParam>> createBuiltInSearchParamMap(FhirContext theFhirContext) {
+		Map<String, Map<String, RuntimeSearchParam>> resourceNameToSearchParams = new HashMap<>();
+
+		Set<String> resourceNames = theFhirContext.getResourceNames();
+
+		for (String resourceName : resourceNames) {
+			RuntimeResourceDefinition nextResDef = theFhirContext.getResourceDefinition(resourceName);
+			String nextResourceName = nextResDef.getName();
+			HashMap<String, RuntimeSearchParam> nameToParam = new HashMap<>();
+			resourceNameToSearchParams.put(nextResourceName, nameToParam);
+
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				nameToParam.put(nextSp.getName(), nextSp);
+			}
+		}
+		return Collections.unmodifiableMap(resourceNameToSearchParams);
 	}
 }

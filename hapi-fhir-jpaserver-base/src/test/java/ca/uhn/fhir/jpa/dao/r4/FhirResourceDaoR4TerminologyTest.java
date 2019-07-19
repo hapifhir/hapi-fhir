@@ -27,6 +27,7 @@ import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -222,7 +223,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
 	}
 
@@ -253,12 +254,17 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	public void testConceptTimestamps() {
 		long start = System.currentTimeMillis() - 10;
 
+		runInTransaction(() -> {
+			List<TermConcept> concepts = myTermConceptDao.findAll();
+			assertThat(concepts, empty());
+		});
+
 		createExternalCsDogs();
 
 		runInTransaction(() -> {
 			List<TermConcept> concepts = myTermConceptDao.findAll();
 			for (TermConcept next : concepts) {
-				assertTrue(next.getUpdated().getTime() > start);
+				assertTrue(new InstantType(new Date(next.getUpdated().getTime())) + " <= " + new InstantType(new Date(start)), next.getUpdated().getTime() > start);
 			}
 		});
 	}

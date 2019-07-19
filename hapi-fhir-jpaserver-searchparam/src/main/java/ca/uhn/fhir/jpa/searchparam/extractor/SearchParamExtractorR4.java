@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -58,6 +59,23 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR4.class);
+	private static final Set<Class<?>> ourIgnoredForSearchDatatypes;
+
+	static {
+		//noinspection unchecked
+		ourIgnoredForSearchDatatypes = Collections.unmodifiableSet(Sets.newHashSet(
+			Age.class,
+			Annotation.class,
+			Attachment.class,
+			Count.class,
+			Distance.class,
+			Ratio.class,
+			SampledData.class,
+			Signature.class,
+			LocationPositionComponent.class
+		));
+	}
+
 	@Autowired
 	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
 
@@ -80,6 +98,17 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
 			String nextValueString = nextValue.getSystemElement().getValueAsString();
 			String nextValueCode = nextValue.getCode();
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
+			nextEntity.setResource(theEntity);
+			retVal.add(nextEntity);
+		}
+	}
+
+	private void addMoney(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Money nextValue) {
+		if (!nextValue.getValueElement().isEmpty()) {
+			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
+			String nextValueString = "urn:iso:std:iso:4217";
+			String nextValueCode = nextValue.getCurrency();
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
@@ -188,6 +217,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 							if (firstValue == null) {
 								firstValue = nextEvent.getValueAsString();
 							}
+						}
+					}
+					if (nextValue.getRepeat().hasBounds()) {
+						if (nextValue.getRepeat().getBoundsPeriod().getStart() != null) {
+							dates.add(nextValue.getRepeat().getBoundsPeriod().getStart());
+						}
+						if (nextValue.getRepeat().getBoundsPeriod().getEnd() != null) {
+							dates.add(nextValue.getRepeat().getBoundsPeriod().getEnd());
 						}
 					}
 					if (dates.isEmpty()) {
@@ -352,11 +389,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				if (nextObject instanceof Quantity) {
 					Quantity nextValue = (Quantity) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue);
+				} else if (nextObject instanceof Money) {
+					Money nextValue = (Money) nextObject;
+					addMoney(theEntity, retVal, resourceName, nextValue);
 				} else if (nextObject instanceof Range) {
 					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
 					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
-				} else if (nextObject instanceof LocationPositionComponent) {
+				} else if (ourIgnoredForSearchDatatypes.contains(nextObject.getClass())) {
 					continue;
 				} else {
 					if (!multiType) {
@@ -747,15 +787,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		myValidationSupport = theValidationSupport;
 	}
 
-	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
-		if (theBoundCode.getValue() != null) {
-			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
-		}
-		return null;
-	}
-
-
 	private class SearchParamExtractorR4HostServices implements FHIRPathEngine.IEvaluationContext {
+
+		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
 
 		@Override
 		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
@@ -787,8 +821,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			return null;
 		}
 
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
-
 		@Override
 		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
 
@@ -810,7 +842,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
 				if (resourceType != null) {
-					retVal = new Resource(){
+					retVal = new Resource() {
 						@Override
 						public Resource copy() {
 							return this;
@@ -837,6 +869,13 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
 			return false;
 		}
+	}
+
+	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
+		if (theBoundCode.getValue() != null) {
+			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
+		}
+		return null;
 	}
 
 }

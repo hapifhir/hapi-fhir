@@ -158,8 +158,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return provideStructureDefinitionMap(theContext).get(url);
   }
 
-  ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-    return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+  @Override
+  public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+    return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
   }
 
   public void flush() {
@@ -171,6 +172,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
     CodeSystem cs = fetchCodeSystem(theContext, theSystem);
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
+  }
+
+  @Override
+  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+    return null;
   }
 
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {

@@ -1,0 +1,12 @@
+<th:block xmlns:th="http://www.thymeleaf.org">
+
+   <!--/* Try to pick the best title from what's available */-->
+   <th:block th:if="${not resource.code.textElement.empty} or ${resource.code.coding.empty}" th:text="${resource.code.textElement.value}"/>
+   <th:block th:if="${not resource.code.coding.empty} and ${resource.code.textElement.empty} and ${not resource.code.coding[0].displayElement.empty}" th:text="${resource.code.coding[0].display}"/>
+   <th:block th:if="${not resource.code.coding.empty} and ${resource.code.textElement.empty} and     ${resource.code.coding[0].displayElement.empty}" th:text="Untitled Diagnostic Report"/>
+
+   <th:block th:each="element : ${resource.entry}">
+      <th:narrative th:name="diagnosticreport" th:element="${element.getResource()}"/>
+   </th:block>
+
+</th:block>

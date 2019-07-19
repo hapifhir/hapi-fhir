@@ -66,12 +66,11 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 
 	}
 
+	// FIXME KHS see
 	@Test
 	@Ignore
 	public void testTranslations() throws DataFormatException {
 		CustomThymeleafNarrativeGenerator customGen = new CustomThymeleafNarrativeGenerator("classpath:/testnarrativee.properties");
-		customGen.setIgnoreFailures(false);
-		customGen.setIgnoreMissingTemplates(false);
 
 		FhirContext ctx = FhirContext.forR4();
 		ctx.setNarrativeGenerator(customGen);
@@ -107,7 +106,8 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		});
 
 		Narrative narrative = new Narrative();
-		customGen.generateNarrative(ctx, value, narrative);
+// FIXME KHS use template system provided by Thymeleaf
+		//		customGen.generateNarrative(ctx, value, narrative);
 		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("Some beautiful proze"));

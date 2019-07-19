@@ -38,7 +38,7 @@ public class ExampleRestfulServlet extends RestfulServer {
 		 * Two resource providers are defined. Each one handles a specific
 		 * type of resource.
 		 */
-		List<IResourceProvider> providers = new ArrayList<IResourceProvider>();
+		List<IResourceProvider> providers = new ArrayList<>();
 		providers.add(new PatientResourceProvider());
 		providers.add(new OrganizationResourceProvider());
 		setResourceProviders(providers);

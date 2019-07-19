@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,15 +54,15 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 
-	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
 
 		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 
 		ExpungeOutcome outcome;
 		if (theIdParam != null) {
-			outcome = getDao().expunge(theIdParam, options);
+			outcome = getDao().expunge(theIdParam, options, theRequest);
 		} else {
-			outcome = getDao().expunge(options);
+			outcome = getDao().expunge(options, theRequest);
 		}
 
 		return createExpungeResponse(outcome);
@@ -115,10 +115,10 @@ public abstract class BaseJpaResourceProvider<T extends IBaseResource> extends B
 	}
 
 	@Patch
-	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
+	public DaoMethodOutcome patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl,  RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
 		startRequest(theRequest);
 		try {
-			return myDao.patch(theId, thePatchType, theBody, theRequestDetails);
+			return myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

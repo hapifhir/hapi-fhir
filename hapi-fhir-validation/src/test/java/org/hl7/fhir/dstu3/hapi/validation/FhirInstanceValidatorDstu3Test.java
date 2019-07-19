@@ -23,8 +23,13 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
+import org.hl7.fhir.dstu3.utils.StructureMapUtilities;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
@@ -64,6 +69,7 @@ public class FhirInstanceValidatorDstu3Test {
 	private HashMap<String, StructureDefinition> myStructureDefinitions;
 	private HashMap<String, CodeSystem> myCodeSystems;
 	private HashMap<String, ValueSet> myValueSets;
+	private HashMap<String, Questionnaire> myQuestionnaires;
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -102,8 +108,12 @@ public class FhirInstanceValidatorDstu3Test {
 		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
-				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
-				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] {theInvocation.getArguments()[1], retVal});
+				String url = (String) theInvocation.getArguments()[1];
+				boolean retVal = myValidSystems.contains(url);
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] {url, retVal});
+				if (retVal == false) {
+					retVal = myCodeSystems.containsKey(url);
+				}
 				return retVal;
 			}
 		});
@@ -114,7 +124,7 @@ public class FhirInstanceValidatorDstu3Test {
 				Class<?> type = (Class<?>) theInvocation.getArguments()[1];
 				String id = (String) theInvocation.getArguments()[2];
 				if ("Questionnaire/q_jon".equals(id)) {
-					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/q_jon.json")));
+					retVal = ourCtx.newJsonParser().parseResource(IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/q_jon.json"), Charsets.UTF_8));
 				} else {
 
 					if (StructureDefinition.class.equals(type)) {
@@ -126,13 +136,16 @@ public class FhirInstanceValidatorDstu3Test {
 					if (CodeSystem.class.equals(type)) {
 						retVal = myCodeSystems.get(id);
 					}
+					if (Questionnaire.class.equals(type)) {
+						retVal = myQuestionnaires.get(id);
+					}
 
 					if (retVal == null) {
 						retVal = myDefaultValidationSupport.fetchResource((FhirContext) theInvocation.getArguments()[0], (Class<IBaseResource>) theInvocation.getArguments()[1], id);
 					}
 				}
 				if (retVal == null) {
-					ourLog.info("fetchResource({}, {}) : {}", new Object[] {type, id, retVal});
+					ourLog.info("fetchResource({}, {}) : {}", type, id, retVal);
 				}
 				return retVal;
 			}
@@ -146,6 +159,10 @@ public class FhirInstanceValidatorDstu3Test {
 				CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+				} else if (myCodeSystems.containsKey(system)) {
+					CodeSystem cs = myCodeSystems.get(system);
+					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
+					retVal = found.map(t->new CodeValidationResult(t)).orElse(null);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
 				}
@@ -174,6 +191,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myStructureDefinitions = new HashMap<>();
 		myValueSets = new HashMap<>();
 		myCodeSystems = new HashMap<>();
+		myQuestionnaires = new HashMap<>();
 		when(myMockSupport.fetchStructureDefinition(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<StructureDefinition>() {
 			@Override
 			public StructureDefinition answer(InvocationOnMock theInvocation) {
@@ -202,7 +220,11 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	private String loadResource(String theFileName) throws IOException {
-		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName));
+		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName), Charsets.UTF_8);
+	}
+
+	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {
+		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnAll(ValidationResult theOutput) {
@@ -290,6 +312,94 @@ public class FhirInstanceValidatorDstu3Test {
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome, empty());
 
+	}
+
+	@Test
+	public void testValidateQuestionnaire() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc01-cs-binderrecommended.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc01-vs-binderrecommended.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc01-vs-yesnounk.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc01-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc01-questionnaireresponse.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
+		assertThat(errors, empty());
+
+	}
+
+	@Test
+	public void testValidateQuestionnaire03() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc03-cs-binderrecommend.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc03-vs-binderrecommend.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc03-vs-fmcyesno.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc03-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc03-questionnaireresponse.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(result);
+		assertThat(errors, empty());
+
+	}
+
+	@Test
+	public void testValidateQuestionnaireWithEnableWhenAndSubItems_ShouldNotBeEnabled() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc02-cs-binderrecomm.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc02-vs-binderrecomm.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc01-vs-yesnounk.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc02-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc02-questionnaireresponse-01.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
+		assertThat(errors.get(0).getMessage(), containsString("Item has answer, even though it is not enabled BO_ConsDrop"));
+		assertEquals(1, errors.size());
+	}
+
+	@Test
+	public void testValidateQuestionnaireWithEnableWhenAndSubItems_ShouldBeEnabled() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc02-cs-binderrecomm.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc02-vs-binderrecomm.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc01-vs-yesnounk.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc02-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc02-questionnaireresponse-02.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
+		assertThat(errors, empty());
 	}
 
 	/**

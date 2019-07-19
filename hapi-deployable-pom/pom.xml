@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -139,9 +139,14 @@
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbyclient</artifactId>
 						</dependency>
+						<dependency>
+							<groupId>org.checkerframework</groupId>
+							<artifactId>checker-compat-qual</artifactId>
+						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
-						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
+						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
+						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
@@ -198,7 +203,6 @@
 							<linksource>true</linksource>
 							<verbose>false</verbose>
 							<debug>false</debug>
-							<additionalparam>-Xdoclint:none</additionalparam>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
 						</configuration>
 						<executions>
@@ -236,6 +240,7 @@
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
+									<trimHeaderLine>true</trimHeaderLine>
 									<roots>
 										<root>src/main/java</root>
 									</roots>

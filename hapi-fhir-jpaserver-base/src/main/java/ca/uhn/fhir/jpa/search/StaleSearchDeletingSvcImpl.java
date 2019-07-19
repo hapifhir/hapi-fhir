@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.search;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -131,7 +131,7 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 1000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 2000))
 		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
@@ -148,8 +148,10 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			long total = tt.execute(t -> mySearchDao.count());
-			ourLog.debug("Deleted {} searches, {} remaining", count, total);
+			if (ourLog.isDebugEnabled()) {
+				long total = tt.execute(t -> mySearchDao.count());
+				ourLog.debug("Deleted {} searches, {} remaining", count, total);
+			}
 		}
 
 	}

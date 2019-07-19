@@ -32,7 +32,7 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	private volatile boolean myInitialized;
 	protected HashMap<String, String> myNameToNarrativeTemplate;
 
-	@Override
+//	@Override
 	public void generateNarrative(FhirContext theFhirContext, IBaseResource theResource, INarrative theNarrative) {
 		String name = getName(theFhirContext, theResource);
 		if (name == null) return;

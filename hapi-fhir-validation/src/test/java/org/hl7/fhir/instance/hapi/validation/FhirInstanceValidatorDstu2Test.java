@@ -14,15 +14,15 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.Observation;
-import org.hl7.fhir.instance.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.Questionnaire;
-import org.hl7.fhir.instance.model.Questionnaire.AnswerFormat;
-import org.hl7.fhir.instance.model.QuestionnaireResponse;
-import org.hl7.fhir.instance.model.QuestionnaireResponse.QuestionnaireResponseStatus;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.Observation;
+import org.hl7.fhir.dstu2.model.Observation.ObservationStatus;
+import org.hl7.fhir.dstu2.model.Questionnaire;
+import org.hl7.fhir.dstu2.model.Questionnaire.AnswerFormat;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse;
+import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.dstu2.model.Reference;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -123,11 +123,11 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testParametersHl7OrgDstu2() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("resource").setResource(patient);
 
 		FhirValidator val = ourCtxHl7OrgDstu2.newValidator();
@@ -203,11 +203,11 @@ public class FhirInstanceValidatorDstu2Test {
 
 	@Test
 	public void testParametersWithTwoParameters() {
-		org.hl7.fhir.instance.model.Patient patient = new org.hl7.fhir.instance.model.Patient();
+		org.hl7.fhir.dstu2.model.Patient patient = new org.hl7.fhir.dstu2.model.Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
-		org.hl7.fhir.instance.model.Parameters input = new org.hl7.fhir.instance.model.Parameters();
+		org.hl7.fhir.dstu2.model.Parameters input = new org.hl7.fhir.dstu2.model.Parameters();
 		input.addParameter().setName("mode").setValue(new StringType("create"));
 		input.addParameter().setName("resource").setResource(patient);
 

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.interceptor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +40,7 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
+@Interceptor
 public class LoggingInterceptor implements IClientInterceptor {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(LoggingInterceptor.class);
 
@@ -72,7 +76,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 	}
 
-	@Override
+	@Hook(Pointcut.CLIENT_REQUEST)
 	public void interceptRequest(IHttpRequest theRequest) {
 		if (myLogRequestSummary) {
 			myLog.info("Client request: {}", theRequest);
@@ -97,7 +101,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 	}
 
-	@Override
+	@Hook(Pointcut.CLIENT_RESPONSE)
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {
 			String message = "HTTP " + theResponse.getStatus() + " " + theResponse.getStatusInfo();

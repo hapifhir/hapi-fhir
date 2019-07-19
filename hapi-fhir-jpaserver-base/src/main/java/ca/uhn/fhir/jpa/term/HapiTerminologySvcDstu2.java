@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,9 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -38,18 +38,18 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
-	private void addAllChildren(String theSystemString, org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private void addAllChildren(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
 			theListToPopulate.add(new VersionIndependentConcept(theSystemString, theCode.getCode()));
 		}
-		for (org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent nextChild : theCode.getConcept()) {
+		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent nextChild : theCode.getConcept()) {
 			addAllChildren(theSystemString, nextChild, theListToPopulate);
 		}
 	}
 
-	private boolean addTreeIfItContainsCode(String theSystemString, org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+	private boolean addTreeIfItContainsCode(String theSystemString, org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent theNext, String theCode, List<VersionIndependentConcept> theListToPopulate) {
 		boolean foundCodeInChild = false;
-		for (org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent nextChild : theNext.getConcept()) {
+		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent nextChild : theNext.getConcept()) {
 			foundCodeInChild |= addTreeIfItContainsCode(theSystemString, nextChild, theCode, theListToPopulate);
 		}
 
@@ -87,13 +87,18 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		throw new UnsupportedOperationException();
 	}
 
-	private void findCodesAbove(org.hl7.fhir.instance.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
-		for (org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
+	private void findCodesAbove(org.hl7.fhir.dstu2.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
+		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
 			addTreeIfItContainsCode(theSystemString, next, theCode, theListToPopulate);
 		}
 	}
@@ -101,20 +106,20 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesAboveUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.instance.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		if (system != null) {
 			findCodesAbove(system, theSystem, theCode, retVal);
 		}
 		return retVal;
 	}
 
-	private void findCodesBelow(org.hl7.fhir.instance.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
-		List<org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
+	private void findCodesBelow(org.hl7.fhir.dstu2.model.ValueSet theSystem, String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate) {
+		List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList = theSystem.getCodeSystem().getConcept();
 		findCodesBelow(theSystemString, theCode, theListToPopulate, conceptList);
 	}
 
-	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent> conceptList) {
-		for (org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
+	private void findCodesBelow(String theSystemString, String theCode, List<VersionIndependentConcept> theListToPopulate, List<org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent> conceptList) {
+		for (org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent next : conceptList) {
 			if (theCode.equals(next.getCode())) {
 				addAllChildren(theSystemString, next, theListToPopulate);
 			} else {
@@ -126,7 +131,7 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	@Override
 	public List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode) {
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
-		org.hl7.fhir.instance.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		org.hl7.fhir.dstu2.model.ValueSet system = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		if (system != null) {
 			findCodesBelow(system, theSystem, theCode, retVal);
 		}

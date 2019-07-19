@@ -1,10 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.r4.model.Subscription;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -50,6 +53,22 @@ public class CanonicalSubscriptionTest {
 		assertThat(s2.getChannelExtensions("key2"), Matchers.contains("VALUE2a", "VALUE2b"));
 		assertThat(s2.getChannelExtensions("key3"), Matchers.empty());
 		assertTrue(s2.equals(s));
+	}
+
+	@Test
+	public void emailDetailsEquals() {
+		SubscriptionCanonicalizer<Subscription> canonicalizer = new SubscriptionCanonicalizer<>(FhirContext.forR4());
+		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
+		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
+		assertTrue(sub1.equals(sub2));
+	}
+
+	private Subscription makeEmailSubscription() {
+		Subscription retval = new Subscription();
+		Subscription.SubscriptionChannelComponent channel = new Subscription.SubscriptionChannelComponent();
+		channel.setType(Subscription.SubscriptionChannelType.EMAIL);
+		retval.setChannel(channel);
+		return retval;
 	}
 
 	private CanonicalSubscription serializeAndDeserialize(CanonicalSubscription theSubscription) throws IOException {

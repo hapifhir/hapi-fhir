@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.apache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -93,9 +93,14 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 
 			// @formatter:off
 			//TODO: Use of a deprecated method should be resolved.
-			RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(getSocketTimeout())
-					.setConnectTimeout(getConnectTimeout()).setConnectionRequestTimeout(getConnectionRequestTimeout())
-					.setStaleConnectionCheckEnabled(true).setProxy(myProxy).build();
+			RequestConfig defaultRequestConfig =
+				RequestConfig.custom()
+					.setSocketTimeout(getSocketTimeout())
+					.setConnectTimeout(getConnectTimeout())
+					.setConnectionRequestTimeout(getConnectionRequestTimeout())
+					.setStaleConnectionCheckEnabled(true)
+					.setProxy(myProxy)
+					.build();
 
 			HttpClientBuilder builder = HttpClients.custom().setConnectionManager(connectionManager)
 					.setDefaultRequestConfig(defaultRequestConfig).disableCookieManagement();

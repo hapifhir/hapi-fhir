@@ -123,6 +123,9 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
         entry.getRequest().getMethodElement().setValueAsString(httpVerb);
         entry.getRequest().getUrlElement().setValue(next.getId());
       }
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
+      }
     }
 
     /*
@@ -216,17 +219,29 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
           entry.getRequest().setUrl(id.getValue());
         }
       }
-
-      // Populate Response
-      if ("1".equals(id.getVersionIdPart())) {
-        entry.getResponse().setStatus("201 Created");
-      } else if (isNotBlank(id.getVersionIdPart())) {
-        entry.getResponse().setStatus("200 OK");
-      }
-      if (isNotBlank(id.getVersionIdPart())) {
-        entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+      if ("DELETE".equals(httpVerb)) {
+        entry.setResource(null);
       }
 
+      // Populate Bundle.entry.response
+      if (theBundleType != null) {
+        switch (theBundleType) {
+          case BATCH_RESPONSE:
+          case TRANSACTION_RESPONSE:
+          case HISTORY:
+            if ("1".equals(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("201 Created");
+            } else if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setStatus("200 OK");
+            }
+            if (isNotBlank(id.getVersionIdPart())) {
+              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            }
+            break;
+        }
+      }
+
+      // Populate Bundle.entry.search
       String searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(nextAsResource);
       if (searchMode != null) {
         entry.getSearch().getModeElement().setValueAsString(searchMode);

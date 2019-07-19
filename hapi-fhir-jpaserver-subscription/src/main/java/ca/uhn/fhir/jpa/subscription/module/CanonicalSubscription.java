@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,10 +29,10 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
@@ -173,6 +173,10 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		return retVal;
 	}
 
+	public String getIdPart() {
+		return new IdType(getIdElementString()).getIdPart();
+	}
+
 	public String getIdElementString() {
 		return myIdElement;
 	}
@@ -303,6 +307,28 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			EmailDetails that = (EmailDetails) theO;
+
+			return new EqualsBuilder()
+				.append(myFrom, that.myFrom)
+				.append(mySubjectTemplate, that.mySubjectTemplate)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myFrom)
+				.append(mySubjectTemplate)
+				.toHashCode();
 		}
 	}
 

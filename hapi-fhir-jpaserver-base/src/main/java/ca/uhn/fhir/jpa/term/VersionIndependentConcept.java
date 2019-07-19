@@ -81,4 +81,9 @@ public class VersionIndependentConcept implements Comparable<VersionIndependentC
 		b.append(myCode, theOther.getCode());
 		return b.toComparison();
 	}
+
+	@Override
+	public String toString() {
+		return "[" + mySystem + "|" + myCode + "]";
+	}
 }

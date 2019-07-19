@@ -58,12 +58,16 @@ public class FluentPathR4 implements IFluentPath {
 
   @Override
   public IExpressionNode parse(String path) {
-    return myEngine.parse(path);
+    // FIXME KHS
+//    return myEngine.parse(path);
+    return null;
   }
 
   @Override
   public IExpressionNodeWithOffset parsePartial(String path, int offset) {
-    return myEngine.parsePartial(path, offset);
+    // FIXME KHS
+//    return myEngine.parsePartial(path, offset);
+    return null;
   }
 
   @Override
@@ -90,7 +94,9 @@ public class FluentPathR4 implements IFluentPath {
 
   @Override
   public INarrativeConstantMap createLiquidIncludeMap() {
-    return new Tuple();
+    return null;
+    // FIXME KHS
+//    return new Tuple();
   }
 
   @Override

@@ -1,15 +1,14 @@
 package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.interceptor.api.Hook;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Interceptor;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.*;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -19,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.annotation.PreDestroy;
 
@@ -31,9 +32,9 @@ import javax.annotation.PreDestroy;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,19 +45,19 @@ import javax.annotation.PreDestroy;
 
 @Component
 @Lazy
-@Interceptor(manualRegistration = true)
+@Interceptor()
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
-	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
-
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	private SubscribableChannel myProcessingChannel;
-
+	protected SubscribableChannel myMatchingChannel;
+	@Autowired
+	protected SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);
 	@Autowired
 	private FhirContext myFhirContext;
 	@Autowired
 	private SubscriptionMatchingSubscriber mySubscriptionMatchingSubscriber;
 	@Autowired
-	private SubscriptionChannelFactory mySubscriptionChannelFactory;
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	/**
 	 * Constructor
@@ -66,11 +67,11 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	}
 
 	public void start() {
-		if (myProcessingChannel == null) {
-			myProcessingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		if (myMatchingChannel == null) {
+			myMatchingChannel = mySubscriptionChannelFactory.newMatchingChannel(SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 		}
-		myProcessingChannel.subscribe(mySubscriptionMatchingSubscriber);
-		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myProcessingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
+		myMatchingChannel.subscribe(mySubscriptionMatchingSubscriber);
+		ourLog.info("Subscription Matching Subscriber subscribed to Matching Channel {} with name {}", myMatchingChannel.getClass().getName(), SUBSCRIPTION_MATCHING_CHANNEL_NAME);
 
 	}
 
@@ -78,44 +79,43 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	@PreDestroy
 	public void preDestroy() {
 
-		if (myProcessingChannel != null) {
-			myProcessingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
+		if (myMatchingChannel != null) {
+			myMatchingChannel.unsubscribe(mySubscriptionMatchingSubscriber);
 		}
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_CREATED)
-	public void resourceCreated(IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+	public void resourceCreated(IBaseResource theResource, RequestDetails theRequest) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.CREATE, theRequest);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_DELETED)
-	public void resourceDeleted(IBaseResource theResource) {
-		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)
+	public void resourceDeleted(IBaseResource theResource, RequestDetails theRequest) {
+		submitResourceModified(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
-	@Hook(Pointcut.OP_PRECOMMIT_RESOURCE_UPDATED)
-	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource) {
-		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
+	public void resourceUpdated(IBaseResource theOldResource, IBaseResource theNewResource, RequestDetails theRequest) {
+		submitResourceModified(theNewResource, ResourceModifiedMessage.OperationTypeEnum.UPDATE, theRequest);
 	}
 
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType) {
+	private void submitResourceModified(IBaseResource theNewResource, ResourceModifiedMessage.OperationTypeEnum theOperationType, RequestDetails theRequest) {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theNewResource, theOperationType);
-
 		// Interceptor call: SUBSCRIPTION_RESOURCE_MODIFIED
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, msg)) {
+		HookParams params = new HookParams()
+			.add(ResourceModifiedMessage.class, msg);
+		boolean outcome = JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequest, Pointcut.SUBSCRIPTION_RESOURCE_MODIFIED, params);
+		if (!outcome) {
 			return;
 		}
 
 		submitResourceModified(msg);
 	}
 
-	private void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
+	protected void sendToProcessingChannel(final ResourceModifiedMessage theMessage) {
 		ourLog.trace("Sending resource modified message to processing channel");
-		Validate.notNull(myProcessingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
-		myProcessingChannel.send(new ResourceModifiedJsonMessage(theMessage));
+		Validate.notNull(myMatchingChannel, "A SubscriptionMatcherInterceptor has been registered without calling start() on it.");
+		myMatchingChannel.send(new ResourceModifiedJsonMessage(theMessage));
 	}
 
 	public void setFhirContext(FhirContext theCtx) {
@@ -127,11 +127,30 @@ public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer
 	 */
 	@Override
 	public void submitResourceModified(final ResourceModifiedMessage theMsg) {
-		sendToProcessingChannel(theMsg);
+		/*
+		 * We only want to submit the message to the processing queue once the
+		 * transaction is committed. We do this in order to make sure that the
+		 * data is actually in the DB, in case it's the database matcher.
+		 */
+		if (TransactionSynchronizationManager.isSynchronizationActive()) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+				@Override
+				public int getOrder() {
+					return 0;
+				}
+
+				@Override
+				public void afterCommit() {
+					sendToProcessingChannel(theMsg);
+				}
+			});
+		} else {
+			sendToProcessingChannel(theMsg);
+		}
 	}
 
 	@VisibleForTesting
 	LinkedBlockingQueueSubscribableChannel getProcessingChannelForUnitTest() {
-		return (LinkedBlockingQueueSubscribableChannel) myProcessingChannel;
+		return (LinkedBlockingQueueSubscribableChannel) myMatchingChannel;
 	}
 }

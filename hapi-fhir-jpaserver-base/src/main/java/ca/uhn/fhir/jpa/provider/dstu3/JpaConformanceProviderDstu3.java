@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,8 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
@@ -38,6 +40,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider {
 
@@ -76,7 +79,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 	}
 
 	@Override
-	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
+	public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
 		CapabilityStatement retVal = myCachedValue;
 
 		Map<String, Long> counts = null;
@@ -85,7 +88,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		}
 		counts = defaultIfNull(counts, Collections.emptyMap());
 
-		retVal = super.getServerConformance(theRequest);
+		retVal = super.getServerConformance(theRequest, theRequestDetails);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
 
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
@@ -149,6 +152,15 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		}
 
 		massage(retVal);
+
+		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
+			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
+				Extension websocketExtension = new Extension();
+				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
+				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
+				retVal.getRestFirstRep().addExtension(websocketExtension);
+			}
+		}
 
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;

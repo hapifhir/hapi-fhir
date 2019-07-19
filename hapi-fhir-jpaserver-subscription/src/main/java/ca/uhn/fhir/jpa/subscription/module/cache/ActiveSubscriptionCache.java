@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ActiveSubscriptionCache {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ActiveSubscriptionCache.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscriptionCache.class);
 
 	private final Map<String, ActiveSubscription> myCache = new ConcurrentHashMap<>();
 
@@ -49,7 +51,7 @@ class ActiveSubscriptionCache {
 		myCache.put(theSubscriptionId, theValue);
 	}
 
-	public void remove(String theSubscriptionId) {
+	public synchronized void remove(String theSubscriptionId) {
 		Validate.notBlank(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
@@ -57,15 +59,23 @@ class ActiveSubscriptionCache {
 			return;
 		}
 
-		activeSubscription.unregisterAll();
+		activeSubscription.close();
 		myCache.remove(theSubscriptionId);
 	}
 
 	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
 		for (String next : new ArrayList<>(myCache.keySet())) {
-			if (!theAllIds.contains(next)) {
-				ourLog.info("Unregistering Subscription/{}", next);
-				remove(next);
+			ActiveSubscription activeSubscription = myCache.get(next);
+			if (theAllIds.contains(next)) {
+				// In case we got a false positive from a race condition on a previous sync, unset the flag.
+				activeSubscription.setFlagForDeletion(false);
+			} else {
+				if (activeSubscription.isFlagForDeletion()) {
+					ourLog.info("Unregistering Subscription/{}", next);
+					remove(next);
+				} else {
+					activeSubscription.setFlagForDeletion(true);
+				}
 			}
 		}
 	}

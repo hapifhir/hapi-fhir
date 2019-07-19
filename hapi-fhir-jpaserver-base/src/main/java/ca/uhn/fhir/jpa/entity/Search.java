@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -22,9 +24,9 @@ import static org.apache.commons.lang3.StringUtils.left;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,7 +42,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 	@Index(name = "IDX_SEARCH_LASTRETURNED", columnList = "SEARCH_LAST_RETURNED"),
 	@Index(name = "IDX_SEARCH_RESTYPE_HASHS", columnList = "RESOURCE_TYPE,SEARCH_QUERY_STRING_HASH,CREATED")
 })
-public class Search implements Serializable {
+public class Search implements ICachedSearchDetails, Serializable {
 
 	@SuppressWarnings("WeakerAccess")
 	public static final int UUID_COLUMN_LENGTH = 36;
@@ -310,5 +312,10 @@ public class Search implements Serializable {
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
 		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
+	}
+
+	@Override
+	public void setCannotBeReused() {
+		mySearchQueryStringHash = null;
 	}
 }

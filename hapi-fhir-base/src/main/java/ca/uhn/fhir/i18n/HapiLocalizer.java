@@ -1,13 +1,14 @@
 package ca.uhn.fhir.i18n;
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.VersionUtil;
 
 import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -18,9 +19,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,6 +41,7 @@ public class HapiLocalizer {
 	private static boolean ourFailOnMissingMessage;
 	private final Map<String, MessageFormat> myKeyToMessageFormat = new ConcurrentHashMap<>();
 	private List<ResourceBundle> myBundle = new ArrayList<>();
+	private final Map<String, String> myHardcodedMessages = new HashMap<>();
 	private String[] myBundleNames;
 
 	public HapiLocalizer() {
@@ -49,6 +51,15 @@ public class HapiLocalizer {
 	public HapiLocalizer(String... theBundleNames) {
 		myBundleNames = theBundleNames;
 		init();
+		addMessage("hapi.version", VersionUtil.getVersion());
+	}
+
+	/**
+	 * Subclasses may use this to add hardcoded messages
+	 */
+	@SuppressWarnings("WeakerAccess")
+	protected void addMessage(String theKey, String theMessage) {
+		myHardcodedMessages.put(theKey, theMessage);
 	}
 
 	public Set<String> getAllKeys() {
@@ -67,14 +78,16 @@ public class HapiLocalizer {
 	 */
 	@SuppressWarnings("WeakerAccess")
 	public String getFormatString(String theQualifiedKey) {
-		String formatString = null;
-		for (ResourceBundle nextBundle : myBundle) {
-			if (nextBundle.containsKey(theQualifiedKey)) {
-				formatString = nextBundle.getString(theQualifiedKey);
-				formatString = trim(formatString);
-			}
-			if (isNotBlank(formatString)) {
-				break;
+		String formatString = myHardcodedMessages.get(theQualifiedKey);
+		if (isBlank(formatString)) {
+			for (ResourceBundle nextBundle : myBundle) {
+				if (nextBundle.containsKey(theQualifiedKey)) {
+					formatString = nextBundle.getString(theQualifiedKey);
+					formatString = trim(formatString);
+				}
+				if (isNotBlank(formatString)) {
+					break;
+				}
 			}
 		}
 
@@ -92,6 +105,20 @@ public class HapiLocalizer {
 		return getMessage(toKey(theType, theKey), theParameters);
 	}
 
+	/**
+	 * Create the message and sanitize parameters using {@link }
+	 */
+	public String getMessageSanitized(Class<?> theType, String theKey, Object... theParameters) {
+		if (theParameters != null) {
+			for (int i = 0; i < theParameters.length; i++) {
+				if (theParameters[i] instanceof CharSequence) {
+					theParameters[i] = UrlUtil.sanitizeUrlPart((CharSequence) theParameters[i]);
+				}
+			}
+		}
+		return getMessage(toKey(theType, theKey), theParameters);
+	}
+
 	public String getMessage(String theQualifiedKey, Object... theParameters) {
 		if (theParameters != null && theParameters.length > 0) {
 			MessageFormat format = myKeyToMessageFormat.get(theQualifiedKey);
@@ -101,11 +128,34 @@ public class HapiLocalizer {
 
 			String formatString = getFormatString(theQualifiedKey);
 
-			format = new MessageFormat(formatString.trim());
+			format = newMessageFormat(formatString);
 			myKeyToMessageFormat.put(theQualifiedKey, format);
 			return format.format(theParameters);
 		}
 		return getFormatString(theQualifiedKey);
+	}
+
+	MessageFormat newMessageFormat(String theFormatString) {
+		StringBuilder pattern = new StringBuilder(theFormatString.trim());
+
+
+		for (int i = 0; i < (pattern.length()-1); i++) {
+			if (pattern.charAt(i) == '{') {
+				char nextChar = pattern.charAt(i+1);
+				if (nextChar >= '0' && nextChar <= '9') {
+					continue;
+				}
+
+				pattern.replace(i, i+1, "'{'");
+				int closeBraceIndex = pattern.indexOf("}", i);
+				if (closeBraceIndex > 0) {
+					i = closeBraceIndex;
+					pattern.replace(i, i+1, "'}'");
+				}
+			}
+		}
+
+		return new MessageFormat(pattern.toString());
 	}
 
 	protected void init() {

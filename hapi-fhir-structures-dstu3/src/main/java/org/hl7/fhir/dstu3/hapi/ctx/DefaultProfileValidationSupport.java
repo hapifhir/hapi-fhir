@@ -155,8 +155,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return retVal;
 	}
 
-	ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
 	}
 
 	public void flush() {
@@ -291,5 +292,10 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
+
+  @Override
+  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+    return null;
+  }
 
 }

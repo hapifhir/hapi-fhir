@@ -11,9 +11,9 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,8 +33,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 public class HasParam extends BaseParam implements IQueryParameterType {
 
 	private static final long serialVersionUID = 1L;
-	
-	private String myOwningFieldName;
+
+	private String myReferenceFieldName;
 	private String myParameterName;
 	private String myParameterValue;
 	private String myTargetResourceType;
@@ -44,10 +44,10 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 	}
 
 
-	public HasParam(String theTargetResourceType, String theOwningFieldName, String theParameterName, String theParameterValue) {
+	public HasParam(String theTargetResourceType, String theReferenceFieldName, String theParameterName, String theParameterValue) {
 		this();
 		myTargetResourceType = theTargetResourceType;
-		myOwningFieldName = theOwningFieldName;
+		myReferenceFieldName = theReferenceFieldName;
 		myParameterName = theParameterName;
 		myParameterValue = theParameterValue;
 	}
@@ -75,13 +75,13 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 		validateColon(qualifier, colonIndex1);
 		
 		myTargetResourceType = qualifier.substring(1, colonIndex0);
-		myOwningFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
+		myReferenceFieldName = qualifier.substring(colonIndex0 + 1, colonIndex1);
 		myParameterName = qualifier.substring(colonIndex1 + 1);
 		myParameterValue = theValue;
 	}
 
-	public String getOwningFieldName() {
-		return myOwningFieldName;
+	public String getReferenceFieldName() {
+		return myReferenceFieldName;
 	}
 
 	public String getParameterName() {
