@@ -130,9 +130,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			// Don't allow the core FHIR definitions to be overwritten
-			String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
-			if (myR4Ctx.getElementDefinition(typeName) != null) {
-				return null;
+			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
+				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (myR4Ctx.getElementDefinition(typeName) != null) {
+					return null;
+				}
 			}
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);

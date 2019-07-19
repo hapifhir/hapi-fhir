@@ -308,6 +308,9 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		if (theSetData) {
 			attachment.setData(SOME_BYTES_2);
 		}
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(documentReference));
+
 		return ourClient.create().resource(documentReference).execute().getId().toUnqualifiedVersionless();
 	}
 
