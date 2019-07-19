@@ -63,32 +63,35 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init400() {
 		Builder version = forVersion(VersionEnum.V4_0_0);
 
+		// Interim builds used this name
+		version.onTable("TRM_VALUESET_CODE").dropThisTable();
+
 		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySourceValueSet", "SOURCE_VS")
-			.renameColumn("myTargetValueSet", "TARGET_VS");
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySourceValueSet", "SOURCE_VS", false, true)
+			.renameColumn("myTargetValueSet", "TARGET_VS", false, true);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySystem", "SYSTEM_URL")
-			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
-			.renameColumn("myValueSet", "VALUESET_URL");
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySystem", "SYSTEM_URL", false, true)
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
+			.renameColumn("myValueSet", "VALUESET_URL", false, true);
 
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySystem", "SYSTEM_URL")
-			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
-			.renameColumn("myValueSet", "VALUESET_URL");
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySystem", "SYSTEM_URL", false, true)
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
+			.renameColumn("myValueSet", "VALUESET_URL", false, true);
 
 		version.onTable("TRM_VALUESET")
-			.renameColumn("NAME", "VSNAME", true);
+			.renameColumn("NAME", "VSNAME", true, true);
 
 		version.onTable("TRM_VALUESET_CONCEPT")
-			.renameColumn("CODE", "CODEVAL", true)
-			.renameColumn("SYSTEM", "SYSTEM_URL", true);
+			.renameColumn("CODE", "CODEVAL", true, true)
+			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
 
 		version.onTable("TRM_CONCEPT")
-			.renameColumn("CODE", "CODEVAL");
+			.renameColumn("CODE", "CODEVAL", false, true);
 
 		// TermValueSet
 		version.startSectionWithMessage("Processing table: TRM_VALUESET");
@@ -117,12 +120,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VALUESET_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
-		termValueSetConceptTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
-		termValueSetConceptTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
+		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
+		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
 		termValueSetConceptTable
 			.addIndex("IDX_VALUESET_CONCEPT_CS_CD")
 			.unique(false)
-			.withColumns("SYSTEM", "CODE");
+			.withColumns("SYSTEM_URL", "CODEVAL");
 		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
 
 		// TermValueSetConceptDesignation

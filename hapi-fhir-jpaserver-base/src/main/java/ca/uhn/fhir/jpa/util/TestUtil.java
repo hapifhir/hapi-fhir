@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.util;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 import org.apache.commons.io.IOUtils;
@@ -38,10 +39,7 @@ import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Ascii.toUpperCase;
@@ -145,6 +143,13 @@ public class TestUtil {
 	private static void scan(AnnotatedElement theAnnotatedElement, Set<String> theNames, boolean theIsSuperClass) {
 		Table table = theAnnotatedElement.getAnnotation(Table.class);
 		if (table != null) {
+
+			// Banned name because we already used it once
+			ArrayList<String> bannedNames = Lists.newArrayList("CDR_USER_2FA", "TRM_VALUESET_CODE");
+			Validate.isTrue(!bannedNames.contains(table.name().toUpperCase()));
+
+			Validate.isTrue(table.name().toUpperCase().equals(table.name()));
+
 			assertNotADuplicateName(table.name(), theNames);
 			for (UniqueConstraint nextConstraint : table.uniqueConstraints()) {
 				assertNotADuplicateName(nextConstraint.name(), theNames);

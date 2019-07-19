@@ -80,7 +80,9 @@ public class JdbcUtils {
 						indexNames.add(indexName);
 					}
 
+					indexNames.removeIf(i -> i == null);
 					return indexNames;
+
 				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}

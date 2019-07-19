@@ -65,6 +65,9 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 	@Nonnull
 	static String createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
+		Validate.notBlank(theIndexName, "theIndexName must not be blank");
+		Validate.notBlank(theTableName, "theTableName must not be blank");
+
 		boolean isUnique = JdbcUtils.isIndexUnique(theConnectionProperties, theTableName, theIndexName);
 
 		String sql = null;

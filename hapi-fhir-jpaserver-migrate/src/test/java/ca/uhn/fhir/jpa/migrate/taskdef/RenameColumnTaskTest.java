@@ -5,6 +5,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -26,6 +27,24 @@ public class RenameColumnTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
+	}
+
+	@Test
+	public void testBothExistDeleteTargetFirst() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
+
+		RenameColumnTask task = new RenameColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setDescription("Drop an index");
+		task.setOldName("myTextCol");
+		task.setNewName("TEXTCOL");
+		task.setDeleteTargetColumnFirstIfBothExist(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE");
+		assertThat(columnNames.toString(), columnNames, containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
 	@Test
