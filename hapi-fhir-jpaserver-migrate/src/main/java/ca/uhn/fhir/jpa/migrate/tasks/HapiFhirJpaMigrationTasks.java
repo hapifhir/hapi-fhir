@@ -86,10 +86,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_VALUESET")
 			.renameColumn("NAME", "VSNAME", true, true);
 
-		version.onTable("TRM_VALUESET_CONCEPT")
-			.renameColumn("CODE", "CODEVAL", true, true)
-			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
-
 		version.onTable("TRM_CONCEPT")
 			.renameColumn("CODE", "CODEVAL", false, true);
 
@@ -127,6 +123,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("SYSTEM_URL", "CODEVAL");
 		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.renameColumn("CODE", "CODEVAL", true, true)
+			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
 
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");

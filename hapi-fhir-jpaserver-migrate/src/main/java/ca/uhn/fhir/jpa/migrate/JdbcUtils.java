@@ -41,10 +41,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static org.thymeleaf.util.StringUtils.toUpperCase;
 
@@ -55,6 +52,10 @@ public class JdbcUtils {
 	 * Retrieve all index names
 	 */
 	public static Set<String> getIndexNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
+
+		if (!getTableNames(theConnectionProperties).contains(theTableName)) {
+			return Collections.emptySet();
+		}
 
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
