@@ -222,7 +222,7 @@
 						<td style="background: #CEC;">4.0.0</td>
 					</tr>
 					<tr>
-						<td>HAPI FHIR 3.8.0-SNAPSHOT</td>
+						<td>HAPI FHIR 3.8.0</td>
 						<td>JDK8</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
