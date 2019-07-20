@@ -15,6 +15,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Attachment;
+import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.After;
@@ -185,7 +186,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLarge() throws IOException {
+	public void testWriteLargeAttachment() throws IOException {
 		IIdType id = createDocumentReference(false);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -249,7 +250,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary small enough that it shouldn't live in binary storage
 	 */
 	@Test
-	public void testWriteSmall() throws IOException {
+	public void testWriteSmallAttachment() throws IOException {
 		IIdType id = createDocumentReference(false);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -289,6 +290,75 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		verify(interceptor, timeout(5000).times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
 		verify(interceptor, timeout(5000).times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), any());
 		verifyNoMoreInteractions(interceptor);
+
+	}
+
+	/**
+	 * Stores a binary large enough that it should live in binary storage
+	 */
+	@Test
+	public void testWriteLargeBinary() throws IOException {
+		Binary binary = new Binary();
+		binary.setContentType("image/png");
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+
+		IIdType id = ourClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESHOW_RESOURCES, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
+
+		// Read it back using the operation
+
+		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
+			"?path=Binary";
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+		post.addHeader("Accept", "application/fhir+json; _pretty=true");
+		String attachmentId;
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Response: {}", response);
+
+			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+
+			Attachment attachment = ref.getContentFirstRep().getAttachment();
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
+			assertEquals(15, attachment.getSize());
+			assertEquals(null, attachment.getData());
+			assertEquals("2", ref.getMeta().getVersionId());
+			attachmentId = attachment.getExtensionString(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID);
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+
+		}
+
+		verify(interceptor, timeout(5000).times(1)).invoke(eq(Pointcut.STORAGE_PRESHOW_RESOURCES), any());
+		verify(interceptor, timeout(5000).times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), any());
+		verifyNoMoreInteractions(interceptor);
+
+		// Read it back using the operation
+
+		path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_READ +
+			"?path=Binary";
+		HttpGet get = new HttpGet(path);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals("image/jpeg", resp.getEntity().getContentType().getValue());
+			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
+
+			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
+			assertArrayEquals(SOME_BYTES, actualBytes);
+		}
 
 	}
 

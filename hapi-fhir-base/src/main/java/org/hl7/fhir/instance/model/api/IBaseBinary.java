@@ -34,4 +34,7 @@ public interface IBaseBinary extends IBaseResource {
 	IBaseBinary setContentAsBase64(String theContent);
 
 	IBaseBinary setContentType(String theContentType);
+
+	boolean hasData();
+
 }

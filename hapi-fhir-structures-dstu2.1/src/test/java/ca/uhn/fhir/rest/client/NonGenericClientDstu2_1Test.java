@@ -144,7 +144,7 @@ public class NonGenericClientDstu2_1Test {
 		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>", resp);
 		assertEquals("http://example.com/fhir/$validate", capt.getAllValues().get(idx).getURI().toString());
 		String request = extractBodyAsString(capt,idx);
-		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient></resource></parameter></Parameters>", request);
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":[\"FAM\"]}]}}]}", request);
 
 		idx = 1;
 		outcome = client.validate(patient, ValidationModeEnum.CREATE, "http://foo");
