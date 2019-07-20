@@ -15,8 +15,8 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.jpa.util.LoggingRule;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.rest.api.Constants;
@@ -56,7 +56,6 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.TestUtil.randomizeLocale;
@@ -78,6 +77,8 @@ public abstract class BaseJpaTest {
 
 	static {
 		System.setProperty(Constants.TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS, "1000");
+		System.setProperty("test", "true");
+		TestUtil.setShouldRandomizeTimezones(false);
 	}
 
 	@Rule
@@ -94,7 +95,7 @@ public abstract class BaseJpaTest {
 
 	@After
 	public void afterPerformCleanup() {
-		BaseHapiFhirResourceDao.setDisableIncrementOnUpdateForUnitTest(false);
+		BaseHapiFhirDao.setDisableIncrementOnUpdateForUnitTest(false);
 		if (myCaptureQueriesListener != null) {
 			myCaptureQueriesListener.clear();
 		}
@@ -257,7 +258,7 @@ public abstract class BaseJpaTest {
 		if (theFirstCall) {
 			bundleProvider = theFound;
 		} else {
-			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(theFound.getUuid());
+			bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, theFound.getUuid());
 		}
 
 		List<IBaseResource> resources = bundleProvider.getResources(theFromIndex, theToIndex);
@@ -268,7 +269,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (Entry next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getId().toUnqualifiedVersionless());
@@ -311,7 +312,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(List<? extends IBaseResource> theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (IBaseResource next : theFound) {
 			retVal.add(next.getIdElement().toUnqualifiedVersionless());
 		}
@@ -327,7 +328,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.dstu3.model.Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
@@ -337,7 +338,7 @@ public abstract class BaseJpaTest {
 	}
 
 	protected List<IIdType> toUnqualifiedVersionlessIds(org.hl7.fhir.r4.model.Bundle theFound) {
-		List<IIdType> retVal = new ArrayList<IIdType>();
+		List<IIdType> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.Bundle.BundleEntryComponent next : theFound.getEntry()) {
 			// if (next.getResource()!= null) {
 			retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
@@ -347,11 +348,11 @@ public abstract class BaseJpaTest {
 	}
 
 	protected String[] toValues(IIdType... theValues) {
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (IIdType next : theValues) {
 			retVal.add(next.getValue());
 		}
-		return retVal.toArray(new String[retVal.size()]);
+		return retVal.toArray(new String[0]);
 	}
 
 	@BeforeClass
@@ -380,11 +381,10 @@ public abstract class BaseJpaTest {
 		if (bundleRes == null) {
 			throw new NullPointerException("Can not load " + resource);
 		}
-		String bundleStr = IOUtils.toString(bundleRes);
-		return bundleStr;
+		return IOUtils.toString(bundleRes, Constants.CHARSET_UTF8);
 	}
 
-	public static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
+	protected static void purgeDatabase(DaoConfig theDaoConfig, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportSvc theBulkDataExportSvc) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataExportSvc.cancelAndPurgeAllJobs();
@@ -394,7 +394,7 @@ public abstract class BaseJpaTest {
 
 		for (int count = 0; ; count++) {
 			try {
-				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true));
+				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
 				break;
 			} catch (Exception e) {
 				if (count >= 3) {
@@ -414,7 +414,7 @@ public abstract class BaseJpaTest {
 		theSearchParamRegistry.forceRefresh();
 	}
 
-	public static Set<String> toCodes(Set<TermConcept> theConcepts) {
+	protected static Set<String> toCodes(Set<TermConcept> theConcepts) {
 		HashSet<String> retVal = new HashSet<>();
 		for (TermConcept next : theConcepts) {
 			retVal.add(next.getCode());
@@ -422,8 +422,8 @@ public abstract class BaseJpaTest {
 		return retVal;
 	}
 
-	public static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
-		HashSet<String> retVal = new HashSet<String>();
+	protected static Set<String> toCodes(List<VersionIndependentConcept> theConcepts) {
+		HashSet<String> retVal = new HashSet<>();
 		for (VersionIndependentConcept next : theConcepts) {
 			retVal.add(next.getCode());
 		}
@@ -453,20 +453,6 @@ public abstract class BaseJpaTest {
 				})
 				.collect(Collectors.joining(", "));
 			fail("Size " + theList.size() + " is != target " + theTarget + " - Got: " + describeResults);
-		}
-	}
-
-	public static void waitForTrue(Supplier<Boolean> theList) {
-		StopWatch sw = new StopWatch();
-		while (!theList.get() && sw.getMillis() <= 16000) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException theE) {
-				throw new Error(theE);
-			}
-		}
-		if (sw.getMillis() >= 16000) {
-			fail("Waited " + sw.toString() + " and is still false");
 		}
 	}
 

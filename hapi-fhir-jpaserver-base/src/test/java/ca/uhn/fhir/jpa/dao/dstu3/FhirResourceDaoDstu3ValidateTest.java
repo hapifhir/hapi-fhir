@@ -426,6 +426,23 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testValidateUsingDifferentialProfile() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		myStructureDefinitionDao.create(sd);
+
+		Patient p = new Patient();
+		p.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/MyPatient421");
+		p.setActive(true);
+
+		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("OO: {}", encoded);
+		assertThat(encoded, containsString("No issues detected"));
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

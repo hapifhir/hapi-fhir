@@ -7,9 +7,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 
-import org.hl7.fhir.instance.model.IdType;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Reference;
+import org.hl7.fhir.dstu2.model.IdType;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.Reference;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

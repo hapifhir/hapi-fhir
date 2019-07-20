@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -35,9 +36,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -130,6 +131,11 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		return super.expandValueSet(valueSetToExpand);
 	}
 
+	@Override
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
+		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
+	}
 
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
@@ -224,11 +230,17 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		return null;
+	}
+
 	@CoverageIgnore
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TermConcept code = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (code != null) {
+		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+		if (codeOpt.isPresent()) {
+			TermConcept code = codeOpt.get();
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());

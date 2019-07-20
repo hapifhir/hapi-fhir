@@ -1,32 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.*;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -34,59 +7,50 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.*;
 
 /**
  * Created by dsotnikov on 2/25/2014.
  */
 public class BinaryDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static Binary ourLast;
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryDstu2Test.class);
-
 	private static int ourPort;
 
 	private static Server ourServer;
-
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		ResourceProvider binaryProvider = new ResourceProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(binaryProvider);
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-
-		int timeout = 5;
-		RequestConfig config = RequestConfig.custom()
-			.setConnectTimeout(timeout * 1000)
-			.setConnectionRequestTimeout(timeout * 1000)
-			.setSocketTimeout(timeout * 1000).build();
-
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.setDefaultRequestConfig(config).build();
-
-	}
 
 	@Before
 	public void before() {
@@ -107,14 +71,14 @@ public class BinaryDstu2Test {
 
 			Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
 	@Test
 	public void testReadWithExplicitTypeJson() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo?_format=json");
-		try (CloseableHttpResponse response = ourClient.execute(httpGet)){
+		try (CloseableHttpResponse response = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
 			IOUtils.closeQuietly(response.getEntity().getContent());
 
@@ -125,7 +89,7 @@ public class BinaryDstu2Test {
 
 			Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
 			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[] { 1, 2, 3, 4 }, bin.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
 		}
 	}
 
@@ -133,13 +97,13 @@ public class BinaryDstu2Test {
 	@Test
 	public void testPostBinary() throws Exception {
 		HttpPost http = new HttpPost("http://localhost:" + ourPort + "/Binary");
-		http.setEntity(new ByteArrayEntity(new byte[] { 1, 2, 3, 4 }, ContentType.create("foo/bar", "UTF-8")));
+		http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
-		try (CloseableHttpResponse response = ourClient.execute(http)){
+		try (CloseableHttpResponse response = ourClient.execute(http)) {
 			assertEquals(201, response.getStatusLine().getStatusCode());
 
 			assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-			assertArrayEquals(new byte[] { 1, 2, 3, 4 }, ourLast.getContent());
+			assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
 		}
 	}
 
@@ -147,7 +111,7 @@ public class BinaryDstu2Test {
 	@Test
 	public void testPostFhirBinary() throws Exception {
 		Binary res = new Binary();
-		res.setContent(new byte[] { 1, 2, 3, 4 });
+		res.setContent(new byte[]{1, 2, 3, 4});
 		res.setContentType("text/plain");
 		String stringContent = ourCtx.newJsonParser().encodeResourceToString(res);
 
@@ -259,7 +223,7 @@ public class BinaryDstu2Test {
 		public Binary read(@IdParam IdDt theId) {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType(theId.getIdPart());
 			return retVal;
 		}
@@ -268,9 +232,46 @@ public class BinaryDstu2Test {
 		public List<Binary> search() {
 			Binary retVal = new Binary();
 			retVal.setId("1");
-			retVal.setContent(new byte[] { 1, 2, 3, 4 });
+			retVal.setContent(new byte[]{1, 2, 3, 4});
 			retVal.setContentType("text/plain");
 			return Collections.singletonList(retVal);
 		}
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		ResourceProvider binaryProvider = new ResourceProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(binaryProvider);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+
+		int timeout = 5;
+		RequestConfig config = RequestConfig.custom()
+			.setConnectTimeout(timeout * 1000)
+			.setConnectionRequestTimeout(timeout * 1000)
+			.setSocketTimeout(timeout * 1000).build();
+
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.setDefaultRequestConfig(config).build();
+
 	}
 }

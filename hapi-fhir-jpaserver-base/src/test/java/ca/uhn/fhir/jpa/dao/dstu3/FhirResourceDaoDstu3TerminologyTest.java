@@ -1,31 +1,13 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import java.util.*;
-
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
-import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
-import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu3.model.ValueSet.*;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -35,6 +17,25 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
+import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
+import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptReferenceComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionContainsComponent;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -226,7 +227,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			myCodeSystemDao.create(codeSystem, mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Can not create multiple code systems with URI \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertEquals("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
 		}
 	}
 

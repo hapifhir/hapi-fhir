@@ -13,7 +13,6 @@ import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInter
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.util.PortUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -184,7 +183,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		// Create a subscription
 		CountDownLatch registerLatch = registerLatchHookInterceptor(1, Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 		Subscription subscription = newSubscription("Observation?status=final", "application/fhir+json");
-		subscription.getChannel().setEndpoint("http://localhost:" + PortUtil.findFreePort()); // this better not succeed!
+		subscription.getChannel().setEndpoint("http://localhost:" + ourListenerPort + "/this/url/does/not/exist"); // this better not succeed!
 
 		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
 		subscription.setId(methodOutcome.getId().getIdPart());

@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -25,6 +24,8 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 public class ExportConceptMapToCsvCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandR4Test.class);
 	private static final String CM_URL = "http://example.com/conceptmap";
@@ -33,7 +34,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	private static final String CS_URL_1 = "http://example.com/codesystem/1";
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
-	private static final String FILE = "./target/output.csv";
+	private static final String FILE = new File("./target/output.csv").getAbsolutePath();
 
 	private static String ourBase;
 	private static IGenericClient ourClient;
@@ -48,14 +49,13 @@ public class ExportConceptMapToCsvCommandR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler servletHandler = new ServletHandler();
 
@@ -67,7 +67,8 @@ public class ExportConceptMapToCsvCommandR4Test {
 		servletHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(servletHandler);
 
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourBase = "http://localhost:" + ourPort;
 

@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class OperationGenericServerR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServerR4Test.class);
@@ -270,18 +272,18 @@ public class OperationGenericServerR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forR4();
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
 
@@ -291,7 +293,8 @@ public class OperationGenericServerR4Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

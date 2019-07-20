@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -164,7 +164,7 @@ public class ValidateCommand extends BaseCommand {
 					}
 
 					if (localProfileResource != null) {
-						org.hl7.fhir.instance.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.instance.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
+						org.hl7.fhir.dstu2.model.StructureDefinition convertedSd = FhirContext.forDstu2Hl7Org().newXmlParser().parseResource(org.hl7.fhir.dstu2.model.StructureDefinition.class, ctx.newXmlParser().encodeResourceToString(localProfileResource));
 						instanceValidator.setStructureDefintion(convertedSd);
 					}
 					if (theCommandLine.hasOption("r")) {

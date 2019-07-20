@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.matcher;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 
 public interface ISubscriptionMatcher {
-	SubscriptionMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
+	InMemoryMatchResult match(CanonicalSubscription subscription, ResourceModifiedMessage msg);
 }

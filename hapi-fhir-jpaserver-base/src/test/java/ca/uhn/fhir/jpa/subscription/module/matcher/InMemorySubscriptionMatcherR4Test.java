@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -32,6 +34,8 @@ public class InMemorySubscriptionMatcherR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InMemorySubscriptionMatcherR4Test.class);
 
 	@Autowired
+	SearchParamMatcher mySearchParamMatcher;
+	@Autowired
 	InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 	@Autowired
 	SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -39,20 +43,20 @@ public class InMemorySubscriptionMatcherR4Test {
 	FhirContext myContext;
 
 	private void assertMatched(Resource resource, SearchParameterMap params) {
-		SubscriptionMatchResult result = match(resource, params);
+		InMemoryMatchResult result = match(resource, params);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertTrue(result.matched());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	private void assertNotMatched(Resource resource, SearchParameterMap params) {
-		SubscriptionMatchResult result = match(resource, params);
+		InMemoryMatchResult result = match(resource, params);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertFalse(result.matched());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
-	private SubscriptionMatchResult match(Resource theResource, SearchParameterMap theParams) {
+	private InMemoryMatchResult match(Resource theResource, SearchParameterMap theParams) {
 		return match(getCriteria(theResource, theParams), theResource);
 	}
 
@@ -60,13 +64,13 @@ public class InMemorySubscriptionMatcherR4Test {
 		return theResource.getResourceType().name() + theParams.toNormalizedQueryString(myContext);
 	}
 
-	private SubscriptionMatchResult match(String criteria, Resource theResource) {
+	private InMemoryMatchResult match(String criteria, Resource theResource) {
 		ourLog.info("Criteria: <{}>", criteria);
-		return myInMemorySubscriptionMatcher.match(criteria, theResource);
+		return mySearchParamMatcher.match(criteria, theResource, null);
 	}
 
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
-		SubscriptionMatchResult result = match(resource, theParams);
+		InMemoryMatchResult result = match(resource, theParams);
 		assertFalse(result.supported());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
 	}
@@ -397,7 +401,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
 			msg.setSubscriptionId("Subscription/123");
 			msg.setId(new IdType("Patient/ABC"));
-			SubscriptionMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
+			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();
 		} catch (AssertionError e){
 			assertEquals("Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());

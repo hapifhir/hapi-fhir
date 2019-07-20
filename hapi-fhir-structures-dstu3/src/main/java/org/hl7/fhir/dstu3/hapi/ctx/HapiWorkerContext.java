@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
+import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -94,7 +95,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public StructureDefinition fetchTypeDefinition(String theCode) {
-    throw new UnsupportedOperationException();
+    return fetchResource(org.hl7.fhir.dstu3.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theCode);
   }
 
   @Override
@@ -161,6 +162,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public IResourceValidator newValidator() throws FHIRException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public IParser getParser(ParserType theType) {
     throw new UnsupportedOperationException();
   }
@@ -178,6 +184,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     }
     Collections.sort(result);
     return result;
+  }
+
+  @Override
+  public Set<String> getResourceNamesAsSet() {
+    return new HashSet<>(getResourceNames());
   }
 
   @Override

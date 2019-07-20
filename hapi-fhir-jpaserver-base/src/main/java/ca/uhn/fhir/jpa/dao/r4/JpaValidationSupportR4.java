@@ -1,16 +1,23 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.conformance.ProfileUtilities;
+import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -19,6 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -31,9 +39,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -121,8 +129,12 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 				search = myValueSetDao.search(params);
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
+			// Don't allow the core FHIR definitions to be overwritten
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-				return null;
+				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (myR4Ctx.getElementDefinition(typeName) != null) {
+					return null;
+				}
 			}
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
@@ -161,7 +173,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return false;
+		return fetchCodeSystem(theCtx, theSystem) != null;
 	}
 
 	@Override
@@ -180,6 +192,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
 		return null;
 	}
 

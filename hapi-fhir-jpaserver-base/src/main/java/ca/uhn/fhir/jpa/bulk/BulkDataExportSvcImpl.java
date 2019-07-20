@@ -75,9 +75,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private long myFileMaxChars = FileUtils.ONE_MB;
 	private int myRetentionPeriod = (int) DateUtils.MILLIS_PER_DAY;
 
-	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
-	private EntityManager myEntityManager;
-
 	/**
 	 * This method is called by the scheduler to run a pass of the
 	 * generator
@@ -149,7 +146,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 						ourLog.info("Purging bulk data file: {}", nextFile.getResourceId());
 						getBinaryDao().delete(toId(nextFile.getResourceId()));
-						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true));
+						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), null);
 						myBulkExportCollectionFileDao.delete(nextFile);
 
 					}
@@ -187,7 +184,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
 			dao.search(map);
-			try (IResultIterator query = sb.createQuery(map, new SearchRuntimeDetails(theJobUuid))) {
+			try (IResultIterator query = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null)) {
 
 				AtomicInteger counter = new AtomicInteger(0);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -202,7 +199,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 					if (pidsSpool.size() >= 10) {
 
-						sb.loadResourcesByPid(pidsSpool, resourcesSpool, Collections.emptySet(), false, myEntityManager, myContext, dao);
+						sb.loadResourcesByPid(pidsSpool, Collections.emptyList(), resourcesSpool, false, null);
 
 						for (IBaseResource nextFileResource : resourcesSpool) {
 							parser.encodeResourceToWriter(nextFileResource, writer);
@@ -339,6 +336,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Override
 	@Transactional
 	public synchronized void cancelAndPurgeAllJobs() {
+		myBulkExportCollectionFileDao.deleteAll();
+		myBulkExportCollectionDao.deleteAll();
 		myBulkExportJobDao.deleteAll();
 	}
 

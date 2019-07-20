@@ -6,10 +6,10 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.instance.model.DateTimeType;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.Reference;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.DateTimeType;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.Reference;
+import org.hl7.fhir.dstu2.model.StringType;
 
 
 @ResourceDef()
@@ -44,7 +44,7 @@ public class MyPatientHl7Org extends Patient {
 	
 	public List<DateTimeType> getImportantDates() {
 		if (myImportantDates==null) {
-			myImportantDates = new ArrayList<DateTimeType>();
+			myImportantDates = new ArrayList<>();
 		}
 		return myImportantDates;
 	}

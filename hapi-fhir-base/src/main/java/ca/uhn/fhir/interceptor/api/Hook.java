@@ -9,9 +9,9 @@ package ca.uhn.fhir.interceptor.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,9 +26,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This annotation should be placed on
- * {@link Interceptor}
- * bean methods.
+ * This annotation should be placed on interceptor methods. The
+ * {@link Pointcut value=Pointcut} property determines which event
+ * is actually being invoked. See the Pointcut JavaDoc for information
+ * on available method parameters for a given hook.
  *
  * @see Interceptor
  */

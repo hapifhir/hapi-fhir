@@ -53,13 +53,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class FhirInstanceValidatorDstu3Test {
@@ -122,8 +116,12 @@ public class FhirInstanceValidatorDstu3Test {
 		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
 			public Boolean answer(InvocationOnMock theInvocation) {
-				boolean retVal = myValidSystems.contains(theInvocation.getArguments()[1]);
-				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] {theInvocation.getArguments()[1], retVal});
+				String url = (String) theInvocation.getArguments()[1];
+				boolean retVal = myValidSystems.contains(url);
+				ourLog.debug("isCodeSystemSupported({}) : {}", new Object[] {url, retVal});
+				if (retVal == false) {
+					retVal = myCodeSystems.containsKey(url);
+				}
 				return retVal;
 			}
 		});
@@ -155,7 +153,7 @@ public class FhirInstanceValidatorDstu3Test {
 					}
 				}
 				if (retVal == null) {
-					ourLog.info("fetchResource({}, {}) : {}", new Object[] {type, id, retVal});
+					ourLog.info("fetchResource({}, {}) : {}", type, id, retVal);
 				}
 				return retVal;
 			}
@@ -169,6 +167,10 @@ public class FhirInstanceValidatorDstu3Test {
 				CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
+				} else if (myCodeSystems.containsKey(system)) {
+					CodeSystem cs = myCodeSystems.get(system);
+					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
+					retVal = found.map(t->new CodeValidationResult(t)).orElse(null);
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
 				}
@@ -343,6 +345,29 @@ public class FhirInstanceValidatorDstu3Test {
 	}
 
 	@Test
+	public void testValidateQuestionnaire03() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc03-cs-binderrecommend.json", CodeSystem.class);
+		myCodeSystems.put(csBinderRecommended.getUrl(), csBinderRecommended);
+
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc03-vs-binderrecommend.json", ValueSet.class);
+		myValueSets.put(vsBinderRequired.getUrl(), vsBinderRequired);
+		myValueSets.put("ValueSet/" +vsBinderRequired.getIdElement().getIdPart(), vsBinderRequired);
+		ValueSet vsYesNo = loadResource("/dstu3/fmc03-vs-fmcyesno.json", ValueSet.class);
+		myValueSets.put(vsYesNo.getUrl(), vsYesNo);
+		myValueSets.put("ValueSet/" + vsYesNo.getIdElement().getIdPart(), vsYesNo);
+		Questionnaire q = loadResource("/dstu3/fmc03-questionnaire.json", Questionnaire.class);
+		myQuestionnaires.put("Questionnaire/" + q.getIdElement().getIdPart(), q);
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc03-questionnaireresponse.json", QuestionnaireResponse.class);
+		ValidationResult result = myVal.validateWithResult(qr);
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(result);
+		assertThat(errors, empty());
+
+	}
+
+	@Test
 	public void testValidateQuestionnaireWithEnableWhenAndSubItems_ShouldNotBeEnabled() throws IOException {
 		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
 		myCodeSystems.put(csYesNo.getUrl(), csYesNo);
@@ -360,7 +385,7 @@ public class FhirInstanceValidatorDstu3Test {
 		QuestionnaireResponse qr = loadResource("/dstu3/fmc02-questionnaireresponse-01.json", QuestionnaireResponse.class);
 		ValidationResult result = myVal.validateWithResult(qr);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
-		assertThat(errors.get(0).getMessage(), containsString("Item with linkId [BO_ConsDrop] has answer, even though it is not enabled"));
+		assertThat(errors.get(0).getMessage(), containsString("Item has answer, even though it is not enabled BO_ConsDrop"));
 		assertEquals(1, errors.size());
 	}
 

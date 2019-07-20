@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +50,15 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private final Long myResourceId;
 	private final Long myVersion;
 	private final ExpungeOptions myExpungeOptions;
+	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
 
-	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions) {
+	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
 		myResourceId = theResourceId;
 		myVersion = theVersion;
 		myExpungeOptions = theExpungeOptions;
+		myRequestDetails = theRequestDetails;
 		myRemainingCount = new AtomicInteger(myExpungeOptions.getLimit());
 	}
 

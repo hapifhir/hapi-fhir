@@ -5,9 +5,9 @@
 
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
-		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
-		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
+		<artifactId>hapi-fhir-karaf</artifactId>
+		<version>4.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<groupId>ca.uhn.hapi.fhir.karaf</groupId>
@@ -19,6 +19,7 @@
 		<features.file>features.xml</features.file>
 		<pax_logging_version>1.10.1</pax_logging_version>
 		<felix_framework_version>3.2.2</felix_framework_version>
+		<guava_failureaccess_version>1.0.1</guava_failureaccess_version>
 		<osgi_version>6.0.0</osgi_version>
 		<configadmin_version>1.9.10</configadmin_version>
 		<aries_blueprint_api_version>1.0.1</aries_blueprint_api_version>

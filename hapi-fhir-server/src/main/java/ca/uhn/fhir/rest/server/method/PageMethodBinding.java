@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -101,13 +101,13 @@ public class PageMethodBinding extends BaseResourceReturningMethodBinding {
 		if (pageId != null) {
 			// This is a page request by Search ID and Page ID
 
-			resultList = pagingProvider.retrieveResultList(thePagingAction, pageId);
+			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction, pageId);
 			validateHaveBundleProvider(thePagingAction, resultList);
 
 		} else {
 			// This is a page request by Search ID and Offset
 
-			resultList = pagingProvider.retrieveResultList(thePagingAction);
+			resultList = pagingProvider.retrieveResultList(theRequest, thePagingAction);
 			validateHaveBundleProvider(thePagingAction, resultList);
 
 			offsetI = RestfulServerUtils.tryToExtractNamedParameter(theRequest, Constants.PARAM_PAGINGOFFSET);

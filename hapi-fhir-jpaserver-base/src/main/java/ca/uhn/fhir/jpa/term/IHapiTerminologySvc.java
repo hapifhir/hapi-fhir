@@ -1,14 +1,18 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /*
@@ -20,9 +24,9 @@ import java.util.Set;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,14 +41,18 @@ public interface IHapiTerminologySvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
+	void expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+
 	/**
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
 
+	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
-	TermConcept findCode(String theCodeSystem, String theCode);
+	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
 	List<TermConcept> findCodes(String theSystem);
 
@@ -77,11 +85,17 @@ public interface IHapiTerminologySvc {
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 
+	void deleteValueSetAndChildren(ResourceTable theResourceTable);
+
 	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
+
+	void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet);
 
 	boolean supportsSystem(String theCodeSystem);
 
 	List<TermConceptMapGroupElementTarget> translate(TranslationRequest theTranslationRequest);
 
 	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
+
+	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 }

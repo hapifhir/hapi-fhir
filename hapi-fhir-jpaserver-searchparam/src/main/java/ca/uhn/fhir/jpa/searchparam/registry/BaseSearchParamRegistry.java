@@ -34,6 +34,8 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
@@ -192,9 +194,13 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 						.collect(Collectors.joining(", "));
 					String message = "Search parameter " + next.getId().toUnqualifiedVersionless().getValue() + " refers to unknown component " + nextRef + ", ignoring this parameter (valid values: " + existingParams + ")";
 					ourLog.warn(message);
-					StorageProcessingMessage msg = new StorageProcessingMessage().setMessage(message);
-					HookParams params = new HookParams(msg);
-					myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PROCESSING_MESSAGE, params);
+
+					// Interceptor broadcast: JPA_PERFTRACE_WARNING
+					HookParams params = new HookParams()
+						.add(RequestDetails.class, null)
+						.add(ServletRequestDetails.class, null)
+						.add(StorageProcessingMessage.class, new StorageProcessingMessage().setMessage(message));
+					myInterceptorBroadcaster.callHooks(Pointcut.JPA_PERFTRACE_WARNING, params);
 				}
 			}
 

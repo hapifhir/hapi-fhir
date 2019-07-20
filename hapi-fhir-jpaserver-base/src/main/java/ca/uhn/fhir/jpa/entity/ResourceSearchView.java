@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -47,7 +48,7 @@ import java.util.Date;
 	",  h.res_updated       as res_updated    " +
 	",  h.res_text          as res_text       " +
 	",  h.res_encoding      as res_encoding   " +
-	",  f.forced_id         as forced_pid      " +
+	",  f.forced_id         as FORCED_PID      " +
 	"FROM HFJ_RES_VER h "
 	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
 	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
@@ -63,7 +64,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE")
+	@Column(name = "RES_TYPE", length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@Column(name = "RES_VERSION")
@@ -96,7 +97,7 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
 
-	@Column(name = "forced_pid")
+	@Column(name = "FORCED_PID", length= ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 
 	public ResourceSearchView() {

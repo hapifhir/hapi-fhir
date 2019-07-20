@@ -1,0 +1,36 @@
+{
+	"resourceType": "ValueSet",
+	"id": "FMCYesNo",
+	"meta": {
+		"versionId": "3",
+		"lastUpdated": "2019-05-03T16:50:45.195+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/vs/FMCYesNo",
+	"identifier": [
+		{
+			"value": "FMCYesNo"
+		}
+	],
+	"name": "FMCYesNo",
+	"title": "Yes or No Choice",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "ValueSet for Yes or No Choice",
+	"compose": {
+		"include": [
+			{
+				"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk",
+				"concept": [
+					{
+						"code": "Yes",
+						"display": "Yes"
+					},
+					{
+						"code": "No",
+						"display": "No"
+					}
+				]
+			}
+		]
+	}
+}

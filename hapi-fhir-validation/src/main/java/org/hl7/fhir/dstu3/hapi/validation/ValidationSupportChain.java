@@ -52,14 +52,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		for (IValidationSupport next : myChain) {
 			if (isNotBlank(theInclude.getSystem())) {
 				if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
-					return next.expandValueSet(theCtx, theInclude);
+					ValueSetExpansionComponent expansion = next.expandValueSet(theCtx, theInclude);
+					if (expansion != null) {
+						return expansion;
+					}
 				}
 			}
-			for (UriType nextValueSet : theInclude.getValueSet()) {
-				ValueSetExpansionComponent retVal = next.expandValueSet(theCtx, theInclude);
-				if (retVal != null && retVal.getContains().size() > 0) {
-					return retVal;
-				}
+			ValueSetExpansionComponent retVal = next.expandValueSet(theCtx, theInclude);
+			if (retVal != null && retVal.getContains().size() > 0) {
+				return retVal;
 			}
 		}
 		return myChain.get(0).expandValueSet(theCtx, theInclude);
@@ -80,11 +81,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		ArrayList<StructureDefinition> retVal = new ArrayList<StructureDefinition>();
-		Set<String> urls = new HashSet<String>();
+		Set<String> urls = new HashSet<>();
 		for (IValidationSupport nextSupport : myChain) {
-			for (StructureDefinition next : nextSupport.fetchAllStructureDefinitions(theContext)) {
-				if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
-					retVal.add(next);
+			List<StructureDefinition> list = nextSupport.fetchAllStructureDefinitions(theContext);
+			if (list != null) {
+				for (StructureDefinition next : list) {
+					if (isBlank(next.getUrl()) || urls.add(next.getUrl())) {
+						retVal.add(next);
+					}
 				}
 			}
 		}
@@ -155,8 +159,10 @@ public class ValidationSupportChain implements IValidationSupport {
 		for (IValidationSupport next : myChain) {
 			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
 				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
-				ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
-				return result;
+				if (result != null) {
+					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
+					return result;
+				}
 			} else {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
@@ -164,5 +170,16 @@ public class ValidationSupportChain implements IValidationSupport {
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
 	}
 
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		StructureDefinition outcome = null;
+		for (org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport next : myChain) {
+			outcome = next.generateSnapshot(theInput, theUrl, theProfileName);
+			if (outcome != null) {
+				break;
+			}
+		}
+		return outcome;
+	}
 
 }

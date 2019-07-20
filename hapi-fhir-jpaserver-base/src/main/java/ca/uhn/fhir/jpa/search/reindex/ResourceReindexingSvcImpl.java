@@ -45,6 +45,7 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
@@ -230,15 +231,15 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		ourLog.info("Cancelling and purging all resource reindexing jobs");
 		myIndexingLock.lock();
 		try {
-			myTxTemplate.execute(t -> {
-				myReindexJobDao.markAllOfTypeAsDeleted();
-				return null;
-			});
+		myTxTemplate.execute(t -> {
+			myReindexJobDao.markAllOfTypeAsDeleted();
+			return null;
+		});
 
-			myTaskExecutor.shutdown();
-			initExecutor();
+		myTaskExecutor.shutdown();
+		initExecutor();
 
-			expungeJobsMarkedAsDeleted();
+		expungeJobsMarkedAsDeleted();
 		} finally {
 			myIndexingLock.unlock();
 		}
@@ -387,7 +388,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			return null;
 		});
 
-		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), newLow);
+		ourLog.info("Completed pass of reindex JOB[{}] - Indexed {} resources in {} ({} / sec) - Have indexed until: {}", theJob.getId(), count, sw.toString(), sw.formatThroughput(count, TimeUnit.SECONDS), new InstantType(newLow));
 		return counter.get();
 	}
 

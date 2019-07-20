@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 
 public class JsonPatchUtilsTest extends BaseJpaTest {
 
-	public static final FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4();
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonPatchUtilsTest.class);
 
 	@Test

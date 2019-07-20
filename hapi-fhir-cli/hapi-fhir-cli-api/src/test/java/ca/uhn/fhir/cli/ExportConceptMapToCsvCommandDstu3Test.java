@@ -4,7 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -17,6 +17,7 @@ import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -24,6 +25,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ExportConceptMapToCsvCommandDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandDstu3Test.class);
@@ -41,6 +44,8 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 	private static int ourPort;
 	private static Server ourServer;
 	private static String ourVersion = "dstu3";
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 
 	static {
 		System.setProperty("test", "true");
@@ -48,14 +53,13 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler servletHandler = new ServletHandler();
 
@@ -67,7 +71,8 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 		servletHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(servletHandler);
 
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourBase = "http://localhost:" + ourPort;
 
@@ -78,7 +83,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 
 	@Test
 	public void testExportConceptMapToCsvCommand() throws IOException {
-		ourLog.info("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+		ourLog.debug("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
 
 		App.main(new String[] {"export-conceptmap-to-csv",
 			"-v", ourVersion,
@@ -100,6 +105,8 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2b\",\"Display 2b\",\"Code 3b\",\"Display 3b\",\"equal\",\"3b This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2c\",\"Display 2c\",\"Code 3c\",\"Display 3c\",\"equal\",\"3c This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n";
+
+		ourLog.info("Going to read file: {}", FILE);
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
 		assertEquals(expected, result);
 

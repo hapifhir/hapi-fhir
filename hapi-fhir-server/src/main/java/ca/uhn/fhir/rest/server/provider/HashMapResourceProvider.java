@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,17 +24,23 @@ import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.server.*;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -84,7 +90,6 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	 * @param theFhirContext  The FHIR context
 	 * @param theResourceType The resource type to support
 	 */
-	@SuppressWarnings("WeakerAccess")
 	public HashMapResourceProvider(FhirContext theFhirContext, Class<T> theResourceType) {
 		myFhirContext = theFhirContext;
 		myResourceType = theResourceType;
@@ -115,17 +120,22 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 	@Create
 	public MethodOutcome create(@ResourceParam T theResource) {
-		long idPart = myNextId++;
-		String idPartAsString = Long.toString(idPart);
-		Long versionIdPart = 1L;
-
-		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		createInternal(theResource);
 
 		myCreateCount.incrementAndGet();
 
 		return new MethodOutcome()
 			.setCreated(true)
-			.setId(id);
+			.setId(theResource.getIdElement());
+	}
+
+	private void createInternal(@ResourceParam T theResource) {
+		long idPart = myNextId++;
+		String idPartAsString = Long.toString(idPart);
+		Long versionIdPart = 1L;
+
+		IIdType id = store(theResource, idPartAsString, versionIdPart);
+		theResource.setId(id);
 	}
 
 	@Delete
@@ -196,13 +206,13 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@History
-	public List<T> historyInstance(@IdParam IIdType theId) {
+	public List<T> historyInstance(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		LinkedList<T> retVal = myIdToHistory.get(theId.getIdPart());
 		if (retVal == null) {
 			throw new ResourceNotFoundException(theId);
 		}
 
-		return retVal;
+		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
 	@History
@@ -211,7 +221,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 	}
 
 	@Read(version = true)
-	public T read(@IdParam IIdType theId) {
+	public T read(@IdParam IIdType theId, RequestDetails theRequestDetails) {
 		TreeMap<Long, T> versions = myIdToVersionToResourceMap.get(theId.getIdPart());
 		if (versions == null || versions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
@@ -236,27 +246,34 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		myReadCount.incrementAndGet();
 
+		retVal = fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
+		if (retVal == null) {
+			throw new ResourceNotFoundException(theId);
+		}
 		return retVal;
 	}
 
 	@Search
-	public List<T> searchAll() {
+	public List<T> searchAll(RequestDetails theRequestDetails) {
 		List<T> retVal = new ArrayList<>();
 
 		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
 			if (next.isEmpty() == false) {
 				T nextResource = next.lastEntry().getValue();
-				retVal.add(nextResource);
+				if (nextResource != null) {
+					retVal.add(nextResource);
+				}
 			}
 		}
 
 		mySearchCount.incrementAndGet();
-		return retVal;
+
+		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
 	@Search
 	public List<T> searchById(
-		@RequiredParam(name = "_id") TokenAndListParam theIds) {
+		@RequiredParam(name = "_id") TokenAndListParam theIds, RequestDetails theRequestDetails) {
 
 		List<T> retVal = new ArrayList<>();
 
@@ -289,7 +306,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		mySearchCount.incrementAndGet();
 
-		return retVal;
+		return fireInterceptorsAndFilterAsNeeded(retVal, theRequestDetails);
 	}
 
 	private IIdType store(@ResourceParam T theResource, String theIdPart, Long theVersionIdPart) {
@@ -351,6 +368,15 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(isBlank(theConditional), "This server doesn't support conditional update");
 
+		boolean created = updateInternal(theResource);
+		myUpdateCount.incrementAndGet();
+
+		return new MethodOutcome()
+			.setCreated(created)
+			.setId(theResource.getIdElement());
+	}
+
+	private boolean updateInternal(@ResourceParam T theResource) {
 		String idPartAsString = theResource.getIdElement().getIdPart();
 		TreeMap<Long, T> versionToResource = getVersionToResource(idPartAsString);
 
@@ -365,12 +391,65 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 		}
 
 		IIdType id = store(theResource, idPartAsString, versionIdPart);
-
-		myUpdateCount.incrementAndGet();
-
-		return new MethodOutcome()
-			.setCreated(created)
-			.setId(id);
+		theResource.setId(id);
+		return created;
 	}
 
+	public FhirContext getFhirContext() {
+		return myFhirContext;
+	}
+
+	/**
+	 * This is a utility method that can be used to store a resource without
+	 * having to use the outside API. In this case, the storage happens without
+	 * any interaction with interceptors, etc.
+	 *
+	 * @param theResource The resource to store. If the resource has an ID, that ID is updated.
+	 * @return Return the ID assigned to the stored resource
+	 */
+	public IIdType store(T theResource) {
+		if (theResource.getIdElement().hasIdPart()) {
+			updateInternal(theResource);
+		} else {
+			createInternal(theResource);
+		}
+		return theResource.getIdElement();
+	}
+
+	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {
+		List<T> output = fireInterceptorsAndFilterAsNeeded(Lists.newArrayList(theResource), theRequestDetails);
+		if (output.size() == 1) {
+			return theResource;
+		} else {
+			return null;
+		}
+	}
+
+	private static <T extends IBaseResource> List<T> fireInterceptorsAndFilterAsNeeded(List<T> theResources, RequestDetails theRequestDetails) {
+		ArrayList<T> resourcesToReturn = new ArrayList<>(theResources);
+
+		if (theRequestDetails != null) {
+			IInterceptorBroadcaster interceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
+
+			// Call the STORAGE_PREACCESS_RESOURCES pointcut (used for consent/auth interceptors)
+			SimplePreResourceAccessDetails preResourceAccessDetails = new SimplePreResourceAccessDetails(resourcesToReturn);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(IPreResourceAccessDetails.class, preResourceAccessDetails);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+			preResourceAccessDetails.applyFilterToList();
+
+			// Call the STORAGE_PREACCESS_RESOURCES pointcut (used for consent/auth interceptors)
+			SimplePreResourceShowDetails preResourceShowDetails = new SimplePreResourceShowDetails(resourcesToReturn);
+			HookParams preShowParams = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(IPreResourceShowDetails.class, preResourceShowDetails);
+			interceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESHOW_RESOURCES, preShowParams);
+
+		}
+
+		return resourcesToReturn;
+	}
 }

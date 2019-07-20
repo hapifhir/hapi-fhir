@@ -3,29 +3,30 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.*;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hamcrest.Matchers;
+import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.hl7.fhir.r4.model.OperationOutcome.IssueSeverity;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -42,9 +43,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
@@ -413,44 +411,6 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType id = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		MedicationRequest mo = myMedicationRequestDao.read(id);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mo));
-	}
-
-	@Test
-	public void testDeleteWithHas() {
-		Observation obs1 = new Observation();
-		obs1.setStatus(ObservationStatus.FINAL);
-		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
-
-		Observation obs2 = new Observation();
-		obs2.setStatus(ObservationStatus.FINAL);
-		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
-
-		DiagnosticReport rpt = new DiagnosticReport();
-		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
-		rpt.addResult(new Reference(obs2id));
-		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
-
-		myObservationDao.read(obs1id);
-		myObservationDao.read(obs2id);
-
-		rpt = new DiagnosticReport();
-		rpt.addIdentifier().setSystem("foo").setValue("IDENTIFIER");
-
-		Bundle b = new Bundle();
-		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Observation?_has:DiagnosticReport:result:identifier=foo|IDENTIFIER");
-		b.addEntry().setResource(rpt).getRequest().setMethod(HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
-		mySystemDao.transaction(mySrd, b);
-
-		myObservationDao.read(obs1id);
-		try {
-			myObservationDao.read(obs2id);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-
-		rpt = myDiagnosticReportDao.read(rptId);
-		assertThat(rpt.getResult(), empty());
 	}
 
 	@Test
@@ -839,6 +799,99 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 			assertEquals("Invalid match URL \"Patient?identifier=urn%3Asystem%7CtestTransactionCreateInlineMatchUrlWithNoMatches\" - No resources match this search", e.getMessage());
 		}
 	}
+
+	@Test
+	public void testTransactionMissingResourceForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		request
+			.addEntry()
+			.setFullUrl("Patient/")
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testTransactionMissingResourceForPut() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.TRANSACTION);
+		request
+			.addEntry()
+			.setFullUrl("Patient/123")
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/123");
+
+		try {
+			mySystemDao.transaction(mySrd, request);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testBatchMissingResourceForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setFullUrl("Patient/")
+			.getRequest()
+			.setMethod(HTTPVerb.POST)
+			.setUrl("Patient/");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation POST", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		validate(outcome);
+	}
+
+	@Test
+	public void testBatchMissingResourceForPut() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setFullUrl("Patient/123")
+			.getRequest()
+			.setMethod(HTTPVerb.PUT)
+			.setUrl("Patient/123");
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("400 Bad Request", outcome.getEntry().get(0).getResponse().getStatus());
+		assertEquals(IssueSeverity.ERROR, ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getSeverity());
+		assertEquals("Missing required resource in Bundle.entry[0].resource for operation PUT", ((OperationOutcome)outcome.getEntry().get(0).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics());
+		validate(outcome);
+	}
+
+	@Test
+	public void testBatchMissingUrlForPost() {
+		Bundle request = new Bundle();
+		request.setType(BundleType.BATCH);
+		request
+			.addEntry()
+			.setResource(new Patient().setActive(true))
+			.getRequest()
+			.setMethod(HTTPVerb.POST);
+
+		Bundle outcome = mySystemDao.transaction(mySrd, request);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertEquals("201 Created", outcome.getEntry().get(0).getResponse().getStatus());
+		validate(outcome);
+	}
+
 
 	@Test
 	public void testTransactionCreateInlineMatchUrlWithOneMatch() {
@@ -2427,6 +2480,66 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		o = find(list, Observation.class, 0);
 		assertThat(o.getSubject().getReference(), matchesPattern("Patient/[0-9]+"));
 
+	}
+
+
+	@Test
+	public void testDeleteInTransactionShouldFailWhenReferencesExist() {
+		final Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		final Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		final DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs2id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+		myDiagnosticReportDao.read(rptId);
+
+		Bundle b = new Bundle();
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(obs2id.getValue());
+
+		try {
+			mySystemDao.transaction(mySrd, b);
+			fail();
+		} catch (ResourceVersionConflictException e) {
+			// good, transaction should not succeed because DiagnosticReport has a reference to the obs2
+		}
+	}
+
+	@Test
+	public void testDeleteInTransactionShouldSucceedWhenReferencesAreAlsoRemoved() {
+		final Observation obs1 = new Observation();
+		obs1.setStatus(ObservationStatus.FINAL);
+		IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
+
+		final Observation obs2 = new Observation();
+		obs2.setStatus(ObservationStatus.FINAL);
+		IIdType obs2id = myObservationDao.create(obs2).getId().toUnqualifiedVersionless();
+
+		final DiagnosticReport rpt = new DiagnosticReport();
+		rpt.addResult(new Reference(obs2id));
+		IIdType rptId = myDiagnosticReportDao.create(rpt).getId().toUnqualifiedVersionless();
+
+		myObservationDao.read(obs1id);
+		myObservationDao.read(obs2id);
+		myDiagnosticReportDao.read(rptId);
+
+		Bundle b = new Bundle();
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(obs2id.getValue());
+		b.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl(rptId.getValue());
+
+		try {
+			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
+			mySystemDao.transaction(mySrd, b);
+		} catch (ResourceVersionConflictException e) {
+			fail();
+		}
 	}
 
 	private Bundle createTransactionBundleForTestTransactionWithRefsToConditionalCreate() {

@@ -99,7 +99,16 @@ public interface IValidationSupport
 	@Override
 	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-	class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
+  /**
+   * Generate a snapshot from the given differential profile.
+   *
+   * @param theInput
+   * @param theUrl
+   * @return Returns null if this module does not know how to handle this request
+   */
+  StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName);
+
+  class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
 
 		public CodeValidationResult(ConceptDefinitionComponent theNext) {
 			super(theNext);

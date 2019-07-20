@@ -3,10 +3,13 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.SchedulerServiceImpl;
@@ -21,7 +24,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
-import ca.uhn.fhir.jpa.util.JpaInterceptorService;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +74,8 @@ public abstract class BaseConfig {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseConfig.class);
+	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
+
 	@Autowired
 	protected Environment myEnv;
 
@@ -109,6 +114,12 @@ public abstract class BaseConfig {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean(name = "myAttachmentBinaryAccessProvider")
+	@Lazy
+	public BinaryAccessProvider AttachmentBinaryAccessProvider() {
+		return new BinaryAccessProvider();
 	}
 
 	@Bean
@@ -173,7 +184,7 @@ public abstract class BaseConfig {
 
 	@Bean
 	public IInterceptorService jpaInterceptorService() {
-		return new JpaInterceptorService();
+		return new InterceptorService();
 	}
 
 	/**
@@ -181,6 +192,11 @@ public abstract class BaseConfig {
 	 */
 	protected boolean isSupported(String theResourceType) {
 		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
+	}
+
+	@Bean
+	public IConsentContextServices consentContextServices() {
+		return new JpaConsentContextServices();
 	}
 
 	@Bean

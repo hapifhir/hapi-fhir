@@ -23,7 +23,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement()
-@Import(FhirDbConfig.class)
+@Import(CommonConfig.class)
 public class FhirServerConfig extends BaseJavaConfigDstu2 {
 
 	@Autowired

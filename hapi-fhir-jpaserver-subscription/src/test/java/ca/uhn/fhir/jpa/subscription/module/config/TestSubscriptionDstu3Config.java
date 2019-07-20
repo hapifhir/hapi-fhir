@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 
 @Configuration
 @Import(TestSubscriptionConfig.class)
-@ComponentScan(basePackages = {"ca.uhn.fhir.jpa.model.interceptor.executor"})
 public class TestSubscriptionDstu3Config extends SubscriptionDstu3Config {
 	@Bean
 	@Primary

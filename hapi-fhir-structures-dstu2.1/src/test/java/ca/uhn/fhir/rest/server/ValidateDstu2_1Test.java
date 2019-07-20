@@ -1,11 +1,15 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.ResourceParam;
+import ca.uhn.fhir.rest.annotation.Validate;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -19,25 +23,27 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.dstu2016may.model.*;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class ValidateDstu2_1Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu2_1Test.class);
+	public static Patient ourLastPatient;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2_1();
 	private static EncodingEnum ourLastEncoding;
 	private static IdType ourLastId;
 	private static ValidationModeEnum ourLastMode;
-	public static Patient ourLastPatient;
 	private static String ourLastProfile;
 	private static String ourLastResourceBody;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValidateDstu2_1Test.class);
 	private static OperationOutcome ourOutcomeToReturn;
 	private static int ourPort;
 
@@ -87,7 +93,7 @@ public class ValidateDstu2_1Test {
 
 
 		String encodedResource = ourCtx.newXmlParser().encodeResourceToString(params);
-		
+
 		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient/$validate");
 		httpPost.setEntity(new StringEntity(encodedResource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
@@ -234,34 +240,6 @@ public class ValidateDstu2_1Test {
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		PatientProvider patientProvider = new PatientProvider();
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
 	public static class OrganizationProvider implements IResourceProvider {
 
 		@Override
@@ -287,7 +265,7 @@ public class ValidateDstu2_1Test {
 		}
 
 		@Validate()
-		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @IdParam(optional=true) IdType theId, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
+		public MethodOutcome validatePatient(@ResourceParam Patient thePatient, @IdParam(optional = true) IdType theId, @Validate.Mode ValidationModeEnum theMode, @Validate.Profile String theProfile) {
 
 			ourLastPatient = thePatient;
 			ourLastId = theId;
@@ -307,6 +285,36 @@ public class ValidateDstu2_1Test {
 			outcome.setOperationOutcome(ourOutcomeToReturn);
 			return outcome;
 		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		PatientProvider patientProvider = new PatientProvider();
+
+		ServletHandler proxyHandler = new ServletHandler();
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(patientProvider, new OrganizationProvider());
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

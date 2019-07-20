@@ -1,9 +1,12 @@
 package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
@@ -218,6 +221,15 @@ public class TestRestfulServer extends RestfulServer {
 		 */
 		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
 		subscriptionInterceptorLoader.registerInterceptors();
+
+		/*
+		 * Cascading deletes
+		 */
+		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
+		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
+		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(daoRegistry, interceptorBroadcaster);
+		registerInterceptor(cascadingDeleteInterceptor);
+
 	}
 
 	/**

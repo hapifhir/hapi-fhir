@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -32,16 +33,21 @@ import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ValidationResult;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -91,6 +97,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myAllergyIntoleranceDaoR4")
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
 	@Autowired
+	protected BinaryAccessProvider myBinaryAccessProvider;
+	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
 	@Qualifier("myAppointmentDaoR4")
@@ -114,6 +122,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myCodeSystemDaoR4")
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 	@Autowired
+	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	@Autowired
 	@Qualifier("myCompartmentDefinitionDaoR4")
 	protected IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
 	@Autowired
@@ -121,6 +133,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDaoConceptMap<ConceptMap> myConceptMapDao;
 	@Autowired
 	protected ITermConceptDao myTermConceptDao;
+	@Autowired
+	protected ITermConceptDesignationDao myTermConceptDesignationDao;
 	@Autowired
 	@Qualifier("myConditionDaoR4")
 	protected IFhirResourceDao<Condition> myConditionDao;
@@ -157,7 +171,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	@Qualifier("myRiskAssessmentDaoR4")
 	protected IFhirResourceDao<RiskAssessment> myRiskAssessmentDao;
-	protected IServerInterceptor myInterceptor;
 	@Autowired
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
@@ -248,7 +261,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IStaleSearchDeletingSvc myStaleSearchDeletingSvc;
 	@Autowired
 	@Qualifier("myStructureDefinitionDaoR4")
-	protected IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
+	protected IFhirResourceDaoStructureDefinition<StructureDefinition> myStructureDefinitionDao;
 	@Autowired
 	@Qualifier("myConsentDaoR4")
 	protected IFhirResourceDao<Consent> myConsentDao;
@@ -284,6 +297,12 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myValueSetDaoR4")
 	protected IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> myValueSetDao;
 	@Autowired
+	protected ITermValueSetDao myTermValueSetDao;
+	@Autowired
+	protected ITermValueSetConceptDao myTermValueSetConceptDao;
+	@Autowired
+	protected ITermValueSetConceptDesignationDao myTermValueSetConceptDesignationDao;
+	@Autowired
 	protected ITermConceptMapDao myTermConceptMapDao;
 	@Autowired
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
@@ -291,10 +310,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected ICacheWarmingSvc myCacheWarmingSvc;
 	@Autowired
 	protected SubscriptionRegistry mySubscriptionRegistry;
+	protected IServerInterceptor myInterceptor;
 	@Autowired
 	private JpaValidationSupportChainR4 myJpaValidationSupportChainR4;
 	private PerformanceTracingLoggingInterceptor myPerformanceTracingLoggingInterceptor;
 	private List<Object> mySystemInterceptors;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
 
@@ -389,8 +411,33 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		return newJsonParser.parseResource(type, string);
 	}
 
+	protected void validate(IBaseResource theResource) {
+		FhirValidator validatorModule = myFhirCtx.newValidator();
+		FhirInstanceValidator instanceValidator = new FhirInstanceValidator(myValidationSupport);
+		instanceValidator.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		validatorModule.registerValidatorModule(instanceValidator);
+		ValidationResult result = validatorModule.validateWithResult(theResource);
+		if (!result.isSuccessful()) {
+			fail(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void upload(String theClasspath) throws IOException {
+		String resource = loadResource(theClasspath);
+		IParser parser = EncodingEnum.detectEncoding(resource).newParser(myFhirCtx);
+		IBaseResource resourceParsed = parser.parseResource(resource);
+		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
+		dao.update(resourceParsed);
+	}
+
+	protected String loadResource(String theClasspath) throws IOException {
+		return IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
+	}
+
+
 	@AfterClass
-	public static void afterClassClearContextBaseJpaR4Test() throws Exception {
+	public static void afterClassClearContextBaseJpaR4Test() {
 		ourValueSetDao.purgeCaches();
 		ourJpaValidationSupportChainR4.flush();
 		TestUtil.clearAllStaticFieldsForUnitTest();

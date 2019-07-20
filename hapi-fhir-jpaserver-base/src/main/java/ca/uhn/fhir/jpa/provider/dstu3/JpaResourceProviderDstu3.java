@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider.dstu3;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +22,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseJpaResourceProvider;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -38,9 +38,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.servlet.http.HttpServletRequest;
 
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META;
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_ADD;
-import static ca.uhn.fhir.jpa.util.JpaConstants.OPERATION_META_DELETE;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_DELETE;
 
 public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaResourceProvider<T> {
 
@@ -87,9 +87,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 		@IdParam IIdType theIdParam,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
-	) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
+		RequestDetails theRequest) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
 		try {
 			return VersionConvertor_30_40.convertParameters(retVal);
 		} catch (FHIRException e) {
@@ -103,9 +103,9 @@ public class JpaResourceProviderDstu3<T extends IAnyResource> extends BaseJpaRes
 	public Parameters expunge(
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerType theLimit,
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanType theExpungeDeletedResources,
-		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions
-	) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanType theExpungeOldVersions,
+		RequestDetails theRequest) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
 		try {
 			return VersionConvertor_30_40.convertParameters(retVal);
 		} catch (FHIRException e) {

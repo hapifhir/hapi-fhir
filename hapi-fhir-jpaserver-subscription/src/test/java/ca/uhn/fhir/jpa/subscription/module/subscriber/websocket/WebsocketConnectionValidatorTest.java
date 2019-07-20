@@ -19,7 +19,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@ContextConfiguration
 public class WebsocketConnectionValidatorTest {
 	public static String RESTHOOK_SUBSCRIPTION_ID = "1";
 	public static String WEBSOCKET_SUBSCRIPTION_ID = "2";

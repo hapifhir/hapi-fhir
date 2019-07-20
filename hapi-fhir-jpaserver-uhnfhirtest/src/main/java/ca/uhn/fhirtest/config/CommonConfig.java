@@ -6,8 +6,11 @@ import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 
 @Configuration
+@Import(WebsocketDispatcherConfig.class)
 public class CommonConfig {
 
 	/**
