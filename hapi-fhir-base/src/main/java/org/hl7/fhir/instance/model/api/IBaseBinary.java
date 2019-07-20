@@ -35,6 +35,6 @@ public interface IBaseBinary extends IBaseResource {
 
 	IBaseBinary setContentType(String theContentType);
 
-	boolean hasData();
+	default boolean hasData() { return getContent() != null && getContent().length > 0; };
 
 }
