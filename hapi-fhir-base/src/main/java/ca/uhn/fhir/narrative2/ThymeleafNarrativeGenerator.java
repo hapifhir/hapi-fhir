@@ -83,6 +83,12 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	}
 
 	@Override
+	protected List<String> getPropertyFile() {
+		// FIXME KHS this class should really be abstract
+		return new ArrayList<>();
+	}
+
+	@Override
 	protected String applyTemplate(FhirContext theFhirContext, INarrativeTemplate theTemplate, IBase theTargetContext) {
 
 		Context context = new Context();

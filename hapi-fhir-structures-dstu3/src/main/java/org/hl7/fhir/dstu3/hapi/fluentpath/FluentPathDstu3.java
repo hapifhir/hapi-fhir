@@ -83,7 +83,7 @@ public class FluentPathDstu3 implements IFluentPath {
   @Override
   public void setHostServices(INarrativeConstantResolver theNarrativeConstantResolver) {
     myLiquidHostServices = new LiquidHostServices(theNarrativeConstantResolver);
-    myLiquidHostServices.setEnvironmentVariable("FHIR_VERSION", myFhirContext.getVersion().getVersion().name());
+    myLiquidHostServices.setEnvironmentVariable("FHIRVERSION", myFhirContext.getVersion().getVersion().name());
     myEngine.setHostServices(myLiquidHostServices);
   }
 

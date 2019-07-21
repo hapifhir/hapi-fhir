@@ -58,45 +58,39 @@ public class FluentPathR4 implements IFluentPath {
 
   @Override
   public IExpressionNode parse(String path) {
-    // FIXME KHS
-//    return myEngine.parse(path);
-    return null;
+    return myEngine.parse(path);
   }
 
   @Override
   public IExpressionNodeWithOffset parsePartial(String path, int offset) {
-    // FIXME KHS
-//    return myEngine.parsePartial(path, offset);
-    return null;
+    return myEngine.parsePartial(path, offset);
   }
 
   @Override
   public String evaluateToString(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return myEngine.evaluateToString(theAppInfo, (Resource)theResource, (Base)theBase, (ExpressionNode) theCompiled);
+    return myEngine.evaluateToString(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
   public boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return myEngine.evaluateToBoolean(theAppInfo, (Resource)theResource, (Base)theBase, (ExpressionNode) theCompiled);
+    return myEngine.evaluateToBoolean(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
   public List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return (List<IBase>)(List<?>)myEngine.evaluate(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
+    return (List<IBase>) (List<?>) myEngine.evaluate(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
   public void setHostServices(INarrativeConstantResolver theNarrativeConstantResolver) {
     myLiquidHostServices = new LiquidHostServices(theNarrativeConstantResolver);
-    myLiquidHostServices.setEnvironmentVariable("FHIR_VERSION", myFhirContext.getVersion().getVersion().name());
+    myLiquidHostServices.setEnvironmentVariable("FHIRVERSION", myFhirContext.getVersion().getVersion().name());
     myEngine.setHostServices(myLiquidHostServices);
   }
 
   @Override
   public INarrativeConstantMap createLiquidIncludeMap() {
-    return null;
-    // FIXME KHS
-//    return new Tuple();
+    return new Tuple();
   }
 
   @Override

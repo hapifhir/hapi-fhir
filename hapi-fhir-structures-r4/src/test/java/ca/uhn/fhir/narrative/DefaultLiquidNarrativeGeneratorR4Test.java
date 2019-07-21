@@ -33,15 +33,9 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 
 	@Before
 	public void before() {
-		DefaultLiquidNarrativeGenerator myNarrativeGenerator = new DefaultLiquidNarrativeGenerator();
+		myNarrativeGenerator = new DefaultLiquidNarrativeGenerator();
 		ourFhirContext.setNarrativeGenerator(myNarrativeGenerator);
 	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Test
 	@Ignore
@@ -224,10 +218,9 @@ public class DefaultLiquidNarrativeGeneratorR4Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		Narrative narrative = new Narrative();
-		myNarrativeGenerator.generateNarrative(ourFhirContext, med, narrative);
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, med);
 
-		String string = narrative.getDiv().getValueAsString();
+		String string = med.getText().getDiv().getValueAsString();
 		assertThat(string, containsString("ciproflaxin"));
 	}
 }
