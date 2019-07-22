@@ -339,12 +339,18 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeEverythingWhereResourceInSearchResults() {
 		createStandardPatients();
 
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 0);
+			await().until(()->mySearchResultDao.count() == 0);
+		});
+
+		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
 		assertEquals(2, search.size().intValue());
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 1);
 			await().until(()->mySearchResultDao.count() == 2);
 			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
 			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());
