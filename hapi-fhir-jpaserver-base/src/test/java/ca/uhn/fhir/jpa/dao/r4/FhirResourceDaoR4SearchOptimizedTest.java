@@ -249,7 +249,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue());
+		IBundleProvider results2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2);
+		Integer results2Size = results2.size();
+		assertEquals(200, results2Size.intValue());
 		assertNotEquals(uuid, uuid2);
 
 	}
