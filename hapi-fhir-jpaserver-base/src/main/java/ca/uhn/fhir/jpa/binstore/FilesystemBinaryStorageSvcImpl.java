@@ -110,7 +110,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public void writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
 		File storagePath = getStoragePath(theBlobId, false);
 		if (storagePath != null) {
 			File file = getStorageFilename(storagePath, theResourceId, theBlobId);
@@ -121,6 +121,26 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 				}
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+		File storagePath = getStoragePath(theBlobId, false);
+		if (storagePath != null) {
+			File storageFile = getStorageFilename(storagePath, theResourceId, theBlobId);
+			if (storageFile.exists()) {
+				delete(storageFile, theBlobId);
+			}
+			File descriptorFile = getDescriptorFilename(storagePath, theResourceId, theBlobId);
+			if (descriptorFile.exists()) {
+				delete(descriptorFile, theBlobId);
+			}
+		}
+	}
+
+	private void delete(File theStorageFile, String theBlobId) {
+		Validate.isTrue(theStorageFile.delete(), "Failed to delete file for blob %s", theBlobId);
 	}
 
 	@Nonnull

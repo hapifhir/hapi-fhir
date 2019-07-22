@@ -61,7 +61,12 @@ public interface IBinaryStorageSvc {
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
 
-	void writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException;
+	/**
+	 * @return Returns <code>true</code> if the blob was found and written, of <code>false</code> if the blob was not found (i.e. it was expunged or the ID was invalid)
+	 */
+	boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException;
+
+	void expungeBlob(IIdType theResourceId, String theBlobId);
 
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

@@ -58,6 +58,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return theSize >= myMinSize;
 	}
 
+	@SuppressWarnings("UnstableApiUsage")
 	@Nonnull
 	static HashingInputStream createHashingInputStream(InputStream theInputStream) {
 		HashFunction hash = Hashing.sha256();

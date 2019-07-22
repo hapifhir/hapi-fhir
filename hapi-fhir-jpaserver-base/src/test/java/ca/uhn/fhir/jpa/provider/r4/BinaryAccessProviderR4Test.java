@@ -4,8 +4,10 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -14,10 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.ContentType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Attachment;
-import org.hl7.fhir.r4.model.Binary;
-import org.hl7.fhir.r4.model.DocumentReference;
-import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.hamcrest.Matchers.containsString;
@@ -46,6 +46,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void before() throws Exception {
 		super.before();
 		myStorageSvc.setMinSize(10);
+		myDaoConfig.setExpungeEnabled(true);
 	}
 
 	@Override
@@ -53,6 +54,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void after() throws Exception {
 		super.after();
 		myStorageSvc.setMinSize(0);
+		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
 	@Test
@@ -164,7 +166,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		DocumentReference dr = ourClient.read().resource(DocumentReference.class).withId(id).execute();
 		dr.getContentFirstRep()
 			.getAttachment()
-			.addExtension(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID, new StringType("AAAAA"));
+			.getDataElement()
+			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("AAAAA"));
 		ourClient.update().resource(dr).execute();
 
 		String path = ourServerBase +
@@ -218,7 +221,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(15, attachment.getSize());
 			assertEquals(null, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getExtensionString(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID);
+			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
@@ -282,7 +285,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(4, attachment.getSize());
 			assertArrayEquals(SOME_BYTES_2, attachment.getData());
 			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getExtensionString(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID);
+			attachmentId = attachment.getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
 			assertEquals(null, attachmentId);
 
 		}
@@ -327,14 +330,12 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info("Response: {}", response);
 
-			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			Binary target = myFhirCtx.newJsonParser().parseResource(Binary.class, response);
 
-			Attachment attachment = ref.getContentFirstRep().getAttachment();
-			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
-			assertEquals(15, attachment.getSize());
-			assertEquals(null, attachment.getData());
-			assertEquals("2", ref.getMeta().getVersionId());
-			attachmentId = attachment.getExtensionString(JpaConstants.EXT_ATTACHMENT_EXTERNAL_BINARY_ID);
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
+			assertEquals(null, target.getData());
+			assertEquals("2", target.getMeta().getVersionId());
+			attachmentId = target.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
 
 		}
@@ -349,6 +350,62 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			"/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=Binary";
+		HttpGet get = new HttpGet(path);
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals("image/jpeg", resp.getEntity().getContentType().getValue());
+			assertEquals(SOME_BYTES.length, resp.getEntity().getContentLength());
+
+			byte[] actualBytes = IOUtils.toByteArray(resp.getEntity().getContent());
+			assertArrayEquals(SOME_BYTES, actualBytes);
+		}
+
+	}
+
+	/**
+	 * Stores a binary large enough that it should live in binary storage
+	 */
+	@Test
+	public void testWriteLargeBinaryWithoutExplicitPath() throws IOException {
+		Binary binary = new Binary();
+		binary.setContentType("image/png");
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(binary));
+
+		IIdType id = ourClient.create().resource(binary).execute().getId().toUnqualifiedVersionless();
+
+		// Write using the operation
+
+		String path = ourServerBase +
+			"/Binary/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_WRITE;
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+		post.addHeader("Accept", "application/fhir+json; _pretty=true");
+		String attachmentId;
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Response: {}", response);
+
+			Binary target = myFhirCtx.newJsonParser().parseResource(Binary.class, response);
+
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
+			assertEquals(null, target.getData());
+			assertEquals("2", target.getMeta().getVersionId());
+			attachmentId = target.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+
+		}
+
+		// Read it back using the operation
+
+		path = ourServerBase +
+			"/Binary/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_READ;
 		HttpGet get = new HttpGet(path);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 
@@ -385,6 +442,60 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 
+	@Test
+	public void testResourceExpungeAlsoExpungesBinaryData() throws IOException {
+		IIdType id = createDocumentReference(false);
+
+		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
+			"?path=DocumentReference.content.attachment";
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+		post.addHeader("Accept", "application/fhir+json; _pretty=true");
+		String attachmentId;
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+			Attachment attachment = ref.getContentFirstRep().getAttachment();
+			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+		}
+
+		ByteArrayOutputStream capture = new ByteArrayOutputStream();
+		myStorageSvc.writeBlob(id, attachmentId, capture);
+		assertEquals(15, capture.size());
+
+		// Now delete (logical delete- should not expunge the binary)
+		ourClient.delete().resourceById(id).execute();
+		try {
+			ourClient.read().resource("DocumentReference").withId(id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		capture = new ByteArrayOutputStream();
+		myStorageSvc.writeBlob(id, attachmentId, capture);
+		assertEquals(15, capture.size());
+
+		// Now expunge
+		Parameters parameters = new Parameters();
+		parameters.addParameter().setName(JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES).setValue(new BooleanType(true));
+		ourClient
+			.operation()
+			.onInstance(id)
+			.named(JpaConstants.OPERATION_EXPUNGE)
+			.withParameters(parameters)
+			.execute();
+
+		capture = new ByteArrayOutputStream();
+		assertFalse(myStorageSvc.writeBlob(id, attachmentId, capture));
+		assertEquals(0, capture.size());
+
+	}
 
 
 }

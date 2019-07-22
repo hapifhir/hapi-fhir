@@ -84,15 +84,21 @@ public class AttachmentUtil {
 		}
 	}
 
+	/**
+	 * This is internal API- Use with caution as it may change
+	 */
 	@SuppressWarnings("unchecked")
-	private static <T> IPrimitiveType<T> newPrimitive(FhirContext theContext, String theType, T theValue) {
+	static <T> IPrimitiveType<T> newPrimitive(FhirContext theContext, String theType, T theValue) {
 		IPrimitiveType<T> primitive = (IPrimitiveType<T>) theContext.getElementDefinition(theType).newInstance();
 		primitive.setValue(theValue);
 		return primitive;
 	}
 
-	private static BaseRuntimeChildDefinition getChild(FhirContext theContext, ICompositeType theAttachment, String theName) {
-		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theAttachment.getClass());
+	/**
+	 * This is internal API- Use with caution as it may change
+	 */
+	static BaseRuntimeChildDefinition getChild(FhirContext theContext, IBase theElement, String theName) {
+		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theElement.getClass());
 		return def.getChildByName(theName);
 	}
 }

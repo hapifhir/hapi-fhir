@@ -100,6 +100,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer = new RestfulServer(myFhirCtx);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.registerProvider(myBinaryAccessProvider);
+			ourRestServer.getInterceptorService().registerInterceptor(myBinaryStorageExpungeInterceptor);
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageExpungeInterceptor;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -10,7 +11,7 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -97,6 +98,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
+	@Autowired
+	protected BinaryStorageExpungeInterceptor myBinaryStorageExpungeInterceptor;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
