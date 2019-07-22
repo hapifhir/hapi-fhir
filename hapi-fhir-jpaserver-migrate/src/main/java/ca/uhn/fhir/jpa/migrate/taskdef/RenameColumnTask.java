@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -34,6 +36,11 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 	private String myOldName;
 	private String myNewName;
 	private boolean myAllowNeitherColumnToExist;
+	private boolean myDeleteTargetColumnFirstIfBothExist;
+
+	public void setDeleteTargetColumnFirstIfBothExist(boolean theDeleteTargetColumnFirstIfBothExist) {
+		myDeleteTargetColumnFirstIfBothExist = theDeleteTargetColumnFirstIfBothExist;
+	}
 
 	public void setOldName(String theOldName) {
 		Validate.notBlank(theOldName);
@@ -51,15 +58,30 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 		boolean haveOldName = columnNames.contains(myOldName.toUpperCase());
 		boolean haveNewName = columnNames.contains(myNewName.toUpperCase());
 		if (haveOldName && haveNewName) {
-			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
-		}
-		if (!haveOldName && !haveNewName) {
+			if (myDeleteTargetColumnFirstIfBothExist) {
+
+				Integer rowsWithData = getConnectionProperties().getTxTemplate().execute(t -> {
+					String sql = "SELECT * FROM " + getTableName() + " WHERE " + myNewName + " IS NOT NULL";
+					JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
+					jdbcTemplate.setMaxRows(1);
+					return jdbcTemplate.query(sql, new ColumnMapRowMapper()).size();
+				});
+				if (rowsWithData > 0) {
+					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
+				}
+
+				ourLog.info("Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+				String sql = DropColumnTask.createSql(getTableName(), myNewName);
+				executeSql(getTableName(), sql);
+			} else {
+				throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist!");
+			}
+		} else if (!haveOldName && !haveNewName) {
 			if (isAllowNeitherColumnToExist()) {
 				return;
 			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
-		}
-		if (haveNewName) {
+		} else if (haveNewName) {
 			ourLog.info("Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
 		}
@@ -94,11 +116,11 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 
 	}
 
-	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
-		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
-	}
-
 	public boolean isAllowNeitherColumnToExist() {
 		return myAllowNeitherColumnToExist;
+	}
+
+	public void setAllowNeitherColumnToExist(boolean theAllowNeitherColumnToExist) {
+		myAllowNeitherColumnToExist = theAllowNeitherColumnToExist;
 	}
 }
