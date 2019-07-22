@@ -37,7 +37,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
 	private int myMaximumBinarySize = Integer.MAX_VALUE;
-	private int myMinSize;
+	private int myMinimumBinarySize;
 
 	BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
@@ -49,13 +49,19 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public int getMinimumBinarySize() {
+		return myMinimumBinarySize;
+	}
+
+	@Override
+	public void setMinimumBinarySize(int theMinimumBinarySize) {
+		myMinimumBinarySize = theMinimumBinarySize;
+	}
+
+	@Override
 	public void setMaximumBinarySize(int theMaximumBinarySize) {
 		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
 		myMaximumBinarySize = theMaximumBinarySize;
-	}
-
-	public void setMinSize(int theMinSize) {
-		myMinSize = theMinSize;
 	}
 
 	String newRandomId() {
@@ -69,7 +75,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
-		return theSize >= myMinSize;
+		return theSize >= getMinimumBinarySize();
 	}
 
 	@SuppressWarnings("UnstableApiUsage")

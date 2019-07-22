@@ -65,7 +65,7 @@ public interface IBinaryStorageSvc {
 	 * than this threshold may be inlined even if a binary storage service
 	 * is active.
 	 */
-	void setMinimumBinarySize(int theMaximumBinarySize);
+	void setMinimumBinarySize(int theMinimumBinarySize);
 
 	/**
 	 * Give the storage service the ability to veto items from storage
