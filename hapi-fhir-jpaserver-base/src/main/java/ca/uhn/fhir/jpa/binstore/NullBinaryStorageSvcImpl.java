@@ -38,6 +38,16 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public int getMinimumBinarySize() {
+		return 0;
+	}
+
+	@Override
+	public void setMinimumBinarySize(int theMinimumBinarySize) {
+		// ignore
+	}
+
+	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
 		return false;
 	}
