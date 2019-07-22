@@ -40,6 +40,12 @@ import java.util.Date;
 public interface IBinaryStorageSvc {
 
 	/**
+	 * Gets the maximum number of bytes that can be stored in a single binary
+	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 */
+	int getMaximumBinarySize();
+
+	/**
 	 * Sets the maximum number of bytes that can be stored in a single binary
 	 * file by this service. The default is {@link Integer#MAX_VALUE}
 	 *
@@ -48,10 +54,18 @@ public interface IBinaryStorageSvc {
 	void setMaximumBinarySize(int theMaximumBinarySize);
 
 	/**
-	 * Gets the maximum number of bytes that can be stored in a single binary
-	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 * Gets the minimum number of bytes that will be stored. Binary content smaller
+	 * * than this threshold may be inlined even if a binary storage service
+	 * * is active.
 	 */
-	int getMaximumBinarySize();
+	int getMinimumBinarySize();
+
+	/**
+	 * Sets the minimum number of bytes that will be stored. Binary content smaller
+	 * than this threshold may be inlined even if a binary storage service
+	 * is active.
+	 */
+	void setMinimumBinarySize(int theMaximumBinarySize);
 
 	/**
 	 * Give the storage service the ability to veto items from storage
