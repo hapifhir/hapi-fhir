@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Interceptor
-public class BinaryStorageExpungeInterceptor {
+public class BinaryStorageInterceptor {
 
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;

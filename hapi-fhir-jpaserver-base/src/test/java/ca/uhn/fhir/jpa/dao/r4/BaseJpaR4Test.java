@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.binstore.BinaryStorageExpungeInterceptor;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -99,7 +99,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
 	@Autowired
-	protected BinaryStorageExpungeInterceptor myBinaryStorageExpungeInterceptor;
+	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
 	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
