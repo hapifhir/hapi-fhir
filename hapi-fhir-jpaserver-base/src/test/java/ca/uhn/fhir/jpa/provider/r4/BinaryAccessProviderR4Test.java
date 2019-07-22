@@ -45,7 +45,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	@Before
 	public void before() throws Exception {
 		super.before();
-		myStorageSvc.setMinSize(10);
+		myStorageSvc.setMinimumBinarySize(10);
 		myDaoConfig.setExpungeEnabled(true);
 		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 	}
@@ -54,7 +54,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	@After
 	public void after() throws Exception {
 		super.after();
-		myStorageSvc.setMinSize(0);
+		myStorageSvc.setMinimumBinarySize(0);
 		myDaoConfig.setExpungeEnabled(new DaoConfig().isExpungeEnabled());
 	}
 
