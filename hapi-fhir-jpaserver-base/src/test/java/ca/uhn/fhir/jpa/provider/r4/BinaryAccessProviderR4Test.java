@@ -310,10 +310,10 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
 
-		// Read it back using the operation
+		// Write using the operation
 
 		String path = ourServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+			"/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 			"?path=Binary";
 		HttpPost post = new HttpPost(path);
@@ -346,7 +346,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		// Read it back using the operation
 
 		path = ourServerBase +
-			"/DocumentReference/" + id.getIdPart() + "/" +
+			"/Binary/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=Binary";
 		HttpGet get = new HttpGet(path);

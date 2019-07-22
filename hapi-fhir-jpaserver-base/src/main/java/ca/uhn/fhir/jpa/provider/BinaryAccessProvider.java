@@ -219,7 +219,7 @@ public class BinaryAccessProvider {
 		FhirContext ctx = theRequestDetails.getFhirContext();
 		String path = thePath.getValueAsString();
 
-		Optional<ICompositeType> type = ctx.newFluentPath().evaluateFirst(theResource, path, ICompositeType.class);
+		Optional<IBase> type = ctx.newFluentPath().evaluateFirst(theResource, path, IBase.class);
 		if (!type.isPresent()) {
 			throw new InvalidRequestException("Unable to find Attachment at path: " + sanitizeUrlPart(path));
 		}
@@ -251,6 +251,41 @@ public class BinaryAccessProvider {
 			throw new InvalidRequestException("Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
 		}
 		return dao;
+	}
+
+
+	private interface IModeOperations {
+
+		void setSize(int theSize);
+
+		void setContentType(String theContentType);
+
+	}
+
+	private enum ModeEnum implements IModeOperations {
+		ATTACHMENT{
+			@Override
+			public void setSize(int theSize) {
+
+			}
+
+			@Override
+			public void setContentType(String theContentType) {
+
+			}
+		},
+		BINARY{
+			@Override
+			public void setSize(int theSize) {
+
+			}
+
+			@Override
+			public void setContentType(String theContentType) {
+
+			}
+		};
+
 	}
 
 
