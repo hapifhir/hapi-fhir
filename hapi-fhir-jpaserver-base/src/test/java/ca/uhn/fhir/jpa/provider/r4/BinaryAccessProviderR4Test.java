@@ -47,6 +47,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		super.before();
 		myStorageSvc.setMinSize(10);
 		myDaoConfig.setExpungeEnabled(true);
+		myInterceptorRegistry.registerInterceptor(myBinaryStorageInterceptor);
 	}
 
 	@Override

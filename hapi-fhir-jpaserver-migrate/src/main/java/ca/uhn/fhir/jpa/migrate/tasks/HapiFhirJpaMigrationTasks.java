@@ -63,6 +63,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init400() {
 		Builder version = forVersion(VersionEnum.V4_0_0);
 
+		// BinaryStorageEntity
+		Builder.BuilderAddTableByColumns binaryBlob = version.addTableByColumns("HFJ_BINARY_STORAGE_BLOB", "BLOB_ID");
+		binaryBlob.addColumn("BLOB_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		binaryBlob.addColumn("RESOURCE_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_SIZE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		binaryBlob.addColumn("CONTENT_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_DATA").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
+		binaryBlob.addColumn("PUBLISHED_DATE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		binaryBlob.addColumn("BLOB_HASH").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 128);
+
 		// Interim builds used this name
 		version.onTable("TRM_VALUESET_CODE").dropThisTable();
 

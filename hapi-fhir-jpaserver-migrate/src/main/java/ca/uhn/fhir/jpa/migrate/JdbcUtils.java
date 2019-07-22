@@ -157,6 +157,8 @@ public class JdbcUtils {
 							case Types.TIMESTAMP:
 							case Types.TIMESTAMP_WITH_TIMEZONE:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
+							case Types.BLOB:
+								return BaseTableColumnTypeTask.ColumnTypeEnum.BLOB.getDescriptor(null);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}

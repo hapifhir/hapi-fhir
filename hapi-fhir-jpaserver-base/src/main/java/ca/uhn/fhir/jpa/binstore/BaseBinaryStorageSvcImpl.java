@@ -23,6 +23,9 @@ package ca.uhn.fhir.jpa.binstore;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CountingInputStream;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
@@ -30,14 +33,25 @@ import java.io.InputStream;
 import java.security.SecureRandom;
 
 abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
-
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private final int ID_LENGTH = 100;
+	private int myMaximumBinarySize = Integer.MAX_VALUE;
 	private int myMinSize;
 
 	BaseBinaryStorageSvcImpl() {
 		myRandom = new SecureRandom();
+	}
+
+	@Override
+	public int getMaximumBinarySize() {
+		return myMaximumBinarySize;
+	}
+
+	@Override
+	public void setMaximumBinarySize(int theMaximumBinarySize) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
+		myMaximumBinarySize = theMaximumBinarySize;
 	}
 
 	public void setMinSize(int theMinSize) {
@@ -60,8 +74,17 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@SuppressWarnings("UnstableApiUsage")
 	@Nonnull
-	static HashingInputStream createHashingInputStream(InputStream theInputStream) {
+	HashingInputStream createHashingInputStream(InputStream theInputStream) {
 		HashFunction hash = Hashing.sha256();
 		return new HashingInputStream(hash, theInputStream);
 	}
+
+	@SuppressWarnings("UnstableApiUsage")
+	@Nonnull
+	CountingInputStream createCountingInputStream(InputStream theInputStream) {
+		InputStream stream = ByteStreams.limit(theInputStream, myMaximumBinarySize);
+		return new CountingInputStream(stream);
+	}
+
+
 }

@@ -70,7 +70,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		// Write binary file
 		File storageFilename = getStorageFilename(storagePath, theResourceId, id);
 		ourLog.info("Writing to file: {}", storageFilename.getAbsolutePath());
-		CountingInputStream countingInputStream = new CountingInputStream(theInputStream);
+		CountingInputStream countingInputStream = createCountingInputStream(theInputStream);
 		HashingInputStream hashingInputStream = createHashingInputStream(countingInputStream);
 		try (FileOutputStream outputStream = new FileOutputStream(storageFilename)) {
 			IOUtils.copy(hashingInputStream, outputStream);

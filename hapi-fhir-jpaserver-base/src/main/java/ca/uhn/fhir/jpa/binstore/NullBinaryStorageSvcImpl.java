@@ -28,6 +28,16 @@ import java.io.OutputStream;
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
+	public int getMaximumBinarySize() {
+		return 0;
+	}
+
+	@Override
+	public void setMaximumBinarySize(int theMaximumBinarySize) {
+		// ignore
+	}
+
+	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
 		return false;
 	}
