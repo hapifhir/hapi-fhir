@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 
 public class FilesystemBinaryStorageSvcImplTest {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(FilesystemBinaryStorageSvcImplTest.class);
 	public static final byte[] SOME_BYTES = {2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+	private static final Logger ourLog = LoggerFactory.getLogger(FilesystemBinaryStorageSvcImplTest.class);
 	private File myPath;
 	private FilesystemBinaryStorageSvcImpl mySvc;
 
@@ -55,5 +55,27 @@ public class FilesystemBinaryStorageSvcImplTest {
 		assertArrayEquals(SOME_BYTES, capture.toByteArray());
 	}
 
+
+	@Test
+	public void testExpunge() throws IOException {
+		IIdType id = new IdType("Patient/123");
+		String contentType = "image/png";
+		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
+
+		ourLog.info("Got id: {}", outcome);
+
+		IBinaryStorageSvc.StoredDetails details = mySvc.fetchBlobDetails(id, outcome.getBlobId());
+		assertEquals(16L, details.getBytes());
+		assertEquals(outcome.getBlobId(), details.getBlobId());
+		assertEquals("image/png", details.getContentType());
+		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
+		assertNotNull(details.getPublished());
+
+		mySvc.expungeBlob(id, outcome.getBlobId());
+
+		ByteArrayOutputStream capture = new ByteArrayOutputStream();
+		mySvc.writeBlob(id, outcome.getBlobId(), capture);
+		assertEquals(0, capture.size());
+	}
 
 }

@@ -210,6 +210,6 @@ public class JpaConstants {
 	/**
 	 * Extension ID for external binary references
 	 */
-	public static final String EXT_ATTACHMENT_EXTERNAL_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/attachment-external-binary-id";
+	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 }
