@@ -161,7 +161,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setCode("myDoctor");
 		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
 		sp.setTitle("My Doctor");
-		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor')");
+		sp.setExpression("Patient.extension('http://fmcna.com/myDoctor').value.as(Reference)");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		mySearchParameterDao.create(sp);
@@ -183,6 +183,41 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		ourLog.info("IDS: " + ids);
 		assertThat(ids, contains(pid.getValue()));
 	}
+
+
+	@Test
+	public void testIndexIntoBundle() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Bundle");
+		sp.setCode("messageid");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setTitle("Message ID");
+		sp.setExpression("Bundle.entry.resource.as(MessageHeader).id");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+		mySearchParameterDao.create(sp);
+
+		mySearchParamRegistry.forceRefresh();
+
+		MessageHeader messageHeader = new MessageHeader();
+		messageHeader.setId("123");
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.MESSAGE);
+		bundle.addEntry()
+			.setResource(messageHeader);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		myBundleDao.create(bundle);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("messageid", new TokenParam("123"));
+		IBundleProvider outcome = myBundleDao.search(params);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+		ourLog.info("IDS: " + ids);
+		assertThat(ids, not(empty()));
+	}
+
 
 	@Test
 	public void testExtensionWithNoValueIndexesWithoutFailure() {
@@ -1075,6 +1110,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setExpression("Observation.specimen.resolve().receivedTime");
 		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
 		mySearchParameterDao.create(sp);
 
 		mySearchParamRegistry.forceRefresh();
@@ -1087,6 +1123,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		o.getContained().add(specimen);
 		o.setStatus(Observation.ObservationStatus.FINAL);
 		o.setSpecimen(new Reference("#FOO"));
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(o));
 		myObservationDao.update(o);
 
 		specimen = new Specimen();
