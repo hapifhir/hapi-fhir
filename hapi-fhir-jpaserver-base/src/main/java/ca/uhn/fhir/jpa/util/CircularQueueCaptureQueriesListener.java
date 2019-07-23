@@ -131,6 +131,13 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	}
 
 	/**
+	 * Returns all INSERT queries executed on the current thread - Index 0 is oldest
+	 */
+	public List<SqlQuery> getAllQueriesForCurrentThread() {
+		return getQueriesForCurrentThreadStartingWith("");
+	}
+
+	/**
 	 * Returns all UPDATE queries executed on the current thread - Index 0 is oldest
 	 */
 	public List<SqlQuery> getUpdateQueriesForCurrentThread() {
@@ -203,6 +210,17 @@ public class CircularQueueCaptureQueriesListener extends BaseCaptureQueriesListe
 	 */
 	public void logInsertQueriesForCurrentThread() {
 		List<String> queries = getInsertQueriesForCurrentThread()
+			.stream()
+			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
+			.collect(Collectors.toList());
+		ourLog.info("Insert Queries:\n{}", String.join("\n", queries));
+	}
+
+	/**
+	 * Log all captured INSERT queries
+	 */
+	public void logAllQueriesForCurrentThread() {
+		List<String> queries = getAllQueriesForCurrentThread()
 			.stream()
 			.map(CircularQueueCaptureQueriesListener::formatQueryAsSql)
 			.collect(Collectors.toList());

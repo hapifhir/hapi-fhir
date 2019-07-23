@@ -72,7 +72,7 @@ public abstract class BaseClient implements IRestfulClient {
 	private final RestfulClientFactory myFactory;
 	private final String myUrlBase;
 	private boolean myDontValidateConformance;
-	private EncodingEnum myEncoding = null; // default unspecified (will be XML)
+	private EncodingEnum myEncoding = null; // default unspecified (will be JSON)
 	private boolean myKeepResponses = false;
 	private IHttpResponse myLastResponse;
 	private String myLastResponseBody;

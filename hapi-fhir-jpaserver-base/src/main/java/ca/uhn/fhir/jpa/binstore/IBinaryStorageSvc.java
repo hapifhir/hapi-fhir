@@ -40,6 +40,34 @@ import java.util.Date;
 public interface IBinaryStorageSvc {
 
 	/**
+	 * Gets the maximum number of bytes that can be stored in a single binary
+	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 */
+	int getMaximumBinarySize();
+
+	/**
+	 * Sets the maximum number of bytes that can be stored in a single binary
+	 * file by this service. The default is {@link Integer#MAX_VALUE}
+	 *
+	 * @param theMaximumBinarySize The maximum size
+	 */
+	void setMaximumBinarySize(int theMaximumBinarySize);
+
+	/**
+	 * Gets the minimum number of bytes that will be stored. Binary content smaller
+	 * * than this threshold may be inlined even if a binary storage service
+	 * * is active.
+	 */
+	int getMinimumBinarySize();
+
+	/**
+	 * Sets the minimum number of bytes that will be stored. Binary content smaller
+	 * than this threshold may be inlined even if a binary storage service
+	 * is active.
+	 */
+	void setMinimumBinarySize(int theMinimumBinarySize);
+
+	/**
 	 * Give the storage service the ability to veto items from storage
 	 *
 	 * @param theSize        How large is the item
@@ -61,7 +89,12 @@ public interface IBinaryStorageSvc {
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
 
-	void writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException;
+	/**
+	 * @return Returns <code>true</code> if the blob was found and written, of <code>false</code> if the blob was not found (i.e. it was expunged or the ID was invalid)
+	 */
+	boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException;
+
+	void expungeBlob(IIdType theResourceId, String theBlobId);
 
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -115,8 +148,18 @@ public interface IBinaryStorageSvc {
 			return myHash;
 		}
 
+		public StoredDetails setHash(String theHash) {
+			myHash = theHash;
+			return this;
+		}
+
 		public Date getPublished() {
 			return myPublished;
+		}
+
+		public StoredDetails setPublished(Date thePublished) {
+			myPublished = thePublished;
+			return this;
 		}
 
 		@Nonnull
@@ -124,13 +167,28 @@ public interface IBinaryStorageSvc {
 			return myContentType;
 		}
 
+		public StoredDetails setContentType(String theContentType) {
+			myContentType = theContentType;
+			return this;
+		}
+
 		@Nonnull
 		public String getBlobId() {
 			return myBlobId;
 		}
 
+		public StoredDetails setBlobId(String theBlobId) {
+			myBlobId = theBlobId;
+			return this;
+		}
+
 		public long getBytes() {
 			return myBytes;
+		}
+
+		public StoredDetails setBytes(long theBytes) {
+			myBytes = theBytes;
+			return this;
 		}
 
 	}

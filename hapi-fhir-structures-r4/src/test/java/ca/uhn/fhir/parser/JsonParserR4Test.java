@@ -40,6 +40,18 @@ public class JsonParserR4Test {
 	}
 
 	@Test
+	public void testEncodeExtensionOnBinaryData() {
+		Binary b = new Binary();
+		b.getDataElement().addExtension("http://foo", new StringType("AAA"));
+
+		String output = ourCtx.newJsonParser().setSummaryMode(true).encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"meta\":{\"tag\":[{\"system\":\"http://terminology.hl7.org/CodeSystem/v3-ObservationValue\",\"code\":\"SUBSETTED\",\"display\":\"Resource encoded in summary mode\"}]}}", output);
+
+		output = ourCtx.newJsonParser().setDontEncodeElements(Sets.newHashSet("*.id", "*.meta")).encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"_data\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}", output);
+	}
+
+	@Test
 	public void testDontStripVersions() {
 		FhirContext ctx = FhirContext.forR4();
 		ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");

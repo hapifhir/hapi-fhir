@@ -22,12 +22,30 @@ package ca.uhn.fhir.jpa.binstore;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 
 public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
+
+	@Override
+	public int getMaximumBinarySize() {
+		return 0;
+	}
+
+	@Override
+	public void setMaximumBinarySize(int theMaximumBinarySize) {
+		// ignore
+	}
+
+	@Override
+	public int getMinimumBinarySize() {
+		return 0;
+	}
+
+	@Override
+	public void setMinimumBinarySize(int theMinimumBinarySize) {
+		// ignore
+	}
 
 	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
@@ -45,7 +63,12 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public void writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
+	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void expungeBlob(IIdType theIdElement, String theBlobId) {
 		throw new UnsupportedOperationException();
 	}
 }
