@@ -31,7 +31,6 @@ import static org.junit.Assert.fail;
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
-	public static final String DBNAME = "dbname";
 	public static Integer ourMaxThreads;
 
 	static {
@@ -100,9 +99,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 
 		};
 
-		String dbName = myEnvironment.getRequiredProperty(DBNAME);
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4_" + dbName);
+		retVal.setUrl("jdbc:h2:mem:testdb_r4");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

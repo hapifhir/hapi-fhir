@@ -73,9 +73,6 @@ import static org.mockito.Mockito.mock;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4Config.class})
-@TestPropertySource(properties = {
-	TestR4Config.DBNAME + "=BaseJpaR4Test"
-})
 public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static JpaValidationSupportChainR4 ourJpaValidationSupportChainR4;
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;

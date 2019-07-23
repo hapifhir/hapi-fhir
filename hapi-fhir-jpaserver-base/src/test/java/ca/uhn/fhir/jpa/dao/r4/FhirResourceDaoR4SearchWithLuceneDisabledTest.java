@@ -41,9 +41,6 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {TestR4WithoutLuceneConfig.class})
-@TestPropertySource(properties = {
-	TestR4Config.DBNAME + "=FhirResourceDaoR4SearchWithLuceneDisabledTest"
-})
 public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithLuceneDisabledTest.class);
 	@Autowired
