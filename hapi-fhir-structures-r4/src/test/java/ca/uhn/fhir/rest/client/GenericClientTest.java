@@ -324,7 +324,7 @@ public class GenericClientTest {
 		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
 		assertEquals("POST", capt.getValue().getMethod());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
 		count++;
 
@@ -335,7 +335,7 @@ public class GenericClientTest {
 		client.create().resource(p1).execute();
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(1).getURI().toString());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
@@ -583,7 +583,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir/MessageHeader/$process-message", capt.getAllValues().get(count).getURI().toString());
 		String requestContent = IOUtils.toString(((HttpPost) capt.getAllValues().get(count)).getEntity().getContent(), Charsets.UTF_8);
-		assertThat(requestContent, startsWith("<Parameters xmlns=\"http://hl7.org/fhir\">"));
+		assertThat(requestContent, containsString("{\"resourceType\":\"Parameters\""));
 		count++;
 	}
 
@@ -1565,7 +1565,7 @@ public class GenericClientTest {
 	}
 
 	@Test
-	public void testTransaction() throws Exception {
+	public void testTransactionJson() throws Exception {
 		Bundle input = createTransactionBundleInput();
 		Bundle output = createTransactionBundleOutput();
 
@@ -1585,7 +1585,7 @@ public class GenericClientTest {
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
 		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 	}
 
@@ -1606,6 +1606,7 @@ public class GenericClientTest {
 
 		Bundle response = client.transaction()
 			.withBundle(input)
+			.encodedXml()
 			.execute();
 
 		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
@@ -1646,7 +1647,7 @@ public class GenericClientTest {
 
 		assertEquals(1, capt.getAllValues().size());
 		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		count++;
 
 		MethodOutcome outcome = client.update().resource(p1).execute();

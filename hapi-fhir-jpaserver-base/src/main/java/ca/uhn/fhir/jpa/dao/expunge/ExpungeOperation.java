@@ -152,15 +152,15 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private void expungeOldVersions() {
 		Slice<Long> historicalIds = findHistoricalVersionsOfNonDeletedResources();
 
-		myPartitionRunner.runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(historicalIds, partition -> myExpungeDaoService.expungeHistoricalVersions(myRequestDetails, partition, myRemainingCount));
 	}
 
 	private void deleteCurrentVersionsOfDeletedResources(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeCurrentVersionOfResources(myRequestDetails, partition, myRemainingCount));
 	}
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(partition, myRemainingCount));
+		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(myRequestDetails, partition, myRemainingCount));
 	}
 
 	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {

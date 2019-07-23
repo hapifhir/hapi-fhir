@@ -86,6 +86,15 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.ORACLE_12C, "number(1,0)");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.POSTGRES_9_4, "boolean");
 		setColumnType(ColumnTypeEnum.BOOLEAN, DriverTypeEnum.MYSQL_5_7, "bit");
+
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.H2_EMBEDDED, "blob");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.DERBY_EMBEDDED, "blob");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.MARIADB_10_1, "longblob");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.MYSQL_5_7, "longblob");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.ORACLE_12C, "blob");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.POSTGRES_9_4, "oid");
+		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
+
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -196,6 +205,14 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 			public String getDescriptor(Long theColumnLength) {
 				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
 				return "int";
+			}
+		},
+
+		BLOB {
+			@Override
+			public String getDescriptor(Long theColumnLength) {
+				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
+				return "blob";
 			}
 		};
 

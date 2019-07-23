@@ -45,6 +45,13 @@
 				should be an easy fix to existing code.
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The HAPI FHIR REST client and server will now default to using JSON encoding instead of XML when
+				the user has not explicitly configured a preference.
+				]]>
+			</action>
 			<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
@@ -110,10 +117,6 @@
 				Hooks have access to the list of resources that have references to the resource being deleted and
 				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
-			</action>
-			<action type="change">
-				The default RestfulServer encoding has been changed from XML to JSON in order to
-				reflect the most common usage.
 			</action>
 			<action type="add" issue="1336">
 				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
@@ -332,6 +335,7 @@
 				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
 				user @navyflower for reporting!
 			</action>
+
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

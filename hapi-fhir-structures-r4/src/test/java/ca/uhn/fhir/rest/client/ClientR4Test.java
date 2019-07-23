@@ -157,9 +157,9 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("{\"resourceType\":\"Patient\""));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
 
@@ -205,7 +205,7 @@ public class ClientR4Test {
 
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -1046,10 +1046,10 @@ public class ClientR4Test {
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 	}
 
 	/**
@@ -1114,7 +1114,7 @@ public class ClientR4Test {
 		assertEquals(HttpPut.class, capt.getValue().getClass());
 		HttpPut post = (HttpPut) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/100"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertEquals("http://example.com/fhir/Patient/100/_history/200", response.getId().getValue());
 		assertEquals("200", response.getId().getVersionIdPart());
 	}
@@ -1138,7 +1138,7 @@ public class ClientR4Test {
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertNull(response.getOperationOutcome());
 		assertNull(response.getResource());
 	}
@@ -1189,7 +1189,7 @@ public class ClientR4Test {
 		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("<Patient"));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
 		assertNotNull(response.getOperationOutcome());
 		assertEquals("ALL GOOD", ((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics());
 		assertNull(response.getResource());
