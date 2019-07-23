@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,6 +21,9 @@ import static org.junit.Assert.*;
 import static org.junit.Assert.assertArrayEquals;
 
 @ContextConfiguration(classes = DatabaseBlobBinaryStorageSvcImplTest.MyConfig.class)
+@TestPropertySource(properties = {
+	TestR4Config.DBNAME + "=DatabaseBlobBinaryStorageSvcImplTest"
+})
 public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 	private static final byte[] SOME_BYTES = {2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 

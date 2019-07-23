@@ -10,10 +10,12 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -29,6 +31,7 @@ import static org.junit.Assert.fail;
 public class TestR4Config extends BaseJavaConfigR4 {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+	public static final String DBNAME = "dbname";
 	public static Integer ourMaxThreads;
 
 	static {
@@ -41,6 +44,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
 		}
 	}
+
+	@Autowired
+	private Environment myEnvironment;
 
 	private Exception myLastStackTrace;
 
@@ -93,8 +99,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			}
 
 		};
+
+		String dbName = myEnvironment.getRequiredProperty(DBNAME);
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_r4");
+		retVal.setUrl("jdbc:h2:mem:testdb_r4_" + dbName);
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
