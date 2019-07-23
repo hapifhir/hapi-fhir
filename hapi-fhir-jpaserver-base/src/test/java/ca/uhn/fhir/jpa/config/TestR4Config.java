@@ -10,10 +10,12 @@ import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -41,6 +43,9 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			ourMaxThreads = (int) (Math.random() * 6.0) + 1;
 		}
 	}
+
+	@Autowired
+	private Environment myEnvironment;
 
 	private Exception myLastStackTrace;
 
@@ -93,6 +98,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 			}
 
 		};
+
 		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl("jdbc:h2:mem:testdb_r4");
 		retVal.setMaxWaitMillis(10000);

@@ -4,9 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
-import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -123,8 +124,14 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")
 	@Lazy
-	public BinaryAccessProvider AttachmentBinaryAccessProvider() {
+	public BinaryAccessProvider binaryAccessProvider() {
 		return new BinaryAccessProvider();
+	}
+
+	@Bean(name = "myBinaryStorageInterceptor")
+	@Lazy
+	public BinaryStorageInterceptor binaryStorageInterceptor() {
+		return new BinaryStorageInterceptor();
 	}
 
 	@Bean

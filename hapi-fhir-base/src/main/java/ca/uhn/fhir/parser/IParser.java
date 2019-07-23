@@ -212,7 +212,7 @@ public interface IParser {
 	 *           The elements to encode
 	 * @see #setEncodeElements(Set)
 	 */
-	void setDontEncodeElements(Set<String> theDontEncodeElements);
+	IParser setDontEncodeElements(Set<String> theDontEncodeElements);
 
 	/**
 	 * If provided, specifies the elements which should be encoded, to the exclusion of all others. Valid values for this
@@ -230,7 +230,7 @@ public interface IParser {
 	 *           The elements to encode
 	 * @see #setDontEncodeElements(Set)
 	 */
-	void setEncodeElements(Set<String> theEncodeElements);
+	IParser setEncodeElements(Set<String> theEncodeElements);
 
 	/**
 	 * If set to <code>true</code> (default is false), the values supplied
