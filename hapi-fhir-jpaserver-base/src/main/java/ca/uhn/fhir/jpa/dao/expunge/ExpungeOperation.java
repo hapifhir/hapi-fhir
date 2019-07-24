@@ -73,8 +73,6 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	public ExpungeOutcome call() {
 		final IdDt id;
 
-		callHooks();
-
 		if (expungeLimitReached()) {
 			return expungeOutcome();
 		}
@@ -95,30 +93,6 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 		}
 
 		return expungeOutcome();
-	}
-
-	private void callHooks() {
-		final AtomicInteger counter = new AtomicInteger();
-
-		if (myResourceId == null) {
-			return;
-		}
-		IdDt id;
-		if (myVersion == null) {
-			id = new IdDt(myResourceName, myResourceId);
-		} else {
-			id = new IdDt(myResourceName, myResourceId.toString(), myVersion.toString());
-		}
-
-		// Notify Interceptors about pre-action call
-		HookParams hooks = new HookParams()
-			.add(AtomicInteger.class, counter)
-			.add(IdDt.class, id)
-			.add(RequestDetails.class, myRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, hooks);
-
-		myRemainingCount.addAndGet(-1 * counter.get());
 	}
 
 	private void expungeDeletedResources() {

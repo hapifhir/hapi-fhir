@@ -82,14 +82,16 @@ public class ExpungeHookTest {
 	public void expungeResourceHook() throws InterruptedException {
 		IIdType expungeId = myPatientDao.create(new Patient()).getId();
 		assertNotNull(myPatientDao.read(expungeId));
-		myExpungeResourceLatch.setExpectedCount(1);
 		myPatientDao.delete(expungeId);
 
 		ExpungeOptions options = new ExpungeOptions();
 		options.setExpungeDeletedResources(true);
-		myExpungeService.expunge("Patient", expungeId.getIdPartAsLong(), expungeId.getVersionIdPartAsLong(), options, null);
+
+		myExpungeResourceLatch.setExpectedCount(2);
+		myExpungeService.expunge("Patient", expungeId.getIdPartAsLong(), null, options, null);
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
-		IdDt hookId = hookParams.get(IdDt.class);
+
+		IIdType hookId = hookParams.get(IIdType.class);
 		assertEquals(expungeId.getValue(), hookId.getValue());
 	}
 }
