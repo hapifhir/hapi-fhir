@@ -1166,15 +1166,11 @@ public enum Pointcut {
 	/**
 	 * Invoked before a resource is about to be expunged via the <code>$expunge</code> operation.
 	 * <p>
-	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
-	 * If the hook deletes any records, the hook is expected to increment this counter by the number of records deleted.
-	 * </p>
-	 * <p>
 	 * Hooks may accept the following parameters:
 	 * </p>
 	 * <ul>
 	 * <li>org.hl7.fhir.instance.model.api.IIdType - The ID of the resource that is about to be deleted</li>
-	 * <li>java.util.concurrent.atomic.AtomicInteger - The counter holding the number of records deleted.</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource that is about to be deleted</li>
 	 * <li>
 	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
 	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
@@ -1193,12 +1189,12 @@ public enum Pointcut {
 	 * Hooks should return void.
 	 * </p>
 	 */
-	STORAGE_PRESTORAGE_EXPUNGE_RESOURCE (
+	STORAGE_PRESTORAGE_EXPUNGE_RESOURCE(
 		// Return type
 		void.class,
 		// Params
-		"java.util.concurrent.atomic.AtomicInteger",
 		"org.hl7.fhir.instance.model.api.IIdType",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
 	),
