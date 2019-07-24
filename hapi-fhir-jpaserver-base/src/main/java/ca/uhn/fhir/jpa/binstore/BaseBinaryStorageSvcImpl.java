@@ -20,11 +20,11 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.CountingInputStream;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -85,11 +85,18 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return new HashingInputStream(hash, theInputStream);
 	}
 
-	@SuppressWarnings("UnstableApiUsage")
 	@Nonnull
 	CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream stream = ByteStreams.limit(theInputStream, myMaximumBinarySize);
-		return new CountingInputStream(stream);
+		return new CountingInputStream(theInputStream){
+			@Override
+			public int getCount() {
+				int retVal = super.getCount();
+				if (retVal > myMaximumBinarySize) {
+					throw new InternalErrorException("Binary size exceeds maximum: " + myMaximumBinarySize);
+				}
+				return retVal;
+			}
+		};
 	}
 
 
