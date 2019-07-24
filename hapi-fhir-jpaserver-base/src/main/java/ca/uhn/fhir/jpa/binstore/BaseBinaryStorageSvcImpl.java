@@ -20,11 +20,13 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
-import com.google.common.io.CountingInputStream;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -49,6 +51,12 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public void setMaximumBinarySize(int theMaximumBinarySize) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
+		myMaximumBinarySize = theMaximumBinarySize;
+	}
+
+	@Override
 	public int getMinimumBinarySize() {
 		return myMinimumBinarySize;
 	}
@@ -56,12 +64,6 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Override
 	public void setMinimumBinarySize(int theMinimumBinarySize) {
 		myMinimumBinarySize = theMinimumBinarySize;
-	}
-
-	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
-		myMaximumBinarySize = theMaximumBinarySize;
 	}
 
 	String newRandomId() {
@@ -85,11 +87,19 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return new HashingInputStream(hash, theInputStream);
 	}
 
-	@SuppressWarnings("UnstableApiUsage")
 	@Nonnull
 	CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream stream = ByteStreams.limit(theInputStream, myMaximumBinarySize);
-		return new CountingInputStream(stream);
+		InputStream is = ByteStreams.limit(theInputStream, myMaximumBinarySize + 1L);
+		return new CountingInputStream(is) {
+			@Override
+			public int getCount() {
+				int retVal = super.getCount();
+				if (retVal > myMaximumBinarySize) {
+					throw new PayloadTooLargeException("Binary size exceeds maximum: " + myMaximumBinarySize);
+				}
+				return retVal;
+			}
+		};
 	}
 
 

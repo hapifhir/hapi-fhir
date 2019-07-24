@@ -41,6 +41,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -59,6 +61,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class BinaryAccessProvider {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(BinaryAccessProvider.class);
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
@@ -169,6 +172,8 @@ public class BinaryAccessProvider {
 		}
 
 		long size = theServletRequest.getContentLength();
+		ourLog.info("**** HAVE CONTENT LENGTH: {}", size);
+
 		String blobId = null;
 
 		if (size > 0) {

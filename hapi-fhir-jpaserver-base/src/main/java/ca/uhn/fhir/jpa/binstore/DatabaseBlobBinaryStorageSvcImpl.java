@@ -23,8 +23,8 @@ package ca.uhn.fhir.jpa.binstore;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import com.google.common.hash.HashingInputStream;
-import com.google.common.io.CountingInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.hibernate.LobHelper;
 import org.hibernate.Session;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -57,7 +57,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@Override
 	@Transactional(Transactional.TxType.SUPPORTS)
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) throws IOException {
+	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) {
 		Date publishedDate = new Date();
 
 		HashingInputStream hashingInputStream = createHashingInputStream(theInputStream);
@@ -103,7 +103,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException {
+	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
 
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isPresent() == false) {

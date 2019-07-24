@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -77,5 +80,23 @@ public class FilesystemBinaryStorageSvcImplTest {
 		mySvc.writeBlob(id, outcome.getBlobId(), capture);
 		assertEquals(0, capture.size());
 	}
+
+	@Test
+	public void testRejectOversized() throws IOException {
+		mySvc.setMinimumBinarySize(0);
+		mySvc.setMaximumBinarySize(5);
+
+		IIdType id = new IdType("Patient/123");
+		String contentType = "image/png";
+		try {
+			mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
+			fail();
+		} catch (PayloadTooLargeException e) {
+			assertEquals("Binary size exceeds maximum: 5", e.getMessage());
+		}
+
+
+	}
+
 
 }
