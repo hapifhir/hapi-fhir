@@ -213,6 +213,7 @@ public class Constants {
 	public static final String CASCADE_DELETE = "delete";
 	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
 	public static final String CACHE_CONTROL_PRIVATE = "private";
+	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

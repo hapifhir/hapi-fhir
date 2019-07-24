@@ -21,9 +21,11 @@ package ca.uhn.fhir.jpa.binstore;
  */
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -49,6 +51,12 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
+	public void setMaximumBinarySize(int theMaximumBinarySize) {
+		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
+		myMaximumBinarySize = theMaximumBinarySize;
+	}
+
+	@Override
 	public int getMinimumBinarySize() {
 		return myMinimumBinarySize;
 	}
@@ -56,12 +64,6 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Override
 	public void setMinimumBinarySize(int theMinimumBinarySize) {
 		myMinimumBinarySize = theMinimumBinarySize;
-	}
-
-	@Override
-	public void setMaximumBinarySize(int theMaximumBinarySize) {
-		Validate.inclusiveBetween(1, Integer.MAX_VALUE, theMaximumBinarySize);
-		myMaximumBinarySize = theMaximumBinarySize;
 	}
 
 	String newRandomId() {
@@ -87,12 +89,13 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		return new CountingInputStream(theInputStream){
+		InputStream is = ByteStreams.limit(theInputStream, myMaximumBinarySize + 1L);
+		return new CountingInputStream(is) {
 			@Override
 			public int getCount() {
 				int retVal = super.getCount();
 				if (retVal > myMaximumBinarySize) {
-					throw new InternalErrorException("Binary size exceeds maximum: " + myMaximumBinarySize);
+					throw new PayloadTooLargeException("Binary size exceeds maximum: " + myMaximumBinarySize);
 				}
 				return retVal;
 			}
