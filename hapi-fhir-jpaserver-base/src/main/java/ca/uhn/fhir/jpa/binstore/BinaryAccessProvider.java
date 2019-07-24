@@ -172,7 +172,7 @@ public class BinaryAccessProvider {
 		}
 
 		long size = theServletRequest.getContentLength();
-		ourLog.info("**** HAVE CONTENT LENGTH: {}", size);
+		ourLog.trace("Request specified content length: {}", size);
 
 		String blobId = null;
 
