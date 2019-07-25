@@ -32,6 +32,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Interceptor
@@ -43,7 +44,7 @@ public class BinaryStorageInterceptor {
 	private FhirContext myCtx;
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
-	public void expungeResource(IBaseResource theResource) {
+	public void expungeResource(AtomicInteger theCounter, IBaseResource theResource) {
 
 		Class<? extends IBase> binaryType = myCtx.getElementDefinition("base64Binary").getImplementingClass();
 		List<? extends IBase> binaryElements = myCtx.newTerser().getAllPopulatedChildElementsOfType(theResource, binaryType);
@@ -57,6 +58,7 @@ public class BinaryStorageInterceptor {
 
 		for (String next : attachmentIds) {
 			myBinaryStorageSvc.expungeBlob(theResource.getIdElement(), next);
+			theCounter.incrementAndGet();
 		}
 
 	}

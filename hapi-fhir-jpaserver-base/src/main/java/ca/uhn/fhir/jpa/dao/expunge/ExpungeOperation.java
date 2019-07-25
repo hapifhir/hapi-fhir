@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -29,22 +30,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 @Scope("prototype")
-public class ExpungeRun implements Callable<ExpungeOutcome> {
+public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeService.class);
 
-	@Autowired
-	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private IResourceExpungeService myExpungeDaoService;
 	@Autowired
 	private PartitionRunner myPartitionRunner;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	private final String myResourceName;
 	private final Long myResourceId;
@@ -53,7 +53,7 @@ public class ExpungeRun implements Callable<ExpungeOutcome> {
 	private final RequestDetails myRequestDetails;
 	private final AtomicInteger myRemainingCount;
 
-	public ExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
+	public ExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		myResourceName = theResourceName;
 		myResourceId = theResourceId;
 		myVersion = theVersion;
