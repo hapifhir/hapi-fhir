@@ -20,24 +20,17 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
-import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.persistence.Id;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -71,13 +64,6 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 
 	@Override
 	public ExpungeOutcome call() {
-		final IdDt id;
-
-		if (expungeLimitReached()) {
-			return expungeOutcome();
-		}
-
-
 		if (myExpungeOptions.isExpungeDeletedResources() && myVersion == null) {
 			expungeDeletedResources();
 			if (expungeLimitReached()) {
