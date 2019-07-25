@@ -18,14 +18,14 @@ import java.util.Set;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,15 +39,11 @@ public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
 	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search")
-	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Search theSearch);
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
+	List<Long> findWithSearchUuid(@Param("search") Search theSearch);
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
-
-	@Modifying
-	@Query("DELETE FROM SearchResult s WHERE s.myResourcePid IN :ids")
-	void deleteByResourceIds(@Param("ids") List<Long> theContent);
 
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")

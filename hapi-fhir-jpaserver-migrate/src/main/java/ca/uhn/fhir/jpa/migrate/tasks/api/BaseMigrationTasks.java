@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -60,46 +60,32 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retVal;
 	}
 
-	public Builder forVersion(T theVersion) {
-		IAcceptsTasks sink = theTask -> {
-			theTask.validate();
-			myTasks.put(theVersion, theTask);
-		};
-		return new Builder(sink);
+	protected Builder forVersion(T theVersion) {
+		return new Builder(theVersion);
 	}
 
-	public interface IAcceptsTasks {
-		void addTask(BaseTask<?> theTask);
-	}
+	protected class Builder {
 
-	public static class Builder {
+		private final T myVersion;
+		private String myTableName;
 
-		private final IAcceptsTasks mySink;
-
-		public Builder(IAcceptsTasks theSink) {
-			mySink = theSink;
+		Builder(T theVersion) {
+			myVersion = theVersion;
 		}
 
 		public BuilderWithTableName onTable(String theTableName) {
-			return new BuilderWithTableName(mySink, theTableName);
+			myTableName = theTableName;
+			return new BuilderWithTableName();
 		}
 
-		public void addTask(BaseTask<?> theTask) {
-			mySink.addTask(theTask);
+		public void addTask(BaseTask theTask) {
+			theTask.validate();
+			myTasks.put(myVersion, theTask);
 		}
 
-		public BuilderAddTableRawSql addTableRawSql(String theTableName) {
-			return new BuilderAddTableRawSql(theTableName);
-		}
-
-		public Builder executeRawSql(@Language("SQL") String theSql) {
-			mySink.addTask(new ExecuteRawSqlTask().addSql(theSql));
-			return this;
-		}
-
-		public Builder executeRawSql(DriverTypeEnum theDriver, @Language("SQL") String theSql) {
-			mySink.addTask(new ExecuteRawSqlTask().addSql(theDriver, theSql));
-			return this;
+		public BuilderAddTable addTable(String theTableName) {
+			myTableName = theTableName;
+			return new BuilderAddTable();
 		}
 
 		public Builder startSectionWithMessage(String theMessage) {
@@ -108,23 +94,10 @@ public class BaseMigrationTasks<T extends Enum> {
 			return this;
 		}
 
-		public BuilderAddTableByColumns addTableByColumns(String theTableName, String thePkColumnName) {
-			return new BuilderAddTableByColumns(mySink, theTableName, thePkColumnName);
-		}
-
-		public void addIdGenerator(String theGeneratorName) {
-			AddIdGeneratorTask task = new AddIdGeneratorTask(theGeneratorName);
-			addTask(task);
-		}
-
-		public static class BuilderWithTableName implements IAcceptsTasks {
-			private final String myTableName;
-			private final IAcceptsTasks mySink;
-
-			public BuilderWithTableName(IAcceptsTasks theSink, String theTableName) {
-				mySink = theSink;
-				myTableName = theTableName;
-			}
+		public class BuilderWithTableName {
+			private String myIndexName;
+			private String myColumnName;
+			private String myForeignKeyName;
 
 			public String getTableName() {
 				return myTableName;
@@ -138,11 +111,13 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			public BuilderAddIndexWithName addIndex(String theIndexName) {
-				return new BuilderAddIndexWithName(theIndexName);
+				myIndexName = theIndexName;
+				return new BuilderAddIndexWithName();
 			}
 
 			public BuilderAddColumnWithName addColumn(String theColumnName) {
-				return new BuilderAddColumnWithName(theColumnName, this);
+				myColumnName = theColumnName;
+				return new BuilderAddColumnWithName();
 			}
 
 			public void dropColumn(String theColumnName) {
@@ -153,47 +128,30 @@ public class BaseMigrationTasks<T extends Enum> {
 				addTask(task);
 			}
 
-			@Override
-			public void addTask(BaseTask<?> theTask) {
-				((BaseTableTask<?>)theTask).setTableName(myTableName);
-				mySink.addTask(theTask);
+			public void addTask(BaseTableTask<?> theTask) {
+				theTask.setTableName(myTableName);
+				Builder.this.addTask(theTask);
 			}
 
 			public BuilderModifyColumnWithName modifyColumn(String theColumnName) {
-				return new BuilderModifyColumnWithName(theColumnName);
+				myColumnName = theColumnName;
+				return new BuilderModifyColumnWithName();
 			}
 
 			public BuilderAddForeignKey addForeignKey(String theForeignKeyName) {
-				return new BuilderAddForeignKey(theForeignKeyName);
-			}
-
-			public BuilderWithTableName renameColumn(String theOldName, String theNewName) {
-				RenameColumnTask task = new RenameColumnTask();
-				task.setTableName(myTableName);
-				task.setOldName(theOldName);
-				task.setNewName(theNewName);
-				addTask(task);
-				return this;
+				myForeignKeyName = theForeignKeyName;
+				return new BuilderAddForeignKey();
 			}
 
 			public class BuilderAddIndexWithName {
-				private final String myIndexName;
-
-				public BuilderAddIndexWithName(String theIndexName) {
-					myIndexName = theIndexName;
-				}
+				private boolean myUnique;
 
 				public BuilderAddIndexUnique unique(boolean theUnique) {
-					return new BuilderAddIndexUnique(theUnique);
+					myUnique = theUnique;
+					return new BuilderAddIndexUnique();
 				}
 
 				public class BuilderAddIndexUnique {
-					private final boolean myUnique;
-
-					public BuilderAddIndexUnique(boolean theUnique) {
-						myUnique = theUnique;
-					}
-
 					public void withColumns(String... theColumnNames) {
 						AddIndexTask task = new AddIndexTask();
 						task.setTableName(myTableName);
@@ -205,30 +163,15 @@ public class BaseMigrationTasks<T extends Enum> {
 				}
 			}
 
-			public static class BuilderAddColumnWithName {
-				private final String myColumnName;
-				private final IAcceptsTasks myTaskSink;
-
-				public BuilderAddColumnWithName(String theColumnName, IAcceptsTasks theTaskSink) {
-					myColumnName = theColumnName;
-					myTaskSink = theTaskSink;
-				}
+			public class BuilderAddColumnWithName {
+				private boolean myNullable;
 
 				public BuilderAddColumnWithNameNullable nullable() {
-					return new BuilderAddColumnWithNameNullable(true);
-				}
-
-				public BuilderAddColumnWithNameNullable nonNullable() {
-					return new BuilderAddColumnWithNameNullable(false);
+					myNullable = true;
+					return new BuilderAddColumnWithNameNullable();
 				}
 
 				public class BuilderAddColumnWithNameNullable {
-					private final boolean myNullable;
-
-					public BuilderAddColumnWithNameNullable(boolean theNullable) {
-						myNullable = theNullable;
-					}
-
 					public void type(AddColumnTask.ColumnTypeEnum theColumnType) {
 						type(theColumnType, null);
 					}
@@ -241,38 +184,26 @@ public class BaseMigrationTasks<T extends Enum> {
 						if (theLength != null) {
 							task.setColumnLength(theLength);
 						}
-						myTaskSink.addTask(task);
+						addTask(task);
 					}
 				}
 			}
 
 			public class BuilderModifyColumnWithName {
 
-				private final String myColumnName;
-
-				public BuilderModifyColumnWithName(String theColumnName) {
-					myColumnName = theColumnName;
-				}
-
-				public String getColumnName() {
-					return myColumnName;
-				}
+				private boolean myNullable;
 
 				public BuilderModifyColumnWithNameAndNullable nullable() {
-					return new BuilderModifyColumnWithNameAndNullable(true);
+					myNullable = true;
+					return new BuilderModifyColumnWithNameAndNullable();
 				}
 
 				public BuilderModifyColumnWithNameAndNullable nonNullable() {
-					return new BuilderModifyColumnWithNameAndNullable(false);
+					myNullable = false;
+					return new BuilderModifyColumnWithNameAndNullable();
 				}
 
 				public class BuilderModifyColumnWithNameAndNullable {
-
-					private final boolean myNullable;
-
-					public BuilderModifyColumnWithNameAndNullable(boolean theNullable) {
-						myNullable = theNullable;
-					}
 
 					public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType) {
 						withType(theColumnType, null);
@@ -298,31 +229,24 @@ public class BaseMigrationTasks<T extends Enum> {
 						task.setNullable(myNullable);
 						task.setColumnType(theColumnType);
 						addTask(task);
+
 					}
+
 				}
 			}
 
-			public class BuilderAddForeignKey {
-				private final String myForeignKeyName;
-
-				public BuilderAddForeignKey(String theForeignKeyName) {
-					myForeignKeyName = theForeignKeyName;
-				}
-
+			public class BuilderAddForeignKey extends BuilderModifyColumnWithName {
 				public BuilderAddForeignKeyToColumn toColumn(String theColumnName) {
-					return new BuilderAddForeignKeyToColumn(theColumnName);
+					myColumnName = theColumnName;
+					return new BuilderAddForeignKeyToColumn();
 				}
 
-				public class BuilderAddForeignKeyToColumn extends BuilderModifyColumnWithName {
-					public BuilderAddForeignKeyToColumn(String theColumnName) {
-						super(theColumnName);
-					}
-
+				public class BuilderAddForeignKeyToColumn {
 					public void references(String theForeignTable, String theForeignColumn) {
 						AddForeignKeyTask task = new AddForeignKeyTask();
 						task.setTableName(myTableName);
 						task.setConstraintName(myForeignKeyName);
-						task.setColumnName(getColumnName());
+						task.setColumnName(myColumnName);
 						task.setForeignTableName(theForeignTable);
 						task.setForeignColumnName(theForeignColumn);
 						addTask(task);
@@ -331,53 +255,23 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 		}
 
-		public class BuilderAddTableRawSql {
+		public class BuilderAddTable {
 
-			private final AddTableRawSqlTask myTask;
+			private final AddTableTask myTask;
 
-			protected BuilderAddTableRawSql(String theTableName) {
-				myTask = new AddTableRawSqlTask();
-				myTask.setTableName(theTableName);
+			protected BuilderAddTable() {
+				myTask = new AddTableTask();
+				myTask.setTableName(myTableName);
 				addTask(myTask);
 			}
 
 
-			public BuilderAddTableRawSql addSql(DriverTypeEnum theDriverTypeEnum, @Language("SQL") String theSql) {
+			public BuilderAddTable addSql(DriverTypeEnum theDriverTypeEnum, @Language("SQL") String theSql) {
 				myTask.addSql(theDriverTypeEnum, theSql);
 				return this;
 			}
-
-			public void addSql(@Language("SQL") String theSql) {
-				myTask.addSql(theSql);
-			}
 		}
-
-		public class BuilderAddTableByColumns extends BuilderWithTableName implements IAcceptsTasks {
-			private final AddTableByColumnTask myTask;
-
-			public BuilderAddTableByColumns(IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
-				super(theSink, theTableName);
-				myTask = new AddTableByColumnTask();
-				myTask.setTableName(theTableName);
-				myTask.setPkColumn(thePkColumnName);
-				theSink.addTask(myTask);
-			}
-
-			@Override
-			public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theColumnName) {
-				return new BuilderWithTableName.BuilderAddColumnWithName(theColumnName, this);
-			}
-
-			@Override
-			public void addTask(BaseTask<?> theTask) {
-				if (theTask instanceof AddColumnTask) {
-					myTask.addAddColumnTask((AddColumnTask) theTask);
-				} else {
-					super.addTask(theTask);
-				}
-			}
-		}
-
 	}
+
 
 }

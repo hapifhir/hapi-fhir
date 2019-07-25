@@ -13,7 +13,6 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,18 +26,16 @@ import static org.junit.Assert.*;
 public class SubscriptionsDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionsDstu3Test.class);
-	private SubscriptionsRequireManualActivationInterceptorDstu3 myInterceptor;
 
-	@Before
+	private static final String WEBSOCKET_PATH = "/websocket/dstu3";
+
+	@Override
 	public void beforeCreateInterceptor() {
-		myInterceptor = new SubscriptionsRequireManualActivationInterceptorDstu3();
-		myInterceptor.setDao(mySubscriptionDao);
-		myInterceptorRegistry.registerInterceptor(myInterceptor);
-	}
+		super.beforeCreateInterceptor();
 
-	@After
-	public void afterDestroyInterceptor() {
-		myInterceptorRegistry.unregisterInterceptor(myInterceptor);
+		SubscriptionsRequireManualActivationInterceptorDstu3 interceptor = new SubscriptionsRequireManualActivationInterceptorDstu3();
+		interceptor.setDao(mySubscriptionDao);
+		myDaoConfig.getInterceptors().add(interceptor);
 	}
 
 	@Before

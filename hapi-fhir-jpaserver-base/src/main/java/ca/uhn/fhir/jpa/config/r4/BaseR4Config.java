@@ -3,16 +3,12 @@ package ca.uhn.fhir.jpa.config.r4;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.r4.SearchParamExtractorR4;
+import ca.uhn.fhir.jpa.dao.r4.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
@@ -39,14 +35,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -86,7 +82,7 @@ public class BaseR4Config extends BaseConfig {
 		return new TransactionProcessor<>();
 	}
 
-	@Bean(name = GRAPHQL_PROVIDER_NAME)
+	@Bean(name = "myGraphQLProvider")
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
 		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
@@ -121,7 +117,7 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoR4().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
+		retVal.setCacheMillis(10 * DateUtils.MILLIS_PER_MINUTE);
 		return retVal;
 	}
 

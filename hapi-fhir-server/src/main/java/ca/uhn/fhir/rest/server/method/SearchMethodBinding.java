@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,10 +23,12 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import ca.uhn.fhir.context.ConfigurationException;
@@ -50,22 +52,13 @@ import javax.annotation.Nonnull;
 public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchMethodBinding.class);
 
-	private static final Set<String> SPECIAL_SEARCH_PARAMS;
 	private String myCompartmentName;
 	private String myDescription;
 	private Integer myIdParamIndex;
 	private String myQueryName;
 	private boolean myAllowUnknownParams;
-  private final String myResourceProviderResourceName;
 
-	static {
-		HashSet<String> specialSearchParams = new HashSet<>();
-		specialSearchParams.add(IAnyResource.SP_RES_ID);
-		specialSearchParams.add(IAnyResource.SP_RES_LANGUAGE);
-		SPECIAL_SEARCH_PARAMS = Collections.unmodifiableSet(specialSearchParams);
-	}
-
-	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Class<? extends IBaseResource> theResourceProviderResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
+	public SearchMethodBinding(Class<? extends IBaseResource> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 		Search search = theMethod.getAnnotation(Search.class);
 		this.myQueryName = StringUtils.defaultIfBlank(search.queryName(), null);
@@ -83,6 +76,27 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		/*
+		 * Check for parameter combinations and names that are invalid
+		 */
+		List<IParameter> parameters = getParameters();
+		for (int i = 0; i < parameters.size(); i++) {
+			IParameter next = parameters.get(i);
+			if (!(next instanceof SearchParameter)) {
+				continue;
+			}
+
+			SearchParameter sp = (SearchParameter) next;
+			if (sp.getName().startsWith("_")) {
+				if (ALLOWED_PARAMS.contains(sp.getName())) {
+					String msg = getContext().getLocalizer().getMessage(getClass().getName() + ".invalidSpecialParamName", theMethod.getName(), theMethod.getDeclaringClass().getSimpleName(),
+							sp.getName());
+					throw new ConfigurationException(msg);
+				}
+			}
+
+		}
+
+		/*
 		 * Only compartment searching methods may have an ID parameter
 		 */
 		if (isBlank(myCompartmentName) && myIdParamIndex != null) {
@@ -90,24 +104,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			throw new ConfigurationException(msg);
 		}
 
-    if (theResourceProviderResourceType != null) {
-      this.myResourceProviderResourceName = theContext.getResourceDefinition(theResourceProviderResourceType).getName();
-    } else {
-      this.myResourceProviderResourceName = null;
-    }
-
 	}
 
 	public String getDescription() {
 		return myDescription;
-	}
-
-	public String getQueryName() {
-		return myQueryName;
-	}
-
-  public String getResourceProviderResourceName() {
-    return myResourceProviderResourceName;
 	}
 
 	@Nonnull
@@ -232,7 +232,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		for (String next : theRequest.getParameters().keySet()) {
-			if (next.startsWith("_") && !SPECIAL_SEARCH_PARAMS.contains(next)) {
+			if (ALLOWED_PARAMS.contains(next)) {
 				methodParamsTemp.add(next);
 			}
 		}

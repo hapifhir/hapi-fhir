@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -19,5 +18,4 @@ public class TestJaxRsDummyPatientProviderDstu3 extends AbstractJaxRsResourcePro
 	public Class<Patient> getResourceType() {
 		return Patient.class;
 	}
-
 }

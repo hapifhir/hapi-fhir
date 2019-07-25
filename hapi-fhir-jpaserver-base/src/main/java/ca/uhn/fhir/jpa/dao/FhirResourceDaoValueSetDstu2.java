@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,6 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
@@ -38,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.ValueSet;
@@ -91,8 +90,8 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequest) {
-		ValueSet source = loadValueSetForExpansion(theId, theRequest);
+	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequestDetails) {
+		ValueSet source = loadValueSetForExpansion(theId);
 		return expand(source, theFilter);
 
 	}
@@ -137,7 +136,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		}
 		ValueSet source;
 
-		org.hl7.fhir.dstu2.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theUri);
+		org.hl7.fhir.instance.model.ValueSet defaultValueSet = myDefaultProfileValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.instance.model.ValueSet.class, theUri);
 		if (defaultValueSet != null) {
 			source = getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(defaultValueSet));
 		} else {
@@ -156,13 +155,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
+	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem) {
 		if (theSystem != null && theSystem.startsWith("http://hl7.org/fhir/")) {
 			return Collections.singletonList((IIdType) new IdDt(theSystem));
 		}
 
 		List<IIdType> valueSetIds;
-		Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)), theRequest);
+		Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_CODE, new TokenParam(theSystem, theCode)));
 		valueSetIds = new ArrayList<IIdType>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdDt("ValueSet", next));
@@ -170,14 +169,14 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return valueSetIds;
 	}
 
-	private ValueSet loadValueSetForExpansion(IIdType theId, RequestDetails theRequest) {
+	private ValueSet loadValueSetForExpansion(IIdType theId) {
 		if (theId.getValue().startsWith("http://hl7.org/fhir/")) {
-			org.hl7.fhir.dstu2.model.ValueSet valueSet = myValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.dstu2.model.ValueSet.class, theId.getValue());
+			org.hl7.fhir.instance.model.ValueSet valueSet = myValidationSupport.fetchResource(myRiCtx, org.hl7.fhir.instance.model.ValueSet.class, theId.getValue());
 			if (valueSet != null) {
 				return getContext().newJsonParser().parseResource(ValueSet.class, myRiCtx.newJsonParser().encodeResourceToString(valueSet));
 			}
 		}
-		BaseHasResource sourceEntity = readEntity(theId, theRequest);
+		BaseHasResource sourceEntity = readEntity(theId);
 		if (sourceEntity == null) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -210,7 +209,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -232,9 +231,9 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 			system = theSystem.getValue();
 		}
 
-		List<IIdType> valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system, theRequest);
+		List<IIdType> valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null, theRequest);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
 			LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
@@ -247,11 +246,6 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		retVal.setSearchedForCode(code);
 		retVal.setSearchedForSystem(system);
 		return retVal;
-	}
-
-	@Override
-	public SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, CodingDt theCodingA, CodingDt theCodingB, RequestDetails theRequestDetails) {
-		return myTerminologySvc.subsumes(theCodeA, theCodeB, theSystem, theCodingA, theCodingB);
 	}
 
 	@Override
@@ -273,7 +267,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 
 	@Override
 	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequest) {
+			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CodingDt theCoding, CodeableConceptDt theCodeableConcept, RequestDetails theRequestDetails) {
 		List<IIdType> valueSetIds;
 
 		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
@@ -291,8 +285,8 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		if (theId != null) {
 			valueSetIds = Collections.singletonList(theId);
 		} else if (haveIdentifierParam) {
-			Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue())), theRequest);
-			valueSetIds = new ArrayList<>();
+			Set<Long> ids = searchForIds(new SearchParameterMap(ValueSet.SP_IDENTIFIER, new TokenParam(null, theValueSetIdentifier.getValue())));
+			valueSetIds = new ArrayList<IIdType>();
 			for (Long next : ids) {
 				valueSetIds.add(new IdDt("ValueSet", next));
 			}
@@ -302,11 +296,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 			}
 			String code = theCode.getValue();
 			String system = toStringOrNull(theSystem);
-			valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system, theRequest);
+			valueSetIds = findCodeSystemIdsContainingSystemAndCode(code, system);
 		}
 
 		for (IIdType nextId : valueSetIds) {
-			ValueSet expansion = expand(nextId, null, theRequest);
+			ValueSet expansion = expand(nextId, null, theRequestDetails);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {

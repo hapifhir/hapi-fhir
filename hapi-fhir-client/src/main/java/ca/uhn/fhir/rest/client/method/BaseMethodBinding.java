@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.method;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,6 @@ package ca.uhn.fhir.rest.client.method;
  */
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -72,11 +71,11 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 
 	}
 
-	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, InputStream theResponseInputStream, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
 		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
 		if (encoding == null) {
-			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseInputStream);
-			populateException(ex, theResponseInputStream);
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			populateException(ex, theResponseReader);
 			throw ex;
 		}
 
@@ -140,7 +139,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return mySupportsConditionalMultiple;
 	}
 
-	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, InputStream theResponseInputStream) {
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
 		BaseServerResponseException ex;
 		switch (theStatusCode) {
 		case Constants.STATUS_HTTP_400_BAD_REQUEST:
@@ -159,9 +158,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			ex = new PreconditionFailedException("Server responded with HTTP 412");
 			break;
 		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
-			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseInputStream, theStatusCode, null);
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode, null);
 			// TODO: handle if something other than OO comes back
-			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseInputStream);
+			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
 			ex = new UnprocessableEntityException(myContext, operationOutcome);
 			break;
 		default:
@@ -169,7 +168,7 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 			break;
 		}
 
-		populateException(ex, theResponseInputStream);
+		populateException(ex, theResponseReader);
 		return ex;
 	}
 
@@ -323,9 +322,9 @@ public abstract class BaseMethodBinding<T> implements IClientResponseHandler<T> 
 		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 
-	private static void populateException(BaseServerResponseException theEx, InputStream theResponseInputStream) {
+	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
 		try {
-			String responseText = IOUtils.toString(theResponseInputStream);
+			String responseText = IOUtils.toString(theResponseReader);
 			theEx.setResponseBody(responseText);
 		} catch (IOException e) {
 			ourLog.debug("Failed to read response", e);

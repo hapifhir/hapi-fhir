@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.interceptor;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
@@ -94,8 +93,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 				statusMessage = sm;
 			}
 		}
-
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		
 		return response.streamResponseAsResource(oo, true, Collections.singleton(SummaryEnum.FALSE), statusCode, statusMessage, false, false);
 		
 	}
@@ -142,7 +140,7 @@ public class ExceptionHandlingInterceptor extends InterceptorAdapter {
 					if (statusCode < 500) {
 						ourLog.warn("Failure during REST processing: {}", theException.toString());
 					} else {
-						ourLog.warn("Failure during REST processing", theException);
+						ourLog.warn("Failure during REST processing: {}", theException);
 					}
 					
 					BaseServerResponseException baseServerResponseException = (BaseServerResponseException) theException;

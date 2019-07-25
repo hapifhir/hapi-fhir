@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SearchHasParamDstu2_1Test {
@@ -60,20 +60,21 @@ public class SearchHasParamDstu2_1Test {
 		
 		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
 		assertEquals("Encounter", param.getTargetResourceType());
-		assertEquals("patient", param.getReferenceFieldName());
+		assertEquals("patient", param.getOwningFieldName());
 		assertEquals("type", param.getParameterName());
 		assertEquals("SURG", param.getParameterValue());
 	}
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -85,8 +86,7 @@ public class SearchHasParamDstu2_1Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

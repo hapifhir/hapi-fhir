@@ -127,7 +127,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	/** THE DEFAULTS */
 
 	@Override
-	public List<IServerInterceptor> getInterceptors_() {
+	public List<IServerInterceptor> getInterceptors() {
 		return Collections.emptyList();
 	}
 
@@ -147,6 +147,11 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 
 	@Override
 	public boolean isDefaultPrettyPrint() {
+		return true;
+	}
+
+	@Override
+	public boolean isUseBrowserFriendlyContentTypes() {
 		return true;
 	}
 

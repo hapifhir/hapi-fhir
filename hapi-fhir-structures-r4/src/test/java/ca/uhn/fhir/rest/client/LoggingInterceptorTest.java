@@ -3,17 +3,18 @@ package ca.uhn.fhir.rest.client;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -29,8 +30,6 @@ import java.net.URL;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class LoggingInterceptorTest {
 
@@ -125,7 +124,7 @@ public class LoggingInterceptorTest {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -140,19 +139,18 @@ public class LoggingInterceptorTest {
 		context.reset();
 		configurator.doConfigure(conf);
 
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 	}

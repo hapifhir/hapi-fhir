@@ -4,14 +4,14 @@ package ca.uhn.fhir.util;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,8 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.InputStream;
 import java.util.Properties;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 /**
  * Used internally by HAPI to log the version of the HAPI FHIR framework
@@ -35,19 +31,9 @@ public class VersionUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(VersionUtil.class);
 	private static String ourVersion;
-	private static String ourBuildNumber;
-	private static String ourBuildTime;
 
 	static {
 		initialize();
-	}
-
-	public static String getBuildNumber() {
-		return ourBuildNumber;
-	}
-
-	public static String getBuildTime() {
-		return ourBuildTime;
 	}
 
 	public static String getVersion() {
@@ -55,26 +41,14 @@ public class VersionUtil {
 	}
 
 	private static void initialize() {
-		try (InputStream is = VersionUtil.class.getResourceAsStream("/ca/uhn/fhir/hapi-fhir-base-build.properties")) {
-
+		try (InputStream is = VersionUtil.class.getResourceAsStream("/ca/uhn/fhir/hapi-version.properties")) {
 			Properties p = new Properties();
-			if (is != null) {
-				p.load(is);
-			}
-
-			ourVersion = p.getProperty("hapifhir.version");
-			ourVersion = defaultIfBlank(ourVersion, "(unknown)");
-
-			ourBuildNumber = p.getProperty("hapifhir.buildnumber");
-			ourBuildTime = p.getProperty("hapifhir.timestamp");
-
-			if (System.getProperty("suppress_hapi_fhir_version_log") == null) {
-				ourLog.info("HAPI FHIR version {} - Rev {}", ourVersion, StringUtils.right(ourBuildNumber, 10));
-			}
-
+			p.load(is);
+			ourVersion = p.getProperty("version");
+			ourLog.info("HAPI FHIR version is: " + ourVersion);
 		} catch (Exception e) {
 			ourLog.warn("Unable to determine HAPI version information", e);
 		}
 	}
-
+	
 }

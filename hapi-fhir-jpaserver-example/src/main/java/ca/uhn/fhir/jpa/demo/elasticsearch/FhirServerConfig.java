@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.search.elasticsearch.cfg.ElasticsearchEnvironment;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +30,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
-	@Bean
+	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setAllowMultipleDelete(true);
@@ -53,7 +54,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 	}
 
 	@Override
-	@Bean
+	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
@@ -86,10 +87,9 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
-	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
+	public IServerInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
@@ -100,7 +100,7 @@ public class FhirServerConfig extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
-	@Bean
+	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

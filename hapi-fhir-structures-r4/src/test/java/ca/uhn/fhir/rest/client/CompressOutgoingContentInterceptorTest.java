@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -21,8 +22,6 @@ import org.junit.*;
 import javax.servlet.http.HttpServletRequest;
 
 import static org.junit.Assert.assertEquals;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class CompressOutgoingContentInterceptorTest {
 
@@ -57,13 +56,14 @@ public class CompressOutgoingContentInterceptorTest {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -75,8 +75,7 @@ public class CompressOutgoingContentInterceptorTest {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

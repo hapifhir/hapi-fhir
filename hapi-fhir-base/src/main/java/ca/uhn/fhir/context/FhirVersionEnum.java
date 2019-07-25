@@ -4,14 +4,14 @@ package ca.uhn.fhir.context;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,7 @@ public enum FhirVersionEnum {
 
 	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null, false, new Version("1.0.2")),
 
-	DSTU2_HL7ORG("org.hl7.fhir.dstu2.hapi.ctx.FhirDstu2Hl7Org", DSTU2, true, new Version("1.0.2")),
+	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true, new Version("1.0.2")),
 
 	DSTU2_1("org.hl7.fhir.dstu2016may.hapi.ctx.FhirDstu2_1", null, true, new Version("1.4.0")),
 

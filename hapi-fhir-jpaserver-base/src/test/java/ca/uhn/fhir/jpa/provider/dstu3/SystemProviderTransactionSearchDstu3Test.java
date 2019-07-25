@@ -24,11 +24,11 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.rp.dstu3.*;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
@@ -47,6 +47,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
+		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
@@ -77,10 +78,13 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			ourServer = new Server(0);
+			int myPort = RandomServerPortProvider.findFreePort();
+			ourServer = new Server(myPort);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");			
+			proxyHandler.setContextPath("/");
+
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -90,9 +94,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
-			JettyUtil.startServer(ourServer);
-            int myPort = JettyUtil.getPortForStartedServer(ourServer);
-            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			ourServer.start();
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -175,6 +177,37 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(5, respBundle.getEntry().size());
 		actualIds = toIds(respBundle);
 		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
+	}
+
+	/**
+	 * 30 searches in one batch! Whoa!
+	 */
+	@Test
+	public void testBatchWithManyGets() {
+		List<String> ids = create20Patients();
+
+		
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+		for (int i = 0; i < 30; i++) {
+			input
+				.addEntry()
+				.getRequest()
+				.setMethod(HTTPVerb.GET)
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
+		}
+		
+		Bundle output = ourClient.transaction().withBundle(input).execute();
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		
+		assertEquals(30, output.getEntry().size());
+		for (int i = 0; i < 30; i++) {
+			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
+			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getLink("next").getUrl(), not(nullValue()));
+			List<String> actualIds = toIds(respBundle);
+			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
+		}
 	}
 
 	@Test
@@ -272,7 +305,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

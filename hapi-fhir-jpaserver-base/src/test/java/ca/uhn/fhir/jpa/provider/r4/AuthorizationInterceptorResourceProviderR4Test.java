@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
@@ -24,10 +22,9 @@ import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,12 +33,11 @@ import static org.junit.Assert.*;
 
 public class AuthorizationInterceptorResourceProviderR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorResourceProviderR4Test.class);
-
 	@Override
 	public void before() throws Exception {
 		super.before();
 		myDaoConfig.setAllowMultipleDelete(true);
+		unregisterInterceptors();
 	}
 
 	/**
@@ -57,23 +53,23 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		pt2.setActive(false);
 		final IIdType pid2 = ourClient.create().resource(pt2).execute().getId().toUnqualifiedVersionless();
 
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow().write().allResources().inCompartment("Patient", pid1).andThen()
 					.build();
 			}
-		};
-		ourRestServer.getInterceptorService().registerInterceptor(authInterceptor);
+		});
 
 		Observation obs = new Observation();
 		obs.setStatus(ObservationStatus.FINAL);
 		obs.setSubject(new Reference(pid1));
 		IIdType oid = ourClient.create().resource(obs).execute().getId().toUnqualified();
 
-		ourRestServer.getInterceptorService().unregisterInterceptor(authInterceptor);
-		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+
+		unregisterInterceptors();
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
@@ -109,13 +105,15 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		final MethodOutcome output1 = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
-		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				//@formatter:off
 				return new RuleBuilder()
-					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdType("Patient/" + output1.getId().getIdPart())).andThen()
+					.allow("Rule 2").write().allResources().inCompartment("Patient", new IdDt("Patient/" + output1.getId().getIdPart())).andThen()
 					.allow().updateConditional().allResources()
 					.build();
+				//@formatter:on
 			}
 		});
 
@@ -146,112 +144,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			fail();
 		} catch (ForbiddenOperationException e) {
 			assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
-		}
-
-	}
-
-	@Test
-	public void testReadInTransaction() {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType id = ourClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute().getId().toUnqualifiedVersionless();
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				String authHeader = theRequestDetails.getHeader("Authorization");
-				if (!"Bearer AAA".equals(authHeader)) {
-					throw new AuthenticationException("Invalid auth header: " + authHeader);
-				}
-				return new RuleBuilder()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.allow().read().resourcesOfType(Patient.class).withAnyId()
-					.build();
-			}
-		});
-
-		SimpleRequestHeaderInterceptor interceptor = new SimpleRequestHeaderInterceptor("Authorization", "Bearer AAA");
-		try {
-			ourClient.registerInterceptor(interceptor);
-
-			Bundle bundle;
-			Bundle responseBundle;
-
-			// Read
-			bundle = new Bundle();
-			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
-			responseBundle = ourClient.transaction().withBundle(bundle).execute();
-			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
-
-			// Search
-			bundle = new Bundle();
-			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient?");
-			responseBundle = ourClient.transaction().withBundle(bundle).execute();
-			responseBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
-			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
-
-		} finally {
-			ourClient.unregisterInterceptor(interceptor);
-		}
-
-	}
-
-	@Test
-	public void testReadWithSubjectMasked() {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-		Observation obs = new Observation();
-		obs.setStatus(ObservationStatus.FINAL);
-		obs.setSubject(new Reference(patientId));
-		IIdType observationId = ourClient.create().resource(obs).execute().getId().toUnqualifiedVersionless();
-
-		Observation obs2 = new Observation();
-		obs2.setStatus(ObservationStatus.FINAL);
-		IIdType observationId2 = ourClient.create().resource(obs2).execute().getId().toUnqualifiedVersionless();
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().read().resourcesOfType(Observation.class).inCompartment("Patient", patientId)
-					.build();
-			}
-		});
-
-		Bundle bundle;
-		Observation response;
-
-		// Read (no masking)
-		response = ourClient.read().resource(Observation.class).withId(observationId).execute();
-		assertEquals(ObservationStatus.FINAL, response.getStatus());
-		assertEquals(patientId.getValue(), response.getSubject().getReference());
-
-		// Read (with _elements masking)
-		response = ourClient
-			.read()
-			.resource(Observation.class)
-			.withId(observationId)
-			.elementsSubset("status")
-			.execute();
-		assertEquals(ObservationStatus.FINAL, response.getStatus());
-		assertEquals(null, response.getSubject().getReference());
-
-		// Read a non-allowed observation
-		try {
-			ourClient.read().resource(Observation.class).withId(observationId2).execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
 		}
 
 	}
@@ -347,52 +239,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 	}
 
-	@Test
-	public void testDeleteIsAllowedForCompartmentUsingTransaction() {
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		final IIdType id = ourClient.create().resource(patient).execute().getId();
-
-		Observation obsInCompartment = new Observation();
-		obsInCompartment.setStatus(ObservationStatus.FINAL);
-		obsInCompartment.getSubject().setReferenceElement(id.toUnqualifiedVersionless());
-		IIdType obsInCompartmentId = ourClient.create().resource(obsInCompartment).execute().getId().toUnqualifiedVersionless();
-
-		Observation obsNotInCompartment = new Observation();
-		obsNotInCompartment.setStatus(ObservationStatus.FINAL);
-		IIdType obsNotInCompartmentId = ourClient.create().resource(obsNotInCompartment).execute().getId().toUnqualifiedVersionless();
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().delete().resourcesOfType(Observation.class).inCompartment("Patient", id).andThen()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.denyAll()
-					.build();
-			}
-		});
-
-		Bundle bundle;
-
-		bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsInCompartmentId.toUnqualifiedVersionless().getValue());
-		ourClient.transaction().withBundle(bundle).execute();
-
-		try {
-			bundle = new Bundle();
-			bundle.setType(Bundle.BundleType.TRANSACTION);
-			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
-			ourClient.transaction().withBundle(bundle).execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
-	}
-
 	/**
 	 * See #503
 	 */
@@ -423,134 +269,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 		patient = ourClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
 		assertEquals(id.getValue(), patient.getId());
-	}
-
-	@Test
-	public void testDeleteCascadeBlocked() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
-		try {
-
-			// Create Patient, and Observation that refers to it
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-			Observation obs = new Observation();
-			obs.setStatus(ObservationStatus.FINAL);
-			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
-
-			// Allow any deletes, but don't allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-				@Override
-				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-					return new RuleBuilder()
-						.allow().delete().allResources().withAnyId().andThen()
-						.build();
-				}
-			});
-
-			try {
-				ourClient
-					.delete()
-					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
-					.execute();
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-
-		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
-		}
-	}
-
-
-	@Test
-	public void testDeleteCascadeAllowed() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
-		try {
-
-			// Create Patient, and Observation that refers to it
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-			Observation obs = new Observation();
-			obs.setStatus(ObservationStatus.FINAL);
-			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
-
-			// Allow any deletes, but don't allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-				@Override
-				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-					return new RuleBuilder()
-						.allow().delete().allResources().withAnyId().andThen()
-						.allow().delete().onCascade().allResources().withAnyId().andThen()
-						.build();
-				}
-			});
-
-			ourClient
-				.delete()
-				.resourceById(patientId)
-				.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
-				.execute();
-
-		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
-		}
-	}
-
-	@Test
-	public void testDeleteCascadeAllowed_ButNotOnTargetType() {
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(myDaoRegistry, myInterceptorRegistry);
-		ourRestServer.getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
-		try {
-
-			// Create Patient, and Observation that refers to it
-			Patient patient = new Patient();
-			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-			patient.addName().setFamily("Tester").addGiven("Raghad");
-			final IIdType patientId = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
-
-			Observation obs = new Observation();
-			obs.setStatus(ObservationStatus.FINAL);
-			obs.getSubject().setReferenceElement(patientId);
-			ourClient.create().resource(obs).execute();
-
-			// Allow any deletes, but don't allow cascade
-			ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-				@Override
-				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-					return new RuleBuilder()
-						.allow().delete().resourcesOfType(Patient.class).withAnyId().andThen()
-						.allow().delete().resourcesOfType(Observation.class).withAnyId().andThen()
-						.allow().delete().onCascade().resourcesOfType(Patient.class).withAnyId().andThen()
-						.build();
-				}
-			});
-
-			try {
-				ourClient
-					.delete()
-					.resourceById(patientId)
-					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
-					.execute();
-				fail();
-			} catch (ForbiddenOperationException e) {
-				// good
-			}
-
-		} finally {
-			ourRestServer.getInterceptorService().unregisterInterceptor(cascadingDeleteInterceptor);
-		}
 	}
 
 	@Test
@@ -659,68 +377,6 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 
 	}
 
-
-	@Test
-	public void testTransactionResponses() {
-
-		ourRestServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					// Allow write but not read
-					.allow("transactions").transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.allow("write patient").write().resourcesOfType(Encounter.class).withAnyId().andThen()
-					.denyAll("deny all")
-					.build();
-			}
-		});
-
-		// Create a bundle that will be used as a transaction
-		Bundle bundle = new Bundle();
-		bundle.setType(Bundle.BundleType.TRANSACTION);
-
-		Encounter encounter = new Encounter();
-		encounter.addIdentifier(new Identifier().setSystem("http://foo").setValue("123"));
-		encounter.setStatus(Encounter.EncounterStatus.FINISHED);
-		bundle.addEntry()
-			.setFullUrl("Encounter")
-			.setResource(encounter)
-			.getRequest()
-			.setUrl("Encounter")
-			.setMethod(Bundle.HTTPVerb.POST);
-
-		// return=minimal - should succeed
-		Bundle resp = ourClient
-			.transaction()
-			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
-			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertNull(resp.getEntry().get(0).getResource());
-
-		// return=OperationOutcome - should succeed
-		resp = ourClient
-			.transaction()
-			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.execute();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertNull(resp.getEntry().get(0).getResource());
-
-		// return=Representation - should fail
-		try {
-			ourClient
-				.transaction()
-				.withBundle(bundle)
-				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
-				.execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
-	}
-
-
 	/**
 	 * See #762
 	 */
@@ -791,7 +447,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		encounter.addDiagnosis(dc);
 		CodeableConcept reason = new CodeableConcept();
 		reason.setText("SLIPPED ON FLOOR,PAIN L) ELBOW");
-		encounter.addReasonCode(reason);
+		encounter.addReason(reason);
 
 		// add encounter to bundle so its created
 		bundle.addEntry()
@@ -802,13 +458,9 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			.setMethod(Bundle.HTTPVerb.POST);
 
 
-		Bundle resp = ourClient
-			.transaction()
-			.withBundle(bundle)
-			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
-			.execute();
+		Bundle resp = ourClient.transaction().withBundle(bundle).execute();
 		assertEquals(3, resp.getEntry().size());
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
+
 	}
 
 	@Test
@@ -843,7 +495,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		});
 
 		String patchBody = "[\n" +
-			"     { \"op\": \"replace\", \"path\": \"/status\", \"value\": \"amended\" }\n" +
+			"     { \"op\": \"replace\", \"path\": \"Observation/status\", \"value\": \"amended\" }\n" +
 			"     ]";
 
 		// Allowed
@@ -917,6 +569,14 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 			fail();
 		} catch (ForbiddenOperationException e) {
 			// good
+		}
+	}
+
+	private void unregisterInterceptors() {
+		for (IServerInterceptor next : new ArrayList<>(ourRestServer.getInterceptors())) {
+			if (next instanceof AuthorizationInterceptor) {
+				ourRestServer.unregisterInterceptor(next);
+			}
 		}
 	}
 

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,20 +21,8 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hibernate.boot.model.naming.Identifier;
-import org.hibernate.dialect.Dialect;
-import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
-import org.hibernate.engine.jdbc.dialect.spi.DatabaseMetaDataDialectResolutionInfoAdapter;
-import org.hibernate.engine.jdbc.dialect.spi.DialectResolver;
-import org.hibernate.engine.jdbc.env.internal.NormalizingIdentifierHelperImpl;
-import org.hibernate.engine.jdbc.env.spi.*;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
-import org.hibernate.engine.jdbc.spi.TypeInfo;
-import org.hibernate.service.ServiceRegistry;
-import org.hibernate.tool.schema.extract.spi.ExtractionContext;
-import org.hibernate.tool.schema.extract.spi.SequenceInformation;
-import org.hibernate.tool.schema.extract.spi.SequenceInformationExtractor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -62,7 +50,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
+					ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, true);
 
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
@@ -90,7 +78,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
+					ResultSet indexes = metadata.getIndexInfo(null, null, theTableName, false, false);
 
 					while (indexes.next()) {
 						String indexName = indexes.getString("INDEX_NAME");
@@ -119,9 +107,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					String catalog = connection.getCatalog();
-					String schema = connection.getSchema();
-					ResultSet indexes = metadata.getColumns(catalog, schema, massageIdentifier(metadata, theTableName), null);
+					ResultSet indexes = metadata.getColumns(null, null, null, null);
 
 					while (indexes.next()) {
 
@@ -139,9 +125,7 @@ public class JdbcUtils {
 						switch (dataType) {
 							case Types.VARCHAR:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
-							case Types.NUMERIC:
 							case Types.BIGINT:
-							case Types.DECIMAL:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
 							case Types.INTEGER:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null);
@@ -149,7 +133,7 @@ public class JdbcUtils {
 							case Types.TIMESTAMP_WITH_TIMEZONE:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
 							default:
-								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
+								throw new IllegalArgumentException("Don't know how to handle datatype: " + dataType);
 						}
 
 					}
@@ -174,7 +158,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theForeignTable));
+					ResultSet indexes = metadata.getCrossReference(null, null, theTableName, null, null, theForeignTable);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -200,9 +184,9 @@ public class JdbcUtils {
 		}
 	}
 
-	/**
-	 * Retrieve all index names
-	 */
+		/**
+        * Retrieve all index names
+        */
 	public static Set<String> getColumnNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
@@ -210,7 +194,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
+					ResultSet indexes = metadata.getColumns(null, null, null, null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {
@@ -232,99 +216,6 @@ public class JdbcUtils {
 		}
 	}
 
-	public static Set<String> getSequenceNames(DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
-		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
-		try (Connection connection = dataSource.getConnection()) {
-			return theConnectionProperties.getTxTemplate().execute(t -> {
-				try {
-					DialectResolver dialectResolver = new StandardDialectResolver();
-					Dialect dialect = dialectResolver.resolveDialect(new DatabaseMetaDataDialectResolutionInfoAdapter(connection.getMetaData()));
-
-					Set<String> sequenceNames = new HashSet<>();
-					if (dialect.supportsSequences()) {
-
-						// Use Hibernate to get a list of current sequences
-						SequenceInformationExtractor sequenceInformationExtractor = dialect.getSequenceInformationExtractor();
-						ExtractionContext extractionContext = new ExtractionContext.EmptyExtractionContext() {
-							@Override
-							public Connection getJdbcConnection() {
-								return connection;
-							}
-
-							@Override
-							public ServiceRegistry getServiceRegistry() {
-								return super.getServiceRegistry();
-							}
-
-							@Override
-							public JdbcEnvironment getJdbcEnvironment() {
-								return new JdbcEnvironment() {
-									@Override
-									public Dialect getDialect() {
-										return dialect;
-									}
-
-									@Override
-									public ExtractedDatabaseMetaData getExtractedDatabaseMetaData() {
-										return null;
-									}
-
-									@Override
-									public Identifier getCurrentCatalog() {
-										return null;
-									}
-
-									@Override
-									public Identifier getCurrentSchema() {
-										return null;
-									}
-
-									@Override
-									public QualifiedObjectNameFormatter getQualifiedObjectNameFormatter() {
-										return null;
-									}
-
-									@Override
-									public IdentifierHelper getIdentifierHelper() {
-										return new NormalizingIdentifierHelperImpl(this, null, true, true, true, null, null, null);
-									}
-
-									@Override
-									public NameQualifierSupport getNameQualifierSupport() {
-										return null;
-									}
-
-									@Override
-									public SqlExceptionHelper getSqlExceptionHelper() {
-										return null;
-									}
-
-									@Override
-									public LobCreatorBuilder getLobCreatorBuilder() {
-										return null;
-									}
-
-									@Override
-									public TypeInfo getTypeInfoForJdbcCode(int jdbcTypeCode) {
-										return null;
-									}
-								};
-							}
-						};
-						Iterable<SequenceInformation> sequences = sequenceInformationExtractor.extractMetadata(extractionContext);
-						for (SequenceInformation next : sequences) {
-							sequenceNames.add(next.getSequenceName().getSequenceName().getText());
-						}
-
-					}
-					return sequenceNames;
-				} catch (SQLException e) {
-					throw new InternalErrorException(e);
-				}
-			});
-		}
-	}
-
 	public static Set<String> getTableNames(DriverTypeEnum.ConnectionProperties theConnectionProperties) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
@@ -332,7 +223,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getTables(connection.getCatalog(), connection.getSchema(), null, null);
+					ResultSet tables = metadata.getTables(null, null, null, null);
 
 					Set<String> columnNames = new HashSet<>();
 					while (tables.next()) {
@@ -363,7 +254,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet tables = metadata.getColumns(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), null);
+					ResultSet tables = metadata.getColumns(null, null, null, null);
 
 					while (tables.next()) {
 						String tableName = toUpperCase(tables.getString("TABLE_NAME"), Locale.US);
@@ -389,15 +280,5 @@ public class JdbcUtils {
 				}
 			});
 		}
-	}
-
-	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
-		String retVal = theCatalog;
-		if (theMetadata.storesLowerCaseIdentifiers()) {
-			retVal = retVal.toLowerCase();
-		} else {
-			retVal = retVal.toUpperCase();
-		}
-		return retVal;
 	}
 }

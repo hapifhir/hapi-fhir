@@ -30,7 +30,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement()
-@Import(CommonConfig.class)
+@Import(FhirDbConfig.class)
 public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	@Autowired
@@ -39,8 +39,21 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
 
+	/**
+	 * Configure FHIR properties around the the JPA server via this bean
+	 */
+	@Bean()
+	public DaoConfig daoConfig() {
+		DaoConfig retVal = new DaoConfig();
+		retVal.setSubscriptionEnabled(true);
+		retVal.setSubscriptionPollDelay(5000);
+		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setAllowMultipleDelete(true);
+		return retVal;
+	}
+
 	@Override
-	@Bean
+	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
@@ -51,9 +64,8 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 * @return
 	 */
-	public LoggingInterceptor loggingInterceptor() {
+	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -65,10 +77,9 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
-	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
+	public IServerInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
@@ -79,7 +90,7 @@ public class FhirServerConfigR4 extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
-	@Bean
+	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

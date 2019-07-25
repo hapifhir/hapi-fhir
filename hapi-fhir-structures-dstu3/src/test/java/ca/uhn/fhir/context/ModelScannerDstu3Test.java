@@ -1,20 +1,28 @@
 package ca.uhn.fhir.context;
 
-import ca.uhn.fhir.model.api.annotation.*;
-import ca.uhn.fhir.model.api.annotation.Extension;
-import ca.uhn.fhir.model.primitive.StringDt;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.util.TestUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.List;
+
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.AfterClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.List;
-
-import static org.junit.Assert.*;
+import ca.uhn.fhir.model.api.annotation.*;
+import ca.uhn.fhir.model.api.annotation.Extension;
+import ca.uhn.fhir.model.primitive.StringDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.util.TestUtil;
 
 public class ModelScannerDstu3Test {
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
 
 	@Test
 	public void testScanBundle() {
@@ -36,9 +44,7 @@ public class ModelScannerDstu3Test {
 		}
 	}
 
-	/**
-	 * This failed at one point
-	 */
+	/** This failed at one point */
 	@Test
 	public void testCarePlan() throws DataFormatException {
 		FhirContext.forDstu3().getResourceDefinition(CarePlan.class);
@@ -100,17 +106,6 @@ public class ModelScannerDstu3Test {
 
 	}
 
-	@Test
-	public void testScanDstu3TypeWithDstu2Backend() throws DataFormatException {
-		FhirContext ctx = FhirContext.forDstu3();
-		try {
-			ctx.getResourceDefinition(CustomDstu3ClassWithDstu2Base.class);
-			fail();
-		} catch (ConfigurationException e) {
-			assertEquals("@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1", e.getMessage());
-		}
-	}
-
 	/**
 	 * TODO: Re-enable this when Claim's compartment defs are cleaned up
 	 */
@@ -135,40 +130,21 @@ public class ModelScannerDstu3Test {
 		}
 	}
 
-	/**
-	 * See #504
-	 */
-	@Test
-	public void testBinaryMayNotHaveExtensions() {
-		FhirContext ctx = FhirContext.forDstu3();
-		try {
-			ctx.getResourceDefinition(LetterTemplate.class);
-			fail();
-		} catch (ConfigurationException e) {
-			assertEquals("Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
-		}
-	}
-
-	class NoResourceDef extends Patient {
-		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
-		public static final String SP_TELECOM = "foo";
-		private static final long serialVersionUID = 1L;
-
-	}
-
 	@ResourceDef(name = "Patient")
 	public static class CompartmentForNonReferenceParam extends Patient {
-		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "string", providesMembershipIn = {@Compartment(name = "Patient"), @Compartment(name = "Device")})
-		public static final String SP_TELECOM = "foo";
 		private static final long serialVersionUID = 1L;
+
+		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "string", providesMembershipIn = { @Compartment(name = "Patient"), @Compartment(name = "Device") })
+		public static final String SP_TELECOM = "foo";
 
 	}
 
 	@ResourceDef(name = "Patient")
 	public static class InvalidParamType extends Patient {
+		private static final long serialVersionUID = 1L;
+
 		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
 		public static final String SP_TELECOM = "foo";
-		private static final long serialVersionUID = 1L;
 
 	}
 
@@ -228,11 +204,33 @@ public class ModelScannerDstu3Test {
 
 	}
 
+	class NoResourceDef extends Patient {
+		private static final long serialVersionUID = 1L;
+
+		@SearchParamDefinition(name = "foo", path = "Patient.telecom", type = "bar")
+		public static final String SP_TELECOM = "foo";
+
+	}
+
+	/**
+	 * See #504
+	 */
+	@Test
+	public void testBinaryMayNotHaveExtensions() {
+		FhirContext ctx = FhirContext.forDstu3();
+		try {
+			ctx.getResourceDefinition(LetterTemplate.class);
+			fail();
+		} catch (ConfigurationException e) {
+			assertEquals("Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
+		}
+	}
+	
 	@ResourceDef(name = "Binary", id = "letter-template", profile = "http://www.something.org/StructureDefinition/letter-template")
 	public static class LetterTemplate extends Binary {
 
 		private static final long serialVersionUID = 1L;
-
+		
 		@Child(name = "name")
 		@Extension(url = "http://example.com/dontuse#name", definedLocally = false, isModifier = false)
 		@Description(shortDefinition = "The name of the template")
@@ -241,18 +239,13 @@ public class ModelScannerDstu3Test {
 		public LetterTemplate() {
 		}
 
-		public StringDt getName() {
-			return myName;
-		}
-
 		public void setName(StringDt name) {
 			myName = name;
 		}
-	}
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
+		public StringDt getName() {
+			return myName;
+		}
 	}
 
 }

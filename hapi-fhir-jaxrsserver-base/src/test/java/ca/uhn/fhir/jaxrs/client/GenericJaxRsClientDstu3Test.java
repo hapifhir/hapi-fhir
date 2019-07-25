@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.Enumeration;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,6 +24,7 @@ import org.junit.*;
 import com.google.common.collect.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
@@ -32,7 +34,6 @@ import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class GenericJaxRsClientDstu3Test {
 	private static FhirContext ourCtx;
@@ -1765,30 +1766,14 @@ public class GenericJaxRsClientDstu3Test {
 	@Test
 	public void testTransactionWithString() {
 
-		Bundle req = new Bundle();
-		req.setType(BundleType.TRANSACTION);
-
+		org.hl7.fhir.dstu3.model.Bundle req = new org.hl7.fhir.dstu3.model.Bundle();
 		Patient patient = new Patient();
-		patient.setId("C01");
-		patient.addName().setFamily("Smith").addGiven("John");
-		req.addEntry()
-			.setFullUrl("Patient/C01")
-			.setResource(patient).getRequest().setMethod(HTTPVerb.PUT).setUrl("Patient/C01");
-
+		patient.addName().setFamily("PAT_FAMILY");
+		req.addEntry().setResource(patient);
 		Observation observation = new Observation();
-		observation.setId("C02");
-		observation.setStatus(Observation.ObservationStatus.FINAL);
-		observation.setEffective(new DateTimeType("2019-02-21T13:35:00-05:00"));
-		observation.getSubject().setReference("Patient/C01");
-		observation.getCode().addCoding().setSystem("http://loinc.org").setCode("3141-9").setDisplay("Body Weight Measured");
-		observation.setValue(new Quantity(null, 190, "http://unitsofmeaure.org", "{lb_av}", "{lb_av}"));
-		req.addEntry()
-			.setFullUrl("Observation/C02")
-			.setResource(observation).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/C02");
-		String reqString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(req);
-		ourLog.info(reqString);
-		reqString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(req);
-		ourLog.info(reqString);
+		observation.getCode().setText("OBS_TEXT");
+		req.addEntry().setResource(observation);
+		String reqString = ourCtx.newJsonParser().encodeResourceToString(req);
 
 		org.hl7.fhir.dstu3.model.Bundle resp = new org.hl7.fhir.dstu3.model.Bundle();
 		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
@@ -2118,7 +2103,9 @@ public class GenericJaxRsClientDstu3Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu3();
 		
-		ourServer = new Server(0);
+		ourPort = RandomServerPortProvider.findFreePort();
+		ourServer = new Server(ourPort);
+		ourLog.info("Starting server on port {}", ourPort);
 		ourServer.setHandler(new AbstractHandler() {
 
 			@Override
@@ -2160,12 +2147,11 @@ public class GenericJaxRsClientDstu3Test {
 			}
 		});
 		
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 }

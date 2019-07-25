@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -20,18 +19,22 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.Organization;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
+import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SearchWithIncludesDstu3Test {
@@ -64,7 +67,7 @@ public class SearchWithIncludesDstu3Test {
 
 	 @AfterClass
 	  public static void afterClassClearContext() throws Exception {
-	    JettyUtil.closeServer(ourServer);
+	    ourServer.stop();
 	    TestUtil.clearAllStaticFieldsForUnitTest();
 	  }
 
@@ -72,21 +75,20 @@ public class SearchWithIncludesDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10));
-		servlet.setResourceProviders(patientProvider);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
+		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

@@ -2,15 +2,15 @@ package ca.uhn.fhirtest.config;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu2;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhirtest.interceptor.PublicSecurityInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.dialect.PostgreSQL94Dialect;
-import org.hl7.fhir.dstu2.model.Subscription;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,35 +50,25 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Bean
-	public PublicSecurityInterceptor securityInterceptor() {
+	public IServerInterceptor securityInterceptor() {
 		return new PublicSecurityInterceptor();
 	}
 
-	@Bean
+	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
-		retVal.setWebsocketContextPath("/websocketDstu2");
-		retVal.setAllowContainsSearches(true);
+		retVal.setSubscriptionEnabled(true);
+		retVal.setSubscriptionPollDelay(5000);
+		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(true);
 		retVal.setAllowExternalReferences(true);
-		retVal.getTreatBaseUrlsAsLocal().add("http://hapi.fhir.org/baseDstu2");
-		retVal.getTreatBaseUrlsAsLocal().add("https://hapi.fhir.org/baseDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("http://fhirtest.uhn.ca/baseDstu2");
 		retVal.getTreatBaseUrlsAsLocal().add("https://fhirtest.uhn.ca/baseDstu2");
 		retVal.setCountSearchResultsUpTo(TestR4Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
-		retVal.setWebsocketContextPath("/");
 		return retVal;
-	}
-
-	@Bean
-	public ModelConfig modelConfig() {
-		return daoConfig().getModelConfig();
 	}
 
 	@Bean(name = "myPersistenceDataSourceDstu1", destroyMethod = "close")
@@ -96,7 +86,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Bean
+	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
@@ -104,7 +94,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean
+	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu2");

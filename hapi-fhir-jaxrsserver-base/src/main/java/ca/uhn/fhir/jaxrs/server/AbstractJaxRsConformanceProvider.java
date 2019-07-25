@@ -4,14 +4,14 @@ package ca.uhn.fhir.jaxrs.server;
  * #%L
  * HAPI FHIR JAX-RS Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,7 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2.hapi.rest.server.ServerConformanceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.LoggerFactory;
 
@@ -62,13 +61,13 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	/** the resource bindings */
 	private ConcurrentHashMap<String, ResourceBinding> myResourceNameToBinding = new ConcurrentHashMap<String, ResourceBinding>();
 	/** the server configuration */
-	private RestfulServerConfiguration serverConfiguration = new RestfulServerConfiguration();
+	private RestulfulServerConfiguration serverConfiguration = new RestulfulServerConfiguration();
 
 	/** the conformance. It is created once during startup */
 	private org.hl7.fhir.r4.model.CapabilityStatement myR4CapabilityStatement;
 	private org.hl7.fhir.dstu3.model.CapabilityStatement myDstu3CapabilityStatement;
 	private org.hl7.fhir.dstu2016may.model.Conformance myDstu2_1Conformance;
-	private org.hl7.fhir.dstu2.model.Conformance myDstu2Hl7OrgConformance;
+	private org.hl7.fhir.instance.model.Conformance myDstu2Hl7OrgConformance;
 	private ca.uhn.fhir.model.dstu2.resource.Conformance myDstu2Conformance;
 	private boolean myInitialized;
 
@@ -135,23 +134,28 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 		switch (fhirContextVersion) {
 			case R4:
 				org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider r4ServerCapabilityStatementProvider = new org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
-				myR4CapabilityStatement = r4ServerCapabilityStatementProvider.getServerConformance(null, null);
+				r4ServerCapabilityStatementProvider.initializeOperations();
+				myR4CapabilityStatement = r4ServerCapabilityStatementProvider.getServerConformance(null);
 				break;
 			case DSTU3:
 				org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider dstu3ServerCapabilityStatementProvider = new org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider(serverConfiguration);
-				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null, null);
+				dstu3ServerCapabilityStatementProvider.initializeOperations();
+				myDstu3CapabilityStatement = dstu3ServerCapabilityStatementProvider.getServerConformance(null);
 				break;
 			case DSTU2_1:
 				org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider dstu2_1ServerConformanceProvider = new org.hl7.fhir.dstu2016may.hapi.rest.server.ServerConformanceProvider(serverConfiguration);
-				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null, null);
+				dstu2_1ServerConformanceProvider.initializeOperations();
+				myDstu2_1Conformance = dstu2_1ServerConformanceProvider.getServerConformance(null);
 				break;
 			case DSTU2_HL7ORG:
-				ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new ServerConformanceProvider(serverConfiguration);
-				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null, null);
+				org.hl7.fhir.instance.conf.ServerConformanceProvider dstu2Hl7OrgServerConformanceProvider = new org.hl7.fhir.instance.conf.ServerConformanceProvider(serverConfiguration);
+				dstu2Hl7OrgServerConformanceProvider.initializeOperations();
+				myDstu2Hl7OrgConformance = dstu2Hl7OrgServerConformanceProvider.getServerConformance(null);
 				break;
 			case DSTU2:
 				ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider dstu2ServerConformanceProvider = new ca.uhn.fhir.rest.server.provider.dstu2.ServerConformanceProvider(serverConfiguration);
-				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null, null);
+				dstu2ServerConformanceProvider.initializeOperations();
+				myDstu2Conformance = dstu2ServerConformanceProvider.getServerConformance(null);
 				break;
 			default:
 				throw new ConfigurationException("Unsupported Fhir version: " + fhirContextVersion);
@@ -223,14 +227,14 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 	}
 
 	/**
-	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object, Class)}  }
+	 * This method will add a provider to the conformance. This method is almost an exact copy of {@link ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods }
 	 * 
 	 * @param theProvider
 	 *           an instance of the provider interface
 	 * @param theProviderInterface
 	 *           the class describing the providers interface
 	 * @return the numbers of basemethodbindings added
-	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods(Object)
+	 * @see ca.uhn.fhir.rest.server.RestfulServer#findResourceMethods
 	 */
 	public int addProvider(IResourceProvider theProvider, Class<? extends IResourceProvider> theProviderInterface) throws ConfigurationException {
 		int count = 0;
@@ -306,7 +310,7 @@ public abstract class AbstractJaxRsConformanceProvider extends AbstractJaxRsProv
 			case DSTU2_1:
 				return Class.class.cast(org.hl7.fhir.dstu2016may.model.Conformance.class);
 			case DSTU2_HL7ORG:
-				return Class.class.cast(org.hl7.fhir.dstu2.model.Conformance.class);
+				return Class.class.cast(org.hl7.fhir.instance.model.Conformance.class);
 			case DSTU2:
 				return Class.class.cast(ca.uhn.fhir.model.dstu2.resource.Conformance.class);
 			default:

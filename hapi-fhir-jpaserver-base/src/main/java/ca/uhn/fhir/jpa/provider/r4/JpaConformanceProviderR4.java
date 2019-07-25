@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,6 @@ import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CapabilityStatement.*;
 import org.hl7.fhir.r4.model.Enumerations.SearchParamType;
@@ -39,13 +36,11 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.ExtensionConstants;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.ServerCapabilityStatementProvider {
 
 	private volatile CapabilityStatement myCachedValue;
 	private DaoConfig myDaoConfig;
-	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -71,15 +66,10 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		myDaoConfig = theDaoConfig;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
-		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
-	}
-
-	public void setSearchParamRegistry(ISearchParamRegistry theSearchParamRegistry) {
-		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	@Override
-	public CapabilityStatement getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
+	public CapabilityStatement getServerConformance(HttpServletRequest theRequest) {
 		CapabilityStatement retVal = myCachedValue;
 
 		Map<String, Long> counts = null;
@@ -88,7 +78,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 		}
 		counts = defaultIfNull(counts, Collections.emptyMap());
 
-		retVal = super.getServerConformance(theRequest, theRequestDetails);
+		retVal = super.getServerConformance(theRequest);
 		for (CapabilityStatementRestComponent nextRest : retVal.getRest()) {
 
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
@@ -109,7 +99,7 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
 				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
-				Collection<RuntimeSearchParam> searchParams =  mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
+				Collection<RuntimeSearchParam> searchParams = mySystemDao.getSearchParamsByResourceType(resourceDef);
 				for (RuntimeSearchParam runtimeSp : searchParams) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
@@ -148,15 +138,6 @@ public class JpaConformanceProviderR4 extends org.hl7.fhir.r4.hapi.rest.server.S
 					
 				}
 				
-			}
-		}
-
-		if (myDaoConfig.getSupportedSubscriptionTypes().contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myDaoConfig.getWebsocketContextPath())) {
-				Extension websocketExtension = new Extension();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myDaoConfig.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addExtension(websocketExtension);
 			}
 		}
 

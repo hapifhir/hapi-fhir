@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,11 +24,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -55,12 +53,8 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -71,14 +65,12 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -91,7 +83,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc, ApplicationContextAware {
 	public static final int DEFAULT_FETCH_SIZE = 250;
@@ -118,12 +111,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
-	protected ITermValueSetDao myValueSetDao;
-	@Autowired
-	protected ITermValueSetConceptDao myValueSetConceptDao;
-	@Autowired
-	protected ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
-	@Autowired
 	protected FhirContext myContext;
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
@@ -147,45 +134,51 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
 	private ApplicationContext myApplicationContext;
-	private TransactionTemplate myTxTemplate;
-	@Autowired
-	private PlatformTransactionManager myTransactionManager;
-	@Autowired(required = false)
-	private IFulltextSearchSvc myFulltextSearchSvc;
 
-	private void addCodeIfNotAlreadyAdded(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
-		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+	/**
+	 * @param theAdd         If true, add the code. If false, remove the code.
+	 * @param theCodeCounter
+	 */
+	private void addCodeIfNotAlreadyAdded(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String code = theConcept.getCode();
-		String display = theConcept.getDisplay();
-		Collection<TermConceptDesignation> designations = theConcept.getDesignations();
-		addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, designations, theAdd, theCodeCounter, codeSystem, code, display);
-	}
-
-	private void addCodeIfNotAlreadyAdded(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, Collection<TermConceptDesignation> theDesignations, boolean theAdd, AtomicInteger theCodeCounter, String theCodeSystem, String theCode, String theDisplay) {
-		if (isNoneBlank(theCodeSystem, theCode)) {
-			if (theAdd && theAddedCodes.add(theCodeSystem + "|" + theCode)) {
-				theValueSetCodeAccumulator.includeCodeWithDesignations(theCodeSystem, theCode, theDisplay, theDesignations);
-				theCodeCounter.incrementAndGet();
+		if (theAdd && theAddedCodes.add(code)) {
+			String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+			ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+			contains.setCode(code);
+			contains.setSystem(codeSystem);
+			contains.setDisplay(theConcept.getDisplay());
+			for (TermConceptDesignation nextDesignation : theConcept.getDesignations()) {
+				contains
+					.addDesignation()
+					.setValue(nextDesignation.getValue())
+					.getUse()
+					.setSystem(nextDesignation.getUseSystem())
+					.setCode(nextDesignation.getUseCode())
+					.setDisplay(nextDesignation.getUseDisplay());
 			}
 
-			if (!theAdd && theAddedCodes.remove(theCodeSystem + "|" + theCode)) {
-				theValueSetCodeAccumulator.excludeCode(theCodeSystem, theCode);
-				theCodeCounter.decrementAndGet();
-			}
+			theCodeCounter.incrementAndGet();
+		}
+
+		if (!theAdd && theAddedCodes.remove(code)) {
+			String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
+			removeCodeFromExpansion(codeSystem, code, theExpansionComponent);
+			theCodeCounter.decrementAndGet();
 		}
 	}
 
-	private void addConceptsToList(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
+	private void addConceptsToList(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
-			if (isNoneBlank(theSystem, next.getCode())) {
-				if (theAdd && theAddedCodes.add(theSystem + "|" + next.getCode())) {
-					theValueSetCodeAccumulator.includeCode(theSystem, next.getCode(), next.getDisplay());
-				}
-				if (!theAdd && theAddedCodes.remove(theSystem + "|" + next.getCode())) {
-					theValueSetCodeAccumulator.excludeCode(theSystem, next.getCode());
-				}
+			if (theAdd && theAddedCodes.add(next.getCode())) {
+				ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+				contains.setCode(next.getCode());
+				contains.setSystem(theSystem);
+				contains.setDisplay(next.getDisplay());
 			}
-			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd);
+			if (!theAdd && theAddedCodes.remove(next.getCode())) {
+				removeCodeFromExpansion(theSystem, next.getCode(), theExpansionComponent);
+			}
+			addConceptsToList(theExpansionComponent, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
 	}
 
@@ -378,33 +371,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		deleteConceptMap(theResourceTable);
 	}
 
-	public void deleteValueSet(ResourceTable theResourceTable) {
-		// Get existing entity so it can be deleted.
-		Optional<TermValueSet> optionalExistingTermValueSetById = myValueSetDao.findByResourcePid(theResourceTable.getId());
-
-		if (optionalExistingTermValueSetById.isPresent()) {
-			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
-
-			ourLog.info("Deleting existing TermValueSet {} and its children...", existingTermValueSet.getId());
-			myValueSetConceptDesignationDao.deleteTermValueSetConceptDesignationsByValueSetId(existingTermValueSet.getId());
-			myValueSetConceptDao.deleteTermValueSetConceptsByValueSetId(existingTermValueSet.getId());
-			myValueSetDao.deleteTermValueSetById(existingTermValueSet.getId());
-			ourLog.info("Done deleting existing TermValueSet {} and its children.", existingTermValueSet.getId());
-
-			ourLog.info("Flushing...");
-			myValueSetConceptDesignationDao.flush();
-			myValueSetConceptDao.flush();
-			myValueSetDao.flush();
-			ourLog.info("Done flushing.");
-		}
-	}
-
-	@Override
-	@Transactional
-	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
-		deleteValueSet(theResourceTable);
-	}
-
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
@@ -417,12 +383,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			}
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			txTemplate.execute(t -> {
-				theDao.deleteAll(link);
-				return null;
-			});
+			theDao.deleteInBatch(link);
 
 			count += link.getNumberOfElements();
 			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
@@ -454,13 +415,26 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(ValueSet theValueSetToExpand) {
 
-		ValueSetExpansionComponentWithCodeAccumulator expansionComponent = new ValueSetExpansionComponentWithCodeAccumulator();
+		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
 		expansionComponent.setTimestamp(new Date());
 
+		Set<String> addedCodes = new HashSet<>();
 		AtomicInteger codeCounter = new AtomicInteger(0);
 
-		expandValueSet(theValueSetToExpand, expansionComponent, codeCounter);
+		// Handle includes
+		ourLog.debug("Handling includes");
+		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
+			boolean add = true;
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add, codeCounter);
+		}
+
+		// Handle excludes
+		ourLog.debug("Handling excludes");
+		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getExclude()) {
+			boolean add = false;
+			expandValueSetHandleIncludeOrExclude(expansionComponent, addedCodes, include, add, codeCounter);
+		}
 
 		expansionComponent.setTotal(codeCounter.get());
 
@@ -471,42 +445,20 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return valueSet;
 	}
 
-	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
-	public void expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
-		expandValueSet(theValueSetToExpand, theValueSetCodeAccumulator, new AtomicInteger(0));
-	}
-
-	private void expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter) {
-		Set<String> addedCodes = new HashSet<>();
-
-		// Handle includes
-		ourLog.debug("Handling includes");
-		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			boolean add = true;
-			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter);
-		}
-
-		// Handle excludes
-		ourLog.debug("Handling excludes");
-		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getExclude()) {
-			boolean add = false;
-			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter);
-		}
-	}
-
 	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {
 		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSet(theValueSetToExpandR4).getExpansion();
 
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
 			retVal.add(
-				new VersionIndependentConcept(nextContains.getSystem(), nextContains.getCode()));
+				new VersionIndependentConcept()
+					.setSystem(nextContains.getSystem())
+					.setCode(nextContains.getCode()));
 		}
 		return retVal;
 	}
 
-	private void expandValueSetHandleIncludeOrExclude(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter) {
+	public void expandValueSetHandleIncludeOrExclude(ValueSet.ValueSetExpansionComponent theExpansionComponent, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter) {
 		String system = theInclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = theInclude.getValueSet().size() > 0;
@@ -518,19 +470,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (cs != null) {
 				TermCodeSystemVersion csv = cs.getCurrentVersion();
 				FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-
-				/*
-				 * If FullText searching is not enabled, we can handle only basic expansions
-				 * since we're going to do it without the database.
-				 */
-				if (myFulltextSearchSvc == null) {
-					expandWithoutHibernateSearch(theValueSetCodeAccumulator, theAddedCodes, theInclude, system, theAdd, theCodeCounter);
-					return;
-				}
-
-				/*
-				 * Ok, let's use hibernate search to build the expansion
-				 */
 				QueryBuilder qb = em.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
 				BooleanJunction<?> bool = qb.bool();
 
@@ -562,8 +501,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 							}
 						} else if (nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) {
 
-							TermConcept code = findCode(system, nextFilter.getValue())
-								.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue()));
+							TermConcept code = findCode(system, nextFilter.getValue());
+							if (code == null) {
+								throw new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue());
+							}
 
 							if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
 								ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
@@ -648,7 +589,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				for (Object next : jpaQuery.getResultList()) {
 					count.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
-					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+					addCodeIfNotAlreadyAdded(theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
 				}
 
 
@@ -669,21 +610,24 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				if (theInclude.getConcept().isEmpty() == false) {
 					for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 						String nextCode = next.getCode();
-						if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
+						if (isNotBlank(nextCode) && !theAddedCodes.contains(nextCode)) {
 							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
 							if (code != null) {
-								if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
-									theValueSetCodeAccumulator.includeCode(system, nextCode, code.getDisplay());
+								if (theAdd && theAddedCodes.add(nextCode)) {
+									ValueSet.ValueSetExpansionContainsComponent contains = theExpansionComponent.addContains();
+									contains.setCode(nextCode);
+									contains.setSystem(system);
+									contains.setDisplay(code.getDisplay());
 								}
-								if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
-									theValueSetCodeAccumulator.excludeCode(system, nextCode);
+								if (!theAdd && theAddedCodes.remove(nextCode)) {
+									removeCodeFromExpansion(system, nextCode, theExpansionComponent);
 								}
 							}
 						}
 					}
 				} else {
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
-					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd);
+					addConceptsToList(theExpansionComponent, theAddedCodes, system, concept, theAdd);
 				}
 
 			}
@@ -695,37 +639,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				for (VersionIndependentConcept nextConcept : expanded) {
 					if (theAdd) {
 						TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
-						myConceptDao
-							.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
-							.ifPresent(concept ->
-								addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
-							);
-
+						TermConcept concept = myConceptDao.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode());
+						addCodeIfNotAlreadyAdded(theExpansionComponent, theAddedCodes, concept, theAdd, theCodeCounter);
 					}
-					if (isNoneBlank(nextConcept.getSystem(), nextConcept.getCode()) && !theAdd && theAddedCodes.remove(nextConcept.getSystem() + "|" + nextConcept.getCode())) {
-						theValueSetCodeAccumulator.excludeCode(nextConcept.getSystem(), nextConcept.getCode());
+					if (!theAdd && theAddedCodes.remove(nextConcept.getCode())) {
+						removeCodeFromExpansion(nextConcept.getSystem(), nextConcept.getCode(), theExpansionComponent);
 					}
 				}
 
 			}
 		} else {
 			throw new InvalidRequestException("ValueSet contains " + (theAdd ? "include" : "exclude") + " criteria with no system defined");
-		}
-	}
-
-	private void expandWithoutHibernateSearch(IValueSetCodeAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
-		ourLog.trace("Hibernate search is not enabled");
-		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithCodeAccumulator) {
-			Validate.isTrue(((ValueSetExpansionComponentWithCodeAccumulator) theValueSetCodeAccumulator).getParameter().isEmpty(), "Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
-		}
-		Validate.isTrue(theInclude.getFilter().isEmpty(), "Can not expand ValueSet with filters - Hibernate Search is not enabled on this server.");
-		Validate.isTrue(isNotBlank(theSystem), "Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
-
-		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
-			if (!theSystem.equals(theInclude.getSystem())) {
-				continue;
-			}
-			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
 		}
 	}
 
@@ -738,7 +662,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	private Optional<TermConcept> fetchLoadedCode(Long theCodeSystemResourcePid, String theCode) {
+	private TermConcept fetchLoadedCode(Long theCodeSystemResourcePid, String theCode) {
 		TermCodeSystemVersion codeSystem = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(theCodeSystemResourcePid);
 		return myConceptDao.findByCodeSystemAndCode(codeSystem, theCode);
 	}
@@ -766,7 +690,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	@Override
-	public Optional<TermConcept> findCode(String theCodeSystem, String theCode) {
+	public TermConcept findCode(String theCodeSystem, String theCode) {
 		TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
 
 		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
@@ -782,15 +706,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		StopWatch stopwatch = new StopWatch();
 
-		Optional<TermConcept> concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
-		if (concept.isPresent() == false) {
+		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
+		if (concept == null) {
 			return Collections.emptySet();
 		}
 
 		Set<TermConcept> retVal = new HashSet<>();
-		retVal.add(concept.get());
+		retVal.add(concept);
 
-		fetchParents(concept.get(), retVal);
+		fetchParents(concept, retVal);
 
 		ourLog.info("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.getMillis());
 		return retVal;
@@ -813,15 +737,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public Set<TermConcept> findCodesBelow(Long theCodeSystemResourcePid, Long theCodeSystemVersionPid, String theCode) {
 		Stopwatch stopwatch = Stopwatch.createStarted();
 
-		Optional<TermConcept> concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
-		if (concept.isPresent() == false) {
+		TermConcept concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
+		if (concept == null) {
 			return Collections.emptySet();
 		}
 
 		Set<TermConcept> retVal = new HashSet<>();
-		retVal.add(concept.get());
+		retVal.add(concept);
 
-		fetchChildren(concept.get(), retVal);
+		fetchChildren(concept, retVal);
 
 		ourLog.info("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 		return retVal;
@@ -939,8 +863,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (relCount > 0) {
-			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / entry)",
-				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(relCount));
+			ourLog.info("Saved {} deferred relationships ({} remain) in {}ms ({}ms / code)",
+				relCount, myConceptLinksToSaveLater.size(), stopwatch.getMillis(), stopwatch.getMillisPerOperation(codeCount));
 		}
 
 		if ((myDeferredConcepts.size() + myConceptLinksToSaveLater.size()) == 0) {
@@ -964,7 +888,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		tt.execute(new TransactionCallbackWithoutResult() {
 			private void createParentsString(StringBuilder theParentsBuilder, Long theConceptPid) {
 				Validate.notNull(theConceptPid, "theConceptPid must not be null");
@@ -1036,6 +960,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	}
 
+	private void removeCodeFromExpansion(String theCodeSystem, String theCode, ValueSet.ValueSetExpansionComponent theExpansionComponent) {
+		theExpansionComponent
+			.getContains()
+			.removeIf(t ->
+				theCodeSystem.equals(t.getSystem()) &&
+					theCode.equals(t.getCode()));
+	}
+
 	private int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -1083,7 +1015,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		tt.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
 		if (!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
 			tt.execute(t -> {
 				processDeferredConcepts();
@@ -1119,7 +1051,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@PostConstruct
 	public void start() {
 		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
-		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
 	@Override
@@ -1133,8 +1064,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Grab the existing versions so we can delete them later
 		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
 
+//		verifyNoDuplicates(theCodeSystemVersion.getConcepts(), new HashSet<String>());
+
 		/*
-		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
+		 * For now we always delete old versions.. At some point it would be nice to allow configuration to keep old versions
 		 */
 
 		ourLog.info("Deleting old code system versions");
@@ -1163,7 +1096,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUri", theSystemUri,
 					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
 				throw new UnprocessableEntityException(msg);
 			}
@@ -1216,12 +1149,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
+	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = createOrUpdateCodeSystem(theCodeSystemResource);
 
-		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId, theRequest);
+		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId);
 		Long codeSystemResourcePid = resource.getId();
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
@@ -1247,22 +1180,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		termConceptMap.setResource(theResourceTable);
 		termConceptMap.setUrl(theConceptMap.getUrl());
 
-		String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
-		String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
-
-		/*
-		 * If this is a mapping between "resources" instead of purely between
-		 * "concepts" (this is a weird concept that is technically possible, at least as of
-		 * FHIR R4), don't try to store the mappings.
-		 *
-		 * See here for a description of what that is:
-		 * http://hl7.org/fhir/conceptmap.html#bnr
-		 */
-		if ("StructureDefinition".equals(new IdType(source).getResourceType()) ||
-			"StructureDefinition".equals(new IdType(target).getResourceType())) {
-			return;
-		}
-
 		/*
 		 * For now we always delete old versions. At some point, it would be nice to allow configuration to keep old versions.
 		 */
@@ -1275,9 +1192,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermConceptMap> optionalExistingTermConceptMapByUrl = myConceptMapDao.findTermConceptMapByUrl(conceptMapUrl);
 		if (!optionalExistingTermConceptMapByUrl.isPresent()) {
 			try {
+				String source = theConceptMap.hasSourceUriType() ? theConceptMap.getSourceUriType().getValueAsString() : null;
 				if (isNotBlank(source)) {
 					termConceptMap.setSource(source);
 				}
+				String target = theConceptMap.hasTargetUriType() ? theConceptMap.getTargetUriType().getValueAsString() : null;
 				if (isNotBlank(target)) {
 					termConceptMap.setTarget(target);
 				}
@@ -1307,10 +1226,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					if (group.hasElement()) {
 						TermConceptMapGroupElement termConceptMapGroupElement;
 						for (ConceptMap.SourceElementComponent element : group.getElement()) {
-							if (isBlank(element.getCode())) {
-								// FIXME: JA - send this to an interceptor message so it can be output
-								continue;
-							}
 							termConceptMapGroupElement = new TermConceptMapGroupElement();
 							termConceptMapGroupElement.setConceptMapGroup(termConceptMapGroup);
 							termConceptMapGroupElement.setCode(element.getCode());
@@ -1319,16 +1234,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 							if (element.hasTarget()) {
 								TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
-								for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
+								for (ConceptMap.TargetElementComponent target : element.getTarget()) {
 									termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 									termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
-									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
-									termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
-									termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
+									termConceptMapGroupElementTarget.setCode(target.getCode());
+									termConceptMapGroupElementTarget.setDisplay(target.getDisplay());
+									termConceptMapGroupElementTarget.setEquivalence(target.getEquivalence());
 									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
 									if (codesSaved++ % 250 == 0) {
-										ourLog.info("Have saved {} codes in ConceptMap", codesSaved);
+										ourLog.info("Have saved {} codes in conceptmap", codesSaved);
 										myConceptMapGroupElementTargetDao.flush();
 									}
 								}
@@ -1350,140 +1265,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		ourLog.info("Done storing TermConceptMap.");
-	}
-
-	@Override
-	@Transactional
-	public void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet {}", theValueSet.getIdElement().getValue());
-
-		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
-		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
-
-		TermValueSet termValueSet = new TermValueSet();
-		termValueSet.setResource(theResourceTable);
-		termValueSet.setUrl(theValueSet.getUrl());
-		termValueSet.setName(theValueSet.hasName() ? theValueSet.getName() : null);
-
-		// We delete old versions; we don't support versioned ValueSets.
-		deleteValueSet(theResourceTable);
-
-		/*
-		 * Do the upload.
-		 */
-		String url = termValueSet.getUrl();
-		Optional<TermValueSet> optionalExistingTermValueSetByUrl = myValueSetDao.findByUrl(url);
-		if (!optionalExistingTermValueSetByUrl.isPresent()) {
-			myValueSetDao.save(termValueSet);
-			int conceptsSaved = 0;
-			int designationsSaved = 0;
-
-			// FIXME: DM 2019-07-15 - Here we should call expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator).
-			// FIXME: DM 2019-07-15 - We need an implementation IValueSetCodeAccumulator that saves ValueSetConcept records and their children.
-			ValueSet expandedValueSet = expandValueSet(theValueSet);
-			if (expandedValueSet.hasExpansion()) {
-				if (expandedValueSet.getExpansion().hasTotal() && expandedValueSet.getExpansion().getTotal() > 0) {
-					TermValueSetConcept concept;
-					for (ValueSet.ValueSetExpansionContainsComponent contains : expandedValueSet.getExpansion().getContains()) {
-						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getSystem(), "ValueSet contains a concept with no system value");
-						ValidateUtil.isNotBlankOrThrowInvalidRequest(contains.getCode(), "ValueSet contains a concept with no code value");
-
-						concept = new TermValueSetConcept();
-						concept.setValueSet(termValueSet);
-						concept.setSystem(contains.getSystem());
-						concept.setCode(contains.getCode());
-						concept.setDisplay(contains.hasDisplay() ? contains.getDisplay() : null);
-						myValueSetConceptDao.save(concept);
-
-						TermValueSetConceptDesignation designation;
-						for (ValueSet.ConceptReferenceDesignationComponent containedDesignation : contains.getDesignation()) {
-							ValidateUtil.isNotBlankOrThrowInvalidRequest(containedDesignation.getValue(), "ValueSet contains a concept designation with no value");
-
-							designation = new TermValueSetConceptDesignation();
-							designation.setConcept(concept);
-							designation.setLanguage(containedDesignation.hasLanguage() ? containedDesignation.getLanguage() : null);
-							if (containedDesignation.hasUse()) {
-								designation.setUseSystem(containedDesignation.getUse().hasSystem() ? containedDesignation.getUse().getSystem() : null);
-								designation.setUseCode(containedDesignation.getUse().hasCode() ? containedDesignation.getUse().getCode() : null);
-								designation.setUseDisplay(containedDesignation.getUse().hasDisplay() ? containedDesignation.getUse().getDisplay() : null);
-							}
-							designation.setValue(containedDesignation.getValue());
-							myValueSetConceptDesignationDao.save(designation);
-
-							if (designationsSaved++ % 250 == 0) {
-								ourLog.info("Have pre-expanded {} designations in ValueSet", designationsSaved);
-								myValueSetConceptDesignationDao.flush();
-							}
-						}
-
-						// TODO: DM 2019-07-16 - We need TermValueSetConceptProperty, similar to TermConceptProperty.
-						// TODO: DM 2019-07-16 - We should also populate TermValueSetConceptProperty entities here.
-
-						if (conceptsSaved++ % 250 == 0) {
-							ourLog.info("Have pre-expanded {} concepts in ValueSet", conceptsSaved);
-							myValueSetConceptDao.flush();
-						}
-					}
-				}
-			}
-
-		} else {
-			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
-
-			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
-				"cannotCreateDuplicateValueSetUrl",
-				url,
-				existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-
-			throw new UnprocessableEntityException(msg);
-		}
-
-		ourLog.info("Done storing TermValueSet.");
-	}
-
-	@Override
-	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
-		VersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
-		VersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
-
-		if (!StringUtils.equals(conceptA.getSystem(), conceptB.getSystem())) {
-			throw new InvalidRequestException("Unable to test subsumption across different code systems");
-		}
-
-		TermConcept codeA = findCode(conceptA.getSystem(), conceptA.getCode())
-			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptA));
-
-		TermConcept codeB = findCode(conceptB.getSystem(), conceptB.getCode())
-			.orElseThrow(() -> new InvalidRequestException("Unknown code: " + conceptB));
-
-		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
-
-		ConceptSubsumptionOutcome subsumes;
-		subsumes = testForSubsumption(em, codeA, codeB, ConceptSubsumptionOutcome.SUBSUMES);
-		if (subsumes == null) {
-			subsumes = testForSubsumption(em, codeB, codeA, ConceptSubsumptionOutcome.SUBSUMEDBY);
-		}
-		if (subsumes == null) {
-			subsumes = ConceptSubsumptionOutcome.NOTSUBSUMED;
-		}
-
-		return new IFhirResourceDaoCodeSystem.SubsumesResult(subsumes);
-	}
-
-	private @Nullable
-	ConceptSubsumptionOutcome testForSubsumption(FullTextEntityManager theEntityManager, TermConcept theLeft, TermConcept theRight, ConceptSubsumptionOutcome theOutput) {
-		QueryBuilder qb = theEntityManager.getSearchFactory().buildQueryBuilder().forEntity(TermConcept.class).get();
-		BooleanJunction<?> bool = qb.bool();
-		bool.must(qb.keyword().onField("myId").matching(Long.toString(theLeft.getId())).createQuery());
-		bool.must(qb.keyword().onField("myParentPids").matching(Long.toString(theRight.getId())).createQuery());
-		Query luceneQuery = bool.createQuery();
-		FullTextQuery jpaQuery = theEntityManager.createFullTextQuery(luceneQuery, TermConcept.class);
-		jpaQuery.setMaxResults(1);
-		if (jpaQuery.getResultList().size() > 0) {
-			return theOutput;
-		}
-		return null;
 	}
 
 	@Override
@@ -1563,12 +1344,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				org.hibernate.query.Query<TermConceptMapGroupElementTarget> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElementTarget>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
+				Iterator<TermConceptMapGroupElementTarget> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
 
-					while (scrollableResultsIterator.hasNext()) {
-						targets.add(scrollableResultsIterator.next());
-					}
-
+				while (scrollableResultsIterator.hasNext()) {
+					targets.add(scrollableResultsIterator.next());
 				}
 
 				ourLastResultsFromTranslationCache = false; // For testing.
@@ -1650,29 +1429,27 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				org.hibernate.query.Query<TermConceptMapGroupElement> hibernateQuery = (org.hibernate.query.Query<TermConceptMapGroupElement>) typedQuery;
 				hibernateQuery.setFetchSize(myFetchSize);
 				ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
+				Iterator<TermConceptMapGroupElement> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults);
 
-					while (scrollableResultsIterator.hasNext()) {
-						TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
-						nextElement.getConceptMapGroupElementTargets().size();
-						myEntityManager.detach(nextElement);
+				while (scrollableResultsIterator.hasNext()) {
+					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
+					nextElement.getConceptMapGroupElementTargets().size();
+					myEntityManager.detach(nextElement);
 
-						if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
-							for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
-								TermConceptMapGroupElementTarget next = iter.next();
-								if (targetCodeSystem.equals(next.getSystem())) {
-									if (targetCode.equals(next.getCode())) {
-										continue;
-									}
+					if (isNotBlank(targetCode) && isNotBlank(targetCodeSystem)) {
+						for (Iterator<TermConceptMapGroupElementTarget> iter = nextElement.getConceptMapGroupElementTargets().iterator(); iter.hasNext(); ) {
+							TermConceptMapGroupElementTarget next = iter.next();
+							if (targetCodeSystem.equals(next.getSystem())) {
+								if (targetCode.equals(next.getCode())) {
+									continue;
 								}
-
-								iter.remove();
 							}
-						}
 
-						elements.add(nextElement);
+							iter.remove();
+						}
 					}
 
+					elements.add(nextElement);
 				}
 
 				ourLastResultsFromTranslationWithReverseCache = false; // For testing.
@@ -1689,9 +1466,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private int validateConceptForStorage(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, ArrayList<String> theConceptsStack,
 													  IdentityHashMap<TermConcept, Object> theAllConcepts) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodeSystemVersion is null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() != null, "CodesystemValue is null");
 		ValidateUtil.isTrueOrThrowInvalidRequest(theConcept.getCodeSystemVersion() == theCodeSystem, "CodeSystems are not equal");
-		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "CodeSystem contains a code with no code value");
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theConcept.getCode(), "Codesystem contains a code with no code value");
 
 		if (theConceptsStack.contains(theConcept.getCode())) {
 			throw new InvalidRequestException("CodeSystem contains circular reference around code " + theConcept.getCode());
@@ -1723,17 +1500,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
 		}
-	}
-
-	@NotNull
-	private static VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType) {
-		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
-		String system = theSystemType != null ? theSystemType.getValueAsString() : null;
-		if (theCodingType != null) {
-			code = theCodingType.getCode();
-			system = theCodingType.getSystem();
-		}
-		return new VersionIndependentConcept(system, code);
 	}
 
 	/**

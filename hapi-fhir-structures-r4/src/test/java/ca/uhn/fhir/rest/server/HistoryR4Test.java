@@ -2,9 +2,9 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -31,8 +31,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class HistoryR4Test {
 
@@ -175,26 +173,26 @@ public class HistoryR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPlainProvider plainProvider = new DummyPlainProvider();
 		DummyResourceProvider patientProvider = new DummyResourceProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
-		servlet.registerProviders(plainProvider, patientProvider);
+		servlet.setPlainProviders(plainProvider);
+		servlet.setResourceProviders(patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

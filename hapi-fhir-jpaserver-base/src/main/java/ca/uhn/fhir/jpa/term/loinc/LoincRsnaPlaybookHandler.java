@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -106,59 +106,59 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 		}
 
 		String loincCodePropName;
-		switch (partTypeName.toLowerCase()) {
-			case "rad.anatomic location.region imaged":
+		switch (partTypeName) {
+			case "Rad.Anatomic Location.Region Imaged":
 				loincCodePropName = "rad-anatomic-location-region-imaged";
 				break;
-			case "rad.anatomic location.imaging focus":
+			case "Rad.Anatomic Location.Imaging Focus":
 				loincCodePropName = "rad-anatomic-location-imaging-focus";
 				break;
-			case "rad.modality.modality type":
+			case "Rad.Modality.Modality type":
 				loincCodePropName = "rad-modality-modality-type";
 				break;
-			case "rad.modality.modality subtype":
+			case "Rad.Modality.Modality subtype":
 				loincCodePropName = "rad-modality-modality-subtype";
 				break;
-			case "rad.anatomic location.laterality":
+			case "Rad.Anatomic Location.Laterality":
 				loincCodePropName = "rad-anatomic-location-laterality";
 				break;
-			case "rad.anatomic location.laterality.presence":
+			case "Rad.Anatomic Location.Laterality.Presence":
 				loincCodePropName = "rad-anatomic-location-laterality-presence";
 				break;
-			case "rad.guidance for.action":
+			case "Rad.Guidance for.Action":
 				loincCodePropName = "rad-guidance-for-action";
 				break;
-			case "rad.guidance for.approach":
+			case "Rad.Guidance for.Approach":
 				loincCodePropName = "rad-guidance-for-approach";
 				break;
-			case "rad.guidance for.object":
+			case "Rad.Guidance for.Object":
 				loincCodePropName = "rad-guidance-for-object";
 				break;
-			case "rad.guidance for.presence":
+			case "Rad.Guidance for.Presence":
 				loincCodePropName = "rad-guidance-for-presence";
 				break;
-			case "rad.maneuver.maneuver type":
+			case "Rad.Maneuver.Maneuver type":
 				loincCodePropName = "rad-maneuver-maneuver-type";
 				break;
-			case "rad.pharmaceutical.route":
+			case "Rad.Pharmaceutical.Route":
 				loincCodePropName = "rad-pharmaceutical-route";
 				break;
-			case "rad.pharmaceutical.substance given":
+			case "Rad.Pharmaceutical.Substance Given":
 				loincCodePropName = "rad-pharmaceutical-substance-given";
 				break;
-			case "rad.reason for exam":
+			case "Rad.Reason for Exam":
 				loincCodePropName = "rad-reason-for-exam";
 				break;
-			case "rad.subject":
+			case "Rad.Subject":
 				loincCodePropName = "rad-subject";
 				break;
-			case "rad.timing":
+			case "Rad.Timing":
 				loincCodePropName = "rad-timing";
 				break;
-			case "rad.view.aggregation":
+			case "Rad.View.Aggregation":
 				loincCodePropName = "rad-view-view-aggregation";
 				break;
-			case "rad.view.view type":
+			case "Rad.View.View type":
 				loincCodePropName = "rad-view-view-type";
 				break;
 			default:

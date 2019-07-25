@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -32,8 +33,6 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class BinaryServerR4Test {
 	private static CloseableHttpClient ourClient;
@@ -227,13 +226,14 @@ public class BinaryServerR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		BinaryProvider binaryProvider = new BinaryProvider();
 
@@ -243,8 +243,7 @@ public class BinaryServerR4Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

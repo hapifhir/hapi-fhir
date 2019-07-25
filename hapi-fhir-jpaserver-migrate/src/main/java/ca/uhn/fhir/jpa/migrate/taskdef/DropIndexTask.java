@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,16 +63,15 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			switch (getDriverType()) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "alter table " + getTableName() + " drop index " + myIndexName;
+					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
 					break;
-				case H2_EMBEDDED:
 				case DERBY_EMBEDDED:
-					sql = "drop index " + myIndexName;
+					sql = "DROP INDEX " + myIndexName;
 					break;
 				case POSTGRES_9_4:
 				case ORACLE_12C:
 				case MSSQL_2012:
-					sql = "alter table " + getTableName() + " drop constraint " + myIndexName;
+					sql = "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + myIndexName;
 					break;
 			}
 		} else {
@@ -80,20 +79,19 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			switch (getDriverType()) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "alter table " + getTableName() + " drop index " + myIndexName;
+					sql = "ALTER TABLE " + getTableName() + " DROP INDEX " + myIndexName;
 					break;
 				case POSTGRES_9_4:
 				case DERBY_EMBEDDED:
-				case H2_EMBEDDED:
 				case ORACLE_12C:
-					sql = "drop index " + myIndexName;
+					sql = "DROP INDEX " + myIndexName;
 					break;
 				case MSSQL_2012:
-					sql = "drop index " + getTableName() + "." + myIndexName;
+					sql = "DROP INDEX " + getTableName() + "." + myIndexName;
 					break;
 			}
 		}
-		executeSql(getTableName(), sql);
+		executeSql(sql);
 
 	}
 

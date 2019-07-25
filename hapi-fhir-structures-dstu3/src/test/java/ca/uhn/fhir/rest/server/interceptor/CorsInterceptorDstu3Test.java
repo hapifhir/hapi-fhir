@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -37,7 +36,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class CorsInterceptorDstu3Test {
@@ -140,7 +139,7 @@ public class CorsInterceptorDstu3Test {
 	}
 	
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		ourClient.close();
 	}
 
@@ -157,11 +156,11 @@ public class CorsInterceptorDstu3Test {
 		builder.setConnectionManager(connectionManager);
 		ourClient = builder.build();
 
-		ourServer = new Server(0);
+		int port = PortUtil.findFreePort();
+		ourServer = new Server(port);
 
 		RestfulServer restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(new DummyPatientResourceProvider());
-		restServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		ServletHolder servletHolder = new ServletHolder(restServer);
 
@@ -190,8 +189,7 @@ public class CorsInterceptorDstu3Test {
 		ourServer.setHandler(contexts);
 
 		ourServer.setHandler(ch);
-		JettyUtil.startServer(ourServer);
-        int port = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 		ourBaseUri = "http://localhost:" + port + "/rootctx/rcp2/fhirctx/fcp2";
 
 	}

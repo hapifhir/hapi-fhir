@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -36,7 +35,7 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Validate;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.VersionUtil;
 
@@ -142,13 +141,14 @@ public class MetadataConformanceDstu2_1Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -156,12 +156,10 @@ public class MetadataConformanceDstu2_1Test {
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setServerConformanceProvider(new ServerConformanceProvider(ourServlet));
 		ourServlet.setResourceProviders(patientProvider);
-		ourServlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

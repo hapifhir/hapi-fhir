@@ -3,15 +3,11 @@ package ca.uhn.fhir.jpa.config.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.TransactionProcessor;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.dstu3.TransactionProcessorVersionAdapterDstu3;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamExtractorDstu3;
+import ca.uhn.fhir.jpa.dao.dstu3.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcDstu3;
@@ -36,14 +32,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -106,7 +102,7 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu3().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

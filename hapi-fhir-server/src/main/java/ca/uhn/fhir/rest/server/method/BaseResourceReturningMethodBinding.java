@@ -2,8 +2,6 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -20,10 +18,11 @@ import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -41,14 +40,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -58,10 +57,27 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public abstract class BaseResourceReturningMethodBinding extends BaseMethodBinding<Object> {
+	protected static final Set<String> ALLOWED_PARAMS;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseResourceReturningMethodBinding.class);
+
+	static {
+		HashSet<String> set = new HashSet<String>();
+		set.add(Constants.PARAM_FORMAT);
+		set.add(Constants.PARAM_NARRATIVE);
+		set.add(Constants.PARAM_PRETTY);
+		set.add(Constants.PARAM_SORT);
+		set.add(Constants.PARAM_SORT_ASC);
+		set.add(Constants.PARAM_SORT_DESC);
+		set.add(Constants.PARAM_COUNT);
+		set.add(Constants.PARAM_SUMMARY);
+		set.add(Constants.PARAM_ELEMENTS);
+		set.add(ResponseHighlighterInterceptor.PARAM_RAW);
+		ALLOWED_PARAMS = Collections.unmodifiableSet(set);
+	}
 
 	private MethodReturnTypeEnum myMethodReturnType;
 	private String myResourceName;
+	private Class<? extends IBaseResource> myResourceType;
 
 	@SuppressWarnings("unchecked")
 	public BaseResourceReturningMethodBinding(Class<?> theReturnResourceType, Method theMethod, FhirContext theContext, Object theProvider) {
@@ -96,12 +112,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		if (theReturnResourceType != null) {
 			if (IBaseResource.class.isAssignableFrom(theReturnResourceType)) {
-
-				// If we're returning an abstract type, that's ok, but if we know the resource
-				// type let's grab it
-				if (!Modifier.isAbstract(theReturnResourceType.getModifiers()) && !Modifier.isInterface(theReturnResourceType.getModifiers())) {
-					Class<? extends IBaseResource> resourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceDefinition(resourceType).getName();
+				if (Modifier.isAbstract(theReturnResourceType.getModifiers()) || Modifier.isInterface(theReturnResourceType.getModifiers())) {
+					// If we're returning an abstract type, that's ok
+				} else {
+					myResourceType = (Class<? extends IResource>) theReturnResourceType;
+					myResourceName = theContext.getResourceDefinition(myResourceType).getName();
 				}
 			}
 		}
@@ -127,7 +142,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 		} else {
 			IPagingProvider pagingProvider = theServer.getPagingProvider();
-			if (theLimit == null || theLimit.equals(0)) {
+			if (theLimit == null || theLimit.equals(Integer.valueOf(0))) {
 				numToReturn = pagingProvider.getDefaultPageSize();
 			} else {
 				numToReturn = Math.min(pagingProvider.getMaximumPageSize(), theLimit);
@@ -144,15 +159,11 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			}
 			RestfulServerUtils.validateResourceListNotNull(resourceList);
 
-			if (numTotalResults == null) {
-				numTotalResults = theResult.size();
-			}
-
 			if (theSearchId != null) {
 				searchId = theSearchId;
 			} else {
 				if (numTotalResults == null || numTotalResults > numToReturn) {
-					searchId = pagingProvider.storeResultList(theRequest, theResult);
+					searchId = pagingProvider.storeResultList(theResult);
 					if (isBlank(searchId)) {
 						ourLog.info("Found {} results but paging provider did not provide an ID to use for paging", numTotalResults);
 						searchId = null;
@@ -182,7 +193,7 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		 */
 		for (IBaseResource next : resourceList) {
 			if (next.getIdElement() == null || next.getIdElement().isEmpty()) {
-				if (!(next instanceof IBaseOperationOutcome)) {
+				if (!(next instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Server method returned resource of type[" + next.getClass().getSimpleName() + "] with no ID specified (IResource#setId(IdDt) must be called)");
 				}
 			}
@@ -198,26 +209,19 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 			// We're doing named pages
 			searchId = theResult.getUuid();
 			if (isNotBlank(theResult.getNextPageId())) {
-				linkNext = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkNext = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getNextPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 			if (isNotBlank(theResult.getPreviousPageId())) {
-				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theResult.getPreviousPageId(), theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		} else if (searchId != null) {
-			/*
-			 * We're doing offset pages - Note that we only return paging links if we actually
-			 * included some results in the response. We do this to avoid situations where
-			 * people have faked the offset number to some huge number to avoid them getting
-			 * back paging links that don't make sense.
-			 */
-			if (resourceList.size() > 0) {
-				if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
-					linkNext = (RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
-				}
-				if (theOffset > 0) {
-					int start = Math.max(0, theOffset - theLimit);
-					linkPrev = RestfulServerUtils.createPagingLink(theIncludes, theRequest, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
-				}
+			// We're doing offset pages
+			if (numTotalResults == null || theOffset + numToReturn < numTotalResults) {
+				linkNext = (RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, theOffset + numToReturn, numToReturn, theRequest.getParameters(), prettyPrint, theBundleType));
+			}
+			if (theOffset > 0) {
+				int start = Math.max(0, theOffset - theLimit);
+				linkPrev = RestfulServerUtils.createPagingLink(theIncludes, serverBase, searchId, start, theLimit, theRequest.getParameters(), prettyPrint, theBundleType);
 			}
 		}
 
@@ -237,8 +241,6 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 
 	public IBaseResource doInvokeServer(IRestfulServer<?> theServer, RequestDetails theRequest) {
 		Object[] params = createMethodParams(theRequest);
-
-
 
 		Object resultObj = invokeServer(theServer, theRequest, params);
 
@@ -382,8 +384,24 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		responseDetails.setResponseResource(response);
 		responseDetails.setResponseCode(Constants.STATUS_HTTP_200_OK);
 
-		if (!callOutgoingResponseHook(theRequest, responseDetails)) {
-			return null;
+		HttpServletRequest servletRequest = null;
+		HttpServletResponse servletResponse = null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
+		for (int i = theServer.getInterceptors().size() - 1; i >= 0; i--) {
+			IServerInterceptor next = theServer.getInterceptors().get(i);
+			boolean continueProcessing = next.outgoingResponse(theRequest, response);
+			if (!continueProcessing) {
+				return null;
+			}
+
+			continueProcessing = next.outgoingResponse(theRequest, responseDetails, servletRequest, servletResponse);
+			if (!continueProcessing) {
+				return null;
+			}
 		}
 
 		boolean prettyPrint = RestfulServerUtils.prettyPrintResponse(theServer, theRequest);
@@ -415,37 +433,4 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 		RESOURCE
 	}
 
-	public static boolean callOutgoingResponseHook(RequestDetails theRequest, ResponseDetails theResponseDetails) {
-		HttpServletRequest servletRequest = null;
-		HttpServletResponse servletResponse = null;
-		if (theRequest instanceof ServletRequestDetails) {
-			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
-			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
-		}
-
-		HookParams responseParams = new HookParams();
-		responseParams.add(RequestDetails.class, theRequest);
-		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-		responseParams.add(IBaseResource.class, theResponseDetails.getResponseResource());
-		responseParams.add(ResponseDetails.class, theResponseDetails);
-		responseParams.add(HttpServletRequest.class, servletRequest);
-		responseParams.add(HttpServletResponse.class, servletResponse);
-		if (theRequest.getInterceptorBroadcaster() != null) {
-			if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, responseParams)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static void callOutgoingFailureOperationOutcomeHook(RequestDetails theRequestDetails, IBaseOperationOutcome theOperationOutcome) {
-		HookParams responseParams = new HookParams();
-		responseParams.add(RequestDetails.class, theRequestDetails);
-		responseParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		responseParams.add(IBaseOperationOutcome.class, theOperationOutcome);
-
-		if (theRequestDetails.getInterceptorBroadcaster() != null) {
-			theRequestDetails.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_FAILURE_OPERATIONOUTCOME, responseParams);
-		}
-	}
 }

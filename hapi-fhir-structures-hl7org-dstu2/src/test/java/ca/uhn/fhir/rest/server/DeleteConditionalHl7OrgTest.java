@@ -13,19 +13,20 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2.model.IdType;
-import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.instance.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -79,13 +80,14 @@ public class DeleteConditionalHl7OrgTest {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 		
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		PatientProvider patientProvider = new PatientProvider();
 
@@ -95,8 +97,7 @@ public class DeleteConditionalHl7OrgTest {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

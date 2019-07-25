@@ -20,8 +20,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2.model.IdType;
-import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.instance.model.IdType;
+import org.hl7.fhir.instance.model.Patient;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,7 +30,7 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -135,13 +135,14 @@ public class CreateConditionalHl7OrgTest {
 	
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 		
 	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		PatientProvider patientProvider = new PatientProvider();
 
@@ -151,8 +152,7 @@ public class CreateConditionalHl7OrgTest {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

@@ -6,6 +6,8 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.*;
 
+import javax.annotation.Priority;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +23,7 @@ import org.junit.Test;
 import com.google.common.collect.*;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jaxrs.server.test.RandomServerPortProvider;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -35,7 +38,6 @@ import ca.uhn.fhir.rest.client.api.*;
 import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class GenericJaxRsClientDstu2Test {
 	private static FhirContext ourCtx;
@@ -2073,7 +2075,9 @@ public class GenericJaxRsClientDstu2Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 		
-		ourServer = new Server(0);
+		ourPort = RandomServerPortProvider.findFreePort();
+		ourServer = new Server(ourPort);
+		ourLog.info("Starting server on port {}", ourPort);
 		ourServer.setHandler(new AbstractHandler() {
 
 			@Override
@@ -2115,12 +2119,11 @@ public class GenericJaxRsClientDstu2Test {
 			}
 		});
 		
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 }

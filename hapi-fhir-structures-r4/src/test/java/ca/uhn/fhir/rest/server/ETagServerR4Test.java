@@ -7,9 +7,9 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.PortUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
@@ -34,8 +34,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ETagServerR4Test {
 
@@ -174,24 +172,23 @@ public class ETagServerR4Test {
 
   @AfterClass
   public static void afterClass() throws Exception {
-    JettyUtil.closeServer(ourServer);
+    ourServer.stop();
   }
 
   @BeforeClass
   public static void beforeClass() throws Exception {
-    ourServer = new Server(0);
+    ourPort = PortUtil.findFreePort();
+    ourServer = new Server(ourPort);
 
     PatientProvider patientProvider = new PatientProvider();
 
     ServletHandler proxyHandler = new ServletHandler();
     RestfulServer servlet = new RestfulServer(ourCtx);
-    servlet.setDefaultResponseEncoding(EncodingEnum.XML);
     servlet.setResourceProviders(patientProvider);
     ServletHolder servletHolder = new ServletHolder(servlet);
     proxyHandler.addServletWithMapping(servletHolder, "/*");
     ourServer.setHandler(proxyHandler);
-    JettyUtil.startServer(ourServer);
-    ourPort = JettyUtil.getPortForStartedServer(ourServer);
+    ourServer.start();
 
     ourConnectionManager = new PoolingHttpClientConnectionManager(50000, TimeUnit.MILLISECONDS);
     HttpClientBuilder builder = HttpClientBuilder.create();

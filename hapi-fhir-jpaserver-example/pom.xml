@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-			xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- 
@@ -11,7 +10,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.6.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -202,18 +201,10 @@
 		For some reason JavaDoc crashed during site generation unless we have this dependency
 		-->
 		<dependency>
-			<groupId>javax.interceptor</groupId>
-			<artifactId>javax.interceptor-api</artifactId>
-			<scope>provided</scope>
+		    <groupId>javax.interceptor</groupId>
+		    <artifactId>javax.interceptor-api</artifactId>
+		    <scope>provided</scope>
 		</dependency>
-
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-test-utilities</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
-
 
 	</dependencies>
 

@@ -2,10 +2,12 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.rp.r4.*;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -35,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SystemProviderTransactionSearchR4Test.class);
@@ -52,6 +52,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	@SuppressWarnings("deprecation")
 	@After
 	public void after() {
+		myRestServer.setUseBrowserFriendlyContentTypes(true);
 		ourClient.unregisterInterceptor(mySimpleHeaderInterceptor);
 		myDaoConfig.setMaximumSearchResultCountInTransaction(new DaoConfig().getMaximumSearchResultCountInTransaction());
 	}
@@ -88,10 +89,13 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			ourServer = new Server(0);
+			int myPort = RandomServerPortProvider.findFreePort();
+			ourServer = new Server(myPort);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
+
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -101,9 +105,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
-			JettyUtil.startServer(ourServer);
-            int myPort = JettyUtil.getPortForStartedServer(ourServer);
-            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			ourServer.start();
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -351,7 +353,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 				.addEntry()
 				.getRequest()
 				.setMethod(HTTPVerb.GET)
-				.setUrl("Patient?_count=5&_sort=family&identifier=urn:foo|A,AAAAA" + i);
+				.setUrl("Patient?_count=5&identifier=urn:foo|A,AAAAA" + i);
 		}
 
 		Bundle output = ourClient.transaction().withBundle(input).execute();
@@ -377,7 +379,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

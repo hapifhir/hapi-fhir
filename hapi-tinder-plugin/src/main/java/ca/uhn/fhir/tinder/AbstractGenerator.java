@@ -21,10 +21,7 @@ package ca.uhn.fhir.tinder;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
-import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
 
 import java.io.IOException;
@@ -48,9 +45,6 @@ public abstract class AbstractGenerator {
 		} else if ("dstu3".equals(context.getVersion())) {
 			fhirContext = FhirContext.forDstu3();
 			packageSuffix = ".dstu3";
-		} else if ("r4".equals(context.getVersion())) {
-			fhirContext = FhirContext.forR4();
-			packageSuffix = ".r4";
 		} else {
 			throw new FailureException("Unknown version configured: " + context.getVersion());
 		}
@@ -113,80 +107,58 @@ public abstract class AbstractGenerator {
 		DatatypeGeneratorUsingSpreadsheet dtp = null;
 		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
 
-		if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
-			vsp = new ValueSetGenerator(context.getVersion());
-			vsp.setResourceValueSetFiles(context.getValueSetFiles());
-			context.setValueSetGenerator(vsp);
-			try {
-				vsp.parse();
-			} catch (Exception e) {
-				throw new FailureException("Failed to load valuesets", e);
-			}
-	
-			/*
-			 * A few enums are not found by default because none of the generated classes
-			 * refer to them, but we still want them.
-			 */
-			vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
-
-			logInfo("Loading Datatypes...");
-	
-			dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-			context.setDatatypeGenerator(dtp);
-			try {
-				dtp.parse();
-				dtp.markResourcesForImports();
-			} catch (Exception e) {
-				throw new FailureException("Failed to load datatypes", e);
-			}
-			dtp.bindValueSets(vsp);
-	
-			datatypeLocalImports = dtp.getLocalImports();
+		vsp = new ValueSetGenerator(context.getVersion());
+		vsp.setResourceValueSetFiles(context.getValueSetFiles());
+		context.setValueSetGenerator(vsp);
+		try {
+			vsp.parse();
+		} catch (Exception e) {
+			throw new FailureException("Failed to load valuesets", e);
 		}
+
+		/*
+		 * A few enums are not found by default because none of the generated classes
+		 * refer to them, but we still want them.
+		 */
+		vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
+
+		logInfo("Loading Datatypes...");
+
+		dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+		context.setDatatypeGenerator(dtp);
+		try {
+			dtp.parse();
+			dtp.markResourcesForImports();
+		} catch (Exception e) {
+			throw new FailureException("Failed to load datatypes", e);
+		}
+		dtp.bindValueSets(vsp);
+
+		datatypeLocalImports = dtp.getLocalImports();
 
 		/*
 		 * Load the requested resources
 		 */
-		
+		ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+		context.setResourceGenerator(rp);
 		logInfo("Loading Resources...");
 		try {
-			switch (context.getResourceSource()) {
-				case SPREADSHEET: {
-					logInfo("... resource definitions from spreadsheets");
-					ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
-					context.setResourceGenerator(rp);
-
-					rp.setBaseResourceNames(includeResources);
-					rp.parse();
-
-					rp.markResourcesForImports();
-					rp.bindValueSets(vsp);
-
-					rp.getLocalImports().putAll(datatypeLocalImports);
-					datatypeLocalImports.putAll(rp.getLocalImports());
-					
-					rp.combineContentMaps(dtp);
-					dtp.combineContentMaps(rp);
-					break;
-				}
-				case MODEL: {
-					logInfo("... resource definitions from model structures");
-					ResourceGeneratorUsingModel rp = new ResourceGeneratorUsingModel(context.getVersion(), context.getBaseDir());
-					context.setResourceGenerator(rp);
-					
-					rp.setBaseResourceNames(includeResources);
-					rp.parse();
-					rp.markResourcesForImports();
-					break;
-				}
-			}
+			rp.setBaseResourceNames(includeResources);
+			rp.parse();
+			rp.markResourcesForImports();
 		} catch (Exception e) {
 			throw new FailureException("Failed to load resources", e);
 		}
 
+		rp.bindValueSets(vsp);
+		rp.getLocalImports().putAll(datatypeLocalImports);
+		datatypeLocalImports.putAll(rp.getLocalImports());
+		rp.combineContentMaps(dtp);
+		dtp.combineContentMaps(rp);
+
 	}
 
-	public static class FailureException extends Exception {
+	public class FailureException extends Exception {
 
 		public FailureException(String message, Throwable cause) {
 			super(message, cause);
@@ -201,7 +173,7 @@ public abstract class AbstractGenerator {
 
 	}
 
-	public static class ExecutionException extends Exception {
+	public class ExecutionException extends Exception {
 
 		public ExecutionException(String message, Throwable cause) {
 			super(message, cause);

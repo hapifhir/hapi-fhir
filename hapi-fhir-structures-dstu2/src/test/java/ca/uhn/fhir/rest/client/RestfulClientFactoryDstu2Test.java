@@ -3,7 +3,8 @@ package ca.uhn.fhir.rest.client;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -55,8 +56,8 @@ public class RestfulClientFactoryDstu2Test {
 		when(httpResponse.getStatus()).thenReturn(404);
 		
 		ApacheRestfulClientFactory cf = new ApacheRestfulClientFactory(ctx);
-		IHttpClient client = mock(IHttpClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
-		BaseClient baseClient = mock(BaseClient.class, withSettings().defaultAnswer(RETURNS_DEEP_STUBS));
+		IHttpClient client = mock(IHttpClient.class);
+		BaseClient baseClient = mock(BaseClient.class);
 		
 		try {
 			cf.validateServerBase("http://localhost:9999", client, baseClient);

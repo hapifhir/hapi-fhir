@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,6 +24,7 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.collect.ForwardingMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -161,7 +162,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 
 					// Generate update SQL
 					StringBuilder sqlBuilder = new StringBuilder();
-					List<Number> arguments = new ArrayList<>();
+					List<Long> arguments = new ArrayList<>();
 					sqlBuilder.append("UPDATE ");
 					sqlBuilder.append(getTableName());
 					sqlBuilder.append(" SET ");
@@ -173,7 +174,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 						arguments.add(nextNewValueEntry.getValue());
 					}
 					sqlBuilder.append(" WHERE SP_ID = ?");
-					arguments.add((Number) nextRow.get("SP_ID"));
+					arguments.add((Long) nextRow.get("SP_ID"));
 
 					// Apply update SQL
 					newJdbcTemnplate().update(sqlBuilder.toString(), arguments.toArray());
@@ -236,7 +237,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		}
 
 		@Override
-		public V get(Object theKey) {
+		public V get(@NullableDecl Object theKey) {
 			if (!containsKey(theKey)) {
 				throw new IllegalArgumentException("No key: " + theKey);
 			}

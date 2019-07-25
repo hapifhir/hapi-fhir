@@ -29,14 +29,14 @@ import ca.uhn.fhir.util.*;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,6 +49,15 @@ import ca.uhn.fhir.util.*;
 public class MethodUtil {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MethodUtil.class);
+	private static final Set<String> ourServletRequestTypes = new HashSet<String>();
+	private static final Set<String> ourServletResponseTypes = new HashSet<String>();
+
+	static {
+		ourServletRequestTypes.add("javax.servlet.ServletRequest");
+		ourServletResponseTypes.add("javax.servlet.ServletResponse");
+		ourServletRequestTypes.add("javax.servlet.http.HttpServletRequest");
+		ourServletResponseTypes.add("javax.servlet.http.HttpServletResponse");
+	}
 
 	/** Non instantiable */
 	private MethodUtil() {
@@ -488,8 +497,8 @@ public class MethodUtil {
 	}
 
 	public static MethodOutcome process2xxResponse(FhirContext theContext, int theResponseStatusCode,
-			String theResponseMimeType, InputStream theResponseReader, Map<String, List<String>> theHeaders) {
-		List<String> locationHeaders = new ArrayList<>();
+			String theResponseMimeType, Reader theResponseReader, Map<String, List<String>> theHeaders) {
+		List<String> locationHeaders = new ArrayList<String>();
 		List<String> lh = theHeaders.get(Constants.HEADER_LOCATION_LC);
 		if (lh != null) {
 			locationHeaders.addAll(lh);
@@ -500,14 +509,14 @@ public class MethodUtil {
 		}
 
 		MethodOutcome retVal = new MethodOutcome();
-		if (locationHeaders.size() > 0) {
+		if (locationHeaders != null && locationHeaders.size() > 0) {
 			String locationHeader = locationHeaders.get(0);
 			BaseOutcomeReturningMethodBinding.parseContentLocation(theContext, retVal, locationHeader);
 		}
 		if (theResponseStatusCode != Constants.STATUS_HTTP_204_NO_CONTENT) {
 			EncodingEnum ct = EncodingEnum.forContentType(theResponseMimeType);
 			if (ct != null) {
-				PushbackInputStream reader = new PushbackInputStream(theResponseReader);
+				PushbackReader reader = new PushbackReader(theResponseReader);
 
 				try {
 					int firstByte = reader.read();

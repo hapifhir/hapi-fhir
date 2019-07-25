@@ -3,16 +3,15 @@ package ca.uhn.fhir.rest.server.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.gclient.IDeleteTyped;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
@@ -30,8 +29,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class HashMapResourceProviderTest {
 
@@ -92,14 +89,7 @@ public class HashMapResourceProviderTest {
 
 		assertEquals(0, myPatientResourceProvider.getCountDelete());
 
-		IDeleteTyped iDeleteTyped = ourClient.delete().resourceById(id.toUnqualifiedVersionless());
-		ourLog.info("About to execute");
-		try {
-			iDeleteTyped.execute();
-		} catch (NullPointerException e) {
-			ourLog.error("NPE", e);
-			fail(e.toString());
-		}
+		ourClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
 
 		assertEquals(1, myPatientResourceProvider.getCountDelete());
 
@@ -206,7 +196,6 @@ public class HashMapResourceProviderTest {
 		for (int i = 0; i < 100; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("FAM" + i);
-			ourClient.registerInterceptor(new LoggingInterceptor(true));
 			IIdType id = ourClient.create().resource(p).execute().getId();
 			assertThat(id.getIdPart(), matchesPattern("[0-9]+"));
 			assertEquals("1", id.getVersionIdPart());
@@ -240,7 +229,7 @@ public class HashMapResourceProviderTest {
 		Bundle resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
 			.returnBundle(Bundle.class).execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
@@ -251,8 +240,8 @@ public class HashMapResourceProviderTest {
 		resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
 			.returnBundle(Bundle.class).execute();
 		assertEquals(2, resp.getTotal());
 		assertEquals(2, resp.getEntry().size());
@@ -262,8 +251,8 @@ public class HashMapResourceProviderTest {
 		resp = ourClient
 			.search()
 			.forResource("Patient")
-			.where(IAnyResource.RES_ID.exactly().codes("2", "3"))
-			.where(IAnyResource.RES_ID.exactly().codes("4", "3"))
+			.where(Patient.RES_ID.exactly().codes("2", "3"))
+			.where(Patient.RES_ID.exactly().codes("4", "3"))
 			.returnBundle(Bundle.class).execute();
 		respIds = resp.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(respIds, containsInAnyOrder("Patient/3"));
@@ -307,15 +296,19 @@ public class HashMapResourceProviderTest {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourListenerServer);
+		ourListenerServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
+		int ourListenerPort = PortUtil.findFreePort();
 		ourRestServer = new MyRestfulServer();
-		
-		ourListenerServer = new Server(0);
+		String ourBase = "http://localhost:" + ourListenerPort + "/";
+		ourListenerServer = new Server(ourListenerPort);
+
+		ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -325,11 +318,7 @@ public class HashMapResourceProviderTest {
 		proxyHandler.addServlet(servletHolder, "/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourListenerServer);
-        int ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        String ourBase = "http://localhost:" + ourListenerPort + "/";
-        ourCtx.getRestfulClientFactory().setSocketTimeout(120000);
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
+		ourListenerServer.start();
 	}
 
 	private static class MyRestfulServer extends RestfulServer {

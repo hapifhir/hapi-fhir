@@ -3,12 +3,13 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -36,8 +37,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	protected static IGenericClient ourClient;
@@ -47,6 +46,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	protected static Server ourServer;
 	protected static String ourServerBase;
 	protected static GenericWebApplicationContext ourWebApplicationContext;
+	protected static SubscriptionRestHookInterceptor ourRestHookSubscriptionInterceptor;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static PlatformTransactionManager ourTxManager;
 	protected static Integer ourConnectionPoolSize;
@@ -68,12 +68,18 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 	
 		if (ourServer == null) {
+			ourPort = RandomServerPortProvider.findFreePort();
+	
 			ourRestServer = new RestfulServer(myFhirCtx);
-			ourRestServer.registerProviders(myResourceProviders.createProviders());
+	
+			ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+	
+			ourRestServer.setResourceProviders((List)myResourceProviders);
+	
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-			ourRestServer.registerProvider(mySystemProvider);
-			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
-
+	
+			ourRestServer.setPlainProviders(mySystemProvider);
+	
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);
@@ -95,6 +101,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 			ourWebApplicationContext.setParent(myAppCtx);
 			ourWebApplicationContext.refresh();
 
+			ourRestHookSubscriptionInterceptor = ourWebApplicationContext.getBean(SubscriptionRestHookInterceptor.class);
 			ourTxManager = ourWebApplicationContext.getBean(PlatformTransactionManager.class);
 
 			proxyHandler.getServletContext().setAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE, ourWebApplicationContext);
@@ -110,9 +117,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 
 			server.setHandler(proxyHandler);
-			JettyUtil.startServer(server);
-            ourPort = JettyUtil.getPortForStartedServer(server);
-            ourServerBase = "http://localhost:" + ourPort + "/fhir/context";
+			server.start();
 
 			ourClient = myFhirCtx.newRestfulGenericClient(ourServerBase);
 			ourClient.registerInterceptor(new LoggingInterceptor());
@@ -150,7 +155,7 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContextBaseResourceProviderDstu3Test() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		ourHttpClient.close();
 		ourServer = null;
 		ourHttpClient = null;

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSubscription;
 import ca.uhn.fhir.jpa.dao.data.ISubscriptionTableDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.SubscriptionTable;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -56,8 +56,8 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 	}
 
 	@Override
-	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId, RequestDetails theRequest) {
-		ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+	public Long getSubscriptionTablePidForSubscriptionResource(IIdType theId) {
+		ResourceTable entity = readEntityLatestVersion(theId);
 		SubscriptionTable table = mySubscriptionTableDao.findOneByResourcePid(entity.getId());
 		if (table == null) {
 			return null;
@@ -80,7 +80,7 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
 		if (theDeletedTimestampOrNull != null) {
-			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt(), theRequest);
+			Long subscriptionId = getSubscriptionTablePidForSubscriptionResource(theEntity.getIdDt());
 			if (subscriptionId != null) {
 				mySubscriptionTableDao.deleteAllForSubscription(retVal);
 			}
@@ -103,11 +103,7 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 	@Nullable
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
-		}
-
-		switch (theResource.getStatus()) {
+		switch (ObjectUtils.defaultIfNull(theResource.getStatus(), Subscription.SubscriptionStatus.OFF)) {
 			case REQUESTED:
 			case ACTIVE:
 				break;
@@ -164,6 +160,11 @@ public class FhirResourceDaoSubscriptionR4 extends FhirResourceDaoR4<Subscriptio
 
 		if (theResource.getChannel().getType() == null) {
 			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
+		}
+
+		SubscriptionStatus status = theResource.getStatus();
+		if (status == null) {
+			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
 		}
 
 	}

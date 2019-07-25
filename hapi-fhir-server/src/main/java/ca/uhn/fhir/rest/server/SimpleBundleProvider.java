@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,19 +25,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class SimpleBundleProvider implements IBundleProvider {
 
-	private final List<? extends IBaseResource> myList;
+	private final List<IBaseResource> myList;
 	private final String myUuid;
 	private Integer myPreferredPageSize;
 	private Integer mySize;
 	private IPrimitiveType<Date> myPublished = InstantDt.withCurrentTime();
-	public SimpleBundleProvider(List<? extends IBaseResource> theList) {
+	public SimpleBundleProvider(List<IBaseResource> theList) {
 		this(theList, null);
 	}
 
@@ -52,7 +51,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 		this(Collections.emptyList());
 	}
 
-	public SimpleBundleProvider(List<? extends IBaseResource> theList, String theUuid) {
+	public SimpleBundleProvider(List<IBaseResource> theList, String theUuid) {
 		myList = theList;
 		myUuid = theUuid;
 		setSize(theList.size());
@@ -61,7 +60,7 @@ public class SimpleBundleProvider implements IBundleProvider {
 	/**
 	 * Returns the results stored in this provider
 	 */
-	protected List<? extends IBaseResource> getList() {
+	protected List<IBaseResource> getList() {
 		return myList;
 	}
 
@@ -79,10 +78,9 @@ public class SimpleBundleProvider implements IBundleProvider {
 		myPublished = thePublished;
 	}
 
-	@Nonnull
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
-		return (List<IBaseResource>) myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
+		return myList.subList(theFromIndex, Math.min(theToIndex, myList.size()));
 	}
 
 	@Override

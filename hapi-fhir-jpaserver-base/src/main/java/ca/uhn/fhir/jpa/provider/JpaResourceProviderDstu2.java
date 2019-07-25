@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -83,11 +83,11 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 	})
 	public Parameters expunge(
 		@IdParam IIdType theIdParam,
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions,
-		RequestDetails theRequest) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions
+	) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(theIdParam, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		return JpaSystemProviderDstu2.toExpungeResponse(retVal);
 	}
 
@@ -95,11 +95,11 @@ public class JpaResourceProviderDstu2<T extends IResource> extends BaseJpaResour
 		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_OUT_PARAM_EXPUNGE_COUNT, type = IntegerDt.class)
 	})
 	public Parameters expunge(
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
-		@OperationParam(name = OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions,
-		RequestDetails theRequest) {
-		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null, theRequest);
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_LIMIT) IntegerDt theLimit,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_DELETED_RESOURCES) BooleanDt theExpungeDeletedResources,
+		@OperationParam(name = JpaConstants.OPERATION_EXPUNGE_PARAM_EXPUNGE_PREVIOUS_VERSIONS) BooleanDt theExpungeOldVersions
+	) {
+		org.hl7.fhir.r4.model.Parameters retVal = super.doExpunge(null, theLimit, theExpungeDeletedResources, theExpungeOldVersions, null);
 		return JpaSystemProviderDstu2.toExpungeResponse(retVal);
 	}
 

@@ -1,14 +1,12 @@
 package ca.uhn.fhir.tinder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.List;
-
+import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
+import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
+import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
+import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
+import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import ca.uhn.fhir.tinder.parser.TargetType;
 import org.apache.commons.lang.WordUtils;
 import org.apache.maven.model.Resource;
 import org.apache.maven.plugin.AbstractMojo;
@@ -23,14 +21,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.EscapeTool;
 
-import ca.uhn.fhir.tinder.AbstractGenerator.ExecutionException;
-import ca.uhn.fhir.tinder.AbstractGenerator.FailureException;
-import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
-import ca.uhn.fhir.tinder.TinderStructuresMojo.ValueSetFileDefinition;
-import ca.uhn.fhir.tinder.parser.BaseStructureParser;
-import ca.uhn.fhir.tinder.parser.BaseStructureSpreadsheetParser;
-import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
-import ca.uhn.fhir.tinder.parser.TargetType;
+import java.io.*;
+import java.util.List;
 
 /**
  * Generate a single file based on resource or composite type metadata.
@@ -52,7 +44,7 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top">version</td>
  *     <td valign="top">The FHIR version whose resource metadata
  *     is to be used to generate the files<br>
- *     Valid values:&nbsp;<code><b>dstu2</b></code>&nbsp;|&nbsp;<code><b>dstu3</b></code>&nbsp;|&nbsp;<code><b>r4</b></code></td>
+ *     Valid values:&nbsp;<code><b>dstu</b></code>&nbsp;|&nbsp;<code><b>dstu2</b></code>&nbsp;|&nbsp;<code><b>dstu3</b></code></td>
  *     <td valign="top" align="center">Yes</td>
  *   </tr>
  *   <tr>
@@ -65,21 +57,12 @@ import ca.uhn.fhir.tinder.parser.TargetType;
  *     <td valign="top">generateResources</td>
  *     <td valign="top">Should files be generated from FHIR resource metadata?<br>
  *     Valid values:&nbsp;<code><b>true</b></code>&nbsp;|&nbsp;<code><b>false</b></code></td> 
- *     <td valign="top" align="center" rowspan="2">One of these two options must be specified as <code><b>true</b></code></td>
+ *     <td valign="top" align="center" rowspan="2">One of these two options must be specified</td>
  *   </tr>
  *   <tr>
  *     <td valign="top">generateDataTypes</td>
  *     <td valign="top">Should files be generated from FHIR composite data type metadata?<br>
  *     Valid values:&nbsp;<code><b>true</b></code>&nbsp;|&nbsp;<code><b>false</b></code></td> 
- *   </tr>
- *   <tr>
- *     <td valign="top">resourceSource</td>
- *     <td valign="top">Which source of resource definitions should be processed? Valid values are:<br>
- *     <ul>
- *     <li><code><b>spreadsheet</b></code>&nbsp;&nbsp;to cause resources to be generated based on the FHIR spreadsheets</li>
- *     <li><code><b>model</b></code>&nbsp;&nbsp;to cause resources to be generated based on the model structure classes. Note that 
- *     <code>generateResources</code> is the only one of the above options that can be used when <code>model</code> is specified.</li></ul></td> 
- *     <td valign="top" align="center">No. Defaults to: <code><b>spreadsheet</b></code></td>
  *   </tr>
  *   <tr>
  *     <td colspan="3" />
@@ -249,9 +232,6 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 
 	@Parameter(required = false)
 	private List<String> excludeResources;
-	
-	@Parameter(required = false)
-	private String resourceSource;
 
 	@Parameter(required = false)
 	private List<ValueSetFileDefinition> valueSetFiles;
@@ -263,20 +243,14 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException, MojoFailureException {
 		
 		GeneratorContext context = new GeneratorContext();
+		context.setVersion(version);
+		context.setBaseDir(baseDir);
+		context.setIncludeResources(includeResources);
+		context.setExcludeResources(excludeResources);
+		context.setValueSetFiles(valueSetFiles);
+
 		Generator generator = new Generator();
 		try {
-			context.setVersion(version);
-			context.setBaseDir(baseDir);
-			context.setIncludeResources(includeResources);
-			context.setExcludeResources(excludeResources);
-			context.setResourceSource(resourceSource);
-			context.setValueSetFiles(valueSetFiles);
-			if (ResourceSource.MODEL.equals(context.getResourceSource())) {
-				if (generateDatatypes) {
-					throw new MojoFailureException("Cannot use \"generateDatatypes\" when resourceSource=model");
-				}
-			}
-
 			generator.prepare(context);
 		} catch (ExecutionException e) {
 			throw new MojoExecutionException(e.getMessage(), e.getCause());
@@ -377,7 +351,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			/*
 			 * Write resources if selected
 			 */
-			BaseStructureParser rp = context.getResourceGenerator();
+			ResourceGeneratorUsingSpreadsheet rp = context.getResourceGenerator();
 			if (generateResources && rp != null) {
 				ourLog.info("Writing Resources...");
 				ctx.put("resources", rp.getResources());

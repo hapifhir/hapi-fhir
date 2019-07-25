@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.6.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -22,14 +22,13 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-converter</artifactId>
+			<artifactId>hapi-fhir-utilities</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.validation</artifactId>
-			<version>${fhir_core_version}</version>
+			<artifactId>hapi-fhir-converter</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
@@ -173,12 +172,6 @@
 			<artifactId>jetty-http</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
@@ -196,19 +189,14 @@
 			<artifactId>jaxb-api</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-core</artifactId>-->
-			<!--<scope>test</scope>-->
-		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>com.sun.xml.bind</groupId>-->
-			<!--<artifactId>jaxb-impl</artifactId>-->
-			<!--<scope>test</scope>-->
-		<!--</dependency>-->
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.xml.bind</groupId>
+			<artifactId>jaxb-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 

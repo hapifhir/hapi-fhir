@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,12 +21,9 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -43,7 +40,8 @@ import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
-import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.dstu3.model.BaseResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,12 +65,6 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
 
-	@Autowired
-	private DaoConfig myDaoConfig;
-
-	@Autowired
-	private IdHelperService myIdHelperService;
-
 	private Boolean ourDisabled;
 
 	/**
@@ -82,7 +74,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		super();
 	}
 
-	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
+	private void addTextSearch(QueryBuilder theQueryBuilder, BooleanJunction<?> theBoolean, List<List<? extends IQueryParameterType>> theTerms, String theFieldName, String theFieldNameEdgeNGram, String theFieldNameNGram) {
 		if (theTerms == null) {
 			return;
 		}
@@ -172,17 +164,17 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		/*
 		 * Handle _content parameter (resource body content)
 		 */
-		List<List<IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
+		List<List<? extends IQueryParameterType>> contentAndTerms = theParams.remove(Constants.PARAM_CONTENT);
 		addTextSearch(qb, bool, contentAndTerms, "myContentText", "myContentTextEdgeNGram", "myContentTextNGram");
 
 		/*
 		 * Handle _text parameter (resource narrative content)
 		 */
-		List<List<IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
+		List<List<? extends IQueryParameterType>> textAndTerms = theParams.remove(Constants.PARAM_TEXT);
 		addTextSearch(qb, bool, textAndTerms, "myNarrativeText", "myNarrativeTextEdgeNGram", "myNarrativeTextNGram");
 
 		if (theReferencingPid != null) {
-			bool.must(qb.keyword().onField("myResourceLinksField").matching(theReferencingPid.toString()).createQuery());
+			bool.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(theReferencingPid).createQuery());
 		}
 
 		if (bool.isEmpty()) {
@@ -195,18 +187,20 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 		Query luceneQuery = bool.createQuery();
 
-		// wrap Lucene query in a javax.persistence.SqlQuery
+		// wrap Lucene query in a javax.persistence.Query
 		FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, ResourceTable.class);
 		jpaQuery.setProjection("myId");
 
 		// execute search
 		List<?> result = jpaQuery.getResultList();
 
-		ArrayList<Long> retVal = new ArrayList<>();
+		HashSet<Long> pidsSet = pids != null ? new HashSet<Long>(pids) : null;
+
+		ArrayList<Long> retVal = new ArrayList<Long>();
 		for (Object object : result) {
 			Object[] nextArray = (Object[]) object;
 			Long next = (Long) nextArray[0];
-			if (next != null) {
+			if (next != null && (pidsSet == null || pidsSet.contains(next))) {
 				retVal.add(next);
 			}
 		}
@@ -215,12 +209,12 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 	}
 
 	@Override
-	public List<Long> everything(String theResourceName, SearchParameterMap theParams, RequestDetails theRequest) {
+	public List<Long> everything(String theResourceName, SearchParameterMap theParams) {
 
 		Long pid = null;
-		if (theParams.get(IAnyResource.SP_RES_ID) != null) {
+		if (theParams.get(BaseResource.SP_RES_ID) != null) {
 			String idParamValue;
-			IQueryParameterType idParam = theParams.get(IAnyResource.SP_RES_ID).get(0).get(0);
+			IQueryParameterType idParam = theParams.get(BaseResource.SP_RES_ID).get(0).get(0);
 			if (idParam instanceof TokenParam) {
 				TokenParam idParm = (TokenParam) idParam;
 				idParamValue = idParm.getValue();
@@ -228,7 +222,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 				StringParam idParm = (StringParam) idParam;
 				idParamValue = idParm.getValue();
 			}
-			pid = myIdHelperService.translateForcedIdToPid(theResourceName, idParamValue, theRequest);
+			pid = BaseHapiFhirDao.translateForcedIdToPid(theResourceName, idParamValue, myForcedIdDao);
 		}
 
 		Long referencingPid = pid;
@@ -270,7 +264,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 
 	@Transactional()
 	@Override
-	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText, RequestDetails theRequest) {
+	public List<Suggestion> suggestKeywords(String theContext, String theSearchParam, String theText) {
 		Validate.notBlank(theContext, "theContext must be provided");
 		Validate.notBlank(theSearchParam, "theSearchParam must be provided");
 		Validate.notBlank(theText, "theSearchParam must be provided");
@@ -281,7 +275,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		if (contextParts.length != 3 || "Patient".equals(contextParts[0]) == false || "$everything".equals(contextParts[2]) == false) {
 			throw new InvalidRequestException("Invalid context: " + theContext);
 		}
-		Long pid = myIdHelperService.translateForcedIdToPid(contextParts[0], contextParts[1], theRequest);
+		Long pid = BaseHapiFhirDao.translateForcedIdToPid(contextParts[0], contextParts[1], myForcedIdDao);
 
 		FullTextEntityManager em = org.hibernate.search.jpa.Search.getFullTextEntityManager(myEntityManager);
 
@@ -297,8 +291,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			.sentence(theText.toLowerCase()).createQuery();
 
 		Query query = qb.bool()
-//			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
-			.must(qb.keyword().onField("myResourceLinksField").matching(pid.toString()).createQuery())
+			.must(qb.keyword().onField("myResourceLinks.myTargetResourcePid").matching(pid).createQuery())
 			.must(textQuery)
 			.createQuery();
 
@@ -345,7 +338,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		}
 
 		long delay = System.currentTimeMillis() - start;
-		ourLog.info("Provided {} suggestions for term {} in {} ms", terms.size(), theText, delay);
+		ourLog.info("Provided {} suggestions for term {} in {} ms", new Object[]{terms.size(), theText, delay});
 
 		return suggestions;
 	}
@@ -358,14 +351,14 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		private ArrayList<Float> myPartialMatchScores;
 		private String myOriginalSearch;
 
-		MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
+		public MySuggestionFormatter(String theOriginalSearch, List<Suggestion> theSuggestions) {
 			myOriginalSearch = theOriginalSearch;
 			mySuggestions = theSuggestions;
 		}
 
 		@Override
 		public String highlightTerm(String theOriginalText, TokenGroup theTokenGroup) {
-			ourLog.debug("{} Found {} with score {}", myAnalyzer, theOriginalText, theTokenGroup.getTotalScore());
+			ourLog.debug("{} Found {} with score {}", new Object[]{myAnalyzer, theOriginalText, theTokenGroup.getTotalScore()});
 			if (theTokenGroup.getTotalScore() > 0) {
 				float score = theTokenGroup.getTotalScore();
 				if (theOriginalText.equalsIgnoreCase(myOriginalSearch)) {
@@ -385,13 +378,13 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 			return null;
 		}
 
-		void setAnalyzer(String theString) {
+		public void setAnalyzer(String theString) {
 			myAnalyzer = theString;
 		}
 
-		void setFindPhrasesWith() {
-			myPartialMatchPhrases = new ArrayList<>();
-			myPartialMatchScores = new ArrayList<>();
+		public void setFindPhrasesWith() {
+			myPartialMatchPhrases = new ArrayList<String>();
+			myPartialMatchScores = new ArrayList<Float>();
 
 			for (Suggestion next : mySuggestions) {
 				myPartialMatchPhrases.add(' ' + next.myTerm);
@@ -408,7 +401,7 @@ public class FulltextSearchSvcImpl implements IFulltextSearchSvc {
 		private String myTerm;
 		private float myScore;
 
-		Suggestion(String theTerm, float theScore) {
+		public Suggestion(String theTerm, float theScore) {
 			myTerm = theTerm;
 			myScore = theScore;
 		}

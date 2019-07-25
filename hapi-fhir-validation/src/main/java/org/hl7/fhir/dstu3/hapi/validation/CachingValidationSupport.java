@@ -41,13 +41,8 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String uri) {
-		return myWrap.fetchCodeSystem(theContext, uri);
-	}
-
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
-		return myWrap.fetchValueSet(theContext, uri);
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+		return myWrap.fetchCodeSystem(theContext, theSystem);
 	}
 
 	@Override
@@ -68,10 +63,5 @@ public class CachingValidationSupport implements IValidationSupport {
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		return myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay);
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		return myWrap.generateSnapshot(theInput, theUrl, theName);
 	}
 }

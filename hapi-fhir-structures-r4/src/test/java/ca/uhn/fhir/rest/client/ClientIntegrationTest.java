@@ -25,17 +25,20 @@ import ca.uhn.fhir.rest.client.api.IBasicClient;
 import ca.uhn.fhir.rest.client.impl.HttpBasicAuthInterceptor;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class ClientIntegrationTest {
+
+	private int myPort;
 	private Server myServer;
 	private MyPatientResourceProvider myPatientProvider;
 	private static FhirContext ourCtx = FhirContext.forR4();
 
 	@Before
 	public void before() {
-		myServer = new Server(0);
+		myPort = PortUtil.findFreePort();
+		myServer = new Server(myPort);
 
 		myPatientProvider = new MyPatientResourceProvider();
 
@@ -52,8 +55,7 @@ public class ClientIntegrationTest {
 	@Test
 	public void testClientSecurity() throws Exception {
 
-		JettyUtil.startServer(myServer);
-        int myPort = JettyUtil.getPortForStartedServer(myServer);
+		myServer.start();
 
 		FhirContext ctx = FhirContext.forR4();
 
@@ -76,7 +78,7 @@ public class ClientIntegrationTest {
 
 	@After
 	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
+		myServer.stop();
 	}
 
 	public static class MyPatientResourceProvider implements IResourceProvider {

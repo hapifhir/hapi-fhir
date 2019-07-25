@@ -112,19 +112,10 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         myValueSets = valueSets;
       }
 
-      // System can take the form "http://url|version"
-      String system = theSystem;
-      if (system.contains("|")) {
-        String version = system.substring(system.indexOf('|') + 1);
-        if (version.matches("^[0-9.]+$")) {
-          system = system.substring(0, system.indexOf('|'));
-        }
-      }
-
       if (codeSystem) {
-        return codeSystems.get(system);
+        return codeSystems.get(theSystem);
       } else {
-        return valueSets.get(system);
+        return valueSets.get(theSystem);
       }
     }
   }
@@ -158,9 +149,8 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return provideStructureDefinitionMap(theContext).get(url);
   }
 
-  @Override
-  public ValueSet fetchValueSet(FhirContext theContext, String uri) {
-    return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
+  ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+    return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
   }
 
   public void flush() {
@@ -172,11 +162,6 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
   public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
     CodeSystem cs = fetchCodeSystem(theContext, theSystem);
     return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
-  }
-
-  @Override
-  public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
-    return null;
   }
 
   private void loadCodeSystems(FhirContext theContext, Map<String, CodeSystem> theCodeSystems, Map<String, ValueSet> theValueSets, String theClasspath) {

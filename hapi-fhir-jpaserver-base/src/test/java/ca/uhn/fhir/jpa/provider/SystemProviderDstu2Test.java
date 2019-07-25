@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
 import ca.uhn.fhir.jpa.rp.dstu2.*;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.resource.*;
 import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
@@ -44,8 +45,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -92,10 +91,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			ourServer = new Server(0);
+			int myPort = RandomServerPortProvider.findFreePort();
+			ourServer = new Server(myPort);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
 			proxyHandler.setContextPath("/");
+
+			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -105,9 +107,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
-			JettyUtil.startServer(ourServer);
-            int myPort = JettyUtil.getPortForStartedServer(ourServer);
-            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			ourServer.start();
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -211,11 +211,9 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		obs.getCode().setText("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL");
 		myObservationDao.update(obs, mySrd);
 
-		// Try to wait for the indexing to complete
-		waitForSize(2, ()-> fetchSuggestionCount(ptId));
-
 		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + ptId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
-		try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
+		CloseableHttpResponse http = ourHttpClient.execute(get);
+		try {
 			assertEquals(200, http.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
@@ -227,16 +225,8 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			assertEquals("score", parameters.getParameter().get(0).getPart().get(1).getName());
 			assertEquals(new DecimalDt("1.0"), parameters.getParameter().get(0).getPart().get(1).getValue());
 
-		}
-	}
-
-	private Number fetchSuggestionCount(IIdType thePtId) throws IOException {
-		HttpGet get = new HttpGet(ourServerBase + "/$suggest-keywords?context=Patient/" + thePtId.getIdPart() + "/$everything&searchParam=_content&text=zxc&_pretty=true&_format=xml");
-		try (CloseableHttpResponse http = ourHttpClient.execute(get)) {
-			assertEquals(200, http.getStatusLine().getStatusCode());
-			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
-			Parameters parameters = ourCtx.newXmlParser().parseResource(Parameters.class, output);
-			return parameters.getParameter().size();
+		} finally {
+			http.close();
 		}
 	}
 
@@ -293,7 +283,6 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	}
 
 	@Test
-	@Ignore
 	public void testTransactionReSavesPreviouslyDeletedResources() throws IOException {
 
 		for (int i = 0; i < 10; i++) {
@@ -492,7 +481,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.provider;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -115,18 +115,12 @@ public abstract class BaseTerminologyUploaderProvider extends BaseJpaProvider {
 			url = defaultString(url);
 
 			UploadStatistics stats;
-			switch(url) {
-				case IHapiTerminologyLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-					break;
-				case IHapiTerminologyLoaderSvc.LOINC_URI:
-					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-					break;
-				case IHapiTerminologyLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-					break;
-				default:
-					throw new InvalidRequestException("Unknown URL: " + url);
+			if (IHapiTerminologyLoaderSvc.SCT_URI.equals(url)) {
+				stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+			} else if (IHapiTerminologyLoaderSvc.LOINC_URI.equals(url)) {
+				stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+			} else {
+				throw new InvalidRequestException("Unknown URL: " + url);
 			}
 
 			Parameters retVal = new Parameters();

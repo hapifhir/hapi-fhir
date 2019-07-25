@@ -43,14 +43,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -63,13 +63,11 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-	public static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
-	public static final String IMGTHLA_HLA_XML = "hla.xml";
 	public static final String LOINC_ANSWERLIST_FILE = "AnswerList.csv";
 	public static final String LOINC_ANSWERLIST_LINK_FILE = "LoincAnswerListLink.csv";
 	public static final String LOINC_DOCUMENT_ONTOLOGY_FILE = "DocumentOntology.csv";
 	public static final String LOINC_UPLOAD_PROPERTIES_FILE = "loincupload.properties";
-	public static final String LOINC_FILE = "LoincTable/Loinc.csv";
+	public static final String LOINC_FILE = "Loinc.csv";
 	public static final String LOINC_HIERARCHY_FILE = "MultiAxialHierarchy.csv";
 	public static final String LOINC_PART_FILE = "Part.csv";
 	public static final String LOINC_PART_LINK_FILE = "LoincPartLink.csv";
@@ -137,7 +135,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			} else {
 				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
 			}
-
 			if (matches) {
 				ourLog.info("Processing file {}", nextFilename);
 				foundMatch = true;
@@ -190,190 +187,49 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	}
 
 	@Override
-	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		LoadedFileDescriptors descriptors = null;
-		try {
-			descriptors = new LoadedFileDescriptors(theFiles);
-			List<String> mandatoryFilenameFragments = Arrays.asList(
-				IMGTHLA_HLA_NOM_TXT,
-				IMGTHLA_HLA_XML
-			);
-			descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
-
-			ourLog.info("Beginning IMGTHLA processing");
-
-			return processImgthlaFiles(descriptors, theRequestDetails);
-		}
-		finally {
-			IOUtils.closeQuietly(descriptors);
-		}
-	}
-
-	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			List<String> mandatoryFilenameFragments = Arrays.asList(
-				LOINC_FILE,
-				LOINC_HIERARCHY_FILE,
-				LOINC_UPLOAD_PROPERTIES_FILE,
-				LOINC_ANSWERLIST_FILE,
-				LOINC_ANSWERLIST_LINK_FILE,
-				LOINC_PART_FILE,
-				LOINC_PART_LINK_FILE,
-				LOINC_PART_RELATED_CODE_MAPPING_FILE,
-				LOINC_DOCUMENT_ONTOLOGY_FILE,
-				LOINC_RSNA_PLAYBOOK_FILE,
-				LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE,
-				LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE,
-				LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
-				LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV,
-				LOINC_IMAGING_DOCUMENT_CODES_FILE
-			);
+		LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles);
+		List<String> mandatoryFilenameFragments = Arrays.asList(
+			LOINC_FILE,
+			LOINC_HIERARCHY_FILE,
+			LOINC_UPLOAD_PROPERTIES_FILE,
+			LOINC_ANSWERLIST_FILE,
+			LOINC_ANSWERLIST_LINK_FILE,
+			LOINC_PART_FILE,
+			LOINC_PART_LINK_FILE,
+			LOINC_PART_RELATED_CODE_MAPPING_FILE,
+			LOINC_DOCUMENT_ONTOLOGY_FILE,
+			LOINC_RSNA_PLAYBOOK_FILE,
+			LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE,
+			LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE,
+			LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE,
+			LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV,
+			LOINC_IMAGING_DOCUMENT_CODES_FILE
+		);
 		descriptors.verifyMandatoryFilesExist(mandatoryFilenameFragments);
 
-			List<String> optionalFilenameFragments = Arrays.asList(
-			);
+		List<String> optionalFilenameFragments = Arrays.asList(
+		);
 		descriptors.verifyOptionalFilesExist(optionalFilenameFragments);
 
 		ourLog.info("Beginning LOINC processing");
 
 		return processLoincFiles(descriptors, theRequestDetails);
-		}
 	}
 
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+		LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles);
 
-			List<String> expectedFilenameFragments = Arrays.asList(
-				SCT_FILE_DESCRIPTION,
-				SCT_FILE_RELATIONSHIP,
-				SCT_FILE_CONCEPT);
-			descriptors.verifyMandatoryFilesExist(expectedFilenameFragments);
+		List<String> expectedFilenameFragments = Arrays.asList(
+			SCT_FILE_DESCRIPTION,
+			SCT_FILE_RELATIONSHIP,
+			SCT_FILE_CONCEPT);
+		descriptors.verifyMandatoryFilesExist(expectedFilenameFragments);
 
-			ourLog.info("Beginning SNOMED CT processing");
+		ourLog.info("Beginning SNOMED CT processing");
 
-			return processSnomedCtFiles(descriptors, theRequestDetails);
-		}
-	}
-
-	UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
-		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> code2concept = new HashMap<>();
-		final List<ValueSet> valueSets = new ArrayList<>();
-		final List<ConceptMap> conceptMaps = new ArrayList<>();
-
-		CodeSystem imgthlaCs;
-		try {
-			String imgthlaCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
-			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
-		} catch (IOException e) {
-			throw new InternalErrorException("Failed to load imgthla.xml", e);
-		}
-
-		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
-		for (CodeSystem.PropertyComponent nextProperty : imgthlaCs.getProperty()) {
-			String nextPropertyCode = nextProperty.getCode();
-			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
-			if (isNotBlank(nextPropertyCode)) {
-				propertyNamesToTypes.put(nextPropertyCode, nextPropertyType);
-			}
-		}
-
-		boolean foundHlaNom = false;
-		boolean foundHlaXml = false;
-		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
-			String nextFilename = nextZipBytes.getFilename();
-
-			if(!IMGTHLA_HLA_NOM_TXT.equals(nextFilename) && !nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)
-				&& !IMGTHLA_HLA_XML.equals(nextFilename) && !nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
-				ourLog.info("Skipping unexpected file {}", nextFilename);
-				continue;
-			}
-
-			if(IMGTHLA_HLA_NOM_TXT.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_NOM_TXT)) {
-				// process colon-delimited hla_nom.txt file
-				ourLog.info("Processing file {}", nextFilename);
-
-//				IRecordHandler handler = new HlaNomTxtHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
-//				AntigenSource antigenSource = new WmdaAntigenSource(hlaNomFilename, relSerSerFilename, relDnaSerFilename);
-
-				Reader reader = null;
-				try {
-					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
-
-					LineNumberReader lnr = new LineNumberReader(reader);
-					while(lnr.readLine() != null) {}
-					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
-
-				} catch (IOException e) {
-					throw new InternalErrorException(e);
-				}
-				finally {
-					IOUtils.closeQuietly(reader);
-				}
-
-				foundHlaNom = true;
-			}
-
-			if(IMGTHLA_HLA_XML.equals(nextFilename) || nextFilename.endsWith("/" + IMGTHLA_HLA_XML)) {
-				// process hla.xml file
-				ourLog.info("Processing file {}", nextFilename);
-
-//				IRecordHandler handler = new HlaXmlHandler(codeSystemVersion, code2concept, propertyNamesToTypes);
-//				AlleleSource alleleSource = new HlaXmlAlleleSource(hlaXmlFilename);
-
-				Reader reader = null;
-				try {
-					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
-
-					LineNumberReader lnr = new LineNumberReader(reader);
-					while(lnr.readLine() != null) {}
-					ourLog.warn("Lines read from {}:  {}", nextFilename, lnr.getLineNumber());
-
-				} catch (IOException e) {
-					throw new InternalErrorException(e);
-				}
-				finally {
-					IOUtils.closeQuietly(reader);
-				}
-
-				foundHlaXml = true;
-			}
-
-		}
-
-		if (!foundHlaNom) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_NOM_TXT);
-		}
-
-		if (!foundHlaXml) {
-			throw new InvalidRequestException("Did not find file matching " + IMGTHLA_HLA_XML);
-		}
-
-		int valueSetCount = valueSets.size();
-		int rootConceptCount = codeSystemVersion.getConcepts().size();
-		int conceptCount = code2concept.size();
-		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
-
-		// remove this when fully implemented ...
-		throw new InternalErrorException("HLA nomenclature terminology upload not yet fully implemented.");
-
-//		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, imgthlaCs, valueSets, conceptMaps);
-//
-//		return new UploadStatistics(conceptCount, target);
+		return processSnomedCtFiles(descriptors, theRequestDetails);
 	}
 
 	UploadStatistics processLoincFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {

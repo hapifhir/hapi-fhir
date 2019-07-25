@@ -38,7 +38,6 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class GenericOkHttpClientDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericOkHttpClientDstu2Test.class);
@@ -64,7 +63,9 @@ public class GenericOkHttpClientDstu2Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 
-		ourServer = new Server(0);
+		ourPort = RandomServerPortProvider.findFreePort();
+		ourServer = new Server(ourPort);
+		ourLog.info("Starting server on port {}", ourPort);
 		ourServer.setHandler(new AbstractHandler() {
 
 			@Override
@@ -106,13 +107,12 @@ public class GenericOkHttpClientDstu2Test {
 			}
 		});
 
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 
 	/**

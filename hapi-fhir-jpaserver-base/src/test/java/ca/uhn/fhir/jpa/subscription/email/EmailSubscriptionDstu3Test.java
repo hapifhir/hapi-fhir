@@ -2,8 +2,9 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
-import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
+import ca.uhn.fhir.jpa.subscription.RestHookTestDstu2Test;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
+import ca.uhn.fhir.jpa.util.JpaConstants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.collect.Lists;
 import com.icegreen.greenmail.store.FolderException;
@@ -12,7 +13,6 @@ import com.icegreen.greenmail.util.ServerSetup;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -21,8 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import static ca.uhn.fhir.jpa.subscription.resthook.RestHookTestDstu3Test.logAllInterceptors;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * Test the rest-hook subscriptions
@@ -30,11 +29,9 @@ import static org.junit.Assert.assertEquals;
 public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
-
-	@Autowired
-	private SubscriptionTestUtil mySubscriptionTestUtil;
-
+	private static List<Observation> ourCreatedObservations = Lists.newArrayList();
 	private static int ourListenerPort;
+	private static List<String> ourContentTypes = new ArrayList<>();
 	private static GreenMail ourTestSmtp;
 	private List<IIdType> mySubscriptionIds = new ArrayList<>();
 
@@ -54,24 +51,23 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Done deleting all subscriptions");
 		myDaoConfig.setAllowMultipleDelete(new DaoConfig().isAllowMultipleDelete());
 
-		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
+		ourRestServer.unregisterInterceptor(ourEmailSubscriptionInterceptor);
+
 	}
 
 	@Before
 	public void beforeRegisterEmailListener() throws FolderException {
 		ourTestSmtp.purgeEmailFromAllMailboxes();
+		;
+		ourRestServer.registerInterceptor(ourEmailSubscriptionInterceptor);
 
-		ourLog.info("Before re-registering interceptors");
-		logAllInterceptors(myInterceptorRegistry);
+		JavaMailEmailSender emailSender = new JavaMailEmailSender();
+		emailSender.setSmtpServerHostname("localhost");
+		emailSender.setSmtpServerPort(ourListenerPort);
+		emailSender.start();
 
-		mySubscriptionTestUtil.registerEmailInterceptor();
-
-		ourLog.info("After re-registering interceptors");
-		logAllInterceptors(myInterceptorRegistry);
-
-		mySubscriptionTestUtil.initEmailSender(ourListenerPort);
-
-		myDaoConfig.setEmailFromAddress("123@hapifhir.io");
+		ourEmailSubscriptionInterceptor.setEmailSender(emailSender);
+		ourEmailSubscriptionInterceptor.setDefaultFromAddress("123@hapifhir.io");
 	}
 
 	private Subscription createSubscription(String theCriteria, String thePayload) throws InterruptedException {
@@ -119,9 +115,8 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String code = "1000000050";
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		Subscription subscription = createSubscription(criteria1, payload);
+		createSubscription(criteria1, payload);
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -155,18 +150,19 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Assert.assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("mailto:myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
+
 
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscriptionTemp));
 
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
+
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -201,10 +197,10 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, sub1.getId());
 		Assert.assertNotNull(subscriptionTemp);
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM)
 			.setValue(new StringType("myfrom@from.com"));
 		subscriptionTemp.getChannel().addExtension()
-			.setUrl(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
+			.setUrl(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE)
 			.setValue(new StringType("This is a subject"));
 		subscriptionTemp.setIdElement(subscriptionTemp.getIdElement().toUnqualifiedVersionless());
 
@@ -212,7 +208,6 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("Subscription ID is: {}", id.getValue());
 
 		waitForQueueToDrain();
-		mySubscriptionTestUtil.setEmailSender(subscriptionTemp.getIdElement());
 
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
@@ -243,7 +238,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {
-		mySubscriptionTestUtil.waitForQueueToDrain();
+		RestHookTestDstu2Test.waitForQueueToDrain(ourEmailSubscriptionInterceptor);
 	}
 
 	@AfterClass
@@ -253,13 +248,13 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
+		ourListenerPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		smtp.setReadTimeout(2000);
 		smtp.setConnectionTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
-        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 }

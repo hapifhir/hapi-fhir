@@ -7,6 +7,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -35,8 +36,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.*;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public class MultitenancyR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(MultitenancyR4Test.class);
@@ -57,7 +56,8 @@ public class MultitenancyR4Test {
 
 	@Test
 	public void testUrlBaseStrategy() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -71,8 +71,7 @@ public class MultitenancyR4Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/TENANT2/Patient?identifier=foo%7Cbar");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
@@ -110,7 +109,7 @@ public class MultitenancyR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

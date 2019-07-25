@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head  th:include="tmpl-head :: head">
+		<title>About This Server</title>
+	</head>
+
+	<body>
+		<form action="" method="get" id="outerForm">
+		<div th:replace="tmpl-navbar-top :: top" ></div>
+		
+		<div class="container-fluid">
+			<div class="row">
+				<div th:replace="tmpl-navbar-left :: left" ></div>
+
+				<div class="col-sm-9 col-sm-offset-3 col-md-9 col-md-offset-3 main">
+
+					<div th:replace="tmpl-banner :: banner"></div>
+
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">About This Server</h3>
+						</div>
+						<div class="panel-body">
+							<div class="pull-right">
+								<object data="img/fhirtest-architecture.svg" width="383" height="369" type="image/svg+xml"></object>
+							</div>
+							<p>
+								This server provides a nearly complete implementation of the FHIR Specification
+								using a 100% open source software stack. It is hosted by University Health Network.
+							</p>
+							<p>
+								The architecture in use here is shown in the image on the right. This server is built
+								from a number of modules of the 
+								<a href="https://github.com/jamesagnew/hapi-fhir/">HAPI FHIR</a>
+								project, which is a 100% open-source (Apache 2.0 Licensed) Java based
+								implementation of the FHIR specification.
+							</p>
+							<p>
+								
+							</p>
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-heading">
+							<h3 class="panel-title">Data On This Server</h3>
+						</div>
+						<div class="panel-body">
+							<p>
+								This server is regularly loaded with a standard set of test data sourced
+								from UHN's own testing environment. Do not use this server to store any data
+								that you will need later, as we will be regularly resetting it. 
+							</p>
+							<p>
+								This is not a production server and it provides no privacy. Do not store any
+								confidential data here.
+							</p>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+
+		<div th:replace="tmpl-footer :: footer" ></div>
+		</form>
+	</body>
+</html>

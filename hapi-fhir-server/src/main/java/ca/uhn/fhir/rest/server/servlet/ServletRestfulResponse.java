@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.servlet;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
@@ -40,9 +39,6 @@ import ca.uhn.fhir.rest.server.RestfulResponse;
 
 public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetails> {
 
-	/**
-	 * Constructor
-	 */
 	public ServletRestfulResponse(ServletRequestDetails servletRequestDetails) {
 		super(servletRequestDetails);
 	}
@@ -53,7 +49,6 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		theHttpResponse.setStatus(stausCode);
 		theHttpResponse.setContentType(contentType);
-		theHttpResponse.setCharacterEncoding(null);
 		if (bin.getContent() == null || bin.getContent().length == 0) {
 			return theHttpResponse.getOutputStream();
 		}
@@ -80,18 +75,8 @@ public class ServletRestfulResponse extends RestfulResponse<ServletRequestDetail
 	private void addHeaders() {
 		HttpServletResponse theHttpResponse = getRequestDetails().getServletResponse();
 		getRequestDetails().getServer().addHeadersToResponse(theHttpResponse);
-		for (Entry<String, List<String>> header : getHeaders().entrySet()) {
-			final String key = header.getKey();
-			boolean first = true;
-			for (String value : header.getValue()) {
-				// existing headers should be overridden
-				if (first) {
-					theHttpResponse.setHeader(key, value);
-					first = false;
-				} else {
-					theHttpResponse.addHeader(key, value);
-				}
-			}
+		for (Entry<String, String> header : getHeaders().entrySet()) {
+			theHttpResponse.setHeader(header.getKey(), header.getValue());
 		}
 	}
 

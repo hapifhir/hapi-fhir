@@ -33,7 +33,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 		mySearchCoordinatorSvcRaw.setLoadingThrottleForUnitTests(null);
 		mySearchCoordinatorSvcRaw.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
-		myDaoConfig.setDefaultTotalMode(null);
 	}
 
 	@Override
@@ -95,24 +94,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 	}
 
 	/**
-	 * Count and data via config - Should include both a count and the data portions of results
-	 */
-	@Test
-	public void testSearchWithTotalAccurateSpecifiedAsDefault() {
-		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
-
-		Bundle outcome = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.returnBundle(Bundle.class)
-			.execute();
-
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
-	}
-
-	/**
 	 * No summary mode - Should return the first page of results but not
 	 * have the total available yet
 	 */
@@ -122,26 +103,6 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.search()
 			.forResource(Patient.class)
 			.where(Patient.ACTIVE.exactly().code("true"))
-			.returnBundle(Bundle.class)
-			.execute();
-
-		assertEquals(null, outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
-	}
-
-	/**
-	 * No summary mode - Should return the first page of results but not
-	 * have the total available yet
-	 */
-	@Test
-	public void testSearchTotalNoneOverridingDefault() {
-		myDaoConfig.setDefaultTotalMode(SearchTotalModeEnum.ACCURATE);
-
-		Bundle outcome = ourClient
-			.search()
-			.forResource(Patient.class)
-			.where(Patient.ACTIVE.exactly().code("true"))
-			.totalMode(SearchTotalModeEnum.NONE)
 			.returnBundle(Bundle.class)
 			.execute();
 

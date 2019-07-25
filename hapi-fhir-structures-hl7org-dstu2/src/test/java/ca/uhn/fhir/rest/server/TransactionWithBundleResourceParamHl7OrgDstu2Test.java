@@ -15,11 +15,11 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu2.model.*;
-import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2.model.Bundle.HTTPVerb;
-import org.hl7.fhir.dstu2.model.Conformance.SystemInteractionComponent;
-import org.hl7.fhir.dstu2.model.Conformance.SystemRestfulInteraction;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.Bundle.HTTPVerb;
+import org.hl7.fhir.instance.model.Conformance.SystemInteractionComponent;
+import org.hl7.fhir.instance.model.Conformance.SystemRestfulInteraction;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 
 public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
@@ -214,12 +214,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
 		RestfulServer server = new RestfulServer(ourCtx);
@@ -233,8 +234,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		proxyHandler.addServlet(handler, "/*");
 
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(500000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

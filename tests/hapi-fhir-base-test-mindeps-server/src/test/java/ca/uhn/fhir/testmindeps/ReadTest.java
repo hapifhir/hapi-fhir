@@ -5,7 +5,6 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -28,8 +27,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.bio.SocketConnector;
+import ca.uhn.fhir.util.PortUtil;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -119,22 +117,19 @@ public class ReadTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyProvider patientProvider = new DummyProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer();
-		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		ourCtx = servlet.getFhirContext();
 		servlet.setResourceProviders(patientProvider, new DummyBinaryProvider());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		ourServer.start();
-        Connector[] connectors = ourServer.getConnectors();
-        assert connectors.length == 1;
-        ourPort = ((SocketConnector) (connectors[0])).getLocalPort();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

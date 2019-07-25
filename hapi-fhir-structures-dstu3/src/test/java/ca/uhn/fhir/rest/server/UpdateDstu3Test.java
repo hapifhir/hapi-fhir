@@ -1,9 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.text.IsEmptyString.emptyString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -11,7 +8,6 @@ import static org.junit.Assert.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import ca.uhn.fhir.model.primitive.InstantDt;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -31,7 +27,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class UpdateDstu3Test {
@@ -42,46 +38,11 @@ public class UpdateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
 	private static int ourPort;
 	private static Server ourServer;
-	private static InstantType ourSetLastUpdated;
 
 	@Before
 	public void before() {
 		ourConditionalUrl = null;
 		ourId = null;
-		ourSetLastUpdated = null;
-	}
-
-	@Test
-	public void testUpdateReturnsETagAndUpdate() throws Exception {
-
-		Patient patient = new Patient();
-		patient.setId("123");
-		patient.addIdentifier().setValue("002");
-		ourSetLastUpdated = new InstantType("2002-04-22T11:22:33.022Z");
-
-		HttpPut httpPost = new HttpPut("http://localhost:" + ourPort + "/Patient/123");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-		ourLog.info("Response was:\n{}", status);
-
-		assertThat(responseContent, is(not(emptyString())));
-
-		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
-		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
-		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals("http://localhost:" + ourPort + "/Patient/123/_history/002", status.getFirstHeader("content-location").getValue());
-		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
-		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
-
 	}
 
 	@Test
@@ -177,13 +138,14 @@ public class UpdateDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
@@ -191,8 +153,7 @@ public class UpdateDstu3Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -219,11 +180,7 @@ public class UpdateDstu3Test {
 				return new MethodOutcome(id, oo, true);
 			}
 
-			thePatient.getMeta().setLastUpdatedElement(ourSetLastUpdated);
-
-			MethodOutcome retVal = new MethodOutcome(id, oo);
-			retVal.setResource(thePatient);
-			return retVal;
+			return new MethodOutcome(id, oo);
 		}
 
 	}

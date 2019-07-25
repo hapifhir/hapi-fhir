@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.jpa.config.BaseJavaConfigDstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorDstu3;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
@@ -31,7 +30,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement()
-@Import(CommonConfig.class)
+@Import(FhirDbConfig.class)
 public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 
 	@Autowired
@@ -40,8 +39,21 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 	@Qualifier("jpaProperties")
 	private Properties myJpaProperties;
 
+	/**
+	 * Configure FHIR properties around the the JPA server via this bean
+	 */
+	@Bean()
+	public DaoConfig daoConfig() {
+		DaoConfig retVal = new DaoConfig();
+		retVal.setSubscriptionEnabled(true);
+		retVal.setSubscriptionPollDelay(5000);
+		retVal.setSubscriptionPurgeInactiveAfterMillis(DateUtils.MILLIS_PER_HOUR);
+		retVal.setAllowMultipleDelete(true);
+		return retVal;
+	}
+
 	@Override
-	@Bean
+	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
@@ -52,9 +64,8 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
-	 * @return
 	 */
-	public LoggingInterceptor loggingInterceptor() {
+	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -66,10 +77,9 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 
 	/**
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
-	 * @return
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
+	public IServerInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
@@ -80,10 +90,11 @@ public class FhirServerConfigDstu3 extends BaseJavaConfigDstu3 {
 		return retVal;
 	}
 
-	@Bean
+	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);
 		return retVal;
 	}
+
 }

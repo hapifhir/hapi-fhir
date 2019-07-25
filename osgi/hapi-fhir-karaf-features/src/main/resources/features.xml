@@ -23,11 +23,9 @@
 	  <feature prerequisite="true">wrap</feature>
 	  <bundle dependency='true'>mvn:com.google.code.gson/gson/${gson_version}</bundle>
 	  <bundle dependency='true'>mvn:org.apache.commons/commons-lang3/${commons_lang3_version}</bundle>
-	  <bundle dependency='true'>mvn:com.google.code.findbugs/jsr305/${jsr305_version}</bundle>
 	  <bundle dependency='true'>mvn:commons-codec/commons-codec/${commons_codec_version}</bundle>
 	  <bundle dependency='true'>mvn:org.apache.commons/commons-text/${commons_text_version}</bundle>
 	  <bundle dependency='true'>mvn:commons-io/commons-io/${commons_io_version}</bundle>
-	  <bundle dependency='true'>mvn:com.google.guava/failureaccess/${guava_failureaccess_version}</bundle>
 	  <bundle dependency='true'>mvn:com.google.guava/guava/${guava_version}</bundle>
 	  <bundle dependency='true'>wrap:mvn:com.google.errorprone/error_prone_annotations/${error_prone_annotations_version}</bundle>
 	  <bundle dependency='true'>mvn:org.codehaus.woodstox/stax2-api/${stax2_api_version}</bundle>
@@ -58,8 +56,12 @@
 	<feature name='hapi-fhir-hl7org-dstu2' version='${project.version}' start-level='50'>
 		<feature version='${project.version}'>hapi-fhir</feature>
 		<feature version='${project.version}'>hapi-fhir-utilities</feature>
-		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}</bundle>
-		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}</bundle>
+		<bundle dependency='true'>
+			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}
+		</bundle>
+		<bundle dependency='true'>
+			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
+		</bundle>
 		<bundle>mvn:ca.uhn.hapi.fhir/hapi-fhir-structures-hl7org-dstu2/${project.version}</bundle>
 	</feature>
 
@@ -82,17 +84,18 @@
 	</feature>
 
 	<feature name='hapi-fhir-ph-schematron' version='${project.version}' start-level='50'>
-		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}</bundle>
-		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}</bundle>
+		<bundle dependency='true'>
+			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.saxon/${servicemix_saxon_version}
+		</bundle>
+		<bundle dependency='true'>
+			mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.xmlresolver/${servicemix_xmlresolver_version}
+		</bundle>
 		<bundle dependency="true">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/${aries_spifly_version}</bundle>
 		<bundle dependency='true'>mvn:com.google.code.findbugs/jsr305/${jsr305_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-commons/${ph_commons_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-collection/${ph_commons_version}</bundle>
-		<!-- needed by ph-xml 9.1.1, will be removed in later versions -->
-		<bundle dependency='true'>mvn:javax.jws/javax.jws-api/1.1</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-xml/${ph_commons_version}</bundle>
-		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-impl/${jaxb_core_version}</bundle>
-		<bundle start-level="20">mvn:com.sun.xml.bind/jaxb-core/${jaxb_core_version}</bundle>
+		<bundle dependency='true'>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jaxb-impl/${jaxb_bundle_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-jaxb/${ph_commons_version}</bundle>
 		<bundle dependency='true'>mvn:com.helger/ph-schematron/${ph_schematron_version}</bundle>
 	</feature>

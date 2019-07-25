@@ -2,15 +2,12 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.GZipUtil;
-import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.dao.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.ResourceTag;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -40,7 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -176,22 +172,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 	private Bundle loadBundle(String theFileName) throws IOException {
 		String req = IOUtils.toString(FhirSystemDaoDstu3Test.class.getResourceAsStream(theFileName), StandardCharsets.UTF_8);
 		return myFhirCtx.newXmlParser().parseResource(Bundle.class, req);
-	}
-
-	@Test
-	public void testTransactionWithDuplicateConditionalCreates2() throws IOException {
-		Bundle request = myFhirCtx.newJsonParser().parseResource(Bundle.class, IOUtils.toString(FhirSystemDaoR4.class.getResourceAsStream("/dstu3/duplicate-conditional-create.json"), Constants.CHARSET_UTF8));
-
-		Bundle response = mySystemDao.transaction(null, request);
-
-		ourLog.info("Response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-
-		List<String> responseTypes = response
-			.getEntry()
-			.stream()
-			.map(t -> new org.hl7.fhir.r4.model.IdType(t.getResponse().getLocation()).getResourceType())
-			.collect(Collectors.toList());
-		assertThat(responseTypes.toString(), responseTypes, contains("Patient", "Encounter", "Location", "Location", "Practitioner", "ProcedureRequest", "DiagnosticReport", "Specimen", "Practitioner", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation", "Observation"));
 	}
 
 	@Test
@@ -341,20 +321,6 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		}
 
 	}
-
-
-	@Test
-	@Ignore
-	public void testProcessCollectionAsBatch() throws IOException {
-		byte[] inputBytes = IOUtils.toByteArray(getClass().getResourceAsStream("/dstu3/Reilly_Libby_73.json.gz"));
-		String input = GZipUtil.decompress(inputBytes);
-		Bundle bundle = myFhirCtx.newJsonParser().setParserErrorHandler(new LenientErrorHandler()).parseResource(Bundle.class, input);
-		ourLog.info("Bundle has {} resources", bundle);
-
-		Bundle output = mySystemDao.transaction(mySrd, bundle);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-	}
-
 
 	/**
 	 * See #410
@@ -878,6 +844,41 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(new IdType(patientId).toUnqualifiedVersionless().getValue(), o.getSubject().getReference());
 	}
 
+	@Test
+	public void testTransactionCreateNoMatchUrl() {
+		String methodName = "testTransactionCreateNoMatchUrl";
+		Bundle request = new Bundle();
+
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		request.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setIfNoneExist("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+		assertEquals(1, resp.getEntry().size());
+
+		BundleEntryComponent respEntry = resp.getEntry().get(0);
+		assertEquals(Constants.STATUS_HTTP_201_CREATED + " Created", respEntry.getResponse().getStatus());
+		String patientId = respEntry.getResponse().getLocation();
+		assertThat(patientId, not(containsString("test")));
+
+		/*
+		 * Interceptor should have been called once for the transaction, and once for the embedded operation
+		 */
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals("Bundle", details.getResourceType());
+		assertEquals(Bundle.class, details.getResource().getClass());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertNull(details.getId());
+		assertEquals("Patient", details.getResourceType());
+		assertEquals(Patient.class, details.getResource().getClass());
+
+	}
 
 	@Test
 	public void testTransactionCreateWithBadRead() {
@@ -1885,7 +1886,75 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertEquals(1, allPatients.size().intValue());
 	}
 
+	@Test
+	public void testTransactionReadAndSearch() {
+		String methodName = "testTransactionReadAndSearch";
 
+		Patient p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.setId("Patient/" + methodName);
+		IIdType idv1 = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Created patient, got id: {}", idv1);
+
+		p = new Patient();
+		p.addIdentifier().setSystem("urn:system").setValue(methodName);
+		p.addName().setFamily("Family Name");
+		p.setId("Patient/" + methodName);
+		IIdType idv2 = myPatientDao.update(p, mySrd).getId();
+		ourLog.info("Updated patient, got id: {}", idv2);
+
+		Bundle request = new Bundle();
+		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(idv1.toUnqualifiedVersionless().getValue());
+		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(idv1.toUnqualified().getValue());
+		request.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl("Patient?identifier=urn%3Asystem%7C" + methodName);
+
+		Bundle resp = mySystemDao.transaction(mySrd, request);
+
+		assertEquals(3, resp.getEntry().size());
+
+		BundleEntryComponent nextEntry;
+
+		nextEntry = resp.getEntry().get(0);
+		assertEquals(Patient.class, nextEntry.getResource().getClass());
+		assertEquals(idv2.toUnqualified(), nextEntry.getResource().getIdElement().toUnqualified());
+
+		nextEntry = resp.getEntry().get(1);
+		assertEquals(Patient.class, nextEntry.getResource().getClass());
+		assertEquals(idv1.toUnqualified(), nextEntry.getResource().getIdElement().toUnqualified());
+
+		nextEntry = resp.getEntry().get(2);
+		assertEquals(Bundle.class, nextEntry.getResource().getClass());
+		Bundle respBundle = (Bundle) nextEntry.getResource();
+		assertEquals(1, respBundle.getTotal());
+
+		/*
+		 * Interceptor should have been called once for the transaction, and once for the embedded operation
+		 */
+		ArgumentCaptor<ActionRequestDetails> detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.TRANSACTION), detailsCapt.capture());
+		ActionRequestDetails details = detailsCapt.getValue();
+		assertEquals("Bundle", details.getResourceType());
+		assertEquals(Bundle.class, details.getResource().getClass());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals(idv1.toUnqualifiedVersionless().getValue(), details.getId().getValue());
+		assertEquals("Patient", details.getResourceType());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals(idv1.toUnqualified().getValue(), details.getId().getValue());
+		assertEquals("Patient", details.getResourceType());
+
+		detailsCapt = ArgumentCaptor.forClass(ActionRequestDetails.class);
+		verify(myInterceptor, times(1)).incomingRequestPreHandled(eq(RestOperationTypeEnum.SEARCH_TYPE), detailsCapt.capture());
+		details = detailsCapt.getValue();
+		assertEquals("Patient", details.getResourceType());
+
+
+	}
 
 	@Test
 	public void testTransactionReadWithIfNoneMatch() {
@@ -2971,7 +3040,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 	@Test
 	public void testTransactionWithReplacement() {
-		byte[] bytes = new byte[]{0, 1, 2, 3, 4};
+		byte[] bytes = new byte[] {0, 1, 2, 3, 4};
 
 		Binary binary = new Binary();
 		binary.setId(IdType.newRandomUuid());

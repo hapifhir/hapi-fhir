@@ -1,20 +1,22 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.TestUtil;
-import org.junit.AfterClass;
-import org.junit.Before;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.Enumeration;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Enumeration;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.AfterClass;
+import org.junit.Before;
+
+import ca.uhn.fhir.jpa.rp.dstu3.PatientResourceProvider;
+import ca.uhn.fhir.rest.api.server.IRequestOperationCallback;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.util.TestUtil;
 
 public abstract class BaseJpaDstu3SystemTest extends BaseJpaDstu3Test {
 	protected ServletRequestDetails mySrd;
@@ -30,7 +32,7 @@ public abstract class BaseJpaDstu3SystemTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() throws ServletException {
 		mySrd = mock(ServletRequestDetails.class);
-		when(mySrd.getInterceptorBroadcaster()).thenReturn(mock(IInterceptorBroadcaster.class));
+		when(mySrd.getRequestOperationCallback()).thenReturn(mock(IRequestOperationCallback.class));
 
 		if (myServer == null) {
 			myServer = new RestfulServer(myFhirCtx);

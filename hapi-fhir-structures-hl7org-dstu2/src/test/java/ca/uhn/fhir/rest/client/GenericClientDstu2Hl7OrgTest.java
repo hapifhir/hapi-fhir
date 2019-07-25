@@ -20,7 +20,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hl7.fhir.dstu2.model.*;
+import org.hl7.fhir.instance.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
@@ -90,13 +90,13 @@ public class GenericClientDstu2Hl7OrgTest {
 
     IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-    org.hl7.fhir.dstu2.model.Bundle response;
+    org.hl7.fhir.instance.model.Bundle response;
 
     //@formatter:off
 		response = client
 				.search()
 				.forResource(Patient.class)
-				.returnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+				.returnBundle(org.hl7.fhir.instance.model.Bundle.class)
 				.execute();
 		//@formatter:on
 
@@ -118,11 +118,11 @@ public class GenericClientDstu2Hl7OrgTest {
     IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
     //@formatter:off
-		org.hl7.fhir.dstu2.model.Bundle response = client.search()
+		org.hl7.fhir.instance.model.Bundle response = client.search()
 				.forResource(Patient.class)
 				.encodedJson()
 				.revInclude(new Include("Provenance:target"))
-				.returnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+				.returnBundle(org.hl7.fhir.instance.model.Bundle.class)
 				.execute();
 		//@formatter:on
 
@@ -172,13 +172,13 @@ public class GenericClientDstu2Hl7OrgTest {
     IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
     int idx = 0;
-    org.hl7.fhir.dstu2.model.Bundle response;
+    org.hl7.fhir.instance.model.Bundle response;
 
     //@formatter:off
 		response = client
 				.history()
 				.onServer()
-				.andReturnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+				.andReturnBundle(org.hl7.fhir.instance.model.Bundle.class)
 				.execute();
 		//@formatter:on
     assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
@@ -189,7 +189,7 @@ public class GenericClientDstu2Hl7OrgTest {
 		response = client
 				.history()
 				.onType(Patient.class)
-				.andReturnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+				.andReturnBundle(org.hl7.fhir.instance.model.Bundle.class)
 				.execute();
 		//@formatter:on
     assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
@@ -200,7 +200,7 @@ public class GenericClientDstu2Hl7OrgTest {
 		response = client
 				.history()
 				.onInstance(new IdType("Patient", "123"))
-				.andReturnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+				.andReturnBundle(org.hl7.fhir.instance.model.Bundle.class)
 				.execute();
 		//@formatter:on
     assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
@@ -221,10 +221,10 @@ public class GenericClientDstu2Hl7OrgTest {
     IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
     //@formatter:off
-        org.hl7.fhir.dstu2.model.Bundle response = client.search()
+        org.hl7.fhir.instance.model.Bundle response = client.search()
                 .forResource("Patient")
                 .where(new StringClientParam("name").matches().value("james"))
-                .returnBundle(org.hl7.fhir.dstu2.model.Bundle.class)
+                .returnBundle(org.hl7.fhir.instance.model.Bundle.class)
                 .execute();
         //@formatter:on
 
@@ -570,7 +570,7 @@ public class GenericClientDstu2Hl7OrgTest {
     inParams.addParameter().setValue(new StringType("STRINGVALIN2"));
     String reqString = p.encodeResourceToString(inParams);
 
-    org.hl7.fhir.dstu2.model.Bundle outParams = new org.hl7.fhir.dstu2.model.Bundle();
+    org.hl7.fhir.instance.model.Bundle outParams = new org.hl7.fhir.instance.model.Bundle();
     outParams.setTotal(123);
     final String respString = p.encodeResourceToString(outParams);
 
@@ -602,14 +602,14 @@ public class GenericClientDstu2Hl7OrgTest {
     assertEquals(extractBody(capt, idx), reqString);
     assertEquals("POST", capt.getAllValues().get(idx).getRequestLine().getMethod());
     assertEquals(1, resp.getParameter().size());
-    assertEquals(org.hl7.fhir.dstu2.model.Bundle.class, resp.getParameter().get(0).getResource().getClass());
+    assertEquals(org.hl7.fhir.instance.model.Bundle.class, resp.getParameter().get(0).getResource().getClass());
     idx++;
   }
 
   @Test
   public void testTransactionWithListOfResources() throws Exception {
 
-    org.hl7.fhir.dstu2.model.Bundle resp = new org.hl7.fhir.dstu2.model.Bundle();
+    org.hl7.fhir.instance.model.Bundle resp = new org.hl7.fhir.instance.model.Bundle();
     resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
     resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
     String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
@@ -644,7 +644,7 @@ public class GenericClientDstu2Hl7OrgTest {
     assertEquals(2, response.size());
 
     String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
-    org.hl7.fhir.dstu2.model.Bundle requestBundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, requestString);
+    org.hl7.fhir.instance.model.Bundle requestBundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.instance.model.Bundle.class, requestString);
     assertEquals(2, requestBundle.getEntry().size());
     assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod().name());
     assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod().name());
@@ -662,7 +662,7 @@ public class GenericClientDstu2Hl7OrgTest {
   @Test
   public void testTransactionWithTransactionResource() throws Exception {
 
-    org.hl7.fhir.dstu2.model.Bundle resp = new org.hl7.fhir.dstu2.model.Bundle();
+    org.hl7.fhir.instance.model.Bundle resp = new org.hl7.fhir.instance.model.Bundle();
     resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
     resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
     String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
@@ -675,7 +675,7 @@ public class GenericClientDstu2Hl7OrgTest {
 
     IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
-    org.hl7.fhir.dstu2.model.Bundle input = new org.hl7.fhir.dstu2.model.Bundle();
+    org.hl7.fhir.instance.model.Bundle input = new org.hl7.fhir.instance.model.Bundle();
 
     Patient p1 = new Patient(); // No ID
     p1.addName().addFamily("PATIENT1");
@@ -687,7 +687,7 @@ public class GenericClientDstu2Hl7OrgTest {
     input.addEntry().setResource(p2);
 
     //@formatter:off
-        org.hl7.fhir.dstu2.model.Bundle response = client.transaction()
+        org.hl7.fhir.instance.model.Bundle response = client.transaction()
                 .withBundle(input)
                 .encodedJson()
                 .execute();

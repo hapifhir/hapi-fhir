@@ -30,7 +30,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
@@ -54,28 +54,19 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 	}
-	
-	@Test	
-	public void testHeadJsonWithInvalidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(404, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
+
+	@Test
+	public void testHeadJson() throws Exception {
+		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/123");
+		HttpResponse status = ourClient.execute(httpGet);
+		assertEquals(null, status.getEntity());
+
+		ourLog.info(status.toString());
+		
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));
 	}
-	
-	@Test	
-	public void testHeadJsonWithValidPatient() throws Exception {	
-		HttpHead httpGet = new HttpHead("http://localhost:" + ourPort + "/Patient/1");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(200, status.getStatusLine().getStatusCode());	
-		assertThat(status.getFirstHeader("x-powered-by").getValue(), containsString("HAPI"));	
-	}
+
 	
 	@Test
 	public void testHttpTrackNotEnabled() throws Exception {
@@ -127,13 +118,14 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		servlet = new RestfulServer(ourCtx);
@@ -144,8 +136,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

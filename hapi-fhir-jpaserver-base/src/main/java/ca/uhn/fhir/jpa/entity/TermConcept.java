@@ -1,25 +1,5 @@
 package ca.uhn.fhir.jpa.entity;
 
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2019 University Health Network
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
-
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
@@ -33,13 +13,32 @@ import org.hibernate.search.annotations.*;
 import org.hl7.fhir.r4.model.Coding;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Index;
 import javax.persistence.*;
+import javax.persistence.Index;
 import java.io.Serializable;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.left;
-import static org.apache.commons.lang3.StringUtils.length;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2018 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 
 @Entity
 @Indexed(interceptor = DeferConceptIndexingInterceptor.class)
@@ -50,17 +49,16 @@ import static org.apache.commons.lang3.StringUtils.length;
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
+	public static final int CODE_LENGTH = 500;
+	protected static final int MAX_DESC_LENGTH = 400;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
 
 	private static final long serialVersionUID = 1L;
 
-	public static final int MAX_CODE_LENGTH = 500;
-	public static final int MAX_DESC_LENGTH = 400;
-
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
 	private Collection<TermConceptParentChildLink> myChildren;
 
-	@Column(name = "CODE", nullable = false, length = MAX_CODE_LENGTH)
+	@Column(name = "CODE", length = CODE_LENGTH, nullable = false)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
 	private String myCode;
 	@Temporal(TemporalType.TIMESTAMP)
@@ -72,7 +70,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
 	@Fields({@Field(name = "myCodeSystemVersionPid")})
 	private long myCodeSystemVersionPid;
-	@Column(name = "DISPLAY", nullable = true, length = MAX_DESC_LENGTH)
+	@Column(name = "DISPLAY", length = MAX_DESC_LENGTH, nullable = true)
 	@Fields({
 		@Field(name = "myDisplay", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "standardAnalyzer")),
 		@Field(name = "myDisplayEdgeNGram", index = org.hibernate.search.annotations.Index.YES, store = Store.NO, analyze = Analyze.YES, analyzer = @Analyzer(definition = "autocompleteEdgeAnalyzer")),
@@ -189,24 +187,20 @@ public class TermConcept implements Serializable {
 		return myCode;
 	}
 
-	public TermConcept setCode(@Nonnull String theCode) {
-		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCode, "theCode must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCode, MAX_CODE_LENGTH,
-			"Code exceeds maximum length (" + MAX_CODE_LENGTH + "): " + length(theCode));
+	public void setCode(String theCode) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theCode, "Code must not be null or empty");
 		myCode = theCode;
-		return this;
 	}
 
 	public TermCodeSystemVersion getCodeSystemVersion() {
 		return myCodeSystem;
 	}
 
-	public TermConcept setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
+	public void setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystem = theCodeSystemVersion;
 		if (theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
-		return this;
 	}
 
 	public List<Coding> getCodingProperties(String thePropertyName) {
@@ -237,7 +231,10 @@ public class TermConcept implements Serializable {
 	}
 
 	public TermConcept setDisplay(String theDisplay) {
-		myDisplay = left(theDisplay, MAX_DESC_LENGTH);
+		myDisplay = theDisplay;
+		if (isNotBlank(theDisplay) && theDisplay.length() > MAX_DESC_LENGTH) {
+			myDisplay = myDisplay.substring(0, MAX_DESC_LENGTH);
+		}
 		return this;
 	}
 
@@ -249,9 +246,8 @@ public class TermConcept implements Serializable {
 		return myIndexStatus;
 	}
 
-	public TermConcept setIndexStatus(Long theIndexStatus) {
+	public void setIndexStatus(Long theIndexStatus) {
 		myIndexStatus = theIndexStatus;
-		return this;
 	}
 
 	public String getParentPidsAsString() {
@@ -276,9 +272,8 @@ public class TermConcept implements Serializable {
 		return mySequence;
 	}
 
-	public TermConcept setSequence(Integer theSequence) {
+	public void setSequence(Integer theSequence) {
 		mySequence = theSequence;
-		return this;
 	}
 
 	public List<String> getStringProperties(String thePropertyName) {
@@ -305,9 +300,8 @@ public class TermConcept implements Serializable {
 		return myUpdated;
 	}
 
-	public TermConcept setUpdated(Date theUpdated) {
+	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
-		return this;
 	}
 
 	@Override
@@ -361,9 +355,8 @@ public class TermConcept implements Serializable {
 		myParentPids = b.toString();
 	}
 
-	public TermConcept setParentPids(String theParentPids) {
+	public void setParentPids(String theParentPids) {
 		myParentPids = theParentPids;
-		return this;
 	}
 
 	@Override

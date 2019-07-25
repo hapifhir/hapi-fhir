@@ -35,7 +35,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class SearchBundleProviderWithNoSizeR4Test {
@@ -64,7 +64,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		when(ourLastBundleProvider.size()).thenReturn(null);
 		when(ourLastBundleProvider.getResources(any(int.class), any(int.class))).then(new Answer<List<IBaseResource>>() {
 			@Override
-			public List<IBaseResource> answer(InvocationOnMock theInvocation) {
+			public List<IBaseResource> answer(InvocationOnMock theInvocation) throws Throwable {
 				int from =(Integer)theInvocation.getArguments()[0]; 
 				int to =(Integer)theInvocation.getArguments()[1];
 				ArrayList<IBaseResource> retVal = Lists.newArrayList();
@@ -141,13 +141,14 @@ public class SearchBundleProviderWithNoSizeR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		DummyPatientResourceProvider patientProvider = new DummyPatientResourceProvider();
 
@@ -159,8 +160,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

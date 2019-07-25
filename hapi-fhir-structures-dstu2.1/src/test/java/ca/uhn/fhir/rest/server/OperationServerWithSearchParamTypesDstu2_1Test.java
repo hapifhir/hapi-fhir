@@ -14,9 +14,6 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -154,7 +151,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 
 		rs.init(createServletConfig());
 
-		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+		Conformance conformance = sc.getServerConformance(createHttpServletRequest());
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -180,7 +177,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -196,7 +193,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"), createRequestDetails(rs));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -212,7 +209,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"), createRequestDetails(rs));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -228,7 +225,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"), createRequestDetails(rs));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -373,13 +370,14 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2_1();
-		ourServer = new Server(0);
+		ourPort = PortUtil.findFreePort();
+		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
@@ -391,8 +389,7 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();
@@ -490,12 +487,4 @@ public class OperationServerWithSearchParamTypesDstu2_1Test {
 
 	}
 
-
-	private RequestDetails createRequestDetails(RestfulServer theServer) {
-		ServletRequestDetails retVal = new ServletRequestDetails(null);
-		retVal.setServer(theServer);
-		return retVal;
-	}
-
 }
-

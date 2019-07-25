@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingInterceptor;
+import ca.uhn.fhir.jpa.subscription.SubscriptionActivatingSubscriber;
+import ca.uhn.fhir.jpa.subscription.resthook.SubscriptionRestHookInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -11,6 +12,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -21,16 +23,19 @@ import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
+	@Autowired
+	private SubscriptionRestHookInterceptor myInterceptor;
+
 	@After
 	public void afterResetDao() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(false);
 		myDaoConfig.setResourceServerIdStrategy(new DaoConfig().getResourceServerIdStrategy());
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
 	}
 
 	@Before
 	public void before() {
-		SubscriptionActivatingInterceptor.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
+		SubscriptionActivatingSubscriber.setWaitForSubscriptionActivationSynchronouslyForUnitTest(true);
 	}
 
 	@Test
@@ -78,6 +83,8 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		});
 
 		myEntityManager.clear();
+
+		myInterceptor.start();
 	}
 
 	/**
@@ -97,6 +104,9 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		assertNotNull(id.getIdPart());
 
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
+
+		myInterceptor.start();
+
 	}
 
 	/**
@@ -114,6 +124,9 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		IIdType id = mySubscriptionDao.create(s).getId().toUnqualifiedVersionless();
 
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
+
+		myInterceptor.start();
+
 	}
 
 	/**
@@ -132,6 +145,9 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		assertNotNull(id.getIdPart());
 
 		BaseHapiFhirDao.setValidationDisabledForUnitTest(false);
+
+		myInterceptor.start();
+
 	}
 
 	@AfterClass

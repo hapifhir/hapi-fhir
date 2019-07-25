@@ -21,7 +21,6 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ExampleServerIT {
 
@@ -52,7 +51,7 @@ public class ExampleServerIT {
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		JettyUtil.closeServer(ourServer);
+		ourServer.stop();
 	}
 
 	@BeforeClass
@@ -66,8 +65,9 @@ public class ExampleServerIT {
 		path = new File(path).getParent();
 
 		ourLog.info("Project base path is: {}", path);
-        
-		ourServer = new Server(0);
+
+		ourPort = RandomServerPortProvider.findFreePort();
+		ourServer = new Server(ourPort);
 
 		WebAppContext webAppContext = new WebAppContext();
 		webAppContext.setContextPath("/");
@@ -76,8 +76,7 @@ public class ExampleServerIT {
 		webAppContext.setParentLoaderPriority(true);
 
 		ourServer.setHandler(webAppContext);
-		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourServer.start();
 
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		ourCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);

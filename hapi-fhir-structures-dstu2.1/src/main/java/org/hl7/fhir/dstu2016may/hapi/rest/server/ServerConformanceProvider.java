@@ -1,41 +1,6 @@
 package org.hl7.fhir.dstu2016may.hapi.rest.server;
 
-import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.annotation.Metadata;
-import ca.uhn.fhir.rest.annotation.Read;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.method.*;
-import ca.uhn.fhir.rest.server.method.SearchParameter;
-import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
-import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.model.Conformance.*;
-import org.hl7.fhir.dstu2016may.model.Enumerations.ConformanceResourceStatus;
-import org.hl7.fhir.dstu2016may.model.Enumerations.ResourceType;
-import org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationDefinitionParameterComponent;
-import org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationKind;
-import org.hl7.fhir.dstu2016may.model.OperationDefinition.OperationParameterUse;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.Map.Entry;
-
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /*
  * #%L
  * HAPI FHIR Structures - DSTU2 (FHIR v1.0.0)
@@ -45,9 +10,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,14 +20,54 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * limitations under the License.
  * #L%
  */
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.hl7.fhir.dstu2016may.model.Conformance.*;
+import org.hl7.fhir.dstu2016may.model.Enumerations.ConformanceResourceStatus;
+import org.hl7.fhir.dstu2016may.model.Enumerations.ResourceType;
+import org.hl7.fhir.dstu2016may.model.OperationDefinition.*;
+import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.method.*;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
+import ca.uhn.fhir.rest.server.method.SearchParameter;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
+ * 
+ * <p>
+ * Note: This class is safe to extend, but it is important to note that the same instance of {@link Conformance} is always returned unless {@link #setCache(boolean)} is called with a value of
+ * <code>false</code>. This means that if you are adding anything to the returned conformance instance on each call you should call <code>setCache(false)</code> in your provider constructor.
+ * </p>
  */
-public class ServerConformanceProvider extends BaseServerCapabilityStatementProvider implements IServerConformanceProvider<Conformance> {
+public class ServerConformanceProvider implements IServerConformanceProvider<Conformance> {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerConformanceProvider.class);
+	private boolean myCache = true;
+	private volatile Conformance myConformance;
+	private IdentityHashMap<OperationMethodBinding, String> myOperationBindingToName;
+	private HashMap<String, List<OperationMethodBinding>> myOperationNameToBindings;
 	private String myPublisher = "Not provided";
+	private Callable<RestulfulServerConfiguration> myServerConfiguration;
 
 	/**
 	 * No-arg constructor and seetter so that the ServerConfirmanceProvider can be Spring-wired with the RestfulService avoiding the potential reference cycle that would happen.
@@ -73,19 +78,16 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 
 	/**
 	 * Constructor
-	 *
-	 * @deprecated Use no-args constructor instead. Deprecated in 4.0.0
 	 */
-	@Deprecated
 	public ServerConformanceProvider(RestfulServer theRestfulServer) {
-		this();
+		this.myServerConfiguration = theRestfulServer::createConfiguration;
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ServerConformanceProvider(RestfulServerConfiguration theServerConfiguration) {
-		super(theServerConfiguration);
+	public ServerConformanceProvider(RestulfulServerConfiguration theServerConfiguration) {
+		this.myServerConfiguration = () -> theServerConfiguration;
 	}
 
 	private void checkBindingForSystemOps(ConformanceRestComponent rest, Set<SystemRestfulInteraction> systemOps, BaseMethodBinding<?> nextMethodBinding) {
@@ -109,9 +111,9 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		}
 	}
 
-	private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings(RequestDetails theRequestDetails) {
+	private Map<String, List<BaseMethodBinding<?>>> collectMethodBindings() {
 		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = new TreeMap<>();
-		for (ResourceBinding next : getServerConfiguration(theRequestDetails).getResourceBindings()) {
+		for (ResourceBinding next : getServerConfiguration().getResourceBindings()) {
 			String resourceName = next.getResourceName();
 			for (BaseMethodBinding<?> nextMethodBinding : next.getMethodBindings()) {
 				if (resourceToMethods.containsKey(resourceName) == false) {
@@ -120,7 +122,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 				resourceToMethods.get(resourceName).add(nextMethodBinding);
 			}
 		}
-		for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration(theRequestDetails).getServerBindings()) {
+		for (BaseMethodBinding<?> nextMethodBinding : getServerConfiguration().getServerBindings()) {
 			String resourceName = "";
 			if (resourceToMethods.containsKey(resourceName) == false) {
 				resourceToMethods.put(resourceName, new ArrayList<>());
@@ -130,8 +132,8 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		return resourceToMethods;
 	}
 
-	private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
-		IPrimitiveType<Date> buildDate = getServerConfiguration(theRequestDetails).getConformanceDate();
+	private DateTimeType conformanceDate() {
+		IPrimitiveType<Date> buildDate = getServerConfiguration().getConformanceDate();
 		if (buildDate != null && buildDate.getValue() != null) {
 			try {
 				return new DateTimeType(buildDate.getValueAsString());
@@ -171,32 +173,32 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		return myPublisher;
 	}
 
-	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Override
 	@Metadata
-	public Conformance getServerConformance(HttpServletRequest theRequest, RequestDetails theRequestDetails) {
-		RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
-		Bindings bindings = serverConfiguration.provideBindings();
+	public Conformance getServerConformance(HttpServletRequest theRequest) {
+		if (myConformance != null && myCache) {
+			return myConformance;
+		}
 
 		Conformance retVal = new Conformance();
 
 		retVal.setPublisher(myPublisher);
-		retVal.setDateElement(conformanceDate(theRequestDetails));
+		retVal.setDateElement(conformanceDate());
 		retVal.setFhirVersion(FhirVersionEnum.DSTU2_1.getFhirVersionString());
 		retVal.setAcceptUnknown(UnknownContentCode.EXTENSIONS); // TODO: make this configurable - this is a fairly big
-		// effort since the parser
+																					// effort since the parser
 		// needs to be modified to actually allow it
 
 		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
-		String serverBase = serverConfiguration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
+		String serverBase = getServerConfiguration().getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 		retVal
 			.getImplementation()
 			.setUrl(serverBase)
-			.setDescription(serverConfiguration.getImplementationDescription());
+			.setDescription(getServerConfiguration().getImplementationDescription());
 
 		retVal.setKind(ConformanceStatementKind.INSTANCE);
-		retVal.getSoftware().setName(serverConfiguration.getServerName());
-		retVal.getSoftware().setVersion(serverConfiguration.getServerVersion());
+		retVal.getSoftware().setName(getServerConfiguration().getServerName());
+		retVal.getSoftware().setVersion(getServerConfiguration().getServerVersion());
 		retVal.addFormat(Constants.CT_FHIR_XML);
 		retVal.addFormat(Constants.CT_FHIR_JSON);
 		retVal.setStatus(ConformanceResourceStatus.ACTIVE);
@@ -207,14 +209,14 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		Set<SystemRestfulInteraction> systemOps = new HashSet<>();
 		Set<String> operationNames = new HashSet<>();
 
-		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings(theRequestDetails);
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
 		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
 			if (nextEntry.getKey().isEmpty() == false) {
 				Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
 				ConformanceRestResourceComponent resource = rest.addResource();
 				String resourceName = nextEntry.getKey();
-				RuntimeResourceDefinition def = serverConfiguration.getFhirContext().getResourceDefinition(resourceName);
+				RuntimeResourceDefinition def = getServerConfiguration().getFhirContext().getResourceDefinition(resourceName);
 				resource.getTypeElement().setValue(def.getName());
 				resource.getProfile().setReference((def.getResourceProfile(serverBase)));
 
@@ -272,10 +274,10 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 
 					if (nextMethodBinding instanceof SearchMethodBinding) {
-						handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding, theRequestDetails);
+						handleSearchMethodBinding(rest, resource, resourceName, def, includes, (SearchMethodBinding) nextMethodBinding);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							// Only add each operation (by name) once
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -310,7 +312,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					checkBindingForSystemOps(rest, systemOps, nextMethodBinding);
 					if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
-						String opName = bindings.getOperationBindingToName().get(methodBinding);
+						String opName = myOperationBindingToName.get(methodBinding);
 						if (operationNames.add(opName)) {
 							ourLog.debug("Found bound operation: {}", opName);
 							rest.addOperation().setName(methodBinding.getName().substring(1)).setDefinition(new Reference("OperationDefinition/" + opName));
@@ -320,11 +322,12 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 			}
 		}
 
+		myConformance = retVal;
 		return retVal;
 	}
 
 	private void handleSearchMethodBinding(ConformanceRestComponent rest, ConformanceRestResourceComponent resource, String resourceName, RuntimeResourceDefinition def, TreeSet<String> includes,
-														SearchMethodBinding searchMethodBinding, RequestDetails theRequestDetails) {
+			SearchMethodBinding searchMethodBinding) {
 		includes.addAll(searchMethodBinding.getIncludes());
 
 		List<IParameter> params = searchMethodBinding.getParameters();
@@ -392,7 +395,7 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 					param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
 				}
 				for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-					RuntimeResourceDefinition targetDef = getServerConfiguration(theRequestDetails).getFhirContext().getResourceDefinition(nextTarget);
+					RuntimeResourceDefinition targetDef = getServerConfiguration().getFhirContext().getResourceDefinition(nextTarget);
 					if (targetDef != null) {
 						ResourceType code;
 						try {
@@ -409,17 +412,40 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		}
 	}
 
+	@Initialize
+	public void initializeOperations() {
+		myOperationBindingToName = new IdentityHashMap<OperationMethodBinding, String>();
+		myOperationNameToBindings = new HashMap<String, List<OperationMethodBinding>>();
 
+		Map<String, List<BaseMethodBinding<?>>> resourceToMethods = collectMethodBindings();
+		for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
+			List<BaseMethodBinding<?>> nextMethodBindings = nextEntry.getValue();
+			for (BaseMethodBinding<?> nextMethodBinding : nextMethodBindings) {
+				if (nextMethodBinding instanceof OperationMethodBinding) {
+					OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
+					if (myOperationBindingToName.containsKey(methodBinding)) {
+						continue;
+					}
+
+					String name = createOperationName(methodBinding);
+					ourLog.debug("Detected operation: {}", name);
+
+					myOperationBindingToName.put(methodBinding, name);
+					if (myOperationNameToBindings.containsKey(name) == false) {
+						myOperationNameToBindings.put(name, new ArrayList<OperationMethodBinding>());
+					}
+					myOperationNameToBindings.get(name).add(methodBinding);
+				}
+			}
+		}
+	}
 
 	@Read(type = OperationDefinition.class)
-	public OperationDefinition readOperationDefinition(@IdParam IdType theId, RequestDetails theRequestDetails) {
+	public OperationDefinition readOperationDefinition(@IdParam IdType theId) {
 		if (theId == null || theId.hasIdPart() == false) {
 			throw new ResourceNotFoundException(theId);
 		}
-		RestfulServerConfiguration serverConfiguration = getServerConfiguration(theRequestDetails);
-		Bindings bindings = serverConfiguration.provideBindings();
-
-		List<OperationMethodBinding> sharedDescriptions = bindings.getOperationNameToBindings().get(theId.getIdPart());
+		List<OperationMethodBinding> sharedDescriptions = myOperationNameToBindings.get(theId.getIdPart());
 		if (sharedDescriptions == null || sharedDescriptions.isEmpty()) {
 			throw new ResourceNotFoundException(theId);
 		}
@@ -431,8 +457,8 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 		op.setInstance(false);
 		op.setSystem(false);
 
-		Set<String> inParams = new HashSet<>();
-		Set<String> outParams = new HashSet<>();
+		Set<String> inParams = new HashSet<String>();
+		Set<String> outParams = new HashSet<String>();
 
 		for (OperationMethodBinding sharedDescription : sharedDescriptions) {
 			if (isNotBlank(sharedDescription.getDescription())) {
@@ -516,10 +542,9 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 	 * <p>
 	 * See the class documentation for an important note if you are extending this class
 	 * </p>
-	 * @deprecated Since 4.0.0 this does not do anything
 	 */
 	public void setCache(boolean theCache) {
-		// nothing
+		myCache = theCache;
 	}
 
 	/**
@@ -532,7 +557,24 @@ public class ServerConformanceProvider extends BaseServerCapabilityStatementProv
 
 	@Override
 	public void setRestfulServer(RestfulServer theRestfulServer) {
-		// ignore
+		myServerConfiguration = theRestfulServer::createConfiguration;
+	}
+
+	RestulfulServerConfiguration getServerConfiguration() {
+		try {
+			return myServerConfiguration.call();
+		} catch (Exception e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
+		Collections.sort(searchParameters, new Comparator<RuntimeSearchParam>() {
+			@Override
+			public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
+				return theO1.getName().compareTo(theO2.getName());
+			}
+		});
 	}
 
 	private void sortSearchParameters(List<SearchParameter> searchParameters) {

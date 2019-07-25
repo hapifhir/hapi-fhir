@@ -5,12 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 
-import org.apache.commons.collections.Transformer;
-import org.apache.commons.collections.map.LazyMap;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -20,6 +15,7 @@ import org.hl7.fhir.dstu3.model.DiagnosticReport.DiagnosticReportStatus;
 import org.hl7.fhir.dstu3.model.Medication;
 import org.hl7.fhir.dstu3.model.MedicationRequest;
 import org.hl7.fhir.dstu3.model.MedicationRequest.MedicationRequestStatus;
+import org.hl7.fhir.dstu3.model.Narrative;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -32,8 +28,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.thymeleaf.messageresolver.StandardMessageResolver;
-import org.thymeleaf.templateresource.ITemplateResource;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -48,6 +42,8 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	public void before() {
 		myGen = new DefaultThymeleafNarrativeGenerator();
 		myGen.setUseHapiServerConformanceNarrative(true);
+		myGen.setIgnoreFailures(false);
+		myGen.setIgnoreMissingTemplates(false);
 
 		ourCtx.setNarrativeGenerator(myGen);
 	}
@@ -64,31 +60,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Patient value = new Patient();
 
 		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().setFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
-		value.addAddress()
-			.addLine("123 Fake Street").addLine("Unit 1")
-			.setCity("Toronto").setState("ON").setCountry("Canada");
-
-		value.setBirthDate(new Date());
-
-		myGen.populateResourceNarrative(ourCtx, value);
-		String output = value.getText().getDiv().getValueAsString();
-		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
-
-	}
-
-	@Test
-	public void testTranslations() throws DataFormatException {
-		CustomThymeleafNarrativeGenerator customGen = new CustomThymeleafNarrativeGenerator("classpath:/testnarrative.properties");
-
-		FhirContext ctx = FhirContext.forDstu3();
-		ctx.setNarrativeGenerator(customGen);
-
-		Patient value = new Patient();
-
-		value.addIdentifier().setSystem("urn:names").setValue("123456");
-		value.addName().setFamily("blow").addGiven("joe").addGiven(null).addGiven("john");
+		value.addName().setFamily("blow").addGiven("joe").addGiven((String) null).addGiven("john");
 		//@formatter:off
 		value.addAddress()
 			.addLine("123 Fake Street").addLine("Unit 1")
@@ -97,29 +69,14 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 		value.setBirthDate(new Date());
 
-		Transformer transformer = new Transformer() {
-			@Override
-			public Object transform(Object input) {
-				return "UNTRANSLATED:" + input;
-			}};
-
-		Map translations = new HashMap<>();
-		translations.put("some_text", "Some beautiful proze");
-
-		customGen.setMessageResolver(new StandardMessageResolver() {
-			@Override
-			protected Map<String, String> resolveMessagesForTemplate(String template,
-			                                                         ITemplateResource templateResource, Locale locale) {
-				return LazyMap.decorate(translations, transformer);
-			}
-		});
-
-		customGen.populateResourceNarrative(ourCtx, value);
-		String output = value.getText().getDiv().getValueAsString();
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("Some beautiful proze"));
-		assertThat(output, StringContains.containsString("UNTRANSLATED:other_text"));
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
+
 	}
+
 
 	@Test
 	public void testGenerateDiagnosticReport() throws DataFormatException {
@@ -130,8 +87,9 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		value.addResult().setReference("Observation/2");
 		value.addResult().setReference("Observation/3");
 
-		myGen.populateResourceNarrative(ourCtx, value);
-		String output = value.getText().getDiv().getValueAsString();
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString(value.getCode().getTextElement().getValue()));
@@ -158,8 +116,9 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		// ourLog.info(output);
 		// assertEquals("Operation Outcome (2 issues)", output);
 
-		myGen.populateResourceNarrative(ourCtx, oo);
-		String output = oo.getText().getDiv().getValueAsString();
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, oo, narrative);
+		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 
@@ -197,8 +156,9 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 			value.addResult().setResource(obs);
 		}
 
-		myGen.populateResourceNarrative(ourCtx, value);
-		String output = value.getText().getDiv().getValueAsString();
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, value, narrative);
+		String output = narrative.getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
@@ -217,11 +177,11 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		mp.setStatus(MedicationRequestStatus.ACTIVE);
 		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
-		myGen.populateResourceNarrative(ourCtx, mp);
-		String output = mp.getText().getDiv().getValueAsString();
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, mp, narrative);
 
-		assertTrue("Expected medication name of ciprofloaxin within narrative: "+output, output.contains("ciprofloaxin"));
-		assertTrue("Expected string status of ACTIVE within narrative: " +output, output.contains("ACTIVE"));
+		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
+		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
 
 	}
 
@@ -230,10 +190,11 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		Medication med = new Medication();
 		med.getCode().setText("ciproflaxin");
 
-		myGen.populateResourceNarrative(ourCtx, med);
+		Narrative narrative = new Narrative();
+		myGen.generateNarrative(ourCtx, med, narrative);
 
-		String output = med.getText().getDiv().getValueAsString();
-		assertThat(output, containsString("ciproflaxin"));
+		String string = narrative.getDiv().getValueAsString();
+		assertThat(string, containsString("ciproflaxin"));
 
 	}
 

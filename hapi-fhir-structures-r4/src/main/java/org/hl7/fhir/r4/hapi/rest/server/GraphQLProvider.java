@@ -8,9 +8,7 @@ import ca.uhn.fhir.rest.annotation.GraphQLQuery;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Initialize;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -54,7 +52,6 @@ public class GraphQLProvider {
   public String graphql(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
 
     GraphQLEngine engine = new GraphQLEngine(myWorkerContext);
-    engine.setAppInfo(theRequestDetails);
     engine.setServices(myStorageServices);
     try {
       engine.setGraphQL(Parser.parse(theQuery));
@@ -76,21 +73,8 @@ public class GraphQLProvider {
 
       return outputBuilder.toString();
 
-    } catch (Exception e) {
-      StringBuilder b = new StringBuilder();
-      b.append("Unable to execute GraphQL Expression: ");
-      int statusCode = 500;
-      if (e instanceof BaseServerResponseException) {
-        b.append("HTTP ");
-        statusCode = ((BaseServerResponseException) e).getStatusCode();
-        b.append(statusCode);
-        b.append(" ");
-      } else {
-        // This means it's a bug, so let's log
-        ourLog.error("Failure during GraphQL processing", e);
-      }
-      b.append(e.getMessage());
-      throw new UnclassifiedServerFailureException(statusCode, b.toString());
+    } catch (Exception theE) {
+      throw new InvalidRequestException("Unable to execute GraphQL Expression: " + theE.toString());
     }
   }
 

@@ -2,12 +2,8 @@ package ca.uhn.fhir.jpa.demo;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.provider.JpaConformanceProviderDstu2;
 import ca.uhn.fhir.jpa.provider.JpaSystemProviderDstu2;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
@@ -16,8 +12,6 @@ import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3;
 import ca.uhn.fhir.jpa.provider.r4.JpaConformanceProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
-import ca.uhn.fhir.jpa.subscription.SubscriptionInterceptorLoader;
-import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -27,12 +21,13 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 
 import javax.servlet.ServletException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class JpaServerDemo extends RestfulServer {
@@ -72,8 +67,8 @@ public class JpaServerDemo extends RestfulServer {
 			throw new IllegalStateException();
 		}
 
-		ResourceProviderFactory beans = myAppCtx.getBean(resourceProviderBeanName, ResourceProviderFactory.class);
-		registerProviders(beans.createProviders());
+		List<IResourceProvider> beans = myAppCtx.getBean(resourceProviderBeanName, List.class);
+		setResourceProviders(beans);
 		
 		/* 
 		 * The system provider implements non-resource-type methods, such as
@@ -88,11 +83,10 @@ public class JpaServerDemo extends RestfulServer {
 		} else if (fhirVersion == FhirVersionEnum.R4) {
 			systemProvider.add(myAppCtx.getBean("mySystemProviderR4", JpaSystemProviderR4.class));
 			systemProvider.add(myAppCtx.getBean(TerminologyUploaderProviderR4.class));
-			systemProvider.add(myAppCtx.getBean(BaseConfig.GRAPHQL_PROVIDER_NAME));
 		} else {
 			throw new IllegalStateException();
 		}
-		registerProviders(systemProvider);
+		setPlainProviders(systemProvider);
 
 		/*
 		 * The conformance provider exports the supported resources, search parameters, etc for
@@ -149,19 +143,19 @@ public class JpaServerDemo extends RestfulServer {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		registerInterceptor(corsInterceptor);
 
+		/*
+		 * Load interceptors for the server from Spring (these are defined in FhirServerConfig.java)
+		 */
+		Collection<IServerInterceptor> interceptorBeans = myAppCtx.getBeansOfType(IServerInterceptor.class).values();
+		for (IServerInterceptor interceptor : interceptorBeans) {
+			this.registerInterceptor(interceptor);
+		}
+
 		DaoConfig daoConfig = myAppCtx.getBean(DaoConfig.class);
 		daoConfig.setAllowExternalReferences(ContextHolder.isAllowExternalRefs());
 		daoConfig.setEnforceReferentialIntegrityOnDelete(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setEnforceReferentialIntegrityOnWrite(!ContextHolder.isDisableReferentialIntegrity());
 		daoConfig.setReuseCachedSearchResultsForMillis(ContextHolder.getReuseCachedSearchResultsForMillis());
-
-		SubscriptionInterceptorLoader subscriptionInterceptorLoader = myAppCtx.getBean(SubscriptionInterceptorLoader.class);
-		subscriptionInterceptorLoader.registerInterceptors();
-
-		DaoRegistry daoRegistry = myAppCtx.getBean(DaoRegistry.class);
-		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
-		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(daoRegistry, interceptorBroadcaster);
-		getInterceptorService().registerInterceptor(cascadingDeleteInterceptor);
 	}
 
 }

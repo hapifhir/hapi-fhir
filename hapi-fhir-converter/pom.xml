@@ -5,31 +5,25 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.6.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
 	<artifactId>hapi-fhir-converter</artifactId>
-	<!-- TODO: BND changed to jar temporarily -->
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-base</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>org.hl7.fhir.convertors</artifactId>
-			<version>${fhir_core_version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 		</dependency>
 
 		<!-- Server -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-server</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -41,49 +35,44 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2.1</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
-			<version>${project.version}</version>
+			<version>3.6.0-SNAPSHOT</version>
 			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>net.sf.saxon</groupId>
-			<artifactId>Saxon-HE</artifactId>
 		</dependency>
 
 		<!-- Testing -->
@@ -133,12 +122,6 @@
 			<artifactId>jetty-http</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-test-utilities</artifactId>
-			<version>${project.version}</version>
-			<scope>test</scope>
-		</dependency>
 
 	</dependencies>
 
@@ -152,10 +135,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<!--
-			TODO: BND
-			With this enabled, JAR file contains a bunch of .class files that
-			seem to get copied in from org.hl7.fhir.convertors
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -170,7 +149,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
-			-->
 		</plugins>
 	</build>
 </project>

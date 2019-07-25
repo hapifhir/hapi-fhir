@@ -11,18 +11,16 @@ import org.apache.commons.io.IOUtils;
 import org.hamcrest.core.IsNot;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
-import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.dstu2.model.*;
-import org.hl7.fhir.dstu2.model.Address.AddressUse;
-import org.hl7.fhir.dstu2.model.Address.AddressUseEnumFactory;
-import org.hl7.fhir.dstu2.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2.model.Conformance.UnknownContentCode;
-import org.hl7.fhir.dstu2.model.Identifier.IdentifierUse;
-import org.hl7.fhir.dstu2.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.dstu2.model.Patient.ContactComponent;
-import org.hl7.fhir.dstu2.model.QuestionnaireResponse.QuestionAnswerComponent;
-import org.hl7.fhir.dstu2.model.ValueSet.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2.model.ValueSet.ValueSetCodeSystemComponent;
+import org.hl7.fhir.instance.model.*;
+import org.hl7.fhir.instance.model.Address.AddressUse;
+import org.hl7.fhir.instance.model.Address.AddressUseEnumFactory;
+import org.hl7.fhir.instance.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.instance.model.Conformance.UnknownContentCode;
+import org.hl7.fhir.instance.model.Identifier.IdentifierUse;
+import org.hl7.fhir.instance.model.Narrative.NarrativeStatus;
+import org.hl7.fhir.instance.model.Patient.ContactComponent;
+import org.hl7.fhir.instance.model.ValueSet.ConceptDefinitionComponent;
+import org.hl7.fhir.instance.model.ValueSet.ValueSetCodeSystemComponent;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -1218,8 +1216,8 @@ public class JsonParserHl7OrgDstu2Test {
 		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
 		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
 
-		List<org.hl7.fhir.dstu2.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
-		org.hl7.fhir.dstu2.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
+		List<org.hl7.fhir.instance.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
+		org.hl7.fhir.instance.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
 		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		IParser xmlParser = ourCtx.newXmlParser();
@@ -1258,17 +1256,6 @@ public class JsonParserHl7OrgDstu2Test {
 		Assert.assertEquals(1, extlst.size());
 		Assert.assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
-
-  @Test
-  public void testParseQuestionnaireResponseAnswerWithValueReference() throws FHIRException {
-    String response = "{\"resourceType\":\"QuestionnaireResponse\",\"group\":{\"question\":[{\"answer\": [{\"valueReference\": {\"reference\": \"Observation/testid\"}}]}]}}";
-    QuestionnaireResponse r = ourCtx.newJsonParser().parseResource(QuestionnaireResponse.class, response);
-
-    QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
-    assertNotNull(answer);
-    assertNotNull(answer.getValueReference());
-    assertEquals("Observation/testid", answer.getValueReference().getReference());
-  }
 
   @ResourceDef(name = "Patient")
   public static class MyPatientWithOneDeclaredAddressExtension extends Patient {

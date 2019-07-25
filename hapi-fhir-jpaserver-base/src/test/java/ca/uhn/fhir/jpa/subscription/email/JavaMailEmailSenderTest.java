@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.EmailDetails;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
+import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -16,7 +15,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class JavaMailEmailSenderTest {
 
@@ -65,11 +64,11 @@ public class JavaMailEmailSenderTest {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
+		ourPort = RandomServerPortProvider.findFreePort();
+		ServerSetup smtp = new ServerSetup(ourPort, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
-        ourPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 }

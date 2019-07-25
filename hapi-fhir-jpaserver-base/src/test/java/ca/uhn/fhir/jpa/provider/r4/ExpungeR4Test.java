@@ -2,15 +2,15 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -19,10 +19,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
@@ -30,7 +27,6 @@ import static org.junit.Assert.*;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(ExpungeR4Test.class);
 	private IIdType myOneVersionPatientId;
 	private IIdType myTwoVersionPatientId;
 	private IIdType myDeletedPatientId;
@@ -69,6 +65,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertStillThere(IIdType theId) {
 		getDao(theId).read(theId);
 	}
+
 
 	public void createStandardPatients() {
 		Patient p = new Patient();
@@ -144,7 +141,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -171,19 +168,20 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myPatientDao.update(p).getId();
 		myPatientDao.delete(new IdType("Patient/TEST"));
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
+		runInTransaction(()-> assertThat(myResourceTableDao.findAll(), not(empty())));
+		runInTransaction(()-> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
+		runInTransaction(()-> assertThat(myForcedIdDao.findAll(), not(empty())));
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
-		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), empty()));
+		runInTransaction(()-> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(()-> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+		runInTransaction(()-> assertThat(myForcedIdDao.findAll(), empty()));
 
 	}
+
 
 	@Test
 	public void testExpungeInstanceVersionCurrentVersion() {
@@ -192,7 +190,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
-				.setExpungeOldVersions(true), null);
+				.setExpungeOldVersions(true));
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals("Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
@@ -212,7 +210,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -234,7 +232,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		mySystemDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -255,7 +253,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(false), null);
+			.setExpungeOldVersions(false));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -276,7 +274,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(false)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -297,7 +295,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true), null);
+			.setExpungeEverything(true));
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -319,7 +317,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -332,63 +330,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertStillThere(myTwoVersionObservationId.withVersion("1"));
 		assertStillThere(myTwoVersionObservationId.withVersion("2"));
 		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeEverythingWhereResourceInSearchResults() {
-		createStandardPatients();
-
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
-		assertEquals(2, search.size().intValue());
-		assertEquals(2, search.getResources(0, 2).size());
-
-		runInTransaction(() -> {
-			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
-			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());
-		});
-
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true), null);
-
-		// Everything deleted
-		assertExpunged(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
-		assertExpunged(myDeletedPatientId);
-
-		// Everything deleted
-		assertExpunged(myOneVersionObservationId);
-		assertExpunged(myTwoVersionObservationId.withVersion("1"));
-		assertExpunged(myTwoVersionObservationId.withVersion("2"));
-		assertExpunged(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeDeletedWhereResourceInSearchResults() {
-		createStandardPatients();
-
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
-		assertEquals(2, search.size().intValue());
-		List<IBaseResource> resources = search.getResources(0, 2);
-		myPatientDao.delete(resources.get(0).getIdElement());
-
-		runInTransaction(() -> {
-			assertEquals(2, mySearchResultDao.count());
-		});
-
-
-		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(true), null);
-
-		// Everything deleted
-		assertExpunged(myOneVersionPatientId);
-		assertStillThere(myTwoVersionPatientId.withVersion("1"));
-		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertExpunged(myDeletedPatientId.withVersion("1"));
-		assertExpunged(myDeletedPatientId);
-
 	}
 
 	@AfterClass

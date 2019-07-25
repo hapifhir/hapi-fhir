@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.6.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -72,21 +72,6 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-subscription</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-searchparam</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-jpaserver-model</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -126,14 +111,21 @@
 			<version>${project.version}</version>
 		</dependency>
 
+		<!--
 		<dependency>
-			<groupId>net.ttddyy</groupId>
-			<artifactId>datasource-proxy</artifactId>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
 		</dependency>
+		-->
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.ttddyy</groupId>
+			<artifactId>datasource-proxy</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -146,10 +138,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<dependency>
@@ -175,26 +163,26 @@
 		</dependency>
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
+			<artifactId>thymeleaf-spring4</artifactId>
 		</dependency>
 
 		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
 		<dependency>
 			<groupId>org.jscience</groupId>
 			<artifactId>jscience</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.javolution</groupId>
-					<artifactId>javolution</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Patch Dependencies -->
 		<dependency>
-           	<groupId>io.dogote</groupId>
-           	<artifactId>json-patch</artifactId>
-        </dependency>
+			<groupId>net.riotopsys</groupId>
+			<artifactId>json_patch</artifactId>
+			<exclusions>
+				<exclusion>
+					<artifactId>com.google.code.gson</artifactId>
+					<groupId>gson</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
@@ -224,39 +212,23 @@
 			<groupId>javax.annotation</groupId>
 			<artifactId>javax.annotation-api</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>javax.xml.bind</groupId>-->
-<!--			<artifactId>jaxb-api</artifactId>-->
-<!--		</dependency>-->
-		<!--<dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-impl</artifactId>
-		</dependency>-->
+		</dependency>
 
 		<!-- Test Database -->
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<!--		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derbyshared</artifactId>
-			<scope>test</scope>
-		</dependency>-->
-		<dependency>
-			<groupId>org.apache.derby</groupId>
-			<artifactId>derbytools</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<version>1.4.199</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -275,12 +247,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-        <dependency>
-            <groupId>ca.uhn.hapi.fhir</groupId>
-            <artifactId>hapi-fhir-test-utilities</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
 		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -380,13 +346,17 @@
 					<groupId>xml-apis</groupId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.jboss.spec.javax.transaction</groupId>
+					<artifactId>jboss-transaction-api_1.2_spec</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.activation</groupId>
+					<artifactId>activation</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>javax.activation</groupId>
 					<artifactId>javax.activation-api</artifactId>
 				</exclusion>
-				<!--<exclusion>-->
-					<!--<groupId>org.jboss.spec.javax.transaction</groupId>-->
-					<!--<artifactId>jboss-transaction-api_1.2_spec</artifactId>-->
-				<!--</exclusion>-->
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -424,14 +394,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>javax.activation</artifactId>
-			<version>1.2.0</version>
+			<groupId>javax.transaction</groupId>
+			<artifactId>javax.transaction-api</artifactId>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>javax.transaction</groupId>-->
-			<!--<artifactId>javax.transaction-api</artifactId>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>javax.mail</groupId>
 			<artifactId>javax.mail-api</artifactId>
@@ -448,10 +413,10 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>com.sun.activation</groupId>-->
-			<!--<artifactId>javax.activation</artifactId>-->
-		<!--</dependency>-->
+		<dependency>
+			<groupId>com.sun.activation</groupId>
+			<artifactId>javax.activation</artifactId>
+		</dependency>
 		<!--<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
@@ -482,10 +447,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-collections4</artifactId>
 		</dependency>
 
 		<dependency>
@@ -529,8 +490,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-test</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -550,6 +511,11 @@
 			<artifactId>greenmail-spring</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<scope>test</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
@@ -560,12 +526,6 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-			<version>16.0.3</version>
-			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>
@@ -590,30 +550,74 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
-				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
-				<configuration>
-					<dialects>
-						<param>h2</param>
-						<param>derby_10_7</param>
-						<param>postgresql92</param>
-						<param>mysql57</param>
-						<param>mariadb</param>
-						<param>oracle12c</param>
-						<param>sqlserver2012</param>
-					</dialects>
-					<outputDirectory>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database</outputDirectory>
-					<packages>
-						<param>ca.uhn.fhir.jpa.entity</param>
-						<param>ca.uhn.fhir.jpa.model.entity</param>
-					</packages>
-				</configuration>
+				<groupId>de.juplo</groupId>
+				<artifactId>hibernate-maven-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>derby107</id>
 						<phase>process-classes</phase>
 						<goals>
-							<goal>gen-ddl</goal>
+							<goal>create</goal>
 						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.DerbyTenSevenDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_derby107.sql</outputFile>
+						</configuration>
+					</execution>
+					<execution>
+						<id>postgres94</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.PostgreSQL94Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_postgres94.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>mysql57</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.MySQL57Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mysql57.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>mariadb103</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.MariaDB103Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_mariadb103.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>oracle12c</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.Oracle12cDialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_oracle12c.sql</outputFile>	
+						</configuration>
+					</execution>
+					<execution>
+						<id>sqlserver2012</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+						<configuration>
+							<dialect>org.hibernate.dialect.SQLServer2012Dialect</dialect>
+							<outputFile>${project.build.directory}/classes/ca/uhn/hapi/fhir/jpa/docs/database/persistence_create_sqlserver2012.sql</outputFile>	
+						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
@@ -622,20 +626,20 @@
 					as JDK9 no longer includes them by default
 					-->
 					<dependency>
-						<groupId>org.glassfish.jaxb</groupId>
-						<artifactId>jaxb-runtime</artifactId>
-						<version>${jaxb_runtime_version}</version>
+						<groupId>javax.xml.bind</groupId>
+						<artifactId>jaxb-api</artifactId>
+						<version>${jaxb_api_version}</version>
 					</dependency>
-					<!--<dependency>-->
-						<!--<groupId>com.sun.xml.bind</groupId>-->
-						<!--<artifactId>jaxb-core</artifactId>-->
-						<!--<version>${jaxb_core_version}</version>-->
-					<!--</dependency>-->
-					<!--<dependency>-->
-						<!--<groupId>com.sun.xml.bind</groupId>-->
-						<!--<artifactId>jaxb-impl</artifactId>-->
-						<!--<version>${jaxb_core_version}</version>-->
-					<!--</dependency>-->
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-core</artifactId>
+						<version>${jaxb_core_version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.sun.xml.bind</groupId>
+						<artifactId>jaxb-impl</artifactId>
+						<version>${jaxb_core_version}</version>
+					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -666,9 +670,8 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
+					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 					<forkCount>0.6C</forkCount>
-					<excludes>*StressTest*</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -842,7 +845,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>2</forkCount>
+							<forkCount>1</forkCount>
 							<reuseForks>true</reuseForks>
 							<runOrder>alphabetical</runOrder>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>

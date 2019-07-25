@@ -50,15 +50,13 @@ public class BaseTest {
 
 	@Before()
 	public void before() {
-		org.h2.Driver.class.toString();
+		myUrl = "jdbc:derby:memory:database " + (ourDatabaseUrl++) + ";create=true";
 
-		myUrl = "jdbc:h2:mem:database" + (ourDatabaseUrl++);
-
-		myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
+		myConnectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
 
 		myMigrator = new Migrator();
 		myMigrator.setConnectionUrl(myUrl);
-		myMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
+		myMigrator.setDriverType(DriverTypeEnum.DERBY_EMBEDDED);
 		myMigrator.setUsername("SA");
 		myMigrator.setPassword("SA");
 	}

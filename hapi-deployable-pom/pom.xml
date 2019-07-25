@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>3.6.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -100,10 +100,6 @@
 							<artifactId>javax.mail-api</artifactId>
 						</dependency>
 						<dependency>
-							<groupId>javax.activation</groupId>
-							<artifactId>javax.activation-api</artifactId>
-						</dependency>
-						<dependency>
 							<groupId>com.helger</groupId>
 							<artifactId>ph-schematron</artifactId>
 						</dependency>
@@ -139,14 +135,9 @@
 							<groupId>org.apache.derby</groupId>
 							<artifactId>derbyclient</artifactId>
 						</dependency>
-						<dependency>
-							<groupId>org.checkerframework</groupId>
-							<artifactId>checker-compat-qual</artifactId>
-						</dependency>
 					</ignoredDependencies>
 					<ignoredResourcePatterns>
-						<ignoredResourcePattern>.*\.txt$</ignoredResourcePattern>
-						<ignoredResourcePattern>.*\.html$</ignoredResourcePattern>
+						<ignoredResourcePattern>changelog.txt</ignoredResourcePattern>
 						<ignoredResource>javac.bat</ignoredResource>
 						<ignoredResource>about.html</ignoredResource>
 						<ignoredResource>changelog.xml</ignoredResource>
@@ -203,6 +194,7 @@
 							<linksource>true</linksource>
 							<verbose>false</verbose>
 							<debug>false</debug>
+							<additionalparam>-Xdoclint:none</additionalparam>
 							<additionalJOption>-Xdoclint:none</additionalJOption>
 						</configuration>
 						<executions>
@@ -240,7 +232,6 @@
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
-									<trimHeaderLine>true</trimHeaderLine>
 									<roots>
 										<root>src/main/java</root>
 									</roots>

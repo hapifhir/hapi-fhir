@@ -10,6 +10,7 @@ import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +32,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	/**
 	 * Configure FHIR properties around the the JPA server via this bean
 	 */
-	@Bean
+	@Bean()
 	public DaoConfig daoConfig() {
 		DaoConfig retVal = new DaoConfig();
 		retVal.setSubscriptionEnabled(true);
@@ -58,7 +59,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	}
 
 	@Override
-	@Bean
+	@Bean()
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
 		LocalContainerEntityManagerFactoryBean retVal = super.entityManagerFactory();
 		retVal.setPersistenceUnitName("HAPI_PU");
@@ -89,7 +90,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	/**
 	 * Do some fancy logging to create a nice access log that has details about each incoming request.
 	 */
-	public LoggingInterceptor loggingInterceptor() {
+	public IServerInterceptor loggingInterceptor() {
 		LoggingInterceptor retVal = new LoggingInterceptor();
 		retVal.setLoggerName("fhirtest.access");
 		retVal.setMessageFormat(
@@ -103,7 +104,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 	 * This interceptor adds some pretty syntax highlighting in responses when a browser is detected
 	 */
 	@Bean(autowire = Autowire.BY_TYPE)
-	public ResponseHighlighterInterceptor responseHighlighterInterceptor() {
+	public IServerInterceptor responseHighlighterInterceptor() {
 		ResponseHighlighterInterceptor retVal = new ResponseHighlighterInterceptor();
 		return retVal;
 	}
@@ -114,7 +115,7 @@ public class FhirServerConfigDstu2 extends BaseJavaConfigDstu2 {
 		return retVal;
 	}
 
-	@Bean
+	@Bean()
 	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
 		JpaTransactionManager retVal = new JpaTransactionManager();
 		retVal.setEntityManagerFactory(entityManagerFactory);

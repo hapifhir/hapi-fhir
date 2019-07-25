@@ -8,7 +8,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +19,6 @@ import java.util.Set;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
 
 public class JsonParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
@@ -150,62 +148,6 @@ public class JsonParserR4Test {
 	}
 
 	@Test
-	public void testEncodeWithInvalidExtensionMissingUrl() {
-
-		Patient p = new Patient();
-		Extension root = p.addExtension();
-		root.setValue(new StringType("ROOT_VALUE"));
-
-		// Lenient error handler
-		IParser parser = ourCtx.newJsonParser();
-		String output = parser.encodeResourceToString(p);
-		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("ROOT_VALUE"));
-
-		// Strict error handler
-		try {
-			parser.setParserErrorHandler(new StrictErrorHandler());
-			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
-		}
-
-	}
-
-
-	@Test
-	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
-
-		Patient p = new Patient();
-		Extension root = p.addExtension();
-		root.setUrl("http://root");
-		root.setValue(new StringType("ROOT_VALUE"));
-		Extension child = root.addExtension();
-		child.setUrl("http://child");
-		child.setValue(new StringType("CHILD_VALUE"));
-
-		// Lenient error handler
-		IParser parser = ourCtx.newJsonParser();
-		String output = parser.encodeResourceToString(p);
-		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
-
-		// Strict error handler
-		try {
-			parser.setParserErrorHandler(new StrictErrorHandler());
-			parser.encodeResourceToString(p);
-			fail();
-		} catch (DataFormatException e) {
-			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
-		}
-
-	}
-
-	@Test
 	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
 
 		Observation obs = new Observation();
@@ -310,7 +252,6 @@ public class JsonParserR4Test {
 	}
 
 	@Test
-	@Ignore
 	public void testExcludeRootStuff() {
 		IParser parser = ourCtx.newJsonParser().setPrettyPrint(true);
 		Set<String> excludes = new HashSet<>();

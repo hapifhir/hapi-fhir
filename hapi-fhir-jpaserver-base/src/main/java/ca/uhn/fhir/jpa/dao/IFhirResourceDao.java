@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.dao;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.dao;
  */
 
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.delete.DeleteConflictList;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.entity.BaseHasResource;
+import ca.uhn.fhir.jpa.entity.ResourceTable;
+import ca.uhn.fhir.jpa.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -44,11 +44,14 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
-	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest);
+	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel);
 
 	/**
 	 * Create a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -67,10 +70,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	/**
 	 * @param thePerformIndexing Use with caution! If you set this to false, you need to manually perform indexing or your resources
 	 *                           won't be indexed and searches won't work.
-	 * @param theUpdateTimestamp
 	 * @param theRequestDetails  TODO
 	 */
-	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, Date theUpdateTimestamp, RequestDetails theRequestDetails);
+	DaoMethodOutcome create(T theResource, String theIfNoneExist, boolean thePerformIndexing, RequestDetails theRequestDetails);
 
 	DaoMethodOutcome create(T theResource, String theIfNoneExist, RequestDetails theRequestDetails);
 
@@ -86,7 +88,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 *
 	 * @param theRequestDetails TODO
 	 */
-	DaoMethodOutcome delete(IIdType theResource, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DaoMethodOutcome delete(IIdType theResource, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
@@ -97,18 +99,22 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 * This method does not throw an exception if there are delete conflicts, but populates them
 	 * in the provided list
 	 */
-	DeleteMethodOutcome deleteByUrl(String theUrl, DeleteConflictList theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
+	DeleteMethodOutcome deleteByUrl(String theUrl, List<DeleteConflict> theDeleteConflictsListToPopulate, RequestDetails theRequestDetails);
 
 	/**
 	 * This method throws an exception if there are delete conflicts
 	 */
 	DeleteMethodOutcome deleteByUrl(String theString, RequestDetails theRequestDetails);
 
-	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
+	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions);
 
-	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
+	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions);
+
+	TagList getAllResourceTags(RequestDetails theRequestDetails);
 
 	Class<T> getResourceType();
+
+	TagList getTags(IIdType theResourceId, RequestDetails theRequestDetails);
 
 	IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails);
 
@@ -142,9 +148,9 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
-	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
+	DaoMethodOutcome patch(IIdType theId, PatchTypeEnum thePatchType, String thePatchBody, RequestDetails theRequestDetails);
 
-	Set<Long> processMatchUrl(String theMatchUrl, RequestDetails theRequest);
+	Set<Long> processMatchUrl(String theMatchUrl);
 
 	/**
 	 * Read a resource - Note that this variant of the method does not take in a {@link RequestDetails} and
@@ -164,19 +170,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	 */
 	T read(IIdType theId, RequestDetails theRequestDetails);
 
-	/**
-	 * Should deleted resources be returned successfully. This should be false for
-	 * a normal FHIR read.
-	 */
-	T read(IIdType theId, RequestDetails theRequestDetails, boolean theDeletedOk);
-
-	BaseHasResource readEntity(IIdType theId, RequestDetails theRequest);
+	BaseHasResource readEntity(IIdType theId);
 
 	/**
 	 * @param theCheckForForcedId If true, this method should fail if the requested ID contains a numeric PID which exists, but is
 	 *                            obscured by a "forced ID" so should not exist as far as the outside world is concerned.
 	 */
-	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId, RequestDetails theRequest);
+	BaseHasResource readEntity(IIdType theId, boolean theCheckForForcedId);
 
 	/**
 	 * Updates index tables associated with the given resource. Does not create a new
@@ -195,7 +195,7 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	@Transactional(propagation = Propagation.SUPPORTS)
 	IBundleProvider search(SearchParameterMap theParams, RequestDetails theRequestDetails, HttpServletResponse theServletResponse);
 
-	Set<Long> searchForIds(SearchParameterMap theParams, RequestDetails theRequest);
+	Set<Long> searchForIds(SearchParameterMap theParams);
 
 	/**
 	 * Takes a map of incoming raw search parameters and translates/parses them into

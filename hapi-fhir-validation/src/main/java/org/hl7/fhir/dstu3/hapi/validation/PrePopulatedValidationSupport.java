@@ -142,20 +142,15 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
   @Override
   public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-    return new ArrayList<>(myStructureDefinitions.values());
+    return new ArrayList<StructureDefinition>(myStructureDefinitions.values());
   }
 
   @Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String uri) {
-		return myCodeSystems.get(uri);
-	}
+  public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+    return myCodeSystems.get(theSystem);
+  }
 
-	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
-		return myValueSets.get(uri);
-	}
-
-	@SuppressWarnings("unchecked")
+  @SuppressWarnings("unchecked")
   @Override
   public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
     if (theClass.equals(StructureDefinition.class)) {
@@ -184,10 +179,5 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
   public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
     return null;
   }
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		return null;
-	}
 
 }

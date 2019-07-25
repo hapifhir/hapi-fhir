@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.JpaConstants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -18,8 +17,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -140,7 +138,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -162,7 +160,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 		try {
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
-				.setExpungeOldVersions(true), null);
+				.setExpungeOldVersions(true));
 			fail();
 		} catch (PreconditionFailedException e) {
 			assertEquals("Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
@@ -180,7 +178,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 
 		myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Patients
 		assertStillThere(myOneVersionPatientId);
@@ -199,7 +197,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@Test
 	public void testExpungeSystemEverything() {
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true), null);
+			.setExpungeEverything(true));
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -219,7 +217,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeSystemOldVersionsAndDeleted() {
 		mySystemDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -238,7 +236,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeDeletedResources() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(false), null);
+			.setExpungeOldVersions(false));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -257,7 +255,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeOldVersions() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(false)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -277,68 +275,13 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
+			.setExpungeOldVersions(true));
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
 		assertExpunged(myTwoVersionPatientId.withVersion("1"));
 		assertStillThere(myTwoVersionPatientId.withVersion("2"));
 		assertExpunged(myDeletedPatientId);
-
-		// No observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertStillThere(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeLimitZero() {
-		try {
-			myPatientDao.expunge(new ExpungeOptions()
-				.setExpungeDeletedResources(true)
-				.setExpungeOldVersions(true)
-				.setLimit(0), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
-		}
-	}
-
-	@Test
-	public void testExpungeInstanceOldVersionsAndDeletedBoundaryLimit() {
-		myPatientDao.delete(myTwoVersionPatientId);
-
-		myPatientDao.expunge(myTwoVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true)
-			.setLimit(2), null);
-
-		// Patients
-		assertStillThere(myOneVersionPatientId);
-		assertExpunged(myTwoVersionPatientId.withVersion("1"));
-		assertExpunged(myTwoVersionPatientId.withVersion("2"));
-		assertGone(myDeletedPatientId);
-
-		// No observations deleted
-		assertStillThere(myOneVersionObservationId);
-		assertStillThere(myTwoVersionObservationId.withVersion("1"));
-		assertStillThere(myTwoVersionObservationId.withVersion("2"));
-		assertGone(myDeletedObservationId);
-	}
-
-	@Test
-	public void testExpungeNothing() {
-
-		myPatientDao.expunge(myOneVersionPatientId.toUnqualifiedVersionless(), new ExpungeOptions()
-			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true), null);
-
-		// Patients
-		assertStillThere(myOneVersionPatientId);
-		assertStillThere(myTwoVersionPatientId.withVersion("1"));
-		assertStillThere(myTwoVersionPatientId.withVersion("2"));
-		assertGone(myDeletedPatientId);
 
 		// No observations deleted
 		assertStillThere(myOneVersionObservationId);

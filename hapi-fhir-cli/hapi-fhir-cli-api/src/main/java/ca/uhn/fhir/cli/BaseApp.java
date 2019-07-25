@@ -4,14 +4,14 @@ package ca.uhn.fhir.cli;
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,11 +41,10 @@ import java.util.List;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
-@SuppressWarnings("WeakerAccess")
 public abstract class BaseApp {
-	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
-	private static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
-	static final String LINESEP = System.getProperty("line.separator");
+	public static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
+	public static final String STACKFILTER_PATTERN_PROP = "log.stackfilter.pattern";
+	public static final String LINESEP = System.getProperty("line.separator");
 	protected static final org.slf4j.Logger ourLog;
 	private static List<BaseCommand> ourCommands;
 
@@ -63,16 +62,12 @@ public abstract class BaseApp {
 	private void logAppHeader() {
 		System.out.flush();
 		System.out.println("------------------------------------------------------------");
-		logProductName();
+		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 		System.out.println("------------------------------------------------------------");
 		System.out.println("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
 		System.out.println("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		System.out.println("Detected Java version           : " + System.getProperty("java.version"));
 		System.out.println("------------------------------------------------------------");
-	}
-
-	protected void logProductName() {
-		System.out.println("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
 	}
 
 	private void logCommandUsage(BaseCommand theCommand) {
@@ -117,6 +112,7 @@ public abstract class BaseApp {
 		PrintWriter pw = new PrintWriter(System.out);
 		fmt.printOptions(pw, columns, theCommand.getOptions(), 2, 2);
 		pw.flush();
+		pw.close();
 
 		// That's it!
 		System.out.println();
@@ -150,7 +146,7 @@ public abstract class BaseApp {
 
 	protected abstract String provideCommandName();
 
-	protected List<BaseCommand> provideCommands() {
+	public List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
 		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
@@ -203,9 +199,7 @@ public abstract class BaseApp {
 				}
 			}
 			if (command == null) {
-				String message = "Unknown command: " + theArgs[1];
-				System.err.println(message);
-				exitDueToProblem(message);
+				System.err.println("Unknown command: " + theArgs[1]);
 				return;
 			}
 			logCommandUsage(command);
@@ -221,11 +215,9 @@ public abstract class BaseApp {
 		}
 
 		if (command == null) {
-			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
-			System.out.println(message);
+			System.out.println("Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE));
 			System.out.println();
 			logUsage();
-			exitDueToProblem(message);
 			return;
 		}
 
@@ -258,44 +250,31 @@ public abstract class BaseApp {
 			}
 
 		} catch (ParseException e) {
-			if (!"true".equals(System.getProperty("test"))) {
-				loggingConfigOff();
-			}
+			loggingConfigOff();
 			System.err.println("Invalid command options for command: " + command.getCommandName());
 			System.err.println("  " + ansi().fg(Ansi.Color.RED).bold() + e.getMessage());
 			System.err.println("" + ansi().fg(Ansi.Color.WHITE).boldOff());
 			logCommandUsageNoHeader(command);
 			runCleanupHookAndUnregister();
-			exitDueToException(e);
+			System.exit(1);
 		} catch (CommandFailureException e) {
 			ourLog.error(e.getMessage());
 			runCleanupHookAndUnregister();
-			exitDueToException(e);
+			if ("true".equals(System.getProperty("test"))) {
+				throw e;
+			} else {
+				System.exit(1);
+			}
 		} catch (Throwable t) {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
-			exitDueToException(new CommandFailureException("Error: " + t.toString(), t));
-		}
-
-	}
-
-	private void exitDueToProblem(String theDescription) {
-		if ("true".equals(System.getProperty("test"))) {
-			throw new Error(theDescription);
-		} else {
-			System.exit(1);
-		}
-	}
-
-	private void exitDueToException(Throwable e) {
-		if ("true".equals(System.getProperty("test"))) {
-			if (e instanceof CommandFailureException) {
-				throw (CommandFailureException)e;
+			if ("true".equals(System.getProperty("test"))) {
+				throw new CommandFailureException("Error: " + t.toString(), t);
+			} else {
+				System.exit(1);
 			}
-			throw new Error(e);
-		} else {
-			System.exit(1);
 		}
+
 	}
 
 	private void runCleanupHookAndUnregister() {
@@ -341,7 +320,7 @@ public abstract class BaseApp {
 	private class MyShutdownHook extends Thread {
 		private final BaseCommand myFinalCommand;
 
-		MyShutdownHook(BaseCommand theFinalCommand) {
+		public MyShutdownHook(BaseCommand theFinalCommand) {
 			myFinalCommand = theFinalCommand;
 		}
 

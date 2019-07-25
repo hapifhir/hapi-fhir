@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -120,12 +120,11 @@ public class ResourceParameter implements IParameter {
 		BODY, BODY_BYTE_ARRAY, ENCODING, RESOURCE
 	}
 
-	private static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
-		return new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
+	public static Reader createRequestReader(RequestDetails theRequest, Charset charset) {
+		Reader requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
+		return requestReader;
 	}
 
-	// Do not make private
-	@SuppressWarnings("WeakerAccess")
 	public static Reader createRequestReader(RequestDetails theRequest) {
 		return createRequestReader(theRequest, determineRequestCharset(theRequest));
 	}
@@ -139,7 +138,7 @@ public class ResourceParameter implements IParameter {
 	}
 
 	@SuppressWarnings("unchecked")
-	static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
+	public static <T extends IBaseResource> T loadResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<T> theResourceType) {
 		FhirContext ctx = theRequest.getServer().getFhirContext();
 
 		final Charset charset = determineRequestCharset(theRequest);
@@ -199,11 +198,7 @@ public class ResourceParameter implements IParameter {
 		return retVal;
 	}
 
-	static IBaseResource parseResourceFromRequest(RequestDetails theRequest, @Nonnull BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
-		if (theRequest.getResource() != null) {
-			return theRequest.getResource();
-		}
-
+	public static IBaseResource parseResourceFromRequest(RequestDetails theRequest, BaseMethodBinding<?> theMethodBinding, Class<? extends IBaseResource> theResourceType) {
 		IBaseResource retVal = null;
 
 		if (theResourceType != null && IBaseBinary.class.isAssignableFrom(theResourceType)) {
@@ -232,9 +227,6 @@ public class ResourceParameter implements IParameter {
 		if (retVal == null) {
 			retVal = loadResourceFromRequest(theRequest, theMethodBinding, theResourceType);
 		}
-
-		theRequest.setResource(retVal);
-
 		return retVal;
 	}
 

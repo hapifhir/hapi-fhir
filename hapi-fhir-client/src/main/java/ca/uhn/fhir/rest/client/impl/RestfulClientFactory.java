@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.client.impl;
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -272,9 +272,10 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 	@Override
 	public void validateServerBase(String theServerBase, IHttpClient theHttpClient, IRestfulClient theClient) {
 		GenericClient client = new GenericClient(myContext, theHttpClient, theServerBase, this);
-
-		client.setInterceptorService(theClient.getInterceptorService());
 		client.setEncoding(theClient.getEncoding());
+		for (IClientInterceptor interceptor : theClient.getInterceptors()) {
+			client.registerInterceptor(interceptor);
+		}
 		client.setDontValidateConformance(true);
 
 		IBaseResource conformance;
@@ -300,7 +301,7 @@ public abstract class RestfulClientFactory implements IRestfulClientFactory {
 				conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 			} catch (FhirClientConnectionException e) {
 				if (!myContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3) && e.getCause() instanceof DataFormatException) {
-					capabilityStatementResourceName = "CapabilityStatement";
+					capabilityStatementResourceName = "Conformance";
 					implementingClass = myContext.getResourceDefinition(capabilityStatementResourceName).getImplementingClass();
 					conformance = (IBaseResource) client.fetchConformance().ofType(implementingClass).execute();
 				} else {

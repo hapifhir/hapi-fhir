@@ -1,12 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -29,14 +24,14 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -99,7 +94,7 @@ public class BaseDstu2Config extends BaseConfig {
 	@Bean(name = "myResourceCountsCache")
 	public ResourceCountCache resourceCountsCache() {
 		ResourceCountCache retVal = new ResourceCountCache(() -> systemDaoDstu2().getResourceCounts());
-		retVal.setCacheMillis(4 * DateUtils.MILLIS_PER_HOUR);
+		retVal.setCacheMillis(60 * DateUtils.MILLIS_PER_SECOND);
 		return retVal;
 	}
 

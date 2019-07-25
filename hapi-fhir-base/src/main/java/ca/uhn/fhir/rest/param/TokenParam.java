@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.param;
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,8 +25,6 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseIdentifierDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -102,11 +100,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	@Override
 	String doGetValueAsQueryToken(FhirContext theContext) {
 		if (getSystem() != null) {
-			if (getValue() != null) {
-				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
-			} else {
-				return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|';
-			}
+			return ParameterUtil.escape(StringUtils.defaultString(getSystem())) + '|' + ParameterUtil.escape(getValue());
 		}
 		return ParameterUtil.escape(getValue());
 	}
@@ -220,7 +214,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		return this;
 	}
 
-
 	@Override
 	public String toString() {
 		ToStringBuilder builder = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -233,30 +226,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 			builder.append(":missing", getMissing());
 		}
 		return builder.toString();
-	}
-
-	@Override
-	public boolean equals(Object theO) {
-		if (this == theO) return true;
-
-		if (theO == null || getClass() != theO.getClass()) return false;
-
-		TokenParam that = (TokenParam) theO;
-
-		return new EqualsBuilder()
-			.append(myModifier, that.myModifier)
-			.append(mySystem, that.mySystem)
-			.append(myValue, that.myValue)
-			.isEquals();
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(myModifier)
-			.append(mySystem)
-			.append(myValue)
-			.toHashCode();
 	}
 
 	private static String toSystemValue(UriDt theSystem) {

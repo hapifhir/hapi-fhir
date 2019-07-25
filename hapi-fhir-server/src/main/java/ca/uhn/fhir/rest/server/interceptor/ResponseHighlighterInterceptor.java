@@ -1,14 +1,10 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -17,22 +13,23 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.text.StringEscapeUtils;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
-import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -40,14 +37,14 @@ import static org.apache.commons.lang3.StringUtils.*;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -62,8 +59,7 @@ import static org.apache.commons.lang3.StringUtils.*;
  *
  * @since 1.0
  */
-@Interceptor
-public class ResponseHighlighterInterceptor {
+public class ResponseHighlighterInterceptor extends InterceptorAdapter {
 
 	/**
 	 * TODO: As of HAPI 1.6 (2016-06-10) this parameter has been replaced with simply
@@ -233,14 +229,15 @@ public class ResponseHighlighterInterceptor {
 		return lineCount;
 	}
 
-	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) {
+	@Override
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+		throws ServletException, IOException {
 		/*
 		 * It's not a browser...
 		 */
 		Set<String> accept = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!accept.contains(Constants.CT_HTML)) {
-			return true;
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
 		/*
@@ -248,27 +245,21 @@ public class ResponseHighlighterInterceptor {
 		 */
 		String requestedWith = theServletRequest.getHeader("X-Requested-With");
 		if (requestedWith != null) {
-			return true;
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * Not a GET
 		 */
 		if (theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
-			return true;
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
-		IBaseOperationOutcome oo = theException.getOperationOutcome();
-		if (oo == null) {
-			return true;
+		if (theException.getOperationOutcome() == null) {
+			return super.handleException(theRequestDetails, theException, theServletRequest, theServletResponse);
 		}
 
-		ResponseDetails responseDetails = new ResponseDetails();
-		responseDetails.setResponseResource(oo);
-		responseDetails.setResponseCode(theException.getStatusCode());
-
-		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), theServletRequest, responseDetails.getResponseCode());
+		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
 
 		return false;
 	}
@@ -313,7 +304,7 @@ public class ResponseHighlighterInterceptor {
 		return this;
 	}
 
-	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
+	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException {
 
@@ -323,7 +314,7 @@ public class ResponseHighlighterInterceptor {
 		String[] rawParamValues = theRequestDetails.getParameters().get(PARAM_RAW);
 		if (rawParamValues != null && rawParamValues.length > 0 && rawParamValues[0].equals(PARAM_RAW_TRUE)) {
 			ourLog.warn("Client is using non-standard/legacy  _raw parameter - Use _format=json or _format=xml instead, as this parmameter will be removed at some point");
-			return true;
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		boolean force = false;
@@ -345,7 +336,7 @@ public class ResponseHighlighterInterceptor {
 				force = true;
 				theRequestDetails.addParameter(Constants.PARAM_FORMAT, PARAM_FORMAT_VALUE_JSON);
 			} else {
-				return true;
+				return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 			}
 		}
 
@@ -354,34 +345,34 @@ public class ResponseHighlighterInterceptor {
 		 */
 		Set<String> highestRankedAcceptValues = RestfulServerUtils.parseAcceptHeaderAndReturnHighestRankedOptions(theServletRequest);
 		if (!force && highestRankedAcceptValues.contains(Constants.CT_HTML) == false) {
-			return true;
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * It's an AJAX request, so no HTML
 		 */
 		if (!force && isNotBlank(theServletRequest.getHeader("X-Requested-With"))) {
-			return true;
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 		/*
 		 * If the request has an Origin header, it is probably an AJAX request
 		 */
 		if (!force && isNotBlank(theServletRequest.getHeader(Constants.HEADER_ORIGIN))) {
-			return true;
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * Not a GET
 		 */
 		if (!force && theRequestDetails.getRequestType() != RequestTypeEnum.GET) {
-			return true;
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		/*
 		 * Not binary
 		 */
-		if (!force && (theResponseObject.getResponseResource() instanceof IBaseBinary)) {
-			return true;
+		if (!force && "Binary".equals(theRequestDetails.getResourceName())) {
+			return super.outgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse);
 		}
 
 		streamResponse(theRequestDetails, theServletResponse, theResponseObject.getResponseResource(), theServletRequest, 200);
@@ -400,7 +391,10 @@ public class ResponseHighlighterInterceptor {
 				Enumeration<String> headerValuesEnum = sr.getHeaders(nextHeaderName);
 				while (headerValuesEnum.hasMoreElements()) {
 					String nextHeaderValue = headerValuesEnum.nextElement();
-					appendHeader(b, nextHeaderName, nextHeaderValue);
+					b.append("<div class=\"headersRow\">");
+					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
+					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
+					b.append("</div>");
 				}
 			}
 			b.append("</div>");
@@ -670,7 +664,7 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	private void writeLength(HttpServletResponse theServletResponse, int theLength) throws IOException {
-		double kb = ((double) theLength) / FileUtils.ONE_KB;
+		double kb = ((double)theLength) / FileUtils.ONE_KB;
 		if (kb <= 1000) {
 			theServletResponse.getWriter().append(String.format("%.1f", kb)).append(" KB");
 		} else {
@@ -696,26 +690,14 @@ public class ResponseHighlighterInterceptor {
 							nextHeaderValue = responseEncoding.getResourceContentType() + ";charset=utf-8";
 						}
 					}
-					appendHeader(b, nextHeaderName, nextHeaderValue);
+					b.append("<div class=\"headersRow\">");
+					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
+					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
+					b.append("</div>");
 				}
 			}
-			IRestfulResponse response = theRequestDetails.getResponse();
-			for (Map.Entry<String, List<String>> next : response.getHeaders().entrySet()) {
-				String name = next.getKey();
-				for (String nextValue : next.getValue()) {
-					appendHeader(b, name, nextValue);
-				}
-			}
-
 			b.append("</div>");
 		}
-	}
-
-	private void appendHeader(StringBuilder theBuilder, String theHeaderName, String theHeaderValue) {
-		theBuilder.append("<div class=\"headersRow\">");
-		theBuilder.append("<span class=\"headerName\">").append(theHeaderName).append(": ").append("</span>");
-		theBuilder.append("<span class=\"headerValue\">").append(theHeaderValue).append("</span>");
-		theBuilder.append("</div>");
 	}
 
 }

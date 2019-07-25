@@ -4,14 +4,14 @@ package ca.uhn.fhir.rest.server.method;
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,10 +22,9 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
@@ -37,12 +36,11 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.exceptions.NonFhirResponseException;
 import ca.uhn.fhir.rest.server.BundleProviders;
+import ca.uhn.fhir.rest.server.IDynamicSearchResourceProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.*;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -86,8 +84,42 @@ public abstract class BaseMethodBinding<T> {
 			}
 		}
 
-		// This allows us to invoke methods on private classes
-		myMethod.setAccessible(true);
+	}
+
+	protected IParser createAppropriateParserForParsingResponse(String theResponseMimeType, Reader theResponseReader, int theResponseStatusCode, List<Class<? extends IBaseResource>> thePreferTypes) {
+		EncodingEnum encoding = EncodingEnum.forContentType(theResponseMimeType);
+		if (encoding == null) {
+			NonFhirResponseException ex = NonFhirResponseException.newInstance(theResponseStatusCode, theResponseMimeType, theResponseReader);
+			populateException(ex, theResponseReader);
+			throw ex;
+		}
+
+		IParser parser = encoding.newParser(getContext());
+		
+		parser.setPreferTypes(thePreferTypes);
+		
+		return parser;
+	}
+
+	protected IParser createAppropriateParserForParsingServerRequest(RequestDetails theRequest) {
+		String contentTypeHeader = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+		EncodingEnum encoding;
+		if (isBlank(contentTypeHeader)) {
+			encoding = EncodingEnum.XML;
+		} else {
+			int semicolon = contentTypeHeader.indexOf(';');
+			if (semicolon != -1) {
+				contentTypeHeader = contentTypeHeader.substring(0, semicolon);
+			}
+			encoding = EncodingEnum.forContentType(contentTypeHeader);
+		}
+
+		if (encoding == null) {
+			throw new InvalidRequestException("Request contins non-FHIR conent-type header value: " + contentTypeHeader);
+		}
+
+		IParser parser = encoding.newParser(getContext());
+		return parser;
 	}
 
 	protected Object[] createMethodParams(RequestDetails theRequest) {
@@ -146,18 +178,11 @@ public abstract class BaseMethodBinding<T> {
 		return myParameters;
 	}
 
-	/**
-	 * For unit tests only
-	 */
-	public void setParameters(List<IParameter> theParameters) {
-		myParameters = theParameters;
-	}
-
 	public Object getProvider() {
 		return myProvider;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Set<Include> getRequestIncludesFromParams(Object[] params) {
 		if (params == null || params.length == 0) {
 			return null;
@@ -204,8 +229,9 @@ public abstract class BaseMethodBinding<T> {
 
 	/**
 	 * Determine which operation is being fired for a specific request
-	 *
-	 * @param theRequestDetails The request
+	 * 
+	 * @param theRequestDetails
+	 *           The request
 	 */
 	public RestOperationTypeEnum getRestOperationType(RequestDetails theRequestDetails) {
 		return getRestOperationType();
@@ -219,17 +245,10 @@ public abstract class BaseMethodBinding<T> {
 		// Handle server action interceptors
 		RestOperationTypeEnum operationType = getRestOperationType(theRequest);
 		if (operationType != null) {
-			ActionRequestDetails details = new ActionRequestDetails(theRequest);
-			populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
-			HookParams preHandledParams = new HookParams();
-			preHandledParams.add(RestOperationTypeEnum.class, theRequest.getRestOperationType());
-			preHandledParams.add(RequestDetails.class, theRequest);
-			preHandledParams.addIfMatchesType(ServletRequestDetails.class, theRequest);
-			preHandledParams.add(ActionRequestDetails.class, details);
-			if (theRequest.getInterceptorBroadcaster() != null) {
-				theRequest
-					.getInterceptorBroadcaster()
-					.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, preHandledParams);
+			for (IServerInterceptor next : theServer.getInterceptors()) {
+				ActionRequestDetails details = new ActionRequestDetails(theRequest);
+				populateActionRequestDetailsForInterceptor(theRequest, details, theMethodParams);
+				next.incomingRequestPreHandled(operationType, details);
 			}
 		}
 
@@ -264,13 +283,54 @@ public abstract class BaseMethodBinding<T> {
 	/**
 	 * Subclasses may override this method (but should also call super.{@link #populateActionRequestDetailsForInterceptor(RequestDetails, ActionRequestDetails, Object[])} to provide method specifics to the
 	 * interceptors.
-	 *
-	 * @param theRequestDetails The server request details
-	 * @param theDetails        The details object to populate
-	 * @param theMethodParams   The method params as generated by the specific method binding
+	 * 
+	 * @param theRequestDetails
+	 *           The server request details
+	 * @param theDetails
+	 *           The details object to populate
+	 * @param theMethodParams
+	 *           The method params as generated by the specific method binding
 	 */
 	protected void populateActionRequestDetailsForInterceptor(RequestDetails theRequestDetails, ActionRequestDetails theDetails, Object[] theMethodParams) {
 		// nothing by default
+	}
+
+	protected BaseServerResponseException processNon2xxResponseAndReturnExceptionToThrow(int theStatusCode, String theResponseMimeType, Reader theResponseReader) {
+		BaseServerResponseException ex;
+		switch (theStatusCode) {
+		case Constants.STATUS_HTTP_400_BAD_REQUEST:
+			ex = new InvalidRequestException("Server responded with HTTP 400");
+			break;
+		case Constants.STATUS_HTTP_404_NOT_FOUND:
+			ex = new ResourceNotFoundException("Server responded with HTTP 404");
+			break;
+		case Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED:
+			ex = new MethodNotAllowedException("Server responded with HTTP 405");
+			break;
+		case Constants.STATUS_HTTP_409_CONFLICT:
+			ex = new ResourceVersionConflictException("Server responded with HTTP 409");
+			break;
+		case Constants.STATUS_HTTP_412_PRECONDITION_FAILED:
+			ex = new PreconditionFailedException("Server responded with HTTP 412");
+			break;
+		case Constants.STATUS_HTTP_422_UNPROCESSABLE_ENTITY:
+			IParser parser = createAppropriateParserForParsingResponse(theResponseMimeType, theResponseReader, theStatusCode, null);
+			// TODO: handle if something other than OO comes back
+			BaseOperationOutcome operationOutcome = (BaseOperationOutcome) parser.parseResource(theResponseReader);
+			ex = new UnprocessableEntityException(myContext, operationOutcome);
+			break;
+		default:
+			ex = new UnclassifiedServerFailureException(theStatusCode, "Server responded with HTTP " + theStatusCode);
+			break;
+		}
+
+		populateException(ex, theResponseReader);
+		return ex;
+	}
+
+	/** For unit tests only */
+	public void setParameters(List<IParameter> theParameters) {
+		myParameters = theParameters;
 	}
 
 	protected IBundleProvider toResourceList(Object response) throws InternalErrorException {
@@ -335,7 +395,7 @@ public abstract class BaseMethodBinding<T> {
 			returnTypeFromRp = ((IResourceProvider) theProvider).getResourceType();
 			if (!verifyIsValidResourceReturnType(returnTypeFromRp)) {
 				throw new ConfigurationException("getResourceType() from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName() + " returned "
-					+ toLogString(returnTypeFromRp) + " - Must return a resource type");
+						+ toLogString(returnTypeFromRp) + " - Must return a resource type");
 			}
 		}
 
@@ -352,14 +412,14 @@ public abstract class BaseMethodBinding<T> {
 				ourLog.trace("Method {} returns a non-typed list, can't verify return type", theMethod);
 			} else if (!verifyIsValidResourceReturnType(returnTypeFromMethod) && !isResourceInterface(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-					+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
-					+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
+						+ " returns a collection with generic type " + toLogString(returnTypeFromMethod)
+						+ " - Must return a resource type or a collection (List, Set) with a resource type parameter (e.g. List<Patient> or List<IBaseResource> )");
 			}
 		} else {
 			if (!isResourceInterface(returnTypeFromMethod) && !verifyIsValidResourceReturnType(returnTypeFromMethod)) {
 				throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-					+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle, " + IBundleProvider.class.getSimpleName()
-					+ ", etc., see the documentation for more details)");
+						+ " returns " + toLogString(returnTypeFromMethod) + " - Must return a resource type (eg Patient, Bundle, " + IBundleProvider.class.getSimpleName()
+						+ ", etc., see the documentation for more details)");
 			}
 		}
 
@@ -388,14 +448,15 @@ public abstract class BaseMethodBinding<T> {
 
 		if (returnTypeFromRp != null) {
 			if (returnTypeFromAnnotation != null && !isResourceInterface(returnTypeFromAnnotation)) {
-				if (returnTypeFromMethod != null && !returnTypeFromRp.isAssignableFrom(returnTypeFromMethod)) {
+				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
+					//FIXME potential null access on retunrTypeFromMethod
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " returns type "
-						+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
+							+ returnTypeFromMethod.getCanonicalName() + " - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
 				if (!returnTypeFromRp.isAssignableFrom(returnTypeFromAnnotation)) {
 					throw new ConfigurationException(
-						"Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type " + returnTypeFromAnnotation.getCanonicalName()
-							+ " per method annotation - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
+							"Method '" + theMethod.getName() + "' in type " + theMethod.getDeclaringClass().getCanonicalName() + " claims to return type " + returnTypeFromAnnotation.getCanonicalName()
+									+ " per method annotation - Must return " + returnTypeFromRp.getCanonicalName() + " (or a subclass of it) per IResourceProvider contract");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
@@ -405,7 +466,7 @@ public abstract class BaseMethodBinding<T> {
 			if (!isResourceInterface(returnTypeFromAnnotation)) {
 				if (!verifyIsValidResourceReturnType(returnTypeFromAnnotation)) {
 					throw new ConfigurationException("Method '" + theMethod.getName() + "' from " + IResourceProvider.class.getSimpleName() + " type " + theMethod.getDeclaringClass().getCanonicalName()
-						+ " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
+							+ " returns " + toLogString(returnTypeFromAnnotation) + " according to annotation - Must return a resource type");
 				}
 				returnType = returnTypeFromAnnotation;
 			} else {
@@ -416,7 +477,7 @@ public abstract class BaseMethodBinding<T> {
 		if (read != null) {
 			return new ReadMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (search != null) {
-			return new SearchMethodBinding(returnType, returnTypeFromRp, theMethod, theContext, theProvider);
+			return new SearchMethodBinding(returnType, theMethod, theContext, theProvider);
 		} else if (conformance != null) {
 			return new ConformanceMethodBinding(theMethod, theContext, theProvider);
 		} else if (create != null) {
@@ -479,7 +540,7 @@ public abstract class BaseMethodBinding<T> {
 					obj1 = object;
 				} else {
 					throw new ConfigurationException("Method " + theNextMethod.getName() + " on type '" + theNextMethod.getDeclaringClass().getSimpleName() + " has annotations @"
-						+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
+							+ obj1.getClass().getSimpleName() + " and @" + object.getClass().getSimpleName() + ". Can not have both.");
 				}
 
 			}

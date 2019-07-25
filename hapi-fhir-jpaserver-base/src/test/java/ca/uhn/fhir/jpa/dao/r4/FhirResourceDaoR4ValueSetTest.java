@@ -1,20 +1,34 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.util.TestUtil;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.io.IOException;
+
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.util.TestUtil;
 
 public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
@@ -210,7 +224,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	
 	@Test
-	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
+	public void testValiedateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
 		IPrimitiveType<String> display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;

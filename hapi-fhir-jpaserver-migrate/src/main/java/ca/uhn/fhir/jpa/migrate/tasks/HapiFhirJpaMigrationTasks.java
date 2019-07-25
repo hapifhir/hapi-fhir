@@ -4,14 +4,14 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #%L
  * HAPI FHIR JPA Server - Migration
  * %%
- * Copyright (C) 2014 - 2019 University Health Network
+ * Copyright (C) 2014 - 2018 University Health Network
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,17 +20,14 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
-import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -39,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"SqlNoDataSourceInspection", "SpellCheckingInspection"})
+@SuppressWarnings({"UnstableApiUsage", "SqlNoDataSourceInspection", "SpellCheckingInspection"})
 public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	private final Set<FlagEnum> myFlags;
@@ -53,89 +50,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.map(FlagEnum::fromCommandLineValue)
 			.collect(Collectors.toSet());
 
-		init330();
 		init340();
 		init350();
 		init360();
-		init400();
 	}
-
-	protected void init400() {
-		Builder version = forVersion(VersionEnum.V4_0_0);
-
-		version.onTable("TRM_CONCEPT_MAP_GROUP")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySourceValueSet", "SOURCE_VS")
-			.renameColumn("myTargetValueSet", "TARGET_VS");
-
-		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySystem", "SYSTEM_URL")
-			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
-			.renameColumn("myValueSet", "VALUESET_URL");
-
-		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
-			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL")
-			.renameColumn("mySystem", "SYSTEM_URL")
-			.renameColumn("mySystemVersion", "SYSTEM_VERSION")
-			.renameColumn("myValueSet", "VALUESET_URL");
-
-		// TermValueSet
-		version.startSectionWithMessage("Processing table: TRM_VALUESET");
-		version.addIdGenerator("SEQ_VALUESET_PID");
-		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("TRM_VALUESET", "PID");
-		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_URL_LENGTH);
-		termValueSetTable
-			.addIndex("IDX_VALUESET_URL")
-			.unique(true)
-			.withColumns("URL");
-		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetTable
-			.addForeignKey("FK_TRMVALUESET_RES")
-			.toColumn("RES_ID")
-			.references("HFJ_RESOURCE", "RES_ID");
-		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
-
-		// TermValueSetConcept
-		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
-		version.addIdGenerator("SEQ_VALUESET_CONCEPT_PID");
-		Builder.BuilderAddTableByColumns termValueSetConceptTable = version.addTableByColumns("TRM_VALUESET_CONCEPT", "PID");
-		termValueSetConceptTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptTable
-			.addForeignKey("FK_TRM_VALUESET_PID")
-			.toColumn("VALUESET_PID")
-			.references("TRM_VALUESET", "PID");
-		termValueSetConceptTable.addColumn("SYSTEM").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
-		termValueSetConceptTable.addColumn("CODE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
-		termValueSetConceptTable
-			.addIndex("IDX_VALUESET_CONCEPT_CS_CD")
-			.unique(false)
-			.withColumns("SYSTEM", "CODE");
-		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
-
-		// TermValueSetConceptDesignation
-		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
-		version.addIdGenerator("SEQ_VALUESET_C_DSGNTN_PID");
-		Builder.BuilderAddTableByColumns termValueSetConceptDesignationTable = version.addTableByColumns("TRM_VALUESET_C_DESIGNATION", "PID");
-		termValueSetConceptDesignationTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptDesignationTable.addColumn("VALUESET_CONCEPT_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetConceptDesignationTable
-			.addForeignKey("FK_TRM_VALUESET_CONCEPT_PID")
-			.toColumn("VALUESET_CONCEPT_PID")
-			.references("TRM_VALUESET_CONCEPT", "PID");
-		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable
-			.addIndex("IDX_VALUESET_C_DSGNTN_VAL")
-			.unique(false)
-			.withColumns("VAL");
-	}
-
 
 	private void init360() {
 		Builder version = forVersion(VersionEnum.V3_6_0);
@@ -156,11 +74,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.nullable()
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
-		version.addTableRawSql("HFJ_RES_REINDEX_JOB")
+		version.addTable("HFJ_RES_REINDEX_JOB")
 			.addSql(DriverTypeEnum.MSSQL_2012, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime2, UPDATE_THRESHOLD_HIGH datetime2 not null, UPDATE_THRESHOLD_LOW datetime2, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED boolean not null, RES_TYPE varchar(255), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))")
 			.addSql(DriverTypeEnum.MARIADB_10_1, "create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime(6), UPDATE_THRESHOLD_HIGH datetime(6) not null, UPDATE_THRESHOLD_LOW datetime(6), primary key (PID))")
-			.addSql(DriverTypeEnum.POSTGRES_9_4, "create table HFJ_RES_REINDEX_JOB (PID int8 not null, JOB_DELETED boolean not null, RES_TYPE varchar(255), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))")
+			.addSql(DriverTypeEnum.POSTGRES_9_4, "persistence_create_postgres94.sql:create table HFJ_RES_REINDEX_JOB (PID int8 not null, JOB_DELETED boolean not null, RES_TYPE varchar(255), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))")
 			.addSql(DriverTypeEnum.MYSQL_5_7, " create table HFJ_RES_REINDEX_JOB (PID bigint not null, JOB_DELETED bit not null, RES_TYPE varchar(255), SUSPENDED_UNTIL datetime(6), UPDATE_THRESHOLD_HIGH datetime(6) not null, UPDATE_THRESHOLD_LOW datetime(6), primary key (PID))")
 			.addSql(DriverTypeEnum.ORACLE_12C, "create table HFJ_RES_REINDEX_JOB (PID number(19,0) not null, JOB_DELETED number(1,0) not null, RES_TYPE varchar2(255 char), SUSPENDED_UNTIL timestamp, UPDATE_THRESHOLD_HIGH timestamp not null, UPDATE_THRESHOLD_LOW timestamp, primary key (PID))");
 
@@ -172,12 +90,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Forced ID changes
 		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
 		version.startSectionWithMessage("Starting work on table: " + forcedId.getTableName());
-
 		forcedId
 			.dropIndex("IDX_FORCEDID_TYPE_FORCEDID");
 		forcedId
 			.dropIndex("IDX_FORCEDID_TYPE_RESID");
-
 		forcedId
 			.addIndex("IDX_FORCEDID_TYPE_FID")
 			.unique(true)
@@ -310,7 +226,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxString
 				.addTask(new CalculateHashesTask()
 					.setColumnName("HASH_NORM_PREFIX")
-					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new ModelConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
+					.addCalculator("HASH_NORM_PREFIX", t -> ResourceIndexedSearchParamString.calculateHashNormalized(new DaoConfig(), t.getResourceType(), t.getString("SP_NAME"), t.getString("SP_VALUE_NORMALIZED")))
 					.addCalculator("HASH_EXACT", t -> ResourceIndexedSearchParamString.calculateHashExact(t.getResourceType(), t.getParamName(), t.getString("SP_VALUE_EXACT")))
 				);
 		}
@@ -406,7 +322,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns("HASH_PRESENCE");
 
-		ArbitrarySqlTask consolidateSearchParamPresenceIndexesTask = new ArbitrarySqlTask("HFJ_SEARCH_PARM", "Consolidate search parameter presence indexes");
+		ArbitrarySqlTask consolidateSearchParamPresenceIndexesTask = new ArbitrarySqlTask("Consolidate search parameter presence indexes");
 		consolidateSearchParamPresenceIndexesTask.setExecuteOnlyIfTableExists("HFJ_SEARCH_PARM");
 		consolidateSearchParamPresenceIndexesTask.setBatchSize(1);
 
@@ -416,14 +332,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			"from HFJ_RES_PARAM_PRESENT " +
 			"join HFJ_SEARCH_PARM ON (HFJ_SEARCH_PARM.PID = HFJ_RES_PARAM_PRESENT.SP_ID) " +
 			"where HFJ_RES_PARAM_PRESENT.HASH_PRESENCE is null";
-		consolidateSearchParamPresenceIndexesTask.addExecuteOnlyIfColumnExists("HFJ_RES_PARAM_PRESENT", "SP_ID");
 		consolidateSearchParamPresenceIndexesTask.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
-			Number pid = (Number) t.get("PID");
-			Boolean present = columnToBoolean(t.get("SP_PRESENT"));
+			Long pid = (Long) t.get("PID");
+			Boolean present = (Boolean) t.get("SP_PRESENT");
 			String resType = (String) t.get("RES_TYPE");
 			String paramName = (String) t.get("PARAM_NAME");
 			Long hash = SearchParamPresent.calculateHashPresence(resType, paramName, present);
-			consolidateSearchParamPresenceIndexesTask.executeSql("HFJ_RES_PARAM_PRESENT", "update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
+			consolidateSearchParamPresenceIndexesTask.executeSql("update HFJ_RES_PARAM_PRESENT set HASH_PRESENCE = ? where PID = ?", hash, pid);
 		});
 		version.addTask(consolidateSearchParamPresenceIndexesTask);
 
@@ -449,7 +364,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Designation
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_DESIG");
 		version
-			.addTableRawSql("TRM_CONCEPT_DESIG")
+			.addTable("TRM_CONCEPT_DESIG")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_DESIG (PID bigint not null, LANG varchar(500), USE_CODE varchar(500), USE_DISPLAY varchar(500), USE_SYSTEM varchar(500), VAL varchar(500) not null, CS_VER_PID bigint, CONCEPT_PID bigint, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_DESIG add constraint FK_CONCEPTDESIG_CSV foreign key (CS_VER_PID) references TRM_CODESYSTEM_VER")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_DESIG add constraint FK_CONCEPTDESIG_CONCEPT foreign key (CONCEPT_PID) references TRM_CONCEPT")
@@ -472,7 +387,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Property
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_PROPERTY");
 		version
-			.addTableRawSql("TRM_CONCEPT_PROPERTY")
+			.addTable("TRM_CONCEPT_PROPERTY")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_PROPERTY (PID bigint not null, PROP_CODESYSTEM varchar(500), PROP_DISPLAY varchar(500), PROP_KEY varchar(500) not null, PROP_TYPE integer not null, PROP_VAL varchar(500), CS_VER_PID bigint, CONCEPT_PID bigint, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_PROPERTY add constraint FK_CONCEPTPROP_CSV foreign key (CS_VER_PID) references TRM_CODESYSTEM_VER")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_PROPERTY add constraint FK_CONCEPTPROP_CONCEPT foreign key (CONCEPT_PID) references TRM_CONCEPT")
@@ -495,7 +410,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Map - Map
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP");
 		version
-			.addTableRawSql("TRM_CONCEPT_MAP")
+			.addTable("TRM_CONCEPT_MAP")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP (PID bigint not null, RES_ID bigint, SOURCE_URL varchar(200), TARGET_URL varchar(200), URL varchar(200) not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP add constraint FK_TRMCONCEPTMAP_RES foreign key (RES_ID) references HFJ_RESOURCE")
 			.addSql(DriverTypeEnum.MYSQL_5_7, "create table TRM_CONCEPT_MAP (PID bigint not null, RES_ID bigint, SOURCE_URL varchar(200), TARGET_URL varchar(200), URL varchar(200) not null, primary key (PID))")
@@ -517,7 +432,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Map - Group
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GROUP");
 		version
-			.addTableRawSql("TRM_CONCEPT_MAP_GROUP")
+			.addTable("TRM_CONCEPT_MAP_GROUP")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GROUP (PID bigint not null, myConceptMapUrl varchar(255), SOURCE_URL varchar(200) not null, mySourceValueSet varchar(255), SOURCE_VERSION varchar(100), TARGET_URL varchar(200) not null, myTargetValueSet varchar(255), TARGET_VERSION varchar(100), CONCEPT_MAP_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GROUP add constraint FK_TCMGROUP_CONCEPTMAP foreign key (CONCEPT_MAP_PID) references TRM_CONCEPT_MAP")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create unique index IDX_CONCEPT_MAP_URL on TRM_CONCEPT_MAP (URL)")
@@ -535,7 +450,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Map - Group Element
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GRP_ELEMENT");
 		version
-			.addTableRawSql("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.addTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GRP_ELEMENT (PID bigint not null, SOURCE_CODE varchar(500) not null, myConceptMapUrl varchar(255), SOURCE_DISPLAY varchar(400), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GROUP_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GRP_ELEMENT add constraint FK_TCMGELEMENT_GROUP foreign key (CONCEPT_MAP_GROUP_PID) references TRM_CONCEPT_MAP_GROUP")
 			.addSql(DriverTypeEnum.MARIADB_10_1, "create table TRM_CONCEPT_MAP_GRP_ELEMENT (PID bigint not null, SOURCE_CODE varchar(500) not null, myConceptMapUrl varchar(255), SOURCE_DISPLAY varchar(400), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GROUP_PID bigint not null, primary key (PID))")
@@ -558,7 +473,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Concept Map - Group Element Target
 		version.startSectionWithMessage("Starting work on table: TRM_CONCEPT_MAP_GRP_ELM_TGT");
 		version
-			.addTableRawSql("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.addTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(500) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT")
 			.addSql(DriverTypeEnum.DERBY_EMBEDDED, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
@@ -577,18 +492,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MSSQL_2012, "create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(500) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID))")
 			.addSql(DriverTypeEnum.MSSQL_2012, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
-	}
-
-	private Boolean columnToBoolean(Object theValue) {
-		if (theValue == null) {
-			return null;
-		}
-		if (theValue instanceof Boolean) {
-			return (Boolean) theValue;
-		}
-
-		long longValue = ((Number) theValue).longValue();
-		return longValue == 1L;
 	}
 
 	private void init340() {
@@ -625,22 +528,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	}
 
-	private void init330() {
-		Builder version = forVersion(VersionEnum.V3_3_0);
-
-		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
-		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
-		hfjResource.dropColumn("RES_TEXT");
-		hfjResource.dropColumn("RES_ENCODING");
-
-		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
-		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
-		hfjResVer.modifyColumn("RES_ENCODING")
-			.nullable();
-		hfjResVer.modifyColumn("RES_TEXT")
-			.nullable();
-	}
-
 	public enum FlagEnum {
 		NO_MIGRATE_HASHES("no-migrate-350-hashes");
 
@@ -648,6 +535,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		FlagEnum(String theCommandLineValue) {
 			myCommandLineValue = theCommandLineValue;
+		}
+
+		public String getCommandLineValue() {
+			return myCommandLineValue;
 		}
 
 		public static FlagEnum fromCommandLineValue(String theCommandLineValue) {

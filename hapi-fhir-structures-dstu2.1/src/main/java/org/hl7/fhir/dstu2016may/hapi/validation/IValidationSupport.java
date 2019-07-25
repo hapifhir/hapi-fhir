@@ -4,8 +4,6 @@ import java.util.List;
 
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
@@ -16,7 +14,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 
 public interface IValidationSupport
-		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem, ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
+		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem, ConceptDefinitionComponent, IssueSeverity> {
 
 	/**
 	 * Expands the given portion of a ValueSet
@@ -35,23 +33,14 @@ public interface IValidationSupport
 	List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext);
 
 	/**
-	 * Fetch a code system by Uri
-	 *
-	 * @param uri
-	 *           Canonical Uri of the code system
+	 * Fetch a code system by ID
+	 * 
+	 * @param theSystem
+	 *           The code system
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
 	@Override
-	CodeSystem fetchCodeSystem(FhirContext theContext, String uri);
-
-	/**
-	 * Fetch a valueset by Uri
-	 *
-	 * @param uri
-	 *           Canonical Uri of the ValueSet
-	 * @return The valueset (must not be null, but can be an empty ValueSet)
-	 */
-	ValueSet fetchValueSet(FhirContext theContext, String uri);
+	CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem);
 
 	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
@@ -100,17 +89,17 @@ public interface IValidationSupport
 	@Override
 	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-	public class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
+	public class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
 
 		public CodeValidationResult(ConceptDefinitionComponent theNext) {
 			super(theNext);
 		}
 
-		public CodeValidationResult(OperationOutcome.IssueSeverity theSeverity, String theMessage) {
+		public CodeValidationResult(IssueSeverity theSeverity, String theMessage) {
 			super(theSeverity, theMessage);
 		}
 
-		public CodeValidationResult(OperationOutcome.IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
+		public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
 			super(severity, message, definition);
 		}
 
