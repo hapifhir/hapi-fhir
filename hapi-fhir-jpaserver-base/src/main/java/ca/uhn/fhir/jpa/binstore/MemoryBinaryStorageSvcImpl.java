@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.binstore;
 
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.IOException;
@@ -52,12 +53,13 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		String id = newRandomId();
 		String key = toKey(theResourceId, id);
 
-		HashingInputStream is = createHashingInputStream(theInputStream);
+		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
+		CountingInputStream countingIs = createCountingInputStream(hashingIs);
 
-		byte[] bytes = IOUtils.toByteArray(is);
+		byte[] bytes = IOUtils.toByteArray(countingIs);
 		theInputStream.close();
 		myDataMap.put(key, bytes);
-		StoredDetails storedDetails = new StoredDetails(id, bytes.length, theContentType, is, new Date());
+		StoredDetails storedDetails = new StoredDetails(id, countingIs.getCount(), theContentType, hashingIs, new Date());
 		myDetailsMap.put(key, storedDetails);
 		return storedDetails;
 	}
