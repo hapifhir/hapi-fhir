@@ -219,7 +219,15 @@ public class MethodUtil {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam) nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
+						OperationParam operationParam = (OperationParam) nextAnnotation;
+						param = new OperationParameter(theContext, op.name(), operationParam);
+						if (isNotBlank(operationParam.typeName())) {
+							Class<?> newParameterType = theContext.getElementDefinition(operationParam.typeName()).getImplementingClass();
+							if (!parameterType.isAssignableFrom(newParameterType)) {
+								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
+							}
+							parameterType = newParameterType;
+						}
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
 							throw new ConfigurationException(

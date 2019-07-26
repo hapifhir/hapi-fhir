@@ -151,12 +151,10 @@ public class OperationParameter implements IParameter {
 
 		boolean typeIsConcrete = !myParameterType.isInterface() && !Modifier.isAbstract(myParameterType.getModifiers());
 
-		//@formatter:off
 		boolean isSearchParam =
 			IQueryParameterType.class.isAssignableFrom(myParameterType) ||
 				IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
 				IQueryParameterAnd.class.isAssignableFrom(myParameterType);
-		//@formatter:off
 
 		/*
 		 * Note: We say here !IBase.class.isAssignableFrom because a bunch of DSTU1/2 datatypes also
