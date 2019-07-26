@@ -138,4 +138,9 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 		return null;
 	}
 
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
 }
