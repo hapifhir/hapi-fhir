@@ -217,14 +217,14 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return null;
 	}
 
-	@CoverageIgnore
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+	public IBaseResource fetchResource(FhirContext theContext, Class theClass, String theUri) {
 		return null;
 	}
 
+	@CoverageIgnore
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -293,20 +293,25 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 	@CoverageIgnore
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
 		if (codeOpt.isPresent()) {
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			TermConcept code = codeOpt.get();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
-			CodeValidationResult retVal = new CodeValidationResult(def);
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
 			retVal.setProperties(code.toValidationProperties());
 			retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
 			return retVal;
 		}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
 	@Override

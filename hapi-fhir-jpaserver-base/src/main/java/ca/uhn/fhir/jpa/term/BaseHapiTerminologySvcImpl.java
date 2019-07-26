@@ -21,10 +21,8 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -78,6 +76,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -1226,13 +1225,105 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
-		theCodeSystemVersion.setResource(resource);
+		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
+
 		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
 
 		myDeferredConceptMaps.addAll(theConceptMaps);
 		myDeferredValueSets.addAll(theValueSets);
 
 		return csId;
+	}
+
+	private void populateCodeSystemVersionProperties(TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystemResource, ResourceTable theResourceTable) {
+		theCodeSystemVersion.setResource(theResourceTable);
+		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
+		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
+	}
+
+	@Override
+	public void storeNewCodeSystemVersion(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
+		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
+			String codeSystemUrl = theCodeSystem.getUrl();
+			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
+
+				Long codeSystemResourcePid = IDao.RESOURCE_PID.get(theCodeSystem);
+				TermCodeSystemVersion persCs = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
+				if (persCs != null) {
+					ourLog.info("Code system version already exists in database");
+				} else {
+
+					persCs = new TermCodeSystemVersion();
+					populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+
+					persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
+					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+					storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), persCs);
+
+				}
+
+			}
+		}
+	}
+
+	private List<TermConcept> toPersistedConcepts(List<CodeSystem.ConceptDefinitionComponent> theConcept, TermCodeSystemVersion theCodeSystemVersion) {
+		ArrayList<TermConcept> retVal = new ArrayList<>();
+
+		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
+			if (isNotBlank(next.getCode())) {
+				TermConcept termConcept = toTermConcept(next, theCodeSystemVersion);
+				retVal.add(termConcept);
+			}
+		}
+
+		return retVal;
+	}
+
+	@Nonnull
+	private TermConcept toTermConcept(CodeSystem.ConceptDefinitionComponent theConceptDefinition, TermCodeSystemVersion theCodeSystemVersion) {
+		TermConcept termConcept = new TermConcept();
+		termConcept.setCode(theConceptDefinition.getCode());
+		termConcept.setCodeSystemVersion(theCodeSystemVersion);
+		termConcept.setDisplay(theConceptDefinition.getDisplay());
+		termConcept.addChildren(toPersistedConcepts(theConceptDefinition.getConcept(), theCodeSystemVersion), RelationshipTypeEnum.ISA);
+
+		for (CodeSystem.ConceptDefinitionDesignationComponent designationComponent : theConceptDefinition.getDesignation()) {
+			if (isNotBlank(designationComponent.getValue())) {
+				TermConceptDesignation designation = termConcept.addDesignation();
+				designation.setLanguage(designationComponent.hasLanguage() ? designationComponent.getLanguage() : null);
+				if (designationComponent.hasUse()) {
+					designation.setUseSystem(designationComponent.getUse().hasSystem() ? designationComponent.getUse().getSystem() : null);
+					designation.setUseCode(designationComponent.getUse().hasCode() ? designationComponent.getUse().getCode() : null);
+					designation.setUseDisplay(designationComponent.getUse().hasDisplay() ? designationComponent.getUse().getDisplay() : null);
+				}
+				designation.setValue(designationComponent.getValue());
+			}
+		}
+
+		for (CodeSystem.ConceptPropertyComponent next : theConceptDefinition.getProperty()) {
+			TermConceptProperty property = new TermConceptProperty();
+
+			property.setKey(next.getCode());
+			property.setConcept(termConcept);
+			property.setCodeSystemVersion(theCodeSystemVersion);
+
+			if (next.getValue() instanceof StringType) {
+				property.setType(TermConceptPropertyTypeEnum.STRING);
+				property.setValue(next.getValueStringType().getValue());
+			} else if (next.getValue() instanceof Coding) {
+				Coding nextCoding = next.getValueCoding();
+				property.setType(TermConceptPropertyTypeEnum.CODING);
+				property.setCodeSystem(nextCoding.getSystem());
+				property.setValue(nextCoding.getCode());
+				property.setDisplay(nextCoding.getDisplay());
+			} else if (next.getValue() != null) {
+				ourLog.warn("Don't know how to handle properties of type: " + next.getValue().getClass());
+			}
+
+			termConcept.getProperties().add(property);
+		}
+		return termConcept;
 	}
 
 	@Override
@@ -1443,6 +1534,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	@Override
+	@Transactional
 	public IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB) {
 		VersionIndependentConcept conceptA = toConcept(theCodeA, theSystem, theCodingA);
 		VersionIndependentConcept conceptB = toConcept(theCodeB, theSystem, theCodingB);
@@ -1469,6 +1561,143 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		return new IFhirResourceDaoCodeSystem.SubsumesResult(subsumes);
+	}
+
+	@Transactional
+	@Override
+	public AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue) {
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			throw new InvalidRequestException("Unknown code system: " + theSystem);
+		}
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+
+		AtomicInteger addedCodeCounter = new AtomicInteger(0);
+
+		TermConcept parentCode = null;
+		if (isNotBlank(theParent)) {
+			parentCode = myConceptDao
+				.findByCodeSystemAndCode(csv, theParent)
+				.orElseThrow(() -> new InvalidRequestException("Unknown code [" + theSystem + "|" + theParent + "]"));
+		}
+
+		List<TermConcept> concepts = new ArrayList<>();
+		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
+			TermConcept concept = toTermConcept(next, csv);
+			if (parentCode != null) {
+				parentCode.addChild(concept, RelationshipTypeEnum.ISA);
+			}
+			concepts.add(concept);
+		}
+
+		// The first pass just saves any concepts that were added to the
+		// root of the CodeSystem
+		List<TermConceptParentChildLink> links = new ArrayList<>();
+		for (TermConcept next : concepts) {
+			saveConcept(next);
+			addedCodeCounter.incrementAndGet();
+			extractLinksFromConceptAndChildren(next, links);
+		}
+
+		// This second pass saves any child concepts
+		for (TermConceptParentChildLink next : links) {
+			next.setCodeSystem(csv);
+			for (TermConceptParentChildLink nextChild : next.getChild().getChildren()) {
+				if (nextChild.getChild().getId() == null) {
+					int addedCount = saveConcept(nextChild.getChild());
+					addedCodeCounter.addAndGet(addedCount);
+				}
+			}
+			myConceptParentChildLinkDao.save(next);
+		}
+
+		return addedCodeCounter;
+	}
+
+
+	@Transactional
+	@Override
+	public AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theValue) {
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			throw new InvalidRequestException("Unknown code system: " + theSystem);
+		}
+
+		AtomicInteger removeCounter = new AtomicInteger(0);
+
+		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
+			Optional<TermConcept> conceptOpt = findCode(theSystem, next.getCode());
+			if (conceptOpt.isPresent()) {
+				TermConcept concept = conceptOpt.get();
+				deleteConceptChildrenAndConcept(concept, removeCounter);
+			}
+		}
+
+		return removeCounter;
+	}
+
+	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
+			myConceptParentChildLinkDao.delete(nextChildLink);
+		}
+
+		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
+		myConceptPropertyDao.deleteAll(theConcept.getProperties());
+		myConceptDao.delete(theConcept);
+		theRemoveCounter.incrementAndGet();
+	}
+
+	protected IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		return txTemplate.execute(t->{
+			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
+			if (codeOpt.isPresent()) {
+				TermConcept code = codeOpt.get();
+
+				IContextValidationSupport.LookupCodeResult result = new IContextValidationSupport.LookupCodeResult();
+				result.setCodeSystemDisplayName(code.getCodeSystemVersion().getCodeSystemDisplayName());
+				result.setCodeSystemVersion(code.getCodeSystemVersion().getCodeSystemVersionId());
+				result.setSearchedForSystem(theSystem);
+				result.setSearchedForCode(theCode);
+				result.setFound(true);
+				result.setCodeDisplay(code.getDisplay());
+
+				for (TermConceptDesignation next : code.getDesignations()) {
+					IContextValidationSupport.ConceptDesignation designation = new IContextValidationSupport.ConceptDesignation();
+					designation.setLanguage(next.getLanguage());
+					designation.setUseSystem(next.getUseSystem());
+					designation.setUseCode(next.getUseCode());
+					designation.setUseDisplay(next.getUseDisplay());
+					designation.setValue(next.getValue());
+					result.getDesignations().add(designation);
+				}
+
+				for (TermConceptProperty next : code.getProperties()) {
+					if (next.getType() == TermConceptPropertyTypeEnum.CODING) {
+						IContextValidationSupport.CodingConceptProperty property = new IContextValidationSupport.CodingConceptProperty(next.getKey(), next.getCodeSystem(), next.getValue(), next.getDisplay());
+						result.getProperties().add(property);
+					} else if (next.getType() == TermConceptPropertyTypeEnum.STRING) {
+						IContextValidationSupport.StringConceptProperty property = new IContextValidationSupport.StringConceptProperty(next.getKey(), next.getValue());
+						result.getProperties().add(property);
+					} else {
+						throw new InternalErrorException("Unknown type: " + next.getType());
+					}
+				}
+
+				return result;
+
+			} else {
+				return null;
+			}
+		});
+	}
+
+	private static void extractLinksFromConceptAndChildren(TermConcept theConcept, List<TermConceptParentChildLink> theLinks) {
+		theLinks.addAll(theConcept.getParents());
+		for (TermConceptParentChildLink child : theConcept.getChildren()) {
+			extractLinksFromConceptAndChildren(child.getChild(), theLinks);
+		}
 	}
 
 	private @Nullable
@@ -1716,15 +1945,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return retVal;
 	}
 
-	private void verifyNoDuplicates(Collection<TermConcept> theConcepts, Set<String> theCodes) {
-		for (TermConcept next : theConcepts) {
-			if (!theCodes.add(next.getCode())) {
-				throw new InvalidRequestException("Duplicate code " + next.getCode() + " found in codesystem after checking " + theCodes.size() + " codes");
-			}
-			verifyNoDuplicates(next.getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList()), theCodes);
-		}
-	}
-
 	@NotNull
 	private static VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
@@ -1775,4 +1995,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
+
+
+
 }

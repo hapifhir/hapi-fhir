@@ -68,7 +68,7 @@ public class MethodUtil {
 
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
+		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;

@@ -69,6 +69,9 @@ public class TermCodeSystemVersion implements Serializable {
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
+	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemDisplayName;
+
 	/**
 	 * Constructor
 	 */
@@ -155,4 +158,14 @@ public class TermCodeSystemVersion implements Serializable {
 		return result;
 	}
 
+	public String getCodeSystemDisplayName() {
+		return myCodeSystemDisplayName;
+	}
+
+	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+		myCodeSystemDisplayName = theCodeSystemDisplayName;
+	}
 }

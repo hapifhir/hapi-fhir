@@ -48,6 +48,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements IHapiTerminologySvcR4 {
+
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
@@ -59,8 +60,6 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
-	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -227,7 +226,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return myTerminologySvc.supportsSystem(theSystem);
+		return supportsSystem(theSystem);
 	}
 
 	@Override
@@ -237,19 +236,24 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@CoverageIgnore
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
 		if (codeOpt.isPresent()) {
 			TermConcept code = codeOpt.get();
 			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
 			def.setCode(code.getCode());
 			def.setDisplay(code.getDisplay());
-			CodeValidationResult retVal = new CodeValidationResult(def);
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
 			retVal.setProperties(code.toValidationProperties());
 			return retVal;
 		}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
 }

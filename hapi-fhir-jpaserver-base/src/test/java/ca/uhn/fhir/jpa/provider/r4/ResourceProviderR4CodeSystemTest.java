@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -42,6 +44,47 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		parentChildCs.addConcept().setCode("ParentB").setDisplay("Parent B");
 
 		myCodeSystemDao.create(parentChildCs);
+
+	}
+
+	@Test
+	public void testApplyDeltaAdd() {
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		ourClient.create().resource(cs).execute();
+
+		CodeSystem delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent codeA = delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		CodeSystem.ConceptDefinitionComponent codeAA = codeA
+			.addConcept()
+			.setCode("codeAA")
+			.setDisplay("displayAA");
+		codeAA
+			.addConcept()
+			.setCode("codeAAA")
+			.setDisplay("displayAAA");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 	}
 

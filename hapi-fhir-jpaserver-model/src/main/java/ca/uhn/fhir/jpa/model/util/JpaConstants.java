@@ -23,6 +23,17 @@ package ca.uhn.fhir.jpa.model.util;
 import ca.uhn.fhir.rest.api.Constants;
 
 public class JpaConstants {
+
+	/**
+	 * Operation name for the $apply-codesystem-delta-add operation
+	 */
+	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";
+
+	/**
+	 * Operation name for the $apply-codesystem-delta-remove operation
+	 */
+	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE = "$apply-codesystem-delta-remove";
+
 	/**
 	 * Operation name for the $expunge operation
 	 */
@@ -157,6 +168,11 @@ public class JpaConstants {
 	 * Operation name for the "$binary-access" operation
 	 */
 	public static final String OPERATION_BINARY_ACCESS_WRITE = "$binary-access-write";
+
+	/**
+	 * Operation name for the "$upload-external-code-system" operation
+	 */
+	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
 	/**
 	 * <p>

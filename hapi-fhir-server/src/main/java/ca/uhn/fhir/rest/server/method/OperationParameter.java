@@ -151,12 +151,10 @@ public class OperationParameter implements IParameter {
 
 		boolean typeIsConcrete = !myParameterType.isInterface() && !Modifier.isAbstract(myParameterType.getModifiers());
 
-		//@formatter:off
 		boolean isSearchParam =
 			IQueryParameterType.class.isAssignableFrom(myParameterType) ||
 				IQueryParameterOr.class.isAssignableFrom(myParameterType) ||
 				IQueryParameterAnd.class.isAssignableFrom(myParameterType);
-		//@formatter:off
 
 		/*
 		 * Note: We say here !IBase.class.isAssignableFrom because a bunch of DSTU1/2 datatypes also
@@ -189,7 +187,7 @@ public class OperationParameter implements IParameter {
 				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
+				throw new ConfigurationException("Invalid type for @OperationParam on method " + theMethod + ": " + myParameterType.getName());
 			}
 
 		}

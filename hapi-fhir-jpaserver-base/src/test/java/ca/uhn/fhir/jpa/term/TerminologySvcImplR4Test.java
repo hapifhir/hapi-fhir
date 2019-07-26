@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
@@ -9,6 +10,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
@@ -18,9 +20,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -31,12 +35,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
+	@Mock
+	IValueSetCodeAccumulator myValueSetCodeAccumulator;
 	private IIdType myConceptMapId;
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
-
-	@Mock
-	IValueSetCodeAccumulator myValueSetCodeAccumulator;
 
 	@Before
 	public void before() {
@@ -99,7 +102,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		return id;
 	}
-	
+
 	private void createAndPersistConceptMap() {
 		ConceptMap conceptMap = createConceptMap();
 		persistConceptMap(conceptMap);
@@ -158,6 +161,208 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testApplyCodeSystemDeltaAdd() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		assertEquals(true, myTermSvc.findCode("http://foo", "codeA").isPresent());
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeZZZ").isPresent());
+
+	}
+
+
+	@Test
+	public void testApplyCodeSystemDeltaAddAsChild() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent codeAA = delta
+			.addConcept()
+			.setCode("codeAA")
+			.setDisplay("displayAA");
+		codeAA
+			.addConcept()
+			.setCode("codeAAA")
+			.setDisplay("displayAAA");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", "codeA", delta);
+
+		assertEquals(true, myTermSvc.findCode("http://foo", "codeAA").isPresent());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeAA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED, myTermSvc.subsumes(toString("codeB"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
+
+		runInTransaction(() -> {
+			List<TermConceptParentChildLink> allChildren = myTermConceptParentChildLinkDao.findAll();
+			assertEquals(2, allChildren.size());
+		});
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaAddWithPropertiesAndDesignations() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setName("Description of my life");
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setVersion("1.2.3");
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent concept = delta
+			.addConcept()
+			.setCode("lunch")
+			.setDisplay("I'm having dog food");
+		concept
+			.addDesignation()
+			.setLanguage("fr")
+			.setUse(new Coding("http://sys", "code", "display"))
+			.setValue("Je mange une pomme");
+		concept
+			.addDesignation()
+			.setLanguage("es")
+			.setUse(new Coding("http://sys", "code", "display"))
+			.setValue("Como una pera");
+		concept.addProperty()
+			.setCode("flavour")
+			.setValue(new StringType("Hints of lime"));
+		concept.addProperty()
+			.setCode("useless_sct_code")
+			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo", "lunch");
+		assertEquals(true, result.isFound());
+		assertEquals("lunch", result.getSearchedForCode());
+		assertEquals("http://foo", result.getSearchedForSystem());
+
+		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
+		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
+		assertEquals(false, output.getParameterBool("abstract"));
+
+		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
+		assertEquals("language", designations.get(0).getPart().get(0).getName());
+		assertEquals("fr", ((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("use", designations.get(0).getPart().get(1).getName());
+		assertEquals("http://sys", ((Coding) designations.get(0).getPart().get(1).getValue()).getSystem());
+		assertEquals("code", ((Coding) designations.get(0).getPart().get(1).getValue()).getCode());
+		assertEquals("display", ((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay());
+		assertEquals("value", designations.get(0).getPart().get(2).getName());
+		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
+
+		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
+		assertEquals("code", properties.get(0).getPart().get(0).getName());
+		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(0).getPart().get(1).getName());
+		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
+
+		assertEquals("code", properties.get(1).getPart().get(0).getName());
+		assertEquals("useless_sct_code", ((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(1).getPart().get(1).getName());
+		assertEquals("http://snomed.info", ((Coding) properties.get(1).getPart().get(1).getValue()).getSystem());
+		assertEquals("1234567", ((Coding) properties.get(1).getPart().get(1).getValue()).getCode());
+		assertEquals("Choked on large meal (finding)", ((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay());
+
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaRemove() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent codeA = delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		CodeSystem.ConceptDefinitionComponent codeAA = codeA
+			.addConcept()
+			.setCode("codeAA")
+			.setDisplay("displayAA");
+		codeAA
+			.addConcept()
+			.setCode("codeAAA")
+			.setDisplay("displayAAA");
+ 		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		// Remove CodeB
+		delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
+
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeB").isPresent());
+		assertEquals(true, myTermSvc.findCode("http://foo", "codeA").isPresent());
+		assertEquals(true, myTermSvc.findCode("http://foo", "codeAA").isPresent());
+		assertEquals(true, myTermSvc.findCode("http://foo", "codeAAA").isPresent());
+
+		// Remove CodeA
+		delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA");
+		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
+
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeB").isPresent());
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeA").isPresent());
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeAA").isPresent());
+		assertEquals(false, myTermSvc.findCode("http://foo", "codeAAA").isPresent());
+
+	}
+
+
+	@Nonnull
+	private StringType toString(String theString) {
+		return new StringType(theString);
+	}
+
+
+	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
 		ConceptMap conceptMap = new ConceptMap();
 		conceptMap.setUrl(CM_URL);
@@ -183,7 +388,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testCreateConceptMapWithVirtualSourceSystem() {
 		ConceptMap conceptMap = createConceptMap();
-		conceptMap.getGroup().forEach(t->t.setSource(null));
+		conceptMap.getGroup().forEach(t -> t.setSource(null));
 		conceptMap.setSource(new CanonicalType("http://hl7.org/fhir/uv/livd/StructureDefinition/loinc-livd"));
 
 		persistConceptMap(conceptMap);

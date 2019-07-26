@@ -171,6 +171,16 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		for (IValidationSupport next : myChain) {
+			if (next.isCodeSystemSupported(theContext, theSystem)) {
+				return next.lookupCode(theContext, theSystem, theCode);
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
 		StructureDefinition outcome = null;
 		for (org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport next : myChain) {

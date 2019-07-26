@@ -294,6 +294,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	}
 
   @Override
+  public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+    return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
+  }
+
+  @Override
   public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
     return null;
   }
