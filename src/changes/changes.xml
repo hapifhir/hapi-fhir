@@ -311,6 +311,11 @@
 				are found on a plain provider.
 			</action>
 			<action type="add">
+				@Operation method parameters may now declare their type via a String name such as
+				"code" or "Coding" in an attribute in @OperationParam. This is useful if you want
+				to make operation methods that can operate across different versions of FHIR.
+			</action>
+			<action type="add">
 				A new resource provider for JPA servers called
 				<![CDATA[<code>BinaryAccessProvider</code>]]>
 				has been added. This provider serves two custom operations called
@@ -335,7 +340,6 @@
 				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
 				user @navyflower for reporting!
 			</action>
-
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

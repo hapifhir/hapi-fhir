@@ -44,7 +44,7 @@ public abstract class ExpungeService {
 	private IResourceExpungeService myExpungeDaoService;
 
 	@Lookup
-	protected abstract ExpungeRun getExpungeRun(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
+	protected abstract ExpungeOperation getExpungeOperation(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
 	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
@@ -63,8 +63,8 @@ public abstract class ExpungeService {
 			}
 		}
 
-		ExpungeRun expungeRun = getExpungeRun(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequest);
-		return expungeRun.call();
+		ExpungeOperation expungeOperation = getExpungeOperation(theResourceName, theResourceId, theVersion, theExpungeOptions, theRequest);
+		return expungeOperation.call();
 	}
 
 	public void deleteAllSearchParams(Long theResourceId) {
