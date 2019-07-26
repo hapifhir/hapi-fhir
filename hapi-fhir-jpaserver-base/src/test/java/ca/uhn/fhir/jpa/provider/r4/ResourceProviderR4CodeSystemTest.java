@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
@@ -81,11 +81,55 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
 			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
 			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);
 
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"valueInteger\": 4"));
+	}
 
+	@Test
+	public void testApplyDeltaRemove() {
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		ourClient.create().resource(cs).execute();
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+
+		// Add
+		ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
+			.execute();
+
+		// Remove
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
+			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"valueInteger\": 1"));
 	}
 
 	@Test

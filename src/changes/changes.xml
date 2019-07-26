@@ -52,7 +52,15 @@
 				the user has not explicitly configured a preference.
 				]]>
 			</action>
-			<action type="add">
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The JPA $upload-external-code-system operation has been moved from being a
+				server level operation (i.e. called on the root of the server) to being
+				a type level operation (i.e. called on the CodeSystem type).
+				]]>
+			</action>
+		<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that

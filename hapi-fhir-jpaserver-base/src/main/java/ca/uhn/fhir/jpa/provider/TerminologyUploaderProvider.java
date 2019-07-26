@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -72,7 +71,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-add
 	 * </code>
 	 */
-	@Operation(name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
+	@Operation(type=CodeSystem.class, name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaAdd(
 		HttpServletRequest theServletRequest,
@@ -95,7 +94,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 			}
 
 			String system = theSystem.getValue();
-			String parentCode = theParentCode.getValue();
+			String parentCode = theParentCode != null ? theParentCode.getValue() : null;
 
 			AtomicInteger counter = myTerminologySvc.applyDeltaCodesystemsAdd(system, parentCode, value);
 
@@ -116,7 +115,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-remove
 	 * </code>
 	 */
-	@Operation(name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
+	@Operation(type=CodeSystem.class, name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaRemove(
 		HttpServletRequest theServletRequest,
@@ -158,14 +157,14 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $upload-external-codesystem
 	 * </code>
 	 */
-	@Operation(name = JpaConstants.UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
+	@Operation(type = CodeSystem.class, name = JpaConstants.UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
 //		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
 	})
 	public IBaseParameters uploadExternalCodeSystem(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = "url", min = 1) StringParam theCodeSystemUrl,
-		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED) List<IPrimitiveType<String>> theLocalFile,
-		@OperationParam(name = "package", min = 0, max = OperationParam.MAX_UNLIMITED) List<ICompositeType> thePackage,
+		@OperationParam(name = "url", min = 1, typeName = "string") IPrimitiveType<String> theCodeSystemUrl,
+		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
+		@OperationParam(name = "package", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
 		RequestDetails theRequestDetails
 	) {
 
