@@ -348,6 +348,12 @@
 				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
 				user @navyflower for reporting!
 			</action>
+			<action type="add">
+				A new attribute has been added to the @Operation annotation called 
+				<![CDATA[<code>typeName</code>]]>. This annotation can be used to specify a 
+				type for an operation declared on a plain provider without needing to use 
+				a specific version of the FHIR structures.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
