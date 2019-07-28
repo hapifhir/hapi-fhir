@@ -40,6 +40,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,6 +68,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		return valueSetIds;
 	}
 
+	@Nonnull
 	@Override
 	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
@@ -95,7 +97,10 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
 
 			ourLog.info("Code system {} is supported", system);
-			return myValidationSupport.lookupCode(getContext(), system, code);
+			IContextValidationSupport.LookupCodeResult retVal = myValidationSupport.lookupCode(getContext(), system, code);
+			if (retVal != null) {
+				return retVal;
+			}
 
 		}
 
@@ -130,7 +135,9 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		CodeSystem cs = (CodeSystem) theResource;
 		addPidToResource(theEntity, theResource);
 
-		myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
+		if (cs.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
+		}
 
 		return retVal;
 	}

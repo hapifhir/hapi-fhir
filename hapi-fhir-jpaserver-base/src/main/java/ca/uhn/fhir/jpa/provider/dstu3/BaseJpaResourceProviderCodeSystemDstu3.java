@@ -27,7 +27,6 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 
@@ -36,7 +35,6 @@ import java.util.List;
 
 public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderDstu3<CodeSystem> {
 
-	@SuppressWarnings("unchecked")
 	@Operation(name = JpaConstants.OPERATION_LOOKUP, idempotent = true, returnParameters = {
 		@OperationParam(name = "name", type = StringType.class, min = 1),
 		@OperationParam(name = "version", type = StringType.class, min = 0),
@@ -57,8 +55,7 @@ public class BaseJpaResourceProviderCodeSystemDstu3 extends JpaResourceProviderD
 			IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> dao = (IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept>) getDao();
 			IContextValidationSupport.LookupCodeResult result = dao.lookupCode(theCode, theSystem, theCoding, theRequestDetails);
 			result.throwNotFoundIfAppropriate();
-			org.hl7.fhir.r4.model.Parameters parametersR4 = (org.hl7.fhir.r4.model.Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
-			return VersionConvertor_30_40.convertParameters(parametersR4);
+			return (Parameters) result.toParameters(theRequestDetails.getFhirContext(), theProperties);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		} finally {

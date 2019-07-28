@@ -309,6 +309,8 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 			if (isOk()) {
 				retVal.setFound(true);
 				retVal.setCodeDisplay(getDisplay());
+				retVal.setCodeSystemDisplayName(getCodeSystemName());
+				retVal.setCodeSystemVersion(getCodeSystemVersion());
 			}
 			return retVal;
 		}

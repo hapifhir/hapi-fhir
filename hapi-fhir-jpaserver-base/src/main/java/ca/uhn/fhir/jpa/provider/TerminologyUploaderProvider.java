@@ -162,7 +162,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters uploadExternalCodeSystem(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = "url", min = 1, typeName = "string") IPrimitiveType<String> theCodeSystemUrl,
+		@OperationParam(name = "url", min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
 		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
 		@OperationParam(name = "package", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
 		RequestDetails theRequestDetails

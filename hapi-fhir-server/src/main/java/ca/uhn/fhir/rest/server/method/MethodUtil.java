@@ -95,25 +95,6 @@ public class MethodUtil {
 					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
 						+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
 				}
-
-				/*
-				 * If the user is trying to bind IPrimitiveType they are probably
-				 * trying to write code that is compatible across versions of FHIR.
-				 * We'll try and come up with an appropriate subtype to give
-				 * them.
-				 *
-				 * This gets tested in HistoryR4Test
-				 */
-				if (IPrimitiveType.class.equals(parameterType)) {
-					Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-					if (Date.class.equals(genericType)) {
-						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
-						parameterType = dateTimeDef.getImplementingClass();
-					} else if (String.class.equals(genericType) || genericType == null) {
-						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
-						parameterType = dateTimeDef.getImplementingClass();
-					}
-				}
 			}
 
 			if (ServletRequest.class.isAssignableFrom(parameterType)) {
@@ -273,6 +254,25 @@ public class MethodUtil {
 
 				}
 
+			}
+
+			/*
+			 * If the user is trying to bind IPrimitiveType they are probably
+			 * trying to write code that is compatible across versions of FHIR.
+			 * We'll try and come up with an appropriate subtype to give
+			 * them.
+			 *
+			 * This gets tested in HistoryR4Test
+			 */
+			if (IPrimitiveType.class.equals(parameterType)) {
+				Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+				if (Date.class.equals(genericType)) {
+					BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
+					parameterType = dateTimeDef.getImplementingClass();
+				} else if (String.class.equals(genericType) || genericType == null) {
+					BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
+					parameterType = dateTimeDef.getImplementingClass();
+				}
 			}
 
 			if (param == null) {

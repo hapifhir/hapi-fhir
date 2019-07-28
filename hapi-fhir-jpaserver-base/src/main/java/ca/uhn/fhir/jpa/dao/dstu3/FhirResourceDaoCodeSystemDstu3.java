@@ -96,7 +96,10 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 
 		if (myValidationSupport.isCodeSystemSupported(getContext(), system)) {
 			ourLog.debug("Code system {} is supported", system);
-			return myValidationSupport.lookupCode(getContext(), system, code);
+			IContextValidationSupport.LookupCodeResult result = myValidationSupport.lookupCode(getContext(), system, code);
+			if (result != null) {
+				return result;
+			}
 		}
 
 		// We didn't find it..
@@ -131,7 +134,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
 		addPidToResource(theEntity, theResource);
 
-		myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
+		if (cs.getContent() != org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
+		}
 
 		return retVal;
 	}

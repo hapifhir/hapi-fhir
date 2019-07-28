@@ -1123,7 +1123,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSystemVersion) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion) {
 		ourLog.info("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
@@ -1168,6 +1168,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 		}
 		theCodeSystemVersion.setCodeSystem(codeSystem);
+
+		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
+		theCodeSystemVersion.setCodeSystemVersionId(theSystemVersionId);
 
 		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
@@ -1227,7 +1230,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
-		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemVersion);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion);
 
 		myDeferredConceptMaps.addAll(theConceptMaps);
 		myDeferredValueSets.addAll(theValueSets);
@@ -1259,7 +1262,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 					persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-					storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), persCs);
+					storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
 
 				}
 
@@ -1318,7 +1321,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				property.setValue(nextCoding.getCode());
 				property.setDisplay(nextCoding.getDisplay());
 			} else if (next.getValue() != null) {
+				// TODO: LOINC has properties of type BOOLEAN that we should handle
 				ourLog.warn("Don't know how to handle properties of type: " + next.getValue().getClass());
+				continue;
 			}
 
 			termConcept.getProperties().add(property);
@@ -1650,7 +1655,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	protected IContextValidationSupport.LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		return txTemplate.execute(t->{
+		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();
@@ -1691,13 +1696,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				return null;
 			}
 		});
-	}
-
-	private static void extractLinksFromConceptAndChildren(TermConcept theConcept, List<TermConceptParentChildLink> theLinks) {
-		theLinks.addAll(theConcept.getParents());
-		for (TermConceptParentChildLink child : theConcept.getChildren()) {
-			extractLinksFromConceptAndChildren(child.getChild(), theLinks);
-		}
 	}
 
 	private @Nullable
@@ -1837,7 +1835,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				predicates = new ArrayList<>();
 
 				coding = translationQuery.getCoding();
-				String targetCode = null;
+				String targetCode;
 				String targetCodeSystem = null;
 				if (coding.hasCode()) {
 					predicates.add(criteriaBuilder.equal(targetJoin.get("myCode"), coding.getCode()));
@@ -1945,6 +1943,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return retVal;
 	}
 
+	private static void extractLinksFromConceptAndChildren(TermConcept theConcept, List<TermConceptParentChildLink> theLinks) {
+		theLinks.addAll(theConcept.getParents());
+		for (TermConceptParentChildLink child : theConcept.getChildren()) {
+			extractLinksFromConceptAndChildren(child.getChild(), theLinks);
+		}
+	}
+
 	@NotNull
 	private static VersionIndependentConcept toConcept(IPrimitiveType<String> theCodeType, IPrimitiveType<String> theSystemType, IBaseCoding theCodingType) {
 		String code = theCodeType != null ? theCodeType.getValueAsString() : null;
@@ -1995,7 +2000,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public static void setForceSaveDeferredAlwaysForUnitTest(boolean theForceSaveDeferredAlwaysForUnitTest) {
 		ourForceSaveDeferredAlwaysForUnitTest = theForceSaveDeferredAlwaysForUnitTest;
 	}
-
 
 
 }

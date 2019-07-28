@@ -49,7 +49,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI + "FOO"))
 				.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -65,35 +65,31 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	public void testUploadLoinc() throws Exception {
 		byte[] packageBytes = TerminologyUploaderProviderDstu3Test.createLoincZip();
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
-		assertThat(((Reference) respParam.getParameter().get(1).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9]+"));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
+		assertThat(((Reference) respParam.getParameter().get(2).getValue()).getReference(), matchesPattern("CodeSystem\\/[a-zA-Z0-9]+"));
 
 		/*
 		 * Try uploading a second time
 		 */
 
-		//@formatter:off
 		respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
-		//@formatter:on
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -106,7 +102,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.execute();
@@ -114,18 +110,16 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: No 'localfile' or 'package' parameter, or package had no data", e.getMessage());
 		}
-		//@formatter:on
 	}
 
 	@Test
 	public void testUploadMissingUrl() throws Exception {
 		byte[] packageBytes = createSctZip();
 
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "package", new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
@@ -133,27 +127,25 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Unknown URL: ", e.getMessage());
 		}
-		//@formatter:on
+
 	}
 
 	@Test
 	public void testUploadSct() throws Exception {
 		byte[] packageBytes = createSctZip();
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@Test
@@ -166,20 +158,18 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		fos.write(packageBytes);
 		fos.close();
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@AfterClass
