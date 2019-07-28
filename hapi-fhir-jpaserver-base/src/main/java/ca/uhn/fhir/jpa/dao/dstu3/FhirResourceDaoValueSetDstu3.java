@@ -239,7 +239,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 			// String code = theCode.getValue();
 			// String system = toStringOrNull(theSystem);
 			IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
-			if (result.isFound()) {
+			if (result != null && result.isFound()) {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
 				return retVal;
 			}

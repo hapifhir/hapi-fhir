@@ -172,7 +172,7 @@ public class JpaConstants {
 	/**
 	 * Operation name for the "$upload-external-code-system" operation
 	 */
-	public static final String UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
+	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
 	/**
 	 * <p>

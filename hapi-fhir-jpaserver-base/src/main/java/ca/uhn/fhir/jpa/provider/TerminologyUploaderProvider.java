@@ -71,7 +71,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-add
 	 * </code>
 	 */
-	@Operation(type=CodeSystem.class, name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
+	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaAdd(
 		HttpServletRequest theServletRequest,
@@ -115,7 +115,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-remove
 	 * </code>
 	 */
-	@Operation(type=CodeSystem.class, name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
+	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaRemove(
 		HttpServletRequest theServletRequest,
@@ -157,7 +157,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $upload-external-codesystem
 	 * </code>
 	 */
-	@Operation(type = CodeSystem.class, name = JpaConstants.UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
+	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
 //		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
 	})
 	public IBaseParameters uploadExternalCodeSystem(

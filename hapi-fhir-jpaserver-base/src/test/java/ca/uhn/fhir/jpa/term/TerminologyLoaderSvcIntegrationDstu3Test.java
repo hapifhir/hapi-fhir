@@ -135,8 +135,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
-		org.hl7.fhir.r4.model.Parameters parametersR4 = (org.hl7.fhir.r4.model.Parameters) result.toParameters(myFhirCtx, null);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
@@ -166,8 +165,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myLoader.loadLoinc(files.getFiles(), mySrd);
 
 		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("17788-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
-		org.hl7.fhir.r4.model.Parameters parametersR4 = (org.hl7.fhir.r4.model.Parameters) result.toParameters(myFhirCtx, null);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, null);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
@@ -186,8 +184,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(new StringType("10013-1"), new StringType(IHapiTerminologyLoaderSvc.LOINC_URI), null, mySrd);
 		List<? extends IPrimitiveType<String>> properties = Lists.newArrayList(new CodeType("SCALE_TYP"));
-		org.hl7.fhir.r4.model.Parameters parametersR4 = (org.hl7.fhir.r4.model.Parameters) result.toParameters(myFhirCtx, properties);
-		Parameters parameters = VersionConvertor_30_40.convertParameters(parametersR4);
+		Parameters parameters = (Parameters) result.toParameters(myFhirCtx, properties);
 
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 

@@ -34,7 +34,7 @@ public class PublicSecurityInterceptor extends AuthorizationInterceptor {
 		if (isBlank(authHeader)) {
 			return new RuleBuilder()
 				.deny().operation().named(BaseJpaSystemProvider.MARK_ALL_RESOURCES_FOR_REINDEXING).onServer().andAllowAllResponses().andThen()
-				.deny().operation().named(JpaConstants.UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andAllowAllResponses().andThen()
+				.deny().operation().named(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM).onServer().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD).atAnyLevel().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE).atAnyLevel().andAllowAllResponses().andThen()
 				.deny().operation().named(JpaConstants.OPERATION_EXPUNGE).onServer().andAllowAllResponses().andThen()
