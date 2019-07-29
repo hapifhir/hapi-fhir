@@ -49,29 +49,33 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testApplyDeltaAdd() {
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		ourClient.create().resource(cs).execute();
 
 		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent codeA = delta
+		delta.setUrl("http://example.com/labCodes");
+		delta.setName("Example Hospital Lab Codes");
+		delta.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		CodeSystem.ConceptDefinitionComponent chem = delta
 			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		delta
+			.setCode("CHEM")
+			.setDisplay("Chemistry Tests");
+		chem
 			.addConcept()
-			.setCode("codeB")
-			.setDisplay("displayB");
-		CodeSystem.ConceptDefinitionComponent codeAA = codeA
+			.setCode("HB")
+			.setDisplay("Hemoglobin");
+		chem
 			.addConcept()
-			.setCode("codeAA")
-			.setDisplay("displayAA");
-		codeAA
+			.setCode("NEUT")
+			.setDisplay("Neutrophil");
+		CodeSystem.ConceptDefinitionComponent micro = delta
 			.addConcept()
-			.setCode("codeAAA")
-			.setDisplay("displayAAA");
+			.setCode("MICRO")
+			.setDisplay("Microbiology Tests");
+		micro
+			.addConcept()
+			.setCode("C&S")
+			.setDisplay("Culture & Sensitivity");
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		ourClient.registerInterceptor(interceptor);
@@ -79,15 +83,14 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
-			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
 			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 4"));
+		assertThat(encoded, containsString("\"valueInteger\": 5"));
 	}
 
 	@Test
@@ -99,6 +102,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourClient.create().resource(cs).execute();
 
 		CodeSystem delta = new CodeSystem();
+		delta.setUrl("http://foo");
 		delta
 			.addConcept()
 			.setCode("codeA")
@@ -109,8 +113,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
-			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
 			.prettyPrint()
 			.execute();
 
@@ -121,8 +124,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.SYSTEM, new StringType("http://foo"))
-			.andParameter(TerminologyUploaderProvider.VALUE, delta)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
 			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);

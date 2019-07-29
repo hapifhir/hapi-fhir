@@ -100,6 +100,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();

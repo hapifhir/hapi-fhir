@@ -5,6 +5,11 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -24,6 +29,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
@@ -185,6 +191,102 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertEquals(true, myTermSvc.findCode("http://foo", "codeA").isPresent());
 		assertEquals(false, myTermSvc.findCode("http://foo", "codeZZZ").isPresent());
 
+	}
+
+	/**
+	 * This would be a good check, but there is no easy eay to do it...
+	 */
+	@Test
+	@Ignore
+	public void testApplyCodeSystemDeltaAddNotPermittedForNonExternalCodeSystem() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		try {
+			myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaAddWithoutPreExistingCodeSystem() {
+
+		CodeSystem delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("CBC")
+			.setDisplay("Complete Blood Count");
+		delta
+			.addConcept()
+			.setCode("URNL")
+			.setDisplay("Routine Urinalysis");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(CodeSystem.SP_URL, new UriParam("http://foo"));
+		IBundleProvider searchResult = myCodeSystemDao.search(params, mySrd);
+		assertEquals(1, searchResult.size().intValue());
+		CodeSystem outcome = (CodeSystem) searchResult.getResources(0,1).get(0);
+
+		assertEquals("http://foo", outcome.getUrl());
+		assertEquals("Acme Lab Codes", outcome.getName());
+	}
+
+
+	@Test
+	public void testApplyCodeSystemDeltaAddDuplicatesIgnored() {
+
+		// Add codes
+		CodeSystem delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("codea")
+			.setDisplay("CODEA0");
+		delta
+			.addConcept()
+			.setCode("codeb")
+			.setDisplay("CODEB0");
+		AtomicInteger outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(2, outcome.get());
+
+		// Add codes again with different display
+		delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("codea")
+			.setDisplay("CODEA1");
+		delta
+			.addConcept()
+			.setCode("codeb")
+			.setDisplay("CODEB1");
+		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(2, outcome.get());
+
+		// Add codes again with no changes
+		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(0, outcome.get());
 	}
 
 

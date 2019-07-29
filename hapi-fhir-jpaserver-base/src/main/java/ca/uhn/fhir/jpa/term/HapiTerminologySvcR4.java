@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -86,6 +87,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
+		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl).getId();

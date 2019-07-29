@@ -55,7 +55,6 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	public static final String CONCEPT_COUNT = "conceptCount";
 	public static final String TARGET = "target";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
-	public static final String SYSTEM = "system";
 	public static final String PARENT_CODE = "parentCode";
 	public static final String VALUE = "value";
 
@@ -75,7 +74,6 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters applyCodeSystemDeltaAdd(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = SYSTEM, min = 1, max = 1) IPrimitiveType<String> theSystem,
 		@OperationParam(name = PARENT_CODE, min = 0, max = 1) IPrimitiveType<String> theParentCode,
 		@OperationParam(name = VALUE, min = 1, max = 1) IBaseResource theValue,
 		RequestDetails theRequestDetails
@@ -93,7 +91,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 				throw new InvalidRequestException("Value must be present and be a CodeSystem");
 			}
 
-			String system = theSystem.getValue();
+			String system = value.getUrl();
 			String parentCode = theParentCode != null ? theParentCode.getValue() : null;
 
 			AtomicInteger counter = myTerminologySvc.applyDeltaCodesystemsAdd(system, parentCode, value);
@@ -119,7 +117,6 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters applyCodeSystemDeltaRemove(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = SYSTEM, min = 1, max = 1) IPrimitiveType<String> theSystem,
 		@OperationParam(name = VALUE, min = 1, max = 1) IBaseResource theValue,
 		RequestDetails theRequestDetails
 	) {
@@ -136,7 +133,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 				throw new InvalidRequestException("Value must be present and be a CodeSystem");
 			}
 
-			String system = theSystem.getValue();
+			String system = value.getUrl();
 
 			AtomicInteger counter = myTerminologySvc.applyDeltaCodesystemsRemove(system, value);
 

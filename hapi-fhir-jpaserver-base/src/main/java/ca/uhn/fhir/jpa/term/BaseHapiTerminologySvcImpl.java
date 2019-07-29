@@ -260,6 +260,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	protected abstract IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource);
 
+	protected void validateCodeSystemForStorage(CodeSystem theCodeSystemResource) {
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theCodeSystemResource.getUrl(), "Can not store a CodeSystem without a valid URL");
+	}
+
 	protected abstract void createOrUpdateConceptMap(ConceptMap theNextConceptMap);
 
 	abstract void createOrUpdateValueSet(ValueSet theValueSet);
@@ -1035,6 +1039,37 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	}
 
+	/**
+	 * Returns the number of saved concepts
+	 */
+	private int saveOrUpdateConcept(TermConcept theConcept) {
+
+		TermCodeSystemVersion csv = theConcept.getCodeSystemVersion();
+		Optional<TermConcept> existing = myConceptDao.findByCodeSystemAndCode(csv, theConcept.getCode());
+		if (existing.isPresent()) {
+			TermConcept existingConcept = existing.get();
+			boolean haveChanges = false;
+			if (!StringUtils.equals(existingConcept.getDisplay(), theConcept.getDisplay())) {
+				existingConcept.setDisplay(theConcept.getDisplay());
+				haveChanges = true;
+			}
+
+			if (!haveChanges) {
+				return 0;
+			}
+
+			myConceptDao.save(existingConcept);
+			return 1;
+
+		} else {
+			return saveConcept(theConcept);
+		}
+		
+	}
+
+	/**
+	 * Returns the number of saved concepts
+	 */
 	private int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -1573,8 +1608,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue) {
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		if (cs == null) {
-			throw new InvalidRequestException("Unknown code system: " + theSystem);
+			List<CodeSystem.ConceptDefinitionComponent> codes = theValue.getConcept();
+			theValue.setConcept(null);
+			createOrUpdateCodeSystem(theValue);
+			cs = getCodeSystem(theSystem);
+			theValue.setConcept(codes);
 		}
+
 		TermCodeSystemVersion csv = cs.getCurrentVersion();
 
 		AtomicInteger addedCodeCounter = new AtomicInteger(0);
@@ -1599,26 +1639,21 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// root of the CodeSystem
 		List<TermConceptParentChildLink> links = new ArrayList<>();
 		for (TermConcept next : concepts) {
-			saveConcept(next);
-			addedCodeCounter.incrementAndGet();
+			int addedCount = saveOrUpdateConcept(next);
+			addedCodeCounter.addAndGet(addedCount);
 			extractLinksFromConceptAndChildren(next, links);
 		}
 
 		// This second pass saves any child concepts
 		for (TermConceptParentChildLink next : links) {
 			next.setCodeSystem(csv);
-			for (TermConceptParentChildLink nextChild : next.getChild().getChildren()) {
-				if (nextChild.getChild().getId() == null) {
-					int addedCount = saveConcept(nextChild.getChild());
-					addedCodeCounter.addAndGet(addedCount);
-				}
-			}
+			int addedCount = saveOrUpdateConcept(next.getChild());
+			addedCodeCounter.addAndGet(addedCount);
 			myConceptParentChildLinkDao.save(next);
 		}
 
 		return addedCodeCounter;
 	}
-
 
 	@Transactional
 	@Override
