@@ -115,6 +115,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.toColumn("RES_ID")
 			.references("HFJ_RESOURCE", "RES_ID");
 		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
+		termValueSetTable.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_EXPANSION_STATUS_LENGTH);
+		termValueSetTable
+			.addIndex("IDX_VALUESET_EXP_STATUS")
+			.unique(false)
+			.withColumns("EXPANSION_STATUS");
 
 		// TermValueSetConcept
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");

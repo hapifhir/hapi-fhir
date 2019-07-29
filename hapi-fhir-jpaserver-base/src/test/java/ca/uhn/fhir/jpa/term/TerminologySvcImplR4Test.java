@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -964,6 +963,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", valueSet.getUrl());
 				assertEquals("Terminology Services Connectation #1 Extensional case #2", valueSet.getName());
 				assertEquals(codeSystem.getConcept().size(), valueSet.getConcepts().size());
+				assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, valueSet.getExpansionStatus());
 
 				TermValueSetConcept concept = valueSet.getConcepts().get(0);
 				ourLog.info("Code:\n" + concept.toString());
