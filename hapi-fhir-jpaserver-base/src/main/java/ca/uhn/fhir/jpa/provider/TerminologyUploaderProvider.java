@@ -66,6 +66,23 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private IHapiTerminologySvc myTerminologySvc;
 
 	/**
+	 * Constructor
+	 */
+	public TerminologyUploaderProvider() {
+		this(null, null, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public TerminologyUploaderProvider(FhirContext theContext, IHapiTerminologyLoaderSvc theTerminologyLoaderSvc, IHapiTerminologySvc theTerminologySvc) {
+		myCtx = theContext;
+		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
+		myTerminologySvc = theTerminologySvc;
+	}
+
+
+	/**
 	 * <code>
 	 * $apply-codesystem-delta-add
 	 * </code>
