@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -590,6 +591,17 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
 		verify(myValueSetCodeAccumulator, times(9)).includeCodeWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
+	}
+
+	@Test
+	public void testValidateCode() {
+		createCodeSystem();
+
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
+		assertEquals(true, validation.isOk());
+
+		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
+		assertEquals(false, validation.isOk());
 	}
 
 	@Test

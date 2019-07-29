@@ -770,9 +770,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	public Optional<TermConcept> findCode(String theCodeSystem, String theCode) {
-		TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
-
-		return myConceptDao.findByCodeSystemAndCode(csv, theCode);
+		/*
+		 * Loading concepts without a transaction causes issues later on some
+		 * platforms (e.g. PSQL) so this transactiontemplate is here to make
+		 * sure that we always call this with an open transaction
+		 */
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_MANDATORY);
+		return txTemplate.execute(t->{
+			TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
+			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
+		});
 	}
 
 	@Override
