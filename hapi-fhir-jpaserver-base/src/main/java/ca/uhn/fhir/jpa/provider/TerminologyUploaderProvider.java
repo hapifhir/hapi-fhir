@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
+public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	public static final String CONCEPT_COUNT = "conceptCount";
 	public static final String TARGET = "target";
