@@ -132,11 +132,9 @@ public class FhirResourceDaoCodeSystemDstu3 extends FhirResourceDaoDstu3<CodeSys
 		CodeSystem csDstu3 = (CodeSystem) theResource;
 
 		org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
-		addPidToResource(theEntity, theResource);
+		addPidToResource(theEntity, cs);
 
-		if (cs.getContent() != org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
-		}
+		myTerminologySvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
 
 		return retVal;
 	}

@@ -30,6 +30,7 @@ import org.junit.*;
 
 import javax.servlet.ServletException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
@@ -42,6 +43,7 @@ public class OperationGenericServer2R4Test {
 	private static IdType ourLastId;
 	private static Object ourLastParam1;
 	private static Object ourLastParam2;
+	private static Object ourLastParam3;
 	private static Parameters ourLastResourceParam;
 	private int myPort;
 	private Server myServer;
@@ -50,6 +52,7 @@ public class OperationGenericServer2R4Test {
 	public void before() {
 		ourLastParam1 = null;
 		ourLastParam2 = null;
+		ourLastParam3=null;
 		ourLastId = null;
 		ourLastResourceParam = null;
 	}
@@ -109,6 +112,65 @@ public class OperationGenericServer2R4Test {
 			assertEquals("sys", param2.getSystem());
 			assertEquals("val", param2.getCode());
 			assertEquals("dis", param2.getDisplay());
+		}
+
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testDeclarativeStringTypedParameters() throws Exception {
+
+		@SuppressWarnings("unused")
+		class PatientProvider implements IResourceProvider {
+
+			@Override
+			public Class<Patient> getResourceType() {
+				return Patient.class;
+			}
+
+			@Operation(name = "$OP_INSTANCE")
+			public Parameters opInstance(
+				@ResourceParam() IBaseResource theResourceParam,
+				@IdParam IdType theId,
+				@OperationParam(name = "PARAM1", min = 1, typeName = "uri") IPrimitiveType<String> theParam1,
+				@OperationParam(name = "PARAM2", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theParam2,
+				@OperationParam(name = "PARAM3", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theParam3
+			) {
+
+				ourLastId = theId;
+				ourLastParam1 = theParam1;
+				ourLastParam2 = theParam2;
+				ourLastParam3 = theParam2;
+				ourLastResourceParam = (Parameters) theResourceParam;
+
+				Parameters retVal = new Parameters();
+				retVal.addParameter().setName("RET1").setValue(new StringType("RETVAL1"));
+				return retVal;
+			}
+
+		}
+
+		PatientProvider provider = new PatientProvider();
+		startServer(provider);
+
+		Parameters p = new Parameters();
+		p.addParameter().setName("PARAM1").setValue(new UriType("PARAM1val"));
+		p.addParameter().setName("PARAM2").setValue(new StringType("PARAM2val"));
+		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + myPort + "/Patient/123/$OP_INSTANCE");
+		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(response);
+			status.getEntity().getContent().close();
+
+			UriType param1 = (UriType) ourLastParam1;
+			assertEquals("PARAM1val", param1.getValue());
+
+			List<StringType> param2 = (List<StringType>) ourLastParam2;
+			assertEquals("PARAM2val", param2.get(0).getValue());
 		}
 
 	}

@@ -75,7 +75,8 @@ public class MethodUtil {
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
 
 			IParameter param = null;
-			Class<?> parameterType = parameterTypes[paramIndex];
+			Class<?> declaredParameterType = parameterTypes[paramIndex];
+			Class<?> parameterType = declaredParameterType;
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {
@@ -85,15 +86,36 @@ public class MethodUtil {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					outerCollectionType = innerCollectionType;
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
 						+ "' is of an invalid generic type (can not be a collection of a collection of a collection)");
+				}
+
+				/*
+				 * If the user is trying to bind IPrimitiveType they are probably
+				 * trying to write code that is compatible across versions of FHIR.
+				 * We'll try and come up with an appropriate subtype to give
+				 * them.
+				 *
+				 * This gets tested in HistoryR4Test
+				 */
+				if (IPrimitiveType.class.equals(parameterType)) {
+					Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					if (Date.class.equals(genericType)) {
+						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
+						parameterType = dateTimeDef.getImplementingClass();
+					} else if (String.class.equals(genericType) || genericType == null) {
+						BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
+						parameterType = dateTimeDef.getImplementingClass();
+					}
 				}
 			}
 
@@ -204,7 +226,7 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, op.name(), operationParam);
 						if (isNotBlank(operationParam.typeName())) {
 							Class<?> newParameterType = theContext.getElementDefinition(operationParam.typeName()).getImplementingClass();
-							if (!parameterType.isAssignableFrom(newParameterType)) {
+							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
 								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
 							}
 							parameterType = newParameterType;
@@ -254,25 +276,6 @@ public class MethodUtil {
 
 				}
 
-			}
-
-			/*
-			 * If the user is trying to bind IPrimitiveType they are probably
-			 * trying to write code that is compatible across versions of FHIR.
-			 * We'll try and come up with an appropriate subtype to give
-			 * them.
-			 *
-			 * This gets tested in HistoryR4Test
-			 */
-			if (IPrimitiveType.class.equals(parameterType)) {
-				Class<?> genericType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
-				if (Date.class.equals(genericType)) {
-					BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("dateTime");
-					parameterType = dateTimeDef.getImplementingClass();
-				} else if (String.class.equals(genericType) || genericType == null) {
-					BaseRuntimeElementDefinition<?> dateTimeDef = theContext.getElementDefinition("string");
-					parameterType = dateTimeDef.getImplementingClass();
-				}
 			}
 
 			if (param == null) {

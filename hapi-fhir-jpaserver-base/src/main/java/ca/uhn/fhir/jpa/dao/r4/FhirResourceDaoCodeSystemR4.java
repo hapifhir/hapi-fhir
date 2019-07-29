@@ -135,9 +135,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		CodeSystem cs = (CodeSystem) theResource;
 		addPidToResource(theEntity, theResource);
 
-		if (cs.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			myTerminologySvc.storeNewCodeSystemVersion(cs, theEntity);
-		}
+		myTerminologySvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
 
 		return retVal;
 	}

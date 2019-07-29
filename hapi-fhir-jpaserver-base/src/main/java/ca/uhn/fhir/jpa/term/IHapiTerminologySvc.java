@@ -86,7 +86,7 @@ public interface IHapiTerminologySvc {
 	 */
 	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
 
-	void storeNewCodeSystemVersion(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
+	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 
