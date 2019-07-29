@@ -189,8 +189,8 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setDisplay("displayB");
 		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
 
-		assertEquals(true, myTermSvc.findCode("http://foo", "codeA").isPresent());
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeZZZ").isPresent());
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeZZZ").isPresent()));
 
 	}
 
@@ -322,7 +322,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setDisplay("displayAAA");
 		myTermSvc.applyDeltaCodesystemsAdd("http://foo", "codeA", delta);
 
-		assertEquals(true, myTermSvc.findCode("http://foo", "codeAA").isPresent());
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
 		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeAA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
@@ -441,10 +441,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setDisplay("displayB");
 		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
 
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeB").isPresent());
-		assertEquals(true, myTermSvc.findCode("http://foo", "codeA").isPresent());
-		assertEquals(true, myTermSvc.findCode("http://foo", "codeAA").isPresent());
-		assertEquals(true, myTermSvc.findCode("http://foo", "codeAAA").isPresent());
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
 
 		// Remove CodeA
 		delta = new CodeSystem();
@@ -453,10 +453,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setCode("codeA");
 		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
 
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeB").isPresent());
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeA").isPresent());
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeAA").isPresent());
-		assertEquals(false, myTermSvc.findCode("http://foo", "codeAAA").isPresent());
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
 
 	}
 
