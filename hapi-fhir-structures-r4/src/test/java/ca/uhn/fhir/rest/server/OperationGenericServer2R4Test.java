@@ -33,8 +33,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 public class OperationGenericServer2R4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
@@ -201,7 +201,7 @@ public class OperationGenericServer2R4Test {
 			fail();
 		} catch (ServletException e) {
 			ConfigurationException ce = (ConfigurationException) e.getCause();
-			assertEquals("Failure scanning class PatientProvider: Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PatientProvider.opInstance(org.hl7.fhir.instance.model.api.ICompositeType)", ce.getMessage());
+			assertThat(ce.getMessage(), containsString("Failure scanning class PatientProvider: Non assignable parameter typeName=\"code\" specified on method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test"));
 		}
 	}
 
