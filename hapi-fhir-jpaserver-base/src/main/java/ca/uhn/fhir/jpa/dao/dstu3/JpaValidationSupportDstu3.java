@@ -171,7 +171,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return fetchCodeSystem(theCtx, theSystem) != null;
+		return false;
 	}
 
 	@Override
@@ -190,6 +190,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 

@@ -126,7 +126,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", cs);
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs);
 		});
 	}
 
@@ -233,7 +233,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testExpandById() {
 		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
@@ -263,7 +263,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandByIdWithFilter() throws IOException {
+	public void testExpandByIdWithFilter() {
 
 		//@formatter:off
 		Parameters respParam = ourClient
@@ -350,7 +350,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandInlineVsAgainstBuiltInCs() throws IOException {
+	public void testExpandInlineVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
@@ -371,7 +371,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandInlineVsAgainstExternalCs() throws IOException {
+	public void testExpandInlineVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
@@ -446,7 +446,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandLocalVsAgainstBuiltInCs() throws IOException {
+	public void testExpandLocalVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
@@ -467,7 +467,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandLocalVsAgainstExternalCs() throws IOException {
+	public void testExpandLocalVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
@@ -491,7 +491,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandLocalVsCanonicalAgainstExternalCs() throws IOException {
+	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
@@ -515,7 +515,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	@Test
-	public void testExpandLocalVsWithUnknownCode() throws IOException {
+	public void testExpandLocalVsWithUnknownCode() {
 		createExternalCsAndLocalVsWithUnknownCode();
 		assertNotNull(myLocalValueSetId);
 
@@ -636,7 +636,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
@@ -664,7 +664,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), Matchers.containsStringIgnoringCase("succeeded"));
@@ -682,6 +682,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("ACME Codes");
+		codeSystem.setVersion("1.2.3.4");
 		IIdType id = theCodeSystemDao.create(codeSystem, theRequestDetails).getId().toUnqualified();
 
 		ResourceTable table = theResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
@@ -707,7 +709,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs);
 		return codeSystem;
 	}
 

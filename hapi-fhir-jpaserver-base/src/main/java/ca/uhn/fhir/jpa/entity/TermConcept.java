@@ -111,7 +111,7 @@ public class TermConcept implements Serializable {
 		setCode(theCode);
 	}
 
-	public TermConcept addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
+	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
 		link.setParent(this);
@@ -120,7 +120,7 @@ public class TermConcept implements Serializable {
 		getChildren().add(link);
 
 		theChild.getParents().add(link);
-		return this;
+		return link;
 	}
 
 	public void addChildren(List<TermConcept> theChildren, RelationshipTypeEnum theRelationshipType) {

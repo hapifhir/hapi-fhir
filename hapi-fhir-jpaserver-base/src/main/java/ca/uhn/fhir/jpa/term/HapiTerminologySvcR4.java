@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -18,6 +19,9 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +52,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements IHapiTerminologySvcR4 {
+
 	@Autowired
 	@Qualifier("myConceptMapDaoR4")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
@@ -60,7 +65,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private PlatformTransactionManager myTransactionManager;
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -87,6 +92,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
+		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(theCodeSystemResource, matchUrl).getId();
@@ -227,7 +233,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return myTerminologySvc.supportsSystem(theSystem);
+		return supportsSystem(theSystem);
 	}
 
 	@Override
@@ -237,19 +243,28 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@CoverageIgnore
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (codeOpt.isPresent()) {
-			TermConcept code = codeOpt.get();
-			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-			def.setCode(code.getCode());
-			def.setDisplay(code.getDisplay());
-			CodeValidationResult retVal = new CodeValidationResult(def);
-			retVal.setProperties(code.toValidationProperties());
-			return retVal;
-		}
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		return txTemplate.execute(t-> {
+			Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
+			if (codeOpt.isPresent()) {
+				TermConcept code = codeOpt.get();
+				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+				def.setCode(code.getCode());
+				def.setDisplay(code.getDisplay());
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+				retVal.setProperties(code.toValidationProperties());
+				return retVal;
+			}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		});
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
 }

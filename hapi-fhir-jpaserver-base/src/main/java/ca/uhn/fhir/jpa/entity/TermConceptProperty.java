@@ -66,6 +66,14 @@ public class TermConceptProperty implements Serializable {
 	private String myValue;
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
 	private TermConceptPropertyTypeEnum myType;
+
+	/**
+	 * Constructor
+	 */
+	public TermConceptProperty() {
+		super();
+	}
+
 	/**
 	 * Relevant only for properties of type {@link TermConceptPropertyTypeEnum#CODING}
 	 */

@@ -187,7 +187,7 @@ public class OperationParameter implements IParameter {
 				mySearchParameterBinding.setType(myContext, theParameterType, theInnerCollectionType, theOuterCollectionType);
 				myConverter = new OperationParamConverter();
 			} else {
-				throw new ConfigurationException("Invalid type for @OperationParam: " + myParameterType.getName());
+				throw new ConfigurationException("Invalid type for @OperationParam on method " + theMethod + ": " + myParameterType.getName());
 			}
 
 		}

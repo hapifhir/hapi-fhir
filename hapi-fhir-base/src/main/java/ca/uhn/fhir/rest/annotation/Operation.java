@@ -54,14 +54,30 @@ public @interface Operation {
 	String name();
 
 	/**
-	 * On a client, this value should be populated with the resource type that the operation applies to. If set to
+	 * This value may be populated with the resource type that the operation applies to. If set to
 	 * {@link IBaseResource} (which is the default) than the operation applies to the server and not to a specific
 	 * resource type.
 	 * <p>
-	 * This value has no effect when used on server implementations.
+	 * This attribute should not be used a resource provider implementing
+	 * <code>IResourceProvider</code> since the type can be inferred from the
+	 * resource provider type.
 	 * </p>
+	 * @see #typeName() may also be used to specify a value as a String
 	 */
 	Class<? extends IBaseResource> type() default IBaseResource.class;
+
+	/**
+	 * This value may be populated with the resource type that the operation applies to. If set to
+	 * {@link IBaseResource} (which is the default) than the operation applies to the server and not to a specific
+	 * resource type.
+	 * <p>
+	 * This attribute should not be used a resource provider implementing
+	 * <code>IResourceProvider</code> since the type can be inferred from the
+	 * resource provider type.
+	 * </p>
+	 * @see #type() may also be used to specify a value for this setting as a class type
+	 */
+	String typeName() default "";
 
 	/**
 	 * If a given operation method is <b><a href="http://en.wikipedia.org/wiki/Idempotence">idempotent</a></b>

@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -72,7 +73,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	private boolean myManualResponseMode;
 
 	protected OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
-												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType,
+												boolean theIdempotent, String theOperationName, Class<? extends IBaseResource> theOperationType, String theOperationTypeName,
 												OperationParam[] theReturnParams, BundleTypeEnum theBundleType) {
 		super(theReturnResourceType, theMethod, theContext, theProvider);
 
@@ -99,12 +100,18 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 		myName = theOperationName;
 
-		if (theReturnTypeFromRp != null) {
-			setResourceName(theContext.getResourceDefinition(theReturnTypeFromRp).getName());
-		} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
-			setResourceName(theContext.getResourceDefinition(theOperationType).getName());
-		} else {
-			setResourceName(null);
+		try {
+			if (theReturnTypeFromRp != null) {
+				setResourceName(theContext.getResourceDefinition(theReturnTypeFromRp).getName());
+			} else if (Modifier.isAbstract(theOperationType.getModifiers()) == false) {
+				setResourceName(theContext.getResourceDefinition(theOperationType).getName());
+			} else if (isNotBlank(theOperationTypeName)) {
+				setResourceName(theContext.getResourceDefinition(theOperationTypeName).getName());
+			} else {
+				setResourceName(null);
+			}
+		} catch (DataFormatException e) {
+			throw new ConfigurationException("Failed to bind method " + theMethod + " - " + e.getMessage(), e);
 		}
 
 		if (theMethod.getReturnType().equals(IBundleProvider.class)) {
@@ -160,7 +167,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 	 */
 	public OperationMethodBinding(Class<?> theReturnResourceType, Class<? extends IBaseResource> theReturnTypeFromRp, Method theMethod, FhirContext theContext, Object theProvider,
 											Operation theAnnotation) {
-		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.returnParameters(),
+		this(theReturnResourceType, theReturnTypeFromRp, theMethod, theContext, theProvider, theAnnotation.idempotent(), theAnnotation.name(), theAnnotation.type(), theAnnotation.typeName(), theAnnotation.returnParameters(),
 			theAnnotation.bundleType());
 
 		myManualRequestMode = theAnnotation.manualRequest();

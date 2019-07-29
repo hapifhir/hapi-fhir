@@ -63,6 +63,13 @@ public class TermCodeSystem implements Serializable {
 	@Column(name = "CS_NAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
+	/**
+	 * Constructor
+	 */
+	public TermCodeSystem() {
+		super();
+	}
+
 	public String getCodeSystemUri() {
 		return myCodeSystemUri;
 	}

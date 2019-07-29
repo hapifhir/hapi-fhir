@@ -29,6 +29,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.r4.model.CodeSystem;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -103,7 +104,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		ourLog.info("Beginning upload - This may take a while...");
 		IBaseParameters response = client
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameters(inputParameters)
 			.execute();

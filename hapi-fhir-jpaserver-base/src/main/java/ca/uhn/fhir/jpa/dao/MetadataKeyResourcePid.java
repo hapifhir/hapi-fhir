@@ -24,8 +24,9 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum.ResourceMetadataKeySupportingAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
-final class MetadataKeyResourcePid extends ResourceMetadataKeySupportingAnyResource<Long, Long> {
+public final class MetadataKeyResourcePid extends ResourceMetadataKeySupportingAnyResource<Long, Long> {
 	private static final long serialVersionUID = 1L;
 
 	MetadataKeyResourcePid(String theValue) {

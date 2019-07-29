@@ -52,7 +52,15 @@
 				the user has not explicitly configured a preference.
 				]]>
 			</action>
-			<action type="add">
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The JPA $upload-external-code-system operation has been moved from being a
+				server level operation (i.e. called on the root of the server) to being
+				a type level operation (i.e. called on the CodeSystem type).
+				]]>
+			</action>
+		<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
@@ -339,6 +347,12 @@
 				Two issues in the Thymeleaf Narrative Template which caused an error when generating
 				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
 				user @navyflower for reporting!
+			</action>
+			<action type="add">
+				A new attribute has been added to the @Operation annotation called 
+				<![CDATA[<code>typeName</code>]]>. This annotation can be used to specify a 
+				type for an operation declared on a plain provider without needing to use 
+				a specific version of the FHIR structures.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">

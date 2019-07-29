@@ -173,7 +173,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return fetchCodeSystem(theCtx, theSystem) != null;
+		return false;
 	}
 
 	@Override
@@ -192,6 +192,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 

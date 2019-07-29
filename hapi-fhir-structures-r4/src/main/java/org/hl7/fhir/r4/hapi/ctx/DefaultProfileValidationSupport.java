@@ -257,16 +257,16 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     return structureDefinitions;
   }
 
-  private CodeValidationResult testIfConceptIsInList(String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
+  private CodeValidationResult testIfConceptIsInList(CodeSystem theCodeSystem, String theCode, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive) {
     String code = theCode;
     if (theCaseSensitive == false) {
       code = code.toUpperCase();
     }
 
-    return testIfConceptIsInListInner(conceptList, theCaseSensitive, code);
+    return testIfConceptIsInListInner(theCodeSystem, conceptList, theCaseSensitive, code);
   }
 
-  private CodeValidationResult testIfConceptIsInListInner(List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
+  private CodeValidationResult testIfConceptIsInListInner(CodeSystem theCodeSystem, List<ConceptDefinitionComponent> conceptList, boolean theCaseSensitive, String code) {
     CodeValidationResult retVal = null;
     for (ConceptDefinitionComponent next : conceptList) {
       String nextCandidate = next.getCode();
@@ -279,10 +279,15 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
       }
 
       // recurse
-      retVal = testIfConceptIsInList(code, next.getConcept(), theCaseSensitive);
+      retVal = testIfConceptIsInList(theCodeSystem, code, next.getConcept(), theCaseSensitive);
       if (retVal != null) {
         break;
       }
+    }
+
+    if (retVal != null) {
+      retVal.setCodeSystemName(theCodeSystem.getName());
+      retVal.setCodeSystemVersion(theCodeSystem.getVersion());
     }
 
     return retVal;
@@ -297,7 +302,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
         caseSensitive = cs.getCaseSensitive();
       }
 
-      CodeValidationResult retVal = testIfConceptIsInList(theCode, cs.getConcept(), caseSensitive);
+      CodeValidationResult retVal = testIfConceptIsInList(cs, theCode, cs.getConcept(), caseSensitive);
 
       if (retVal != null) {
         return retVal;
@@ -305,6 +310,11 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
     }
 
     return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+  }
+
+  @Override
+  public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+    return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
   }
 
 }

@@ -160,6 +160,16 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		for (IValidationSupport next : myChain) {
+			if (next.isCodeSystemSupported(theContext, theSystem)) {
+				return next.lookupCode(theContext, theSystem, theCode);
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
 		ArrayList<StructureDefinition> retVal = new ArrayList<>();
 		Set<String> urls = new HashSet<>();

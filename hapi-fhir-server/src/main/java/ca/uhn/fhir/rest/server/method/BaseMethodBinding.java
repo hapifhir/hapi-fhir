@@ -445,15 +445,6 @@ public abstract class BaseMethodBinding<T> {
 		return theReturnTypeFromMethod.equals(IBaseResource.class) || theReturnTypeFromMethod.equals(IResource.class) || theReturnTypeFromMethod.equals(IAnyResource.class);
 	}
 
-	private static void populateException(BaseServerResponseException theEx, Reader theResponseReader) {
-		try {
-			String responseText = IOUtils.toString(theResponseReader);
-			theEx.setResponseBody(responseText);
-		} catch (IOException e) {
-			ourLog.debug("Failed to read response", e);
-		}
-	}
-
 	private static String toLogString(Class<?> theType) {
 		if (theType == null) {
 			return null;

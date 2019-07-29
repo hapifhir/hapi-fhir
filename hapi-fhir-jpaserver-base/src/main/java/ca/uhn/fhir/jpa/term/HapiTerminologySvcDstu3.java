@@ -19,6 +19,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +64,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	/**
 	 * Constructor
@@ -100,6 +105,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();
@@ -217,14 +223,14 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return null;
 	}
 
-	@CoverageIgnore
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+	public IBaseResource fetchResource(FhirContext theContext, Class theClass, String theUri) {
 		return null;
 	}
 
+	@CoverageIgnore
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -293,20 +299,30 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 	@CoverageIgnore
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (codeOpt.isPresent()) {
-			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-			TermConcept code = codeOpt.get();
-			def.setCode(code.getCode());
-			def.setDisplay(code.getDisplay());
-			CodeValidationResult retVal = new CodeValidationResult(def);
-			retVal.setProperties(code.toValidationProperties());
-			retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
-			return retVal;
-		}
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		return txTemplate.execute(t->{
+			Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+			if (codeOpt.isPresent()) {
+				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+				TermConcept code = codeOpt.get();
+				def.setCode(code.getCode());
+				def.setDisplay(code.getDisplay());
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+				retVal.setProperties(code.toValidationProperties());
+				retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
+				return retVal;
+			}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		});
+
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
 	@Override
