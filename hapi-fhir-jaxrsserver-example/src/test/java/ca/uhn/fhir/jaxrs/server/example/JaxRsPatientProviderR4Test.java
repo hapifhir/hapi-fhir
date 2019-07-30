@@ -1,42 +1,45 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.resource.*;
-import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.primitive.*;
+import ca.uhn.fhir.model.primitive.BoundCodeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
-public class JaxRsPatientProviderTest {
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+public class JaxRsPatientProviderR4Test {
 
 	private static IGenericClient client;
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final String PATIENT_NAME = "Van Houte";
 	private static int ourPort;
 	private static Server jettyServer;
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-        JettyUtil.closeServer(jettyServer);
+		JettyUtil.closeServer(jettyServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -53,7 +56,7 @@ public class JaxRsPatientProviderTest {
 		jerseyServlet.setInitParameter("resteasy.resources",
 				StringUtils.join(Arrays.asList(
 						JaxRsConformanceProvider.class.getCanonicalName(),
-						JaxRsPatientRestProvider.class.getCanonicalName(), 
+						JaxRsPatientRestProvider.class.getCanonicalName(),
 						JaxRsPageProvider.class.getCanonicalName()
 					), ","));
 		//@formatter:on
@@ -128,7 +131,7 @@ public class JaxRsPatientProviderTest {
 		Bundle response = client.search()
 				.forResource(Patient.class)
 				.withIdAndCompartment("1", "Condition")
-				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.returnBundle(Bundle.class)
 				.execute();
 		assertTrue(response.getEntry().size() > 0);
 	}
@@ -139,7 +142,7 @@ public class JaxRsPatientProviderTest {
 	public void testSummary() {
 		client.search()
 				.forResource(Patient.class)
-				.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
+				.returnBundle(Bundle.class)
 				.execute();
 	}
 
@@ -147,13 +150,13 @@ public class JaxRsPatientProviderTest {
 	public void testCreatePatient() {
 		final Patient existing = new Patient();
 		existing.setId((IdDt) null);
-		existing.getNameFirstRep().addFamily("Created Patient 54");
+		existing.getNameFirstRep().setFamily("Created Patient 54");
 		client.setEncoding(EncodingEnum.JSON);
 		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
 		final Patient patient = (Patient) results.getResource();
 		System.out.println(patient);
-		assertNotNull(client.read(patient.getId()));
+		assertNotNull(client.read().resource(Patient.class).withId(patient.getId()));
 		client.setEncoding(EncodingEnum.JSON);
 	}
 
@@ -162,7 +165,7 @@ public class JaxRsPatientProviderTest {
 	public void testConditionalCreate() {
 		final Patient existing = new Patient();
 		existing.setId((IdDt) null);
-		existing.getNameFirstRep().addFamily("Created Patient 54");
+		existing.getNameFirstRep().setFamily("Created Patient 54");
 		client.setEncoding(EncodingEnum.XML);
 		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
@@ -171,37 +174,37 @@ public class JaxRsPatientProviderTest {
 		client.create()
 				.resource(patient)
 				.conditional()
-				.where(Patient.IDENTIFIER.exactly().identifier(patient.getIdentifierFirstRep()))
+				.where(Patient.IDENTIFIER.exactly().identifier(patient.getIdentifierFirstRep().toString()))
 				.execute();
 	}
 
 	/** Find By Id */
 	@Test
 	public void findUsingGenericClientById() {
-		final Patient results = client.read(Patient.class, "1");
-		assertEquals(results.getId().getIdPartAsLong().longValue(), 1L);
+		final Patient results = client.read().resource(Patient.class).withId("1").execute();
+		assertEquals(results.getIdElement().getIdPartAsLong().longValue(), 1L);
 	}
 
 	@Test
 	public void testUpdateById() {
-		final Patient existing = client.read(Patient.class, "1");
-		final List<HumanNameDt> name = existing.getName();
+		final Patient existing = client.read().resource(Patient.class).withId("1").execute();
+		final List<HumanName> name = existing.getName();
 		name.get(0).addSuffix("The Second");
 		existing.setName(name);
 		client.setEncoding(EncodingEnum.XML);
-		final MethodOutcome results = client.update("1", existing);
+		final MethodOutcome results = client.update().resource(existing).withId("1").execute();
 	}
 
 	@Test
 	public void testDeletePatient() {
 		final Patient existing = new Patient();
-		existing.getNameFirstRep().addFamily("Created Patient XYZ");
+		existing.getNameFirstRep().setFamily("Created Patient XYZ");
 		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
 		final Patient patient = (Patient) results.getResource();
-		client.delete().resourceById(patient.getId()).execute();
+		client.delete().resource(patient).execute();
 		try {
-			client.read(patient.getId());
+			client.read().resource(Patient.class).withId(patient.getId()).execute();
 			fail();
 		} catch (final Exception e) {
 			// assertEquals(e.getStatusCode(), Constants.STATUS_HTTP_404_NOT_FOUND);
@@ -213,9 +216,9 @@ public class JaxRsPatientProviderTest {
 	@Test
 	public void testTransaction() {
 		Bundle bundle = new Bundle();
-		Entry entry = bundle.addEntry();
+		Bundle.BundleEntryComponent entry = bundle.addEntry();
 		final Patient existing = new Patient();
-		existing.getNameFirstRep().addFamily("Created with bundle");
+		existing.getNameFirstRep().setFamily("Created with bundle");
 		entry.setResource(existing);
 
 		BoundCodeDt<BundleEntryTransactionMethodEnum> theTransactionOperation = new BoundCodeDt(
@@ -228,9 +231,9 @@ public class JaxRsPatientProviderTest {
 	@Test
 	@Ignore
 	public void testConformance() {
-		final Conformance conf = client.fetchConformance().ofType(Conformance.class).execute();
-		System.out.println(conf.getRest().get(0).getResource().get(0).getType());
-		assertEquals(conf.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
+		final CapabilityStatement caps = client.capabilities().ofType(CapabilityStatement.class).execute();
+		System.out.println(caps.getRest().get(0).getResource().get(0).getType());
+		assertEquals(caps.getRest().get(0).getResource().get(0).getType().toString(), "Patient");
 	}
 
 	/** Extended Operations */
@@ -241,9 +244,9 @@ public class JaxRsPatientProviderTest {
 
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
-		inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
-		inParams.addParameter().setName("dummy").setValue(new StringDt("myAwesomeDummyValue"));
+		inParams.addParameter().setName("start").setValue(new DateTimeType("2001-01-01"));
+		inParams.addParameter().setName("end").setValue(new DateTimeType("2015-03-01"));
+		inParams.addParameter().setName("dummy").setValue(new StringType("myAwesomeDummyValue"));
 
 		// Invoke $everything on "Patient/1"
 		Parameters outParams = client
@@ -262,9 +265,9 @@ public class JaxRsPatientProviderTest {
 	public void testExtendedOperationsUsingGet() {
 		// Create the input parameters to pass to the server
 		Parameters inParams = new Parameters();
-		inParams.addParameter().setName("start").setValue(new DateDt("2001-01-01"));
-		inParams.addParameter().setName("end").setValue(new DateDt("2015-03-01"));
-		inParams.addParameter().setName("dummy").setValue(new StringDt("myAwesomeDummyValue"));
+		inParams.addParameter().setName("start").setValue(new DateTimeType("2001-01-01"));
+		inParams.addParameter().setName("end").setValue(new DateTimeType("2015-03-01"));
+		inParams.addParameter().setName("dummy").setValue(new StringType("myAwesomeDummyValue"));
 
 		// Invoke $everything on "Patient/1"
 		Parameters outParams = client
@@ -281,25 +284,25 @@ public class JaxRsPatientProviderTest {
 
 	@Test
 	public void testVRead() {
-		final Patient patient = client.vread(Patient.class, "1", "1");
+		final Patient patient = client.read().resource(Patient.class).withIdAndVersion("1", "1").execute();
 		System.out.println(patient);
 	}
 
 	@Test
 	public void testRead() {
-		final Patient patient = client.read(Patient.class, "1");
+		final Patient patient = client.read().resource(Patient.class).withId("1").execute();
 		System.out.println(patient);
 	}
 
 	@Test
 	public void testInstanceHistory() {
 		final Bundle history = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
-		assertEquals("myTestId", history.getId().getIdPart());
+		assertEquals("myTestId", history.getIdElement().getIdPart());
 	}
 
 	@Test
 	public void testTypeHistory() {
 		final Bundle history = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
-		assertEquals("myTestId", history.getId().getIdPart());
+		assertEquals("myTestId", history.getIdElement().getIdPart());
 	}
 }
