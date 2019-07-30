@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
+public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	public static final String CONCEPT_COUNT = "conceptCount";
 	public static final String TARGET = "target";
@@ -64,6 +64,23 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+
+	/**
+	 * Constructor
+	 */
+	public TerminologyUploaderProvider() {
+		this(null, null, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public TerminologyUploaderProvider(FhirContext theContext, IHapiTerminologyLoaderSvc theTerminologyLoaderSvc, IHapiTerminologySvc theTerminologySvc) {
+		myCtx = theContext;
+		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
+		myTerminologySvc = theTerminologySvc;
+	}
+
 
 	/**
 	 * <code>
