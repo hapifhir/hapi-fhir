@@ -354,6 +354,11 @@
 				type for an operation declared on a plain provider without needing to use 
 				a specific version of the FHIR structures.
 			</action>
+			<action type="add">
+				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
+				can now be used to upload custom vocabulary that has been converted into a standard file format
+				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

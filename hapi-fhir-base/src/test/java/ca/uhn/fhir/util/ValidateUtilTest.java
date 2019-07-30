@@ -3,6 +3,7 @@ package ca.uhn.fhir.util;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.junit.Test;
 
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -67,6 +68,20 @@ public class ValidateUtilTest {
 		} catch (InvalidRequestException e) {
 			assertEquals("The message", e.getMessage());
 		}
+	}
+
+
+	@Test
+	public void testIsNotNull() {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity("aa", "");
+
+		try {
+			ValidateUtil.isNotNullOrThrowUnprocessableEntity(null, "The message %s", "123");
+			fail();
+		} catch (UnprocessableEntityException e) {
+			assertEquals("The message 123", e.getMessage());
+		}
+
 	}
 
 }

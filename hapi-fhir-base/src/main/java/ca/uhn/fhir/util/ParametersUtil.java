@@ -166,6 +166,13 @@ public class ParametersUtil {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static void addParameterToParametersCode(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("code").newInstance();
+		value.setValue(theValue);
+		addParameterToParameters(theCtx, theParameters, theName, value);
+	}
+
+	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersInteger(FhirContext theCtx, IBaseParameters theParameters, String theName, int theValue) {
 		IPrimitiveType<Integer> count = (IPrimitiveType<Integer>) theCtx.getElementDefinition("integer").newInstance();
 		count.setValue(theValue);
@@ -182,6 +189,13 @@ public class ParametersUtil {
 	@SuppressWarnings("unchecked")
 	public static void addParameterToParametersString(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
 		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("string").newInstance();
+		value.setValue(theValue);
+		addParameterToParameters(theCtx, theParameters, theName, value);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void addParameterToParametersUri(FhirContext theCtx, IBaseParameters theParameters, String theName, String theValue) {
+		IPrimitiveType<String> value = (IPrimitiveType<String>) theCtx.getElementDefinition("uri").newInstance();
 		value.setValue(theValue);
 		addParameterToParameters(theCtx, theParameters, theName, value);
 

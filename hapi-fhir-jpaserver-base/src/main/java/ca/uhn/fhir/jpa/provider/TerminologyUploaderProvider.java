@@ -160,6 +160,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 	public IBaseParameters uploadExternalCodeSystem(
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = "url", min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+		@OperationParam(name = "contentMode", min = 0, typeName = "code") IPrimitiveType<String> theContentMode,
 		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
 		@OperationParam(name = "package", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
 		RequestDetails theRequestDetails
@@ -210,7 +211,7 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 					final String url = AttachmentUtil.getOrCreateUrl(myCtx, nextPackage).getValueAsString();
 
 					if (isBlank(url)) {
-						throw new UnprocessableEntityException("Package is missing mandatory url element");
+						throw new UnprocessableEntityException("Package is missing mandatory codeSystemUrl element");
 					}
 
 					localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
@@ -228,22 +229,27 @@ public abstract class TerminologyUploaderProvider extends BaseJpaProvider {
 				}
 			}
 
-			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
-			url = defaultString(url);
+			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
+			codeSystemUrl = defaultString(codeSystemUrl);
 
+			String contentMode = theContentMode != null ? theContentMode.getValue() : null;
 			UploadStatistics stats;
-			switch (url) {
-				case IHapiTerminologyLoaderSvc.SCT_URI:
-					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-					break;
-				case IHapiTerminologyLoaderSvc.LOINC_URI:
-					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-					break;
-				case IHapiTerminologyLoaderSvc.IMGTHLA_URI:
-					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-					break;
-				default:
-					throw new InvalidRequestException("Unknown URL: " + url);
+			if ("custom".equals(contentMode)) {
+				stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
+			} else {
+				switch (codeSystemUrl) {
+					case IHapiTerminologyLoaderSvc.SCT_URI:
+						stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+						break;
+					case IHapiTerminologyLoaderSvc.LOINC_URI:
+						stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+						break;
+					case IHapiTerminologyLoaderSvc.IMGTHLA_URI:
+						stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+						break;
+					default:
+						throw new InvalidRequestException("Unknown URL: " + codeSystemUrl);
+				}
 			}
 
 			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);

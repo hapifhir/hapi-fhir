@@ -39,6 +39,8 @@ public interface IHapiTerminologyLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
+	UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
 	interface FileDescriptor {
 
 		String getFilename();
