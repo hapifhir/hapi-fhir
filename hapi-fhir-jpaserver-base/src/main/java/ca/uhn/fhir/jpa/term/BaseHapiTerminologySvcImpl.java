@@ -1495,7 +1495,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap.");
 	}
 
-	@Scheduled(fixedDelay = 1000)
+	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Transactional
 	@Override
 	public synchronized void preExpandValueSetToTerminologyTables() {

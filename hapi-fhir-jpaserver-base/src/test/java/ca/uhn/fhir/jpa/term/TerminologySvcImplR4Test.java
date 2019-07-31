@@ -22,6 +22,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -38,6 +39,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
 	@Rule
@@ -980,16 +984,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
-			assertEquals(0, termValueSet.getConcepts().size()); // DM 2019-07-30: Concepts are persisted in the background.
+			assertEquals(0, termValueSet.getConcepts().size());
 			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
-		// FIXME: DM 2019-07-31 - Wait for ValueSet expansion status to be EXPANDED.
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException theE) {
-			theE.printStackTrace();
-		}
+		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
@@ -1083,16 +1082,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
-			assertEquals(0, termValueSet.getConcepts().size()); // DM 2019-07-30: Concepts are persisted in the background.
+			assertEquals(0, termValueSet.getConcepts().size());
 			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
-		// FIXME: DM 2019-07-31 - Wait for ValueSet expansion status to be EXPANDED.
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException theE) {
-			theE.printStackTrace();
-		}
+		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
