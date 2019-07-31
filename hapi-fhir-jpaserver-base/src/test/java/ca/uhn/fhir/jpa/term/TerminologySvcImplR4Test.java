@@ -11,6 +11,7 @@ import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
@@ -42,7 +43,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
 	@Mock
-	IValueSetCodeAccumulator myValueSetCodeAccumulator;
+	IValueSetConceptAccumulator myValueSetCodeAccumulator;
 	private IIdType myConceptMapId;
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
@@ -135,6 +136,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		loadAndPersistValueSet();
 	}
 
+	private void loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude() throws IOException {
+		loadAndPersistCodeSystemWithDesignations();
+		loadAndPersistValueSetWithExclude();
+	}
+
 	private void loadAndPersistCodeSystem() throws IOException {
 		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
 		persistCodeSystem(codeSystem);
@@ -156,6 +162,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	private void loadAndPersistValueSet() throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		persistValueSet(valueSet);
+	}
+
+	private void loadAndPersistValueSetWithExclude() throws IOException {
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
 		persistValueSet(valueSet);
 	}
 
@@ -589,7 +600,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		include.setSystem(CS_URL);
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
-		verify(myValueSetCodeAccumulator, times(9)).includeCodeWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
+		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
 	}
 
 	@Test
@@ -625,14 +636,23 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				TermConcept concept = concepts.get(0);
 				assertEquals("8450-9", concept.getCode());
 				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-				assertEquals(1, concept.getDesignations().size());
+				assertEquals(2, concept.getDesignations().size());
 
-				TermConceptDesignation designation = concept.getDesignations().iterator().next();
+				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
+
+				TermConceptDesignation designation = designations.get(0);
 				assertEquals("nl", designation.getLanguage());
 				assertEquals("http://snomed.info/sct", designation.getUseSystem());
 				assertEquals("900000000000013009", designation.getUseCode());
 				assertEquals("Synonym", designation.getUseDisplay());
 				assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+				designation = designations.get(1);
+				assertEquals("sv", designation.getLanguage());
+				assertEquals("http://snomed.info/sct", designation.getUseSystem());
+				assertEquals("900000000000013009", designation.getUseCode());
+				assertEquals("Synonym", designation.getUseDisplay());
+				assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
 				concept = concepts.get(1);
 				assertEquals("11378-7", concept.getCode());
@@ -948,67 +968,197 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
-				assertTrue(optionalValueSetByResourcePid.isPresent());
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-				Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-				assertTrue(optionalValueSetByUrl.isPresent());
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
 
-				TermValueSet valueSet = optionalValueSetByUrl.get();
-				assertSame(optionalValueSetByResourcePid.get(), valueSet);
-				ourLog.info("ValueSet:\n" + valueSet.toString());
-				assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", valueSet.getUrl());
-				assertEquals("Terminology Services Connectation #1 Extensional case #2", valueSet.getName());
-				assertEquals(codeSystem.getConcept().size(), valueSet.getConcepts().size());
-				assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, valueSet.getExpansionStatus());
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size()); // DM 2019-07-30: Concepts are persisted in the background.
+			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		});
 
-				TermValueSetConcept concept = valueSet.getConcepts().get(0);
-				ourLog.info("Code:\n" + concept.toString());
-				assertEquals("http://acme.org", concept.getSystem());
-				assertEquals("8450-9", concept.getCode());
-				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-				assertEquals(1, concept.getDesignations().size());
+		// FIXME: DM 2019-07-31 - Wait for ValueSet expansion status to be EXPANDED.
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException theE) {
+			theE.printStackTrace();
+		}
 
-				TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
 
-				concept = valueSet.getConcepts().get(1);
-				ourLog.info("Code:\n" + concept.toString());
-				assertEquals("http://acme.org", concept.getSystem());
-				assertEquals("11378-7", concept.getCode());
-				assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
 
-				// ...
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
-				concept = valueSet.getConcepts().get(22);
-				ourLog.info("Code:\n" + concept.toString());
-				assertEquals("http://acme.org", concept.getSystem());
-				assertEquals("8491-3", concept.getCode());
-				assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-				assertEquals(1, concept.getDesignations().size());
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
 
-				designation = concept.getDesignations().get(0);
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
 
-				concept = valueSet.getConcepts().get(23);
-				ourLog.info("Code:\n" + concept.toString());
-				assertEquals("http://acme.org", concept.getSystem());
-				assertEquals("8492-1", concept.getCode());
-				assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
-			}
+			designation = concept.getDesignations().get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(1);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+
+			// ...
+
+			concept = termValueSet.getConcepts().get(22);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
+
+			designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(23);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+		});
+	}
+
+	@Test
+	public void testStoreTermValueSetAndChildrenWithExclude() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size()); // DM 2019-07-30: Concepts are persisted in the background.
+			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		});
+
+		// FIXME: DM 2019-07-31 - Wait for ValueSet expansion status to be EXPANDED.
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException theE) {
+			theE.printStackTrace();
+		}
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
+
+			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+			designation = concept.getDesignations().get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(1);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+
+			// ...
+
+			concept = termValueSet.getConcepts().get(22 - 2);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
+
+			designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(23 - 2);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 		});
 	}
 

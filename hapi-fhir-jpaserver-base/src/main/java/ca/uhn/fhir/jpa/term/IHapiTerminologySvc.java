@@ -44,14 +44,14 @@ public interface IHapiTerminologySvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
-	void expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+	void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	/**
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
 
-	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
@@ -94,7 +94,7 @@ public interface IHapiTerminologySvc {
 
 	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
 
-	void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet);
+	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
 
 	boolean supportsSystem(String theCodeSystem);
 
@@ -107,4 +107,6 @@ public interface IHapiTerminologySvc {
 	AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue);
 
 	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
+
+	void preExpandValueSetToTerminologyTables();
 }

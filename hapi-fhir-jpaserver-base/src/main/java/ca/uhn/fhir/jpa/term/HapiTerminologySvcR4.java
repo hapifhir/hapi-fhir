@@ -3,9 +3,9 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
-import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -138,7 +138,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
 	}
@@ -229,6 +229,11 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	@Override
 	protected CodeSystem getCodeSystemFromContext(String theSystem) {
 		return myValidationSupport.fetchCodeSystem(myContext, theSystem);
+	}
+
+	@Override
+	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		return myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
 	}
 
 	@Override

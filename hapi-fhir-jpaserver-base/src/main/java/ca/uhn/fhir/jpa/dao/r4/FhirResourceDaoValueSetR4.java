@@ -313,7 +313,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 		if (myDaoConfig.isPreExpandValueSetsExperimental()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myHapiTerminologySvc.storeTermValueSetAndChildren(retVal, valueSet);
+				myHapiTerminologySvc.storeTermValueSet(retVal, valueSet);
 			} else {
 				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
 			}

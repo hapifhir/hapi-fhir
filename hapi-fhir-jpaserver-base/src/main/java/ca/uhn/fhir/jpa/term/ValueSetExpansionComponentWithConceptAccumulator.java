@@ -27,10 +27,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.util.Collection;
 
 @Block()
-public class ValueSetExpansionComponentWithCodeAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetCodeAccumulator {
+public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetConceptAccumulator {
 
 	@Override
-	public void includeCode(String theSystem, String theCode, String theDisplay) {
+	public void includeConcept(String theSystem, String theCode, String theDisplay) {
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		contains.setSystem(theSystem);
 		contains.setCode(theCode);
@@ -38,7 +38,7 @@ public class ValueSetExpansionComponentWithCodeAccumulator extends ValueSet.Valu
 	}
 
 	@Override
-	public void includeCodeWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		contains.setSystem(theSystem);
 		contains.setCode(theCode);
@@ -58,7 +58,7 @@ public class ValueSetExpansionComponentWithCodeAccumulator extends ValueSet.Valu
 	}
 
 	@Override
-	public void excludeCode(String theSystem, String theCode) {
+	public void excludeConcept(String theSystem, String theCode) {
 		this
 			.getContains()
 			.removeIf(t ->

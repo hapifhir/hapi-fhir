@@ -315,7 +315,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
 					org.hl7.fhir.r4.model.ValueSet converted = VersionConvertor_30_40.convertValueSet(valueSet);
-					myHapiTerminologySvc.storeTermValueSetAndChildren(retVal, converted);
+					myHapiTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);
 				}

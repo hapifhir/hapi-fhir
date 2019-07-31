@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
@@ -177,7 +178,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 
 		try {
@@ -290,6 +291,20 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+	}
+
+	@Override
+	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		ValueSet valueSet = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+
+		org.hl7.fhir.r4.model.ValueSet valueSetR4;
+		try {
+			valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+
+		return valueSetR4;
 	}
 
 	@Override
