@@ -221,7 +221,7 @@ public class StopWatch {
 	 *
 	 * @see #formatThroughput(int, TimeUnit)
 	 */
-	public double getThroughput(int theNumOperations, TimeUnit theUnit) {
+	public double getThroughput(long theNumOperations, TimeUnit theUnit) {
 		if (theNumOperations <= 0) {
 			return 0.0f;
 		}
@@ -229,10 +229,9 @@ public class StopWatch {
 		long millisElapsed = Math.max(1, getMillis());
 		long periodMillis = theUnit.toMillis(1);
 
-		double numerator = theNumOperations;
 		double denominator = ((double) millisElapsed) / ((double) periodMillis);
 
-		return numerator / denominator;
+		return (double) theNumOperations / denominator;
 	}
 
 	public void restart() {
