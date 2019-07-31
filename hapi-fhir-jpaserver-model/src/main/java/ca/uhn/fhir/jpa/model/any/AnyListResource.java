@@ -94,6 +94,10 @@ public class AnyListResource {
 		return (org.hl7.fhir.r4.model.ListResource) get();
 	}
 
+	public FhirVersionEnum getFhirVersion() {
+		return myFhirVersion;
+	}
+
 	public void addCode(String theSystem, String theCode) {
 		switch (myFhirVersion) {
 			case DSTU3:
