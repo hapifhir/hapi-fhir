@@ -530,6 +530,11 @@
 			<id>gteichrow</id>
 			<name>Gary Teichrow</name>
 		</developer>
+		<developer>
+			<id>sethrylan</id>
+			<name>Seth Rylan Gainey</name>
+			<url>http://sethrylan.org/</url>
+		</developer>
 	</developers>
 
 	<licenses>

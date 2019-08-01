@@ -359,6 +359,11 @@
 				can now be used to upload custom vocabulary that has been converted into a standard file format
 				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
 			</action>
+			<action type="fix" issue="1404">
+				In the JAX-RS server, the resource type history and instance vread
+				operations had ambiguous paths that could lead to the wrong method
+				being called. Thanks to Seth Rylan Gainey for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
