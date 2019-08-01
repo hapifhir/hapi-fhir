@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.json.*;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.hl7.fhir.r4.model.*;
 
@@ -12,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@Ignore
 public class RDFParserTest {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -47,13 +49,13 @@ public class RDFParserTest {
 		FhirContext ctx = FhirContext.forR4();
 		ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");
 
-		//QuestionnaireResponse qr = new QuestionnaireResponse();
-		//qr.getQuestionnaireElement().setValueAsString("Questionnaire/123/_history/456");
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		qr.getQuestionnaireElement().setValueAsString("Questionnaire/123/_history/456");
 
-		//String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(qr);
-		//ourLog.info(output);
+		String output = ctx.newRDFParser().setPrettyPrint(true).encodeResourceToString(qr);
+		ourLog.info(output);
 
-		//assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
+		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
 	}
 
 }

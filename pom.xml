@@ -983,7 +983,8 @@
 			<dependency>
 				<groupId>org.apache.jena</groupId>
 				<artifactId>apache-jena-libs</artifactId>
-				<version>3.11.0</version>
+				<version>3.12.0</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>

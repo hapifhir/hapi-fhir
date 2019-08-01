@@ -1,10 +1,9 @@
 package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -12,14 +11,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
+@Ignore
 public class RDFParserR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RDFParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -41,7 +36,6 @@ public class RDFParserR4Test {
 
 	@Test
 	public void testDontStripVersions() {
-		/*
 		FhirContext ctx = FhirContext.forR4();
 		ctx.getParserOptions().setDontStripVersionsFromReferencesAtPaths("QuestionnaireResponse.questionnaire");
 
@@ -52,12 +46,11 @@ public class RDFParserR4Test {
 		ourLog.info(output);
 
 		assertThat(output, containsString("\"Questionnaire/123/_history/456\""));
-	   */
 	}
 
 	@Test
 	public void testDuplicateContainedResourcesNotOutputtedTwice() {
-		/*MedicationDispense md = new MedicationDispense();
+		MedicationDispense md = new MedicationDispense();
 
 		MedicationRequest mr = new MedicationRequest();
 		md.addAuthorizingPrescription().setResource(mr);
@@ -74,7 +67,6 @@ public class RDFParserR4Test {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
-		*/
 	}
 
 	/**
@@ -82,7 +74,6 @@ public class RDFParserR4Test {
 	 */
 	@Test
 	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIds() {
-		/*
 		MedicationDispense md = new MedicationDispense();
 
 		MedicationRequest mr = new MedicationRequest();
@@ -102,7 +93,6 @@ public class RDFParserR4Test {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
-		*/
 	}
 
 	/*
@@ -110,7 +100,6 @@ public class RDFParserR4Test {
 	 */
 	@Test
 	public void testDuplicateContainedResourcesNotOutputtedTwiceWithManualIdsAndManualAddition() {
-		/*
 		MedicationDispense md = new MedicationDispense();
 
 		MedicationRequest mr = new MedicationRequest();
@@ -136,12 +125,10 @@ public class RDFParserR4Test {
 
 		idx = encoded.indexOf("\"Medication\"", idx + 1);
 		assertEquals(-1, idx);
-		*/
 	}
 
 	@Test
 	public void testEncodeAndParseUnicodeCharacterInNarrative() {
-		/*
 		Patient p = new Patient();
 		p.getText().getDiv().setValueAsString("<div>Copy © 1999</div>");
 		String encoded = ourCtx.newRDFParser().encodeResourceToString(p);
@@ -149,13 +136,11 @@ public class RDFParserR4Test {
 
 		p = (Patient) ourCtx.newRDFParser().parseResource(encoded);
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy &copy; 1999</div>", p.getText().getDivAsString());
-	  */
 	}
 
 
 	@Test
 	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalFirst() {
-      /*
 		Observation obs = new Observation();
 
 		Patient pt = new Patient();
@@ -180,13 +165,11 @@ public class RDFParserR4Test {
 
 		enc = (Encounter) obs.getEncounter().getResource();
 		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
-	   */
 	}
 
 
 	@Test
 	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast() {
-      /*
 		Observation obs = new Observation();
 
 		Patient pt = new Patient();
@@ -211,12 +194,10 @@ public class RDFParserR4Test {
 
 		enc = (Encounter) obs.getEncounter().getResource();
 		assertEquals(Encounter.EncounterStatus.ARRIVED, enc.getStatus());
-	   */
 	}
 
 	@Test
 	public void testEncodeResourceWithMixedManualAndAutomaticContainedResourcesLocalLast2() {
-   /*
 		MedicationRequest mr = new MedicationRequest();
 		Practitioner pract = new Practitioner().setActive(true);
 		mr.getRequester().setResource(pract);
@@ -232,94 +213,6 @@ public class RDFParserR4Test {
 
 		assertEquals("#2", mr.getContained().get(0).getId());
 		assertEquals("#1", mr.getContained().get(1).getId());
-   */
-	}
-
-	@Test
-	public void testExcludeNothing() {
-	/*
-		IParser parser = ourCtx.newRDFParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-//		excludes.add("*.id");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	*/
-	}
-
-
-	@Test
-	@Ignore
-	public void testExcludeRootStuff() {
-	/*
-		IParser parser = ourCtx.newRDFParser().setPrettyPrint(true);
-
-		Set<String> excludes = new HashSet<>();
-		excludes.add("id");
-		excludes.add("meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	*/
-	}
-
-
-	@Test
-	public void testExcludeStarDotStuff() {
-	/*
-		IParser parser = ourCtx.newRDFParser().setPrettyPrint(true);
-		Set<String> excludes = new HashSet<>();
-		excludes.add("*.id");
-		excludes.add("*.meta");
-		parser.setDontEncodeElements(excludes);
-
-		Bundle b = createBundleWithPatient();
-
-		String encoded = parser.encodeResourceToString(b);
-		ourLog.info(encoded);
-
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, not(containsString("PATIENTID")));
-		assertThat(encoded, not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
-
-		b = parser.parseResource(Bundle.class, encoded);
-
-		assertNotEquals("BUNDLEID", b.getIdElement().getIdPart());
-		assertNotEquals("Patient/PATIENTID", b.getEntry().get(0).getResource().getId());
-		assertEquals("GIVEN", ((Patient) b.getEntry().get(0).getResource()).getNameFirstRep().getGivenAsSingleString());
-	*/
 	}
 
 
@@ -328,7 +221,6 @@ public class RDFParserR4Test {
 	 */
 	@Test
 	public void testNoBreakInLongString() {
-	/*
 		String longString = StringUtils.leftPad("", 100000, 'A');
 
 		Patient p = new Patient();
@@ -336,13 +228,11 @@ public class RDFParserR4Test {
 		String encoded = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(p);
 
 		assertThat(encoded, containsString(longString));
-	*/
 	}
 
 
 	@Test
 	public void testParseAndEncodeExtensionWithValueWithExtension() {
-	/*
 		String input = "{\n" +
 			"  \"resourceType\": \"Patient\",\n" +
 			"  \"extension\": [\n" +
@@ -381,21 +271,6 @@ public class RDFParserR4Test {
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
 		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
 		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
-   */
-	}
-
-	@Test
-	public void testParseExtensionOnPrimitive() throws IOException {
-	/*
-		String input = IOUtils.toString(JsonParserR4Test.class.getResourceAsStream("/extension-on-line.txt"), Constants.CHARSET_UTF8);
-		IParser parser = ourCtx.newRDFParser().setPrettyPrint(true);
-		Patient pt = parser.parseResource(Patient.class, input);
-
-		StringType line0 = pt.getAddressFirstRep().getLine().get(0);
-		assertEquals("535 Sheppard Avenue West, Unit 1907", line0.getValue());
-		Extension houseNumberExt = line0.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/iso21090-ADXP-houseNumber");
-		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
-   */
 	}
 
 	@AfterClass

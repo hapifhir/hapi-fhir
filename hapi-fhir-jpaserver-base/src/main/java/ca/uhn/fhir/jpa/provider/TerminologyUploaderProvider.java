@@ -228,7 +228,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					final String url = AttachmentUtil.getOrCreateUrl(myCtx, nextPackage).getValueAsString();
 
 					if (isBlank(url)) {
-						throw new UnprocessableEntityException("Package is missing mandatory codeSystemUrl element");
+						throw new UnprocessableEntityException("Package is missing mandatory url element");
 					}
 
 					localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {

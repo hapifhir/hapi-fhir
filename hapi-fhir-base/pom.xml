@@ -73,6 +73,7 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<optional>true</optional>
+			<type>pom</type>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
