@@ -40,7 +40,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermCodeSystemVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	static final int MAX_VERSION_LENGTH = 200;
+	public static final int MAX_VERSION_LENGTH = 200;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
