@@ -79,6 +79,11 @@
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
 			</action>
+			<action type="add" issue="1321">
+				Support has been added for RDF encoding and parsing in the
+				<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
+				format. Thanks to Raul Estrada for the pull request!
+			</action>
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow
@@ -353,6 +358,16 @@
 				<![CDATA[<code>typeName</code>]]>. This annotation can be used to specify a 
 				type for an operation declared on a plain provider without needing to use 
 				a specific version of the FHIR structures.
+			</action>
+			<action type="add">
+				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
+				can now be used to upload custom vocabulary that has been converted into a standard file format
+				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
+			<action type="fix" issue="1404">
+				In the JAX-RS server, the resource type history and instance vread
+				operations had ambiguous paths that could lead to the wrong method
+				being called. Thanks to Seth Rylan Gainey for the pull request!
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">

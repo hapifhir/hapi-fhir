@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -56,6 +57,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
+		addOptionalOption(options, null, "custom", false, "Indicates that this upload uses the HAPI FHIR custom external terminology format");
 		addBasicAuthOption(options);
 		addVerboseLoggingOption(options);
 
@@ -78,23 +80,13 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		IGenericClient client = super.newClient(theCommandLine);
-		IBaseParameters inputParameters;
-		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			org.hl7.fhir.dstu3.model.Parameters p = new org.hl7.fhir.dstu3.model.Parameters();
-			p.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(termUrl));
-			for (String next : datafile) {
-				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.dstu3.model.StringType(next));
-			}
-			inputParameters = p;
-		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			org.hl7.fhir.r4.model.Parameters p = new org.hl7.fhir.r4.model.Parameters();
-			p.addParameter().setName("url").setValue(new org.hl7.fhir.r4.model.UriType(termUrl));
-			for (String next : datafile) {
-				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.r4.model.StringType(next));
-			}
-			inputParameters = p;
-		} else {
-			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
+		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, "url", termUrl);
+		for (String next : datafile) {
+			ParametersUtil.addParameterToParametersString(myFhirCtx, inputParameters, "localfile", next);
+		}
+		if (theCommandLine.hasOption("custom")) {
+			ParametersUtil.addParameterToParametersCode(myFhirCtx, inputParameters, "contentMode", "custom");
 		}
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {

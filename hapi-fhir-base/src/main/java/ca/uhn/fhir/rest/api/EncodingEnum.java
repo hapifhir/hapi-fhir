@@ -42,16 +42,25 @@ public enum EncodingEnum {
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
+	},
+
+	RDF(Constants.CT_RDF_TURTLE, Constants.CT_RDF_TURTLE, Constants.FORMAT_TURTLE) {
+		@Override
+		public IParser newParser(FhirContext theContext) {
+			return theContext.newRDFParser();
+		}
 	};
 
 	/**
 	 * "json"
 	 */
 	public static final String JSON_PLAIN_STRING = "json";
+
 	/**
 	 * "xml"
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
+
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
@@ -127,9 +136,9 @@ public enum EncodingEnum {
 		return myResourceContentTypeNonLegacy;
 	}
 
-	public abstract IParser newParser(FhirContext theContext);
+	public abstract IParser newParser(final FhirContext theContext);
 
-	public static EncodingEnum detectEncoding(String theBody) {
+	public static EncodingEnum detectEncoding(final String theBody) {
 		EncodingEnum retVal = detectEncodingNoDefault(theBody);
 		retVal = ObjectUtils.defaultIfNull(retVal, EncodingEnum.XML);
 		return retVal;
@@ -158,7 +167,7 @@ public enum EncodingEnum {
 	 * even if the "+fhir" part is missing from the expected content type.
 	 * </p>
 	 */
-	public static EncodingEnum forContentType(String theContentType) {
+	public static EncodingEnum forContentType(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return null;
@@ -177,7 +186,7 @@ public enum EncodingEnum {
 	 *
 	 * @see #forContentType(String)
 	 */
-	public static EncodingEnum forContentTypeStrict(String theContentType) {
+	public static EncodingEnum forContentTypeStrict(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return null;
@@ -186,7 +195,7 @@ public enum EncodingEnum {
 		}
 	}
 
-	private static String getTypeWithoutCharset(String theContentType) {
+	private static String getTypeWithoutCharset(final String theContentType) {
 		if (theContentType == null) {
 			return null;
 		} else {
@@ -198,7 +207,7 @@ public enum EncodingEnum {
 	/**
 	 * Is the given type a FHIR legacy (pre-DSTU3) content type?
 	 */
-	public static boolean isLegacy(String theContentType) {
+	public static boolean isLegacy(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return false;

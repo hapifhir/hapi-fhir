@@ -1,51 +1,52 @@
 package ca.uhn.fhir.jaxrs.server.example;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.api.AddProfileTagEnum;
+import ca.uhn.fhir.context.api.BundleInclusionRule;
+import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.ETagSupportEnum;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.*;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.DateRangeParam;
-import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.api.AddProfileTagEnum;
-import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.server.*;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A demo JaxRs Patient Rest Provider
- * 
- * @author Peter Van Houte | peter.vanhoute@agfa.com | Agfa Healthcare
  */
 @Local
-@Path(JaxRsPatientRestProviderDstu3.PATH)
+@Path(JaxRsPatientRestProviderR4.PATH)
 @Stateless
 @Produces({ MediaType.APPLICATION_JSON, Constants.CT_FHIR_JSON, Constants.CT_FHIR_XML })
-public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider<Patient> {
+public class JaxRsPatientRestProviderR4 extends AbstractJaxRsResourceProvider<Patient> {
 
 	private static Long counter = 1L;
-	
+
 	/**
 	 * The HAPI paging provider for this server
 	 */
 	public static final IPagingProvider PAGE_PROVIDER;
-	
+
 	static final String PATH = "/Patient";
 	private static final ConcurrentHashMap<String, List<Patient>> patients = new ConcurrentHashMap<String, List<Patient>>();
 
@@ -61,8 +62,8 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 		}
 	}
 
-	public JaxRsPatientRestProviderDstu3() {
-		super(FhirContext.forDstu3(), JaxRsPatientRestProviderDstu3.class);
+	public JaxRsPatientRestProviderR4() {
+		super(FhirContext.forDstu3(), JaxRsPatientRestProviderR4.class);
 	}
 
 	@Create

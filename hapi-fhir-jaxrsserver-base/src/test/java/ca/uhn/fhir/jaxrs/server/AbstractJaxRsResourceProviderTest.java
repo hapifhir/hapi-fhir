@@ -22,6 +22,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringAndListParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +37,7 @@ import org.mockito.Matchers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -80,6 +82,12 @@ public class AbstractJaxRsResourceProviderTest {
 	private Patient createPatient(long id) {
 		Patient theResource = new Patient();
 		theResource.setId(new IdDt(id));
+		return theResource;
+	}
+
+	private Patient createPatient(long id, String version) {
+		Patient theResource = new Patient();
+		theResource.setId(new IdDt(id).withVersion(version));
 		return theResource;
 	}
 
@@ -341,12 +349,32 @@ public class AbstractJaxRsResourceProviderTest {
 
 	@Test
 	public void testVRead() {
-		when(mock.findHistory(idCaptor.capture())).thenReturn(createPatient(1));
+		when(mock.findVersion(idCaptor.capture())).thenReturn(createPatient(1));
 		final Patient patient = client.vread(Patient.class, "1", "2");
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1", patient);
 		assertEquals("1", idCaptor.getValue().getIdPart());
 		assertEquals("2", idCaptor.getValue().getVersionIdPart());
+	}
+
+	@Test
+	public void testInstanceHistory() {
+		when(mock.getHistoryForInstance(idCaptor.capture())).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
+		compareResultId(1, patient);
+		compareResultUrl("/Patient/1/_history/1", patient);
+		assertEquals("1", idCaptor.getValue().getIdPart());
+		assertNull(idCaptor.getValue().getVersionIdPart());
+	}
+
+	@Test
+	public void testTypeHistory() {
+		when(mock.getHistoryForType()).thenReturn(new SimpleBundleProvider(Collections.singletonList(createPatient(1, "1"))));
+		final Bundle bundle = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		Patient patient = (Patient) bundle.getEntryFirstRep().getResource();
+		compareResultId(1, patient);
+		compareResultUrl("/Patient/1/_history/1", patient);
 	}
 
 	@Test
