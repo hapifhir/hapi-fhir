@@ -79,6 +79,11 @@
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
 			</action>
+			<action type="add" issue="1321">
+				Support has been added for RDF encoding and parsing in the
+				<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
+				format. Thanks to Raul Estrada for the pull request!
+			</action>
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
 				in small batches. This change will likely reduce performance, but does allow

@@ -535,6 +535,10 @@
 			<name>Seth Rylan Gainey</name>
 			<url>http://sethrylan.org/</url>
 		</developer>
+		<developer>
+			<id>uurl</id>
+			<name>Raul Estrada</name>
+		</developer>
 	</developers>
 
 	<licenses>
