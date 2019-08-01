@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
@@ -82,12 +83,17 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
+	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator) {
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		throw new UnsupportedOperationException();
 	}
 

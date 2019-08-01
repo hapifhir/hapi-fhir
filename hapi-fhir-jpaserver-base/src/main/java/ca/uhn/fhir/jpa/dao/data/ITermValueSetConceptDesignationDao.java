@@ -30,6 +30,6 @@ public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermVa
 
 	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myValueSet.myId = :pid")
 	@Modifying
-	void deleteTermValueSetConceptDesignationsByValueSetId(@Param("pid") Long theValueSetId);
+	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
 }

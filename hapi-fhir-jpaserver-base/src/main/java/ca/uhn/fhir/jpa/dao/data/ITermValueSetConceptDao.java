@@ -26,10 +26,15 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
 
 	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
 	@Modifying
-	void deleteTermValueSetConceptsByValueSetId(@Param("pid") Long theValueSetId);
+	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	Optional<TermValueSetConcept> findByValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 
 }
