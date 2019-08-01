@@ -977,6 +977,11 @@
 				<version>${httpcore_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>3.11.0</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.lucene</groupId>
 				<artifactId>lucene-highlighter</artifactId>
 				<version>${lucene_version}</version>
