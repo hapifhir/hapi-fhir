@@ -90,9 +90,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
 			.renameColumn("myValueSet", "VALUESET_URL", false, true);
 
-		version.onTable("TRM_VALUESET")
-			.renameColumn("NAME", "VSNAME", true, true);
-
 		version.onTable("TRM_CONCEPT")
 			.renameColumn("CODE", "CODEVAL", false, true);
 
@@ -112,8 +109,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.toColumn("RES_ID")
 			.references("HFJ_RESOURCE", "RES_ID");
 		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
-		termValueSetTable.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_EXPANSION_STATUS_LENGTH);
-		termValueSetTable
+
+		version.onTable("TRM_VALUESET")
+			.renameColumn("NAME", "VSNAME", true, true);
+
+		Builder.BuilderWithTableName termValueSetTableChange = version.onTable("TRM_VALUESET");
+		termValueSetTableChange.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_EXPANSION_STATUS_LENGTH);
+		termValueSetTableChange
 			.addIndex("IDX_VALUESET_EXP_STATUS")
 			.unique(false)
 			.withColumns("EXPANSION_STATUS");
