@@ -80,7 +80,7 @@ public class TransactionClientTest {
     HttpPost post = (HttpPost) capt.getValue();
     assertEquals("http://foo", post.getURI().toString());
 
-    Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
+    Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());
@@ -119,7 +119,7 @@ public class TransactionClientTest {
     HttpPost post = (HttpPost) capt.getValue();
     assertEquals("http://foo", post.getURI().toString());
 
-    Bundle bundle = ctx.newXmlParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
+    Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.info(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
     assertEquals(2, bundle.getEntry().size());

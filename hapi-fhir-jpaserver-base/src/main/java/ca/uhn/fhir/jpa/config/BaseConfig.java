@@ -3,7 +3,11 @@ package ca.uhn.fhir.jpa.config;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
@@ -16,7 +20,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.LinkedBlockingQueueSubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
-import ca.uhn.fhir.jpa.util.JpaInterceptorService;
+import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +49,9 @@ import javax.annotation.Nonnull;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,6 +74,7 @@ import javax.annotation.Nonnull;
 public abstract class BaseConfig implements SchedulingConfigurer {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
+	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 
 	@Autowired
 	protected Environment myEnv;
@@ -115,6 +120,18 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Lazy
 	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
 		return new SubscriptionTriggeringProvider();
+	}
+
+	@Bean(name = "myAttachmentBinaryAccessProvider")
+	@Lazy
+	public BinaryAccessProvider binaryAccessProvider() {
+		return new BinaryAccessProvider();
+	}
+
+	@Bean(name = "myBinaryStorageInterceptor")
+	@Lazy
+	public BinaryStorageInterceptor binaryStorageInterceptor() {
+		return new BinaryStorageInterceptor();
 	}
 
 	@Bean
@@ -179,7 +196,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 
 	@Bean
 	public IInterceptorService jpaInterceptorService() {
-		return new JpaInterceptorService();
+		return new InterceptorService();
 	}
 
 	/**
@@ -187,6 +204,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 */
 	protected boolean isSupported(String theResourceType) {
 		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
+	}
+
+	@Bean
+	public IConsentContextServices consentContextServices() {
+		return new JpaConsentContextServices();
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
@@ -198,5 +220,6 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	private static HapiFhirHibernateJpaDialect hibernateJpaDialect(HapiLocalizer theLocalizer) {
 		return new HapiFhirHibernateJpaDialect(theLocalizer);
 	}
+
 
 }

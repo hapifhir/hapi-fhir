@@ -14,7 +14,7 @@ import static org.junit.Assert.fail;
 @ContextConfiguration(classes = {TestSubscriptionDstu3Config.class})
 public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 
-	private SubscriptionTestHelper mySubscriptionTestHelper = new SubscriptionTestHelper();
+	private final SubscriptionTestHelper mySubscriptionTestHelper = new SubscriptionTestHelper();
 
 	public static void waitForSize(int theTarget, List<?> theList) {
 		StopWatch sw = new StopWatch();

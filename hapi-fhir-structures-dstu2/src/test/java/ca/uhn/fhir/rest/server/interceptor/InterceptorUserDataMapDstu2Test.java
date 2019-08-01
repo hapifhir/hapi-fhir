@@ -1,20 +1,27 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
+import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
+import ca.uhn.fhir.model.dstu2.resource.Bundle;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
+import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
+import ca.uhn.fhir.model.primitive.DateDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -25,39 +32,30 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.IdentifierUseEnum;
-import ca.uhn.fhir.model.primitive.*;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.Assert.*;
 
 public class InterceptorUserDataMapDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(InterceptorUserDataMapDstu2Test.class);
 	private static int ourPort;
 	private static Server ourServer;
 	private static RestfulServer servlet;
 	private final Object myKey = "KEY";
+	private final Object myValue = "VALUE";
 	private Map<Object, Object> myMap;
 	private Set<String> myMapCheckMethods;
-	private final Object myValue = "VALUE";
 
 	@Before
 	public void before() {
@@ -69,10 +67,10 @@ public class InterceptorUserDataMapDstu2Test {
 	@Before
 	public void beforePurgeMap() {
 		myMap = null;
-		myMapCheckMethods= new LinkedHashSet<>();
+		myMapCheckMethods = new LinkedHashSet<>();
 	}
 
-	
+
 	@Test
 	public void testException() throws Exception {
 
@@ -81,7 +79,7 @@ public class InterceptorUserDataMapDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException"));
+		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
 	}
 
 	@Test
@@ -97,9 +95,8 @@ public class InterceptorUserDataMapDstu2Test {
 			}
 
 		}
-		
-		ourLog.info(myMapCheckMethods.toString());
-		assertThat(myMapCheckMethods.toString(), myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally"));
+
+		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
@@ -114,32 +111,49 @@ public class InterceptorUserDataMapDstu2Test {
 		myMapCheckMethods.add(theMethod);
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
+	@Interceptor
+	public class MyInterceptor {
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+		public void incomingRequestPostProcessed(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
+			updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
+		}
 
-		ServletHandler proxyHandler = new ServletHandler();
-		servlet = new RestfulServer(ourCtx);
-		
-		servlet.setResourceProviders(new DummyPatientResourceProvider());
-		servlet.setPlainProviders(new PlainProvider());
-		
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+		public void incomingRequestPreHandled(ActionRequestDetails theRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
+		}
 
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
+		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+		public void outgoingResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "outgoingResponse");
+			updateMapUsing(theServletRequestDetails.getUserData(), "outgoingResponse");
+		}
+
+		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
+		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
+			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
+		}
+
+		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED)
+		public void processingCompleted(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "processingCompleted");
+			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompleted");
+		}
+
+		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
+		public void preProcessOutgoingException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
+			updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
+		}
+
+		@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
+		public void handleException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
+			updateMapUsing(theRequestDetails.getUserData(), "handleException");
+			updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
+		}
 
 	}
 
@@ -183,9 +197,8 @@ public class InterceptorUserDataMapDstu2Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
-		 * @param theId
-		 *            The resource identity
+		 *
+		 * @param theId The resource identity
 		 * @return The resource
 		 */
 		@Read()
@@ -200,9 +213,8 @@ public class InterceptorUserDataMapDstu2Test {
 
 		/**
 		 * Retrieve the resource by its identifier
-		 * 
-		 * @param theId
-		 *            The resource identity
+		 *
+		 * @param theId The resource identity
 		 * @return The resource
 		 */
 		@Search()
@@ -233,46 +245,6 @@ public class InterceptorUserDataMapDstu2Test {
 
 	}
 
-	@Interceptor
-	public class MyInterceptor {
-
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
-		public void incomingRequestPostProcessed(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPostProcessed");
-			updateMapUsing(theServletRequestDetails.getUserData(), "incomingRequestPostProcessed");
-		}
-
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-		public void incomingRequestPreHandled(ActionRequestDetails theRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "incomingRequestPreHandled");
-		}
-
-		@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
-		public void outgoingResponse(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "outgoingResponse");
-			updateMapUsing(theServletRequestDetails.getUserData(), "outgoingResponse");
-		}
-
-		@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
-		public void processingCompletedNormally(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "processingCompletedNormally");
-			updateMapUsing(theServletRequestDetails.getUserData(), "processingCompletedNormally");
-		}
-
-		@Hook(Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION)
-		public void preProcessOutgoingException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "preProcessOutgoingException");
-			updateMapUsing(theServletRequestDetails.getUserData(), "preProcessOutgoingException");
-		}
-
-		@Hook(Pointcut.SERVER_HANDLE_EXCEPTION)
-		public void handleException(RequestDetails theRequestDetails, ServletRequestDetails theServletRequestDetails) {
-			updateMapUsing(theRequestDetails.getUserData(), "handleException");
-			updateMapUsing(theServletRequestDetails.getUserData(), "handleException");
-		}
-
-	}
-
 	public static class PlainProvider {
 
 		@Operation(name = "$everything", idempotent = true)
@@ -284,5 +256,34 @@ public class InterceptorUserDataMapDstu2Test {
 		}
 
 	}
-	
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		ServletHandler proxyHandler = new ServletHandler();
+		servlet = new RestfulServer(ourCtx);
+
+		servlet.setResourceProviders(new DummyPatientResourceProvider());
+		servlet.setPlainProviders(new PlainProvider());
+
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
+
+	}
+
 }

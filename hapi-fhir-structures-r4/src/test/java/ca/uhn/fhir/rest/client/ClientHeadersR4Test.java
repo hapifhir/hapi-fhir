@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestFormatParamStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.util.RandomServerPortProvider;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -27,6 +26,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ClientHeadersR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientHeadersR4Test.class);
@@ -122,7 +123,7 @@ public class ClientHeadersR4Test {
 
 		assertNotNull(resp);
 		assertEquals(1, ourHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals("application/fhir+xml; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
+		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
 	}
 
 	@Before
@@ -164,7 +165,8 @@ public class ClientHeadersR4Test {
 	}
 
 	@AfterClass
-	public static void afterClassClearContext() {
+	public static void afterClassClearContext() throws Exception {
+        JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -172,13 +174,11 @@ public class ClientHeadersR4Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forR4();
 
-		int myPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(myPort);
+		ourServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
-		ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 		ourCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 
 		ServletHolder servletHolder = new ServletHolder();
@@ -186,7 +186,9 @@ public class ClientHeadersR4Test {
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        int myPort = JettyUtil.getPortForStartedServer(ourServer);
+        ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 	}
 

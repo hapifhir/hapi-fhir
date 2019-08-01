@@ -3,15 +3,17 @@ package org.hl7.fhir.r4.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class CachingValidationSupport implements IValidationSupport {
@@ -21,7 +23,11 @@ public class CachingValidationSupport implements IValidationSupport {
 
 	public CachingValidationSupport(IValidationSupport theWrap) {
 		myWrap = theWrap;
-		myCache = Caffeine.newBuilder().expireAfterWrite(60, TimeUnit.SECONDS).build();
+		myCache = Caffeine
+			.newBuilder()
+			.expireAfterWrite(60, TimeUnit.SECONDS)
+			.maximumSize(5000)
+			.build();
 	}
 
 	@Override
@@ -31,14 +37,14 @@ public class CachingValidationSupport implements IValidationSupport {
 
 	@Override
 	public List<IBaseResource> fetchAllConformanceResources(FhirContext theContext) {
-		return (List<IBaseResource>) myCache.get("fetchAllConformanceResources",
-			t -> myWrap.fetchAllConformanceResources(theContext));
+		String key = "fetchAllConformanceResources";
+		return loadFromCache(key, t -> myWrap.fetchAllConformanceResources(theContext));
 	}
 
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return (List<StructureDefinition>) myCache.get("fetchAllStructureDefinitions",
-			t -> myWrap.fetchAllStructureDefinitions(theContext));
+		String key = "fetchAllStructureDefinitions";
+		return loadFromCache(key, t -> myWrap.fetchAllStructureDefinitions(theContext));
 	}
 
 	@Override
@@ -63,11 +69,29 @@ public class CachingValidationSupport implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return myWrap.isCodeSystemSupported(theContext, theSystem);
+		String key = "isCodeSystemSupported " + theSystem;
+		return loadFromCache(key, t -> myWrap.isCodeSystemSupported(theContext, theSystem));
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+		return myWrap.generateSnapshot(theInput, theUrl, theProfileName);
 	}
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		return myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay);
+		String key = "validateCode " + theCodeSystem + " " + theCode;
+		return loadFromCache(key, t -> myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay));
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		String key = "lookupCode " + theSystem + " " + theCode;
+		return loadFromCache(key, t -> myWrap.lookupCode(theContext, theSystem, theCode));
+	}
+
+	@Nullable
+	private <T> T loadFromCache(String theKey, Function<String, T> theLoader) {
+		return (T) myCache.get(theKey, theLoader);
 	}
 }

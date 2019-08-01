@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,13 +20,17 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -49,10 +53,111 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.map(FlagEnum::fromCommandLineValue)
 			.collect(Collectors.toSet());
 
+		init330();
 		init340();
 		init350();
 		init360();
+		init400();
 	}
+
+	protected void init400() {
+		Builder version = forVersion(VersionEnum.V4_0_0);
+
+		// BinaryStorageEntity
+		Builder.BuilderAddTableByColumns binaryBlob = version.addTableByColumns("HFJ_BINARY_STORAGE_BLOB", "BLOB_ID");
+		binaryBlob.addColumn("BLOB_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		binaryBlob.addColumn("RESOURCE_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_SIZE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		binaryBlob.addColumn("CONTENT_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		binaryBlob.addColumn("BLOB_DATA").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
+		binaryBlob.addColumn("PUBLISHED_DATE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		binaryBlob.addColumn("BLOB_HASH").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 128);
+
+		// Interim builds used this name
+		version.onTable("TRM_VALUESET_CODE").dropThisTable();
+
+		version.onTable("TRM_CONCEPT_MAP_GROUP")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySourceValueSet", "SOURCE_VS", false, true)
+			.renameColumn("myTargetValueSet", "TARGET_VS", false, true);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELEMENT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySystem", "SYSTEM_URL", false, true)
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
+			.renameColumn("myValueSet", "VALUESET_URL", false, true);
+
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+			.renameColumn("myConceptMapUrl", "CONCEPT_MAP_URL", false, true)
+			.renameColumn("mySystem", "SYSTEM_URL", false, true)
+			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
+			.renameColumn("myValueSet", "VALUESET_URL", false, true);
+
+		version.onTable("TRM_VALUESET")
+			.renameColumn("NAME", "VSNAME", true, true);
+
+		version.onTable("TRM_CONCEPT")
+			.renameColumn("CODE", "CODEVAL", false, true);
+
+		// TermValueSet
+		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		version.addIdGenerator("SEQ_VALUESET_PID");
+		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("TRM_VALUESET", "PID");
+		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_URL_LENGTH);
+		termValueSetTable
+			.addIndex("IDX_VALUESET_URL")
+			.unique(true)
+			.withColumns("URL");
+		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable
+			.addForeignKey("FK_TRMVALUESET_RES")
+			.toColumn("RES_ID")
+			.references("HFJ_RESOURCE", "RES_ID");
+		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
+
+		// TermValueSetConcept
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
+		version.addIdGenerator("SEQ_VALUESET_CONCEPT_PID");
+		Builder.BuilderAddTableByColumns termValueSetConceptTable = version.addTableByColumns("TRM_VALUESET_CONCEPT", "PID");
+		termValueSetConceptTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptTable
+			.addForeignKey("FK_TRM_VALUESET_PID")
+			.toColumn("VALUESET_PID")
+			.references("TRM_VALUESET", "PID");
+		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
+		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
+		termValueSetConceptTable
+			.addIndex("IDX_VALUESET_CONCEPT_CS_CD")
+			.unique(false)
+			.withColumns("SYSTEM_URL", "CODEVAL");
+		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+		version.onTable("TRM_VALUESET_CONCEPT")
+			.renameColumn("CODE", "CODEVAL", true, true)
+			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
+
+		// TermValueSetConceptDesignation
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
+		version.addIdGenerator("SEQ_VALUESET_C_DSGNTN_PID");
+		Builder.BuilderAddTableByColumns termValueSetConceptDesignationTable = version.addTableByColumns("TRM_VALUESET_C_DESIGNATION", "PID");
+		termValueSetConceptDesignationTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable.addColumn("VALUESET_CONCEPT_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable
+			.addForeignKey("FK_TRM_VALUESET_CONCEPT_PID")
+			.toColumn("VALUESET_CONCEPT_PID")
+			.references("TRM_VALUESET_CONCEPT", "PID");
+		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable
+			.addIndex("IDX_VALUESET_C_DSGNTN_VAL")
+			.unique(false)
+			.withColumns("VAL");
+	}
+
 
 	private void init360() {
 		Builder version = forVersion(VersionEnum.V3_6_0);
@@ -540,6 +645,22 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
 
+	}
+
+	private void init330() {
+		Builder version = forVersion(VersionEnum.V3_3_0);
+
+		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
+		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
+		hfjResource.dropColumn("RES_TEXT");
+		hfjResource.dropColumn("RES_ENCODING");
+
+		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
+		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
+		hfjResVer.modifyColumn("RES_ENCODING")
+			.nullable();
+		hfjResVer.modifyColumn("RES_TEXT")
+			.nullable();
 	}
 
 	public enum FlagEnum {

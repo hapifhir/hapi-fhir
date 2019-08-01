@@ -360,7 +360,7 @@ public class FhirInstanceValidatorR4Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(48, errors.size());
+		assertEquals(45, errors.size());
 	}
 
 	@Test

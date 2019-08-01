@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
-import ca.uhn.fhir.jpa.util.BaseCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.SqlQuery;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -38,7 +38,7 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 		long deleteCount = myCaptureQueriesListener.getDeleteQueries()
 			.stream()
 			.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
-			.collect(Collectors.summarizingInt(BaseCaptureQueriesListener.Query::getSize))
+			.collect(Collectors.summarizingInt(SqlQuery::getSize))
 			.getSum();
 		assertEquals(1, deleteCount);
 	}

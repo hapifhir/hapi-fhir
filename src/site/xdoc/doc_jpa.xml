@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
 	<properties>
 		<title>JPA Server</title>
@@ -11,7 +12,7 @@
 		<section name="JPA Server">
 
 			<p>
-				The HAPI FHIR 
+				The HAPI FHIR
 				<a href="./doc_rest_server.html">RestfulServer</a>
 				module can be used to create a FHIR server endpoint against an arbitrary
 				data source, which could be a database of your own design, an existing
@@ -20,83 +21,99 @@
 			<p>
 				HAPI also provides a persistence module which can be used to
 				provide a complete RESTful server implementation, backed by a database of
-				your choosing. This module uses the <a href="http://en.wikipedia.org/wiki/Java_Persistence_API">JPA 2.0</a>
-				API to store data in a database without depending on any specific database technology. 
+				your choosing. This module uses the
+				<a href="http://en.wikipedia.org/wiki/Java_Persistence_API">JPA 2.0</a>
+				API to store data in a database without depending on any specific database technology.
 			</p>
 			<p>
-				<b>Important Note: </b>
-				This implementation uses a fairly simple table design, with a 
-				single table being used to hold resource bodies (which are stored as 
-				CLOBs, optionally GZipped to save space) and a set of tables to hold search indexes, tags, 
+				<b>Important Note:</b>
+				This implementation uses a fairly simple table design, with a
+				single table being used to hold resource bodies (which are stored as
+				CLOBs, optionally GZipped to save space) and a set of tables to hold search indexes, tags,
 				history details, etc. This design is only one of many possible ways
 				of designing a FHIR server so it is worth considering whether it
 				is appropriate for the problem you are trying to solve.
 			</p>
 
 			<subsection name="Getting Started">
-				
+
 				<p>
 					The easiest way to get started with HAPI's JPA server module is
-					to begin with the example project. There is a complete sample project 
-					found in our GitHub repo here: <a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example">hapi-fhir-jpaserver-example</a>
+					to begin with the example project. There is a complete sample project
+					found in our GitHub repo here:
+					<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example">
+						hapi-fhir-jpaserver-example
+					</a>
 				</p>
-				
+
 				<p>
-					This example is a fully contained FHIR server, supporting all standard operations (read/create/delete/etc).
-					It bundles an embedded instance of the <a href="http://db.apache.org/derby/">Apache Derby</a> Java database
+					This example is a fully contained FHIR server, supporting all standard operations
+					(read/create/delete/etc).
+					It bundles an embedded instance of the <a href="http://db.apache.org/derby/">Apache Derby</a> Java
+					database
 					so that the server can run without depending on any external database, but it can also be
-					configured to use an installation of Oracle, Postgres, etc. 
+					configured to use an installation of Oracle, Postgres, etc.
 				</p>
-				
+
 				<p>
 					To take this project for a spin, check out the sources from GitHib (or download a snapshot),
 					and then build the project:
 				</p>
-				
+
 				<source><![CDATA[$ cd hapi-fhir-jpaserver-example
 $ mvn install]]></source>
-				
+
 				<p>
 					You now have two options for starting the server:
 				</p>
 				<ul>
 					<li>
-						<b>Deploy to Tomcat/JBoss/Websphere/etc: </b> You will now have a file 
+						<b>Deploy to Tomcat/JBoss/Websphere/etc:</b>
+						You will now have a file
 						in your <code>target</code> directory called <code>hapi-fhir-jpaserver-example.war</code>.
 						This WAR file can be deployed to any Servlet container, at which point you could
-						access the server by pointing your browser at a URL similar to the following 
-						(you may need to adjust the 
+						access the server by pointing your browser at a URL similar to the following
+						(you may need to adjust the
 						port depending on which port your container is configured to listen on):
-						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">http://localhost:8080/hapi-fhir-jpaserver-example/</a> 
+						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">
+							http://localhost:8080/hapi-fhir-jpaserver-example/
+						</a>
 					</li>
 					<li>
-						<b>Run with Maven and Embedded Jetty: </b> To start the server
-						directly within Maven, you can execute the following command:<br/>
+						<b>Run with Maven and Embedded Jetty:</b>
+						To start the server
+						directly within Maven, you can execute the following command:
+						<br/>
 						<source>$ mvn jetty:run</source>
-						You can then access the server by pointing your browser at the following URL: 
-						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">http://localhost:8080/hapi-fhir-jpaserver-example/</a> 
+						You can then access the server by pointing your browser at the following URL:
+						<a href="http://localhost:8080/hapi-fhir-jpaserver-example/">
+							http://localhost:8080/hapi-fhir-jpaserver-example/
+						</a>
 					</li>
 				</ul>
 			</subsection>
 		</section>
-		
+
 		<section name="Configuring The JPA Server">
-			
+
 			<p>
 				The JPA server is configured through a series of configuration files, most
-				of which are documented inline. 
+				of which are documented inline.
 			</p>
 			<ul>
 				<li>
-					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java"><b>FhirServerConfig.java</b></a>:
-					Configures the database connection settings 
+					<a href="https://github.com/jamesagnew/hapi-fhir/blob/master/hapi-fhir-jpaserver-example/src/main/java/ca/uhn/fhir/jpa/demo/FhirServerConfig.java">
+						<b>FhirServerConfig.java</b>
+					</a>
+					:
+					Configures the database connection settings
 				</li>
 			</ul>
-			
+
 		</section>
-			
+
 		<section name="DaoConfig">
-				
+
 			<p>
 				The Spring confguration contains a definition for a bean called <code>daoConfig</code>,
 				which will look something like the following:
@@ -108,16 +125,17 @@ public DaoConfig daoConfig() {
 	retVal.setAllowInlineMatchUrlReferences(true);
 	return retVal;
 }]]></source>
-				
+
 			<p>
 				You can use this method to change various configuration settings on the DaoConfig bean
 				which define the way that the JPA server will behave.
-				See the <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig JavaDoc</a>
+				See the
+				<a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html">DaoConfig JavaDoc</a>
 				for information about the available settings.
 			</p>
 
 			<subsection name="External/Absolute Resource References">
-				
+
 				<p>
 					Clients may sometimes post resources to your server that contain
 					absolute resource references. For example, consider the following resource:
@@ -133,7 +151,7 @@ public DaoConfig daoConfig() {
       <reference value="http://example.com/fhir/Organization/123"/>
    </managingOrganization>
 </Patient>]]></source>
-				
+
 				<p>
 					By default, the server will reject this reference, as only
 					local references are permitted by the server. This can be changed
@@ -141,7 +159,7 @@ public DaoConfig daoConfig() {
 				</p>
 				<p>
 					If you want the server to recognize that this URL is actually a local
-					reference (i.e. because the server will be deployed to the base URL 
+					reference (i.e. because the server will be deployed to the base URL
 					<code>http://example.com/fhir/</code>) you can
 					configure the server to recognize this URL via the following DaoConfig
 					setting:
@@ -161,7 +179,7 @@ public DaoConfig daoConfig() {
 					it will be possible to search for references that refer to these
 					external references.
 				</p>
-				
+
 				<source><![CDATA[@Bean
 public DaoConfig daoConfig() {
 	DaoConfig retVal = new DaoConfig();
@@ -176,7 +194,7 @@ public DaoConfig daoConfig() {
 			</subsection>
 
 			<subsection name="Logical References">
-				
+
 				<p>
 					In some cases, you may have references which are <i>Logical References</i>,
 					which means that they act as an identifier and not necessarily as a literal
@@ -185,27 +203,30 @@ public DaoConfig daoConfig() {
 				<p>
 					A common use for logical references is in references to conformance
 					resources, such as ValueSets, StructureDefinitions, etc. For example,
-					you might refer to the ValueSet 
+					you might refer to the ValueSet
 					<code>http://hl7.org/fhir/ValueSet/quantity-comparator</code>
 					from your own resources. In this case, you are not neccesarily telling
 					the server that this is a real address that it should resolve, but
 					rather that this is an identifier for a ValueSet where
-					<code>ValueSet.url</code> has the given URI/URL.
+					<code>ValueSet.url</code>
+					has the given URI/URL.
 				</p>
 				<p>
-					HAPI can be configured to treat certain URI/URL patterns as 
+					HAPI can be configured to treat certain URI/URL patterns as
 					logical by using the DaoConfig#setTreatReferencesAsLogical property
-					(see <a href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html#setTreatReferencesAsLogical-java.util.Set-">JavaDoc</a>).
+					(see <a
+					href="./apidocs-jpaserver/ca/uhn/fhir/jpa/dao/DaoConfig.html#setTreatReferencesAsLogical-java.util.Set-">
+					JavaDoc</a>).
 					For example:
 				</p>
 				<div class="source">
-				<pre>
-					// Treat specific URL as logical
-					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
-					
-					// Treat all references with given prefix as logical
-					myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
-				</pre>
+					<pre>
+						// Treat specific URL as logical
+						myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/ValueSet/cats-and-dogs");
+
+						// Treat all references with given prefix as logical
+						myDaoConfig.getTreatReferencesAsLogical().add("http://mysystem.com/mysystem-vs-*");
+					</pre>
 				</div>
 				<a name="search_result caching"/>
 			</subsection>
@@ -225,31 +246,37 @@ public DaoConfig daoConfig() {
 					but in some cases it is not. If you want to disable caching, you have two
 					options:
 				</p>
-				<p><b>Globally Disable / Change Caching Timeout</b></p>
+				<p>
+					<b>Globally Disable / Change Caching Timeout</b>
+				</p>
 				<p>
 					You can change the global cache using the following setting:
 				</p>
 				<div class="source">
-				<pre>
-					myDaoConfig.setReuseCachedSearchResultsForMillis(null);
-				</pre>
+					<pre>
+						myDaoConfig.setReuseCachedSearchResultsForMillis(null);
+					</pre>
 				</div>
-				<p><b>Disable Cache at the Request Level</b></p>
+				<p>
+					<b>Disable Cache at the Request Level</b>
+				</p>
 				<p>
 					Clients can selectively disable caching for an individual request
 					using the Cache-Control header:
 				</p>
 				<div class="source">
-				<pre>
-					Cache-Control: no-cache
-				</pre>
+					<pre>
+						Cache-Control: no-cache
+					</pre>
 				</div>
-				<p><b>Disable Paging at the Request Level</b></p>
+				<p>
+					<b>Disable Paging at the Request Level</b>
+				</p>
 				<p>
 					If the client knows that they will only want a small number of results
 					(for example, a UI containing 20 results is being shown and the client
 					knows that they will never load the next page of results) the client
-					may also use the <code>nostore</code> directive along with a HAPI FHIR
+					may also use the <code>no-store</code> directive along with a HAPI FHIR
 					extension called <code>max-results</code> in order to specify that
 					only the given number of results should be fetched. This directive
 					disabled paging entirely for the request and causes the request to
@@ -258,71 +285,81 @@ public DaoConfig daoConfig() {
 				</p>
 				<div class="source">
 					<pre>
-						Cache-Control: nostore, max-results=20
+						Cache-Control: no-store, max-results=20
 					</pre>
 				</div>
 
 			</subsection>
 
 		</section>
-		
+
 		<section name="Architecture">
-		
+
 			<img src="images/jpa_architecture.png" alt="Architecture" align="right"/>
-			
+
 			<p>
 				The HAPI JPA Server has the following components:
 			</p>
-			
+
 			<ul>
 				<li>
-					<b>Resource Providers: </b>
+					<b>Resource Providers:</b>
 					A RESTful server <a href="./doc_rest_server.html#resource_providers">Resource Provider</a> is
 					provided for each resource type in a given release of FHIR. Each resource provider implements
-					a 
-					<a href="./apidocs/ca/uhn/fhir/rest/annotation/Search.html">@Search</a> 
+					a
+					<a href="./apidocs/ca/uhn/fhir/rest/annotation/Search.html">@Search</a>
 					method implementing the complete set of search parameters defined in the FHIR
-					specification for the given resource type.<br/><br/>
+					specification for the given resource type.
+					<br/>
+					<br/>
 					The resource providers also extend a superclass which implements all of the
-					other FHIR methods, such as Read, Create, Delete, etc.<br/><br/>
-					Note that these resource providers are generated as a part of the HAPI build process, 
-					so they are not checked into Git. You can see their source 
+					other FHIR methods, such as Read, Create, Delete, etc.
+					<br/>
+					<br/>
+					Note that these resource providers are generated as a part of the HAPI build process,
+					so they are not checked into Git. You can see their source
 					in the <a href="./xref-jpaserver/">JXR Report</a>,
 					for example the
-					<a href="./xref-jpaserver/ca/uhn/fhir/jpa/rp/dstu2/PatientResourceProvider.html">PatientResourceProvider</a>.
-					<br/><br/>
+					<a href="./xref-jpaserver/ca/uhn/fhir/jpa/rp/dstu2/PatientResourceProvider.html">
+						PatientResourceProvider</a>.
+					<br/>
+					<br/>
 					The resource providers do not actually implement any of the logic
 					in searching, updating, etc. They simply receive the incoming HTTP calls (via the RestfulServer)
 					and pass along the incoming requests to the DAOs.
-					<br/><br/>
+					<br/>
+					<br/>
 				</li>
 				<li>
-					<b>HAPI DAOs: </b>
-					The DAOs actually implement all of the database business logic relating to 
+					<b>HAPI DAOs:</b>
+					The DAOs actually implement all of the database business logic relating to
 					the storage, indexing, and retrieval of FHIR resources, using the underlying JPA
 					API.
-					<br/><br/>
-				</li> 
+					<br/>
+					<br/>
+				</li>
 				<li>
-					<b>Hibernate: </b>
+					<b>Hibernate:</b>
 					The HAPI JPA Server uses the JPA library, implemented by Hibernate. No Hibernate
 					specific features are used, so the library should also work with other
 					providers (e.g. Eclipselink) but it is not tested regularly with them.
-					<br/><br/>
-				</li> 
+					<br/>
+					<br/>
+				</li>
 				<li>
-					<b>Database: </b>
+					<b>Database:</b>
 					The RESTful server uses an embedded Derby database, but can be configured to
-					talk to 
-					<a href="https://developer.jboss.org/wiki/SupportedDatabases2?_sscc=t">any database supported by Hibernate</a>.
-				</li> 
-			    
+					talk to
+					<a href="https://developer.jboss.org/wiki/SupportedDatabases2?_sscc=t">any database supported by
+						Hibernate</a>.
+				</li>
+
 			</ul>
-			
+
 		</section>
 
 		<section name="Additional Information">
-		
+
 			<ul>
 				<li>
 					<a href="https://www.openhealthhub.org/t/hapi-terminology-server-uk-snomed-ct-import/592">This page</a>
@@ -330,9 +367,9 @@ public DaoConfig daoConfig() {
 					the database.
 				</li>
 			</ul>
-			
+
 		</section>
-		
+
 		<!-- 
 		alter table hfj_res_link ALTER COLUMN "TARGET_RESOURCE_ID" NULL;
 		
@@ -378,19 +415,24 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 
 			<p>
 				When upgrading the JPA server from one version of HAPI FHIR to a newer version,
-				often there will be changes to the database schema. The <b>Migrate Database</b>
+				often there will be changes to the database schema. The
+				<b>Migrate Database</b>
 				command can be used to perform a migration from one version to the next.
 			</p>
 
 			<p>
 				Note that this feature was added in HAPI FHIR 3.5.0. It is not able to migrate
-				from versions prior to HAPI FHIR 3.4.0. <b>Please make a backup of your
-				database before running this command!</b>
+				from versions prior to HAPI FHIR 3.4.0.
+				<b>Please make a backup of your
+					database before running this command!
+				</b>
 			</p>
 			<p>
 				The following example shows how to use the migrator utility to migrate between two versions.
 			</p>
-			<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_5_0</pre>
+			<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u
+				"jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_5_0
+			</pre>
 
 			<p>
 				You may use the following command to get detailed help on the options:
@@ -400,9 +442,18 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 			<p>
 				Note the arguments:
 				<ul>
-					<li><code>-d [dialect]</code> - This indicates the database dialect to use. See the detailed help for a list of options</li>
-					<li><code>-f [version]</code> - The version to migrate from</li>
-					<li><code>-t [version]</code> - The version to migrate to</li>
+					<li>
+						<code>-d [dialect]</code>
+						- This indicates the database dialect to use. See the detailed help for a list of options
+					</li>
+					<li>
+						<code>-f [version]</code>
+						- The version to migrate from
+					</li>
+					<li>
+						<code>-t [version]</code>
+						- The version to migrate to
+					</li>
 				</ul>
 			</p>
 
@@ -412,7 +463,9 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 					so they are not included in HAPI FHIR. In order to use this command with an Oracle database,
 					you will need to invoke the CLI as follows:
 				</p>
-				<pre>java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n "[username]" -p "[password]" -f V3_4_0 -t V3_5_0</pre>
+				<pre>java -cp hapi-fhir-cli.jar ca.uhn.fhir.cli.App migrate-database -d ORACLE_12C -u "[url]" -n
+					"[username]" -p "[password]" -f V3_4_0 -t V3_5_0
+				</pre>
 			</subsection>
 
 			<subsection name="Migrating 3.4.0 to 3.5.0+">
@@ -446,19 +499,26 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 					</li>
 					<li>
 						Modify your <code>DaoConfig</code> to specify that hash-based searches should not be used, using
-						the following setting:<br/>
+						the following setting:
+						<br/>
 						<pre>myDaoConfig.setDisableHashBasedSearches(true);</pre>
 					</li>
 					<li>
 						Make sure that you have your JPA settings configured to not automatically
 						create database indexes and columns using the following setting
-						in your JPA Properties:<br/>
+						in your JPA Properties:
+						<br/>
 						<pre>extraProperties.put("hibernate.hbm2ddl.auto", "none");</pre>
 					</li>
 					<li>
-						Run the database migrator command, including the entry <code>-x no-migrate-350-hashes</code>
-						on the command line. For example:<br/>
-						<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0 -x no-migrate-350-hashes</pre>
+						Run the database migrator command, including the entry
+						<code>-x no-migrate-350-hashes</code>
+						on the command line. For example:
+						<br/>
+						<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u
+							"jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0 -x
+							no-migrate-350-hashes
+						</pre>
 					</li>
 					<li>
 						Rebuild and start your HAPI FHIR JPA server. At this point you should have a working
@@ -468,7 +528,8 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 					</li>
 					<li>
 						With the system running, request a complete reindex of the data in the database using
-						an HTTP request such as the following:<br/>
+						an HTTP request such as the following:
+						<br/>
 						<pre>GET /$mark-all-resources-for-reindexing</pre>
 						Note that this is a custom operation built into the HAPI FHIR JPA server. It should
 						be secured in a real deployment, so Authentication is likely required for this
@@ -488,12 +549,16 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 					<li>
 						Modify your <code>DaoConfig</code> to specify that hash-based searches are used, using
 						the following setting (this is the default setting, so it could also simply
-						be omitted):<br/>
+						be omitted):
+						<br/>
 						<pre>myDaoConfig.setDisableHashBasedSearches(false);</pre>
 					</li>
 					<li>
-						Execute the migrator tool again, this time omitting the flag option, e.g.<br/>
-						<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u "jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0</pre>
+						Execute the migrator tool again, this time omitting the flag option, e.g.
+						<br/>
+						<pre>./hapi-fhir-cli migrate-database -d DERBY_EMBEDDED -u
+							"jdbc:derby:directory:target/jpaserver_derby_files;create=true" -n "" -p "" -f V3_4_0 -t V3_6_0
+						</pre>
 					</li>
 					<li>
 						Rebuild, and start HAPI FHIR JPA again.
@@ -501,6 +566,23 @@ delete from hfj_res_ver where res_id in (select res_id from hfj_resource where s
 				</ul>
 			</subsection>
 
+		</section>
+
+		<section type="Cascading Deletes">
+			<p>
+				An interceptor called
+				<code>CascadingDeleteInterceptor</code>
+				may be registered against the Server. When this interceptor is enabled,
+				cascading deletes may be performed using either of the following:
+			</p>
+			<ul>
+				<li>The request may include the following parameter:
+					<code>_cascade=delete</code>
+				</li>
+				<li>The request may include the following header:
+					<code>X-Cascade: delete</code>
+				</li>
+			</ul>
 		</section>
 
 	</body>

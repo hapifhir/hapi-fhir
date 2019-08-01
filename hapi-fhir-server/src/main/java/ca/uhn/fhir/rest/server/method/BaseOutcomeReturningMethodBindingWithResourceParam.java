@@ -11,9 +11,9 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -128,10 +128,16 @@ abstract class BaseOutcomeReturningMethodBindingWithResourceParam extends BaseOu
 		/*
 		 * If the method has no parsed resource parameter, we parse here in order to have something for the interceptor.
 		 */
+		IBaseResource resource;
 		if (myResourceParameterIndex != -1) {
-			theDetails.setResource((IBaseResource) theMethodParams[myResourceParameterIndex]);
+			resource = (IBaseResource) theMethodParams[myResourceParameterIndex];
 		} else {
-			theDetails.setResource(ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType));
+			resource = ResourceParameter.parseResourceFromRequest(theRequestDetails, this, myResourceType);
+		}
+
+		theRequestDetails.setResource(resource);
+		if (theDetails != null) {
+			theDetails.setResource(resource);
 		}
 
 	}

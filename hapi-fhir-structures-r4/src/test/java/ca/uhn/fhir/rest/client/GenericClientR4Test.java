@@ -202,9 +202,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Binary output = ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt));
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), "UTF-8"));
@@ -241,9 +241,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
 
@@ -353,7 +353,7 @@ public class GenericClientR4Test {
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
 		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
 	}
@@ -801,9 +801,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Patient/123/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
 		assertEquals("name", output.getParameterFirstRep().getName());
 		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
 	}
@@ -845,9 +845,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Patient/123/_history/456/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
 		assertEquals("name", output.getParameterFirstRep().getName());
 		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
 	}
@@ -889,9 +889,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
 		assertEquals("name", output.getParameterFirstRep().getName());
 		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
 	}
@@ -1012,9 +1012,9 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Patient/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Parameters output = ourCtx.newXmlParser().parseResource(Parameters.class, extractBodyAsString(capt));
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
 		assertEquals("name", output.getParameterFirstRep().getName());
 		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
 	}
@@ -1342,6 +1342,7 @@ public class GenericClientR4Test {
 			.update()
 			.resource(bundle)
 			.prefer(PreferReturnEnum.REPRESENTATION)
+			.encodedXml()
 			.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
@@ -2109,10 +2110,10 @@ public class GenericClientR4Test {
 		assertEquals("http://example.com/fhir/Patient/111", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+xml;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
-		assertThat(body, containsString("<id value=\"111\"/>"));
+		assertThat(body, containsString("\"id\":\"111\""));
 	}
 
 	@Test

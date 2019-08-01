@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -229,6 +230,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+
+		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+
 	}
 
 	@Test
@@ -370,6 +374,46 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testValidateUsCoreR4Content() throws IOException {
+		myDaoConfig.setAllowExternalReferences(true);
+
+		upload("/r4/uscore/CodeSystem-cdcrec.json");
+		upload("/r4/uscore/StructureDefinition-us-core-birthsex.json");
+		upload("/r4/uscore/StructureDefinition-us-core-ethnicity.json");
+		upload("/r4/uscore/StructureDefinition-us-core-patient.json");
+		upload("/r4/uscore/StructureDefinition-us-core-race.json");
+		upload("/r4/uscore/ValueSet-birthsex.json");
+		upload("/r4/uscore/ValueSet-detailed-ethnicity.json");
+		upload("/r4/uscore/ValueSet-detailed-race.json");
+		upload("/r4/uscore/ValueSet-omb-ethnicity-category.json");
+		upload("/r4/uscore/ValueSet-omb-race-category.json");
+		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
+
+		{
+			String resource = loadResource("/r4/uscore/patient-resource-badcode.json");
+			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
+			try {
+				myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
+				fail();
+			} catch (PreconditionFailedException e) {
+				OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+				String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+				ourLog.info("Outcome:\n{}", encoded);
+				assertThat(encoded, containsString("Unknown code {urn:oid:2.16.840.1.113883.6.238}2106-3AAA"));
+			}
+		}
+		{
+			String resource = loadResource("/r4/uscore/patient-resource-good.json");
+			IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(resource);
+			MethodOutcome outcome = myPatientDao.validate((Patient) parsedResource, null, resource, null, null, null, mySrd);
+			OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
+			String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+			ourLog.info("Outcome:\n{}", encoded);
+			assertThat(encoded, containsString("No issues detected"));
+		}
+	}
+
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;
 		for (BundleEntryComponent next : vss.getEntry()) {
@@ -401,6 +445,26 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			throw e;
 		}
 	}
+
+	@Test
+	public void testValidateUsingDifferentialProfile() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+		myStructureDefinitionDao.create(sd);
+
+		Patient p = new Patient();
+		p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		p.getText().getDiv().setValue("<div>hello</div>");
+		p.getMeta().addProfile("http://example.com/fhir/StructureDefinition/patient-1a-extensions");
+		p.setActive(true);
+
+		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("OO: {}", encoded);
+		assertThat(encoded, containsString("No issues detected"));
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

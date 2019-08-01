@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,13 +21,16 @@ package ca.uhn.fhir.jpa.entity;
  */
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
 
 import static org.apache.commons.lang3.StringUtils.left;
+import static org.apache.commons.lang3.StringUtils.length;
 
 //@formatter:off
 @Table(name = "TRM_CODESYSTEM", uniqueConstraints = {
@@ -37,9 +40,11 @@ import static org.apache.commons.lang3.StringUtils.left;
 //@formatter:on
 public class TermCodeSystem implements Serializable {
 	private static final long serialVersionUID = 1L;
-	public static final int CS_NAME_LENGTH = 200;
 
-	@Column(name = "CODE_SYSTEM_URI", nullable = false)
+	private static final int MAX_NAME_LENGTH = 200;
+	public static final int MAX_URL_LENGTH = 200;
+
+	@Column(name = "CODE_SYSTEM_URI", nullable = false, length = MAX_URL_LENGTH)
 	private String myCodeSystemUri;
 
 	@OneToOne()
@@ -55,8 +60,15 @@ public class TermCodeSystem implements Serializable {
 	private ResourceTable myResource;
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourcePid;
-	@Column(name = "CS_NAME", nullable = true)
+	@Column(name = "CS_NAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
+
+	/**
+	 * Constructor
+	 */
+	public TermCodeSystem() {
+		super();
+	}
 
 	public String getCodeSystemUri() {
 		return myCodeSystemUri;
@@ -66,16 +78,21 @@ public class TermCodeSystem implements Serializable {
 		return myName;
 	}
 
-	public void setCodeSystemUri(String theCodeSystemUri) {
+	public TermCodeSystem setCodeSystemUri(@Nonnull String theCodeSystemUri) {
+		ValidateUtil.isNotBlankOrThrowIllegalArgument(theCodeSystemUri, "theCodeSystemUri must not be null or empty");
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theCodeSystemUri, MAX_URL_LENGTH,
+			"URI exceeds maximum length (" + MAX_URL_LENGTH + "): " + length(theCodeSystemUri));
 		myCodeSystemUri = theCodeSystemUri;
+		return this;
 	}
 
 	public TermCodeSystemVersion getCurrentVersion() {
 		return myCurrentVersion;
 	}
 
-	public void setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
+	public TermCodeSystem setCurrentVersion(TermCodeSystemVersion theCurrentVersion) {
 		myCurrentVersion = theCurrentVersion;
+		return this;
 	}
 
 	public Long getPid() {
@@ -86,12 +103,14 @@ public class TermCodeSystem implements Serializable {
 		return myResource;
 	}
 
-	public void setName(String theName) {
-		myName = left(theName, CS_NAME_LENGTH);
+	public TermCodeSystem setName(String theName) {
+		myName = left(theName, MAX_NAME_LENGTH);
+		return this;
 	}
 
-	public void setResource(ResourceTable theResource) {
+	public TermCodeSystem setResource(ResourceTable theResource) {
 		myResource = theResource;
+		return this;
 	}
 
 	@Override

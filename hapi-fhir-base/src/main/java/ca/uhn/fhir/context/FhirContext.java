@@ -40,9 +40,9 @@ import java.util.Map.Entry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -80,7 +80,7 @@ public class FhirContext {
 	private AddProfileTagEnum myAddProfileTagWhenEncoding = AddProfileTagEnum.ONLY_FOR_CUSTOM;
 	private volatile Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> myClassToElementDefinition = Collections.emptyMap();
 	private ArrayList<Class<? extends IBase>> myCustomTypes;
-	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<String, Class<? extends IBaseResource>>();
+	private Map<String, Class<? extends IBaseResource>> myDefaultTypeForProfile = new HashMap<>();
 	private volatile Map<String, RuntimeResourceDefinition> myIdToResourceDefinition = Collections.emptyMap();
 	private volatile boolean myInitialized;
 	private volatile boolean myInitializing = false;
@@ -91,7 +91,7 @@ public class FhirContext {
 	private volatile INarrativeGenerator myNarrativeGenerator;
 	private volatile IParserErrorHandler myParserErrorHandler = new LenientErrorHandler();
 	private ParserOptions myParserOptions = new ParserOptions();
-	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<PerformanceOptionsEnum>();
+	private Set<PerformanceOptionsEnum> myPerformanceOptions = new HashSet<>();
 	private Collection<Class<? extends IBaseResource>> myResourceTypesToScan;
 	private volatile IRestfulClientFactory myRestfulClientFactory;
 	private volatile RuntimeChildUndeclaredExtensionDefinition myRuntimeChildUndeclaredExtensionDefinition;
@@ -199,7 +199,7 @@ public class FhirContext {
 	private void ensureCustomTypeList() {
 		myClassToElementDefinition.clear();
 		if (myCustomTypes == null) {
-			myCustomTypes = new ArrayList<Class<? extends IBase>>();
+			myCustomTypes = new ArrayList<>();
 		}
 	}
 
@@ -277,14 +277,6 @@ public class FhirContext {
 	public BaseRuntimeElementDefinition<?> getElementDefinition(final String theElementName) {
 		validateInitialized();
 		return myNameToElementDefinition.get(theElementName.toLowerCase());
-	}
-
-	/**
-	 * For unit tests only
-	 */
-	int getElementDefinitionCount() {
-		validateInitialized();
-		return myClassToElementDefinition.size();
 	}
 
 	/**
@@ -787,7 +779,7 @@ public class FhirContext {
 			myRuntimeChildUndeclaredExtensionDefinition = scanner.getRuntimeChildUndeclaredExtensionDefinition();
 		}
 
-		Map<String, BaseRuntimeElementDefinition<?>> nameToElementDefinition = new HashMap<String, BaseRuntimeElementDefinition<?>>();
+		Map<String, BaseRuntimeElementDefinition<?>> nameToElementDefinition = new HashMap<>();
 		nameToElementDefinition.putAll(myNameToElementDefinition);
 		for (Entry<String, BaseRuntimeElementDefinition<?>> next : scanner.getNameToElementDefinitions().entrySet()) {
 			if (!nameToElementDefinition.containsKey(next.getKey())) {
@@ -795,7 +787,7 @@ public class FhirContext {
 			}
 		}
 
-		Map<String, RuntimeResourceDefinition> nameToResourceDefinition = new HashMap<String, RuntimeResourceDefinition>();
+		Map<String, RuntimeResourceDefinition> nameToResourceDefinition = new HashMap<>();
 		nameToResourceDefinition.putAll(myNameToResourceDefinition);
 		for (Entry<String, RuntimeResourceDefinition> next : scanner.getNameToResourceDefinition().entrySet()) {
 			if (!nameToResourceDefinition.containsKey(next.getKey())) {
@@ -803,7 +795,7 @@ public class FhirContext {
 			}
 		}
 
-		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<Class<? extends IBase>, BaseRuntimeElementDefinition<?>>();
+		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
 		for (BaseRuntimeElementDefinition<?> next : classToElementDefinition.values()) {
@@ -816,7 +808,7 @@ public class FhirContext {
 			}
 		}
 
-		Map<String, RuntimeResourceDefinition> idToElementDefinition = new HashMap<String, RuntimeResourceDefinition>();
+		Map<String, RuntimeResourceDefinition> idToElementDefinition = new HashMap<>();
 		idToElementDefinition.putAll(myIdToResourceDefinition);
 		idToElementDefinition.putAll(scanner.getIdToResourceDefinition());
 
@@ -882,9 +874,9 @@ public class FhirContext {
 		if (theResourceTypes == null) {
 			return null;
 		}
-		List<Class<? extends IElement>> resTypes = new ArrayList<Class<? extends IElement>>();
+		List<Class<? extends IElement>> resTypes = new ArrayList<>();
 		for (Class<? extends IBaseResource> next : theResourceTypes) {
-			resTypes.add((Class<? extends IElement>) next);
+			resTypes.add(next);
 		}
 		return resTypes;
 	}
@@ -942,7 +934,7 @@ public class FhirContext {
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
-		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<Class<? extends IBaseResource>>(1);
+		ArrayList<Class<? extends IBaseResource>> retVal = new ArrayList<>(1);
 		retVal.add(theResourceType);
 		return retVal;
 	}

@@ -8,6 +8,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.server.IRestfulResponse;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -16,24 +17,22 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils.ResponseEncoding;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -46,9 +45,9 @@ import static org.apache.commons.lang3.StringUtils.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -235,8 +234,7 @@ public class ResponseHighlighterInterceptor {
 	}
 
 	@Hook(value = Pointcut.SERVER_HANDLE_EXCEPTION, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
-	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
-		throws ServletException, IOException {
+	public boolean handleException(RequestDetails theRequestDetails, BaseServerResponseException theException, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) {
 		/*
 		 * It's not a browser...
 		 */
@@ -260,11 +258,17 @@ public class ResponseHighlighterInterceptor {
 			return true;
 		}
 
-		if (theException.getOperationOutcome() == null) {
+		IBaseOperationOutcome oo = theException.getOperationOutcome();
+		if (oo == null) {
 			return true;
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theException.getOperationOutcome(), theServletRequest, theException.getStatusCode());
+		ResponseDetails responseDetails = new ResponseDetails();
+		responseDetails.setResponseResource(oo);
+		responseDetails.setResponseCode(theException.getStatusCode());
+
+		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
+		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), theServletRequest, responseDetails.getResponseCode());
 
 		return false;
 	}
@@ -396,10 +400,7 @@ public class ResponseHighlighterInterceptor {
 				Enumeration<String> headerValuesEnum = sr.getHeaders(nextHeaderName);
 				while (headerValuesEnum.hasMoreElements()) {
 					String nextHeaderValue = headerValuesEnum.nextElement();
-					b.append("<div class=\"headersRow\">");
-					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
-					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
-					b.append("</div>");
+					appendHeader(b, nextHeaderName, nextHeaderValue);
 				}
 			}
 			b.append("</div>");
@@ -695,14 +696,26 @@ public class ResponseHighlighterInterceptor {
 							nextHeaderValue = responseEncoding.getResourceContentType() + ";charset=utf-8";
 						}
 					}
-					b.append("<div class=\"headersRow\">");
-					b.append("<span class=\"headerName\">").append(nextHeaderName).append(": ").append("</span>");
-					b.append("<span class=\"headerValue\">").append(nextHeaderValue).append("</span>");
-					b.append("</div>");
+					appendHeader(b, nextHeaderName, nextHeaderValue);
 				}
 			}
+			IRestfulResponse response = theRequestDetails.getResponse();
+			for (Map.Entry<String, List<String>> next : response.getHeaders().entrySet()) {
+				String name = next.getKey();
+				for (String nextValue : next.getValue()) {
+					appendHeader(b, name, nextValue);
+				}
+			}
+
 			b.append("</div>");
 		}
+	}
+
+	private void appendHeader(StringBuilder theBuilder, String theHeaderName, String theHeaderValue) {
+		theBuilder.append("<div class=\"headersRow\">");
+		theBuilder.append("<span class=\"headerName\">").append(theHeaderName).append(": ").append("</span>");
+		theBuilder.append("<span class=\"headerValue\">").append(theHeaderValue).append("</span>");
+		theBuilder.append("</div>");
 	}
 
 }
