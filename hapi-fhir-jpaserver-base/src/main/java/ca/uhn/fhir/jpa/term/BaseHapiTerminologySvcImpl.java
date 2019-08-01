@@ -1496,7 +1496,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	@Scheduled(fixedDelay = 600000) // 10 minutes.
-	@Transactional
 	@Override
 	public synchronized void preExpandValueSetToTerminologyTables() {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {

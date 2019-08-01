@@ -20,10 +20,23 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+/**
+ * This enum is used to indicate the expansion status of a given ValueSet in the terminology tables. In this context,
+ * an expanded ValueSet has its included concepts stored in the terminology tables as well.
+ */
 public enum TermValueSetExpansionStatusEnum {
 
+	/**
+	 * This status indicates the ValueSet is waiting to be picked up and expanded by a scheduled task.
+	 */
 	NOT_EXPANDED,
+	/**
+	 * This status indicates the ValueSet has been picked up by a scheduled task and is mid-expansion.
+	 */
 	EXPANSION_IN_PROGRESS,
+	/**
+	 * This status indicates the ValueSet has been picked up by a scheduled task and expansion is complete.
+	 */
 	EXPANDED
 	
 }
