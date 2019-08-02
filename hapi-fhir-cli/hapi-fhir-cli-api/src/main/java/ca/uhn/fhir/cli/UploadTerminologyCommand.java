@@ -21,7 +21,6 @@ package ca.uhn.fhir.cli;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -94,12 +93,28 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
-		IBaseParameters response = client
-			.operation()
-			.onType(CodeSystem.class)
-			.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameters(inputParameters)
-			.execute();
+
+		IBaseParameters response;
+		switch (myFhirCtx.getVersion().getVersion()) {
+			case DSTU3:
+				response = client
+					.operation()
+					.onType(org.hl7.fhir.dstu3.model.CodeSystem.class)
+					.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
+					.withParameters(inputParameters)
+					.execute();
+				break;
+			case R4:
+				response = client
+					.operation()
+					.onType(CodeSystem.class)
+					.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
+					.withParameters(inputParameters)
+					.execute();
+				break;
+			default:
+				throw new UnsupportedOperationException("This command does not currently support " + myFhirCtx.getVersion().getVersion());
+		}
 
 		ourLog.info("Upload complete!");
 		ourLog.info("Response:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
