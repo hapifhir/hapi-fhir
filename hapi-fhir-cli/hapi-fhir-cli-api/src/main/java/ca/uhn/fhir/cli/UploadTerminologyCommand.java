@@ -20,8 +20,6 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -30,7 +28,6 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.r4.model.CodeSystem;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -67,7 +64,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
-		FhirContext ctx = getFhirContext();
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
@@ -94,15 +90,16 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
+
 		IBaseParameters response = client
 			.operation()
-			.onType(CodeSystem.class)
+			.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
 			.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameters(inputParameters)
 			.execute();
 
 		ourLog.info("Upload complete!");
-		ourLog.info("Response:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 }
