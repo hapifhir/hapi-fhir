@@ -254,6 +254,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
@@ -585,9 +591,10 @@
 		<plugins>
 			<plugin>
 				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
 				<configuration>
 					<dialects>
+						<param>h2</param>
 						<param>derby_10_7</param>
 						<param>postgresql92</param>
 						<param>mysql57</param>
@@ -835,7 +842,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
+							<forkCount>2</forkCount>
 							<reuseForks>true</reuseForks>
 							<runOrder>alphabetical</runOrder>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>

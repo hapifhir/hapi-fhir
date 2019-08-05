@@ -35,6 +35,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -51,6 +52,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		mySearchCoordinatorSvcImpl = (SearchCoordinatorSvcImpl) AopProxyUtils.getSingletonTarget(mySearchCoordinatorSvc);
+		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(null);
+		mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests(SearchCoordinatorSvcImpl.DEFAULT_SYNC_SIZE);
 		myCaptureQueriesListener.setCaptureQueryStackTrace(true);
 	}
 
@@ -121,7 +124,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
-		// Seach with total expicitly requested
+		// Seach with total explicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
@@ -133,7 +136,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(ids, hasSize(10));
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
-		// Seach with count only
+		// Search with count only
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam().setMissing(false));
 		params.setSummaryMode(SummaryEnum.COUNT);
@@ -148,7 +151,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testFetchTotalAccurateForSlowLoading() {
+	public void testFetchTotalAccurateForSlowLoading() throws InterruptedException {
 		create200Patients();
 
 		mySearchCoordinatorSvcImpl.setLoadingThrottleForUnitTests(25);
@@ -171,6 +174,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00004", ids.get(4));
 
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 5000, false);
+		assertEquals(200, ids.size());
+
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
 		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer search2Size = search2.size();
@@ -188,13 +194,17 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		params.setSummaryMode(SummaryEnum.DATA);
 		IBundleProvider results = myPatientDao.search(params);
-		String uuid = results.getUuid();
+		final String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+
+		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size() != null);
+		results = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
+		Integer resultsSize = results.size();
+		assertEquals(200, resultsSize.intValue());
 
 		// Try the same query again. This time the same thing should come back, but
 		// from the cache...
@@ -204,13 +214,14 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 		params.setSummaryMode(SummaryEnum.DATA);
 		results = myPatientDao.search(params);
-		uuid = results.getUuid();
-		ourLog.info("** Search returned UUID: {}", uuid);
+		String uuid2 = results.getUuid();
+		assertEquals(uuid, uuid2);
+		ourLog.info("** Search returned UUID: {}", uuid2);
 		assertEquals(200, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue());
 
 	}
 
@@ -244,7 +255,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
-		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue());
+		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size() != null);
+		IBundleProvider results2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2);
+		Integer results2Size = results2.size();
+		assertEquals(200, results2Size.intValue());
 		assertNotEquals(uuid, uuid2);
 
 	}

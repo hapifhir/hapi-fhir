@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -1216,6 +1216,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		// Update version/lastUpdated so that interceptors see the correct version
 		updateResourceMetadata(savedEntity, theResource);
 
+		// Populate the PID in the resource so it is available to hooks
+		addPidToResource(savedEntity, theResource);
+
 		// Notify interceptors
 		if (!savedEntity.isUnchangedInCurrentOperation()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -1232,6 +1235,14 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		return savedEntity;
+	}
+
+	protected void addPidToResource(ResourceTable theEntity, IBaseResource theResource) {
+		if (theResource instanceof IAnyResource) {
+			IDao.RESOURCE_PID.put((IAnyResource) theResource, theEntity.getId());
+		} else if (theResource instanceof IResource) {
+			IDao.RESOURCE_PID.put((IResource) theResource, theEntity.getId());
+		}
 	}
 
 	protected void doCallHooks(RequestDetails theRequestDetails, Pointcut thePointcut, HookParams theParams) {

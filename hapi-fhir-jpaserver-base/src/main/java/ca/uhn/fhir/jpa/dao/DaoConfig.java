@@ -9,7 +9,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,6 +145,10 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 */
+	private boolean myPreExpandValueSetsExperimental = false;
 
 	/**
 	 * Constructor
@@ -1598,6 +1602,34 @@ public class DaoConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSetsExperimental() {
+		return myPreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
+		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
 	}
 
 	public enum IndexEnabledEnum {

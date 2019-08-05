@@ -34,7 +34,7 @@ public interface ITermCodeSystemDao  extends JpaRepository<TermCodeSystem, Long>
 	TermCodeSystem findByCodeSystemUri(@Param("code_system_uri") String theCodeSystemUri);
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myResourcePid = :resource_pid")
-	TermCodeSystem findByResourcePid(@Param("resource_pid") Long theReourcePid);
+	TermCodeSystem findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myCurrentVersion.myId = :csv_pid")
 	Optional<TermCodeSystem> findWithCodeSystemVersionAsCurrentVersion(@Param("csv_pid") Long theCodeSystemVersionPid);

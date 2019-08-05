@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -43,7 +44,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * interceptor may be configured to run any validator modules, and will then add headers to the response or fail the
  * request with an {@link UnprocessableEntityException HTTP 422 Unprocessable Entity}.
  */
-abstract class BaseValidatingInterceptor<T> extends InterceptorAdapter {
+@Interceptor
+public abstract class BaseValidatingInterceptor<T> {
 
 	/**
 	 * Default value:<br/>

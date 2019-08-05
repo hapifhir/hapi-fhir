@@ -23,6 +23,7 @@ package ca.uhn.fhir.igpacks.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
@@ -93,7 +94,9 @@ public abstract class BaseIgPackParser<T> {
 					if (entry.getName().equals(igResourceName)) {
 						parsed = FhirContext.forDstu3().newJsonParser().parseResource(ImplementationGuide.class, nextReader);
 					} else {
-						parsed = myCtx.newJsonParser().parseResource(nextReader);
+						LenientErrorHandler errorHandler = new LenientErrorHandler();
+						errorHandler.setErrorOnInvalidValue(false);
+						parsed = myCtx.newJsonParser().setParserErrorHandler(errorHandler).parseResource(nextReader);
 					}
 
 					candidateResources.put(entry.getName(), parsed);

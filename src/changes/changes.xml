@@ -45,7 +45,22 @@
 				should be an easy fix to existing code.
 				]]>
 			</action>
-			<action type="add">
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The HAPI FHIR REST client and server will now default to using JSON encoding instead of XML when
+				the user has not explicitly configured a preference.
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The JPA $upload-external-code-system operation has been moved from being a
+				server level operation (i.e. called on the root of the server) to being
+				a type level operation (i.e. called on the CodeSystem type).
+				]]>
+			</action>
+		<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
@@ -63,6 +78,11 @@
 				<li>
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
+			</action>
+			<action type="add" issue="1321">
+				Support has been added for RDF encoding and parsing in the
+				<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
+				format. Thanks to Raul Estrada for the pull request!
 			</action>
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes
@@ -110,10 +130,6 @@
 				Hooks have access to the list of resources that have references to the resource being deleted and
 				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
-			</action>
-			<action type="change">
-				The default RestfulServer encoding has been changed from XML to JSON in order to
-				reflect the most common usage.
 			</action>
 			<action type="add" issue="1336">
 				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
@@ -265,6 +281,93 @@
 			<action type="add">
 				A new server interceptor hook called PROCESSING_COMPLETED has been added. This
 				hook is called by the server at the end of processing every request (success and failure).
+			</action>
+			<action type="fix">
+				The <![CDATA[<code>_summary</code>]]> element was not always respected when encoding
+				JSON resources.
+			</action>
+			<action type="change">
+				The JPA server now uses the H2 database instead of the derby database to run its 
+				unit tests. We are hoping that this cuts down on the number of false test failures 
+				we get due to mysterious derby failures.
+			</action>
+			<action type="add">
+				Added a new Pointcut STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING that is called at the start of
+				the expungeEverything operation.
+			</action>
+			<action type="add">
+				The JPA server now has the ability to generate snapshot profiles from differential
+				profiles via the $snapshot operation, and will automatically generate a snapshot when
+				needed for validation.
+			</action>
+			<action type="change">
+				The Base64Binary types for DSTU3+ now use a byte array internally to represent their
+				content, which is more efficient than storing base 64 encoded text to represent
+				the binary as was previously done.
+			</action>
+			<action type="add">
+				Creating/updating CodeSystems now persist <![CDATA[<code>CodeSystem.concept.designation</code>]]> to
+				the terminology tables.
+			</action>
+			<action type="add">
+				Expanded ValueSets now populate <![CDATA[<code>ValueSet.expansion.contains.designation.language</code>]]>.
+			</action>
+			<action type="add">
+				@Operation methods can now declare that they will manually process the request
+				body and/or manually generate a response instead of letting the HAPI FHIR
+				framework take care of these things. This is useful for situations where
+				direct access to the low-level servlet streaming API is needed.
+			</action>
+			<action type="add">
+				@Operation methods can now declare that they are global, meaning that they will
+				apply to all resource types (or instances of all resource types) if they
+				are found on a plain provider.
+			</action>
+			<action type="add">
+				@Operation method parameters may now declare their type via a String name such as
+				"code" or "Coding" in an attribute in @OperationParam. This is useful if you want
+				to make operation methods that can operate across different versions of FHIR.
+			</action>
+			<action type="add">
+				A new resource provider for JPA servers called
+				<![CDATA[<code>BinaryAccessProvider</code>]]>
+				has been added. This provider serves two custom operations called
+				<![CDATA[<code>$binary-access-read</code>]]> and
+				<![CDATA[<code>$binary-access-write</code>]]> that can be used to
+				request binary data in Attachments as raw binary content instead of
+				as base 64 encoded content.
+			</action>
+			<action type="change">
+				A few columns named 'CODE' in the JPA terminology services tables have been
+				renamed to 'CODEVAL' to avoid any possibility of conflicting with reserved
+				words in MySQL. The database migrator tool has been updated to handle this 
+				change.
+			</action>
+			<action type="add">
+				Support for PATCH operations performed within a transaction (using a Binary
+				resource as the resource type in order to hold a JSONPatch or XMLPatch body)
+				has been added to the JPA server.
+			</action>
+			<action type="fix" issue="1390">
+				Two issues in the Thymeleaf Narrative Template which caused an error when generating
+				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
+				user @navyflower for reporting!
+			</action>
+			<action type="add">
+				A new attribute has been added to the @Operation annotation called 
+				<![CDATA[<code>typeName</code>]]>. This annotation can be used to specify a 
+				type for an operation declared on a plain provider without needing to use 
+				a specific version of the FHIR structures.
+			</action>
+			<action type="add">
+				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
+				can now be used to upload custom vocabulary that has been converted into a standard file format
+				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
+			<action type="fix" issue="1404">
+				In the JAX-RS server, the resource type history and instance vread
+				operations had ambiguous paths that could lead to the wrong method
+				being called. Thanks to Seth Rylan Gainey for the pull request!
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
@@ -510,6 +613,10 @@
 			<action type="add" issue="1303">
 				The JSON parser has removed a few unneeded super keywords that prevented overriding behaviour.
 				Thanks to Anders Havn for the pull request!
+			</action>
+			<action type="add" issue="1179">
+				The DSTU2/3 version converter now converts Specimen resources. Thanks to Gary
+				Graham for the pull request!
 			</action>
 		</release>
 		<release version="3.7.0" date="2019-02-06" description="Gale">

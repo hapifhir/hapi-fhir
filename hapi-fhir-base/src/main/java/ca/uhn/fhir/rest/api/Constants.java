@@ -43,6 +43,7 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	public static final String CT_RDF_TURTLE = "application/x-turtle";
 	/**
 	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
 	 */
@@ -71,6 +72,9 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
+	public static final String FORMAT_TURTLE = "text/turtle";
+
+
 	/**
 	 * "text/html" and "html"
 	 */
@@ -211,6 +215,9 @@ public class Constants {
 	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
 	public static final String HEADER_CASCADE = "X-Cascade";
 	public static final String CASCADE_DELETE = "delete";
+	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
+	public static final String CACHE_CONTROL_PRIVATE = "private";
+	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

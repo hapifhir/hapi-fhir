@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.Constants;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -36,7 +37,7 @@ public class ResourceReindexJobEntity implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RES_REINDEX_JOB")
 	@Column(name = "PID")
 	private Long myId;
-	@Column(name = "RES_TYPE", nullable = true)
+	@Column(name = "RES_TYPE", nullable = true, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 	/**
 	 * Inclusive
@@ -78,7 +79,11 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	public Date getThresholdLow() {
-		return myThresholdLow;
+		Date retVal = myThresholdLow;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 	/**
@@ -100,7 +105,11 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	public Date getThresholdHigh() {
-		return myThresholdHigh;
+		Date retVal = myThresholdHigh;
+		if (retVal != null) {
+			retVal = new Date(retVal.getTime());
+		}
+		return retVal;
 	}
 
 	/**

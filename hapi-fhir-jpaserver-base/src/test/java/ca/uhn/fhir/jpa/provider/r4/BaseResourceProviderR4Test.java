@@ -1,11 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -101,6 +99,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
+			ourRestServer.registerProvider(myBinaryAccessProvider);
+			ourRestServer.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 

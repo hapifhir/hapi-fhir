@@ -49,6 +49,7 @@ public abstract class BaseServerResponseException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 
 	static {
+		registerExceptionType(PayloadTooLargeException.STATUS_CODE, PayloadTooLargeException.class);
 		registerExceptionType(AuthenticationException.STATUS_CODE, AuthenticationException.class);
 		registerExceptionType(InternalErrorException.STATUS_CODE, InternalErrorException.class);
 		registerExceptionType(InvalidRequestException.STATUS_CODE, InvalidRequestException.class);

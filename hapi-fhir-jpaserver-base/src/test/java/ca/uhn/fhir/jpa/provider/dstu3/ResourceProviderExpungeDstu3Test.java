@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -199,7 +199,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	@Test
 	public void testExpungeSystemEverything() {
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
+			.setExpungeEverything(true), null);
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -219,7 +219,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeSystemOldVersionsAndDeleted() {
 		mySystemDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -238,7 +238,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeDeletedResources() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(false));
+			.setExpungeOldVersions(false), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -257,7 +257,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeOldVersions() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(false)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -277,7 +277,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	public void testExpungeTypeOldVersionsAndDeleted() {
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -298,7 +298,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 			myPatientDao.expunge(new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true)
-				.setLimit(0));
+				.setLimit(0), null);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());

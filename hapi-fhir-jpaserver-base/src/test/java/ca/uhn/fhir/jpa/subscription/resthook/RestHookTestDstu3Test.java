@@ -3,10 +3,10 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.jpa.subscription.module.interceptor.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -36,6 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
 
@@ -157,7 +158,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
 	}
 
@@ -167,7 +168,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
 
@@ -467,16 +468,19 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
 		assertEquals(1, tags.size());
 		Coding tag = tags.get(0);
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
 		assertEquals("In-memory", tag.getDisplay());
+
+		// Wait for subscription to be moved to active
+		await().until(()-> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
 		tags = subscriptionActivated.getMeta().getTag();
 		assertEquals(1, tags.size());
 		tag = tags.get(0);
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
 		assertEquals("In-memory", tag.getDisplay());
 	}
@@ -491,16 +495,19 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
 		assertEquals(1, tags.size());
 		Coding tag = tags.get(0);
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
 		assertEquals("Database", tag.getDisplay());
+
+		// Wait for subscription to be moved to active
+		await().until(()-> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		tags = subscription.getMeta().getTag();
 		assertEquals(1, tags.size());
 		tag = tags.get(0);
-		assertEquals(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
 		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
 		assertEquals("Database", tag.getDisplay());
 	}

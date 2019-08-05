@@ -18,6 +18,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -31,6 +32,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
+import static org.hamcrest.CoreMatchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -220,7 +223,7 @@ public class SummaryParamR4Test {
 				assertThat(responseContent, (containsString("entry")));
 				assertThat(responseContent, (containsString(">TEXT<")));
 				assertThat(responseContent, (containsString("Medication/123")));
-				assertThat(responseContent, not(containsStringIgnoringCase("note")));
+				assertThat(responseContent, not(CoreMatchers.containsStringIgnoringCase("note")));
 			}
 		);
 

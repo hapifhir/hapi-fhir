@@ -23,6 +23,8 @@ package ca.uhn.fhir.rest.server.interceptor;
 import java.util.HashSet;
 import java.util.Set;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -54,7 +56,7 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 	public void addExcludeOperationType(RestOperationTypeEnum theOperationType) {
 		Validate.notNull(theOperationType, "theOperationType must not be null");
 		if (myExcludeOperationTypes == null) {
-			myExcludeOperationTypes = new HashSet<RestOperationTypeEnum>();
+			myExcludeOperationTypes = new HashSet<>();
 		}
 		myExcludeOperationTypes.add(theOperationType);
 	}
@@ -64,7 +66,7 @@ public class ResponseValidatingInterceptor extends BaseValidatingInterceptor<IBa
 		return theValidator.validateWithResult(theRequest);
 	}
 
-	@Override
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, IBaseResource theResponseObject) {
 		RestOperationTypeEnum operationType = theRequestDetails.getRestOperationType();
 		if (operationType != null && myExcludeOperationTypes != null && myExcludeOperationTypes.contains(operationType)) {

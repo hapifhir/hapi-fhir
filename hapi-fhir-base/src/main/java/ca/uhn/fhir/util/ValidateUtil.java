@@ -23,7 +23,7 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class ValidateUtil {
 
@@ -37,10 +37,16 @@ public class ValidateUtil {
 	}
 
 	/**
-	 * Throws {@link IllegalArgumentException} if theValue is <= theMinimum
+	 * Throws {@link IllegalArgumentException} if theValue is < theMinimum
 	 */
 	public static void isGreaterThanOrEqualTo(long theValue, long theMinimum, String theMessage) {
 		if (theValue < theMinimum) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
+	public static void isNotBlankOrThrowIllegalArgument(String theString, String theMessage) {
+		if (isBlank(theString)) {
 			throw new IllegalArgumentException(theMessage);
 		}
 	}
@@ -57,8 +63,32 @@ public class ValidateUtil {
 		}
 	}
 
-	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage) {
+	public static void isNotNullOrThrowUnprocessableEntity(Object theObject, String theMessage, Object... theValues) {
+		if (theObject == null) {
+			throw new UnprocessableEntityException(String.format(theMessage, theValues));
+		}
+	}
+
+	public static void isNotTooLongOrThrowIllegalArgument(String theString, int theMaxLength, String theMessage) {
+		if (length(theString) > theMaxLength) {
+			throw new IllegalArgumentException(theMessage);
+		}
+	}
+
+	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage, Object... theValues) {
 		if (theSuccess == false) {
+			throw new InvalidRequestException(String.format(theMessage, theValues));
+		}
+	}
+
+	public static void exactlyOneNotNullOrThrowInvalidRequestException(Object[] theObjects, String theMessage) {
+		int count = 0;
+		for (Object next : theObjects) {
+			if (next != null) {
+				count++;
+			}
+		}
+		if (count != 1) {
 			throw new InvalidRequestException(theMessage);
 		}
 	}

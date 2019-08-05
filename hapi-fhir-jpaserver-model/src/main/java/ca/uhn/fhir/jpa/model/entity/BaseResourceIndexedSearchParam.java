@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.model.entity;
  */
 
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
@@ -64,7 +65,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	private Long myResourcePid;
 
 	@Field()
-	@Column(name = "RES_TYPE", nullable = false)
+	@Column(name = "RES_TYPE", nullable = false, length = Constants.MAX_RESOURCE_NAME_LENGTH)
 	private String myResourceType;
 
 	@Field()

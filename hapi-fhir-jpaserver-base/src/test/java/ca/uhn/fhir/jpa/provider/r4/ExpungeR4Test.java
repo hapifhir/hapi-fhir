@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
@@ -177,7 +178,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
@@ -234,7 +235,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		mySystemDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -255,7 +256,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(false));
+			.setExpungeOldVersions(false), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -276,7 +277,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(false)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -297,7 +298,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		createStandardPatients();
 
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
+			.setExpungeEverything(true), null);
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -319,7 +320,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
-			.setExpungeOldVersions(true));
+			.setExpungeOldVersions(true), null);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -338,18 +339,25 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeEverythingWhereResourceInSearchResults() {
 		createStandardPatients();
 
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 0);
+			await().until(()->mySearchResultDao.count() == 0);
+		});
+
+		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
 		assertEquals(2, search.size().intValue());
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 1);
+			await().until(()->mySearchResultDao.count() == 2);
 			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
 			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());
 		});
 
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeEverything(true));
+			.setExpungeEverything(true), null);
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);
@@ -380,7 +388,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 
 		mySystemDao.expunge(new ExpungeOptions()
-			.setExpungeDeletedResources(true));
+			.setExpungeDeletedResources(true), null);
 
 		// Everything deleted
 		assertExpunged(myOneVersionPatientId);

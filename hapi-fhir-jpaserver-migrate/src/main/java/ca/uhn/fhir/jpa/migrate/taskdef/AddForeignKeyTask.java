@@ -75,10 +75,13 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 				break;
 			case POSTGRES_9_4:
 			case DERBY_EMBEDDED:
+			case H2_EMBEDDED:
 			case ORACLE_12C:
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " add constraint " + myConstraintName + " foreign key (" + getColumnName() + ") references " + myForeignTableName;
 				break;
+			default:
+				throw new IllegalStateException();
 		}
 
 

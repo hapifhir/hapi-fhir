@@ -461,6 +461,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// the correct version
 		updateResourceMetadata(entity, theResource);
 
+		// Populate the PID in the resource so it is available to hooks
+		addPidToResource(entity, theResource);
+
 		// Notify JPA interceptors
 		if (!updatedEntity.isUnchangedInCurrentOperation()) {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
@@ -555,18 +558,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
 
-			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions);
+			return myExpungeService.expunge(getResourceName(), entity.getResourceId(), entity.getVersion(), theExpungeOptions, theRequest);
 		}
 
-		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), entity.getResourceId(), null, theExpungeOptions, theRequest);
 	}
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
-	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions) {
+	public ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails) {
 		ourLog.info("Beginning TYPE[{}] expunge operation", getResourceName());
 
-		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions);
+		return myExpungeService.expunge(getResourceName(), null, null, theExpungeOptions, theRequestDetails);
 	}
 
 	public String getResourceName() {
@@ -848,6 +851,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
+
 	}
 
 	@Override

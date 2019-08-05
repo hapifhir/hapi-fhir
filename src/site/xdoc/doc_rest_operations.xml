@@ -1839,6 +1839,28 @@ If-Match: W/"3"]]></pre>
 				</p>
 			</subsection>
 
+			<subsection name="Manually handing Request/Response">
+
+				<p>
+					For some operations you may wish to bypass the HAPI FHIR
+					standard request parsing and/or response generation. In this
+					case you may use the <code>manualRequest()</code> and
+					<code>manualResponse()</code> attributes on the <code>@Operation</code>
+					annotation.
+				</p>
+				<p>
+					The following example shows an operation that parses the
+					request and generates a response (by echoing back the request).
+				</p>
+				<macro name="snippet">
+					<param name="id" value="manualInputAndOutput" />
+					<param name="file"
+							 value="examples/src/main/java/example/ServerOperations.java" />
+				</macro>
+
+
+			</subsection>
+
 		</section>
 
 	</body>

@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.config;
 
 import java.util.Properties;
 
+import org.hibernate.dialect.H2Dialect;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +39,7 @@ public class TestR4WithoutLuceneConfig extends TestR4Config {
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
+		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.search.autoregister_listeners", "false");
 		return extraProperties;
 	}
