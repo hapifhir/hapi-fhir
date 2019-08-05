@@ -42,7 +42,9 @@ public enum FhirVersionEnum {
 
 	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, new Dstu3Version()),
 
-	R4("org.hl7.fhir.r4.hapi.ctx.FhirR4", null, true, new R4Version()),;
+	R4("org.hl7.fhir.r4.hapi.ctx.FhirR4", null, true, new R4Version()),
+
+	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
 
 	private final FhirVersionEnum myEquivalent;
 	private final boolean myIsRi;
@@ -134,6 +136,8 @@ public enum FhirVersionEnum {
 				return FhirContext.forDstu3();
 			case R4:
 				return FhirContext.forR4();
+			case R5:
+				return FhirContext.forR5();
 		}
 		throw new IllegalStateException("Unknown version: " + this); // should not happen
 	}
@@ -207,6 +211,26 @@ public enum FhirVersionEnum {
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
 				myVersion = "4.0.0";
+			}
+		}
+
+		@Override
+		public String provideVersion() {
+			return myVersion;
+		}
+
+	}
+
+	private static class R5Version implements IVersionProvider {
+
+		private String myVersion;
+
+		R5Version() {
+			try {
+				Class<?> c = Class.forName("org.hl7.fhir.r5.model.Constants");
+				myVersion = (String) c.getDeclaredField("VERSION").get(null);
+			} catch (Exception e) {
+				myVersion = "5.0.0";
 			}
 		}
 
