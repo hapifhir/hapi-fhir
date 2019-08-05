@@ -530,6 +530,15 @@
 			<id>gteichrow</id>
 			<name>Gary Teichrow</name>
 		</developer>
+		<developer>
+			<id>sethrylan</id>
+			<name>Seth Rylan Gainey</name>
+			<url>http://sethrylan.org/</url>
+		</developer>
+		<developer>
+			<id>uurl</id>
+			<name>Raul Estrada</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -970,6 +979,12 @@
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore</artifactId>
 				<version>${httpcore_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>apache-jena-libs</artifactId>
+				<version>3.12.0</version>
+				<type>pom</type>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>

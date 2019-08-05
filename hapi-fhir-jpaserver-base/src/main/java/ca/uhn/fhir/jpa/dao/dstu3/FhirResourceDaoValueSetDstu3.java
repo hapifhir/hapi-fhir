@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -238,8 +238,8 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 			}
 			// String code = theCode.getValue();
 			// String system = toStringOrNull(theSystem);
-			LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
-			if (result.isFound()) {
+			IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
+			if (result != null && result.isFound()) {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
 				return retVal;
 			}
@@ -315,7 +315,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 				try {
 					ValueSet valueSet = (ValueSet) theResource;
 					org.hl7.fhir.r4.model.ValueSet converted = VersionConvertor_30_40.convertValueSet(valueSet);
-					myHapiTerminologySvc.storeTermValueSetAndChildren(retVal, converted);
+					myHapiTerminologySvc.storeTermValueSet(retVal, converted);
 				} catch (FHIRException fe) {
 					throw new InternalErrorException(fe);
 				}

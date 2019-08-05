@@ -43,6 +43,7 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermValueSet implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
 
@@ -67,6 +68,15 @@ public class TermValueSet implements Serializable {
 
 	@OneToMany(mappedBy = "myValueSet")
 	private List<TermValueSetConcept> myConcepts;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
+	private TermValueSetExpansionStatusEnum myExpansionStatus;
+
+	public TermValueSet() {
+		super();
+		myExpansionStatus = TermValueSetExpansionStatusEnum.NOT_EXPANDED;
+	}
 
 	public Long getId() {
 		return myId;
@@ -110,6 +120,14 @@ public class TermValueSet implements Serializable {
 		return myConcepts;
 	}
 
+	public TermValueSetExpansionStatusEnum getExpansionStatus() {
+		return myExpansionStatus;
+	}
+
+	public void setExpansionStatus(TermValueSetExpansionStatusEnum theExpansionStatus) {
+		myExpansionStatus = theExpansionStatus;
+	}
+
 	@Override
 	public boolean equals(Object theO) {
 		if (this == theO) return true;
@@ -139,6 +157,7 @@ public class TermValueSet implements Serializable {
 			.append("myResourcePid", myResourcePid)
 			.append("myName", myName)
 			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
+			.append("myExpansionStatus", myExpansionStatus)
 			.toString();
 	}
 }

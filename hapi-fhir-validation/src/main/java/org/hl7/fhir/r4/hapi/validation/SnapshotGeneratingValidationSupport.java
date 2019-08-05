@@ -96,6 +96,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		return null;
 	}
 
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
 	private class MyProfileKnowledgeWorker implements ProfileUtilities.ProfileKnowledgeProvider {
 		@Override
 		public boolean isDatatype(String typeSimple) {

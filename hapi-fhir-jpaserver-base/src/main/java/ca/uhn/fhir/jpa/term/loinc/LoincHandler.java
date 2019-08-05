@@ -34,8 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.trim;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class LoincHandler implements IRecordHandler {
 
@@ -64,7 +63,7 @@ public class LoincHandler implements IRecordHandler {
 			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
 			concept.setDisplay(display);
 
-			if (!display.equalsIgnoreCase(shortName)) {
+			if (isNotBlank(shortName) && !display.equalsIgnoreCase(shortName)) {
 				concept
 					.addDesignation()
 					.setUseDisplay("ShortName")

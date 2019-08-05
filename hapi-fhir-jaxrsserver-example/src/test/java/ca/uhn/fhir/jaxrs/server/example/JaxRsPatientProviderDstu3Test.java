@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.util.Arrays;
 import java.util.List;
 
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -284,5 +285,17 @@ public class JaxRsPatientProviderDstu3Test {
         final Patient patient = client.read(Patient.class, "1");
         System.out.println(patient);
     }
+
+	@Test
+	public void testInstanceHistory() {
+		final Bundle history = client.history().onInstance(new IdDt("Patient", 1L)).returnBundle(Bundle.class).execute();
+		assertEquals("myTestId", history.getIdElement().getIdPart());
+	}
+
+	@Test
+	public void testTypeHistory() {
+		final Bundle history = client.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		assertEquals("myTestId", history.getIdElement().getIdPart());
+	}
 
 }

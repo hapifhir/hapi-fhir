@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -14,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.*;
 
 public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test {
 
@@ -46,6 +48,93 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
+	public void testApplyDeltaAdd() {
+
+		CodeSystem delta = new CodeSystem();
+		delta.setUrl("http://example.com/labCodes");
+		delta.setName("Example Hospital Lab Codes");
+		delta.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		CodeSystem.ConceptDefinitionComponent chem = delta
+			.addConcept()
+			.setCode("CHEM")
+			.setDisplay("Chemistry Tests");
+		chem
+			.addConcept()
+			.setCode("HB")
+			.setDisplay("Hemoglobin");
+		chem
+			.addConcept()
+			.setCode("NEUT")
+			.setDisplay("Neutrophil");
+		CodeSystem.ConceptDefinitionComponent micro = delta
+			.addConcept()
+			.setCode("MICRO")
+			.setDisplay("Microbiology Tests");
+		micro
+			.addConcept()
+			.setCode("C&S")
+			.setDisplay("Culture & Sensitivity");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"valueInteger\": 5"));
+	}
+
+	@Test
+	public void testApplyDeltaRemove() {
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		ourClient.create().resource(cs).execute();
+
+		CodeSystem delta = new CodeSystem();
+		delta.setUrl("http://foo");
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+
+		// Add
+		ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
+			.execute();
+
+		// Remove
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
+			.prettyPrint()
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, containsString("\"valueInteger\": 1"));
+	}
+
+	@Test
 	public void testLookupOnExternalCode() {
 		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
 
@@ -61,11 +150,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("SYSTEM NAME", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
 		respParam = ourClient
@@ -81,11 +172,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals(("SYSTEM VERSION"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 	}
 
@@ -103,11 +196,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
 	@Test
@@ -140,7 +235,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -176,7 +271,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -245,11 +340,13 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("Unknown", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Married", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).booleanValue());
+		assertEquals("v3.MaritalStatus", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2018-08-12", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Married", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
 	}
 
 	@Test

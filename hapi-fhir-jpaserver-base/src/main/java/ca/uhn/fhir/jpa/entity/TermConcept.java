@@ -50,15 +50,12 @@ import static org.apache.commons.lang3.StringUtils.length;
 	@Index(name = "IDX_CONCEPT_UPDATED", columnList = "CONCEPT_UPDATED")
 })
 public class TermConcept implements Serializable {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
-
-	private static final long serialVersionUID = 1L;
-
 	public static final int MAX_CODE_LENGTH = 500;
 	public static final int MAX_DESC_LENGTH = 400;
-
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermConcept.class);
+	private static final long serialVersionUID = 1L;
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myParent", cascade = {})
-	private Collection<TermConceptParentChildLink> myChildren;
+	private List<TermConceptParentChildLink> myChildren;
 
 	@Column(name = "CODEVAL", nullable = false, length = MAX_CODE_LENGTH)
 	@Fields({@Field(name = "myCode", index = org.hibernate.search.annotations.Index.YES, store = Store.YES, analyze = Analyze.YES, analyzer = @Analyzer(definition = "exactAnalyzer")),})
@@ -111,7 +108,7 @@ public class TermConcept implements Serializable {
 		setCode(theCode);
 	}
 
-	public TermConcept addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
+	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
 		Validate.notNull(theRelationshipType, "theRelationshipType must not be null");
 		TermConceptParentChildLink link = new TermConceptParentChildLink();
 		link.setParent(this);
@@ -120,7 +117,7 @@ public class TermConcept implements Serializable {
 		getChildren().add(link);
 
 		theChild.getParents().add(link);
-		return this;
+		return link;
 	}
 
 	public void addChildren(List<TermConcept> theChildren, RelationshipTypeEnum theRelationshipType) {
@@ -178,7 +175,7 @@ public class TermConcept implements Serializable {
 		return b.isEquals();
 	}
 
-	public Collection<TermConceptParentChildLink> getChildren() {
+	public List<TermConceptParentChildLink> getChildren() {
 		if (myChildren == null) {
 			myChildren = new ArrayList<>();
 		}

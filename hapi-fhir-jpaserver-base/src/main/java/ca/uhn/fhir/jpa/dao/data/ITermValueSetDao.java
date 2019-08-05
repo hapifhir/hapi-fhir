@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetExpansionStatusEnum;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,12 +35,15 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 
 	@Query("DELETE FROM TermValueSet vs WHERE vs.myId = :pid")
 	@Modifying
-	void deleteTermValueSetById(@Param("pid") Long theId);
+	void deleteByTermValueSetId(@Param("pid") Long theId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myResourcePid = :resource_pid")
 	Optional<TermValueSet> findByResourcePid(@Param("resource_pid") Long theResourcePid);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url")
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
+
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
+	Page<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetExpansionStatusEnum theExpansionStatus);
 
 }

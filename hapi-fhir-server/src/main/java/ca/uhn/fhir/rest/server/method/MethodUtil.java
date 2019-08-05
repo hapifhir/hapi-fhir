@@ -68,14 +68,15 @@ public class MethodUtil {
 
 	@SuppressWarnings("unchecked")
 	public static List<IParameter> getResourceParameters(final FhirContext theContext, Method theMethod, Object theProvider, RestOperationTypeEnum theRestfulOperationTypeEnum) {
-		List<IParameter> parameters = new ArrayList<IParameter>();
+		List<IParameter> parameters = new ArrayList<>();
 
 		Class<?>[] parameterTypes = theMethod.getParameterTypes();
 		int paramIndex = 0;
 		for (Annotation[] annotations : theMethod.getParameterAnnotations()) {
 
 			IParameter param = null;
-			Class<?> parameterType = parameterTypes[paramIndex];
+			Class<?> declaredParameterType = parameterTypes[paramIndex];
+			Class<?> parameterType = declaredParameterType;
 			Class<? extends java.util.Collection<?>> outerCollectionType = null;
 			Class<? extends java.util.Collection<?>> innerCollectionType = null;
 			if (TagList.class.isAssignableFrom(parameterType)) {
@@ -85,11 +86,13 @@ public class MethodUtil {
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					outerCollectionType = innerCollectionType;
 					innerCollectionType = (Class<? extends java.util.Collection<?>>) parameterType;
 					parameterType = ReflectionUtil.getGenericCollectionTypeOfMethodParameter(theMethod, paramIndex);
+					declaredParameterType = parameterType;
 				}
 				if (Collection.class.isAssignableFrom(parameterType)) {
 					throw new ConfigurationException("Argument #" + paramIndex + " of Method '" + theMethod.getName() + "' in type '" + theMethod.getDeclaringClass().getCanonicalName()
@@ -219,7 +222,15 @@ public class MethodUtil {
 						param = new ConditionalParamBinder(theRestfulOperationTypeEnum, ((ConditionalUrlParam) nextAnnotation).supportsMultiple());
 					} else if (nextAnnotation instanceof OperationParam) {
 						Operation op = theMethod.getAnnotation(Operation.class);
-						param = new OperationParameter(theContext, op.name(), ((OperationParam) nextAnnotation));
+						OperationParam operationParam = (OperationParam) nextAnnotation;
+						param = new OperationParameter(theContext, op.name(), operationParam);
+						if (isNotBlank(operationParam.typeName())) {
+							Class<?> newParameterType = theContext.getElementDefinition(operationParam.typeName()).getImplementingClass();
+							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
+								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
+							}
+							parameterType = newParameterType;
+						}
 					} else if (nextAnnotation instanceof Validate.Mode) {
 						if (parameterType.equals(ValidationModeEnum.class) == false) {
 							throw new ConfigurationException(

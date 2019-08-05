@@ -112,6 +112,15 @@ public interface IValidationSupport
       super(severity, message, definition);
     }
 
+    @Override
+    protected String getDisplay() {
+      String retVal = null;
+      if (isOk()) {
+        retVal = asConceptDefinition().getDisplay();
+      }
+      return retVal;
+    }
+
   }
 
 }

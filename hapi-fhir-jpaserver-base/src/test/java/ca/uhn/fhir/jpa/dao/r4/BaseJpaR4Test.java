@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
@@ -126,6 +127,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
@@ -288,7 +291,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected IHapiTerminologySvc myTermSvc;
+	protected IHapiTerminologySvcR4 myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired

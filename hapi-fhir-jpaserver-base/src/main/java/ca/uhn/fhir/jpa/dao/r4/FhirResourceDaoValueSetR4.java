@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem.LookupCodeResult;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -239,7 +239,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			}
 			// String code = theCode.getValue();
 			// String system = toStringOrNull(theSystem);
-			LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
+			IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
 			if (result.isFound()) {
 				ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
 				return retVal;
@@ -313,7 +313,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 		if (myDaoConfig.isPreExpandValueSetsExperimental()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
-				myHapiTerminologySvc.storeTermValueSetAndChildren(retVal, valueSet);
+				myHapiTerminologySvc.storeTermValueSet(retVal, valueSet);
 			} else {
 				myHapiTerminologySvc.deleteValueSetAndChildren(retVal);
 			}

@@ -71,6 +71,11 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return myWrap.lookupCode(theContext, theSystem, theCode);
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
 		return myWrap.generateSnapshot(theInput, theUrl, theName);
 	}

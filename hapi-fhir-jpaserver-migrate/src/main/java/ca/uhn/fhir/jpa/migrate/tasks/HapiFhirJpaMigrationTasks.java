@@ -20,10 +20,7 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystem;
-import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -93,9 +90,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.renameColumn("mySystemVersion", "SYSTEM_VERSION", false, true)
 			.renameColumn("myValueSet", "VALUESET_URL", false, true);
 
-		version.onTable("TRM_VALUESET")
-			.renameColumn("NAME", "VSNAME", true, true);
-
 		version.onTable("TRM_CONCEPT")
 			.renameColumn("CODE", "CODEVAL", false, true);
 
@@ -116,6 +110,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.references("HFJ_RESOURCE", "RES_ID");
 		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
 
+		version.onTable("TRM_VALUESET")
+			.renameColumn("NAME", "VSNAME", true, true);
+
+		Builder.BuilderWithTableName termValueSetTableChange = version.onTable("TRM_VALUESET");
+		termValueSetTableChange.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_EXPANSION_STATUS_LENGTH);
+		termValueSetTableChange
+			.addIndex("IDX_VALUESET_EXP_STATUS")
+			.unique(false)
+			.withColumns("EXPANSION_STATUS");
+
 		// TermValueSetConcept
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
 		version.addIdGenerator("SEQ_VALUESET_CONCEPT_PID");
@@ -128,14 +132,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.references("TRM_VALUESET", "PID");
 		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
 		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
-		termValueSetConceptTable
-			.addIndex("IDX_VALUESET_CONCEPT_CS_CD")
-			.unique(false)
-			.withColumns("SYSTEM_URL", "CODEVAL");
 		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
 		version.onTable("TRM_VALUESET_CONCEPT")
 			.renameColumn("CODE", "CODEVAL", true, true)
 			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
+
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT, swapping index for unique constraint");
+		termValueSetConceptTable.dropIndex("IDX_VALUESET_CONCEPT_CS_CD");
+		termValueSetConceptTable
+			.addIndex("IDX_VS_CONCEPT_CS_CD")
+			.unique(true)
+			.withColumns("VALUESET_PID", "SYSTEM_URL", "CODEVAL");
 
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
@@ -156,6 +163,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addIndex("IDX_VALUESET_C_DSGNTN_VAL")
 			.unique(false)
 			.withColumns("VAL");
+
+		// TermCodeSystemVersion
+		version.startSectionWithMessage("Processing table: TRM_CODESYSTEM_VER");
+		Builder.BuilderWithTableName termCodeSystemVersionTable = version.onTable("TRM_CODESYSTEM_VER");
+		termCodeSystemVersionTable.addColumn("CS_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystemVersion.MAX_VERSION_LENGTH);
 	}
 
 

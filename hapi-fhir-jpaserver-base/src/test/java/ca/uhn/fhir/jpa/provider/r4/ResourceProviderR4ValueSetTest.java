@@ -16,7 +16,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -514,7 +513,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
@@ -603,7 +602,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs);
 		return codeSystem;
 	}
 

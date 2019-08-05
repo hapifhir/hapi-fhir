@@ -139,26 +139,35 @@ class ResourceExpungeService implements IResourceExpungeService {
 		}
 	}
 
-	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId) {
+	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
 		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
 		IdDt id = version.getIdDt();
 		ourLog.info("Deleting resource version {}", id.getValue());
 
-		// Interceptor call: STORAGE_PRESTORAGE_EXPUNGE_RESOURCE
+		callHooks(theRequestDetails, theRemainingCount, version, id);
+
+		myResourceHistoryTagDao.deleteAll(version.getTags());
+		myResourceHistoryTableDao.delete(version);
+
+		theRemainingCount.decrementAndGet();
+	}
+
+	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
+		final AtomicInteger counter = new AtomicInteger();
 		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
-			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(id.getResourceType());
-			IBaseResource resource = resourceDao.toResource(version, false);
+			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			IBaseResource resource = resourceDao.toResource(theVersion, false);
 			HookParams params = new HookParams()
-				.add(IIdType.class, id)
+				.add(AtomicInteger.class, counter)
+				.add(IIdType.class, theId)
 				.add(IBaseResource.class, resource)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
 		}
-
-		myResourceHistoryTagDao.deleteAll(version.getTags());
-		myResourceHistoryTableDao.delete(version);
+		theRemainingCount.addAndGet(-1 * counter.get());
 	}
+
 
 	@Override
 	@Transactional
@@ -175,19 +184,19 @@ class ResourceExpungeService implements IResourceExpungeService {
 	@Transactional
 	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
 		for (Long next : theHistoricalIds) {
-			expungeHistoricalVersion(theRequestDetails, next);
-			if (theRemainingCount.decrementAndGet() <= 0) {
+			expungeHistoricalVersion(theRequestDetails, next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
 				return;
 			}
 		}
 	}
 
-	private void expungeCurrentVersionOfResource(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
+	private void expungeCurrentVersionOfResource(RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
-			expungeHistoricalVersion(theRequestDetails, currentVersion.getId());
+			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
@@ -203,8 +212,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		}
 
 		myResourceTableDao.delete(resource);
-
-		theRemainingCount.decrementAndGet();
 	}
 
 	@Override
@@ -230,8 +237,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
-			expungeHistoricalVersion(theRequestDetails, nextVersionId);
-			if (theRemainingCount.decrementAndGet() <= 0) {
+			expungeHistoricalVersion(theRequestDetails, nextVersionId, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
 				return;
 			}
 		}

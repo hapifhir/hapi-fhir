@@ -67,8 +67,9 @@ public interface IInterceptorService extends IInterceptorBroadcaster {
 	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.
 	 *
 	 * @param theInterceptor The interceptor to unregister
+	 * @return Returns <code>true</code> if the interceptor was found and removed
 	 */
-	void unregisterInterceptor(Object theInterceptor);
+	boolean unregisterInterceptor(Object theInterceptor);
 
 	void registerAnonymousInterceptor(Pointcut thePointcut, IAnonymousInterceptor theInterceptor);
 

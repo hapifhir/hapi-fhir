@@ -12,6 +12,15 @@
 			</use>
 			<value value="Systolische bloeddruk - expiratie"/>
 		</designation>
+		<designation>
+			<language value="sv"/>
+			<use>
+				<system value="http://snomed.info/sct"/>
+				<code value="900000000000013009"/>
+				<display value="Synonym"/>
+			</use>
+			<value value="Systoliskt blodtryck - utgång"/>
+		</designation>
 	</concept>
 	<concept>
 		<code value="11378-7" />

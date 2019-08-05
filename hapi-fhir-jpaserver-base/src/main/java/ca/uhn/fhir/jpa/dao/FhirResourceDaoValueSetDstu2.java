@@ -27,6 +27,7 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
@@ -185,13 +186,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return source;
 	}
 
-	private LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
+	private IContextValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
 		for (ExpansionContains nextCode : theContains) {
 
 			String system = nextCode.getSystem();
 			String code = nextCode.getCode();
 			if (theSystem.equals(system) && theCode.equals(code)) {
-				LookupCodeResult retVal = new LookupCodeResult();
+				IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
 				retVal.setSearchedForCode(code);
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
@@ -210,7 +211,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -236,13 +237,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null, theRequest);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			LookupCodeResult result = lookup(contains, system, code);
+			IContextValidationSupport.LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
 				return result;
 			}
 		}
 
-		LookupCodeResult retVal = new LookupCodeResult();
+		IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
 		retVal.setFound(false);
 		retVal.setSearchedForCode(code);
 		retVal.setSearchedForSystem(system);
