@@ -23,7 +23,6 @@ public class ResourceIndexedSearchParamsTest {
 		target.setResourceType("Organization");
 		target.setId(123L);
 
-
 		ResourceIndexedSearchParams params = new ResourceIndexedSearchParams(source);
 		ResourceLink link = new ResourceLink("organization", source, target, new Date());
 		params.getResourceLinks().add(link);
