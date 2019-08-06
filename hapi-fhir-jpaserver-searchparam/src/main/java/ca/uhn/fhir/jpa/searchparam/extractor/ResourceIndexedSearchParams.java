@@ -260,7 +260,8 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
-	boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+	// KHS This needs to be public as libraries outside of hapi call it directly
+	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
