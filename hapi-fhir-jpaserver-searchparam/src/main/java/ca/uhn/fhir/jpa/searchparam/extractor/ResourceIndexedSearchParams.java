@@ -260,7 +260,7 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
-	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
+	boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
 		Predicate<ResourceLink> namedParamPredicate = resourceLink ->
