@@ -129,10 +129,10 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		StructureDefinition outcome = null;
 		for (IValidationSupport next : myChain) {
-			outcome = next.generateSnapshot(theInput, theUrl, theProfileName);
+			outcome = next.generateSnapshot(theInput, theUrl, theWebUrl, theProfileName);
 			if (outcome != null) {
 				break;
 			}

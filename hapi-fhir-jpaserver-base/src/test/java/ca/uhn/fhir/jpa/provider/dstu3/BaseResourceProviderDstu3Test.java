@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
@@ -61,9 +62,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
 	protected static ISearchDao mySearchEntityDao;
-	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
+	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 	private static Server ourServer;
-	private TerminologyUploaderProviderDstu3 myTerminologyUploaderProvider;
 	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
 
 	public BaseResourceProviderDstu3Test() {
@@ -91,8 +91,8 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderDstu3.class);
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
+			TerminologyUploaderProvider terminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
+			ourRestServer.registerProviders(mySystemProvider, terminologyUploaderProvider);
 
 			SubscriptionTriggeringProvider subscriptionTriggeringProvider = myAppCtx.getBean(SubscriptionTriggeringProvider.class);
 			ourRestServer.registerProvider(subscriptionTriggeringProvider);
@@ -102,6 +102,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
+			ourSearchCoordinatorSvc = myAppCtx.getBean(ISearchCoordinatorSvc.class);
 
 			Server server = new Server(0);
 
@@ -151,7 +152,7 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
-			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
+			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
 			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);

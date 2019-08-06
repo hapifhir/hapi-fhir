@@ -1309,29 +1309,6 @@ public class ClientR4Test {
 		retVal.addEntry().setResource(p);
 
 		return theCtx.newXmlParser().encodeResourceToString(retVal);
-
-		// String msg = "<feed xmlns=\"http://www.w3.org/2005/Atom\">\n" +
-		// "<title/>\n" +
-		// "<id>d039f91a-cc3c-4013-988e-af4d8d0614bd</id>\n" +
-		// "<os:totalResults xmlns:os=\"http://a9.com/-/spec/opensearch/1.1/\">1</os:totalResults>\n" +
-		// "<author>\n" +
-		// "<name>ca.uhn.fhir.rest.server.DummyRestfulServer</name>\n" +
-		// "</author>\n" +
-		// "<entry>\n" +
-		// "<content type=\"text/xml\">"
-		// + "<Patient xmlns=\"http://hl7.org/fhir\">"
-		// + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal: 444333333 </div></text>"
-		// + "<identifier><label value=\"SSN\" /><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
-		// + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-		// + "<name><family value=\"Kramer\" /><given value=\"Doe\" /></name>"
-		// + "<telecom><system value=\"phone\" /><value value=\"555-555-2004\" /><use value=\"work\" /></telecom>"
-		// + "<gender><coding><system value=\"http://hl7.org/fhir/v3/AdministrativeGender\" /><code value=\"M\" /></coding></gender>"
-		// + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
-		// + "</Patient>"
-		// + "</content>\n"
-		// + " </entry>\n"
-		// + "</feed>";
-		// return msg;
 	}
 
 }

@@ -23,7 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseStructureSpreadsheetParser extends BaseStructureParser {
 
-	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) {
+	public BaseStructureSpreadsheetParser(String theVersion, String theBaseDir) throws MojoFailureException {
 		super(theVersion, theBaseDir);
 
 		myBindingStrengths = new HashMap<>();

@@ -288,8 +288,6 @@ public class TinderGenericMultiFileMojo extends AbstractMojo {
 			}
 
 			generator.prepare(context);
-		} catch (ExecutionException e) {
-			throw new MojoExecutionException(e.getMessage(), e.getCause());
 		} catch (FailureException e) {
 			throw new MojoFailureException(e.getMessage(), e.getCause());
 		}

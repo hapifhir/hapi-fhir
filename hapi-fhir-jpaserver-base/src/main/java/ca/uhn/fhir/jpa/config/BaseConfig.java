@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
@@ -209,6 +210,13 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	@Lazy
+	public TerminologyUploaderProvider terminologyUploaderProvider() {
+		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
+		return retVal;
 	}
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {

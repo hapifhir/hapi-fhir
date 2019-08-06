@@ -76,7 +76,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		IWorkerContext context = new HapiWorkerContext(myCtx, myValidationSupport);
 		ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorker();
 		ArrayList<ValidationMessage> messages = new ArrayList<>();
@@ -86,7 +86,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			throw new PreconditionFailedException("Unknown base definition: " + theInput.getBaseDefinition());
 		}
 
-		new ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, theInput, theUrl, theProfileName);
+		new ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, theInput, theUrl, theWebUrl, theProfileName);
 
 		return theInput;
 	}
@@ -128,6 +128,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 
 		@Override
 		public BindingResolution resolveBinding(org.hl7.fhir.r4.model.StructureDefinition def, ElementDefinition.ElementDefinitionBindingComponent binding, String path) throws FHIRException {
+			return null;
+		}
+
+		@Override
+		public BindingResolution resolveBinding(StructureDefinition def, String url, String path) throws FHIRException {
 			return null;
 		}
 

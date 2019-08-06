@@ -24,7 +24,7 @@ import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -148,13 +148,6 @@ public class BaseDstu3Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologySvcDstu3 terminologyService() {
 		return new HapiTerminologySvcDstu3();
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProviderDstu3 terminologyUploaderProvider() {
-		TerminologyUploaderProviderDstu3 retVal = new TerminologyUploaderProviderDstu3();
-		retVal.setContext(fhirContextDstu3());
-		return retVal;
 	}
 
 	@Primary

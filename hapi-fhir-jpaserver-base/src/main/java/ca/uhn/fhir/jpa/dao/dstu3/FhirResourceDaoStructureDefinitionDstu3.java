@@ -32,7 +32,7 @@ public class FhirResourceDaoStructureDefinitionDstu3 extends FhirResourceDaoDstu
 	private IValidationSupport myValidationSupport;
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
 		StructureDefinition output = myValidationSupport.generateSnapshot(theInput, theUrl, theName);
 		Validate.notNull(output);
 		return output;

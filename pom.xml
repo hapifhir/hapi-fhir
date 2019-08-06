@@ -550,7 +550,7 @@
 
 	<properties>
 
-		<fhir_core_version>3.8.12-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>3.8.23-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -1864,6 +1864,9 @@
 								<copy todir="target/site/apidocs-r4">
 									<fileset dir="hapi-fhir-structures-r4/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-r5">
+									<fileset dir="hapi-fhir-structures-r5/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
@@ -2296,6 +2299,7 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
+				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-jpaserver-model</module>
@@ -2352,6 +2356,8 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-structures-r5</module>
+				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

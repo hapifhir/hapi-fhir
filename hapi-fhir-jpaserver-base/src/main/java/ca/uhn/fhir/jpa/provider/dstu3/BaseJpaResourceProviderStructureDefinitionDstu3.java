@@ -68,7 +68,7 @@ public class BaseJpaResourceProviderStructureDefinitionDstu3 extends JpaResource
 			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
 		}
 
-		return getDao().generateSnapshot(sd, null, null);
+		return getDao().generateSnapshot(sd, null, null, null);
 	}
 
 	@Override

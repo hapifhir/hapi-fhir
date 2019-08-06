@@ -107,7 +107,7 @@ public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Tes
 				.setType(TriggerDefinition.TriggerType.DATAADDED)
 				.setCondition(new Expression()
 					.setDescription("Encounter Location = emergency (active/completed encounters, current or previous)")
-					.setLanguage(Expression.ExpressionLanguage.TEXT_FHIRPATH)
+					.setLanguage(Expression.ExpressionLanguage.TEXT_FHIRPATH.toCode())
 					.setExpression("(this | %previous).location.where(location = 'Location/emergency' and status in {'active', 'completed'}).exists()")
 				)
 			);

@@ -925,12 +925,21 @@ public class FhirContext {
 	}
 
 	/**
-	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#DSTU3 DSTU3}
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R4 R4}
 	 *
 	 * @since 3.0.0
 	 */
 	public static FhirContext forR4() {
 		return new FhirContext(FhirVersionEnum.R4);
+	}
+
+	/**
+	 * Creates and returns a new FhirContext with version {@link FhirVersionEnum#R5 R5}
+	 *
+	 * @since 4.0.0
+	 */
+	public static FhirContext forR5() {
+		return new FhirContext(FhirVersionEnum.R5);
 	}
 
 	private static Collection<Class<? extends IBaseResource>> toCollection(Class<? extends IBaseResource> theResourceType) {
@@ -950,4 +959,5 @@ public class FhirContext {
 		}
 		return retVal;
 	}
+
 }

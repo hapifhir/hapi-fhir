@@ -16,7 +16,7 @@ import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -84,14 +84,14 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@After
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		val.setBestPracticeWarningLevel(org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel.Warning);
 	}
 
 
 	@Test
 	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		IResourceValidator.BestPracticeWarningLevel a = IResourceValidator.BestPracticeWarningLevel.Ignore;
+		org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel a = IResourceValidator.BestPracticeWarningLevel.Ignore;
 		val.setBestPracticeWarningLevel(a);
 
 		ValueSet vs = new ValueSet();

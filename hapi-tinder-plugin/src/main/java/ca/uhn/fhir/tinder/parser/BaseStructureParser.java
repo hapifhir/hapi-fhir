@@ -57,10 +57,9 @@ public abstract class BaseStructureParser {
 	private String myVelocityPath = null;
 	private String myVelocityProperties = null;
 
-	public BaseStructureParser(String theVersion, String theBaseDir) {
+	public BaseStructureParser(String theVersion, String theBaseDir) throws MojoFailureException {
 		myVersion = theVersion;
 		myBaseDir = theBaseDir;
-		myIsRi = myVersion.equals("dstu3");
 
 		if (myVersion.equals("r4")) {
 			myCtx = FhirContext.forR4();
@@ -68,7 +67,13 @@ public abstract class BaseStructureParser {
 			myCtx = FhirContext.forDstu3();
 		} else if (myVersion.equals("dstu2")) {
 			myCtx = FhirContext.forDstu2();
+		} else if (myVersion.equals("r5")) {
+			myCtx = FhirContext.forR5();
+		} else {
+			throw new MojoFailureException("Unknown version: " + myVersion);
 		}
+
+		myIsRi = myCtx.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3);
 	}
 
 	private void addImport(String bindingClass) {
@@ -719,6 +724,8 @@ public abstract class BaseStructureParser {
 			versionEnum = FhirVersionEnum.DSTU3;
 		} else if ("r4".equals(version)) {
 			versionEnum = FhirVersionEnum.R4;
+		} else if ("r5".equals(version)) {
+			versionEnum = FhirVersionEnum.R5;
 		} else {
 			throw new IllegalArgumentException("Unknown version: " + version);
 		}
