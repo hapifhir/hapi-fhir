@@ -24,7 +24,7 @@ import ca.uhn.fhir.model.dstu2.resource.StructureDefinition;
 
 public class FhirResourceDaoStructureDefinitionDstu2 extends FhirResourceDaoDstu2<StructureDefinition> implements IFhirResourceDaoStructureDefinition<StructureDefinition> {
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
 		// FIXME: implement
 		return null;
 	}

@@ -41,6 +41,20 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>fhirServletR5</servlet-name>
+		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
+		<init-param>
+			<param-name>ImplementationDescription</param-name>
+			<param-value>UHN Test Server (R5 Resources)</param-value>
+		</init-param>
+		<init-param>
+			<param-name>FhirVersion</param-name>
+			<param-value>R5</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
 		<servlet-name>fhirServletR4</servlet-name>
 		<servlet-class>ca.uhn.fhirtest.TestRestfulServer</servlet-class>
 		<init-param>
@@ -112,15 +126,17 @@
 -->
 
 	<servlet-mapping>
+		<servlet-name>fhirServletR5</servlet-name>
+		<url-pattern>/baseR5/*</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
 		<servlet-name>fhirServletR4</servlet-name>
 		<url-pattern>/baseR4/*</url-pattern>
 	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>fhirServletDstu2</servlet-name>
 		<url-pattern>/baseDstu2/*</url-pattern>
 	</servlet-mapping>
-	
 	<servlet-mapping>
 		<servlet-name>fhirServletDstu3</servlet-name>
 		<url-pattern>/baseDstu2.1/*</url-pattern>

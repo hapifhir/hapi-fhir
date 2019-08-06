@@ -22,10 +22,10 @@ package ca.uhn.fhir.tinder;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
-import ca.uhn.fhir.tinder.parser.BaseStructureParser;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingSpreadsheet;
+import org.apache.maven.plugin.MojoFailureException;
 
 import java.io.IOException;
 import java.util.*;
@@ -36,7 +36,7 @@ public abstract class AbstractGenerator {
 
 	protected abstract void logInfo (String message);
 	
-	public void prepare (GeneratorContext context) throws ExecutionException, FailureException {
+	public void prepare (GeneratorContext context) throws FailureException, MojoFailureException {
 
 		/*
 		 * Deal with the FHIR spec version
@@ -63,7 +63,7 @@ public abstract class AbstractGenerator {
 		List<String> excludeResources = context.getExcludeResources();
 		
 		if (includeResources == null || includeResources.isEmpty()) {
-			includeResources = new ArrayList<String>();
+			includeResources = new ArrayList<>();
 			
 			logInfo("No resource names supplied, going to use all resources from version: "+fhirContext.getVersion().getVersion());
 			
@@ -76,7 +76,7 @@ public abstract class AbstractGenerator {
 
 			logDebug("Property file contains: "+p);
 
-			TreeSet<String> keys = new TreeSet<String>();
+			TreeSet<String> keys = new TreeSet<>();
 			for(Object next : p.keySet()) {
 				keys.add((String) next);
 			}
@@ -111,7 +111,7 @@ public abstract class AbstractGenerator {
 		 */
 		ValueSetGenerator vsp = null;
 		DatatypeGeneratorUsingSpreadsheet dtp = null;
-		Map<String, String> datatypeLocalImports = new HashMap<String, String>();
+		Map<String, String> datatypeLocalImports = new HashMap<>();
 
 		if (ResourceSource.SPREADSHEET.equals(context.getResourceSource())) {
 			vsp = new ValueSetGenerator(context.getVersion());
@@ -188,24 +188,17 @@ public abstract class AbstractGenerator {
 
 	public static class FailureException extends Exception {
 
-		public FailureException(String message, Throwable cause) {
+		FailureException(String message, Throwable cause) {
 			super(message, cause);
 		}
-		public FailureException(Throwable cause) {
-			super(cause);
-		}
 
-		public FailureException(String message) {
+		FailureException(String message) {
 			super(message);
 		}
 
 	}
 
 	public static class ExecutionException extends Exception {
-
-		public ExecutionException(String message, Throwable cause) {
-			super(message, cause);
-		}
 
 		public ExecutionException(String message) {
 			super(message);

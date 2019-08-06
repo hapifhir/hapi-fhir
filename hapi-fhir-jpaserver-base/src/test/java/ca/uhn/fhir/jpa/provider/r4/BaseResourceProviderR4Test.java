@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -20,6 +21,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -52,8 +54,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.fail;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	protected static JpaValidationSupportChainR4 myValidationSupport;
@@ -70,7 +70,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static Server ourServer;
 	protected IGenericClient ourClient;
 	ResourceCountCache ourResourceCountsCache;
-	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
+	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
@@ -104,7 +104,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
+			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 

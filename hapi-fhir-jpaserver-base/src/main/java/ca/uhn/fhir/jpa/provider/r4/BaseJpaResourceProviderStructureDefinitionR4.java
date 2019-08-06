@@ -62,13 +62,15 @@ public class BaseJpaResourceProviderStructureDefinitionR4 extends JpaResourcePro
 			map.setLoadSynchronousUpTo(2);
 			map.add(StructureDefinition.SP_URL, new UriParam(theUrl.getValue()));
 			IBundleProvider outcome = getDao().search(map, theRequestDetails);
-			if (outcome.size() == 0) {
+			Integer numResults = outcome.size();
+			assert numResults != null;
+			if (numResults == 0) {
 				throw new ResourceNotFoundException("No StructureDefiniton found with url = '" + theUrl.getValue() + "'");
 			}
 			sd = (StructureDefinition) outcome.getResources(0, 1).get(0);
 		}
 
-		return getDao().generateSnapshot(sd, null, null);
+		return getDao().generateSnapshot(sd, null, null, null);
 	}
 
 	@Override

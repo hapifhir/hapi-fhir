@@ -32,8 +32,8 @@ public class FhirResourceDaoStructureDefinitionR4 extends FhirResourceDaoR4<Stru
 	private IValidationSupport myValidationSupport;
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
-		StructureDefinition output = myValidationSupport.generateSnapshot(theInput, theUrl, , theName);
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theName) {
+		StructureDefinition output = myValidationSupport.generateSnapshot(theInput, theUrl, theWebUrl, theName);
 		Validate.notNull(output);
 		return output;
 	}

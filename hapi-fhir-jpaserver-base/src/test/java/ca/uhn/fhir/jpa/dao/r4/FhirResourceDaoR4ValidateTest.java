@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -184,7 +184,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Test
 	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Ignore);
+		val.setBestPracticeWarningLevel(org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel.Ignore);
 
 		ValueSet vs = new ValueSet();
 		vs.setId("MYVS");
