@@ -260,6 +260,7 @@ public final class ResourceIndexedSearchParams {
 		return resourceParams.stream().anyMatch(namedParamPredicate);
 	}
 
+	// KHS This needs to be public as libraries outside of hapi call it directly
 	public boolean matchResourceLinks(String theResourceName, String theParamName, IQueryParameterType theParam, String theParamPath) {
 		ReferenceParam reference = (ReferenceParam)theParam;
 
@@ -274,7 +275,11 @@ public final class ResourceIndexedSearchParams {
 		ResourceTable target = theResourceLink.getTargetResource();
 		IdDt idDt = target.getIdDt();
 		if (idDt.isIdPartValidLong()) {
-			return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
+			if (theReference.isIdPartValidLong()) {
+				return theReference.getIdPartAsLong().equals(idDt.getIdPartAsLong());
+			} else {
+				return false;
+			}
 		} else {
 			ForcedId forcedId = target.getForcedId();
 			if (forcedId != null) {
