@@ -1409,8 +1409,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
-		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
-		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
+		if (theRequest != null) {
+			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
+			notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
+		}
 
 		if (theMode == ValidationModeEnum.DELETE) {
 			if (theId == null || theId.hasIdPart() == false) {
@@ -1435,11 +1437,26 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		validator.registerValidatorModule(getInstanceValidator());
 		validator.registerValidatorModule(new IdChecker(theMode));
 
+		IBaseResource resourceToValidateById = null;
+		if (theId != null && theId.hasResourceType() && theId.hasIdPart()) {
+			Class<? extends IBaseResource> type = getContext().getResourceDefinition(theId.getResourceType()).getImplementingClass();
+			IFhirResourceDao<? extends IBaseResource> dao = getDao(type);
+			resourceToValidateById = dao.read(theId, theRequest);
+		}
+
+
+		ValidationResult result;
 		ValidationOptions options = new ValidationOptions()
 			.addProfileIfNotBlank(theProfile);
 
-		ValidationResult result;
-		if (isNotBlank(theRawResource)) {
+		if (theResource == null) {
+			if (resourceToValidateById != null) {
+				result = validator.validateWithResult(resourceToValidateById, options);
+			} else {
+				String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
+				throw new InvalidRequestException(msg);
+			}
+		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource, options);
 		} else if (theResource != null) {
 			result = validator.validateWithResult(theResource, options);
@@ -1457,33 +1474,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 	}
-
-
-	private static class IdChecker implements IValidatorModule {
-
-		private ValidationModeEnum myMode;
-
-		IdChecker(ValidationModeEnum theMode) {
-			myMode = theMode;
-		}
-
-		@Override
-		public void validateResource(IValidationContext<IBaseResource> theCtx) {
-			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
-			if (myMode == ValidationModeEnum.CREATE) {
-				if (hasId) {
-					throw new UnprocessableEntityException("Resource has an ID - ID must not be populated for a FHIR create");
-				}
-			} else if (myMode == ValidationModeEnum.UPDATE) {
-				if (hasId == false) {
-					throw new UnprocessableEntityException("Resource has no ID - ID must be populated for a FHIR update");
-				}
-			}
-
-		}
-
-	}
-
 
 	/**
 	 * Get the resource definition from the criteria which specifies the resource type
@@ -1520,7 +1510,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 	}
 
-
 	private void validateResourceType(BaseHasResource entity) {
 		validateResourceType(entity, myResourceName);
 	}
@@ -1530,6 +1519,31 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			// Note- Throw a HAPI FHIR exception here so that hibernate doesn't try to translate it into a database exception
 			throw new InvalidRequestException("Incorrect resource type (" + theId.getResourceType() + ") for this DAO, wanted: " + myResourceName);
 		}
+	}
+
+	private static class IdChecker implements IValidatorModule {
+
+		private ValidationModeEnum myMode;
+
+		IdChecker(ValidationModeEnum theMode) {
+			myMode = theMode;
+		}
+
+		@Override
+		public void validateResource(IValidationContext<IBaseResource> theCtx) {
+			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			if (myMode == ValidationModeEnum.CREATE) {
+				if (hasId) {
+					throw new UnprocessableEntityException("Resource has an ID - ID must not be populated for a FHIR create");
+				}
+			} else if (myMode == ValidationModeEnum.UPDATE) {
+				if (hasId == false) {
+					throw new UnprocessableEntityException("Resource has no ID - ID must be populated for a FHIR update");
+				}
+			}
+
+		}
+
 	}
 
 }

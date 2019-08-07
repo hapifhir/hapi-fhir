@@ -75,7 +75,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer value must be of type string"));
+			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));
 		}
 	}
 	
@@ -98,8 +98,8 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			ourClient.create().resource(qr1).execute();
 			fail();
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.toString(), containsString("Answer value must be of type string"));
-		}
+			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));
+			RestfulServerUtils		}
 	}
 	
 	@Test

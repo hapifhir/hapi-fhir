@@ -300,39 +300,36 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			myFetchResourceCache = Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
 				.maximumSize(10000)
-				.build(new CacheLoader<ResourceKey, org.hl7.fhir.r5.model.Resource>() {
-					@Override
-					public org.hl7.fhir.r5.model.Resource load(ResourceKey key) {
-						Resource fetched;
-						switch (key.getResourceName()) {
-							case "StructureDefinition":
-								fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
-								break;
-							case "ValueSet":
-								fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
-								break;
-							case "CodeSystem":
-								fetched = myWrap.fetchResource(CodeSystem.class, key.getUri());
-								break;
-							case "Questionnaire":
-								fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
-								break;
-							case "ImplementationGuide":
-								fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
-								break;
-							default:
-								throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
-						}
+				.build(key -> {
+					Resource fetched;
+					switch (key.getResourceName()) {
+						case "StructureDefinition":
+							fetched = myWrap.fetchResource(StructureDefinition.class, key.getUri());
+							break;
+						case "ValueSet":
+							fetched = myWrap.fetchResource(ValueSet.class, key.getUri());
+							break;
+						case "CodeSystem":
+							fetched = myWrap.fetchResource(CodeSystem.class, key.getUri());
+							break;
+						case "Questionnaire":
+							fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
+							break;
+						case "ImplementationGuide":
+							fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
+							break;
+						default:
+							throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
+					}
 
-						if (fetched == null) {
-							return null;
-						}
+					if (fetched == null) {
+						return null;
+					}
 
-						try {
-							return VersionConvertor_30_50.convertResource(fetched, true);
-						} catch (FHIRException e) {
-							throw new InternalErrorException(e);
-						}
+					try {
+						return VersionConvertor_30_50.convertResource(fetched, true);
+					} catch (FHIRException e) {
+						throw new InternalErrorException(e);
 					}
 				});
 		}

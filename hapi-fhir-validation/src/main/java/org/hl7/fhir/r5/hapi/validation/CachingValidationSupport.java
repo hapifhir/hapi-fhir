@@ -12,6 +12,7 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -59,7 +60,8 @@ public class CachingValidationSupport implements IValidationSupport {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
-		return myWrap.fetchResource(theContext, theClass, theUri);
+		return loadFromCache("fetchResource " + theClass.getName() + " " + theUri,
+			t -> myWrap.fetchResource(theContext, theClass, theUri));
 	}
 
 	@Override
@@ -92,6 +94,8 @@ public class CachingValidationSupport implements IValidationSupport {
 
 	@Nullable
 	private <T> T loadFromCache(String theKey, Function<String, T> theLoader) {
-		return (T) myCache.get(theKey, theLoader);
+		Function<String, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
+		Optional<T> result = (Optional<T>) myCache.get(theKey, loaderWrapper);
+		return result.orElse(null);
 	}
 }

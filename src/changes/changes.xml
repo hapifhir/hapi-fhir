@@ -386,6 +386,10 @@
 				using an explicit	profile declaration rather than simply relying on the declared 
 				URL in the resource itself.
 			</action>
+			<action type="fix">
+				When using the ResponseHighlighterInterceptor, some invalid requests that would normally generate an HTTP
+				400 response (e.g. an invalid _elements value) would cause an HTTP 500 crash.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">

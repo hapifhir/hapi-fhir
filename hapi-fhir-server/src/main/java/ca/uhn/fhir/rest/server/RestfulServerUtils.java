@@ -181,19 +181,22 @@ public class RestfulServerUtils {
 					break;
 				}
 			}
-			switch (theRequestDetails.getRestOperationType()) {
-				case SEARCH_SYSTEM:
-				case SEARCH_TYPE:
-				case HISTORY_SYSTEM:
-				case HISTORY_TYPE:
-				case HISTORY_INSTANCE:
-				case GET_PAGE:
-					if (!haveExplicitBundleElement) {
-						parser.setEncodeElementsAppliesToChildResourcesOnly(true);
-					}
-					break;
-				default:
-					break;
+
+			if (theRequestDetails.getRestOperationType() != null) {
+				switch (theRequestDetails.getRestOperationType()) {
+					case SEARCH_SYSTEM:
+					case SEARCH_TYPE:
+					case HISTORY_SYSTEM:
+					case HISTORY_TYPE:
+					case HISTORY_INSTANCE:
+					case GET_PAGE:
+						if (!haveExplicitBundleElement) {
+							parser.setEncodeElementsAppliesToChildResourcesOnly(true);
+						}
+						break;
+					default:
+						break;
+				}
 			}
 
 			parser.setEncodeElements(newElements);

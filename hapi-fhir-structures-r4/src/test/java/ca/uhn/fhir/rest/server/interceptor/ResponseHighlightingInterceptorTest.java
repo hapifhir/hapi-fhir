@@ -84,6 +84,19 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@Test
+	public void testInvalidRequest() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/html?_elements=Patient:foo");
+		httpGet.addHeader("Accept", "text/html");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), containsString("text/html"));
+		assertThat(responseContent, containsString("Invalid _elements value"));
+	}
+
+	@Test
 	public void testBinaryReadAcceptBrowser() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Binary/foo");
 		httpGet.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1");

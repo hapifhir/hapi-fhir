@@ -51,6 +51,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	private IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 
 	@Autowired
 	private FhirContext myR4Ctx;
@@ -142,6 +143,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
 			search = myCodeSystemDao.search(params);
+		} else if ("ImplementationGuide".equals(resourceName)) {
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			search = myImplementationGuideDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -179,6 +185,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		myValueSetDao = myApplicationContext.getBean("myValueSetDaoR4", IFhirResourceDao.class);
 		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoR4", IFhirResourceDao.class);
 		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoR4", IFhirResourceDao.class);
+		myImplementationGuideDao = myApplicationContext.getBean("myImplementationGuideDaoR4", IFhirResourceDao.class);
 	}
 
 	@Override
