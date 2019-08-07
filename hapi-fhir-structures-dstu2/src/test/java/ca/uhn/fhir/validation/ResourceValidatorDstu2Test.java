@@ -89,7 +89,7 @@ public class ResourceValidatorDstu2Test {
 	@SuppressWarnings("deprecation")
 	@Test
 	public void testSchemaBundleValidator() throws IOException {
-		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("bundle-example.json"));
+		String res = IOUtils.toString(ResourceValidatorDstu2Test.class.getResourceAsStream("/bundle-example.json"));
 		Bundle b = ourCtx.newJsonParser().parseResource(Bundle.class, res);
 
 		FhirValidator val = createFhirValidator();
