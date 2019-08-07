@@ -99,7 +99,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(myFhirCtx.newJsonParser().encodeResourceToString(e.getOperationOutcome()), containsString("Answer value must be of type string"));
-			RestfulServerUtils		}
+		}
 	}
 	
 	@Test
