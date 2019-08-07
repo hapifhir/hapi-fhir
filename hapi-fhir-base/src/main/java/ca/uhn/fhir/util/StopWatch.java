@@ -96,7 +96,7 @@ public class StopWatch {
 	 *
 	 * @see #formatMillis(long)
 	 */
-	public String formatMillisPerOperation(int theNumOperations) {
+	public String formatMillisPerOperation(long theNumOperations) {
 		double millisPerOperation = (((double) getMillis()) / Math.max(1.0, theNumOperations));
 		return formatMillis(millisPerOperation);
 	}
@@ -163,9 +163,9 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #getThroughput(int, TimeUnit)
+	 * @see #getThroughput(long, TimeUnit)
 	 */
-	public String formatThroughput(int theNumOperations, TimeUnit theUnit) {
+	public String formatThroughput(long theNumOperations, TimeUnit theUnit) {
 		double throughput = getThroughput(theNumOperations, theUnit);
 		return new DecimalFormat("0.0").format(throughput);
 	}
@@ -202,8 +202,8 @@ public class StopWatch {
 	/**
 	 * @param theNumOperations Ok for this to be 0, it will be treated as 1
 	 */
-	public int getMillisPerOperation(int theNumOperations) {
-		return (int) (((double) getMillis()) / Math.max(1.0, theNumOperations));
+	public long getMillisPerOperation(long theNumOperations) {
+		return (long) (((double) getMillis()) / Math.max(1.0, theNumOperations));
 	}
 
 	public Date getStartedDate() {
@@ -219,7 +219,7 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #formatThroughput(int, TimeUnit)
+	 * @see #formatThroughput(long, TimeUnit)
 	 */
 	public double getThroughput(long theNumOperations, TimeUnit theUnit) {
 		if (theNumOperations <= 0) {

@@ -141,11 +141,11 @@ public class StopWatchTest {
 		int minutes = 60;
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -minutes));
 		int numOperations = 60;
-		int millis = sw.getMillisPerOperation(numOperations);
+		long millis = sw.getMillisPerOperation(numOperations);
 		ourLog.info("{} operations in {}ms = {}ms / operation", numOperations, minutes * DateUtils.MILLIS_PER_MINUTE, millis);
 
-		assertThat(millis, Matchers.lessThan(62000));
-		assertThat(millis, Matchers.greaterThan(58000));
+		assertThat(millis, Matchers.lessThan(62000L));
+		assertThat(millis, Matchers.greaterThan(58000L));
 	}
 
 	@Test
