@@ -77,7 +77,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		ourLog.info("Done validation");
 
-//		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome()));
 	}
 
 	@Test

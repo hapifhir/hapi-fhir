@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.validation.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
@@ -177,6 +178,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public IBaseOperationOutcome createInfoOperationOutcome(String theMessage) {
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
 	}
+
+	protected abstract IValidatorModule getInstanceValidator();
 
 	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode);
 
@@ -1403,6 +1406,84 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
 		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
 	}
+
+	@Override
+	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
+		ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
+		notifyInterceptors(RestOperationTypeEnum.VALIDATE, requestDetails);
+
+		if (theMode == ValidationModeEnum.DELETE) {
+			if (theId == null || theId.hasIdPart() == false) {
+				throw new InvalidRequestException("No ID supplied. ID is required when validating with mode=DELETE");
+			}
+			final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
+
+			// Validate that there are no resources pointing to the candidate that
+			// would prevent deletion
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
+			if (myDaoConfig.isEnforceReferentialIntegrityOnDelete()) {
+				myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, true, theRequest);
+			}
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+
+			IBaseOperationOutcome oo = createInfoOperationOutcome("Ok to delete");
+			return new MethodOutcome(new IdDt(theId.getValue()), oo);
+		}
+
+		FhirValidator validator = getContext().newValidator();
+
+		validator.registerValidatorModule(getInstanceValidator());
+		validator.registerValidatorModule(new IdChecker(theMode));
+
+		ValidationOptions options = new ValidationOptions()
+			.addProfileIfNotBlank(theProfile);
+
+		ValidationResult result;
+		if (isNotBlank(theRawResource)) {
+			result = validator.validateWithResult(theRawResource, options);
+		} else if (theResource != null) {
+			result = validator.validateWithResult(theResource, options);
+		} else {
+			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
+			throw new InvalidRequestException(msg);
+		}
+
+		if (result.isSuccessful()) {
+			MethodOutcome retVal = new MethodOutcome();
+			retVal.setOperationOutcome(result.toOperationOutcome());
+			return retVal;
+		} else {
+			throw new PreconditionFailedException("Validation failed", result.toOperationOutcome());
+		}
+
+	}
+
+
+	private static class IdChecker implements IValidatorModule {
+
+		private ValidationModeEnum myMode;
+
+		IdChecker(ValidationModeEnum theMode) {
+			myMode = theMode;
+		}
+
+		@Override
+		public void validateResource(IValidationContext<IBaseResource> theCtx) {
+			boolean hasId = theCtx.getResource().getIdElement().hasIdPart();
+			if (myMode == ValidationModeEnum.CREATE) {
+				if (hasId) {
+					throw new UnprocessableEntityException("Resource has an ID - ID must not be populated for a FHIR create");
+				}
+			} else if (myMode == ValidationModeEnum.UPDATE) {
+				if (hasId == false) {
+					throw new UnprocessableEntityException("Resource has no ID - ID must be populated for a FHIR update");
+				}
+			}
+
+		}
+
+	}
+
 
 	/**
 	 * Get the resource definition from the criteria which specifies the resource type

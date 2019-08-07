@@ -51,13 +51,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements IValidationSupport, IHapiTerminologySvcR5 {
 
 	@Autowired
-	@Qualifier("myConceptMapDaoR4")
+	@Qualifier("myConceptMapDaoR5")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
 	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
+	@Qualifier("myCodeSystemDaoR5")
 	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
 	@Autowired
-	@Qualifier("myValueSetDaoR4")
+	@Qualifier("myValueSetDaoR5")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;

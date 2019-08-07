@@ -1,21 +1,19 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import com.google.gson.*;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.common.hapi.validation.ValidatorWrapper;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
@@ -27,12 +25,9 @@ import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.formats.IParser;
 import org.hl7.fhir.r5.formats.ParserType;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
-import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.INarrativeGenerator;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel;
-import org.hl7.fhir.r5.utils.IResourceValidator.IdStatus;
-import org.hl7.fhir.r5.validation.InstanceValidator;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
@@ -40,11 +35,10 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -64,7 +58,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	private volatile WorkerContextWrapper myWrappedWorkerContext;
 
 	private boolean errorForUnknownProfiles;
-	private List<String> extensionDomains = Collections.emptyList();
+	private List<String> myExtensionDomains = Collections.emptyList();
 
 	/**
 	 * Constructor
@@ -90,8 +84,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * Every element in a resource or data type includes an optional <it>extension</it> child element
 	 * which is identified by it's {@code url attribute}. There exists a number of predefined
 	 * extension urls or extension domains:<ul>
-	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
-	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 * <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
 	 * </ul>
 	 * It is possible to extend this list of known extension by defining custom extensions:
 	 * Any url which starts which one of the elements in the list of custom extension domains is
@@ -101,7 +95,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * </p>
 	 */
 	public FhirInstanceValidator setCustomExtensionDomains(List<String> extensionDomains) {
-		this.extensionDomains = extensionDomains;
+		this.myExtensionDomains = extensionDomains;
 		return this;
 	}
 
@@ -109,8 +103,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * Every element in a resource or data type includes an optional <it>extension</it> child element
 	 * which is identified by it's {@code url attribute}. There exists a number of predefined
 	 * extension urls or extension domains:<ul>
-	 *  <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
-	 *  <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
+	 * <li>any url which contains {@code example.org}, {@code nema.org}, or {@code acme.com}.</li>
+	 * <li>any url which starts with {@code http://hl7.org/fhir/StructureDefinition/}.</li>
 	 * </ul>
 	 * It is possible to extend this list of known extension by defining custom extensions:
 	 * Any url which starts which one of the elements in the list of custom extension domains is
@@ -120,7 +114,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * </p>
 	 */
 	public FhirInstanceValidator setCustomExtensionDomains(String... extensionDomains) {
-		this.extensionDomains = Arrays.asList(extensionDomains);
+		this.myExtensionDomains = Arrays.asList(extensionDomains);
 		return this;
 	}
 
@@ -225,14 +219,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	public boolean isAnyExtensionsAllowed() {
 		return myAnyExtensionsAllowed;
 	}
-	
-	public boolean isErrorForUnknownProfiles() {
-		return errorForUnknownProfiles;
-	}
-	
-	public void setErrorForUnknownProfiles(boolean errorForUnknownProfiles) {
-		this.errorForUnknownProfiles = errorForUnknownProfiles;
-	}
 
 	/**
 	 * If set to {@literal true} (default is true) extensions which are not known to the
@@ -243,13 +229,21 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myAnyExtensionsAllowed = theAnyExtensionsAllowed;
 	}
 
+	public boolean isErrorForUnknownProfiles() {
+		return errorForUnknownProfiles;
+	}
+
+	public void setErrorForUnknownProfiles(boolean errorForUnknownProfiles) {
+		this.errorForUnknownProfiles = errorForUnknownProfiles;
+	}
+
 	/**
 	 * If set to {@literal true} (default is false) the valueSet will not be validate
 	 */
 	public boolean isNoTerminologyChecks() {
 		return noTerminologyChecks;
 	}
-	
+
 	/**
 	 * If set to {@literal true} (default is false) the valueSet will not be validate
 	 */
@@ -261,131 +255,33 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		myStructureDefintion = theStructureDefintion;
 	}
 
-	protected List<ValidationMessage> validate(final FhirContext theCtx, String theInput, EncodingEnum theEncoding) {
+	private List<String> getExtensionDomains() {
+		return myExtensionDomains;
+	}
+
+	@Override
+	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
+		final FhirContext ctx = theValidationCtx.getFhirContext();
 
 		WorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
-			HapiWorkerContext workerContext = new HapiWorkerContext(theCtx, myValidationSupport);
+			HapiWorkerContext workerContext = new HapiWorkerContext(ctx, myValidationSupport);
 			wrappedWorkerContext = new WorkerContextWrapper(workerContext);
 		}
 		myWrappedWorkerContext = wrappedWorkerContext;
 
-		InstanceValidator v;
-		FHIRPathEngine.IEvaluationContext evaluationCtx = new org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator.NullEvaluationContext();
-		try {
-			v = new InstanceValidator(wrappedWorkerContext, evaluationCtx);
-		} catch (Exception e) {
-			throw new ConfigurationException(e);
-		}
+		return new ValidatorWrapper()
+			.setAnyExtensionsAllowed(isAnyExtensionsAllowed())
+			.setBestPracticeWarningLevel(getBestPracticeWarningLevel())
+			.setErrorForUnknownProfiles(isErrorForUnknownProfiles())
+			.setExtensionDomains(getExtensionDomains())
+			.setNoTerminologyChecks(isNoTerminologyChecks())
+			.validate(wrappedWorkerContext, theValidationCtx);
 
-		v.setBestPracticeWarningLevel(getBestPracticeWarningLevel());
-		v.setAnyExtensionsAllowed(isAnyExtensionsAllowed());
-		v.setResourceIdRule(IdStatus.OPTIONAL);
-		v.setNoTerminologyChecks(isNoTerminologyChecks());
-		v.setErrorForUnknownProfiles(isErrorForUnknownProfiles());
-		v.getExtensionDomains().addAll(extensionDomains);
-
-		List<ValidationMessage> messages = new ArrayList<>();
-
-		if (theEncoding == EncodingEnum.XML) {
-			Document document;
-			try {
-				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-				InputSource src = new InputSource(new StringReader(theInput));
-				document = builder.parse(src);
-			} catch (Exception e2) {
-				ourLog.error("Failure to parse XML input", e2);
-				ValidationMessage m = new ValidationMessage();
-				m.setLevel(IssueSeverity.FATAL);
-				m.setMessage("Failed to parse input, it does not appear to be valid XML:" + e2.getMessage());
-				return Collections.singletonList(m);
-			}
-
-			// Determine if meta/profiles are present...
-			ArrayList<String> resourceNames = determineIfProfilesSpecified(document);
-			if (resourceNames.isEmpty()) {
-				resourceNames.add(determineResourceName(document));
-			}
-
-			for (String resourceName : resourceNames) {
-				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-				if (profile != null) {
-					try {
-						v.validate(null, messages, document, profile.getUrl());
-					} catch (Exception e) {
-						ourLog.error("Failure during validation", e);
-						throw new InternalErrorException("Unexpected failure while validating resource", e);
-					}
-				} else {
-					profile = findStructureDefinitionForResourceName(theCtx, determineResourceName(document));
-					if (profile != null) {
-						try {
-							v.validate(null, messages, document, profile.getUrl());
-						} catch (Exception e) {
-							ourLog.error("Failure during validation", e);
-							throw new InternalErrorException("Unexpected failure while validating resource", e);
-						}
-					}
-				}
-			}
-		} else if (theEncoding == EncodingEnum.JSON) {
-			Gson gson = new GsonBuilder().create();
-			JsonObject json = gson.fromJson(theInput, JsonObject.class);
-
-			ArrayList<String> resourceNames = new ArrayList<String>();
-			JsonArray profiles = null;
-			try {
-				profiles = json.getAsJsonObject("meta").getAsJsonArray("profile");
-				for (JsonElement element : profiles) {
-					resourceNames.add(element.getAsString());
-				}
-			} catch (Exception e) {
-				resourceNames.add(json.get("resourceType").getAsString());
-			}
-
-			for (String resourceName : resourceNames) {
-				StructureDefinition profile = findStructureDefinitionForResourceName(theCtx, resourceName);
-				if (profile != null) {
-					try {
-						v.validate(null, messages, json, profile.getUrl());
-					} catch (Exception e) {
-						throw new InternalErrorException("Unexpected failure while validating resource", e);
-					}
-				} else {
-					profile = findStructureDefinitionForResourceName(theCtx, json.get("resourceType").getAsString());
-					if (profile != null) {
-						try {
-							v.validate(null, messages, json, profile.getUrl());
-						} catch (Exception e) {
-							ourLog.error("Failure during validation", e);
-							throw new InternalErrorException("Unexpected failure while validating resource", e);
-						}
-					}
-				}
-			}
-		} else {
-			throw new IllegalArgumentException("Unknown encoding: " + theEncoding);
-		}
-
-		for (int i = 0; i < messages.size(); i++) {
-			ValidationMessage next = messages.get(i);
-			String message = next.getMessage();
-			if ("Binding has no source, so can't be checked".equals(message) ||
-			    "ValueSet http://hl7.org/fhir/ValueSet/mimetypes not found".equals(message)) {
-				messages.remove(i);
-				i--;
-			}
-		}
-		return messages;
-	}
-
-	@Override
-	protected List<ValidationMessage> validate(IValidationContext<?> theCtx) {
-		return validate(theCtx.getFhirContext(), theCtx.getResourceAsString(), theCtx.getResourceAsStringEncoding());
 	}
 
 
-	private class WorkerContextWrapper implements IWorkerContext {
+	private static class WorkerContextWrapper implements IWorkerContext {
 		private final HapiWorkerContext myWrap;
 		private final VersionConvertor_30_50 myConverter;
 		private volatile List<org.hl7.fhir.r5.model.StructureDefinition> myAllStructures;
@@ -406,7 +302,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				.maximumSize(10000)
 				.build(new CacheLoader<ResourceKey, org.hl7.fhir.r5.model.Resource>() {
 					@Override
-					public org.hl7.fhir.r5.model.Resource load(ResourceKey key) throws Exception {
+					public org.hl7.fhir.r5.model.Resource load(ResourceKey key) {
 						Resource fetched;
 						switch (key.getResourceName()) {
 							case "StructureDefinition":
@@ -420,6 +316,9 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 								break;
 							case "Questionnaire":
 								fetched = myWrap.fetchResource(Questionnaire.class, key.getUri());
+								break;
+							case "ImplementationGuide":
+								fetched = myWrap.fetchResource(ImplementationGuide.class, key.getUri());
 								break;
 							default:
 								throw new UnsupportedOperationException("Don't know how to fetch " + key.getResourceName());
@@ -487,19 +386,28 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 			throw new UnsupportedOperationException();
 		}
 
-		private ValidationResult convertValidationResult(org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult theResult) {
-			IssueSeverity issueSeverity = theResult.getSeverity();
-			String message = theResult.getMessage();
-			org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
-			if (theResult.asConceptDefinition() != null) {
-				try {
-					conceptDefinition = VersionConvertor_30_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
-				} catch (FHIRException e) {
-					throw new InternalErrorException(e);
+		@Nonnull
+		private ValidationResult convertValidationResult(@Nullable  org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult theResult) {
+			ValidationResult retVal = null;
+			if (theResult != null) {
+				IssueSeverity issueSeverity = theResult.getSeverity();
+				String message = theResult.getMessage();
+				org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent conceptDefinition = null;
+				if (theResult.asConceptDefinition() != null) {
+					try {
+						conceptDefinition = VersionConvertor_30_50.convertConceptDefinitionComponent(theResult.asConceptDefinition());
+					} catch (FHIRException e) {
+						throw new InternalErrorException(e);
+					}
 				}
+
+				retVal = new ValidationResult(issueSeverity, message, conceptDefinition);
 			}
 
-			ValidationResult retVal = new ValidationResult(issueSeverity, message, conceptDefinition);
+			if (retVal == null) {
+				retVal = new ValidationResult(IssueSeverity.ERROR, "Validation failed");
+			}
+
 			return retVal;
 		}
 
@@ -656,17 +564,17 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public void setUcumService(UcumService ucumService) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
 		public List<String> getTypeNames() {
 			return myWrap.getTypeNames();
 		}
 
 		@Override
 		public UcumService getUcumService() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void setUcumService(UcumService ucumService) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -716,13 +624,13 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
-		public void setLogger(ILoggingService logger) {
-			throw new UnsupportedOperationException();
+		public ILoggingService getLogger() {
+			return null;
 		}
 
 		@Override
-		public ILoggingService getLogger() {
-			return null;
+		public void setLogger(ILoggingService logger) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
@@ -743,7 +651,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		@Override
 		public ValidationResult validateCode(TerminologyServiceOptions theOptions, String system, String code, String display) {
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(system, code, display);
-			// TODO: converted code might be null -> NPE
 			return convertValidationResult(result);
 		}
 
@@ -794,7 +701,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
-			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}
@@ -815,7 +721,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 				throw new InternalErrorException(e);
 			}
 
-			// TODO: converted code might be null -> NPE
 			org.hl7.fhir.dstu3.context.IWorkerContext.ValidationResult result = myWrap.validateCode(convertedCode, convertedVs);
 			return convertValidationResult(result);
 		}

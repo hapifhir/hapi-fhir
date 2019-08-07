@@ -59,12 +59,20 @@
 				a type level operation (i.e. called on the CodeSystem type).
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The FhirValidator#validate(IResource) method has been removed. It was deprecated in HAPI FHIR 0.7 and replaced with
+				FhirValidator#validateWithResults(IBaseResource) so it is unlikely anyone is still depending on the
+				old method.
+				]]>
+			</action>
 			<action type="add">
 				Support for the new R5 draft resources has been added. This support includes the client,
 				server, and JPA server. Note that these definitions will change as the R5 standard is 
 				modified until it is released, so use with caution!
 			</action>
-		<action type="add">
+			<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that

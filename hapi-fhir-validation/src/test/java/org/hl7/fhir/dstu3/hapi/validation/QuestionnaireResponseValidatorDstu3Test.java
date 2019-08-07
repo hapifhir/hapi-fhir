@@ -240,7 +240,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1' - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -250,7 +250,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system2::code3) is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("Validation failed for 'http://codesystems.com/system2#code3'"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -271,7 +271,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No LinkId, so can't be validated"));
+		assertThat(errors.toString(), containsString("Element 'QuestionnaireResponse.item[0].linkId': minimum required = 1, but only found 0"));
 	}
 	
 	@Test
@@ -1033,7 +1033,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1' - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Partial code
