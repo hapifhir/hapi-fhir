@@ -2839,7 +2839,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);

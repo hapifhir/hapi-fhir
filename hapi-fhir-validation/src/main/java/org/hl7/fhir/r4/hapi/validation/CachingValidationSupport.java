@@ -98,4 +98,8 @@ public class CachingValidationSupport implements IValidationSupport {
 		Optional<T> result = (Optional<T>) myCache.get(theKey, loaderWrapper);
 		return result.orElse(null);
 	}
+
+	public void flushCaches() {
+		myCache.invalidateAll();
+	}
 }
