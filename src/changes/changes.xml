@@ -381,6 +381,11 @@
 				operations had ambiguous paths that could lead to the wrong method
 				being called. Thanks to Seth Rylan Gainey for the pull request!
 			</action>
+			<action type="fix" issue="1414">
+				The profile validator (FhirInstanceValidator) can now be used to validate a resource 
+				using an explicit	profile declaration rather than simply relying on the declared 
+				URL in the resource itself.
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
