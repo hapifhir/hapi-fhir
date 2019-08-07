@@ -59,12 +59,20 @@
 				a type level operation (i.e. called on the CodeSystem type).
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The FhirValidator#validate(IResource) method has been removed. It was deprecated in HAPI FHIR 0.7 and replaced with
+				FhirValidator#validateWithResults(IBaseResource) so it is unlikely anyone is still depending on the
+				old method.
+				]]>
+			</action>
 			<action type="add">
 				Support for the new R5 draft resources has been added. This support includes the client,
 				server, and JPA server. Note that these definitions will change as the R5 standard is 
 				modified until it is released, so use with caution!
 			</action>
-		<action type="add">
+			<action type="add">
 				A new interceptor called
 				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
@@ -372,6 +380,15 @@
 				In the JAX-RS server, the resource type history and instance vread
 				operations had ambiguous paths that could lead to the wrong method
 				being called. Thanks to Seth Rylan Gainey for the pull request!
+			</action>
+			<action type="fix" issue="1414">
+				The profile validator (FhirInstanceValidator) can now be used to validate a resource 
+				using an explicit	profile declaration rather than simply relying on the declared 
+				URL in the resource itself.
+			</action>
+			<action type="fix">
+				When using the ResponseHighlighterInterceptor, some invalid requests that would normally generate an HTTP
+				400 response (e.g. an invalid _elements value) would cause an HTTP 500 crash.
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">

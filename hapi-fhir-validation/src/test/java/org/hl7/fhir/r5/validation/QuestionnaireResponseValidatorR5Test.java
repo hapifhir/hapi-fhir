@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.validation;
+package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -7,19 +7,19 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
-import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
-import org.hl7.fhir.r4.hapi.validation.ValidationSupportChain;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
-import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
-import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r5.hapi.ctx.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
+import org.hl7.fhir.r5.hapi.validation.ValidationSupportChain;
+import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemComponent;
+import org.hl7.fhir.r5.model.Questionnaire.QuestionnaireItemType;
+import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
+import org.hl7.fhir.r5.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
@@ -39,14 +39,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class QuestionnaireResponseValidatorR4Test {
+public class QuestionnaireResponseValidatorR5Test {
 	public static final String ID_ICC_QUESTIONNAIRE_SETUP = "Questionnaire/profile";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorR4Test.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(QuestionnaireResponseValidatorR5Test.class);
 	private static final String CODE_ICC_SCHOOLTYPE_PT = "PT";
 	private static final String ID_VS_SCHOOLTYPE = "ValueSet/schooltype";
 	private static final String SYSTEMURI_ICC_SCHOOLTYPE = "http://ehealthinnovation/icc/ns/schooltype";
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forR5();
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
@@ -192,9 +192,9 @@ public class QuestionnaireResponseValidatorR4Test {
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
 		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any()))
-			.thenReturn(new IValidationSupport.CodeValidationResult(new CodeSystem.ConceptDefinitionComponent().setCode("code0")));
+			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
 		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any()))
-			.thenReturn(new IValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
+			.thenReturn(new CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -691,13 +691,13 @@ public class QuestionnaireResponseValidatorR4Test {
 		{
 			questionnaire.setId(ID_ICC_QUESTIONNAIRE_SETUP);
 
-			Questionnaire.QuestionnaireItemComponent basicGroup = questionnaire.addItem();
+			QuestionnaireItemComponent basicGroup = questionnaire.addItem();
 			basicGroup.setLinkId("basic");
-			basicGroup.setType(Questionnaire.QuestionnaireItemType.GROUP);
+			basicGroup.setType(QuestionnaireItemType.GROUP);
 			basicGroup
 				.addItem()
 				.setLinkId("schoolType")
-				.setType(Questionnaire.QuestionnaireItemType.CHOICE)
+				.setType(QuestionnaireItemType.CHOICE)
 				.setAnswerValueSet(ID_VS_SCHOOLTYPE)
 				.setRequired(true);
 		}
@@ -707,11 +707,11 @@ public class QuestionnaireResponseValidatorR4Test {
 		 */
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.setQuestionnaire(ID_ICC_QUESTIONNAIRE_SETUP);
 		qa.getSubject().setReference("Patient/123");
 
-		QuestionnaireResponse.QuestionnaireResponseItemComponent basicGroup = qa
+		QuestionnaireResponseItemComponent basicGroup = qa
 			.addItem();
 		basicGroup.setLinkId("basic");
 		basicGroup

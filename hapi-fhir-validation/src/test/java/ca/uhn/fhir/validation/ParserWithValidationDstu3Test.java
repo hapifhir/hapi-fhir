@@ -27,7 +27,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -42,7 +42,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator still likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -66,7 +66,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -81,7 +81,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator still likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -102,7 +102,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -117,7 +117,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator still likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -138,7 +138,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, origContent, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {
@@ -153,7 +153,7 @@ public class ParserWithValidationDstu3Test {
 
 		// verify that InstanceValidator still likes the format
 		{
-			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content);
+			IValidationContext<IBaseResource> validationCtx = ValidationContext.forText(ourCtx, content, null);
 			new FhirInstanceValidator(validationSupport).validateResource(validationCtx);
 			ValidationResult result = validationCtx.toResult();
 			for (SingleValidationMessage msg : result.getMessages()) {

@@ -2889,8 +2889,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myStructureDefinitionDao.create(sd, mySrd);
 
 		String rawResource = IOUtils.toString(getClass().getResourceAsStream("/binu_testpatient_resource.json"), StandardCharsets.UTF_8);
+		IBaseResource parsedResource = myFhirCtx.newJsonParser().parseResource(rawResource);
 		try {
-			myValueSetDao.validate(null, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
+			myPatientDao.validate((Patient) parsedResource, null, rawResource, EncodingEnum.JSON, ValidationModeEnum.UPDATE, null, mySrd);
 			fail();
 		} catch (PreconditionFailedException e) {
 			ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
