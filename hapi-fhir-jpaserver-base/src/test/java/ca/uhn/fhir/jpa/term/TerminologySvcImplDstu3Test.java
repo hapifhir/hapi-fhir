@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -731,7 +732,16 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 
-	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+	@Test
+	public void testValidateCodeWithProperties() {
+		createCodeSystem();
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null);
+		assertEquals(true, code.isOk());
+		assertEquals(2, code.getProperties().size());
+	}
+
+
+		public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();
 
 		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {
