@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements ApplicationContextAware {
+public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
@@ -133,6 +134,11 @@ public class DaoRegistry implements ApplicationContextAware {
 		} catch (InvalidRequestException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public boolean isResourceTypeSupported(String theResourceType) {
+		return mySupportedResourceTypes.contains(theResourceType);
 	}
 
 	private void init() {
