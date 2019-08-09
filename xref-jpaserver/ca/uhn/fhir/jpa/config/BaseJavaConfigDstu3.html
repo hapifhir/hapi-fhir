@@ -2745,9 +2745,9 @@
 <a class="jxr_linenumber" name="L2737" href="#L2737">2737</a> 	@Bean(name=<span class="jxr_string">"myStructureDefinitionDaoDstu3"</span>, autowire=Autowire.BY_NAME)
 <a class="jxr_linenumber" name="L2738" href="#L2738">2738</a> 	@Lazy
 <a class="jxr_linenumber" name="L2739" href="#L2739">2739</a> 	<strong class="jxr_keyword">public</strong> 
-<a class="jxr_linenumber" name="L2740" href="#L2740">2740</a> 		IFhirResourceDao&lt;org.hl7.fhir.dstu3.model.StructureDefinition&gt;
+<a class="jxr_linenumber" name="L2740" href="#L2740">2740</a> 		IFhirResourceDaoStructureDefinition&lt;org.hl7.fhir.dstu3.model.StructureDefinition&gt;
 <a class="jxr_linenumber" name="L2741" href="#L2741">2741</a> 		 daoStructureDefinitionDstu3() {
-<a class="jxr_linenumber" name="L2742" href="#L2742">2742</a> 		ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3&lt;org.hl7.fhir.dstu3.model.StructureDefinition&gt; retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3&lt;org.hl7.fhir.dstu3.model.StructureDefinition&gt;();
+<a class="jxr_linenumber" name="L2742" href="#L2742">2742</a> 		ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoStructureDefinitionDstu3 retVal = <strong class="jxr_keyword">new</strong> ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoStructureDefinitionDstu3();
 <a class="jxr_linenumber" name="L2743" href="#L2743">2743</a> 		retVal.setResourceType(org.hl7.fhir.dstu3.model.StructureDefinition.<strong class="jxr_keyword">class</strong>);
 <a class="jxr_linenumber" name="L2744" href="#L2744">2744</a> 		retVal.setContext(fhirContextDstu3());
 <a class="jxr_linenumber" name="L2745" href="#L2745">2745</a> 		<strong class="jxr_keyword">return</strong> retVal;

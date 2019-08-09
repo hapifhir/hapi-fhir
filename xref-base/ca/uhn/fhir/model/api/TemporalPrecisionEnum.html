@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -89,7 +89,21 @@
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		<strong class="jxr_keyword">return</strong> myCalendarConstant;
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	}
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  }
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">	 * Given the standard string representation - YYYY-DD-MMTHH:NN:SS.SSS - how long is the string for the stated precision?</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> stringLength() {
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  		<strong class="jxr_keyword">switch</strong> (<strong class="jxr_keyword">this</strong>) {
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">case</strong> YEAR: <strong class="jxr_keyword">return</strong> 4;
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<strong class="jxr_keyword">case</strong> MONTH: <strong class="jxr_keyword">return</strong> 7;
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			<strong class="jxr_keyword">case</strong> DAY: <strong class="jxr_keyword">return</strong> 10;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			<strong class="jxr_keyword">case</strong> MINUTE: <strong class="jxr_keyword">return</strong> 16;
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			<strong class="jxr_keyword">case</strong> SECOND: <strong class="jxr_keyword">return</strong> 19;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			<strong class="jxr_keyword">case</strong> MILLI: <strong class="jxr_keyword">return</strong> 23;
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		}
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		<strong class="jxr_keyword">return</strong> 0; <em class="jxr_comment">// ??</em>
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	}
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

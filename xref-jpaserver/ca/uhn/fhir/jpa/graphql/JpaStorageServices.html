@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -32,118 +32,133 @@
 <a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeSearchParam;
 <a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 <a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.BaseHasResource;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IQueryParameterType;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.server.IBundleProvider;
-<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.*;
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.InvalidRequestException;
-<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.NotImplementedOperationException;
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.exceptions.FHIRException;
-<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
-<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
-<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Bundle;
-<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Reference;
-<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Resource;
-<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.utils.GraphQLEngine;
-<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.utilities.graphql.Argument;
-<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.utilities.graphql.Value;
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.Propagation;
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.Transactional;
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.api.server.RequestDetails;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.param.*;
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.InvalidRequestException;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.<strong class="jxr_keyword">rest</strong>.server.exceptions.NotImplementedOperationException;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.exceptions.FHIRException;
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IBaseResource;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.instance.model.api.IIdType;
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Bundle;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.IdType;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Reference;
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.model.Resource;
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.r4.utils.GraphQLEngine;
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.utilities.graphql.Argument;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <strong class="jxr_keyword">import</strong> org.hl7.fhir.utilities.graphql.Value;
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.Propagation;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> org.springframework.transaction.annotation.Transactional;
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="JpaStorageServices" href="../../../../../ca/uhn/fhir/jpa/graphql/JpaStorageServices.html#JpaStorageServices">JpaStorageServices</a> <strong class="jxr_keyword">extends</strong> BaseHapiFhirDao&lt;IBaseResource&gt; <strong class="jxr_keyword">implements</strong> GraphQLEngine.IGraphQLStorageServices {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> java.util.List;
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">private</strong> IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; getDao(String theResourceType) {
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">return</strong> getDao(typeDef.getImplementingClass());
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Transactional(propagation = Propagation.NEVER)
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	@Override
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> listResources(Object theAppInfo, String theType, List&lt;Argument&gt; theSearchParams, List&lt;Resource&gt; theMatches) <strong class="jxr_keyword">throws</strong> FHIRException {
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = getDao(typeDef.getImplementingClass());
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		SearchParameterMap params = <strong class="jxr_keyword">new</strong> SearchParameterMap();
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		params.setLoadSynchronousUpTo(500);
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		<strong class="jxr_keyword">for</strong> (Argument nextArgument : theSearchParams) {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="JpaStorageServices" href="../../../../../ca/uhn/fhir/jpa/graphql/JpaStorageServices.html#JpaStorageServices">JpaStorageServices</a> <strong class="jxr_keyword">extends</strong> BaseHapiFhirDao&lt;IBaseResource&gt; <strong class="jxr_keyword">implements</strong> GraphQLEngine.IGraphQLStorageServices {
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<strong class="jxr_keyword">private</strong> IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; getDao(String theResourceType) {
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  		<strong class="jxr_keyword">return</strong> getDao(typeDef.getImplementingClass());
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	}
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	@Transactional(propagation = Propagation.NEVER)
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	@Override
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> listResources(Object theAppInfo, String theType, List&lt;Argument&gt; theSearchParams, List&lt;Resource&gt; theMatches) <strong class="jxr_keyword">throws</strong> FHIRException {
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = getDao(typeDef.getImplementingClass());
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		SearchParameterMap params = <strong class="jxr_keyword">new</strong> SearchParameterMap();
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		params.setLoadSynchronousUpTo(500);
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<strong class="jxr_keyword">for</strong> (Argument nextArgument : theSearchParams) {
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			<strong class="jxr_keyword">for</strong> (Value nextValue : nextArgument.getValues()) {
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  				String value = nextValue.getValue();
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  				IQueryParameterType param = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  				<strong class="jxr_keyword">switch</strong> (searchParam.getParamType()) {
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  					<strong class="jxr_keyword">case</strong> NUMBER:
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  						param = <strong class="jxr_keyword">new</strong> NumberParam(value);
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  					<strong class="jxr_keyword">case</strong> DATE:
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  						param = <strong class="jxr_keyword">new</strong> DateParam(value);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  					<strong class="jxr_keyword">case</strong> STRING:
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  						param = <strong class="jxr_keyword">new</strong> StringParam(value);
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  					<strong class="jxr_keyword">case</strong> TOKEN:
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  						param = <strong class="jxr_keyword">new</strong> TokenParam(<strong class="jxr_keyword">null</strong>, value);
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  					<strong class="jxr_keyword">case</strong> REFERENCE:
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  						param = <strong class="jxr_keyword">new</strong> ReferenceParam(value);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  					<strong class="jxr_keyword">case</strong> COMPOSITE:
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Composite parameters are not yet supported in GraphQL"</span>);
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  					<strong class="jxr_keyword">case</strong> QUANTITY:
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  						param = <strong class="jxr_keyword">new</strong> QuantityParam(value);
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  					<strong class="jxr_keyword">case</strong> URI:
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  			RuntimeSearchParam searchParam = mySearchParamRegistry.getSearchParamByName(typeDef, nextArgument.getName());
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  			<strong class="jxr_keyword">for</strong> (Value nextValue : nextArgument.getValues()) {
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  				String value = nextValue.getValue();
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  				IQueryParameterType param = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  				<strong class="jxr_keyword">switch</strong> (searchParam.getParamType()) {
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  					<strong class="jxr_keyword">case</strong> NUMBER:
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  						param = <strong class="jxr_keyword">new</strong> NumberParam(value);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  					<strong class="jxr_keyword">case</strong> DATE:
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  						param = <strong class="jxr_keyword">new</strong> DateParam(value);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  					<strong class="jxr_keyword">case</strong> STRING:
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  						param = <strong class="jxr_keyword">new</strong> StringParam(value);
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  					<strong class="jxr_keyword">case</strong> TOKEN:
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  						param = <strong class="jxr_keyword">new</strong> TokenParam(<strong class="jxr_keyword">null</strong>, value);
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  					<strong class="jxr_keyword">case</strong> REFERENCE:
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  						param = <strong class="jxr_keyword">new</strong> ReferenceParam(value);
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  					<strong class="jxr_keyword">case</strong> COMPOSITE:
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(<span class="jxr_string">"Composite parameters are not yet supported in GraphQL"</span>);
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  					<strong class="jxr_keyword">case</strong> QUANTITY:
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  						param = <strong class="jxr_keyword">new</strong> QuantityParam(value);
 <a class="jxr_linenumber" name="L96" href="#L96">96</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  					<strong class="jxr_keyword">case</strong> HAS:
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  				}
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 				params.add(nextArgument.getName(), param);
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			}
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		IBundleProvider response = dao.search(params);
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		<strong class="jxr_keyword">int</strong> size = response.size();
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		<strong class="jxr_keyword">if</strong> (response.preferredPageSize() != <strong class="jxr_keyword">null</strong> &amp;&amp; response.preferredPageSize() &lt; size) {
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 			size = response.preferredPageSize();
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		}
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		<strong class="jxr_keyword">for</strong> (IBaseResource next : response.getResources(0, size)) {
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 			theMatches.add((Resource) next);
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		}
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	}
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  					<strong class="jxr_keyword">case</strong> SPECIAL:
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  						param = <strong class="jxr_keyword">new</strong> SpecialParam().setValue(value);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 					<strong class="jxr_keyword">case</strong> URI:
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 					<strong class="jxr_keyword">case</strong> HAS:
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 				}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 				params.add(nextArgument.getName(), param);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 			}
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		}
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 		IBundleProvider response = dao.search(params, requestDetails);
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">int</strong> size = response.size();
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		<strong class="jxr_keyword">if</strong> (response.preferredPageSize() != <strong class="jxr_keyword">null</strong> &amp;&amp; response.preferredPageSize() &lt; size) {
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			size = response.preferredPageSize();
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 		}
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	@Transactional(propagation = Propagation.REQUIRED)
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	@Override
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	<strong class="jxr_keyword">public</strong> Resource lookup(Object theAppInfo, String theType, String theId) <strong class="jxr_keyword">throws</strong> FHIRException {
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		IIdType refId = getContext().getVersion().newIdType();
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		refId.setValue(theType + <span class="jxr_string">"/"</span> + theId);
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = getDao(theType);
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		BaseHasResource id = dao.readEntity(refId);
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		<strong class="jxr_keyword">return</strong> (Resource) toResource(id, false);
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 	}
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 	@Override
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	<strong class="jxr_keyword">public</strong> ReferenceResolution lookup(Object appInfo, Resource context, Reference reference) <strong class="jxr_keyword">throws</strong> FHIRException {
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	}
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	@Transactional(propagation = Propagation.NEVER)
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	@Override
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	<strong class="jxr_keyword">public</strong> Bundle search(Object theAppInfo, String theType, List&lt;Argument&gt; theSearchParams) <strong class="jxr_keyword">throws</strong> FHIRException {
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NotImplementedOperationException(<span class="jxr_string">"Not yet able to handle this GraphQL request"</span>);
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	}
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> }
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">for</strong> (IBaseResource next : response.getResources(0, size)) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			theMatches.add((Resource) next);
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 		}
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	@Transactional(propagation = Propagation.REQUIRED)
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	@Override
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 	<strong class="jxr_keyword">public</strong> Resource lookup(Object theAppInfo, String theType, String theId) <strong class="jxr_keyword">throws</strong> FHIRException {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		IIdType refId = getContext().getVersion().newIdType();
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		refId.setValue(theType + <span class="jxr_string">"/"</span> + theId);
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		<strong class="jxr_keyword">return</strong> lookup(theAppInfo, refId);
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 	}
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	<strong class="jxr_keyword">private</strong> Resource lookup(Object theAppInfo, IIdType theRefId) {
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		IFhirResourceDao&lt;? <strong class="jxr_keyword">extends</strong> IBaseResource&gt; dao = getDao(theRefId.getResourceType());
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 		<strong class="jxr_keyword">return</strong> (Resource) dao.read(theRefId, requestDetails, false);
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	}
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 	@Transactional(propagation = Propagation.REQUIRED)
+<a class="jxr_linenumber" name="L138" href="#L138">138</a>     @Override
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 	<strong class="jxr_keyword">public</strong> ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) <strong class="jxr_keyword">throws</strong> FHIRException {
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		IdType refId = <strong class="jxr_keyword">new</strong> IdType(theReference.getReference());
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 		Resource outcome = lookup(theAppInfo, refId);
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 		<strong class="jxr_keyword">if</strong> (outcome == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 	}
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> ReferenceResolution(theContext, outcome);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 	}
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 	@Transactional(propagation = Propagation.NEVER)
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 	@Override
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 	<strong class="jxr_keyword">public</strong> Bundle search(Object theAppInfo, String theType, List&lt;Argument&gt; theSearchParams) <strong class="jxr_keyword">throws</strong> FHIRException {
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> NotImplementedOperationException(<span class="jxr_string">"Not yet able to handle this GraphQL request"</span>);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 	}
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

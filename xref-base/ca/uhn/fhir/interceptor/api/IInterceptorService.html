@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -75,29 +75,30 @@
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  <em class="jxr_javadoccomment">	 * Unregister an interceptor. This method has no effect if the given interceptor is not already registered.</em>
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_javadoccomment">	 *</em>
 <a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_javadoccomment">	 * @param theInterceptor The interceptor to unregister</em>
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  	<strong class="jxr_keyword">void</strong> unregisterInterceptor(Object theInterceptor);
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  	<strong class="jxr_keyword">void</strong> registerAnonymousInterceptor(<a name="Pointcut" href="../../../../../ca/uhn/fhir/interceptor/api/Pointcut.html#Pointcut">Pointcut</a> thePointcut, <a name="IAnonymousInterceptor" href="../../../../../ca/uhn/fhir/interceptor/api/IAnonymousInterceptor.html#IAnonymousInterceptor">IAnonymousInterceptor</a> theInterceptor);
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  	<strong class="jxr_keyword">void</strong> registerAnonymousInterceptor(<a name="Pointcut" href="../../../../../ca/uhn/fhir/interceptor/api/Pointcut.html#Pointcut">Pointcut</a> thePointcut, <strong class="jxr_keyword">int</strong> theOrder, <a name="IAnonymousInterceptor" href="../../../../../ca/uhn/fhir/interceptor/api/IAnonymousInterceptor.html#IAnonymousInterceptor">IAnonymousInterceptor</a> theInterceptor);
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  <em class="jxr_javadoccomment">	 * Returns all currently registered interceptors (excluding any thread local interceptors).</em>
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  	List&lt;Object&gt; getAllRegisteredInterceptors();
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  <em class="jxr_javadoccomment">	 * Unregisters all registered interceptors. Note that this method does not unregister</em>
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">	 * any {@link #registerThreadLocalInterceptor(Object) thread local interceptors}.</em>
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  	<strong class="jxr_keyword">void</strong> unregisterAllInterceptors();
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	<strong class="jxr_keyword">void</strong> unregisterInterceptors(@Nullable Collection&lt;?&gt; theInterceptors);
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<strong class="jxr_keyword">void</strong> registerInterceptors(@Nullable Collection&lt;?&gt; theInterceptors);
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  }
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_javadoccomment">	 * @return Returns &lt;code&gt;true&lt;/code&gt; if the interceptor was found and removed</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  	<strong class="jxr_keyword">boolean</strong> unregisterInterceptor(Object theInterceptor);
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	<strong class="jxr_keyword">void</strong> registerAnonymousInterceptor(<a name="Pointcut" href="../../../../../ca/uhn/fhir/interceptor/api/Pointcut.html#Pointcut">Pointcut</a> thePointcut, <a name="IAnonymousInterceptor" href="../../../../../ca/uhn/fhir/interceptor/api/IAnonymousInterceptor.html#IAnonymousInterceptor">IAnonymousInterceptor</a> theInterceptor);
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">void</strong> registerAnonymousInterceptor(<a name="Pointcut" href="../../../../../ca/uhn/fhir/interceptor/api/Pointcut.html#Pointcut">Pointcut</a> thePointcut, <strong class="jxr_keyword">int</strong> theOrder, <a name="IAnonymousInterceptor" href="../../../../../ca/uhn/fhir/interceptor/api/IAnonymousInterceptor.html#IAnonymousInterceptor">IAnonymousInterceptor</a> theInterceptor);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  <em class="jxr_javadoccomment">	 * Returns all currently registered interceptors (excluding any thread local interceptors).</em>
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  	List&lt;Object&gt; getAllRegisteredInterceptors();
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  <em class="jxr_javadoccomment">	 * Unregisters all registered interceptors. Note that this method does not unregister</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  <em class="jxr_javadoccomment">	 * any {@link #registerThreadLocalInterceptor(Object) thread local interceptors}.</em>
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	<strong class="jxr_keyword">void</strong> unregisterAllInterceptors();
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">void</strong> unregisterInterceptors(@Nullable Collection&lt;?&gt; theInterceptors);
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  	<strong class="jxr_keyword">void</strong> registerInterceptors(@Nullable Collection&lt;?&gt; theInterceptors);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

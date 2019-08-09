@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -114,59 +114,59 @@
 <a class="jxr_linenumber" name="L106" href="#L106">106</a> 		}
 <a class="jxr_linenumber" name="L107" href="#L107">107</a> 
 <a class="jxr_linenumber" name="L108" href="#L108">108</a> 		String loincCodePropName;
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		<strong class="jxr_keyword">switch</strong> (partTypeName) {
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Anatomic Location.Region Imaged"</span>:
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 		<strong class="jxr_keyword">switch</strong> (partTypeName.toLowerCase()) {
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.anatomic location.region imaged"</span>:
 <a class="jxr_linenumber" name="L111" href="#L111">111</a> 				loincCodePropName = <span class="jxr_string">"rad-anatomic-location-region-imaged"</span>;
 <a class="jxr_linenumber" name="L112" href="#L112">112</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Anatomic Location.Imaging Focus"</span>:
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.anatomic location.imaging focus"</span>:
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 				loincCodePropName = <span class="jxr_string">"rad-anatomic-location-imaging-focus"</span>;
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Modality.Modality type"</span>:
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.modality.modality type"</span>:
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 				loincCodePropName = <span class="jxr_string">"rad-modality-modality-type"</span>;
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Modality.Modality subtype"</span>:
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.modality.modality subtype"</span>:
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 				loincCodePropName = <span class="jxr_string">"rad-modality-modality-subtype"</span>;
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Anatomic Location.Laterality"</span>:
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.anatomic location.laterality"</span>:
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 				loincCodePropName = <span class="jxr_string">"rad-anatomic-location-laterality"</span>;
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Anatomic Location.Laterality.Presence"</span>:
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.anatomic location.laterality.presence"</span>:
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 				loincCodePropName = <span class="jxr_string">"rad-anatomic-location-laterality-presence"</span>;
 <a class="jxr_linenumber" name="L127" href="#L127">127</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Guidance for.Action"</span>:
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.guidance for.action"</span>:
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 				loincCodePropName = <span class="jxr_string">"rad-guidance-for-action"</span>;
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Guidance for.Approach"</span>:
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.guidance for.approach"</span>:
 <a class="jxr_linenumber" name="L132" href="#L132">132</a> 				loincCodePropName = <span class="jxr_string">"rad-guidance-for-approach"</span>;
 <a class="jxr_linenumber" name="L133" href="#L133">133</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Guidance for.Object"</span>:
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.guidance for.object"</span>:
 <a class="jxr_linenumber" name="L135" href="#L135">135</a> 				loincCodePropName = <span class="jxr_string">"rad-guidance-for-object"</span>;
 <a class="jxr_linenumber" name="L136" href="#L136">136</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Guidance for.Presence"</span>:
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.guidance for.presence"</span>:
 <a class="jxr_linenumber" name="L138" href="#L138">138</a> 				loincCodePropName = <span class="jxr_string">"rad-guidance-for-presence"</span>;
 <a class="jxr_linenumber" name="L139" href="#L139">139</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Maneuver.Maneuver type"</span>:
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.maneuver.maneuver type"</span>:
 <a class="jxr_linenumber" name="L141" href="#L141">141</a> 				loincCodePropName = <span class="jxr_string">"rad-maneuver-maneuver-type"</span>;
 <a class="jxr_linenumber" name="L142" href="#L142">142</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Pharmaceutical.Route"</span>:
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.pharmaceutical.route"</span>:
 <a class="jxr_linenumber" name="L144" href="#L144">144</a> 				loincCodePropName = <span class="jxr_string">"rad-pharmaceutical-route"</span>;
 <a class="jxr_linenumber" name="L145" href="#L145">145</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Pharmaceutical.Substance Given"</span>:
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.pharmaceutical.substance given"</span>:
 <a class="jxr_linenumber" name="L147" href="#L147">147</a> 				loincCodePropName = <span class="jxr_string">"rad-pharmaceutical-substance-given"</span>;
 <a class="jxr_linenumber" name="L148" href="#L148">148</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Reason for Exam"</span>:
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.reason for exam"</span>:
 <a class="jxr_linenumber" name="L150" href="#L150">150</a> 				loincCodePropName = <span class="jxr_string">"rad-reason-for-exam"</span>;
 <a class="jxr_linenumber" name="L151" href="#L151">151</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Subject"</span>:
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.subject"</span>:
 <a class="jxr_linenumber" name="L153" href="#L153">153</a> 				loincCodePropName = <span class="jxr_string">"rad-subject"</span>;
 <a class="jxr_linenumber" name="L154" href="#L154">154</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.Timing"</span>:
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.timing"</span>:
 <a class="jxr_linenumber" name="L156" href="#L156">156</a> 				loincCodePropName = <span class="jxr_string">"rad-timing"</span>;
 <a class="jxr_linenumber" name="L157" href="#L157">157</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.View.Aggregation"</span>:
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.view.aggregation"</span>:
 <a class="jxr_linenumber" name="L159" href="#L159">159</a> 				loincCodePropName = <span class="jxr_string">"rad-view-view-aggregation"</span>;
 <a class="jxr_linenumber" name="L160" href="#L160">160</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"Rad.View.View type"</span>:
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 			<strong class="jxr_keyword">case</strong> <span class="jxr_string">"rad.view.view type"</span>:
 <a class="jxr_linenumber" name="L162" href="#L162">162</a> 				loincCodePropName = <span class="jxr_string">"rad-view-view-type"</span>;
 <a class="jxr_linenumber" name="L163" href="#L163">163</a> 				<strong class="jxr_keyword">break</strong>;
 <a class="jxr_linenumber" name="L164" href="#L164">164</a> 			<strong class="jxr_keyword">default</strong>:

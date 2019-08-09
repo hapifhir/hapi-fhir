@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -29,11 +29,11 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.context.RuntimeResourceDefinition;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.ResourceTable;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.TagDefinition;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.util.DeleteConflict;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.delete.DeleteConflictList;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.ResourceTable;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.model.entity.TagDefinition;
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.IResource;
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
@@ -220,7 +220,7 @@
 <a class="jxr_linenumber" name="L212" href="#L212">212</a> 		Collections.sort(theRequest.getEntry(), <strong class="jxr_keyword">new</strong> TransactionSorter());
 <a class="jxr_linenumber" name="L213" href="#L213">213</a> 
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 		List&lt;IIdType&gt; deletedResources = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
-<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		List&lt;DeleteConflict&gt; deleteConflicts = <strong class="jxr_keyword">new</strong> ArrayList&lt;&gt;();
+<a class="jxr_linenumber" name="L215" href="#L215">215</a> 		DeleteConflictList deleteConflicts = <strong class="jxr_keyword">new</strong> <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a>();
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 		Map&lt;Entry, ResourceTable&gt; entriesToProcess = <strong class="jxr_keyword">new</strong> IdentityHashMap&lt;&gt;();
 <a class="jxr_linenumber" name="L217" href="#L217">217</a> 		Set&lt;ResourceTable&gt; nonUpdatedEntities = <strong class="jxr_keyword">new</strong> HashSet&lt;ResourceTable&gt;();
 <a class="jxr_linenumber" name="L218" href="#L218">218</a> 		Set&lt;ResourceTable&gt; updatedEntities = <strong class="jxr_keyword">new</strong> HashSet&lt;&gt;();
@@ -315,7 +315,7 @@
 <a class="jxr_linenumber" name="L307" href="#L307">307</a> 		<strong class="jxr_keyword">return</strong> response;
 <a class="jxr_linenumber" name="L308" href="#L308">308</a> 	}
 <a class="jxr_linenumber" name="L309" href="#L309">309</a> 
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set&lt;IdDt&gt; theAllIds, Map&lt;IdDt, IdDt&gt; theIdSubstitutions, Map&lt;IdDt, DaoMethodOutcome&gt; theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap&lt;Entry, Integer&gt; theOriginalRequestOrder, List&lt;IIdType&gt; theDeletedResources, List&lt;DeleteConflict&gt; theDeleteConflicts, Map&lt;Entry, ResourceTable&gt; theEntriesToProcess, Set&lt;ResourceTable&gt; theNonUpdatedEntities, Set&lt;ResourceTable&gt; theUpdatedEntities) {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> handleTransactionWriteOperations(ServletRequestDetails theRequestDetails, Bundle theRequest, String theActionName, Date theUpdateTime, Set&lt;IdDt&gt; theAllIds, Map&lt;IdDt, IdDt&gt; theIdSubstitutions, Map&lt;IdDt, DaoMethodOutcome&gt; theIdToPersistedOutcome, Bundle theResponse, IdentityHashMap&lt;Entry, Integer&gt; theOriginalRequestOrder, List&lt;IIdType&gt; theDeletedResources, <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, Map&lt;Entry, ResourceTable&gt; theEntriesToProcess, Set&lt;ResourceTable&gt; theNonUpdatedEntities, Set&lt;ResourceTable&gt; theUpdatedEntities) {
 <a class="jxr_linenumber" name="L311" href="#L311">311</a> 		<em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L312" href="#L312">312</a> <em class="jxr_comment">		 * Loop through the request and process any entries of type</em>
 <a class="jxr_linenumber" name="L313" href="#L313">313</a> <em class="jxr_comment">		 * PUT, POST or DELETE</em>
@@ -452,7 +452,7 @@
 <a class="jxr_linenumber" name="L444" href="#L444">444</a> <em class="jxr_comment">		 */</em>
 <a class="jxr_linenumber" name="L445" href="#L445">445</a> 
 <a class="jxr_linenumber" name="L446" href="#L446">446</a> 		theDeleteConflicts.removeIf(next -&gt; theDeletedResources.contains(next.getTargetId().toVersionless()));
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		validateDeleteConflictsEmptyOrThrowException(theDeleteConflicts);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(theDeleteConflicts);
 <a class="jxr_linenumber" name="L448" href="#L448">448</a> 
 <a class="jxr_linenumber" name="L449" href="#L449">449</a> 		<em class="jxr_comment">/*</em>
 <a class="jxr_linenumber" name="L450" href="#L450">450</a> <em class="jxr_comment">		 * Perform ID substitutions and then index each resource we have saved</em>
@@ -517,7 +517,7 @@
 <a class="jxr_linenumber" name="L509" href="#L509">509</a> 				String matchUrl = nextEntry.getRequest().getIfNoneExist();
 <a class="jxr_linenumber" name="L510" href="#L510">510</a> 				<strong class="jxr_keyword">if</strong> (isNotBlank(matchUrl)) {
 <a class="jxr_linenumber" name="L511" href="#L511">511</a> 					IFhirResourceDao&lt;?&gt; resourceDao = getDao(nextEntry.getResource().getClass());
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 					Set&lt;Long&gt; val = resourceDao.processMatchUrl(matchUrl);
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 					Set&lt;Long&gt; val = resourceDao.processMatchUrl(matchUrl, theRequestDetails);
 <a class="jxr_linenumber" name="L513" href="#L513">513</a> 					<strong class="jxr_keyword">if</strong> (val.size() &gt; 1) {
 <a class="jxr_linenumber" name="L514" href="#L514">514</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> InvalidRequestException(
 <a class="jxr_linenumber" name="L515" href="#L515">515</a> 							<span class="jxr_string">"Unable to process "</span> + theActionName + <span class="jxr_string">" - Request would cause multiple resources to match URL: \&quot;"</span> + matchUrl + <span class="jxr_string">"\&quot;. Does transaction request contain duplicates?"</span>);

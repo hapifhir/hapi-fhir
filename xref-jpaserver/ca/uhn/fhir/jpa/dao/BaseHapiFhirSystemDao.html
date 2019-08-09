@@ -37,9 +37,9 @@
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L30" href="#L30">30</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L31" href="#L31">31</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L33" href="#L33">33</a>  <em class="jxr_comment"> *      <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L35" href="#L35">35</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L36" href="#L36">36</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L37" href="#L37">37</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -57,8 +57,8 @@
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  
 <a class="jxr_linenumber" name="L50" href="#L50">50</a>  	@Override
 <a class="jxr_linenumber" name="L51" href="#L51">51</a>  	@Transactional(propagation = Propagation.NEVER)
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <a name="ExpungeOutcome" href="../../../../../ca/uhn/fhir/jpa/util/ExpungeOutcome.html#ExpungeOutcome">ExpungeOutcome</a> expunge(<a name="ExpungeOptions" href="../../../../../ca/uhn/fhir/jpa/util/ExpungeOptions.html#ExpungeOptions">ExpungeOptions</a> theExpungeOptions) {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">return</strong> myExpungeService.expunge(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, theExpungeOptions);
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <a name="ExpungeOutcome" href="../../../../../ca/uhn/fhir/jpa/util/ExpungeOutcome.html#ExpungeOutcome">ExpungeOutcome</a> expunge(<a name="ExpungeOptions" href="../../../../../ca/uhn/fhir/jpa/util/ExpungeOptions.html#ExpungeOptions">ExpungeOptions</a> theExpungeOptions, RequestDetails theRequestDetails) {
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">return</strong> myExpungeService.expunge(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, theExpungeOptions, theRequestDetails);
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  	@Transactional(propagation = Propagation.REQUIRED)
@@ -89,8 +89,8 @@
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  			notifyInterceptors(RestOperationTypeEnum.HISTORY_SYSTEM, requestDetails);
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  		}
 <a class="jxr_linenumber" name="L83" href="#L83">83</a>  
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		StopWatch w = <strong class="jxr_keyword">new</strong> <a name="StopWatch" href="../../../../../ca/uhn/fhir/jpa/util/StopWatch.html#StopWatch">StopWatch</a>();
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		IBundleProvider retVal = <strong class="jxr_keyword">super</strong>.history(<strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, theSince, theUntil);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		StopWatch w = <strong class="jxr_keyword">new</strong> StopWatch();
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		IBundleProvider retVal = <strong class="jxr_keyword">super</strong>.history(theRequestDetails, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">null</strong>, theSince, theUntil);
 <a class="jxr_linenumber" name="L86" href="#L86">86</a>  		ourLog.info(<span class="jxr_string">"Processed global history in {}ms"</span>, w.getMillisAndRestart());
 <a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}

@@ -17,9 +17,9 @@
 <a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
 <a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
 <a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * You may obtain a copy of the License at</em>
-<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
-<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * </em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> *</em>
 <a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
 <a class="jxr_linenumber" name="L16" href="#L16">16</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
 <a class="jxr_linenumber" name="L17" href="#L17">17</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
@@ -62,15 +62,15 @@
 <a class="jxr_linenumber" name="L54" href="#L54">54</a>  	}
 <a class="jxr_linenumber" name="L55" href="#L55">55</a>  
 <a class="jxr_linenumber" name="L56" href="#L56">56</a>  
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">protected</strong> Parameters doExpunge(IIdType theIdParam, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Integer&gt; theLimit, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeDeletedResources, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeOldVersions, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeEverything) {
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	<strong class="jxr_keyword">protected</strong> Parameters doExpunge(IIdType theIdParam, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Integer&gt; theLimit, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeDeletedResources, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeOldVersions, IPrimitiveType&lt;? <strong class="jxr_keyword">extends</strong> Boolean&gt; theExpungeEverything, RequestDetails theRequest) {
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  
 <a class="jxr_linenumber" name="L61" href="#L61">61</a>  		ExpungeOutcome outcome;
 <a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<strong class="jxr_keyword">if</strong> (theIdParam != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			outcome = getDao().expunge(theIdParam, options);
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  			outcome = getDao().expunge(theIdParam, options, theRequest);
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  		} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			outcome = getDao().expunge(options);
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  			outcome = getDao().expunge(options, theRequest);
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		}
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<strong class="jxr_keyword">return</strong> createExpungeResponse(outcome);
@@ -123,10 +123,10 @@
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 	}
 <a class="jxr_linenumber" name="L116" href="#L116">116</a> 
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 	@Patch
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<strong class="jxr_keyword">public</strong> <a name="DaoMethodOutcome" href="../../../../../ca/uhn/fhir/jpa/dao/DaoMethodOutcome.html#DaoMethodOutcome">DaoMethodOutcome</a> patch(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	<strong class="jxr_keyword">public</strong> <a name="DaoMethodOutcome" href="../../../../../ca/uhn/fhir/jpa/dao/DaoMethodOutcome.html#DaoMethodOutcome">DaoMethodOutcome</a> patch(HttpServletRequest theRequest, @IdParam IIdType theId, @ConditionalUrlParam String theConditionalUrl,  RequestDetails theRequestDetails, @ResourceParam String theBody, PatchTypeEnum thePatchType) {
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 		startRequest(theRequest);
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">return</strong> myDao.patch(theId, thePatchType, theBody, theRequestDetails);
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 			<strong class="jxr_keyword">return</strong> myDao.patch(theId, theConditionalUrl, thePatchType, theBody, theRequestDetails);
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 		} <strong class="jxr_keyword">finally</strong> {
 <a class="jxr_linenumber" name="L123" href="#L123">123</a> 			endRequest(theRequest);
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 		}
