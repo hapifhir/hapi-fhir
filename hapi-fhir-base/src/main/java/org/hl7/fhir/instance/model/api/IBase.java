@@ -56,4 +56,9 @@ public interface IBase extends Serializable {
 	 */
 	List<String> getFormatCommentsPost();
 
+	/**
+	 * Returns the FHIR type name for the given element, e.g. "Patient" or "unsignedInt"
+	 */
+	default String fhirType() { return null; }
+
 }
