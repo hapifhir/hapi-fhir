@@ -53,7 +53,7 @@ public class SubscriptionLoader {
 	private ISubscriptionProvider mySubscriptionProvider;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
+	@Autowired(required = false)
 	private IDaoRegistry myDaoRegistry;
 
 	private final Object mySyncSubscriptionsLock = new Object();
@@ -65,7 +65,7 @@ public class SubscriptionLoader {
 	@SuppressWarnings("unused")
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
 	public void syncSubscriptions() {
-		if (!myDaoRegistry.isResourceTypeSupported("Subscription")) {
+		if (myDaoRegistry != null && !myDaoRegistry.isResourceTypeSupported("Subscription")) {
 			return;
 		}
 		if (!mySyncSubscriptionsSemaphore.tryAcquire()) {
