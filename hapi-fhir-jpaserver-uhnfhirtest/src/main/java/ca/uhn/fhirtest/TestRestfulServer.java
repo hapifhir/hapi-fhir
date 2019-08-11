@@ -34,7 +34,7 @@ import ca.uhn.fhirtest.config.TestR4Config;
 import ca.uhn.fhirtest.config.TestR5Config;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
@@ -127,6 +127,7 @@ public class TestRestfulServer extends RestfulServer {
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			case "R4": {
@@ -164,7 +165,7 @@ public class TestRestfulServer extends RestfulServer {
 				confProvider.setImplementationDescription(implDesc);
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
-//				providers.add(myAppCtx.getBean(GraphQLProvider.class));
+				providers.add(myAppCtx.getBean(GraphQLProvider.class));
 				break;
 			}
 			default:

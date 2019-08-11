@@ -138,7 +138,7 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Override
 	public boolean isResourceTypeSupported(String theResourceType) {
-		return mySupportedResourceTypes.contains(theResourceType);
+		return mySupportedResourceTypes == null || mySupportedResourceTypes.contains(theResourceType);
 	}
 
 	private void init() {

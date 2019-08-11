@@ -1,4 +1,4 @@
-package ca.uhn.fhir.rest.server;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -6,6 +6,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
@@ -18,11 +22,14 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.graphql.Argument;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,9 +41,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class GraphQLR4ProviderTest {
 
@@ -216,9 +222,9 @@ public class GraphQLR4ProviderTest {
 
 	}
 
-	private static class MyStorageServices implements GraphQLEngine.IGraphQLStorageServices {
+	private static class MyStorageServices implements IGraphQLStorageServices {
 		@Override
-		public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<Resource> theMatches) throws FHIRException {
+		public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 			ourLog.info("listResources of {} - {}", theType, theSearchParams);
 
 			if (theSearchParams.size() == 1) {
@@ -264,8 +270,8 @@ public class GraphQLR4ProviderTest {
 		}
 
 		@Override
-		public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
-			ourLog.info("lookup from {} to {}", theContext.getIdElement().getValue(), theReference.getReference());
+		public IGraphQLStorageServices.ReferenceResolution lookup(Object theAppInfo, IBaseResource theContext, IBaseReference theReference) throws FHIRException {
+			ourLog.info("lookup from {} to {}", theContext.getIdElement().getValue(), theReference.getReferenceElement().getValue());
 			return null;
 		}
 
