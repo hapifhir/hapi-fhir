@@ -64,6 +64,7 @@ public class TestR5Config extends BaseJavaConfigR5 {
 		retVal.setCountSearchResultsUpTo(TestR5Config.COUNT_SEARCH_RESULTS_UP_TO);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setExpungeEnabled(true);
+		retVal.setFilterParameterEnabled(true);
 		return retVal;
 	}
 

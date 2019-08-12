@@ -111,6 +111,18 @@
 				The JPA server now supports GraphQL for DSTU3 / R4 / R5 servers.
 				]]>
 			</action>
+			<action type="add" issue="1220">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now supports the <code>_filter</code> search parameter when configured to
+				do so. The <a href="http://hl7.org/fhir/search_filter.html">filter search parameter</a>
+				is an extremely flexible and powerful feature, allowing for advanced grouping and order of
+				operations on searches. It can be dangerous however, as it potentially allows users to create
+				queries for which no database indexes exist in the default configuration so it is disabled by
+				default. Thanks to Anthony Sute for the pull request and all of his support in what turned
+				out to be a lengthy merge!
+				]]>
+			</action>
 			<action type="add">
 				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
 				<![CDATA[
