@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -21,11 +22,12 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	@After
 	public void after() {
-
+		myDaoConfig.setFilterParameterEnabled(new DaoConfig().isFilterParameterEnabled());
 	}
 
 	@Before
 	public void before() {
+		myDaoConfig.setFilterParameterEnabled(true);
 	}
 
 	@Test
@@ -71,6 +73,19 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testFilterDisabled() {
+		myDaoConfig.setFilterParameterEnabled(false);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith"));
+		try {
+			myPatientDao.search(map);
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
@@ -149,6 +150,7 @@ public class DaoConfig {
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
 	 */
 	private boolean myPreExpandValueSetsExperimental = false;
+	private boolean myFilterParameterEnabled = false;
 
 	/**
 	 * Constructor
@@ -972,7 +974,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
-	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
+	 * @see CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -986,7 +988,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
-	 * @see ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor
+	 * @see CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
@@ -1630,6 +1632,28 @@ public class DaoConfig {
 	 */
 	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
 		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public boolean isFilterParameterEnabled() {
+		return myFilterParameterEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public void setFilterParameterEnabled(boolean theFilterParameterEnabled) {
+		myFilterParameterEnabled = theFilterParameterEnabled;
 	}
 
 	public enum IndexEnabledEnum {

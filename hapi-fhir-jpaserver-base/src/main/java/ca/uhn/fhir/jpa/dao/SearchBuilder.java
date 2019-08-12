@@ -2861,7 +2861,7 @@ public class SearchBuilder implements ISearchBuilder {
 						if (filter != null) {
 
 							if (!myDaoConfig.isFilterParameterEnabled()) {
-								
+								throw new InvalidRequestException(Constants.PARAM_FILTER + " parameter is disabled on this server");
 							}
 
 							// TODO: we clear the predicates below because the filter builds up
