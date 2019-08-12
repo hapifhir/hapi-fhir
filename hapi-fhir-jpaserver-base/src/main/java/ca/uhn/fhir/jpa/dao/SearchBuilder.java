@@ -2762,11 +2762,9 @@ public class SearchBuilder implements ISearchBuilder {
 				theResourceName, theRequest);
 
 			if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
-				return myBuilder.and(leftPredicate,
-					rightPredicate);
+				return myBuilder.and(leftPredicate,	rightPredicate);
 			} else if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
-				return myBuilder.or(leftPredicate,
-					rightPredicate);
+				return myBuilder.or(leftPredicate, rightPredicate);
 			}
 		} else if (filter instanceof SearchFilterParser.FilterParameterGroup) {
 			return processFilter(((SearchFilterParser.FilterParameterGroup) filter).getContained(),
@@ -2854,7 +2852,7 @@ public class SearchBuilder implements ISearchBuilder {
 					// Parse the predicates enumerated in the _filter separated by AND or OR...
 					if (theAndOrParams.get(0).get(0) instanceof StringParam) {
 						String filterString = ((StringParam) theAndOrParams.get(0).get(0)).getValue();
-						SearchFilterParser.Filter filter = null;
+						SearchFilterParser.Filter filter;
 						try {
 							filter = SearchFilterParser.parse(filterString);
 						} catch (SearchFilterParser.FilterSyntaxException theE) {
@@ -2862,11 +2860,18 @@ public class SearchBuilder implements ISearchBuilder {
 						}
 						if (filter != null) {
 
+							if (!myDaoConfig.isFilterParameterEnabled()) {
+								
+							}
+
 							// TODO: we clear the predicates below because the filter builds up
 							// its own collection of predicates. It'd probably be good at some
 							// point to do something more fancy...
+							ArrayList<Predicate> holdPredicates = new ArrayList<>(myPredicates);
+
 							Predicate filterPredicate = processFilter(filter, theResourceName, theRequest);
 							myPredicates.clear();
+							myPredicates.addAll(holdPredicates);
 							myPredicates.add(filterPredicate);
 						}
 					}

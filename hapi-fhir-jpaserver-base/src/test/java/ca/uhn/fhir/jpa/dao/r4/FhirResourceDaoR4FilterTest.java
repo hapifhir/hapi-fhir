@@ -20,11 +20,12 @@ import static org.junit.Assert.*;
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	@After
-	public void afterResetSearchSize() {
+	public void after() {
+
 	}
 
 	@Before
-	public void beforeDisableCacheReuse() {
+	public void before() {
 	}
 
 	@Test

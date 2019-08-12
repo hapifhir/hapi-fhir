@@ -8,22 +8,17 @@ import org.junit.Test;
 public class SearchFilterSyntaxTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchFilterSyntaxTest.class);
 
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	private void testParse(String expression) throws SearchFilterParser.FilterSyntaxException {
-		SearchFilterParser.Filter filter = SearchFilterParser.parse(expression);
+	private void testParse(String theExpression) throws SearchFilterParser.FilterSyntaxException {
+		SearchFilterParser.Filter filter = SearchFilterParser.parse(theExpression);
+		ourLog.info("Source: {}", theExpression);
+		ourLog.info("Parsed: {}", filter.toString());
 		Assert.assertNotNull("Parsing failed - returned null",
 			filter);
-		if (filter != null) {
-			Assert.assertEquals(String.format("Expression mismatch: found %s, expecting %s",
-				filter.toString(),
-				expression),
-				expression,
-				filter.toString());
-		}
+		Assert.assertEquals(String.format("Expression mismatch: found %s, expecting %s",
+			filter.toString(),
+			theExpression),
+			theExpression,
+			filter.toString());
 	}
 
 	@Test
@@ -74,6 +69,11 @@ public class SearchFilterSyntaxTest {
 	@Test
 	public void testPrecedence() throws SearchFilterParser.FilterSyntaxException {
 		testParse("this eq that and this1 eq that1");
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

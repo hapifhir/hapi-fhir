@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class SearchFilterParser {
 
-	private static final String XML_DATE_PATTERN = "[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\\.[0-9]+)?(Z|(\\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?)?)?)?";
+	private static final String XML_DATE_PATTERN = "[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\\.[0-9]+)?(Z|([+\\-])((0[0-9]|1[0-3]):[0-5][0-9]|14:00))?)?)?)?";
 	private static final Pattern XML_DATE_MATCHER = Pattern.compile(XML_DATE_PATTERN);
 	private static final List<String> CODES_CompareOperation = Arrays.asList("eq", "ne", "co", "sw", "ew", "gt", "lt", "ge", "le", "pr", "po", "ss", "sb", "in", "re");
 	private static final List<String> CODES_LogicalOperation = Arrays.asList("and", "or", "not");
@@ -192,7 +192,7 @@ public class SearchFilterParser {
 			grp = new FilterParameterGroup();
 			grp.setContained(parseOpen());
 			if (peek() != FilterLexType.fsltClose) {
-				throw new FilterSyntaxException(String.format("Expected ')' at %d but found %c",
+				throw new FilterSyntaxException(String.format("Expected ')' at %d but found %s",
 					cursor,
 					peekCh()));
 			}
@@ -201,9 +201,9 @@ public class SearchFilterParser {
 			if (lexType == FilterLexType.fsltName) {
 				result = parseLogical(grp);
 			} else if ((lexType == FilterLexType.fsltEnded) || (lexType == FilterLexType.fsltClose) || (lexType == FilterLexType.fsltCloseSq)) {
-				result = (Filter) grp;
+				result = grp;
 			} else {
-				throw new FilterSyntaxException(String.format("Unexpected Character %c at %d",
+				throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
 					peekCh(),
 					cursor));
 			}
@@ -221,8 +221,8 @@ public class SearchFilterParser {
 	private Filter parseLogical(Filter filter) throws FilterSyntaxException {
 
 		Filter result = null;
-		String s = null;
-		FilterLogical logical = null;
+		String s;
+		FilterLogical logical;
 		if (filter == null) {
 			s = "not";
 		} else {
@@ -234,7 +234,7 @@ public class SearchFilterParser {
 			}
 
 			logical = new FilterLogical();
-			logical.setFilter1((Filter) filter);
+			logical.setFilter1(filter);
 			if (s.compareToIgnoreCase("or") == 0) {
 				logical.setOperation(FilterLogicalOperation.or);
 			} else if (s.compareToIgnoreCase("not") == 0) {
@@ -244,7 +244,7 @@ public class SearchFilterParser {
 			}
 
 			logical.setFilter2(parseOpen());
-			result = (Filter) logical;
+			result = logical;
 		}
 		return result;
 	}
@@ -283,16 +283,15 @@ public class SearchFilterParser {
 
 	private Filter parseParameter(String name) throws FilterSyntaxException {
 
-		Filter result = null;
-		String s = null;
-		int i;
+		Filter result;
+		String s;
 		FilterParameter filter = new FilterParameter();
 
 		// 1. the path
 		filter.setParamPath(parsePath(name));
 
 		if (peek() != FilterLexType.fsltName) {
-			throw new FilterSyntaxException(String.format("Unexpected Character %c at %d",
+			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}
@@ -316,7 +315,7 @@ public class SearchFilterParser {
 			filter.setValue(consumeString());
 			filter.setValueType(FilterValueType.string);
 		} else {
-			throw new FilterSyntaxException(String.format("Unexpected Character %c at %d",
+			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}
@@ -343,9 +342,9 @@ public class SearchFilterParser {
 		if (lexType == FilterLexType.fsltName) {
 			result = parseLogical(filter);
 		} else if ((lexType == FilterLexType.fsltEnded) || (lexType == FilterLexType.fsltClose) || (lexType == FilterLexType.fsltCloseSq)) {
-			result = (Filter) filter;
+			result = filter;
 		} else {
-			throw new FilterSyntaxException(String.format("Unexpected Character %c at %d",
+			throw new FilterSyntaxException(String.format("Unexpected Character %s at %d",
 				peekCh(),
 				cursor));
 		}
@@ -400,19 +399,19 @@ public class SearchFilterParser {
 		fsltCloseSq
 	}
 
-	abstract public class Filter {
+	abstract public static class Filter {
 
-		public FilterItemType itemType;
+		private FilterItemType itemType;
 
-		abstract public FilterItemType getFilterItemType();
+		public FilterItemType getFilterItemType() {
+			return itemType;
+		}
 	}
 
-	public class FilterParameterPath {
+	public static class FilterParameterPath {
 
 		private String FName;
-
 		private Filter FFilter;
-
 		private FilterParameterPath FNext;
 
 		public String getName() {
@@ -447,7 +446,7 @@ public class SearchFilterParser {
 
 		@Override
 		public String toString() {
-			String result = null;
+			String result;
 			if (getFilter() != null) {
 				result = getName() + "[" + getFilter().toString() + "]";
 			} else {
@@ -460,7 +459,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	public class FilterParameterGroup extends Filter {
+	public static class FilterParameterGroup extends Filter {
 
 		private Filter FContained;
 
@@ -474,11 +473,6 @@ public class SearchFilterParser {
 			FContained = value;
 		}
 
-		@Override
-		public FilterItemType getFilterItemType() {
-
-			return itemType;
-		}
 
 		@Override
 		public String toString() {
@@ -487,31 +481,23 @@ public class SearchFilterParser {
 		}
 	}
 
-	public class FilterParameter extends Filter {
+	public static class FilterParameter extends Filter {
 
 		private FilterParameterPath FParamPath;
-
 		private CompareOperation FOperation;
-
 		private String FValue;
-
 		private FilterValueType FValueType;
 
-		public FilterParameterPath getParamPath() {
+		FilterParameterPath getParamPath() {
 
 			return FParamPath;
 		}
 
-		public void setParamPath(FilterParameterPath value) {
+		void setParamPath(FilterParameterPath value) {
 
 			FParamPath = value;
 		}
 
-		@Override
-		public FilterItemType getFilterItemType() {
-
-			return itemType;
-		}
 
 		public CompareOperation getOperation() {
 
@@ -553,26 +539,19 @@ public class SearchFilterParser {
 		}
 	}
 
-	public class FilterLogical extends Filter {
+	public static class FilterLogical extends Filter {
 
 		private Filter FFilter1;
-
 		private FilterLogicalOperation FOperation;
-
 		private Filter FFilter2;
 
-		@Override
-		public FilterItemType getFilterItemType() {
 
-			return itemType;
-		}
-
-		public Filter getFilter1() {
+		Filter getFilter1() {
 
 			return FFilter1;
 		}
 
-		public void setFilter1(Filter FFilter1) {
+		void setFilter1(Filter FFilter1) {
 
 			this.FFilter1 = FFilter1;
 		}
@@ -587,12 +566,12 @@ public class SearchFilterParser {
 			this.FOperation = FOperation;
 		}
 
-		public Filter getFilter2() {
+		Filter getFilter2() {
 
 			return FFilter2;
 		}
 
-		public void setFilter2(Filter FFilter2) {
+		void setFilter2(Filter FFilter2) {
 
 			this.FFilter2 = FFilter2;
 		}
@@ -603,7 +582,7 @@ public class SearchFilterParser {
 		}
 	}
 
-	public static class FilterSyntaxException extends Exception {
+	static class FilterSyntaxException extends Exception {
 		FilterSyntaxException(String theMessage) {
 			super(theMessage);
 		}
