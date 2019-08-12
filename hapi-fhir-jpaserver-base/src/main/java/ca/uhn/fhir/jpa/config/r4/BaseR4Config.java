@@ -21,12 +21,13 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -89,12 +90,6 @@ public class BaseR4Config extends BaseConfig {
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
 		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
-	}
-
-	@Bean
-	@Lazy
-	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
