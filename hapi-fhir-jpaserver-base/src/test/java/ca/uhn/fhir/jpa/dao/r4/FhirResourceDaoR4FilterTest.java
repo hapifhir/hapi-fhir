@@ -83,7 +83,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("_filter parameter is disabled on this server", e.getMessage());
 		}
 	}
 
