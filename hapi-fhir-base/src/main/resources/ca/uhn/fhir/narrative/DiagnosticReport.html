@@ -60,7 +60,22 @@
 				<tr th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 					<td>
 						<th:block th:switch="${fhirVersion}">
-                     <th:block th:case="'DSTU2' or 'DSTU2_HL7ORG' or 'DSTU2_1' or 'DSTU3'">
+                     <th:block th:case="'DSTU2'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_HL7ORG'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_1'">
+                        <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
+                        <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
+                     </th:block>
+                     <th:block th:case="'DSTU3'">
                         <th:block th:if="${not result.resource.code.textElement.empty}" th:text="${result.resource.code.textElement.value}"/>
                         <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${not result.resource.code.coding[0].displayElement.empty}" th:text="${result.resource.code.coding[0].display}"/>
                         <th:block th:if="${result.resource.code.textElement.empty} and ${not #lists.isEmpty(result.resource.code.coding)} and ${not result.resource.code.coding[0].empty} and ${result.resource.code.coding[0].displayElement.empty}" th:text="'?'"/>
@@ -76,7 +91,19 @@
 					<td th:narrative="${result.resource.value}">2.2 g/L</td>
 					<td>
                   <th:block th:switch="${fhirVersion}">
-                     <th:block th:case="'DSTU2' or 'DSTU2_HL7ORG' or 'DSTU2_1' or 'DSTU3'">
+                     <th:block th:case="'DSTU2'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_HL7ORG'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU2_1'">
+                        <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
+                        <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
+                     </th:block>
+                     <th:block th:case="'DSTU3'">
                         <th:block th:if="${not result.resource.interpretation.textElement.empty}" th:text="${result.resource.interpretation.text}"/>
                         <th:block th:if="${result.resource.interpretation.textElement.empty} and ${not result.resource.interpretation.coding.empty} and ${not result.resource.interpretation.coding[0].displayElement.empty}" th:text="${result.resource.interpretation.coding[0].display}"/>
                      </th:block>
@@ -98,18 +125,33 @@
 				</tr>
 
 				<th:block th:switch="${fhirVersion}">
-					<th:block th:case="'DSTU2' or 'DSTU2_HL7ORG' or 'DSTU2_1' or 'DSTU3'">
-						<tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
-							<td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+					<th:block th:case="'DSTU2'">
+						<tr th:if="${not result.resource.commentsElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+							<td th:text="${result.resource.commentsElement.value}" colspan="5">This is a comment</td>
 						</tr>
 					</th:block>
+               <th:block th:case="'DSTU2_HL7ORG'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
+               <th:block th:case="'DSTU2_1'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
+               <th:block th:case="'DSTU3'">
+                  <tr th:if="${not result.resource.commentElement.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
+                     <td th:text="${result.resource.commentElement.value}" colspan="5">This is a comment</td>
+                  </tr>
+               </th:block>
 					<th:block th:case="*">
 						<tr th:if="${not result.resource.note.empty}" th:class="${rowStat.odd}? 'hapiTableOfValuesRowOdd' : 'hapiTableOfValuesRowEven'" class="hapiTableOfValuesRowOdd">
 							<td th:text="${result.resource.note[0].text}" colspan="5">This is a comment</td>
 						</tr>
 					</th:block>
 				</th:block>
-				
+
 				<!--/* The following are just examples that don't appear in the generated narrative -->
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
 				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>
