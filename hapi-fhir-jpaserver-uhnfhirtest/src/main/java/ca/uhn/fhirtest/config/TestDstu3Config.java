@@ -64,6 +64,7 @@ public class TestDstu3Config extends BaseJavaConfigDstu3 {
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setReindexThreadCount(1);
 		retVal.setExpungeEnabled(true);
+		retVal.setFilterParameterEnabled(true);
 		return retVal;
 	}
 
