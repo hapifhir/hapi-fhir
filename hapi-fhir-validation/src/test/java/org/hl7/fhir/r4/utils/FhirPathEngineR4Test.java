@@ -127,7 +127,7 @@ public class FhirPathEngineR4Test {
 	}
 
 	@Test
-	public void testConcatenationFunction() throws FHIRException {
+	public void testStringCompare() throws FHIRException {
 		String exp = "element.first().path.startsWith(%resource.type) and element.tail().all(path.startsWith(%resource.type&'.'))";
 
 		StructureDefinition sd = new StructureDefinition();
@@ -138,9 +138,9 @@ public class FhirPathEngineR4Test {
 
 		Patient p = new Patient();
 		p.addName().setFamily("TEST");
-		List<Base> result = ourEngine.evaluate(null, p, diff, exp);
+		List<Base> result = ourEngine.evaluate(null, p, null, diff, exp);
 		ourLog.info(result.toString());
-//		assertEquals("TEST.", result);
+		assertEquals(true, ((BooleanType)result.get(0)).booleanValue());
 	}
 
 
