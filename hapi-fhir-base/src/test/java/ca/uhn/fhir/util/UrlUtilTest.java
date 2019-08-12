@@ -59,4 +59,15 @@ public class UrlUtilTest {
 
 	}
 
+	@Test
+	public void testSanitize() {
+		assertEquals(" &apos; ", UrlUtil.sanitizeUrlPart(" ' "));
+		assertEquals(" &lt; ", UrlUtil.sanitizeUrlPart(" < "));
+		assertEquals(" &gt; ", UrlUtil.sanitizeUrlPart(" > "));
+		assertEquals(" &quot; ", UrlUtil.sanitizeUrlPart(" \" "));
+		assertEquals(" &#10; ", UrlUtil.sanitizeUrlPart(" \n "));
+		assertEquals(" &#13; ", UrlUtil.sanitizeUrlPart(" \r "));
+		assertEquals("  ", UrlUtil.sanitizeUrlPart(" \0 "));
+	}
+
 }
