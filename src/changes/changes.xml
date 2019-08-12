@@ -88,16 +88,28 @@
 			</action>
 			<action type="add">
 				Support for the new R5 draft resources has been added. This support includes the client,
+				<![CDATA[
+				<b>New Feature</b>:
 				server, and JPA server. Note that these definitions will change as the R5 standard is 
 				modified until it is released, so use with caution!
+				]]>
 			</action>
 			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
 				A new interceptor called
-				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				<code>ConsentInterceptor</code> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
 				and operations that are being returned. See
-				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>]]>
+				<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>
 				for more information.
+				]]>
+			</action>
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now supports GraphQL for DSTU3 / R4 / R5 servers.
+				]]>
 			</action>
 			<action type="add">
 				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
@@ -105,7 +117,8 @@
 				<ul>
 				<li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook,
 				which allows it to successfully authorize JPA operations that don't actually return resource content,
-				such as GraphQL responses.</li>
+				such as GraphQL responses, and resources that have been filtered using the <code>_elements</code>
+				parameter.</li>
 				<li>
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
