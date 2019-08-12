@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -71,7 +72,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected IGenericClient ourClient;
 	ResourceCountCache ourResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
-	private Object ourGraphQLProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	@Autowired
@@ -105,10 +105,10 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
-			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
+			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
