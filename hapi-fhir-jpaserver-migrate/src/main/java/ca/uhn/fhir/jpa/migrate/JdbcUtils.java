@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,10 +41,7 @@ import org.springframework.jdbc.core.ColumnMapRowMapper;
 
 import javax.sql.DataSource;
 import java.sql.*;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static org.thymeleaf.util.StringUtils.toUpperCase;
 
@@ -56,25 +53,37 @@ public class JdbcUtils {
 	 */
 	public static Set<String> getIndexNames(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName) throws SQLException {
 
+		if (!getTableNames(theConnectionProperties).contains(theTableName)) {
+			return Collections.emptySet();
+		}
+
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
 			return theConnectionProperties.getTxTemplate().execute(t -> {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, true);
 
+					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
-
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
-
 						String indexName = indexes.getString("INDEX_NAME");
 						indexName = toUpperCase(indexName, Locale.US);
 						indexNames.add(indexName);
 					}
 
+					indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), true, false);
+					while (indexes.next()) {
+						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
+						String indexName = indexes.getString("INDEX_NAME");
+						indexName = toUpperCase(indexName, Locale.US);
+						indexNames.add(indexName);
+					}
+
+					indexNames.removeIf(i -> i == null);
 					return indexNames;
+
 				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}
@@ -148,6 +157,8 @@ public class JdbcUtils {
 							case Types.TIMESTAMP:
 							case Types.TIMESTAMP_WITH_TIMEZONE:
 								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
+							case Types.BLOB:
+								return BaseTableColumnTypeTask.ColumnTypeEnum.BLOB.getDescriptor(null);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}

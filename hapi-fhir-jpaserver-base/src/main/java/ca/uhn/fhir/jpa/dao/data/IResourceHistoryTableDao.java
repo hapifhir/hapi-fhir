@@ -1,10 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import java.util.Collection;
-import java.util.Date;
-
-import javax.persistence.TemporalType;
-
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.Temporal;
 import org.springframework.data.repository.query.Param;
 
-import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import javax.persistence.TemporalType;
+import java.util.Collection;
+import java.util.Date;
 
 /*
  * #%L
@@ -24,9 +22,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -73,6 +71,13 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 
 	@Query("SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion")
 	Slice<Long> findForResourceId(Pageable thePage, @Param("resId") Long theId, @Param("dontWantVersion") Long theDontWantVersion);
+
+	@Query("" +
+		"SELECT v.myId FROM ResourceHistoryTable v " +
+		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
+		"WHERE v.myResourceVersion != t.myVersion AND " +
+		"t.myId = :resId")
+	Slice<Long> findIdsOfPreviousVersionsOfResourceId(Pageable thePage, @Param("resId") Long theResourceId);
 
 	@Query("" +
 		"SELECT v.myId FROM ResourceHistoryTable v " +

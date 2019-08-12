@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
@@ -26,6 +27,7 @@ public class ValidateTest {
 	}
 
 	@Test
+	@Ignore
 	public void testValidateUsingIgPackSucceedingDstu2() {
 		String resourcePath = ValidateTest.class.getResource("/argo-dstu2-observation-good.json").getFile();
 		ourLog.info(resourcePath);

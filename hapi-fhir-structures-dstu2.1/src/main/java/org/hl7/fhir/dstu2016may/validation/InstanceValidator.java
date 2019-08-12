@@ -18,50 +18,21 @@ import org.hl7.fhir.dstu2016may.metamodel.Manager.FhirFormat;
 import org.hl7.fhir.dstu2016may.metamodel.ParserBase;
 import org.hl7.fhir.dstu2016may.metamodel.ParserBase.ValidationPolicy;
 import org.hl7.fhir.dstu2016may.metamodel.XmlParser;
-import org.hl7.fhir.dstu2016may.model.Address;
-import org.hl7.fhir.dstu2016may.model.Attachment;
-import org.hl7.fhir.dstu2016may.model.Bundle;
+import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.ContactPoint;
-import org.hl7.fhir.dstu2016may.model.DateType;
-import org.hl7.fhir.dstu2016may.model.DomainResource;
-import org.hl7.fhir.dstu2016may.model.ElementDefinition;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.ConstraintSeverity;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.ElementDefinitionBindingComponent;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.ElementDefinitionConstraintComponent;
 import org.hl7.fhir.dstu2016may.model.ElementDefinition.TypeRefComponent;
 import org.hl7.fhir.dstu2016may.model.Enumerations.BindingStrength;
-import org.hl7.fhir.dstu2016may.model.ExpressionNode;
-import org.hl7.fhir.dstu2016may.model.Extension;
-import org.hl7.fhir.dstu2016may.model.HumanName;
-import org.hl7.fhir.dstu2016may.model.Identifier;
-import org.hl7.fhir.dstu2016may.model.IntegerType;
-import org.hl7.fhir.dstu2016may.model.Period;
-import org.hl7.fhir.dstu2016may.model.Quantity;
-import org.hl7.fhir.dstu2016may.model.Questionnaire;
 import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemOptionComponent;
 import org.hl7.fhir.dstu2016may.model.Questionnaire.QuestionnaireItemType;
-import org.hl7.fhir.dstu2016may.model.Range;
-import org.hl7.fhir.dstu2016may.model.Ratio;
-import org.hl7.fhir.dstu2016may.model.Reference;
-import org.hl7.fhir.dstu2016may.model.Resource;
-import org.hl7.fhir.dstu2016may.model.SampledData;
-import org.hl7.fhir.dstu2016may.model.StringType;
-import org.hl7.fhir.dstu2016may.model.StructureDefinition;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition.ExtensionContext;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition.StructureDefinitionSnapshotComponent;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition.TypeDerivationRule;
-import org.hl7.fhir.dstu2016may.model.TimeType;
-import org.hl7.fhir.dstu2016may.model.Timing;
-import org.hl7.fhir.dstu2016may.model.Type;
-import org.hl7.fhir.dstu2016may.model.UriType;
-import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.dstu2016may.utils.FHIRPathEngine;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
@@ -345,9 +316,9 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			txTime = txTime + (System.nanoTime() - t);
 			if (s == null || s.isOk())
 				return true;
-			if (s.getSeverity() == IssueSeverity.INFORMATION)
+			if (s.getSeverity() == OperationOutcome.IssueSeverity.INFORMATION)
 				hint(errors, IssueType.CODEINVALID, element.line(), element.col(), path, s == null, s.getMessage());
-			else if (s.getSeverity() == IssueSeverity.WARNING)
+			else if (s.getSeverity() == OperationOutcome.IssueSeverity.WARNING)
 				warning(errors, IssueType.CODEINVALID, element.line(), element.col(), path, s == null, s.getMessage());
 			else
 				return rule(errors, IssueType.CODEINVALID, element.line(), element.col(), path, s == null, s.getMessage());

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,42 +20,70 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
-public class VersionIndependentConcept {
+import org.apache.commons.lang3.builder.CompareToBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-	private String mySystem;
-	private String myCode;
+public class VersionIndependentConcept implements Comparable<VersionIndependentConcept> {
 
-	/**
-	 * Constructor
-	 */
-	public VersionIndependentConcept() {
-		super();
-	}
+	private final String mySystem;
+	private final String myCode;
+	private int myHashCode;
 
 	/**
 	 * Constructor
 	 */
 	public VersionIndependentConcept(String theSystem, String theCode) {
-		setSystem(theSystem);
-		setCode(theCode);
+		mySystem = theSystem;
+		myCode = theCode;
+		myHashCode = new HashCodeBuilder(17, 37)
+			.append(mySystem)
+			.append(myCode)
+			.toHashCode();
 	}
 
 	public String getSystem() {
 		return mySystem;
 	}
 
-	public VersionIndependentConcept setSystem(String theSystem) {
-		mySystem = theSystem;
-		return this;
-	}
 
 	public String getCode() {
 		return myCode;
 	}
 
-	public VersionIndependentConcept setCode(String theCode) {
-		myCode = theCode;
-		return this;
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) {
+			return true;
+		}
+
+		if (theO == null || getClass() != theO.getClass()) {
+			return false;
+		}
+
+		VersionIndependentConcept that = (VersionIndependentConcept) theO;
+
+		return new EqualsBuilder()
+			.append(mySystem, that.mySystem)
+			.append(myCode, that.myCode)
+			.isEquals();
 	}
 
+	@Override
+	public int hashCode() {
+		return myHashCode;
+	}
+
+	@Override
+	public int compareTo(VersionIndependentConcept theOther) {
+		CompareToBuilder b = new CompareToBuilder();
+		b.append(mySystem, theOther.getSystem());
+		b.append(myCode, theOther.getCode());
+		return b.toComparison();
+	}
+
+	@Override
+	public String toString() {
+		return "[" + mySystem + "|" + myCode + "]";
+	}
 }

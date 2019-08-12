@@ -38,6 +38,7 @@
 						<td><b>DSTU2.1</b></td>
 						<td><b>DSTU3</b></td>
 						<td><b>R4</b></td>
+						<td><b>R5</b></td>
 					</tr>
 				</thead>
 				<tbody>
@@ -46,6 +47,7 @@
 						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #EEB;">0.5.0-5843</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
@@ -58,12 +60,14 @@
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.3</td>
 						<td>JDK6</td>
 						<td style="background: #CEC;">0.0.82</td>
 						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
@@ -76,6 +80,7 @@
 						<td style="background: #DDD;"></td>
 						<td style="background: #EEB;">1.3.0-7602</td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 1.5</td>
@@ -84,6 +89,7 @@
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #EEB;">1.4.0-8138</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -94,6 +100,7 @@
 						<td style="background: #DDD;"></td>
 						<td style="background: #EEB;">1.4.0-8636</td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.0</td>
@@ -102,6 +109,7 @@
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #EEB;">1.6.0-9663</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -112,6 +120,7 @@
 						<td style="background: #DDD;"></td>
 						<td style="background: #EEB;">1.7.0-10129</td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.2</td>
@@ -120,6 +129,7 @@
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #EEB;">1.8.0-10528</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -130,6 +140,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #EEB;">1.9.0-11501</td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 2.4</td>
@@ -138,6 +149,7 @@
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #DDD;"></td>
 						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
@@ -148,6 +160,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #DDD;"></td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.0.0</td>
@@ -157,6 +170,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.1.0-12370</td>
+						<td style="background: #DDD;"></td>
 						</tr>
 					<tr>
 						<td>HAPI FHIR 3.1.0</td>
@@ -166,6 +180,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.1.0-12370</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.2.0</td>
@@ -175,6 +190,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.2.0-12917</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.3.0</td>
@@ -184,6 +200,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.2.0-13271</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.4.0</td>
@@ -193,6 +210,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.4.0-13732</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 						<tr>
 						<td>HAPI FHIR 3.5.0</td>
@@ -202,6 +220,7 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.4.0-13732</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
 						<td>HAPI FHIR 3.6.0</td>
@@ -211,16 +230,39 @@
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #EEB;">3.6.0-1202b2eed0f</td>
+						<td style="background: #DDD;"></td>
 					</tr>
 					<tr>
-						<td>HAPI FHIR 3.7.0-SNAPSHOT</td>
+						<td>HAPI FHIR 3.7.0</td>
 						<td>JDK8</td>
 						<td style="background: #DDD;"></td>
 						<td style="background: #CEC;">1.0.2</td>
 						<td style="background: #EEB;">1.4.0</td>
 						<td style="background: #CEC;">3.0.1</td>
 						<td style="background: #CEC;">4.0.0</td>
+						<td style="background: #DDD;"></td>
 					</tr>
+					<tr>
+						<td>HAPI FHIR 3.8.0</td>
+						<td>JDK8</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #CEC;">4.0.0</td>
+						<td style="background: #DDD;"></td>
+					</tr>
+					<tr>
+						<td>HAPI FHIR 4.0.0</td>
+						<td>JDK8</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #CEC;">4.0.0</td>
+						<td style="background: #EEB;">4.1.0-e0e3caf9ba</td>
+					</tr>
+
 		</tbody>
 			</table>
 
@@ -411,7 +453,7 @@
 				version of FHIR.
 			</p>
 
-			<subsection name="DSTU2 Resources - HAPI Structures">
+			<subsection name="HAPI Structures (Response Models)">
 
 				<p>
 					HAPI also has a <code>hapi-fhir-structures-dstu2-[version].jar</code>, which

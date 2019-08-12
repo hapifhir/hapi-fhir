@@ -1,10 +1,15 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -12,11 +17,14 @@ import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
+	public static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
 	private IIdType myExtensionalVsId;
 
@@ -47,10 +55,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals(("SYSTEM VERSION"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 		// With HTTP GET
 		respParam = ourClient
@@ -67,10 +77,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
 		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
 	}
 
@@ -88,11 +100,13 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals(("v2 Identifier Type"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals(("2.8.2"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
 	@Test
@@ -115,7 +129,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedCode() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
@@ -123,13 +136,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("ACME Codes", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -156,20 +168,18 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testLookupOperationByCoding() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("lookup")
 			.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("Unknown"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
@@ -231,9 +241,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 	}
 
 	@Test
-//	@Ignore
 	public void testLookupOperationForBuiltInCode() {
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
@@ -241,17 +249,54 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 			.withParameter(Parameters.class, "code", new CodeType("M"))
 			.andParameter("system", new UriType("http://hl7.org/fhir/v3/MaritalStatus"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
 		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("Unknown", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals("Married", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).booleanValue());
+		assertEquals("v3 Code System MaritalStatus", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("2016-11-11", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(2).getName());
+		assertEquals("Married", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(3).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
+	}
+
+	@Test
+	public void testValidationOfUploadedCodeSystems() throws IOException {
+		CodeSystem csYesNo = loadResource("/dstu3/fmc01-cs-yesnounk.json", CodeSystem.class);
+		ourClient.update().resource(csYesNo).execute();
+
+		CodeSystem csBinderRecommended = loadResource("/dstu3/fmc03-cs-binderrecommend.json", CodeSystem.class);
+		ourClient.update().resource(csBinderRecommended).execute();
+
+		ValueSet vsBinderRequired = loadResource("/dstu3/fmc03-vs-binderrecommend.json", ValueSet.class);
+		ourClient.update().resource(vsBinderRequired);
+
+		ValueSet vsYesNo = loadResource("/dstu3/fmc03-vs-fmcyesno.json", ValueSet.class);
+		ourClient.update().resource(vsYesNo).execute();
+
+		Questionnaire q = loadResource("/dstu3/fmc03-questionnaire.json", Questionnaire.class);
+		ourClient.update().resource(q).execute();
+
+		QuestionnaireResponse qr = loadResource("/dstu3/fmc03-questionnaireresponse.json", QuestionnaireResponse.class);
+		IBaseOperationOutcome oo = ourClient.validate().resource(qr).execute().getOperationOutcome();
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
+		ourLog.info("Encoded:\n{}", encoded);
+	}
+
+	private String loadResource(String theFileName) throws IOException {
+		InputStream resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName);
+		if (resourceAsStream == null) {
+			resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName.substring(1));
+		}
+		return IOUtils.toString(resourceAsStream, Charsets.UTF_8);
+	}
+
+	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {
+		return ourCtx.newJsonParser().parseResource(theType, loadResource(theFilename));
 	}
 
 	@AfterClass

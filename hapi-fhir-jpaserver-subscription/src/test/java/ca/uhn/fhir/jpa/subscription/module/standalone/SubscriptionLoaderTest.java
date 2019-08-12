@@ -19,8 +19,6 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 	private static final int MOCK_FHIR_CLIENT_FAILURES = 5;
 	@Autowired
 	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
-	@Autowired
-	private SubscriptionLoader mySubscriptionLoader;
 
 	@Before
 	public void setFailCount() {
@@ -33,7 +31,7 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 	}
 
 	@Test
-	public void testSubscriptionLoaderFhirClientDown() {
+	public void testSubscriptionLoaderFhirClientDown() throws Exception {
 		String payload = "application/fhir+json";
 
 		String criteria1 = "Observation?code=SNOMED-CT|" + myCode + "&_format=xml";
@@ -43,8 +41,9 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
-		IBundleProvider bundle = new SimpleBundleProvider(new ArrayList<>(subs), "uuid");
-		initSubscriptionLoader(bundle);
+        mySubscriptionActivatedPost.setExpectedCount(2);
+		initSubscriptionLoader(subs, "uuid");
+        mySubscriptionActivatedPost.awaitExpected();
 		assertEquals(0, myMockFhirClientSubscriptionProvider.getFailCount());
 	}
 }

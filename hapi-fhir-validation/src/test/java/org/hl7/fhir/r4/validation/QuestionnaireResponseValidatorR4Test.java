@@ -7,7 +7,6 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -21,6 +20,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemComponent;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseItemComponent;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
+import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
 	private IValidationSupport myValSupport;
-	private IWorkerContext myWorkerCtx;
+	private HapiWorkerContext myWorkerCtx;
 
 	@Before
 	public void before() {
@@ -70,7 +70,7 @@ public class QuestionnaireResponseValidatorR4Test {
 	}
 
 	private ValidationResult stripBindingHasNoSourceMessage(ValidationResult theErrors) {
-		List<SingleValidationMessage> messages = new ArrayList<SingleValidationMessage>(theErrors.getMessages());
+		List<SingleValidationMessage> messages = new ArrayList<>(theErrors.getMessages());
 		for (int i = 0; i < messages.size(); i++) {
 			if (messages.get(i).getMessage().contains("has no source, so can't")) {
 				messages.remove(i);
@@ -130,10 +130,13 @@ public class QuestionnaireResponseValidatorR4Test {
 		answerValues[14] = new Reference("http://example.com/Questionnaire/q1");
 		answerValues[15] = new Quantity(42);
 
+
 		for (int i = 0; i < itemCnt; i++) {
+			ourLog.info("Testing item {}: {}", i, questionnaireItemTypes[i]);
+
+			Questionnaire q = new Questionnaire();
 			if (questionnaireItemTypes[i] == null) continue;
 			String linkId = "link" + i;
-			Questionnaire q = new Questionnaire();
 			QuestionnaireItemComponent questionnaireItemComponent =
 				q.addItem().setLinkId(linkId).setRequired(true).setType(questionnaireItemTypes[i]);
 			if (i == 10 || i == 11) {
@@ -146,7 +149,7 @@ public class QuestionnaireResponseValidatorR4Test {
 			QuestionnaireResponse qa = new QuestionnaireResponse();
 			qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 			qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
-			qa.setQuestionnaire("http://example.com/Questionnaire/q1");
+			qa.setQuestionnaire("http://example.com/Questionnaire/q" + i);
 			qa.addItem().setLinkId(linkId).addAnswer().setValue(answerValues[i]);
 
 			when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class),
@@ -185,6 +188,13 @@ public class QuestionnaireResponseValidatorR4Test {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.CHOICE).setAnswerValueSet("http://somevalueset");
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq("http://example.com/Questionnaire/q1"))).thenReturn(q);
+
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
+		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any()))
+			.thenReturn(new IValidationSupport.CodeValidationResult(new CodeSystem.ConceptDefinitionComponent().setCode("code0")));
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any()))
+			.thenReturn(new IValidationSupport.CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -227,8 +237,8 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1' - QuestionnaireResponse.item[0].answer[0].value.ofType(Coding)"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -238,8 +248,8 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system2::code3) is not in the options value set in the questionnaire"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("Validation failed for 'http://codesystems.com/system2#code3'"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
 
@@ -259,22 +269,21 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("ERROR - No LinkId, so can't be validated - QuestionnaireResponse"));
+		assertThat(errors.toString(), containsString("Element 'QuestionnaireResponse.item[0].linkId': minimum required = 1, but only found 0"));
 	}
 
 	@Test
 	public void testItemWithNoType() {
 		Questionnaire q = new Questionnaire();
-		QuestionnaireItemComponent qGroup = q.addItem();
-		qGroup.setLinkId("link0");
-		qGroup.addItem().setLinkId("link1").setType(QuestionnaireItemType.STRING);
+		QuestionnaireItemComponent qItem = q.addItem();
+		qItem.setLinkId("link0");
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
-		QuestionnaireResponseItemComponent qaGroup = qa.addItem().setLinkId("link0");
-		qaGroup.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+		QuestionnaireResponseItemComponent qaItem = qa.addItem().setLinkId("link0");
+		qaItem.addAnswer().setValue(new StringType("FOO"));
 
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(qa.getQuestionnaire()))).thenReturn(q);
 		ValidationResult errors = myVal.validateWithResult(qa);
@@ -301,7 +310,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response found for required item link0"));
+		assertThat(errors.toString(), containsString("No response found for required item with id = 'link0'"));
 	}
 
 	@Test
@@ -455,10 +464,10 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages(), empty());
-  }
+	}
 
-  @Test
-  public void testMissingRequiredAnswer() {
+	@Test
+	public void testMissingRequiredAnswer() {
 		Questionnaire q = new Questionnaire();
 		q.addItem().setLinkId("link0")
 			.setType(QuestionnaireItemType.STRING)
@@ -469,7 +478,7 @@ public class QuestionnaireResponseValidatorR4Test {
 			.thenReturn(q);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
-	  qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		qa.setQuestionnaire(reference);
 		qa.addItem().setLinkId("link0");
 		qa.setStatus(QuestionnaireResponseStatus.INPROGRESS);
@@ -540,7 +549,7 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
 //		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		// Partial code
 //
@@ -553,7 +562,7 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
 //		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		qa = new QuestionnaireResponse();
 //		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -564,7 +573,7 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
 //		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		// System only in known codesystem
 //		qa = new QuestionnaireResponse();
@@ -575,7 +584,7 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = myVal.validateWithResult(qa);
 //		ourLog.info(errors.toString());
 //		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -586,7 +595,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
 		assertThat(errors.toString(), containsString("INFORMATION - Code http://system/null was not validated because the code system is not present"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type
 
@@ -598,7 +607,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.toString(), containsString("Cannot validate integer answer option because no option list is provided"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item.answer"));
+		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// String answer
 
@@ -620,8 +629,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setDisplay(""));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("No response answer found for required item link0"));
-		assertThat(errors.toString(), containsString("QuestionnaireResponse.item"));
+		assertThat(errors.toString(), containsString("No response found for required item with id = 'link0'"));
 
 	}
 

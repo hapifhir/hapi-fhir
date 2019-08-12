@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -31,9 +31,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -51,6 +51,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	private IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 
 	@Autowired
 	private FhirContext myR4Ctx;
@@ -86,6 +87,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		return fetchResource(theCtx, CodeSystem.class, theSystem);
 	}
 
+	@Override
+	public ValueSet fetchValueSet(FhirContext theCtx, String theSystem) {
+		return fetchResource(theCtx, ValueSet.class, theSystem);
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
@@ -116,8 +122,12 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 				search = myValueSetDao.search(params);
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
+			// Don't allow the core FHIR definitions to be overwritten
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-				return null;
+				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (myR4Ctx.getElementDefinition(typeName) != null) {
+					return null;
+				}
 			}
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
@@ -133,6 +143,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
 			search = myCodeSystemDao.search(params);
+		} else if ("ImplementationGuide".equals(resourceName)) {
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			search = myImplementationGuideDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -170,11 +185,22 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		myValueSetDao = myApplicationContext.getBean("myValueSetDaoR4", IFhirResourceDao.class);
 		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoR4", IFhirResourceDao.class);
 		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoR4", IFhirResourceDao.class);
+		myImplementationGuideDao = myApplicationContext.getBean("myImplementationGuideDaoR4", IFhirResourceDao.class);
 	}
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
 

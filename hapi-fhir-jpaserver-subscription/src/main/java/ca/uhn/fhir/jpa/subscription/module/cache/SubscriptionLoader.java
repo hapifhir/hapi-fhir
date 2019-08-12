@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.retry.Retrier;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -49,9 +50,11 @@ public class SubscriptionLoader {
 	private static final int MAX_RETRIES = 60; // 60 * 5 seconds = 5 minutes
 
 	@Autowired
-	private ISubscriptionProvider mySubscriptionProvidor;
+	private ISubscriptionProvider mySubscriptionProvider;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired(required = false)
+	private IDaoRegistry myDaoRegistry;
 
 	private final Object mySyncSubscriptionsLock = new Object();
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
@@ -62,6 +65,9 @@ public class SubscriptionLoader {
 	@SuppressWarnings("unused")
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_MINUTE)
 	public void syncSubscriptions() {
+		if (myDaoRegistry != null && !myDaoRegistry.isResourceTypeSupported("Subscription")) {
+			return;
+		}
 		if (!mySyncSubscriptionsSemaphore.tryAcquire()) {
 			return;
 		}
@@ -74,7 +80,10 @@ public class SubscriptionLoader {
 
 	@VisibleForTesting
 	public int doSyncSubscriptionsForUnitTest() {
-		return doSyncSubscriptionsWithRetry();
+		// Two passes for delete flag to take effect
+		int first = doSyncSubscriptionsWithRetry();
+		int second = doSyncSubscriptionsWithRetry();
+		return first + second;
 	}
 
 	synchronized int doSyncSubscriptionsWithRetry() {
@@ -87,11 +96,15 @@ public class SubscriptionLoader {
 			ourLog.debug("Starting sync subscriptions");
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Subscription.SP_STATUS, new TokenOrListParam()
+				// TODO KHS Ideally we should only be pulling ACTIVE subscriptions here, but this class is overloaded so that
+				// the @Scheduled task also activates requested subscriptions if their type was enabled after they were requested
+				// There should be a separate @Scheduled task that looks for requested subscriptions that need to be activated
+				// independent of the registry loading process.
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.REQUESTED.toCode()))
 				.addOr(new TokenParam(null, Subscription.SubscriptionStatus.ACTIVE.toCode())));
 			map.setLoadSynchronousUpTo(SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS);
 
-			IBundleProvider subscriptionBundleList = mySubscriptionProvidor.search(map);
+			IBundleProvider subscriptionBundleList = mySubscriptionProvider.search(map);
 
 			if (subscriptionBundleList.size() >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
@@ -104,7 +117,7 @@ public class SubscriptionLoader {
 			for (IBaseResource resource : resourceList) {
 				String nextId = resource.getIdElement().getIdPart();
 				allIds.add(nextId);
-				boolean changed = mySubscriptionProvidor.loadSubscription(resource);
+				boolean changed = mySubscriptionProvider.loadSubscription(resource);
 				if (changed) {
 					changesCount++;
 				}
@@ -119,7 +132,7 @@ public class SubscriptionLoader {
 
 	@VisibleForTesting
 	public void setSubscriptionProviderForUnitTest(ISubscriptionProvider theSubscriptionProvider) {
-		mySubscriptionProvidor = theSubscriptionProvider;
+		mySubscriptionProvider = theSubscriptionProvider;
 	}
 }
 

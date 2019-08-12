@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -252,18 +252,21 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		TokenParam token = (TokenParam) theParam;
 		boolean retval = false;
+		String valueString = defaultString(getValue());
+		String tokenValueString = defaultString(token.getValue());
+
 		// Only match on system if it wasn't specified
 		if (token.getSystem() == null || token.getSystem().isEmpty()) {
-			if (getValue().equalsIgnoreCase(token.getValue())) {
+			if (valueString.equalsIgnoreCase(tokenValueString)) {
 				retval = true;
 			}
-		} else if (token.getValue() == null || token.getValue().isEmpty()) {
+		} else if (tokenValueString == null || tokenValueString.isEmpty()) {
 			if (token.getSystem().equalsIgnoreCase(getSystem())) {
 				retval = true;
 			}
 		} else {
 			if (token.getSystem().equalsIgnoreCase(getSystem()) &&
-				getValue().equalsIgnoreCase(token.getValue())) {
+				valueString.equalsIgnoreCase(tokenValueString)) {
 				retval = true;
 			}
 		}

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,6 +47,7 @@ public class ModelConfig {
 		"http://hl7.org/fhir/codesystem-*",
 		"http://hl7.org/fhir/StructureDefinition/*")));
 
+	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	/**
 	 * update setter javadoc if default changes
 	 */
@@ -58,6 +59,7 @@ public class ModelConfig {
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private String myEmailFromAddress = "noreply@unknown.com";
 	private boolean mySubscriptionMatchingEnabled = true;
+	private String myWebsocketContextPath = DEFAULT_WEBSOCKET_CONTEXT_PATH;
 
 	/**
 	 * If set to {@code true} the default search params (i.e. the search parameters that are
@@ -363,6 +365,22 @@ public class ModelConfig {
 		myEmailFromAddress = theEmailFromAddress;
 	}
 
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public String getWebsocketContextPath() {
+		return myWebsocketContextPath;
+	}
+
+	/**
+	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
+	 */
+
+	public void setWebsocketContextPath(String theWebsocketContextPath) {
+		myWebsocketContextPath = theWebsocketContextPath;
+	}
+
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
 
@@ -374,5 +392,4 @@ public class ModelConfig {
 		}
 
 	}
-
 }

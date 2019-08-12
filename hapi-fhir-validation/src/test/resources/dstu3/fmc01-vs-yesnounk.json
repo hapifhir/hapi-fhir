@@ -1,0 +1,26 @@
+{
+	"resourceType": "ValueSet",
+	"id": "FMCYesNoUnk",
+	"meta": {
+		"versionId": "1",
+		"lastUpdated": "2019-04-17T12:51:01.210+00:00"
+	},
+	"url": "http://fkcfhir.org/fhir/vs/FMCYesNoUnk",
+	"identifier": [
+		{
+			"value": "FMCYesNoUnk"
+		}
+	],
+	"name": "FMCYesNoUnk",
+	"title": "Yes or No or Unknown Choice",
+	"status": "active",
+	"publisher": "FMCNA",
+	"description": "ValueSet for Yes or No or Unknown Choice",
+	"compose": {
+		"include": [
+			{
+				"system": "http://fkcfhir.org/fhir/cs/FMCYesNoUnk"
+			}
+		]
+	}
+}

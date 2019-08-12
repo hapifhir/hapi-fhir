@@ -1,0 +1,57 @@
+<ConceptMap xmlns="http://hl7.org/fhir">
+	<id value="sct-icd"/>
+	<url value="http://hl7.org/fhir/ConceptMap/103"/>
+	<identifier>
+		<system value="urn:ietf:rfc:3986"/>
+		<value value="urn:uuid:53cd62ee-033e-414c-9f58-3ca97b5ffc3b"/>
+	</identifier>
+	<version value="4.0.0"/>
+	<name value="SNOMED CT to ICD-10-CM mappings for fracture of ulna"/>
+	<status value="draft"/>
+	<experimental value="true"/>
+	<date value="2012-06-13"/>
+	<publisher value="HL7, Inc"/>
+	<contact>
+		<name value="FHIR project team (example)"/>
+		<telecom>
+			<system value="url"/>
+			<value value="http://hl7.org/fhir"/>
+		</telecom>
+	</contact>
+	<description value="Example rule-based mappings between SNOMED CT to ICD-10-CM for fracture of ulna"/>
+	<jurisdiction>
+		<coding>
+			<system value="http://unstats.un.org/unsd/methods/m49/m49.htm"/>
+			<code value="840"/>
+			<display value="United States of America"/>
+		</coding>
+	</jurisdiction>
+	<purpose value="Show example rule based mappings"/>
+	<copyright value="Creative Commons 0"/>
+	<sourceCanonical value="http://snomed.info/id?fhir_vs"/>
+	<targetCanonical value="http://hl7.org/fhir/sid/icd-10-us"/>
+	<group>
+		<source value="http://snomed.info/sct"/>
+		<sourceVersion value="March 2015 US Edition"/>
+		<target value="http://hl7.org/fhir/sid/icd-10-us"/>
+		<targetVersion value="2015"/>
+		<element>
+			<code value="263204007"/>
+			<target>
+				<code value="S52.209A"/>
+				<equivalence value="narrower"/>
+				<comment value="The target mapping to ICD-10-CM is narrower, since additional patient data on the encounter
+         (initial vs. subsequent) and fracture type is required for a valid ICD-10-CM mapping."/>
+			</target>
+		</element>
+		<element>
+			<target>
+				<code value="S52.209D"/>
+				<equivalence value="narrower"/>
+				<comment value="The target mapping to ICD-10-CM is narrower, since additional patient data on the encounter
+         (initial vs. subsequent), fracture type and healing (for subsequent encounter) is required
+         for a valid ICD-10-CM mapping."/>
+			</target>
+		</element>
+	</group>
+</ConceptMap>

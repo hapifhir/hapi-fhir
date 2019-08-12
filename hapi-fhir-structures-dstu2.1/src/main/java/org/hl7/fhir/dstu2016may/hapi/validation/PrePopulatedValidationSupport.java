@@ -99,8 +99,13 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
-		return myCodeSystems.get(theSystem);
+	public CodeSystem fetchCodeSystem(FhirContext theContext, String uri) {
+		return myCodeSystems.get(uri);
+	}
+
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return myValueSets.get(uri);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -130,6 +135,11 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 

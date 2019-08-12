@@ -6,13 +6,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,6 +58,34 @@ public class SingleItemLoadingCacheTest {
 		SingleItemLoadingCache.setNowForUnitTest(start + 800);
 		cache.update();
 		assertEquals("2", cache.get().getId());
+
+	}
+
+	@Test
+	public void testCacheWithLoadingDisabled() {
+		long start = System.currentTimeMillis();
+		SingleItemLoadingCache.setNowForUnitTest(start);
+
+		// Cache of 0 means "never load"
+		SingleItemLoadingCache<CapabilityStatement> cache = new SingleItemLoadingCache<>(myFetcher);
+		cache.setCacheMillis(0);
+
+		/*
+		 * No matter how long we wait it should never load...
+		 */
+
+		assertEquals(null, cache.get());
+
+		cache.update();
+		assertEquals(null, cache.get());
+
+		SingleItemLoadingCache.setNowForUnitTest(start + 400);
+		cache.update();
+		assertEquals(null, cache.get());
+
+		SingleItemLoadingCache.setNowForUnitTest(start + 80000);
+		cache.update();
+		assertEquals(null, cache.get());
 
 	}
 

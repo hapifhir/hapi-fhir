@@ -13,7 +13,7 @@ public class SearchFilterSyntaxTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	private void testParse(String expression) {
+	private void testParse(String expression) throws SearchFilterParser.FilterSyntaxException {
 		SearchFilterParser.Filter filter = SearchFilterParser.parse(expression);
 		Assert.assertNotNull("Parsing failed - returned null",
 			filter);
@@ -27,52 +27,52 @@ public class SearchFilterSyntaxTest {
 	}
 
 	@Test
-	public void testString() {
+	public void testString() throws SearchFilterParser.FilterSyntaxException {
 		testParse("userName eq \"bjensen\"");
 	}
 
 	@Test
-	public void testToken() {
+	public void testToken() throws SearchFilterParser.FilterSyntaxException {
 		testParse("name eq loinc|1234");
 	}
 
 	@Test
-	public void testUrl() {
+	public void testUrl() throws SearchFilterParser.FilterSyntaxException {
 		testParse("name in http://loinc.org/vs/LP234");
 	}
 
 	@Test
-	public void testDate() {
+	public void testDate() throws SearchFilterParser.FilterSyntaxException {
 		testParse("date ge 2010-10-10");
 	}
 
 	@Test
-	public void testSubsumes() {
+	public void testSubsumes() throws SearchFilterParser.FilterSyntaxException {
 		testParse("code sb snomed|diabetes");
 	}
 
 	@Test
-	public void testSubsumesId() {
+	public void testSubsumesId() throws SearchFilterParser.FilterSyntaxException {
 		testParse("code ss snomed|diabetes-NIDDM-stage-1");
 	}
 
 	@Test
-	public void testFilter() {
+	public void testFilter() throws SearchFilterParser.FilterSyntaxException {
 		testParse("related[type eq comp].target pr false");
 	}
 
 	@Test
-	public void testFilter2() {
+	public void testFilter2() throws SearchFilterParser.FilterSyntaxException {
 		testParse("related[type eq comp and this lt that].target pr false");
 	}
 
 	@Test
-	public void testParentheses() {
+	public void testParentheses() throws SearchFilterParser.FilterSyntaxException {
 		testParse("((userName eq \"bjensen\") or (userName eq \"jdoe\")) and (code sb snomed|diabetes)");
 	}
 
 	@Test
-	public void testPrecedence() {
+	public void testPrecedence() throws SearchFilterParser.FilterSyntaxException {
 		testParse("this eq that and this1 eq that1");
 	}
 

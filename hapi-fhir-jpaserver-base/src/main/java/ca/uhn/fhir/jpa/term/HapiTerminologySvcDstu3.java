@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
@@ -19,13 +20,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 /*
  * #%L
@@ -36,9 +40,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,6 +65,8 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IHapiTerminologySvc myTerminologySvc;
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
 	/**
 	 * Constructor
@@ -100,6 +106,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+		validateCodeSystemForStorage(theCodeSystemResource);
 		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
 			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
 			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();
@@ -171,6 +178,19 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			super.expandValueSet(valueSetToExpandR4, theValueSetCodeAccumulator);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {
@@ -205,7 +225,13 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public IBaseResource fetchResource(FhirContext theContext, Class theClass, String theUri) {
+		return null;
+	}
+
+	@CoverageIgnore
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -268,25 +294,55 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
+	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		ValueSet valueSet = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+
+		org.hl7.fhir.r4.model.ValueSet valueSetR4;
+		try {
+			valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+
+		return valueSetR4;
+	}
+
+	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
 		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
 	@CoverageIgnore
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TermConcept code = myTerminologySvc.findCode(theCodeSystem, theCode);
-		if (code != null) {
-			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-			def.setCode(code.getCode());
-			def.setDisplay(code.getDisplay());
-			CodeValidationResult retVal = new CodeValidationResult(def);
-			retVal.setProperties(code.toValidationProperties());
-			retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
-			return retVal;
-		}
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		return txTemplate.execute(t->{
+			Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
+			if (codeOpt.isPresent()) {
+				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+				TermConcept code = codeOpt.get();
+				def.setCode(code.getCode());
+				def.setDisplay(code.getDisplay());
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+				retVal.setProperties(code.toValidationProperties());
+				retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
+				return retVal;
+			}
 
-		return new CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+		});
+
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return super.lookupCode(theContext, theSystem, theCode);
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		return null;
 	}
 
 

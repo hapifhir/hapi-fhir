@@ -67,6 +67,7 @@ public class JaxRsRequest extends RequestDetails {
 	 */
 	public JaxRsRequest(AbstractJaxRsProvider server, String resourceString, RequestTypeEnum requestType,
 							  RestOperationTypeEnum restOperation) {
+		super(server.getInterceptorService());
 		this.myHeaders = server.getHeaders();
 		this.myResourceString = resourceString;
 		this.setRestOperationType(restOperation);
@@ -220,7 +221,7 @@ public class JaxRsRequest extends RequestDetails {
 						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU2_HL7ORG:
-						result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
+						result.setId(new org.hl7.fhir.dstu2.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
 						break;
 					case DSTU2:
 						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId), UrlUtil.unescape(myVersion)));
@@ -240,7 +241,7 @@ public class JaxRsRequest extends RequestDetails {
 						result.setId(new org.hl7.fhir.dstu2016may.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU2_HL7ORG:
-						result.setId(new org.hl7.fhir.instance.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
+						result.setId(new org.hl7.fhir.dstu2.model.IdType(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
 						break;
 					case DSTU2:
 						result.setId(new ca.uhn.fhir.model.primitive.IdDt(myServer.getBaseForRequest(), UrlUtil.unescape(myId)));
@@ -264,7 +265,7 @@ public class JaxRsRequest extends RequestDetails {
 							result.setId(new org.hl7.fhir.dstu2016may.model.IdType(contentLocation));
 							break;
 						case DSTU2_HL7ORG:
-							result.setId(new org.hl7.fhir.instance.model.IdType(contentLocation));
+							result.setId(new org.hl7.fhir.dstu2.model.IdType(contentLocation));
 							break;
 						case DSTU2:
 							result.setId(new ca.uhn.fhir.model.primitive.IdDt(contentLocation));

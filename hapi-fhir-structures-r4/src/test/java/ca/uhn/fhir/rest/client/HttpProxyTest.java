@@ -23,7 +23,7 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 public class HttpProxyTest {
@@ -36,8 +36,7 @@ public class HttpProxyTest {
 	@SuppressWarnings("serial")
 	@Test
 	public void testProxiedRequest() throws Exception {
-		int port = PortUtil.findFreePort();
-		Server server = new Server(port);
+		Server server = new Server(0);
 		myFirstRequest = true;
 		myAuthHeader = null;
 		
@@ -74,7 +73,8 @@ public class HttpProxyTest {
 		server.setHandler(contexts);
 
 		server.setHandler(ch);
-		server.start();
+		JettyUtil.startServer(server);
+        int port = JettyUtil.getPortForStartedServer(server);
 		try {
 
 //			final String authUser = "username";
@@ -107,7 +107,7 @@ public class HttpProxyTest {
 			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
 			
 		} finally {
-			server.stop();
+			JettyUtil.closeServer(server);
 		}
 
 	}

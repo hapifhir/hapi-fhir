@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -41,7 +40,7 @@ public class LinkedBlockingQueueSubscribableChannel implements SubscribableChann
 	private final ExecutorSubscribableChannel mySubscribableChannel;
 	private final BlockingQueue<Runnable> myQueue;
 
-	public LinkedBlockingQueueSubscribableChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern) {
+	public LinkedBlockingQueueSubscribableChannel(BlockingQueue<Runnable> theQueue, String theThreadNamingPattern, int theConcurrentConsumers) {
 
 		ThreadFactory threadFactory = new BasicThreadFactory.Builder()
 			.namingPattern(theThreadNamingPattern)
@@ -53,15 +52,16 @@ public class LinkedBlockingQueueSubscribableChannel implements SubscribableChann
 			StopWatch sw = new StopWatch();
 			try {
 				theQueue.put(theRunnable);
-			} catch (InterruptedException theE) {
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 				throw new RejectedExecutionException("Task " + theRunnable.toString() +
-					" rejected from " + theE.toString());
+					" rejected from " + e.toString());
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			1,
-			SubscriptionConstants.EXECUTOR_THREAD_COUNT,
+			theConcurrentConsumers,
 			0L,
 			TimeUnit.MILLISECONDS,
 			theQueue,

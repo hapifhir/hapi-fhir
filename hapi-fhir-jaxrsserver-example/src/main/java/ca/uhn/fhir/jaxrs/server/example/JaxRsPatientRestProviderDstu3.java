@@ -10,6 +10,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -90,7 +93,7 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 	}
 
 	@Read(version = true)
-	public Patient findHistory(@IdParam final IdType theId) {
+	public Patient findVersion(@IdParam final IdType theId) {
 		if (patients.containsKey(theId.getIdPart())) {
 			final List<Patient> list = patients.get(theId.getIdPart());
 			for (final Patient patient : list) {
@@ -100,6 +103,16 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 			}
 		}
 		throw new ResourceNotFoundException(theId);
+	}
+
+	@History
+	public IBundleProvider getHistoryForInstance(@IdParam IdType theId, @Since Date theSince, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+		return new SimpleBundleProvider(Collections.emptyList(), "myTestId");
+	}
+
+	@History
+	public IBundleProvider getHistoryForType(@Since Date theSince, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+		return new SimpleBundleProvider(Collections.emptyList(), "myTestId");
 	}
 
 	@Operation(name = "firstVersion", idempotent = true, returnParameters = { @OperationParam(name = "return", type = StringType.class) })
@@ -128,7 +141,7 @@ public class JaxRsPatientRestProviderDstu3 extends AbstractJaxRsResourceProvider
 	/** THE DEFAULTS */
 
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 

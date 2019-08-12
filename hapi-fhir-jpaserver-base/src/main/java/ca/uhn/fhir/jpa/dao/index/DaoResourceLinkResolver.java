@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.index;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.IResourceLinkResolver;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -57,11 +58,12 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 	protected EntityManager myEntityManager;
 
 	@Override
-	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId) {
+	public ResourceTable findTargetResource(RuntimeSearchParam theNextSpDef, String theNextPathsUnsplit, IIdType theNextId, String theTypeString, Class<? extends IBaseResource> theType, String theId, RequestDetails theRequest) {
 		ResourceTable target;
 		Long valueOf;
 		try {
-			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId);
+			valueOf = myIdHelperService.translateForcedIdToPid(theTypeString, theId, theRequest);
+			ourLog.trace("Translated {}/{} to resource PID {}", theType, theId, valueOf);
 		} catch (ResourceNotFoundException e) {
 			if (myDaoConfig.isEnforceReferentialIntegrityOnWrite() == false) {
 				return null;
@@ -86,7 +88,9 @@ public class DaoResourceLinkResolver implements IResourceLinkResolver {
 			throw new InvalidRequestException("Resource " + resName + "/" + theId + " not found, specified in path: " + theNextPathsUnsplit);
 		}
 
+		ourLog.trace("Resource PID {} is of type {}", valueOf, target.getResourceType());
 		if (!theTypeString.equals(target.getResourceType())) {
+			ourLog.error("Resource {} with PID {} was not of type {}", target.getIdDt().getValue(), target.getId(), theTypeString);
 			throw new UnprocessableEntityException(
 				"Resource contains reference to " + theNextId.getValue() + " but resource with ID " + theNextId.getIdPart() + " is actually of type " + target.getResourceType());
 		}

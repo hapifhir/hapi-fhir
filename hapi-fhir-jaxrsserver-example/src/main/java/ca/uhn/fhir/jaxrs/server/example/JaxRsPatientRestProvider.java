@@ -19,6 +19,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.*;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -89,7 +92,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	}
 
 	@Read(version = true)
-	public Patient findHistory(@IdParam final IdDt theId) {
+	public Patient findVersion(@IdParam final IdDt theId) {
 		if (patients.containsKey(theId.getIdPart())) {
 			final List<Patient> list = patients.get(theId.getIdPart());
 			for (final Patient patient : list) {
@@ -99,6 +102,17 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 			}
 		}
 		throw new ResourceNotFoundException(theId);
+	}
+
+	// from BaseJpaResourceProvider
+	@History
+	public IBundleProvider getHistoryForInstance(@IdParam IdDt theId, @Since Date theSince, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+		return new SimpleBundleProvider(Collections.emptyList(), "myTestId");
+	}
+
+	@History
+	public IBundleProvider getHistoryForType(@Since Date theSince, @At DateRangeParam theAt, RequestDetails theRequestDetails) {
+		return new SimpleBundleProvider(Collections.emptyList(), "myTestId");
 	}
 
 	@Operation(name = "firstVersion", idempotent = true, returnParameters = { @OperationParam(name = "return", type = StringDt.class) })
@@ -127,7 +141,7 @@ public class JaxRsPatientRestProvider extends AbstractJaxRsResourceProvider<Pati
 	/** THE DEFAULTS */
 
 	@Override
-	public List<IServerInterceptor> getInterceptors() {
+	public List<IServerInterceptor> getInterceptors_() {
 		return Collections.emptyList();
 	}
 

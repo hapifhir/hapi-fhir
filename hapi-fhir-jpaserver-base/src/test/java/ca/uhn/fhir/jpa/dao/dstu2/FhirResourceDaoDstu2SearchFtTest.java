@@ -14,7 +14,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
@@ -55,19 +54,19 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		myMediaDao.create(med, mySrd);
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
 
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press");
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("Pressure", output.get(0).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "prezure", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("Pressure", output.get(0).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(1).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "syst", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("syst", output.get(0).getTerm());
@@ -75,7 +74,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		assertEquals("Systolic", output.get(2).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(3).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
 	}
@@ -114,7 +113,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		obs2.getCode().setText("ZXCVBNMZZ");
 		myObservationDao.create(obs2, mySrd);
 
-		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM");
+		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXCVBNM", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("ZXCVBNM", output.get(0).getTerm());
@@ -122,7 +121,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		assertEquals("ZXC", output.get(2).getTerm());
 		assertEquals("ZXC HELLO", output.get(3).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZXC", null);
 		ourLog.info("Found: " + output);
 		assertEquals(4, output.size());
 		assertEquals("ZXC", output.get(0).getTerm());
@@ -130,17 +129,17 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		assertEquals("ZXCVBNM", output.get(2).getTerm());
 		assertEquals("ZXCVBNM ASDFGHJKL QWERTYUIOPASDFGHJKL", output.get(3).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "HELO", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("HELLO", output.get(0).getTerm());
 		assertEquals("ZXC HELLO", output.get(1).getTerm());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
 
-		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX");
+		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "ZX", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
 		assertEquals("ZXC", output.get(0).getTerm());
@@ -152,15 +151,12 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 	public void testSearchAndReindex() {
 		SearchParameterMap map;
 
-		final IIdType pId1= newTxTemplate().execute(new TransactionCallback<IIdType>() {
-			@Override
-			public IIdType doInTransaction(TransactionStatus theStatus) {
-				// TODO Auto-generated method stub
-				Patient patient = new Patient();
-				patient.getText().setDiv("<div>DIVAAA</div>");
-				patient.addName().addGiven("NAMEAAA");
-				return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-			}
+		final IIdType pId1= newTxTemplate().execute(t -> {
+			// TODO Auto-generated method stub
+			Patient patient = new Patient();
+			patient.getText().setDiv("<div>DIVAAA</div>");
+			patient.addName().addGiven("NAMEAAA");
+			return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		});
 
 		map = new SearchParameterMap();
@@ -179,7 +175,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
 				Patient patient = new Patient();
-				patient.setId(pId1);
+				patient.setId(pId1.getValue());
 				patient.getText().setDiv("<div>DIVBBB</div>");
 				patient.addName().addGiven("NAMEBBB");
 				myPatientDao.update(patient, mySrd);

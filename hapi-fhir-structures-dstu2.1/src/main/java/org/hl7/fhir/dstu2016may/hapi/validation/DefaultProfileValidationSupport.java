@@ -11,10 +11,10 @@ import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -139,8 +139,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return provideStructureDefinitionMap(theContext).get(theUrl);
 	}
 
-	ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
-		return (ValueSet) fetchCodeSystemOrValueSet(theContext, theSystem, false);
+	@Override
+	public ValueSet fetchValueSet(FhirContext theContext, String uri) {
+		return (ValueSet) fetchCodeSystemOrValueSet(theContext, uri, false);
 	}
 
 	public void flush() {
@@ -160,7 +161,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		InputStreamReader reader = null;
 		if (inputStream != null) {
 			try {
-				reader = new InputStreamReader(inputStream, Charsets.UTF_8);
+				reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
 				Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
 				for (BundleEntryComponent next : bundle.getEntry()) {
@@ -193,7 +194,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		ourLog.info("Loading structure definitions from classpath: {}", theClasspath);
 		InputStream valuesetText = DefaultProfileValidationSupport.class.getResourceAsStream(theClasspath);
 		if (valuesetText != null) {
-			InputStreamReader reader = new InputStreamReader(valuesetText, Charsets.UTF_8);
+			InputStreamReader reader = new InputStreamReader(valuesetText, StandardCharsets.UTF_8);
 
 			Bundle bundle = theContext.newXmlParser().parseResource(Bundle.class, reader);
 			for (BundleEntryComponent next : bundle.getEntry()) {
@@ -272,7 +273,12 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 			}
 		}
 
-		return new CodeValidationResult(IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+		return new CodeValidationResult(OperationOutcome.IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
 	}
 
 }

@@ -11,9 +11,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -116,7 +116,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;
 			if (isNotBlank(binary.getContentType()) && EncodingEnum.forContentTypeStrict(binary.getContentType()) == null) {
-				return httpClient.createBinaryRequest(getContext(), binary);
+				if (binary.hasData()) {
+					return httpClient.createBinaryRequest(getContext(), binary);
+				}
 			}
 		}
 
@@ -129,7 +131,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		}
-		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.XML);
+		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.JSON);
 		String contents = encodeContents(thePrettyPrint, encoding);
 		String contentType = getContentType(encoding);
 		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);

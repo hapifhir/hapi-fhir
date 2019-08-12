@@ -2,8 +2,8 @@ package ca.uhn.fhir.model;
 
 import static org.junit.Assert.*;
 
-import org.hl7.fhir.instance.model.DecimalType;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.DecimalType;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.junit.Test;
 import org.thymeleaf.standard.expression.NumberTokenExpression;
 

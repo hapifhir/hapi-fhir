@@ -9,7 +9,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class StopWatchTest {
 
@@ -99,6 +100,7 @@ public class StopWatchTest {
 
 	@Test
 	public void testFormatMillis() {
+		assertEquals("0.134ms", StopWatch.formatMillis(0.1339d).replace(',', '.'));
 		assertEquals("1000ms", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
 		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
 		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
@@ -139,11 +141,11 @@ public class StopWatchTest {
 		int minutes = 60;
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -minutes));
 		int numOperations = 60;
-		int millis = sw.getMillisPerOperation(numOperations);
+		long millis = sw.getMillisPerOperation(numOperations);
 		ourLog.info("{} operations in {}ms = {}ms / operation", numOperations, minutes * DateUtils.MILLIS_PER_MINUTE, millis);
 
-		assertThat(millis, Matchers.lessThan(62000));
-		assertThat(millis, Matchers.greaterThan(58000));
+		assertThat(millis, Matchers.lessThan(62000L));
+		assertThat(millis, Matchers.greaterThan(58000L));
 	}
 
 	@Test

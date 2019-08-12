@@ -2,10 +2,10 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -362,7 +362,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -370,7 +369,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.withParameter(Parameters.class, "url", new UriType(URL_MY_VALUE_SET))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -515,13 +513,59 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		ourLog.info(resp);
 
 		assertEquals("result", respParam.getParameter().get(0).getName());
-		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue().booleanValue());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
 		assertEquals("message", respParam.getParameter().get(1).getName());
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue(), containsStringIgnoringCase("succeeded"));
 
 		assertEquals("display", respParam.getParameter().get(2).getName());
 		assertEquals("Yes", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
+	}
+
+	@Test
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://mycs");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ConceptDefinitionComponent parentA = cs.addConcept().setCode("ParentA").setDisplay("Parent A");
+		parentA.addConcept().setCode("ChildAA").setDisplay("Child AA");
+		myCodeSystemDao.create(cs);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://myvs");
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://mycs")
+			.addFilter()
+			.setOp(FilterOperator.ISA)
+			.setProperty("concept")
+			.setValue("ParentA");
+		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
+
+		HttpGet expandGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
+		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
+			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", response);
+		}
+
+		HttpGet validateCodeGet = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?code=ChildAA&_pretty=true");
+		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
+			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", response);
+			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+			assertEquals(true, output.getParameterBool("result"));
+		}
+
+		HttpGet validateCodeGet2 = new HttpGet(ourServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?code=FOO&_pretty=true");
+		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
+			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", response);
+			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+			assertEquals(false, output.getParameterBool("result"));
+		}
+
 	}
 
 	@AfterClass
@@ -558,7 +602,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM,"SYSTEM NAME" , cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs);
 		return codeSystem;
 	}
 

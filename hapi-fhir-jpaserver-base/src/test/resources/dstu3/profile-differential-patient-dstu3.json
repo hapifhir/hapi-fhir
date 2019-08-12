@@ -1,0 +1,64 @@
+{
+	"resourceType":"StructureDefinition",
+	"meta":{
+		"lastUpdated":"2017-08-26T18:27:24.959+01:00"
+	},
+	"url":"http://hl7.org/fhir/StructureDefinition/MyPatient421",
+	"name":"MyPatient",
+	"status":"draft",
+	"date":"2017-08-25T14:34:21.08+01:00",
+	"fhirVersion":"3.0.1",
+	"kind":"resource",
+	"abstract":false,
+	"type":"Patient",
+	"baseDefinition":"http://hl7.org/fhir/StructureDefinition/Patient",
+	"derivation":"constraint",
+	"differential":{
+		"element": [
+			{
+				"id":"Patient.id",
+				"path":"Patient.id",
+				"definition":"The logical id of the resource, as used in the URL for the resource. Once assigned, this value never changes."
+			},
+			{
+				"id":"Patient.extension",
+				"path":"Patient.extension",
+				"slicing":{
+					"discriminator": [
+						{
+							"type":"value",
+							"path":"url"
+						}
+					],
+					"rules":"open"
+				}
+			},
+			{
+				"id":"Patient.extension:us-core-race",
+				"path":"Patient.extension",
+				"sliceName":"us-core-race",
+				"type": [
+					{
+						"code":"Extension",
+						"profile":"http://hl7.org/fhir/StructureDefinition/us-core-race"
+					}
+				]
+			},
+			{
+				"id":"Patient.extension:us-core-religion",
+				"path":"Patient.extension",
+				"sliceName":"us-core-religion",
+				"short":"Optional Extensions Element",
+				"definition":"Optional Extension Element - found in all resources.",
+				"min":"0",
+				"max":"*",
+				"type": [
+					{
+						"code":"Extension",
+						"profile":"http://hl7.org/fhir/StructureDefinition/us-core-religion"
+					}
+				]
+			}
+		]
+	}
+}

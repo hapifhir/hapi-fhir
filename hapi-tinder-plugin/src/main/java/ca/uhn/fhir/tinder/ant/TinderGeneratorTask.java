@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.lang.WordUtils;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.velocity.VelocityContext;
@@ -339,9 +340,7 @@ public class TinderGeneratorTask extends Task {
 			}
 
 			generator.prepare(context);
-		} catch (ExecutionException e) {
-			throw new BuildException(e.getMessage(), e.getCause());
-		} catch (FailureException e) {
+		} catch (MojoFailureException | FailureException e) {
 			throw new BuildException(e.getMessage(), e.getCause());
 		}
 

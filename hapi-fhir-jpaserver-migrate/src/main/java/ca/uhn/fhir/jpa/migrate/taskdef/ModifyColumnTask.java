@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -88,6 +88,18 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 				break;
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
+				break;
+			case H2_EMBEDDED:
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					if (isNullable()) {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+					} else {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+					}
+				}
 				break;
 			default:
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());

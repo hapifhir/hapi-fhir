@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
@@ -64,7 +65,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 	@JsonProperty("restHookDetails")
 	private RestHookDetails myRestHookDetails;
 	@JsonProperty("extensions")
-	private Map<String, String> myChannelExtensions;
+	private Map<String, List<String>> myChannelExtensions;
 
 	/**
 	 * Constructor
@@ -134,15 +135,32 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
-	public String getChannelExtension(String url) {
-		return myChannelExtensions.get(url);
+	public String getChannelExtension(String theUrl) {
+		String retVal = null;
+		List<String> strings = myChannelExtensions.get(theUrl);
+		if (strings != null && strings.isEmpty()==false) {
+			retVal = strings.get(0);
+		}
+		return retVal;
 	}
 
-	public void setChannelExtensions(Map<String, String> theChannelExtensions) {
+	@Nonnull
+	public List<String> getChannelExtensions(String theUrl) {
+		List<String> retVal = myChannelExtensions.get(theUrl);
+		if (retVal == null) {
+			retVal = Collections.emptyList();
+		} else {
+			retVal = Collections.unmodifiableList(retVal);
+		}
+		return retVal;
+	}
+
+	public void setChannelExtensions(Map<String, List<String>> theChannelExtensions) {
 		myChannelExtensions = new HashMap<>();
 		for (String url : theChannelExtensions.keySet()) {
-			if (isNotBlank(url) && isNotBlank(theChannelExtensions.get(url))) {
-				myChannelExtensions.put(url, theChannelExtensions.get(url));
+			List<String> values = theChannelExtensions.get(url);
+			if (isNotBlank(url) && values != null) {
+				myChannelExtensions.put(url, values);
 			}
 		}
 	}
@@ -153,6 +171,10 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 			retVal = theContext.getVersion().newIdType().setValue(myIdElement);
 		}
 		return retVal;
+	}
+
+	public String getIdPart() {
+		return new IdType(getIdElementString()).getIdPart();
 	}
 
 	public String getIdElementString() {
@@ -285,6 +307,28 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 
 		public void setSubjectTemplate(String theSubjectTemplate) {
 			mySubjectTemplate = theSubjectTemplate;
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+
+			if (theO == null || getClass() != theO.getClass()) return false;
+
+			EmailDetails that = (EmailDetails) theO;
+
+			return new EqualsBuilder()
+				.append(myFrom, that.myFrom)
+				.append(mySubjectTemplate, that.mySubjectTemplate)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myFrom)
+				.append(mySubjectTemplate)
+				.toHashCode();
 		}
 	}
 

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.index;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedCompositeStringUniqueDao;
-import ca.uhn.fhir.jpa.dao.r4.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedCompositeStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceLinkExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -87,7 +88,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams existingParams) {
+	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
 		mySearchParamExtractorService.extractFromResource(theParams, theEntity, theResource);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
@@ -97,18 +98,18 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		theParams.setUpdatedTime(theUpdateTime);
 
-		extractInlineReferences(theResource);
+		extractInlineReferences(theResource, theRequest);
 
-		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true);
+		myResourceLinkExtractor.extractResourceLinks(theParams, theEntity, theResource, theUpdateTime, myDaoResourceLinkResolver, true, theRequest);
 
 		/*
 		 * If the existing resource already has links and those match links we still want, use them instead of removing them and re adding them
 		 */
-		for (Iterator<ResourceLink> existingLinkIter = existingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
+		for (Iterator<ResourceLink> existingLinkIter = theExistingParams.getResourceLinks().iterator(); existingLinkIter.hasNext(); ) {
 			ResourceLink nextExisting = existingLinkIter.next();
-			if (theParams.links.remove(nextExisting)) {
+			if (theParams.myLinks.remove(nextExisting)) {
 				existingLinkIter.remove();
-				theParams.links.add(nextExisting);
+				theParams.myLinks.add(nextExisting);
 			}
 		}
 
@@ -133,28 +134,28 @@ public class SearchParamWithInlineReferencesExtractor {
 				Collection<String> linksForCompositePartWantPaths = null;
 				switch (nextCompositeOf.getParamType()) {
 					case NUMBER:
-						paramsListForCompositePart = theParams.numberParams;
+						paramsListForCompositePart = theParams.myNumberParams;
 						break;
 					case DATE:
-						paramsListForCompositePart = theParams.dateParams;
+						paramsListForCompositePart = theParams.myDateParams;
 						break;
 					case STRING:
-						paramsListForCompositePart = theParams.stringParams;
+						paramsListForCompositePart = theParams.myStringParams;
 						break;
 					case TOKEN:
-						paramsListForCompositePart = theParams.tokenParams;
+						paramsListForCompositePart = theParams.myTokenParams;
 						break;
 					case REFERENCE:
-						linksForCompositePart = theParams.links;
-						linksForCompositePartWantPaths = new HashSet<>();
-						linksForCompositePartWantPaths.addAll(nextCompositeOf.getPathsSplit());
+						linksForCompositePart = theParams.myLinks;
+						linksForCompositePartWantPaths = new HashSet<>(nextCompositeOf.getPathsSplit());
 						break;
 					case QUANTITY:
-						paramsListForCompositePart = theParams.quantityParams;
+						paramsListForCompositePart = theParams.myQuantityParams;
 						break;
 					case URI:
-						paramsListForCompositePart = theParams.uriParams;
+						paramsListForCompositePart = theParams.myUriParams;
 						break;
+					case SPECIAL:
 					case COMPOSITE:
 					case HAS:
 						break;
@@ -189,11 +190,12 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 			}
 
-			Set<String> queryStringsToPopulate = theParams.extractCompositeStringUniquesValueChains(resourceType, partsChoices);
+			Set<String> queryStringsToPopulate = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(resourceType, partsChoices);
 
 			for (String nextQueryString : queryStringsToPopulate) {
 				if (isNotBlank(nextQueryString)) {
-					theParams.compositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
+					ourLog.trace("Adding composite unique SP: {}", nextQueryString);
+					theParams.myCompositeStringUniques.add(new ResourceIndexedCompositeStringUnique(theEntity, nextQueryString));
 				}
 			}
 		}
@@ -205,8 +207,7 @@ public class SearchParamWithInlineReferencesExtractor {
 	 * Handle references within the resource that are match URLs, for example references like "Patient?identifier=foo". These match URLs are resolved and replaced with the ID of the
 	 * matching resource.
 	 */
-
-	public void extractInlineReferences(IBaseResource theResource) {
+	public void extractInlineReferences(IBaseResource theResource, RequestDetails theRequest) {
 		if (!myDaoConfig.isAllowInlineMatchUrlReferences()) {
 			return;
 		}
@@ -237,7 +238,7 @@ public class SearchParamWithInlineReferencesExtractor {
 					throw new InvalidRequestException(msg);
 				}
 				Class<? extends IBaseResource> matchResourceType = matchResourceDef.getImplementingClass();
-				Set<Long> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType);
+				Set<Long> matches = myMatchResourceUrlService.processMatchUrl(nextIdText, matchResourceType, theRequest);
 				if (matches.isEmpty()) {
 					String msg = myContext.getLocalizer().getMessage(BaseHapiFhirDao.class, "invalidMatchUrlNoMatches", nextId.getValue());
 					throw new ResourceNotFoundException(msg);
@@ -258,12 +259,13 @@ public class SearchParamWithInlineReferencesExtractor {
 
 		// Store composite string uniques
 		if (myDaoConfig.isUniqueIndexesEnabled()) {
-			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(existingParams.compositeStringUniques, theParams.compositeStringUniques)) {
+			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(existingParams.myCompositeStringUniques, theParams.myCompositeStringUniques)) {
 				ourLog.debug("Removing unique index: {}", next);
 				myEntityManager.remove(next);
 				theEntity.getParamsCompositeStringUnique().remove(next);
 			}
-			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.compositeStringUniques, existingParams.compositeStringUniques)) {
+			boolean haveNewParams = false;
+			for (ResourceIndexedCompositeStringUnique next : myDaoSearchParamSynchronizer.subtract(theParams.myCompositeStringUniques, existingParams.myCompositeStringUniques)) {
 				if (myDaoConfig.isUniqueIndexesCheckedBeforeSave()) {
 					ResourceIndexedCompositeStringUnique existing = myResourceIndexedCompositeStringUniqueDao.findByQueryString(next.getIndexString());
 					if (existing != null) {
@@ -273,6 +275,12 @@ public class SearchParamWithInlineReferencesExtractor {
 				}
 				ourLog.debug("Persisting unique index: {}", next);
 				myEntityManager.persist(next);
+				haveNewParams = true;
+			}
+			if (theParams.myCompositeStringUniques.size() > 0 || haveNewParams) {
+				theEntity.setParamsCompositeStringUniquePresent(true);
+			} else {
+				theEntity.setParamsCompositeStringUniquePresent(false);
 			}
 		}
 	}

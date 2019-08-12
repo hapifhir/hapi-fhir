@@ -147,34 +147,6 @@ public class Dstu2ResourceValidatorDstu2Test {
 		assertEquals(1, operationOutcome.getIssue().size());
 	}
 
-	@SuppressWarnings("deprecation")
-	@Test
-	public void testSchemaResourceValidator() throws IOException {
-		String res = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("patient-example-dicom.json"));
-		Patient p = ourCtx.newJsonParser().parseResource(Patient.class, res);
-
-		ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p));
-
-		FhirValidator val = ourCtx.newValidator();
-		val.setValidateAgainstStandardSchema(true);
-		if (ValidationConstants.SCHEMATRON_ENABLED) {
-			val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		}
-
-		val.validate(p);
-
-		p.getAnimal().getBreed().setText("The Breed");
-		try {
-			val.validate(p);
-			fail();
-		} catch (ValidationFailureException e) {
-			OperationOutcome operationOutcome = (OperationOutcome) e.getOperationOutcome();
-			ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-			assertEquals(1, operationOutcome.getIssue().size());
-			assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue(), containsString("cvc-complex-type"));
-		}
-	}
-
 	/**
 	 * Make sure that the elements that appear in all resources (meta, language, extension, etc)
 	 * all appear in the correct order

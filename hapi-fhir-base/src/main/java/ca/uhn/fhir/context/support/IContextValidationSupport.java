@@ -9,9 +9,9 @@ package ca.uhn.fhir.context.support;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,9 +21,21 @@ package ca.uhn.fhir.context.support;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This interface is a version-independent representation of the
@@ -102,6 +114,68 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 */
 	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
+	/**
+	 * Look up a code using the system and code value
+	 *
+	 * @param theContext The FHIR context
+	 * @param theSystem  The CodeSystem URL
+	 * @param theCode    The code
+	 */
+	LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode);
+
+	class ConceptDesignation {
+		private String myLanguage;
+		private String myUseSystem;
+		private String myUseCode;
+		private String myUseDisplay;
+		private String myValue;
+
+		public String getLanguage() {
+			return myLanguage;
+		}
+
+		public ConceptDesignation setLanguage(String theLanguage) {
+			myLanguage = theLanguage;
+			return this;
+		}
+
+		public String getUseSystem() {
+			return myUseSystem;
+		}
+
+		public ConceptDesignation setUseSystem(String theUseSystem) {
+			myUseSystem = theUseSystem;
+			return this;
+		}
+
+		public String getUseCode() {
+			return myUseCode;
+		}
+
+		public ConceptDesignation setUseCode(String theUseCode) {
+			myUseCode = theUseCode;
+			return this;
+		}
+
+		public String getUseDisplay() {
+			return myUseDisplay;
+		}
+
+		public ConceptDesignation setUseDisplay(String theUseDisplay) {
+			myUseDisplay = theUseDisplay;
+			return this;
+		}
+
+		public String getValue() {
+			return myValue;
+		}
+
+		public ConceptDesignation setValue(String theValue) {
+			myValue = theValue;
+			return this;
+		}
+	}
+
 	abstract class BaseConceptProperty {
 		private final String myPropertyName;
 
@@ -165,7 +239,7 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 		}
 	}
 
-	class CodeValidationResult<CDCT, IST> {
+	abstract class CodeValidationResult<CDCT, IST> {
 		private CDCT myDefinition;
 		private String myMessage;
 		private IST mySeverity;
@@ -228,6 +302,190 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 			return myDefinition != null;
 		}
 
+		public LookupCodeResult asLookupCodeResult(String theSearchedForSystem, String theSearchedForCode) {
+			LookupCodeResult retVal = new LookupCodeResult();
+			retVal.setSearchedForSystem(theSearchedForSystem);
+			retVal.setSearchedForCode(theSearchedForCode);
+			if (isOk()) {
+				retVal.setFound(true);
+				retVal.setCodeDisplay(getDisplay());
+				retVal.setCodeSystemDisplayName(getCodeSystemName());
+				retVal.setCodeSystemVersion(getCodeSystemVersion());
+			}
+			return retVal;
+		}
+
+		protected abstract String getDisplay();
+
+	}
+
+	class LookupCodeResult {
+
+		private String myCodeDisplay;
+		private boolean myCodeIsAbstract;
+		private String myCodeSystemDisplayName;
+		private String myCodeSystemVersion;
+		private boolean myFound;
+		private String mySearchedForCode;
+		private String mySearchedForSystem;
+		private List<IContextValidationSupport.BaseConceptProperty> myProperties;
+		private List<ConceptDesignation> myDesignations;
+
+		/**
+		 * Constructor
+		 */
+		public LookupCodeResult() {
+			super();
+		}
+
+		public List<BaseConceptProperty> getProperties() {
+			if (myProperties == null) {
+				myProperties = new ArrayList<>();
+			}
+			return myProperties;
+		}
+
+		public void setProperties(List<IContextValidationSupport.BaseConceptProperty> theProperties) {
+			myProperties = theProperties;
+		}
+
+		@Nonnull
+		public List<ConceptDesignation> getDesignations() {
+			if (myDesignations == null) {
+				myDesignations = new ArrayList<>();
+			}
+			return myDesignations;
+		}
+
+		public String getCodeDisplay() {
+			return myCodeDisplay;
+		}
+
+		public void setCodeDisplay(String theCodeDisplay) {
+			myCodeDisplay = theCodeDisplay;
+		}
+
+		public String getCodeSystemDisplayName() {
+			return myCodeSystemDisplayName;
+		}
+
+		public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+			myCodeSystemDisplayName = theCodeSystemDisplayName;
+		}
+
+		public String getCodeSystemVersion() {
+			return myCodeSystemVersion;
+		}
+
+		public void setCodeSystemVersion(String theCodeSystemVersion) {
+			myCodeSystemVersion = theCodeSystemVersion;
+		}
+
+		public String getSearchedForCode() {
+			return mySearchedForCode;
+		}
+
+		public LookupCodeResult setSearchedForCode(String theSearchedForCode) {
+			mySearchedForCode = theSearchedForCode;
+			return this;
+		}
+
+		public String getSearchedForSystem() {
+			return mySearchedForSystem;
+		}
+
+		public LookupCodeResult setSearchedForSystem(String theSearchedForSystem) {
+			mySearchedForSystem = theSearchedForSystem;
+			return this;
+		}
+
+		public boolean isCodeIsAbstract() {
+			return myCodeIsAbstract;
+		}
+
+		public void setCodeIsAbstract(boolean theCodeIsAbstract) {
+			myCodeIsAbstract = theCodeIsAbstract;
+		}
+
+		public boolean isFound() {
+			return myFound;
+		}
+
+		public LookupCodeResult setFound(boolean theFound) {
+			myFound = theFound;
+			return this;
+		}
+
+		public void throwNotFoundIfAppropriate() {
+			if (isFound() == false) {
+				throw new ResourceNotFoundException("Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
+			}
+		}
+
+		public IBaseParameters toParameters(FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+			if (isNotBlank(getCodeSystemDisplayName())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "name", getCodeSystemDisplayName());
+			}
+			if (isNotBlank(getCodeSystemVersion())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, "version", getCodeSystemVersion());
+			}
+			ParametersUtil.addParameterToParametersString(theContext, retVal, "display", getCodeDisplay());
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, "abstract", isCodeIsAbstract());
+
+			if (myProperties != null) {
+
+				Set<String> properties = Collections.emptySet();
+				if (theProperties != null) {
+					properties = theProperties
+						.stream()
+						.map(IPrimitiveType::getValueAsString)
+						.collect(Collectors.toSet());
+				}
+
+				for (IContextValidationSupport.BaseConceptProperty next : myProperties) {
+
+					if (!properties.isEmpty()) {
+						if (!properties.contains(next.getPropertyName())) {
+							continue;
+						}
+					}
+
+					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
+					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+
+					if (next instanceof IContextValidationSupport.StringConceptProperty) {
+						IContextValidationSupport.StringConceptProperty prop = (IContextValidationSupport.StringConceptProperty) next;
+						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
+					} else if (next instanceof IContextValidationSupport.CodingConceptProperty) {
+						IContextValidationSupport.CodingConceptProperty prop = (IContextValidationSupport.CodingConceptProperty) next;
+						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
+					} else {
+						throw new IllegalStateException("Don't know how to handle " + next.getClass());
+					}
+				}
+			}
+
+			if (myDesignations != null) {
+				for (ConceptDesignation next : myDesignations) {
+
+					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
+					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
+					ParametersUtil.addPartCoding(theContext, property, "use", next.getUseSystem(), next.getUseCode(), next.getUseDisplay());
+					ParametersUtil.addPartString(theContext, property, "value", next.getValue());
+				}
+			}
+
+			return retVal;
+		}
+
+		public static LookupCodeResult notFound(String theSearchedForSystem, String theSearchedForCode) {
+			return new LookupCodeResult()
+				.setFound(false)
+				.setSearchedForSystem(theSearchedForSystem)
+				.setSearchedForCode(theSearchedForCode);
+		}
 	}
 
 }

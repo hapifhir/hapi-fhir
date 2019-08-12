@@ -60,7 +60,7 @@ import com.google.common.base.Charsets;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -86,7 +86,6 @@ import ca.uhn.fhir.model.dstu2.resource.Location;
 import ca.uhn.fhir.model.dstu2.resource.Medication;
 import ca.uhn.fhir.model.dstu2.resource.MedicationAdministration;
 import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
@@ -1037,11 +1036,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		obs1.getDevice().setReference(devId1);
 		IIdType obsId1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
 
+		IIdType obsId2;
 		Observation obs2 = new Observation();
 		obs2.getSubject().setReference(ptId1);
 		obs2.getCode().addCoding().setCode("CODE2");
 		obs2.setValue(new StringDt("obsvalue2"));
-		IIdType obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
+		obsId2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		Observation obs3 = new Observation();
 		obs3.getSubject().setReference(ptId2);
@@ -1057,17 +1057,15 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
 
-		//@formatter:off
 		Parameters response = ourClient
 			.operation()
 			.onInstance(ptId1)
 			.named("everything")
 			.withParameter(Parameters.class, Constants.PARAM_CONTENT, new StringDt("obsvalue1"))
 			.execute();
-		//@formatter:on
 
 		actual = toUnqualifiedVersionlessIds((ca.uhn.fhir.model.dstu2.resource.Bundle) response.getParameter().get(0).getResource());
-		assertThat(actual, containsInAnyOrder(ptId1, obsId1, devId1));
+		assertThat(actual.toString(), actual, containsInAnyOrder(ptId1, obsId1, devId1));
 
 	}
 
@@ -1637,9 +1635,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
 		assertEquals(1, response.getEntry().size());
+//		assertEquals(21, response.getTotal().intValue());
+//		assertEquals(null, response.getLink("next"));
+
+		// Again
+
+		response = ourClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
+
+		assertEquals(1, response.getEntry().size());
 		assertEquals(21, response.getTotal().intValue());
 		assertEquals(null, response.getLink("next"));
-
 	}
 
 	@Test
@@ -1687,7 +1692,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.setName("content")
 			.setResource(bundle);
 		try {
-			ourClient.operation().onType(MessageHeader.class).named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
+			ourClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
 			fail();
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage(), containsString("This operation is not yet implemented on this server"));
@@ -2087,7 +2092,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IOUtils.closeQuietly(response.getEntity().getContent());
 		ourLog.info(resp);
 		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirCtx.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
-		matches = bundle.getTotal();
+		matches = bundle.getEntry().size();
 
 		assertThat(matches, greaterThan(0));
 	}
@@ -2834,7 +2839,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirCtx.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		HttpPost post = new HttpPost(ourServerBase + "/Patient/123/$validate");
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);

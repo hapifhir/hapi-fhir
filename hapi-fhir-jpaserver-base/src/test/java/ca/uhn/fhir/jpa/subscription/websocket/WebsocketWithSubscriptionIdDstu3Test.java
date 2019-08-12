@@ -52,6 +52,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -65,6 +66,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 		myWebSocketClient.stop();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -107,7 +109,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 		mySocketImplementation = new SocketImplementation(mySubscriptionId, EncodingEnum.JSON);
 
 		myWebSocketClient.start();
-		URI echoUri = new URI("ws://localhost:" + ourPort + "/websocket");
+		URI echoUri = new URI("ws://localhost:" + ourPort + myModelConfig.getWebsocketContextPath());
 		ClientUpgradeRequest request = new ClientUpgradeRequest();
 		ourLog.info("Connecting to : {}", echoUri);
 		Future<Session> connection = myWebSocketClient.connect(mySocketImplementation, echoUri, request);
@@ -117,7 +119,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void createObservation() throws Exception {
+	public void createObservation() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
@@ -141,7 +143,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void createObservationThatDoesNotMatch() throws Exception {
+	public void createObservationThatDoesNotMatch() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.interceptor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,12 +33,15 @@ import java.util.Objects;
 
 /**
  * This interceptor adds arbitrary header values to requests made by the client.
+ *
+ * This is now also possible directly on the Fluent Client API by calling
+ * {@link ca.uhn.fhir.rest.gclient.IClientExecutable#withAdditionalHeader(String, String)}
  */
 public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	private final Map<String, List<String>> additionalHttpHeaders = new HashMap<>();
 
 	public AdditionalRequestHeadersInterceptor() {
-		this(new HashMap<String, List<String>>());
+		this(new HashMap<>());
 	}
 
 	public AdditionalRequestHeadersInterceptor(Map<String, List<String>> additionalHttpHeaders) {
@@ -84,7 +87,7 @@ public class AdditionalRequestHeadersInterceptor implements IClientInterceptor {
 	 */
 	private List<String> getHeaderValues(String headerName) {
 		if (additionalHttpHeaders.get(headerName) == null) {
-			additionalHttpHeaders.put(headerName, new ArrayList<String>());
+			additionalHttpHeaders.put(headerName, new ArrayList<>());
 		}
 		return additionalHttpHeaders.get(headerName);
 	}

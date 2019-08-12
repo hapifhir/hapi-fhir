@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.jpa.model.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -60,6 +61,13 @@ public class SubscriptionRegistry {
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionRegistry() {
+		super();
+	}
+
 	public ActiveSubscription get(String theIdPart) {
 		return myActiveSubscriptionCache.get(theIdPart);
 	}
@@ -94,13 +102,16 @@ public class SubscriptionRegistry {
 			deliveryHandler = Optional.empty();
 		}
 
+		ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
 		deliveryHandler.ifPresent(activeSubscription::register);
 
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
-		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, canonicalized);
+		HookParams params = new HookParams()
+			.add(CanonicalSubscription.class, canonicalized);
+		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
 
 		return canonicalized;
 	}
@@ -108,11 +119,16 @@ public class SubscriptionRegistry {
 	public void unregisterSubscription(IIdType theId) {
 		Validate.notNull(theId);
 		String subscriptionId = theId.getIdPart();
+
+		ourLog.info("Unregistering active subscription {}", theId.toUnqualified().getValue());
 		myActiveSubscriptionCache.remove(subscriptionId);
 	}
 
 	@PreDestroy
 	public void unregisterAllSubscriptions() {
+		// Once to set flag
+		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
+		// Twice to remove
 		unregisterAllSubscriptionsNotInCollection(Collections.emptyList());
 	}
 
@@ -130,9 +146,12 @@ public class SubscriptionRegistry {
 				return false;
 			}
 			ourLog.info("Updating already-registered active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+			if (channelTypeSame(existingSubscription.get(), newSubscription)) {
+				ourLog.info("Channel type is same.  Updating active subscription and re-using existing channel and handlers.");
+				updateSubscription(theSubscription);
+				return true;
+			}
 			unregisterSubscription(theSubscription.getIdElement());
-		} else {
-			ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
 			registerSubscription(theSubscription.getIdElement(), theSubscription);
@@ -140,7 +159,25 @@ public class SubscriptionRegistry {
 		} else {
 			return false;
 		}
+	}
 
+	private void updateSubscription(IBaseResource theSubscription) {
+		IIdType theId = theSubscription.getIdElement();
+		Validate.notNull(theId);
+		Validate.notBlank(theId.getIdPart());
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.get(theId.getIdPart());
+		Validate.notNull(activeSubscription);
+		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
+		activeSubscription.setSubscription(canonicalized);
+
+		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
+		HookParams params = new HookParams()
+			.add(CanonicalSubscription.class, canonicalized);
+		myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED, params);
+	}
+
+	private boolean channelTypeSame(CanonicalSubscription theExistingSubscription, CanonicalSubscription theNewSubscription) {
+		return theExistingSubscription.getChannelType().equals(theNewSubscription.getChannelType());
 	}
 
 	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {

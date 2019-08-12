@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -165,14 +165,14 @@ public class ResourceLink extends BaseResourceIndex {
 		Validate.isTrue(theTargetResourceUrl.hasBaseUrl());
 		Validate.isTrue(theTargetResourceUrl.hasResourceType());
 
-		if (theTargetResourceUrl.hasIdPart()) {
+//		if (theTargetResourceUrl.hasIdPart()) {
 			// do nothing
-		} else {
+//		} else {
 			// Must have set an url like http://example.org/something
 			// We treat 'something' as the resource type because of fix for #659. Prior to #659 fix, 'something' was
 			// treated as the id and 'example.org' was treated as the resource type
 			// TODO: log a warning?
-		}
+//		}
 
 		myTargetResourceType = theTargetResourceUrl.getResourceType();
 		myTargetResourceUrl = theTargetResourceUrl.getValue();
