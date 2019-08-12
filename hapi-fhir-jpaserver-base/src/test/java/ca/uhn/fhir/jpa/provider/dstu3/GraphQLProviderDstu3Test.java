@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider.r4;
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -6,7 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,8 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
 
-public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
-	private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderR4Test.class);
+public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
+	private Logger ourLog = LoggerFactory.getLogger(GraphQLProviderDstu3Test.class);
 	private IIdType myPatientId0;
 
 	@Test
@@ -67,6 +67,7 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"  }]\n" +
 				"}"), TestUtil.stripReturns(resp));
 		}
+
 	}
 
 	private void initTestPatients() {

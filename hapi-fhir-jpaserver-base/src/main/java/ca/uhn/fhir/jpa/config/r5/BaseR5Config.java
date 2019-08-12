@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r5.TransactionProcessorVersionAdapterR5;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR5;
@@ -21,11 +21,9 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r5.hapi.rest.server.GraphQLProvider;
 import org.hl7.fhir.r5.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.utils.GraphQLEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
@@ -85,17 +83,11 @@ public class BaseR5Config extends BaseConfig {
 		return new TransactionProcessor<>();
 	}
 
-//	@Bean(name = GRAPHQL_PROVIDER_NAME)
-//	@Lazy
-//	public GraphQLProvider graphQLProvider() {
-//		return new GraphQLProvider(fhirContextR5(), validationSupportChainR5(), graphqlStorageServices());
-//	}
-//
-//	@Bean
-//	@Lazy
-//	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
-//		return new JpaStorageServices();
-//	}
+	@Bean(name = GRAPHQL_PROVIDER_NAME)
+	@Lazy
+	public GraphQLProvider graphQLProvider() {
+		return new GraphQLProvider(fhirContextR5(), validationSupportChainR5(), graphqlStorageServices());
+	}
 
 	@Bean(name = "myInstanceValidatorR5")
 	@Lazy
