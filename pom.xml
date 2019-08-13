@@ -543,6 +543,10 @@
 			<id>anthonys123</id>
 			<name>Anthony Sute</name>
 		</developer>
+		<developer>
+			<id>nickrobison-usds</id>
+			<name>Nick Robison</name>
+		</developer>
 	</developers>
 
 	<licenses>

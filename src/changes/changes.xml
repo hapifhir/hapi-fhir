@@ -439,6 +439,10 @@
 				in Resource.meta.versionId is now used if a version isn't found in the resource
 				ID itself. Thanks to Stig Døssing for the pull request!
 			</action>
+			<action type="fix" issue="1375">
+				An example datatype was corrected in the DSTU2 Identifier datatype
+				StructureDefinition. Thanks to Nick Robison for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
