@@ -400,6 +400,12 @@ public enum Pointcut {
 	 * <li>
 	 * java.lang.String - The GraphQL response
 	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * </li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -417,7 +423,9 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"java.lang.String",
-		"java.lang.String"
+		"java.lang.String",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
 	),
 
 

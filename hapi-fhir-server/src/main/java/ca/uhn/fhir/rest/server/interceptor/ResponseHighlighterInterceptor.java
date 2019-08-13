@@ -268,7 +268,7 @@ public class ResponseHighlighterInterceptor {
 		responseDetails.setResponseCode(theException.getStatusCode());
 
 		BaseResourceReturningMethodBinding.callOutgoingFailureOperationOutcomeHook(theRequestDetails, oo);
-		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), theServletRequest, responseDetails.getResponseCode());
+		streamResponse(theRequestDetails, theServletResponse, responseDetails.getResponseResource(), null, theServletRequest, responseDetails.getResponseCode());
 
 		return false;
 	}
@@ -313,10 +313,39 @@ public class ResponseHighlighterInterceptor {
 		return this;
 	}
 
+	@Hook(value = Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
+	public boolean outgoingGraphqlResponse(RequestDetails theRequestDetails, String theRequest, String theResponse, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
+		throws AuthenticationException {
+
+		/*
+		 * Return true here so that we still fire SERVER_OUTGOING_GRAPHQL_RESPONSE!
+		 */
+
+		if (handleOutgoingResponse(theRequestDetails, null, theServletRequest, theServletResponse, theResponse, null)) {
+			return true;
+		}
+
+		theRequestDetails.setAttribute("ResponseHighlighterInterceptorHandled", Boolean.TRUE);
+
+		return true;
+	}
+
 	@Hook(value = Pointcut.SERVER_OUTGOING_RESPONSE, order = InterceptorOrders.RESPONSE_HIGHLIGHTER_INTERCEPTOR)
 	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse)
 		throws AuthenticationException {
 
+		if (!Boolean.TRUE.equals(theRequestDetails.getAttribute("ResponseHighlighterInterceptorHandled"))) {
+			String graphqlResponse = null;
+			IBaseResource resourceResponse = theResponseObject.getResponseResource();
+			if (handleOutgoingResponse(theRequestDetails, theResponseObject, theServletRequest, theServletResponse, graphqlResponse, resourceResponse)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean handleOutgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseObject, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse, String theGraphqlResponse, IBaseResource theResourceResponse) {
 		/*
 		 * Request for _raw
 		 */
@@ -380,12 +409,11 @@ public class ResponseHighlighterInterceptor {
 		/*
 		 * Not binary
 		 */
-		if (!force && (theResponseObject.getResponseResource() instanceof IBaseBinary)) {
+		if (!force && theResponseObject != null && (theResponseObject.getResponseResource() instanceof IBaseBinary)) {
 			return true;
 		}
 
-		streamResponse(theRequestDetails, theServletResponse, theResponseObject.getResponseResource(), theServletRequest, 200);
-
+		streamResponse(theRequestDetails, theServletResponse, theResourceResponse, theGraphqlResponse, theServletRequest, 200);
 		return false;
 	}
 
@@ -407,39 +435,50 @@ public class ResponseHighlighterInterceptor {
 		}
 	}
 
-	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource theResource, ServletRequest theServletRequest, int theStatusCode) {
+	private void streamResponse(RequestDetails theRequestDetails, HttpServletResponse theServletResponse, IBaseResource theResource, String theGraphqlResponse, ServletRequest theServletRequest, int theStatusCode) {
+		EncodingEnum encoding;
+		String encoded;
+		Map<String, String[]> parameters = theRequestDetails.getParameters();
+
+		if (isNotBlank(theGraphqlResponse)) {
+
+			encoded = theGraphqlResponse;
+			encoding = EncodingEnum.JSON;
+
+		} else {
+
+			IParser p;
+			if (parameters.containsKey(Constants.PARAM_FORMAT)) {
+				FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
+				p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
+			} else {
+				EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
+				p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
+				RestfulServerUtils.configureResponseParser(theRequestDetails, p);
+			}
+
+			// This interceptor defaults to pretty printing unless the user
+			// has specifically requested us not to
+			boolean prettyPrintResponse = true;
+			String[] prettyParams = parameters.get(Constants.PARAM_PRETTY);
+			if (prettyParams != null && prettyParams.length > 0) {
+				if (Constants.PARAM_PRETTY_VALUE_FALSE.equals(prettyParams[0])) {
+					prettyPrintResponse = false;
+				}
+			}
+			if (prettyPrintResponse) {
+				p.setPrettyPrint(true);
+			}
+
+			encoding = p.getEncoding();
+			encoded = p.encodeResourceToString(theResource);
+
+		}
 
 		if (theRequestDetails.getServer() instanceof RestfulServer) {
 			RestfulServer rs = (RestfulServer) theRequestDetails.getServer();
 			rs.addHeadersToResponse(theServletResponse);
 		}
-
-		IParser p;
-		Map<String, String[]> parameters = theRequestDetails.getParameters();
-		if (parameters.containsKey(Constants.PARAM_FORMAT)) {
-			FhirVersionEnum forVersion = theResource.getStructureFhirVersionEnum();
-			p = RestfulServerUtils.getNewParser(theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
-		} else {
-			EncodingEnum defaultResponseEncoding = theRequestDetails.getServer().getDefaultResponseEncoding();
-			p = defaultResponseEncoding.newParser(theRequestDetails.getServer().getFhirContext());
-			RestfulServerUtils.configureResponseParser(theRequestDetails, p);
-		}
-
-		// This interceptor defaults to pretty printing unless the user
-		// has specifically requested us not to
-		boolean prettyPrintResponse = true;
-		String[] prettyParams = parameters.get(Constants.PARAM_PRETTY);
-		if (prettyParams != null && prettyParams.length > 0) {
-			if (Constants.PARAM_PRETTY_VALUE_FALSE.equals(prettyParams[0])) {
-				prettyPrintResponse = false;
-			}
-		}
-		if (prettyPrintResponse) {
-			p.setPrettyPrint(true);
-		}
-
-		EncodingEnum encoding = p.getEncoding();
-		String encoded = p.encodeResourceToString(theResource);
 
 		try {
 
@@ -545,27 +584,30 @@ public class ResponseHighlighterInterceptor {
 			outputBuffer.append("	<body>");
 
 			outputBuffer.append("<p>");
-			outputBuffer.append("This result is being rendered in HTML for easy viewing. ");
-			outputBuffer.append("You may access this content as ");
 
-			outputBuffer.append("<a href=\"");
-			outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
-			outputBuffer.append("\">Raw JSON</a> or ");
+			if (isBlank(theGraphqlResponse)) {
+				outputBuffer.append("This result is being rendered in HTML for easy viewing. ");
+				outputBuffer.append("You may access this content as ");
 
-			outputBuffer.append("<a href=\"");
-			outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
-			outputBuffer.append("\">Raw XML</a>, ");
+				outputBuffer.append("<a href=\"");
+				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_JSON));
+				outputBuffer.append("\">Raw JSON</a> or ");
 
-			outputBuffer.append(" or view this content in ");
+				outputBuffer.append("<a href=\"");
+				outputBuffer.append(createLinkHref(parameters, Constants.FORMAT_XML));
+				outputBuffer.append("\">Raw XML</a>, ");
 
-			outputBuffer.append("<a href=\"");
-			outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
-			outputBuffer.append("\">HTML JSON</a> ");
+				outputBuffer.append(" or view this content in ");
 
-			outputBuffer.append("or ");
-			outputBuffer.append("<a href=\"");
-			outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
-			outputBuffer.append("\">HTML XML</a>.");
+				outputBuffer.append("<a href=\"");
+				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_JSON));
+				outputBuffer.append("\">HTML JSON</a> ");
+
+				outputBuffer.append("or ");
+				outputBuffer.append("<a href=\"");
+				outputBuffer.append(createLinkHref(parameters, Constants.FORMATS_HTML_XML));
+				outputBuffer.append("\">HTML XML</a>.");
+			}
 
 			Date startTime = (Date) theServletRequest.getAttribute(RestfulServer.REQUEST_START_TIME);
 			if (startTime != null) {

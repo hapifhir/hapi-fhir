@@ -106,7 +106,9 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(String.class, theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY)[0])
-			.add(String.class, responseString);
+			.add(String.class, responseString)
+			.add(HttpServletRequest.class, servletRequest)
+			.add(HttpServletResponse.class, servletResponse);
 		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
 			return null;
 		}
