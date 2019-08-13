@@ -21,16 +21,19 @@ package ca.uhn.fhir.rest.server.method;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.server.RestfulServer;
-import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 import javax.annotation.Nonnull;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Method;
@@ -63,7 +66,7 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
-		if ("$graphql".equals(theRequest.getOperation())) {
+		if (Constants.OPERATION_NAME_GRAPHQL.equals(theRequest.getOperation())) {
 			return true;
 		}
 
@@ -85,11 +88,22 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 		String charset = Constants.CHARSET_NAME_UTF8;
 		boolean respondGzip = theRequest.isRespondGzip();
 
-		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
-
 		String responseString = (String) response;
-		writer.write(responseString);
-		writer.close();
+
+		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
+		HookParams params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(String.class, theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY)[0])
+			.add(String.class, responseString);
+		if (theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
+
+			// Write the response
+			Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
+			writer.write(responseString);
+			writer.close();
+
+		}
 
 		return null;
 	}

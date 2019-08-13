@@ -6,6 +6,15 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
+		<!--
+		<release version="4.1.0" date="TBD" description="Igloo">
+		<action type="add" issue="1321">
+			Support has been added for RDF encoding and parsing in the
+			<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
+			format. Thanks to Raul Estrada for the pull request!
+		</action>
+		</release>
+		-->
 		<release version="4.0.0" date="TBD" description="Igloo">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
@@ -134,11 +143,6 @@
 				<li>
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
-			</action>
-			<action type="add" issue="1321">
-				Support has been added for RDF encoding and parsing in the
-				<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
-				format. Thanks to Raul Estrada for the pull request!
 			</action>
 			<action type="add">
 				The $expunge global everything operation has been refactored to do deletes

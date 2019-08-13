@@ -49,7 +49,9 @@ public enum EncodingEnum {
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newRDFParser();
 		}
-	};
+	},
+
+	;
 
 	/**
 	 * "json"

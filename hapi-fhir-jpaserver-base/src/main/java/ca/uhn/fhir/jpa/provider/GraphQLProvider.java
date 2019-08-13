@@ -109,7 +109,7 @@ public class GraphQLProvider {
 	}
 
 	@GraphQL
-	public String processGraphQlRequet(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+	public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
 
 		IGraphQLEngine engine = engineFactory.get();
 		engine.setAppInfo(theRequestDetails);
