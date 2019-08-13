@@ -434,6 +434,11 @@
 				When using the ResponseHighlighterInterceptor, some invalid requests that would normally generate an HTTP
 				400 response (e.g. an invalid _elements value) would cause an HTTP 500 crash.
 			</action>
+			<action type="add" issue="1388">
+				When performing a read-if-newer operation on a plain server, the resource ID
+				in Resource.meta.versionId is now used if a version isn't found in the resource
+				ID itself. Thanks to Stig Døssing for the pull request!
+			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
 			<action type="fix">
