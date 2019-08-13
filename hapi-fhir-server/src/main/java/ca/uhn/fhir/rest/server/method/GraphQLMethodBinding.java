@@ -29,8 +29,11 @@ import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
@@ -91,20 +94,40 @@ public class GraphQLMethodBinding extends BaseMethodBinding<String> {
 
 		String responseString = (String) response;
 
+		HttpServletRequest servletRequest=null;
+		HttpServletResponse servletResponse=null;
+		if (theRequest instanceof ServletRequestDetails) {
+			servletRequest = ((ServletRequestDetails) theRequest).getServletRequest();
+			servletResponse = ((ServletRequestDetails) theRequest).getServletResponse();
+		}
+
 		// Interceptor call: SERVER_OUTGOING_GRAPHQL_RESPONSE
 		HookParams params = new HookParams()
 			.add(RequestDetails.class, theRequest)
 			.addIfMatchesType(ServletRequestDetails.class, theRequest)
 			.add(String.class, theRequest.getParameters().get(Constants.PARAM_GRAPHQL_QUERY)[0])
 			.add(String.class, responseString);
-		if (theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
-
-			// Write the response
-			Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
-			writer.write(responseString);
-			writer.close();
-
+		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_GRAPHQL_RESPONSE, params)) {
+			return null;
 		}
+
+		// Interceptor call: SERVER_OUTGOING_RESPONSE
+		params = new HookParams()
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest)
+			.add(IBaseResource.class, null)
+			.add(ResponseDetails.class, new ResponseDetails())
+			.add(HttpServletRequest.class, servletRequest)
+			.add(HttpServletResponse.class, servletResponse);
+		if (!theRequest.getInterceptorBroadcaster().callHooks(Pointcut.SERVER_OUTGOING_RESPONSE, params)) {
+			return null;
+		}
+
+		// Write the response
+		Writer writer = theRequest.getResponse().getResponseWriter(statusCode, statusMessage, contentType, charset, respondGzip);
+		writer.write(responseString);
+		writer.close();
+
 
 		return null;
 	}
