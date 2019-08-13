@@ -400,9 +400,6 @@ public enum Pointcut {
 	 * <li>
 	 * java.lang.String - The GraphQL response
 	 * </li>
-	 * <li>
-	 * ca.uhn.fhir.rest.api.server.ResponseDetails - This object contains details about the response, including the contents. Hook methods may modify this object to change or replace the response.
-	 * </li>
 	 * </ul>
 	 * </p>
 	 * <p>
@@ -420,8 +417,7 @@ public enum Pointcut {
 		"ca.uhn.fhir.rest.api.server.RequestDetails",
 		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 		"java.lang.String",
-		"java.lang.String",
-		"ca.uhn.fhir.rest.api.server.ResponseDetails"
+		"java.lang.String"
 	),
 
 
