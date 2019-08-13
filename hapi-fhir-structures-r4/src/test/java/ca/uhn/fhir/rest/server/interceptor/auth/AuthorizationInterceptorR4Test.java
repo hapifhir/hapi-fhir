@@ -1938,7 +1938,7 @@ public class AuthorizationInterceptorR4Test {
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		assertFalse(ourHitMethod);
 
 	}
 
