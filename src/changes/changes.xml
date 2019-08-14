@@ -15,7 +15,7 @@
 		</action>
 		</release>
 		-->
-		<release version="4.0.0" date="TBD" description="Igloo">
+		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -96,10 +96,10 @@
 				]]>
 			</action>
 			<action type="add">
-				Support for the new R5 draft resources has been added. This support includes the client,
 				<![CDATA[
 				<b>New Feature</b>:
-				server, and JPA server. Note that these definitions will change as the R5 standard is 
+				Support for the new R5 draft resources has been added. This support includes the client,
+				server, and JPA server. Note that these definitions will change as the R5 standard is
 				modified until it is released, so use with caution!
 				]]>
 			</action>
@@ -130,6 +130,17 @@
 				queries for which no database indexes exist in the default configuration so it is disabled by
 				default. Thanks to Anthony Sute for the pull request and all of his support in what turned
 				out to be a lengthy merge!
+				]]>
+			</action>
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				A new interceptor called CascadingDeleteInterceptor has been added to the
+				JPA project. This interceptor allows deletes to cascade when a specific
+				URL parameter or header is added to the request. Cascading deletes
+				can also be controlled by a new flag in the AuthorizationIntereptor
+				RuleBuilder, in order to ensure that cascading deletes are only available
+				to users with sufficient permission.
 				]]>
 			</action>
 			<action type="add">
@@ -284,14 +295,6 @@
 				A BOM POM has been added to the HAPI FHIR distribution, allowing users to import
 				the HAPI FHIR library with all of its submodules automatically sharing the same
 				version. Thanks to Stig Døssing for the pull request!
-			</action>
-			<action type="add">
-				A new interceptor called CascadingDeleteInterceptor has been added to the
-				JPA project. This interceptor allows deletes to cascade when a specific
-				URL parameter or header is added to the request. Cascading deletes
-				can also be controlled by a new flag in the AuthorizationIntereptor
-				RuleBuilder, in order to ensure that cascading deletes are only available
-				to users with sufficient permission.
 			</action>
 			<action type="add">
 				AuthorizationInterceptor will now try to block delete operations sooner
