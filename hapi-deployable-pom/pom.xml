@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.0.0</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -240,6 +240,7 @@
 									<licenseName>apache_v2</licenseName>
 									<canUpdateDescription>true</canUpdateDescription>
 									<canUpdateCopyright>true</canUpdateCopyright>
+									<trimHeaderLine>true</trimHeaderLine>
 									<roots>
 										<root>src/main/java</root>
 									</roots>

@@ -32,7 +32,7 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.*;
@@ -204,7 +204,7 @@ public class FhirInstanceValidatorR4Test {
 		IWorkerContext worker = new HapiWorkerContext(ourCtx, theDefaultValSupport);
 		List<ValidationMessage> issues = new ArrayList<>();
 		ProfileUtilities profileUtilities = new ProfileUtilities(worker, issues, null);
-		profileUtilities.generateSnapshot(base, derived, "", "");
+		profileUtilities.generateSnapshot(base, derived, "", "", "");
 
 		return derived;
 	}
@@ -291,7 +291,8 @@ public class FhirInstanceValidatorR4Test {
 		// With BPs enabled
 		val = ourCtx.newValidator();
 		instanceModule = new FhirInstanceValidator(myDefaultValidationSupport);
-		instanceModule.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Error);
+		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Error;
+		instanceModule.setBestPracticeWarningLevel(level);
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
@@ -360,7 +361,7 @@ public class FhirInstanceValidatorR4Test {
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(48, errors.size());
+		assertEquals(45, errors.size());
 	}
 
 	@Test
@@ -978,8 +979,7 @@ public class FhirInstanceValidatorR4Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 1, errors.size());
-		assertEquals("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved", errors.get(0).getMessage());
+		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
 	}
 
 	@Test
@@ -1128,7 +1128,7 @@ public class FhirInstanceValidatorR4Test {
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
-		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
+		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
 			"Code http://example.com/foo/bar/bar was not validated because the code system is not present",
 			all.get(0).getMessage());

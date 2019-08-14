@@ -171,11 +171,11 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IIdType moId = myMedicationRequestDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -202,7 +202,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setEverythingMode(EverythingModeEnum.PATIENT_INSTANCE);
 		IPrimitiveType<Integer> count = new IntegerType(1000);
-		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, mySrd);
+		IBundleProvider everything = myPatientDao.patientInstanceEverything(mySrd.getServletRequest(), new IdType("Patient/A161443"), count, null, null, null, null, null, mySrd);
 
 		TreeSet<String> ids = new TreeSet<>(toUnqualifiedVersionlessIdValues(everything));
 		assertThat(ids, hasItem("List/A161444"));
@@ -1138,10 +1138,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";
 
-		int sleep = 100;
-		Thread.sleep(sleep);
-
 		DateTimeType beforeAny = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
+		TestUtil.sleepOneClick();
+
 		IIdType id1a;
 		{
 			Patient patient = new Patient();
@@ -1157,9 +1156,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 		DateTimeType beforeR2 = new DateTimeType(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 
 		IIdType id2;
 		{
@@ -1220,9 +1219,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
-	public void testSearchLastUpdatedParamWithComparator() throws InterruptedException {
+	public void testSearchLastUpdatedParamWithComparator() {
 		IIdType id0;
 		{
 			Patient patient = new Patient();
@@ -3215,12 +3213,12 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("_id", SortOrderEnum.ASC));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", id1, id2));
+		assertThat(ids, contains(id1, id2, "Patient/AA", "Patient/AB"));
 
 	}
 
 	@Test
-	public void testSortOnLastUpdated() throws Exception {
+	public void testSortOnLastUpdated() {
 		// Numeric ID
 		Patient p01 = new Patient();
 		p01.setActive(true);
@@ -3371,13 +3369,13 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec(Patient.SP_FAMILY, SortOrderEnum.ASC).setChain(new SortSpec(Patient.SP_GIVEN, SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
-		assertThat(ids, contains(pid2, pid4, pid5, pid3, pid1));
+		assertThat(ids.toString(), ids, contains(pid1, pid2, pid3, pid4, pid5));
 		assertEquals(5, ids.size());
 
 	}
 
 	@Test
-	public void testSortOnSparselyPopulatedSearchParameter() throws Exception {
+	public void testSortOnSparselyPopulatedSearchParameter() {
 		Patient pCA = new Patient();
 		pCA.setId("CA");
 		pCA.setActive(false);
@@ -3421,19 +3419,19 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		map.setSort(new SortSpec("gender"));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
-		assertThat(ids, containsInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		assertThat(ids.toString(), ids, containsInAnyOrder("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
 
 		map = new SearchParameterMap();
 		map.setSort(new SortSpec("gender").setChain(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC))));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		ourLog.info("IDS: {}", ids);
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB", "Patient/CA"));
+		assertThat(ids.toString(), ids, contains("Patient/CA", "Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
 
 		map = new SearchParameterMap();
 		map.add(Patient.SP_ACTIVE, new TokenParam(null, "true"));
 		map.setSort(new SortSpec("family", SortOrderEnum.ASC).setChain(new SortSpec("given", SortOrderEnum.ASC)));
 		ids = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
-		assertThat(ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
+		assertThat(ids.toString(), ids, contains("Patient/AA", "Patient/AB", "Patient/BA", "Patient/BB"));
 	}
 
 	private String toStringMultiline(List<?> theResults) {

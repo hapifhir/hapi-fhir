@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.provider;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ import org.springframework.beans.factory.annotation.Required;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
+public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider implements IJpaSystemProvider {
 
 	public static final String MARK_ALL_RESOURCES_FOR_REINDEXING = "$mark-all-resources-for-reindexing";
 	public static final String PERFORM_REINDEXING_PASS = "$perform-reindexing-pass";
@@ -55,9 +55,9 @@ public class BaseJpaSystemProvider<T, MT> extends BaseJpaProvider {
 		return myResourceReindexingSvc;
 	}
 
-	protected Parameters doExpunge(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+	protected Parameters doExpunge(IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequestDetails) {
 		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
-		ExpungeOutcome outcome = getDao().expunge(options);
+		ExpungeOutcome outcome = getDao().expunge(options, theRequestDetails);
 		return createExpungeResponse(outcome);
 	}
 

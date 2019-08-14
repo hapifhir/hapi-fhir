@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -160,6 +161,7 @@ public class CorsInterceptorDstu3Test {
 
 		RestfulServer restServer = new RestfulServer(ourCtx);
 		restServer.setResourceProviders(new DummyPatientResourceProvider());
+		restServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		ServletHolder servletHolder = new ServletHolder(restServer);
 

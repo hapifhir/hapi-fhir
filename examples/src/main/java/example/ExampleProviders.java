@@ -48,11 +48,11 @@ public class ExampleServlet extends ca.uhn.fhir.rest.server.RestfulServer {
      */
     List<Object> plainProviders=new ArrayList<Object>();
     plainProviders.add(new PlainProvider());
-    setPlainProviders(plainProviders);
+    registerProviders(plainProviders);
     
     List<IResourceProvider> resourceProviders = new ArrayList<IResourceProvider>();
     // ...add some resource providers...
-    setResourceProviders(resourceProviders);
+	  registerProviders(resourceProviders);
   }
 	
 }

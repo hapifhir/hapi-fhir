@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -146,6 +146,11 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 */
+	private boolean myPreExpandValueSetsExperimental = false;
+	private boolean myFilterParameterEnabled = false;
 
 	/**
 	 * Constructor
@@ -969,6 +974,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -982,6 +988,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 * @see CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
@@ -1597,6 +1604,56 @@ public class DaoConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSetsExperimental() {
+		return myPreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * future optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code false}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
+		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public boolean isFilterParameterEnabled() {
+		return myFilterParameterEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public void setFilterParameterEnabled(boolean theFilterParameterEnabled) {
+		myFilterParameterEnabled = theFilterParameterEnabled;
 	}
 
 	public enum IndexEnabledEnum {

@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -152,7 +154,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 
 		rs.init(createServletConfig());
 
-		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest());
+		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -178,7 +180,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		/*
 		 * Check the operation definitions themselves
 		 */
-		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"));
+		OperationDefinition andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist"), createRequestDetails(rs));
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -194,7 +196,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"));
+		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -210,7 +212,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 
-		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"));
+		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -226,7 +228,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		));
 		//@formatter:on
 		
-		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"));
+		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient--orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
@@ -487,5 +489,12 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		}
 
 	}
+
+	private RequestDetails createRequestDetails(RestfulServer theServer) {
+		ServletRequestDetails retVal = new ServletRequestDetails(null);
+		retVal.setServer(theServer);
+		return retVal;
+	}
+
 
 }

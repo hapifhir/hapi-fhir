@@ -14,7 +14,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.instance.model.Patient;
+import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,7 +95,7 @@ public class ReadHl7OrgDstu2Test {
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Read
-		public Patient read(@IdParam org.hl7.fhir.instance.model.IdType theId) {
+		public Patient read(@IdParam org.hl7.fhir.dstu2.model.IdType theId) {
 			Patient p1 = new Patient();
 			p1.setId("p1ReadId");
 			p1.addIdentifier().setValue("p1ReadValue");

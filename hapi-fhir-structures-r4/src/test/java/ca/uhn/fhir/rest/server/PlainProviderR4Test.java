@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -55,6 +56,7 @@ public class PlainProviderR4Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder();
 		myRestfulServer = new RestfulServer(ourCtx);
+		myRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		servletHolder.setServlet(myRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
 		myServer.setHandler(proxyHandler);

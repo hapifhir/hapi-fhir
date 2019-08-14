@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -282,6 +283,7 @@ public class OperationGenericServerR4Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		servlet.setPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2));
 

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -15,46 +14,28 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TerminologyLoaderSvcLoincTest {
+public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
 	private TerminologyLoaderSvcImpl mySvc;
 
 	@Mock
 	private IHapiTerminologySvc myTermSvc;
-
-	@Mock
-	private IHapiTerminologySvcDstu3 myTermSvcDstu3;
-
-	@Captor
-	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
-	@Mock
-	private RequestDetails details;
-	@Captor
-	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor;
-	@Captor
-	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor;
+
 	private ZipCollectionBuilder myFiles;
 
 
@@ -62,33 +43,8 @@ public class TerminologyLoaderSvcLoincTest {
 	public void before() {
 		mySvc = new TerminologyLoaderSvcImpl();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
-		mySvc.setTermSvcDstu3ForUnitTest(myTermSvcDstu3);
 
 		myFiles = new ZipCollectionBuilder();
-	}
-
-	private Map<String, ConceptMap> extractConceptMaps() {
-		Map<String, ConceptMap> conceptMaps = new HashMap<>();
-		for (ConceptMap next : myConceptMapCaptor.getAllValues().get(0)) {
-			conceptMaps.put(next.getId(), next);
-		}
-		return conceptMaps;
-	}
-
-	private Map<String, TermConcept> extractConcepts() {
-		Map<String, TermConcept> concepts = new HashMap<>();
-		for (TermConcept next : myCsvCaptor.getValue().getConcepts()) {
-			concepts.put(next.getCode(), next);
-		}
-		return concepts;
-	}
-
-	private Map<String, ValueSet> extractValueSets() {
-		Map<String, ValueSet> valueSets = new HashMap<>();
-		for (ValueSet next : myValueSetsCaptor.getValue()) {
-			valueSets.put(next.getId(), next);
-		}
-		return valueSets;
 	}
 
 	@Test
@@ -96,9 +52,9 @@ public class TerminologyLoaderSvcLoincTest {
 		addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), details);
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvcDstu3, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -347,9 +303,9 @@ public class TerminologyLoaderSvcLoincTest {
 		addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), details);
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvcDstu3, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -371,7 +327,7 @@ public class TerminologyLoaderSvcLoincTest {
 
 		// Actually do the load
 		try {
-			mySvc.loadLoinc(myFiles.getFiles(), details);
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));

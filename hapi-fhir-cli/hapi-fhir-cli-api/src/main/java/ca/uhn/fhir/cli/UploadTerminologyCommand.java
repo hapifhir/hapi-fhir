@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,11 +20,10 @@ package ca.uhn.fhir.cli;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -55,6 +54,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
+		addOptionalOption(options, null, "custom", false, "Indicates that this upload uses the HAPI FHIR custom external terminology format");
 		addBasicAuthOption(options);
 		addVerboseLoggingOption(options);
 
@@ -64,7 +64,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
-		FhirContext ctx = getFhirContext();
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
@@ -77,23 +76,13 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		IGenericClient client = super.newClient(theCommandLine);
-		IBaseParameters inputParameters;
-		if (ctx.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
-			org.hl7.fhir.dstu3.model.Parameters p = new org.hl7.fhir.dstu3.model.Parameters();
-			p.addParameter().setName("url").setValue(new org.hl7.fhir.dstu3.model.UriType(termUrl));
-			for (String next : datafile) {
-				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.dstu3.model.StringType(next));
-			}
-			inputParameters = p;
-		} else if (ctx.getVersion().getVersion() == FhirVersionEnum.R4) {
-			org.hl7.fhir.r4.model.Parameters p = new org.hl7.fhir.r4.model.Parameters();
-			p.addParameter().setName("url").setValue(new org.hl7.fhir.r4.model.UriType(termUrl));
-			for (String next : datafile) {
-				p.addParameter().setName("localfile").setValue(new org.hl7.fhir.r4.model.StringType(next));
-			}
-			inputParameters = p;
-		} else {
-			throw new ParseException("This command does not support FHIR version " + ctx.getVersion().getVersion());
+		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, "url", termUrl);
+		for (String next : datafile) {
+			ParametersUtil.addParameterToParametersString(myFhirCtx, inputParameters, "localfile", next);
+		}
+		if (theCommandLine.hasOption("custom")) {
+			ParametersUtil.addParameterToParametersCode(myFhirCtx, inputParameters, "contentMode", "custom");
 		}
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
@@ -101,15 +90,16 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
+
 		IBaseParameters response = client
 			.operation()
-			.onServer()
+			.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
 			.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
 			.withParameters(inputParameters)
 			.execute();
 
 		ourLog.info("Upload complete!");
-		ourLog.info("Response:\n{}", ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 }

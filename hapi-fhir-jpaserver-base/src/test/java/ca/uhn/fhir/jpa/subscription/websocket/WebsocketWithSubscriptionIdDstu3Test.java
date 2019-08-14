@@ -52,6 +52,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		super.after();
@@ -65,6 +66,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 		myWebSocketClient.stop();
 	}
 
+	@Override
 	@Before
 	public void before() throws Exception {
 		super.before();
@@ -117,7 +119,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void createObservation() throws Exception {
+	public void createObservation() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
@@ -141,7 +143,7 @@ public class WebsocketWithSubscriptionIdDstu3Test extends BaseResourceProviderDs
 	}
 
 	@Test
-	public void createObservationThatDoesNotMatch() throws Exception {
+	public void createObservationThatDoesNotMatch() {
 		Observation observation = new Observation();
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);

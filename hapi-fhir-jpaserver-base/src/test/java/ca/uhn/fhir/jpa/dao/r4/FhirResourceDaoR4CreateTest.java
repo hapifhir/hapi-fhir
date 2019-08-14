@@ -76,6 +76,19 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	/**
+	 * See #1352
+	 */
+	@Test
+	public void testCreateWithSampledDataInObservation() {
+		Observation o = new Observation();
+		o.setStatus(Observation.ObservationStatus.FINAL);
+		SampledData sampledData = new SampledData();
+		sampledData.setData("2 3 4 5 6");
+		o.setValue(sampledData);
+		assertTrue(myObservationDao.create(o).getCreated());
+	}
+
 	@Test
 	public void testCreateWithClientAssignedIdDisallowed() {
 		myDaoConfig.setResourceClientIdStrategy(DaoConfig.ClientIdStrategyEnum.NOT_ALLOWED);
@@ -241,6 +254,29 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(output.getEntry().get(0).getResponse().getLocation(), matchesPattern("Organization/[a-z0-9]{8}-.*"));
 		assertThat(output.getEntry().get(1).getResponse().getLocation(), matchesPattern("Patient/[a-z0-9]{8}-.*"));
 
+
+	}
+
+	@Test
+	public void testTagsInContainedResourcesPreserved() {
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Organization o = new Organization();
+		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
+		p.getManagingOrganization().setResource(o);
+
+		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = myPatientDao.read(id);
+
+		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		Organization org = (Organization) p.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId());
+		assertEquals(1, org.getMeta().getTag().size());
 
 	}
 

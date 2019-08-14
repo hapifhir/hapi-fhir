@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
 
@@ -33,10 +34,17 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 
 	@Override
-	public void execute() {
+	public void execute() throws SQLException {
 
 		String existingType;
 		boolean nullable;
+
+		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+		if (!columnNames.contains(getColumnName())) {
+			ourLog.info("Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			return;
+		}
+
 		try {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
 			nullable = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), getColumnName());
@@ -89,6 +97,18 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			case MSSQL_2012:
 				sql = "alter table " + getTableName() + " alter column " + getColumnName() + " " + type + notNull;
 				break;
+			case H2_EMBEDDED:
+				if (!alreadyOfCorrectType) {
+					sql = "alter table " + getTableName() + " alter column " + getColumnName() + " type " + type;
+				}
+				if (!alreadyCorrectNullable) {
+					if (isNullable()) {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " drop not null";
+					} else {
+						sqlNotNull = "alter table " + getTableName() + " alter column " + getColumnName() + " set not null";
+					}
+				}
+				break;
 			default:
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
@@ -103,5 +123,4 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}
-
 }

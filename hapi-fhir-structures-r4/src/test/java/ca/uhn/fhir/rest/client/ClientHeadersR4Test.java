@@ -123,7 +123,7 @@ public class ClientHeadersR4Test {
 
 		assertNotNull(resp);
 		assertEquals(1, ourHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
-		assertEquals("application/fhir+xml; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
+		assertEquals("application/fhir+json; charset=UTF-8", ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0));
 	}
 
 	@Before

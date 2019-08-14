@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
-import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
@@ -93,11 +92,11 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType moId = myMedicationOrderDao.create(mo, mySrd).getId().toUnqualifiedVersionless();
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, mySrd);
+		IBundleProvider resp = myPatientDao.patientTypeEverything(request, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId, patId2));
 
 		request = mock(HttpServletRequest.class);
-		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, mySrd);
+		resp = myPatientDao.patientInstanceEverything(request, patId, null, null, null, null, null, null, mySrd);
 		assertThat(toUnqualifiedVersionlessIds(resp), containsInAnyOrder(orgId, medId, patId, moId));
 	}
 
@@ -751,10 +750,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 	public void testSearchLastUpdatedParam() throws InterruptedException {
 		String methodName = "testSearchLastUpdatedParam";
 
-		int sleep = 100;
-		Thread.sleep(sleep);
-
 		DateTimeDt beforeAny = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
+		TestUtil.sleepOneClick();
+
 		IIdType id1a;
 		{
 			Patient patient = new Patient();
@@ -770,9 +768,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			id1b = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 		}
 
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 		DateTimeDt beforeR2 = new DateTimeDt(new Date(), TemporalPrecisionEnum.MILLI);
-		Thread.sleep(1100);
+		TestUtil.sleepOneClick();
 
 		IIdType id2;
 		{
@@ -1542,7 +1540,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		QuantityParam param;
 		Set<Long> found;
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
-		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		int initialSize = found.size();
 
 		Observation o = new Observation();
@@ -1553,19 +1551,19 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		myObservationDao.create(o, mySrd);
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, null);
-		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		assertEquals(1 + initialSize, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), null, methodName + "units");
-		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		assertEquals(1, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, null);
-		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		assertEquals(1, found.size());
 
 		param = new QuantityParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new BigDecimal("10"), "urn:bar:" + methodName, methodName + "units");
-		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param));
+		found = myObservationDao.searchForIds(new SearchParameterMap("value-quantity", param), null);
 		assertEquals(1, found.size());
 
 	}

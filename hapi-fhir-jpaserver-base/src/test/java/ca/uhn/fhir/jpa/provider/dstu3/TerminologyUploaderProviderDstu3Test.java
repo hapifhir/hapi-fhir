@@ -85,7 +85,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI + "FOO"))
 				.andParameter("package", new Attachment().setUrl("foo").setData(packageBytes))
@@ -102,7 +102,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -111,7 +111,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 
 		/*
 		 * Try uploading a second time
@@ -119,7 +119,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -136,7 +136,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.andParameter("package", new Attachment().setData(packageBytes))
@@ -154,7 +154,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "package", new Attachment().setUrl("foo").setData(packageBytes))
 				.execute();
@@ -170,7 +170,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.execute();
@@ -186,7 +186,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -195,7 +195,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
@@ -221,7 +221,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@AfterClass

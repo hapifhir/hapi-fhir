@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +41,16 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 			return;
 		}
 
-		String sql = "alter table " + getTableName() + " drop column " + getColumnName();
+		String tableName = getTableName();
+		String columnName = getColumnName();
+		String sql = createSql(tableName, columnName);
 		ourLog.info("Dropping column {} on table {}", getColumnName(), getTableName());
 		executeSql(getTableName(), sql);
+	}
+
+	@Language("SQL")
+	static String createSql(String theTableName, String theColumnName) {
+		return "alter table " + theTableName + " drop column " + theColumnName;
 	}
 
 }

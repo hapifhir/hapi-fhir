@@ -66,7 +66,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	private InMemoryMatchResult match(String criteria, Resource theResource) {
 		ourLog.info("Criteria: <{}>", criteria);
-		return mySearchParamMatcher.match(criteria, theResource);
+		return mySearchParamMatcher.match(criteria, theResource, null);
 	}
 
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {

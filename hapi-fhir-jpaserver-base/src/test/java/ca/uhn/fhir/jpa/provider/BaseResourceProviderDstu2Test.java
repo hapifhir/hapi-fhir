@@ -8,6 +8,7 @@ import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -68,13 +69,11 @@ public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
 	
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
-	
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
-	
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
-	
 			ourRestServer.registerProvider(mySystemProvider);
-	
+			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
+
 			JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(confProvider);

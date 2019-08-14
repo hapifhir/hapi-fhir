@@ -2,11 +2,13 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.ThreadQueryCountHolder;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.hibernate.dialect.H2Dialect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -98,8 +100,8 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 			}
 
 		};
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
-		retVal.setUrl("jdbc:derby:memory:myUnitTestDBDstu2;create=true");
+		retVal.setDriver(new org.h2.Driver());
+		retVal.setUrl("jdbc:h2:mem:testdb_dstu2");
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -111,6 +113,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 //			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
 			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 			.afterQuery(captureQueriesListener())
+			.afterQuery(new CurrentThreadCaptureQueriesListener())
 			.countQuery(new ThreadQueryCountHolder())
 			.build();
 
@@ -137,7 +140,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
-		extraProperties.put("hibernate.dialect", "ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect");
+		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.search.model_mapping", LuceneSearchMappingFactory.class.getName());
 		extraProperties.put("hibernate.search.default.directory_provider", "local-heap");
 		extraProperties.put("hibernate.search.lucene_version", "LUCENE_CURRENT");

@@ -1,36 +1,56 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
-import ca.uhn.fhir.jpa.entity.TermConceptMap;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroup;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
-import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
+import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.CanonicalType;
-import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+@TestPropertySource(properties = {
+	"scheduling_disabled=true"
+})
 public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);
 	@Rule
 	public final ExpectedException expectedException = ExpectedException.none();
+	@Mock
+	IValueSetConceptAccumulator myValueSetCodeAccumulator;
 	private IIdType myConceptMapId;
+	private IIdType myExtensionalCsId;
+	private IIdType myExtensionalVsId;
 
 	@Before
 	public void before() {
@@ -40,8 +60,62 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
+		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
 	}
-	
+
+	private IIdType createCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		codeSystem.setName("SYSTEM NAME");
+		codeSystem.setVersion("SYSTEM VERSION");
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
+
+		ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
+
+		TermCodeSystemVersion cs = new TermCodeSystemVersion();
+		cs.setResource(table);
+
+		TermConcept parent;
+		parent = new TermConcept(cs, "ParentWithNoChildrenA");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenB");
+		cs.getConcepts().add(parent);
+		parent = new TermConcept(cs, "ParentWithNoChildrenC");
+		cs.getConcepts().add(parent);
+
+		TermConcept parentA = new TermConcept(cs, "ParentA");
+		cs.getConcepts().add(parentA);
+
+		TermConcept childAA = new TermConcept(cs, "childAA");
+		parentA.addChild(childAA, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAAA = new TermConcept(cs, "childAAA");
+		childAAA.addPropertyString("propA", "valueAAA");
+		childAAA.addPropertyString("propB", "foo");
+		childAA.addChild(childAAA, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAAB = new TermConcept(cs, "childAAB");
+		childAAB.addPropertyString("propA", "valueAAB");
+		childAAB.addPropertyString("propB", "foo");
+		childAAB.addDesignation()
+			.setUseSystem("D1S")
+			.setUseCode("D1C")
+			.setUseDisplay("D1D")
+			.setValue("D1V");
+		childAA.addChild(childAAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept childAB = new TermConcept(cs, "childAB");
+		parentA.addChild(childAB, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		TermConcept parentB = new TermConcept(cs, "ParentB");
+		cs.getConcepts().add(parentB);
+
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs);
+
+		return id;
+	}
+
 	private void createAndPersistConceptMap() {
 		ConceptMap conceptMap = createConceptMap();
 		persistConceptMap(conceptMap);
@@ -55,6 +129,357 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			}
 		});
 	}
+
+	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
+		loadAndPersistCodeSystem();
+		loadAndPersistValueSet();
+	}
+
+	private void loadAndPersistCodeSystemAndValueSetWithDesignations() throws IOException {
+		loadAndPersistCodeSystemWithDesignations();
+		loadAndPersistValueSet();
+	}
+
+	private void loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude() throws IOException {
+		loadAndPersistCodeSystemWithDesignations();
+		loadAndPersistValueSetWithExclude();
+	}
+
+	private void loadAndPersistCodeSystem() throws IOException {
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		persistCodeSystem(codeSystem);
+	}
+
+	private void loadAndPersistCodeSystemWithDesignations() throws IOException {
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
+		persistCodeSystem(codeSystem);
+	}
+
+	private void persistCodeSystem(CodeSystem theCodeSystem) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
+	}
+
+	private void loadAndPersistValueSet() throws IOException {
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		persistValueSet(valueSet);
+	}
+
+	private void loadAndPersistValueSetWithExclude() throws IOException {
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
+		persistValueSet(valueSet);
+	}
+
+	private void persistValueSet(ValueSet theValueSet) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+			}
+		});
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaAdd() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeZZZ").isPresent()));
+
+	}
+
+	/**
+	 * This would be a good check, but there is no easy eay to do it...
+	 */
+	@Test
+	@Ignore
+	public void testApplyCodeSystemDeltaAddNotPermittedForNonExternalCodeSystem() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		try {
+			myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("", e.getMessage());
+		}
+
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaAddWithoutPreExistingCodeSystem() {
+
+		CodeSystem delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("CBC")
+			.setDisplay("Complete Blood Count");
+		delta
+			.addConcept()
+			.setCode("URNL")
+			.setDisplay("Routine Urinalysis");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(CodeSystem.SP_URL, new UriParam("http://foo"));
+		IBundleProvider searchResult = myCodeSystemDao.search(params, mySrd);
+		assertEquals(1, searchResult.size().intValue());
+		CodeSystem outcome = (CodeSystem) searchResult.getResources(0,1).get(0);
+
+		assertEquals("http://foo", outcome.getUrl());
+		assertEquals("Acme Lab Codes", outcome.getName());
+	}
+
+
+	@Test
+	public void testApplyCodeSystemDeltaAddDuplicatesIgnored() {
+
+		// Add codes
+		CodeSystem delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("codea")
+			.setDisplay("CODEA0");
+		delta
+			.addConcept()
+			.setCode("codeb")
+			.setDisplay("CODEB0");
+		AtomicInteger outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(2, outcome.get());
+
+		// Add codes again with different display
+		delta = new CodeSystem();
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.setUrl("http://foo");
+		delta.setName("Acme Lab Codes");
+		delta
+			.addConcept()
+			.setCode("codea")
+			.setDisplay("CODEA1");
+		delta
+			.addConcept()
+			.setCode("codeb")
+			.setDisplay("CODEB1");
+		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(2, outcome.get());
+
+		// Add codes again with no changes
+		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+		assertEquals(0, outcome.get());
+	}
+
+
+	@Test
+	public void testApplyCodeSystemDeltaAddAsChild() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent codeAA = delta
+			.addConcept()
+			.setCode("codeAA")
+			.setDisplay("displayAA");
+		codeAA
+			.addConcept()
+			.setCode("codeAAA")
+			.setDisplay("displayAAA");
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", "codeA", delta);
+
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeAA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
+		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED, myTermSvc.subsumes(toString("codeB"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
+
+		runInTransaction(() -> {
+			List<TermConceptParentChildLink> allChildren = myTermConceptParentChildLinkDao.findAll();
+			assertEquals(2, allChildren.size());
+		});
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaAddWithPropertiesAndDesignations() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setName("Description of my life");
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		cs.setVersion("1.2.3");
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent concept = delta
+			.addConcept()
+			.setCode("lunch")
+			.setDisplay("I'm having dog food");
+		concept
+			.addDesignation()
+			.setLanguage("fr")
+			.setUse(new Coding("http://sys", "code", "display"))
+			.setValue("Je mange une pomme");
+		concept
+			.addDesignation()
+			.setLanguage("es")
+			.setUse(new Coding("http://sys", "code", "display"))
+			.setValue("Como una pera");
+		concept.addProperty()
+			.setCode("flavour")
+			.setValue(new StringType("Hints of lime"));
+		concept.addProperty()
+			.setCode("useless_sct_code")
+			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
+		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo", "lunch");
+		assertEquals(true, result.isFound());
+		assertEquals("lunch", result.getSearchedForCode());
+		assertEquals("http://foo", result.getSearchedForSystem());
+
+		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
+		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
+		assertEquals(false, output.getParameterBool("abstract"));
+
+		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
+		assertEquals("language", designations.get(0).getPart().get(0).getName());
+		assertEquals("fr", ((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("use", designations.get(0).getPart().get(1).getName());
+		assertEquals("http://sys", ((Coding) designations.get(0).getPart().get(1).getValue()).getSystem());
+		assertEquals("code", ((Coding) designations.get(0).getPart().get(1).getValue()).getCode());
+		assertEquals("display", ((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay());
+		assertEquals("value", designations.get(0).getPart().get(2).getName());
+		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
+
+		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
+		assertEquals("code", properties.get(0).getPart().get(0).getName());
+		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(0).getPart().get(1).getName());
+		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
+
+		assertEquals("code", properties.get(1).getPart().get(0).getName());
+		assertEquals("useless_sct_code", ((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(1).getPart().get(1).getName());
+		assertEquals("http://snomed.info", ((Coding) properties.get(1).getPart().get(1).getValue()).getSystem());
+		assertEquals("1234567", ((Coding) properties.get(1).getPart().get(1).getValue()).getCode());
+		assertEquals("Choked on large meal (finding)", ((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay());
+
+	}
+
+	@Test
+	public void testApplyCodeSystemDeltaRemove() {
+
+		// Create not-present
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+
+		CodeSystem delta = new CodeSystem();
+		CodeSystem.ConceptDefinitionComponent codeA = delta
+			.addConcept()
+			.setCode("codeA")
+			.setDisplay("displayA");
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		CodeSystem.ConceptDefinitionComponent codeAA = codeA
+			.addConcept()
+			.setCode("codeAA")
+			.setDisplay("displayAA");
+		codeAA
+			.addConcept()
+			.setCode("codeAAA")
+			.setDisplay("displayAAA");
+ 		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
+
+		// Remove CodeB
+		delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeB")
+			.setDisplay("displayB");
+		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
+
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+
+		// Remove CodeA
+		delta = new CodeSystem();
+		delta
+			.addConcept()
+			.setCode("codeA");
+		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
+
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+
+	}
+
+
+	@Nonnull
+	private StringType toString(String theString) {
+		return new StringType(theString);
+	}
+
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
@@ -82,7 +507,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@Test
 	public void testCreateConceptMapWithVirtualSourceSystem() {
 		ConceptMap conceptMap = createConceptMap();
-		conceptMap.getGroup().forEach(t->t.setSource(null));
+		conceptMap.getGroup().forEach(t -> t.setSource(null));
 		conceptMap.setSource(new CanonicalType("http://hl7.org/fhir/uv/livd/StructureDefinition/loinc-livd"));
 
 		persistConceptMap(conceptMap);
@@ -138,6 +563,16 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDuplicateCodeSystemUrls() throws Exception {
+		loadAndPersistCodeSystem();
+
+		expectedException.expect(UnprocessableEntityException.class);
+		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
+
+		loadAndPersistCodeSystem();
+	}
+
+	@Test
 	public void testDuplicateConceptMapUrls() {
 		createAndPersistConceptMap();
 
@@ -145,6 +580,206 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
 
 		createAndPersistConceptMap();
+	}
+
+	@Test
+	public void testDuplicateValueSetUrls() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
+		loadAndPersistCodeSystemAndValueSet();
+
+		expectedException.expect(UnprocessableEntityException.class);
+		expectedException.expectMessage("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
+
+		loadAndPersistValueSet();
+	}
+
+	@Test
+	public void testExpandValueSetWithValueSetCodeAccumulator() {
+		createCodeSystem();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+
+		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
+		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
+	}
+
+	@Test
+	public void testValidateCode() {
+		createCodeSystem();
+
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
+		assertEquals(true, validation.isOk());
+
+		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
+		assertEquals(false, validation.isOk());
+	}
+
+	@Test
+	public void testStoreTermCodeSystemAndChildren() throws Exception {
+		loadAndPersistCodeSystemWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsId.getIdPartAsLong());
+				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
+				assertNull(codeSystem.getName());
+
+				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
+				assertEquals(24, codeSystemVersion.getConcepts().size());
+
+				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+
+				TermConcept concept = concepts.get(0);
+				assertEquals("8450-9", concept.getCode());
+				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+				assertEquals(2, concept.getDesignations().size());
+
+				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
+
+				TermConceptDesignation designation = designations.get(0);
+				assertEquals("nl", designation.getLanguage());
+				assertEquals("http://snomed.info/sct", designation.getUseSystem());
+				assertEquals("900000000000013009", designation.getUseCode());
+				assertEquals("Synonym", designation.getUseDisplay());
+				assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+				designation = designations.get(1);
+				assertEquals("sv", designation.getLanguage());
+				assertEquals("http://snomed.info/sct", designation.getUseSystem());
+				assertEquals("900000000000013009", designation.getUseCode());
+				assertEquals("Synonym", designation.getUseDisplay());
+				assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+				concept = concepts.get(1);
+				assertEquals("11378-7", concept.getCode());
+				assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+				assertEquals(0, concept.getDesignations().size());
+
+				// ...
+
+				concept = concepts.get(22);
+				assertEquals("8491-3", concept.getCode());
+				assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+				assertEquals(1, concept.getDesignations().size());
+
+				designation = concept.getDesignations().iterator().next();
+				assertEquals("nl", designation.getLanguage());
+				assertEquals("http://snomed.info/sct", designation.getUseSystem());
+				assertEquals("900000000000013009", designation.getUseCode());
+				assertEquals("Synonym", designation.getUseDisplay());
+				assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+				concept = concepts.get(23);
+				assertEquals("8492-1", concept.getCode());
+				assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+				assertEquals(0, concept.getDesignations().size());
+			}
+		});
+	}
+
+	@Test
+	public void testStoreTermCodeSystemAndNestedChildren() {
+		IIdType codeSystemId = createCodeSystem();
+		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemId.getIdPartAsLong());
+				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
+				assertEquals("SYSTEM NAME", codeSystem.getName());
+
+				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
+				assertEquals(9, codeSystemVersion.getConcepts().size());
+
+				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+
+				TermConcept parentWithNoChildrenA = concepts.get(0);
+				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+				assertNull(parentWithNoChildrenA.getDisplay());
+				assertEquals(0, parentWithNoChildrenA.getChildren().size());
+				assertEquals(0, parentWithNoChildrenA.getParents().size());
+				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+
+				TermConcept parentWithNoChildrenB = concepts.get(1);
+				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+				assertNull(parentWithNoChildrenB.getDisplay());
+				assertEquals(0, parentWithNoChildrenB.getChildren().size());
+				assertEquals(0, parentWithNoChildrenB.getParents().size());
+				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+
+				TermConcept parentWithNoChildrenC = concepts.get(2);
+				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+				assertNull(parentWithNoChildrenC.getDisplay());
+				assertEquals(0, parentWithNoChildrenC.getChildren().size());
+				assertEquals(0, parentWithNoChildrenC.getParents().size());
+				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+
+				TermConcept parentA = concepts.get(3);
+				assertEquals("ParentA", parentA.getCode());
+				assertNull(parentA.getDisplay());
+				assertEquals(2, parentA.getChildren().size());
+				assertEquals(0, parentA.getParents().size());
+				assertEquals(0, parentA.getDesignations().size());
+				assertEquals(0, parentA.getProperties().size());
+
+				TermConcept childAA = concepts.get(4);
+				assertEquals("childAA", childAA.getCode());
+				assertNull(childAA.getDisplay());
+				assertEquals(2, childAA.getChildren().size());
+				assertEquals(1, childAA.getParents().size());
+				assertSame(parentA, childAA.getParents().iterator().next().getParent());
+				assertEquals(0, childAA.getDesignations().size());
+				assertEquals(0, childAA.getProperties().size());
+
+				TermConcept childAAA = concepts.get(5);
+				assertEquals("childAAA", childAAA.getCode());
+				assertNull(childAAA.getDisplay());
+				assertEquals(0, childAAA.getChildren().size());
+				assertEquals(1, childAAA.getParents().size());
+				assertSame(childAA, childAAA.getParents().iterator().next().getParent());
+				assertEquals(0, childAAA.getDesignations().size());
+				assertEquals(2, childAAA.getProperties().size());
+
+				TermConcept childAAB = concepts.get(6);
+				assertEquals("childAAB", childAAB.getCode());
+				assertNull(childAAB.getDisplay());
+				assertEquals(0, childAAB.getChildren().size());
+				assertEquals(1, childAAB.getParents().size());
+				assertSame(childAA, childAAB.getParents().iterator().next().getParent());
+				assertEquals(1, childAAB.getDesignations().size());
+				assertEquals(2, childAAB.getProperties().size());
+
+				TermConcept childAB = concepts.get(7);
+				assertEquals("childAB", childAB.getCode());
+				assertNull(childAB.getDisplay());
+				assertEquals(0, childAB.getChildren().size());
+				assertEquals(1, childAB.getParents().size());
+				assertSame(parentA, childAB.getParents().iterator().next().getParent());
+				assertEquals(0, childAB.getDesignations().size());
+				assertEquals(0, childAB.getProperties().size());
+
+				TermConcept parentB = concepts.get(8);
+				assertEquals("ParentB", parentB.getCode());
+				assertNull(parentB.getDisplay());
+				assertEquals(0, parentB.getChildren().size());
+				assertEquals(0, parentB.getParents().size());
+				assertEquals(0, parentB.getDesignations().size());
+				assertEquals(0, parentB.getProperties().size());
+			}
+		});
 	}
 
 	@Test
@@ -322,6 +957,202 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
+		});
+	}
+
+	@Test
+	public void testStoreTermValueSetAndChildren() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		});
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
+
+			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+			designation = concept.getDesignations().get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(1);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+
+			// ...
+
+			concept = termValueSet.getConcepts().get(22);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
+
+			designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(23);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+		});
+	}
+
+	@Test
+	public void testStoreTermValueSetAndChildrenWithExclude() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		});
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
+			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
+
+			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+			designation = concept.getDesignations().get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(1);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+
+			// ...
+
+			concept = termValueSet.getConcepts().get(22 - 2);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
+
+			designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(23 - 2);
+			ourLog.info("Code:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 		});
 	}
 

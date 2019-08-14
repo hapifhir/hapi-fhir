@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -291,6 +291,11 @@ public interface IServerInterceptor {
 	@Hook(Pointcut.SERVER_PROCESSING_COMPLETED_NORMALLY)
 	void processingCompletedNormally(ServletRequestDetails theRequestDetails);
 
+	/**
+	 * @deprecated This class doesn't bring anything that can't be done with {@link RequestDetails}. That
+	 * class should be used instead. Deprecated in 4.0.0
+	 */
+	@Deprecated
 	class ActionRequestDetails {
 		private final FhirContext myContext;
 		private final IIdType myId;
@@ -428,12 +433,20 @@ public interface IServerInterceptor {
 				return;
 			}
 
+			IIdType previousRequestId = requestDetails.getId();
+			requestDetails.setId(getId());
+
 			IInterceptorService interceptorService = server.getInterceptorService();
 
 			HookParams params = new HookParams();
 			params.add(RestOperationTypeEnum.class, theOperationType);
 			params.add(this);
+			params.add(RequestDetails.class, this.getRequestDetails());
+			params.addIfMatchesType(ServletRequestDetails.class, this.getRequestDetails());
 			interceptorService.callHooks(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, params);
+
+			// Reset the request ID
+			requestDetails.setId(previousRequestId);
 
 		}
 

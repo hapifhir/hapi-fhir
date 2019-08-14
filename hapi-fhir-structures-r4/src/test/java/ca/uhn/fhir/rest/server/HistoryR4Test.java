@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.util.TestUtil;
@@ -187,6 +188,7 @@ public class HistoryR4Test {
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
 		servlet.registerProviders(plainProvider, patientProvider);
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
