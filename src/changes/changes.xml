@@ -6,15 +6,20 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<!--
 		<release version="4.1.0" date="TBD" description="Igloo">
+		<!--
 		<action type="add" issue="1321">
 			Support has been added for RDF encoding and parsing in the
 			<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
 			format. Thanks to Raul Estrada for the pull request!
 		</action>
-		</release>
 		-->
+			<action type="add" issye="1357">
+				The email Subscription deliverer now respects the payload property of the subscription
+				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
+				pull request!
+			</action>
+		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
