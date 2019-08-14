@@ -97,10 +97,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		mySubscription = theSubscription;
 	}
 
-	public void setPayload(FhirContext theCtx, IBaseResource thePayload, Boolean isXml) {
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload, Boolean theXml) {
 		myPayload = thePayload;
 
-		if (isXml) {
+		if (theXml) {
 			myPayloadString = theCtx.newXmlParser().encodeResourceToString(thePayload);
 		} else {
 			myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
