@@ -19,6 +19,11 @@
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
 				pull request!
 			</action>
+			<action type="fix">
+				When using the _filter search parameter, string comparisons using the "eq" operator
+				were incorrectly performing a partial match. This has been corrected. Thanks to 
+				Marc Sandberg for pointing this out!
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

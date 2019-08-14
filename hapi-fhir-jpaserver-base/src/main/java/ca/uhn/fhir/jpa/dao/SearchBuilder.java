@@ -1676,14 +1676,17 @@ public class SearchBuilder implements ISearchBuilder {
 
 			Predicate predicate;
 			if ((operation == null) ||
-				(operation == SearchFilterParser.CompareOperation.eq) ||
-				(operation == SearchFilterParser.CompareOperation.co) ||
 				(operation == SearchFilterParser.CompareOperation.sw) ||
 				(operation == SearchFilterParser.CompareOperation.ew)) {
 
 				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
 				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
 				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), likeExpression);
+				predicate = theBuilder.and(hashCode, singleCode);
+			} else if (operation == SearchFilterParser.CompareOperation.eq) {
+				Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(myDaoConfig.getModelConfig(), theResourceName, theParamName, normalizedString);
+				Predicate hashCode = theBuilder.equal(theFrom.get("myHashNormalizedPrefix").as(Long.class), hash);
+				Predicate singleCode = theBuilder.like(theFrom.get("myValueNormalized").as(String.class), normalizedString);
 				predicate = theBuilder.and(hashCode, singleCode);
 			} else if (operation == SearchFilterParser.CompareOperation.ne) {
 				Predicate singleCode = theBuilder.notEqual(theFrom.get("myValueNormalized").as(String.class), likeExpression);
@@ -1701,7 +1704,7 @@ public class SearchBuilder implements ISearchBuilder {
 				Predicate singleCode = theBuilder.lessThanOrEqualTo(theFrom.get("myValueNormalized").as(String.class), likeExpression);
 				predicate = combineParamIndexPredicateWithParamNamePredicate(theResourceName, theParamName, theFrom, singleCode);
 			} else {
-				throw new IllegalArgumentException("Unknown operation type: " + operation);
+				throw new IllegalArgumentException("Don't yet know how to handle operation " + operation + " on a string");
 			}
 
 			return predicate;
