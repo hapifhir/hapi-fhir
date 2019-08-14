@@ -3,9 +3,9 @@
   <title>HAPI-FHIR: HAPI FHIR Changelog</title>
   <link rel="alternate" href="https://hapifhir.io/changes-report.html" />
   <subtitle>These are the latest changes of this project.</subtitle>
-  <updated>2019-08-14T17:37:00Z</updated>
+  <updated>2019-08-14T17:52:58Z</updated>
   <dc:creator>James Agnew</dc:creator>
-  <dc:date>2019-08-14T17:37:00Z</dc:date>
+  <dc:date>2019-08-14T17:52:58Z</dc:date>
   <dc:language>en</dc:language>
   <entry>
     <title>4.0.0</title>
