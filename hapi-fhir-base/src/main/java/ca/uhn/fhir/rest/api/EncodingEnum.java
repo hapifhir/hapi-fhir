@@ -197,12 +197,25 @@ public enum EncodingEnum {
 		}
 	}
 
-	private static String getTypeWithoutCharset(final String theContentType) {
+	static String getTypeWithoutCharset(final String theContentType) {
 		if (theContentType == null) {
 			return null;
 		} else {
-			String[] contentTypeSplitted = theContentType.split(";");
-			return contentTypeSplitted[0];
+
+			int start = 0;
+			for (; start < theContentType.length(); start++) {
+				if (theContentType.charAt(start) != ' ') {
+					break;
+				}
+			}
+			int end = start;
+			for (; end < theContentType.length(); end++) {
+				if (theContentType.charAt(end) == ' ' || theContentType.charAt(end) == ';') {
+					break;
+				}
+			}
+
+			return theContentType.substring(start, end);
 		}
 	}
 

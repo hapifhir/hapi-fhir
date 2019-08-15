@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.email;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private FhirContext myCtx;
 
 	private IEmailSender myEmailSender;
 
@@ -66,13 +70,21 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			}
 		}
 
+		String payload = "";
+		if (isNotBlank(subscription.getPayloadString())) {
+			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
+			if (encoding != null) {
+				payload = theMessage.getPayloadString();
+			}
+		}
+
 		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myModelConfig.getEmailFromAddress()));
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
-		details.setBodyTemplate(theMessage.getPayloadString());
+		details.setBodyTemplate(payload);
 		details.setSubjectTemplate(subjectTemplate);
 		details.setSubscription(subscription.getIdElement(myFhirContext));
 

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
@@ -144,23 +145,14 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
 			}
+			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
 
-			// Only include the payload if either XML or JSON was specified in the subscription's payload property
-			// See http://hl7.org/fhir/subscription-definitions.html#Subscription.channel.payload
-			if (encoding != null) {
-				deliveryMsg.setPayload(myFhirContext, payload, encoding);
-			} else if (isText) {
-				// TODO: Handle payload mimetype of text/plain (for just the .text representation of the resource being updated?)
-			}
-
+			deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-			if (deliveryMsg.getPayload(myFhirContext) == null) {
-				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
-			}
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 			HookParams params = new HookParams()

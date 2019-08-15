@@ -24,5 +24,5 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 public interface IResourceRetriever {
-	IBaseResource getResource(IIdType id);
+	IBaseResource getResource(IIdType theId);
 }

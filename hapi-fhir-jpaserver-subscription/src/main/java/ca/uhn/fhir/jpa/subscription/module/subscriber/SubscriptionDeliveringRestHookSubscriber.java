@@ -155,10 +155,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		String payloadString = subscription.getPayloadString();
 		EncodingEnum payloadType = null;
 		if (payloadString != null) {
-			if (payloadString.contains(";")) {
-				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
-			}
-			payloadString = payloadString.trim();
 			payloadType = EncodingEnum.forContentType(payloadString);
 		}
 
