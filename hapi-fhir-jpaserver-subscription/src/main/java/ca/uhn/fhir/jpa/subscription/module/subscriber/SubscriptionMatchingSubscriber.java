@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -104,7 +105,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
-		Boolean isXml = false, isJson = false, isText = false;
+		Boolean isText = false;
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -138,9 +139,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
 			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
 
+			EncodingEnum encoding = null;
 			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
-				isXml = subscription.getPayloadString().equals(Constants.CT_XML) || subscription.getPayloadString().equals(Constants.CT_FHIR_XML_NEW);
-				isJson = subscription.getPayloadString().equals(Constants.CT_JSON) || subscription.getPayloadString().equals(Constants.CT_FHIR_JSON_NEW);
+				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
 				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
 			}
 
@@ -148,8 +149,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			// Only include the payload if either XML or JSON was specified in the subscription's payload property
 			// See http://hl7.org/fhir/subscription-definitions.html#Subscription.channel.payload
-			if (isXml || isJson) {
-				deliveryMsg.setPayload(myFhirContext, payload, isXml);
+			if (encoding != null) {
+				deliveryMsg.setPayload(myFhirContext, payload, encoding);
 			} else if (isText) {
 				// TODO: Handle payload mimetype of text/plain (for just the .text representation of the resource being updated?)
 			}
@@ -157,7 +158,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-			if (payload == null) {
+			if (deliveryMsg.getPayload(myFhirContext) == null) {
 				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
 			}
 
