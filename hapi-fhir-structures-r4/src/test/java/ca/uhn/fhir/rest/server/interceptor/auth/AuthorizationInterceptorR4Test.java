@@ -43,10 +43,7 @@ import org.junit.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -2136,6 +2133,41 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
+
+	@Test
+	public void testReadByTypeWithAnyId() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(ServiceRequest.class).withAnyId().andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(new Consent().setDateTime(new Date()).setId("Consent/123"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Consent");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourReturn = Collections.singletonList(new ServiceRequest().setAuthoredOn(new Date()).setId("ServiceRequest/123"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/ServiceRequest");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
+
 	@Test
 	public void testReadByCompartmentReadByIdParam() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3607,6 +3639,38 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
+	public static class DummyServiceRequestResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ServiceRequest.class;
+		}
+
+		@Search
+		public List<Resource> search() {
+			assert ourReturn != null;
+			ourHitMethod = true;
+			return ourReturn;
+		}
+
+	}
+
+	public static class DummyConsentResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Consent.class;
+		}
+
+		@Search
+		public List<Resource> search() {
+			assert ourReturn != null;
+			ourHitMethod = true;
+			return ourReturn;
+		}
+
+	}
+
 	@SuppressWarnings("unused")
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
@@ -3825,7 +3889,9 @@ public class AuthorizationInterceptorR4Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
+		ourServlet.registerProvider(new DummyConsentResourceProvider());
 		ourServlet.setPlainProviders(plainProvider);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
