@@ -29,6 +29,9 @@
 				the server will now reject requests for other resource types earlier in the processing
 				cycle. Thanks to Anders Havn for the suggestion!
 			</action>
+			<action type="fix">
+				Reference search parameters did not work via the _filter parameter
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

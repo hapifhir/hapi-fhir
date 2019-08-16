@@ -3,7 +3,10 @@ package ca.uhn.fhir.jpa.stresstest;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,9 +36,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -64,7 +65,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
 	@Autowired
-	private IPagingProvider myPagingProvider;
+	private DatabaseBackedPagingProvider myPagingProvider;
+	private int myPreviousMaxPageSize;
 
 	@Override
 	@After
@@ -74,6 +76,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
+		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
 	}
 
 	@Override
@@ -85,7 +88,84 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		FhirInstanceValidator module = new FhirInstanceValidator();
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
+
+		myPreviousMaxPageSize = myPagingProvider.getMaximumPageSize();
+		myPagingProvider.setMaximumPageSize(300);
 	}
+
+
+
+
+	@Test
+	public void testNoDuplicatesInSearchResults() throws Exception {
+		int count = 1000;
+		Bundle bundle = new Bundle();
+
+		for (int i = 0; i < count; i++) {
+			Observation o = new Observation();
+			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
+			o.setEffective( DateTimeType.now());
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
+		}
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		Map<String, IBaseResource> ids = new HashMap<>();
+
+		IGenericClient fhirClient = this.ourClient;
+
+		String url = ourServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
+
+		int pageIndex = 0;
+		ourLog.info("Loading page {}", pageIndex);
+		Bundle searchResult = fhirClient
+			.search()
+			.byUrl(url)
+			.count(300)
+			.returnBundle(Bundle.class)
+			.execute();
+		while(true) {
+			List<String> passIds = searchResult
+				.getEntry()
+				.stream()
+				.map(t -> t.getResource().getIdElement().getValue())
+				.collect(Collectors.toList());
+
+			int index = 0;
+			for (String nextId : passIds) {
+				Resource nextResource = searchResult.getEntry().get(index).getResource();
+
+				if (ids.containsKey(nextId)) {
+					String previousContent = fhirClient.getFhirContext().newJsonParser().encodeResourceToString(ids.get(nextId));
+					String newContent = fhirClient.getFhirContext().newJsonParser().encodeResourceToString(nextResource);
+					throw new Exception("Duplicate ID " + nextId + " found at index " + index + " of page " + pageIndex + "\n\nPrevious: " + previousContent + "\n\nNew: " + newContent);
+				}
+				ids.put(nextId, nextResource);
+				index++;
+			}
+
+			if (searchResult.getLink(Constants.LINK_NEXT) == null) {
+				break;
+			} else {
+				if (searchResult.getEntry().size() != 300) {
+					throw new Exception("Page had " + searchResult.getEntry().size() + " resources");
+				}
+				if (passIds.size() != 300) {
+					throw new Exception("Page had " + passIds.size() + " unique ids");
+				}
+			}
+
+			pageIndex++;
+			ourLog.info("Loading page {}: {}", pageIndex, searchResult.getLink(Constants.LINK_NEXT).getUrl());
+			searchResult = fhirClient.loadPage().next(searchResult).execute();
+		}
+
+		assertEquals(count, ids.size());
+	}
+
 
 	@Test
 	public void testPageThroughLotsOfPages() {
