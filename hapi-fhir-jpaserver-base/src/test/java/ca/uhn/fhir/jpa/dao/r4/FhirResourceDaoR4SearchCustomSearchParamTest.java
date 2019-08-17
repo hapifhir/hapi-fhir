@@ -495,6 +495,56 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 	}
 
 	@Test
+	public void testSearchForExtensionReferenceWithTwoPaths() {
+		Practitioner p1 = new Practitioner();
+		p1.addName().setFamily("P1");
+		IIdType p1id = myPractitionerDao.create(p1).getId().toUnqualifiedVersionless();
+
+		Practitioner p2 = new Practitioner();
+		p2.addName().setFamily("P2");
+		IIdType p2id = myPractitionerDao.create(p2).getId().toUnqualifiedVersionless();
+
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("DiagnosticReport");
+		sp.setCode("fooBar");
+		sp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE);
+		sp.setTitle("FOO AND BAR");
+		sp.setExpression("DiagnosticReport.extension('http://foo') | DiagnosticReport.extension('http://bar')");
+		sp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		DiagnosticReport dr1 = new DiagnosticReport();
+		dr1.addExtension("http://foo", new Reference(p1id.getValue()));
+		IIdType dr1id = myDiagnosticReportDao.create(dr1).getId().toUnqualifiedVersionless();
+
+		DiagnosticReport dr2 = new DiagnosticReport();
+		dr2.addExtension("http://bar", new Reference(p2id.getValue()));
+		IIdType dr2id = myDiagnosticReportDao.create(dr2).getId().toUnqualifiedVersionless();
+
+		SearchParameterMap map;
+		IBundleProvider results;
+		List<String> foundResources;
+
+		// Find one
+		map = new SearchParameterMap();
+		map.add(sp.getCode(), new ReferenceParam(p1id.getValue()));
+		results = myDiagnosticReportDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(dr1id.getValue()));
+
+		// Find both
+		map = new SearchParameterMap();
+		map.add(sp.getCode(), new ReferenceOrListParam().addOr(new ReferenceParam(p1id.getValue())).addOr(new ReferenceParam(p2id.getValue())));
+		results = myDiagnosticReportDao.search(map);
+		foundResources = toUnqualifiedVersionlessIdValues(results);
+		assertThat(foundResources, containsInAnyOrder(dr1id.getValue(), dr2id.getValue()));
+
+	}
+
+	@Test
 	public void testSearchForExtensionReferenceWithTarget() {
 		SearchParameter siblingSp = new SearchParameter();
 		siblingSp.addBase("Patient");
