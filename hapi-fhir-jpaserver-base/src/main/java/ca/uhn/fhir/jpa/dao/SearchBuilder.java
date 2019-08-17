@@ -829,7 +829,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return addPredicateString(theResourceName,
 			theParamName,
 			theList,
-			SearchFilterParser.CompareOperation.eq);
+			SearchFilterParser.CompareOperation.sw);
 	}
 
 	private Predicate addPredicateString(String theResourceName,
