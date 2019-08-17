@@ -16,9 +16,9 @@ public class EncodingEnumTest {
 
 	@Test
 	public void getTypeWithSpace() {
-		assertEquals("application/fhir xml", EncodingEnum.getTypeWithoutCharset("application/fhir+xml"));
-		assertEquals("application/fhir xml", EncodingEnum.getTypeWithoutCharset("application/fhir+xml; charset=utf-8"));
-		assertEquals("application/fhir xml", EncodingEnum.getTypeWithoutCharset("application/fhir+xml ; charset=utf-8"));
+		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml"));
+		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml; charset=utf-8"));
+		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml ; charset=utf-8"));
 	}
 
 }
