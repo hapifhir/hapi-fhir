@@ -844,7 +844,7 @@ public class SearchBuilder implements ISearchBuilder {
 			return null;
 		}
 
-		List<Predicate> codePredicates = new ArrayList<Predicate>();
+		List<Predicate> codePredicates = new ArrayList<>();
 		for (IQueryParameterType nextOr : theList) {
 			IQueryParameterType theParameter = nextOr;
 			Predicate singleCode = createPredicateString(theParameter,
