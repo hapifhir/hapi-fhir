@@ -829,7 +829,7 @@ public class SearchBuilder implements ISearchBuilder {
 		return addPredicateString(theResourceName,
 			theParamName,
 			theList,
-			SearchFilterParser.CompareOperation.eq);
+			SearchFilterParser.CompareOperation.sw);
 	}
 
 	private Predicate addPredicateString(String theResourceName,
@@ -1743,11 +1743,11 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 	private Collection<Predicate> createPredicateToken(Collection<IQueryParameterType> theParameters,
-														String theResourceName,
-														String theParamName,
-														CriteriaBuilder theBuilder,
-														From<?, ResourceIndexedSearchParamToken> theFrom,
-														SearchFilterParser.CompareOperation operation) {
+																		String theResourceName,
+																		String theParamName,
+																		CriteriaBuilder theBuilder,
+																		From<?, ResourceIndexedSearchParamToken> theFrom,
+																		SearchFilterParser.CompareOperation operation) {
 		final List<VersionIndependentConcept> codes = new ArrayList<>();
 
 		TokenParamModifier modifier = null;
@@ -2495,7 +2495,7 @@ public class SearchBuilder implements ISearchBuilder {
 		// the user has a chance to know that they were in the results
 		if (allAdded.size() > 0) {
 			List<Long> includedPidList = new ArrayList<>(allAdded);
-			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, ()->this);
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(includedPidList, () -> this);
 			HookParams params = new HookParams()
 				.add(IPreResourceAccessDetails.class, accessDetails)
 				.add(RequestDetails.class, theRequest)
@@ -2718,13 +2718,13 @@ public class SearchBuilder implements ISearchBuilder {
 					Collections.singletonList(new NumberParam(theFilter.getValue())),
 					theFilter.getOperation());
 			} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
-				return addPredicateReference(theResourceName,
-					theFilter.getParamPath().getName(),
-					Collections.singletonList(new ReferenceParam(theFilter.getParamPath().getName(),
-						(theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString()
-							: null,
-						theFilter.getValue())),
-					theFilter.getOperation(), theRequest);
+				String paramName = theFilter.getParamPath().getName();
+				SearchFilterParser.CompareOperation operation = theFilter.getOperation();
+				String resourceType = null; // The value can either have (Patient/123) or not have (123) a resource type, either way it's not needed here
+				String chain = (theFilter.getParamPath().getNext() != null) ? theFilter.getParamPath().getNext().toString() : null;
+				String value = theFilter.getValue();
+				ReferenceParam referenceParam = new ReferenceParam(resourceType, chain, value);
+				return addPredicateReference(theResourceName, paramName, Collections.singletonList(referenceParam), operation, theRequest);
 			} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
 				return addPredicateQuantity(theResourceName,
 					theFilter.getParamPath().getName(),
@@ -2765,7 +2765,7 @@ public class SearchBuilder implements ISearchBuilder {
 				theResourceName, theRequest);
 
 			if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.and) {
-				return myBuilder.and(leftPredicate,	rightPredicate);
+				return myBuilder.and(leftPredicate, rightPredicate);
 			} else if (((SearchFilterParser.FilterLogical) filter).getOperation() == SearchFilterParser.FilterLogicalOperation.or) {
 				return myBuilder.or(leftPredicate, rightPredicate);
 			}
@@ -3078,79 +3078,79 @@ public class SearchBuilder implements ISearchBuilder {
 					CurrentThreadCaptureQueriesListener.startCapturing();
 				}
 
-			// If we don't have a query yet, create one
-			if (myResultsIterator == null) {
-				if (myMaxResultsToFetch == null) {
-					myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
-				}
+				// If we don't have a query yet, create one
+				if (myResultsIterator == null) {
+					if (myMaxResultsToFetch == null) {
+						myMaxResultsToFetch = myDaoConfig.getFetchSizeDefaultMaximum();
+					}
 
-				final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false, myRequest);
+					final TypedQuery<Long> query = createQuery(mySort, myMaxResultsToFetch, false, myRequest);
 
-				mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
+					mySearchRuntimeDetails.setQueryStopwatch(new StopWatch());
 
-				Query<Long> hibernateQuery = (Query<Long>) query;
-				hibernateQuery.setFetchSize(myFetchSize);
-				ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
-				myResultsIterator = new ScrollableResultsIterator<>(scroll);
+					Query<Long> hibernateQuery = (Query<Long>) query;
+					hibernateQuery.setFetchSize(myFetchSize);
+					ScrollableResults scroll = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+					myResultsIterator = new ScrollableResultsIterator<>(scroll);
 
-				// If the query resulted in extra results being requested
-				if (myAlsoIncludePids != null) {
-					myPreResultsIterator = myAlsoIncludePids.iterator();
-				}
-			}
-
-			if (myNext == null) {
-
-				if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
-					while (myPreResultsIterator.hasNext()) {
-						Long next = myPreResultsIterator.next();
-						if (next != null)
-							if (myPidSet.add(next)) {
-								myNext = next;
-								break;
-							}
+					// If the query resulted in extra results being requested
+					if (myAlsoIncludePids != null) {
+						myPreResultsIterator = myAlsoIncludePids.iterator();
 					}
 				}
 
 				if (myNext == null) {
-					while (myResultsIterator.hasNext()) {
-						Long next = myResultsIterator.next();
-						if (next != null) {
-							if (myPidSet.add(next)) {
-								myNext = next;
-								break;
-							} else {
-								mySkipCount++;
-							}
-						}
-					}
-				}
 
-				if (myNext == null) {
-					if (myStillNeedToFetchIncludes) {
-						myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
-						myStillNeedToFetchIncludes = false;
-					}
-					if (myIncludesIterator != null) {
-						while (myIncludesIterator.hasNext()) {
-							Long next = myIncludesIterator.next();
+					if (myPreResultsIterator != null && myPreResultsIterator.hasNext()) {
+						while (myPreResultsIterator.hasNext()) {
+							Long next = myPreResultsIterator.next();
 							if (next != null)
 								if (myPidSet.add(next)) {
 									myNext = next;
 									break;
 								}
 						}
-						if (myNext == null) {
+					}
+
+					if (myNext == null) {
+						while (myResultsIterator.hasNext()) {
+							Long next = myResultsIterator.next();
+							if (next != null) {
+								if (myPidSet.add(next)) {
+									myNext = next;
+									break;
+								} else {
+									mySkipCount++;
+								}
+							}
+						}
+					}
+
+					if (myNext == null) {
+						if (myStillNeedToFetchIncludes) {
+							myIncludesIterator = new IncludesIterator(myPidSet, myRequest);
+							myStillNeedToFetchIncludes = false;
+						}
+						if (myIncludesIterator != null) {
+							while (myIncludesIterator.hasNext()) {
+								Long next = myIncludesIterator.next();
+								if (next != null)
+									if (myPidSet.add(next)) {
+										myNext = next;
+										break;
+									}
+							}
+							if (myNext == null) {
+								myNext = NO_MORE;
+							}
+						} else {
 							myNext = NO_MORE;
 						}
-					} else {
-						myNext = NO_MORE;
 					}
-				}
 
-			} // if we need to fetch the next result
+				} // if we need to fetch the next result
 
-			mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
+				mySearchRuntimeDetails.setFoundMatchesCount(myPidSet.size());
 
 			} finally {
 				if (haveRawSqlHooks) {
@@ -3281,7 +3281,6 @@ public class SearchBuilder implements ISearchBuilder {
 	}
 
 
-
 	/**
 	 * Figures out the tolerance for a search. For example, if the user is searching for <code>4.00</code>, this method
 	 * returns <code>0.005</code> because we shold actually match values which are
@@ -3345,7 +3344,6 @@ public class SearchBuilder implements ISearchBuilder {
 
 		return query.getResultList();
 	}
-
 
 
 	private static Predicate[] toArray(List<Predicate> thePredicates) {

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
+import net.ttddyy.dsproxy.listener.logging.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.dialect.H2Dialect;
@@ -106,9 +107,10 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		retVal.setPassword("");
 		retVal.setMaxTotal(ourMaxThreads);
 
+		SLF4JLogLevel level = SLF4JLogLevel.INFO;
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
-//			.logQueryBySlf4j(SLF4JLogLevel.INFO, "SQL")
+			.logQueryBySlf4j(level, "SQL")
 //			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
