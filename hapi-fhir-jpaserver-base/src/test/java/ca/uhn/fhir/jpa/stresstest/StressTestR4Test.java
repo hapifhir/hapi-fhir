@@ -4,6 +4,8 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -35,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.AopTestUtils;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -77,6 +80,11 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 
 		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
+
+		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+		searchCoordinator.setLoadingThrottleForUnitTests(null);
+		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+
 	}
 
 	@Override
@@ -93,15 +101,22 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
-
+	@Autowired
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
 
 
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
-		int count = 1000;
+		int resourceCount = 1000;
+		int queryCount = 30;
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(50, 200, -1));
+
+		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+		searchCoordinator.setLoadingThrottleForUnitTests(10);
+
 		Bundle bundle = new Bundle();
 
-		for (int i = 0; i < count; i++) {
+		for (int i = 0; i < resourceCount; i++) {
 			Observation o = new Observation();
 			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
 			o.setEffective( DateTimeType.now());
@@ -124,7 +139,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		Bundle searchResult = fhirClient
 			.search()
 			.byUrl(url)
-			.count(300)
+			.count(queryCount)
 			.returnBundle(Bundle.class)
 			.execute();
 		while(true) {
@@ -150,10 +165,10 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			if (searchResult.getLink(Constants.LINK_NEXT) == null) {
 				break;
 			} else {
-				if (searchResult.getEntry().size() != 300) {
+				if (searchResult.getEntry().size() != queryCount) {
 					throw new Exception("Page had " + searchResult.getEntry().size() + " resources");
 				}
-				if (passIds.size() != 300) {
+				if (passIds.size() != queryCount) {
 					throw new Exception("Page had " + passIds.size() + " unique ids");
 				}
 			}
@@ -163,7 +178,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			searchResult = fhirClient.loadPage().next(searchResult).execute();
 		}
 
-		assertEquals(count, ids.size());
+		assertEquals(resourceCount, ids.size());
 	}
 
 

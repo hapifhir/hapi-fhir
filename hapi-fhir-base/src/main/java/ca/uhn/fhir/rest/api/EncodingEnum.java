@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public enum EncodingEnum {
 
 	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_JSON) {
@@ -166,7 +168,10 @@ public enum EncodingEnum {
 	 * is found.
 	 * <p>
 	 * <b>This method is lenient!</b> Things like "application/xml" will return {@link EncodingEnum#XML}
-	 * even if the "+fhir" part is missing from the expected content type.
+	 * even if the "+fhir" part is missing from the expected content type. Also,
+	 * spaces are treated as a plus (i.e. "application/fhir json" will be treated as
+	 * "application/fhir+json" in order to account for unescaped spaces in URL
+	 * parameters)
 	 * </p>
 	 */
 	public static EncodingEnum forContentType(final String theContentType) {
@@ -198,7 +203,7 @@ public enum EncodingEnum {
 	}
 
 	static String getTypeWithoutCharset(final String theContentType) {
-		if (theContentType == null) {
+		if (isBlank(theContentType)) {
 			return null;
 		} else {
 
@@ -210,12 +215,22 @@ public enum EncodingEnum {
 			}
 			int end = start;
 			for (; end < theContentType.length(); end++) {
-				if (theContentType.charAt(end) == ' ' || theContentType.charAt(end) == ';') {
+				if (theContentType.charAt(end) == ';') {
+					break;
+				}
+			}
+			for (; end > start; end--) {
+				if (theContentType.charAt(end - 1) != ' ') {
 					break;
 				}
 			}
 
-			return theContentType.substring(start, end);
+			String retVal = theContentType.substring(start, end);
+
+			if (retVal.contains(" ")) {
+				retVal = retVal.replace(' ', '+');
+			}
+			return retVal;
 		}
 	}
 
