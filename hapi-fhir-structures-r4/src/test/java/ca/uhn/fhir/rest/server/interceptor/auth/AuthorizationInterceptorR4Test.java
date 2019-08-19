@@ -19,7 +19,9 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
@@ -34,24 +36,19 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
 import org.junit.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.*;
-
-import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class AuthorizationInterceptorR4Test {
 
@@ -1894,6 +1891,55 @@ public class AuthorizationInterceptorR4Test {
 	}
 
 	@Test
+	public void testGraphQLAllowed() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").graphQL().any().andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+	}
+
+	@Test
+	public void testGraphQLDenied() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+	}
+
+	@Test
 	public void testReadByAnyId() throws Exception {
 		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2086,6 +2132,41 @@ public class AuthorizationInterceptorR4Test {
 		assertFalse(ourHitMethod);
 
 	}
+
+
+	@Test
+	public void testReadByTypeWithAnyId() throws Exception {
+		ourServlet.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(ServiceRequest.class).withAnyId().andThen()
+					.build();
+			}
+		});
+
+		HttpGet httpGet;
+		HttpResponse status;
+		String response;
+
+		ourReturn = Collections.singletonList(new Consent().setDateTime(new Date()).setId("Consent/123"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/Consent");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertFalse(ourHitMethod);
+
+		ourReturn = Collections.singletonList(new ServiceRequest().setAuthoredOn(new Date()).setId("ServiceRequest/123"));
+		ourHitMethod = false;
+		httpGet = new HttpGet("http://localhost:" + ourPort + "/ServiceRequest");
+		status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertTrue(ourHitMethod);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+	}
+
 
 	@Test
 	public void testReadByCompartmentReadByIdParam() throws Exception {
@@ -3558,6 +3639,38 @@ public class AuthorizationInterceptorR4Test {
 
 	}
 
+	public static class DummyServiceRequestResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ServiceRequest.class;
+		}
+
+		@Search
+		public List<Resource> search() {
+			assert ourReturn != null;
+			ourHitMethod = true;
+			return ourReturn;
+		}
+
+	}
+
+	public static class DummyConsentResourceProvider implements IResourceProvider {
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return Consent.class;
+		}
+
+		@Search
+		public List<Resource> search() {
+			assert ourReturn != null;
+			ourHitMethod = true;
+			return ourReturn;
+		}
+
+	}
+
 	@SuppressWarnings("unused")
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
@@ -3732,6 +3845,11 @@ public class AuthorizationInterceptorR4Test {
 			return (Parameters) new Parameters().setId("1");
 		}
 
+		@GraphQL
+		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+			ourHitMethod = true;
+			return "{'foo':'bar'}";
+		}
 
 		@Transaction()
 		public Bundle search(ServletRequestDetails theRequestDetails, IInterceptorBroadcaster theInterceptorBroadcaster, @TransactionParam Bundle theInput) {
@@ -3771,7 +3889,9 @@ public class AuthorizationInterceptorR4Test {
 		ServletHandler proxyHandler = new ServletHandler();
 		ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
-		ourServlet.setResourceProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProviders(patProvider, obsProv, encProv, cpProv, orgProv, drProv);
+		ourServlet.registerProvider(new DummyServiceRequestResourceProvider());
+		ourServlet.registerProvider(new DummyConsentResourceProvider());
 		ourServlet.setPlainProviders(plainProvider);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ourServlet.setDefaultResponseEncoding(EncodingEnum.JSON);
@@ -3779,7 +3899,7 @@ public class AuthorizationInterceptorR4Test {
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourServer);
-        ourPort = JettyUtil.getPortForStartedServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

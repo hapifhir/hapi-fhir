@@ -20,7 +20,7 @@ public class TestSubscriptionDstu3Config extends SubscriptionDstu3Config {
 
 	@Bean
 	@Primary
-	public ISubscriptionProvider subsriptionProvider() {
+	public ISubscriptionProvider subscriptionProvider() {
 		return new MockFhirClientSubscriptionProvider();
 	}
 

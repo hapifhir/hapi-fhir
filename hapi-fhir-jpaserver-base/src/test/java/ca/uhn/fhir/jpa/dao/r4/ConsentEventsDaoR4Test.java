@@ -464,12 +464,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 			ourLog.info("Allowing IDs: {}", nonBlocked);
 
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				ourLog.error("Trace", e);
-			}
-
 		}
 	}
 

@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -108,8 +109,7 @@ public abstract class BaseResourceProviderR5Test extends BaseJpaR5Test {
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
 
-//			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
-//			ourRestServer.registerProvider(ourGraphQLProvider);
+			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 
 			JpaConformanceProviderR5 confProvider = new JpaConformanceProviderR5(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");

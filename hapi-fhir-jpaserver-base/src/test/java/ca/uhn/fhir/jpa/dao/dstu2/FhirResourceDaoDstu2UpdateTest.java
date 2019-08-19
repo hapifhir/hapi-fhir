@@ -6,6 +6,7 @@ import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TagList;
 import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.Organization;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -18,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -82,6 +84,18 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily(methodName);
 
 		myPatientDao.update(p, mySrd);
+	}
+
+	/**
+	 * Make sure we can upload a real example resource from the DSTU2 argonaut example pack
+	 */
+	@Test
+	public void testUploadArgonautExampleConformance() throws IOException {
+		Conformance conformance = loadResourceFromClasspath(Conformance.class, "/dstu2/Conformance-server.json");
+		conformance.setId("");
+		myConformanceDao.create(conformance);
+
+		assertEquals(1, myConformanceDao.search(new SearchParameterMap().setLoadSynchronous(true)).size().intValue());
 	}
 
 	/**

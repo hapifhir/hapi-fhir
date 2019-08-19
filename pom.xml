@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>4.0.0-SNAPSHOT</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -539,6 +539,14 @@
 			<id>uurl</id>
 			<name>Raul Estrada</name>
 		</developer>
+		<developer>
+			<id>anthonys123</id>
+			<name>Anthony Sute</name>
+		</developer>
+		<developer>
+			<id>nickrobison-usds</id>
+			<name>Nick Robison</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -550,7 +558,7 @@
 
 	<properties>
 
-		<fhir_core_version>3.8.23-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.1-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->

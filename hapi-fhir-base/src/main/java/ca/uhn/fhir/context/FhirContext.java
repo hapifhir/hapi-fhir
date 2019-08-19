@@ -631,7 +631,10 @@ public class FhirContext {
 	 * Performance Note: <b>This method is cheap</b> to call, and may be called once for every message being processed
 	 * without incurring any performance penalty
 	 * </p>
+	 *
+	 * @deprecated THIS FEATURE IS NOT YET COMPLETE
 	 */
+	@Deprecated
 	public IParser newRDFParser() {
 		return new RDFParser(this, myParserErrorHandler, Lang.TURTLE);
 	}

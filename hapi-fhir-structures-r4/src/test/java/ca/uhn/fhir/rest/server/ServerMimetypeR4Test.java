@@ -319,16 +319,16 @@ public class ServerMimetypeR4Test {
 	public void testSearchWithFormatJsonNew() throws Exception {
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?_format=" + Constants.CT_FHIR_JSON_NEW);
-		HttpResponse status = ourClient.execute(httpGet);
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
-		ourLog.info("Response was:\n{}", responseContent);
+			ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent, containsString("\"resourceType\""));
-		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("\"resourceType\""));
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		}
 	}
 
 	@Test

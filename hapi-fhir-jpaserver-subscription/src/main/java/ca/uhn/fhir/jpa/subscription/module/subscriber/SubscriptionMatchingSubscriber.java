@@ -10,6 +10,8 @@ import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*-
@@ -103,6 +106,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		IIdType resourceId = theMsg.getId(myFhirContext);
+		Boolean isText = false;
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAll();
 
@@ -134,15 +138,21 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
 			IBaseResource payload = theMsg.getNewPayload(myFhirContext);
+			CanonicalSubscription subscription = nextActiveSubscription.getSubscription();
+
+			EncodingEnum encoding = null;
+			if (subscription.getPayloadString() != null && !subscription.getPayloadString().isEmpty()) {
+				encoding = EncodingEnum.forContentType(subscription.getPayloadString());
+				isText = subscription.getPayloadString().equals(Constants.CT_TEXT);
+			}
+			encoding = defaultIfNull(encoding, EncodingEnum.JSON);
 
 			ResourceDeliveryMessage deliveryMsg = new ResourceDeliveryMessage();
-			deliveryMsg.setPayload(myFhirContext, payload);
-			deliveryMsg.setSubscription(nextActiveSubscription.getSubscription());
+
+			deliveryMsg.setPayload(myFhirContext, payload, encoding);
+			deliveryMsg.setSubscription(subscription);
 			deliveryMsg.setOperationType(theMsg.getOperationType());
 			deliveryMsg.copyAdditionalPropertiesFrom(theMsg);
-			if (payload == null) {
-				deliveryMsg.setPayloadId(theMsg.getId(myFhirContext));
-			}
 
 			// Interceptor call: SUBSCRIPTION_RESOURCE_MATCHED
 			HookParams params = new HookParams()

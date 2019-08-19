@@ -710,7 +710,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLongString() {
-		//@formatter:off
 		String input = "<NamingSystem>\n" +
 			"        <name value=\"NDF-RT (National Drug File – Reference Terminology)\"/>\n" +
 			"        <status value=\"draft\"/>\n" +
@@ -728,12 +727,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			"          <preferred value=\"false\"/>\n" +
 			"        </uniqueId>\n" +
 			"      </NamingSystem>";
-		//@formatter:on
 
 		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true))), org.hamcrest.Matchers.contains(id.getValue()));
+		SearchParameterMap params = new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true);
+		IBundleProvider result = myNamingSystemDao.search(params);
+		assertThat(toUnqualifiedVersionlessIdValues(result), org.hamcrest.Matchers.contains(id.getValue()));
 	}
 
 	@Test

@@ -73,6 +73,7 @@ public class TestDstu2Config extends BaseJavaConfigDstu2 {
 		retVal.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
 		retVal.setFetchSizeDefaultMaximum(10000);
 		retVal.setWebsocketContextPath("/");
+		retVal.setFilterParameterEnabled(true);
 		return retVal;
 	}
 
