@@ -1062,7 +1062,8 @@
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>3.1.6</version>
+				<version>4.0.0-rc1</version>
+				<!-- TODO KHS With this version bump, these excludes should no longer be necessary
 				<exclusions>
 					<exclusion>
 						<groupId>org.hamcrest</groupId>
@@ -1077,6 +1078,7 @@
 						<artifactId>hamcrest-library</artifactId>
 					</exclusion>
 				</exclusions>
+				-->
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
