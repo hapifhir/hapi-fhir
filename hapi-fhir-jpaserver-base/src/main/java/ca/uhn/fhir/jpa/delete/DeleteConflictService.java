@@ -42,11 +42,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class DeleteConflictService {
@@ -68,7 +65,11 @@ public class DeleteConflictService {
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
-		newConflicts.setResourcesMarkedForDeletion(theDeleteConflicts.getResourcesMarkedForDeletion());
+
+		// We want the list of resources that are marked to be the same list even as we
+		// drill into conflict resolution stacks.. this allows us to not get caught by
+		// circular references
+		newConflicts.setResourceIdsMarkedForDeletion(theDeleteConflicts.getResourceIdsMarkedForDeletion());
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
@@ -122,8 +123,8 @@ public class DeleteConflictService {
 			IdDt targetId = theEntity.getIdDt();
 			IdDt sourceId = link.getSourceResource().getIdDt();
 			String sourcePath = link.getSourcePath();
-			if (theDeleteConflicts.getResourcesMarkedForDeletion().contains(sourceId.toUnqualifiedVersionless().getValue())) {
-				if (theDeleteConflicts.getResourcesMarkedForDeletion().contains(targetId.toUnqualifiedVersionless().getValue())) {
+			if (theDeleteConflicts.getResourceIdsMarkedForDeletion().contains(sourceId.toUnqualifiedVersionless().getValue())) {
+				if (theDeleteConflicts.getResourceIdsMarkedForDeletion().contains(targetId.toUnqualifiedVersionless().getValue())) {
 					continue;
 				}
 			}
