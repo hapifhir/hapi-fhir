@@ -13,11 +13,11 @@ public class ResourceHistoryProvenanceEntity {
 	@Id
 	@Column(name = "RES_VER_PID")
 	private Long myId;
-	@OneToOne()
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_VER_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RESVER_PID"), nullable = false, insertable = false, updatable = false)
 	@MapsId
 	private ResourceHistoryTable myResourceHistoryTable;
-	@OneToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "RES_PID", referencedColumnName = "RES_ID", foreignKey = @ForeignKey(name = "FK_RESVERPROV_RES_PID"), nullable = false)
 	private ResourceTable myResourceTable;
 	@Column(name = "SOURCE_URI", length = SOURCE_URI_LENGTH, nullable = true)
