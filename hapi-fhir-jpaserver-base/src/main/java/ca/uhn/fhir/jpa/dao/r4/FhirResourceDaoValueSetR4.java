@@ -323,7 +323,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 		}
 
 		if (vs != null) {
-			ValueSet expansion = doExpand(vs); // FIXME: DM 2019-08-17 - Need to account for concepts in terminology tables.
+			ValueSet expansion = doExpand(vs); // TODO: DM 2019-08-17 - Need to account for concepts in terminology tables. See #1431
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
