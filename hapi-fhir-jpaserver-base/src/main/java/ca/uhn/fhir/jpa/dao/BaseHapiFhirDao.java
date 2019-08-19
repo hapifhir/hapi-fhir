@@ -615,7 +615,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (theEntity.getId() == null) {
 				changed = true;
 			} else {
-				ResourceHistoryTable currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
+				if (currentHistoryVersion == null) {
+					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), theEntity.getVersion());
+				}
 				if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
 					changed = true;
 				} else {
@@ -871,11 +874,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
 			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+			((ResourceTable)theEntity).setCurrentVersionEntity(history);
+
 			while (history == null) {
 				if (version > 1L) {
 					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
 				} else {
 					return null;
 				}

@@ -34,28 +34,26 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-//@formatter:off
 @Entity
 @Immutable
-@Subselect("SELECT h.pid        as pid            " +
-	",  h.res_id            as res_id         " +
-	",  h.res_type          as res_type       " +
-	",  h.res_version       as res_version    " + // FHIR version
-	",  h.res_ver           as res_ver        " + // resource version
-	",  h.has_tags          as has_tags       " +
-	",  h.res_deleted_at    as res_deleted_at " +
-	",  h.res_published     as res_published  " +
-	",  h.res_updated       as res_updated    " +
-	",  h.res_text          as res_text       " +
-	",  h.res_encoding      as res_encoding   " +
-	",  p.SOURCE_URI        as prov_source_uri" +
-	",  p.REQUEST_ID        as prov_request_id" +
-	",  f.forced_id         as FORCED_PID      " +
+@Subselect("SELECT h.pid               as pid,            " +
+	"               h.res_id            as res_id,         " +
+	"               h.res_type          as res_type,       " +
+	"               h.res_version       as res_version,    " + // FHIR version
+	"               h.res_ver           as res_ver,        " + // resource version
+	"               h.has_tags          as has_tags,       " +
+	"               h.res_deleted_at    as res_deleted_at, " +
+	"               h.res_published     as res_published,  " +
+	"               h.res_updated       as res_updated,    " +
+	"               h.res_text          as res_text,       " +
+	"               h.res_encoding      as res_encoding,   " +
+	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
+	"               p.REQUEST_ID        as PROV_REQUEST_ID," +
+	"               f.forced_id         as FORCED_PID      " +
 	"FROM HFJ_RES_VER h "
 	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
 	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid "
 	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
-// @formatter:on
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -76,9 +74,9 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
-	@Column(name = "prov_request_id")
+	@Column(name = "PROV_REQUEST_ID")
 	private String myProvenanceRequestId;
-	@Column(name = "prov_source_uri")
+	@Column(name = "PROV_SOURCE_URI")
 	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;

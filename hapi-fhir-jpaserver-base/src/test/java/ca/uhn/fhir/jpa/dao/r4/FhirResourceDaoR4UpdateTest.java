@@ -108,20 +108,12 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			return resourceTable.getUpdated().getValueAsString();
 		});
 
-		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("2");
-			myPatientDao.update(p);
+			myPatientDao.update(p).getResource();
 		});
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// TODO: it'd be nice if this was lower
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
-		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
 		runInTransaction(() -> {
 			List<ResourceTable> allResources = myResourceTableDao.findAll();
@@ -157,7 +149,9 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		// Do a read
 		{
+			myCaptureQueriesListener.clear();
 			Patient patient = myPatientDao.read(id, mySrd);
+			myCaptureQueriesListener.logAllQueriesForCurrentThread();
 			List<CanonicalType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());

@@ -27,7 +27,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-//@formatter:off
 @Entity
 @Table(name = "HFJ_RES_VER", uniqueConstraints = {
 	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
@@ -36,7 +35,6 @@ import java.util.Collection;
 	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
-//@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
@@ -73,7 +71,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
-	@OneToOne(mappedBy = "myResourceHistoryTable")
+	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
 	private ResourceHistoryProvenanceEntity myProvenance;
 
 	public ResourceHistoryTable() {

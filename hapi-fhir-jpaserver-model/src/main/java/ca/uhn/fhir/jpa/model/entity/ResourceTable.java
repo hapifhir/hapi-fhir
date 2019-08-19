@@ -216,6 +216,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	private long myVersion;
 	@OneToMany(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
 	private Collection<ResourceHistoryProvenanceEntity> myProvenance;
+	@Transient
+	private transient ResourceHistoryTable myCurrentVersionEntity;
 
 	public Collection<ResourceLink> getResourceLinksAsTarget() {
 		if (myResourceLinksAsTarget == null) {
@@ -612,4 +614,19 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 		}
 	}
 
+	/**
+	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
+	 * not persisted.
+	 */
+	public void setCurrentVersionEntity(ResourceHistoryTable theCurrentVersionEntity) {
+		myCurrentVersionEntity = theCurrentVersionEntity;
+	}
+
+	/**
+	 * This is a convenience to avoid loading the version a second time within a single transaction. It is
+	 * not persisted.
+	 */
+	public ResourceHistoryTable getCurrentVersionEntity() {
+		return myCurrentVersionEntity;
+	}
 }
