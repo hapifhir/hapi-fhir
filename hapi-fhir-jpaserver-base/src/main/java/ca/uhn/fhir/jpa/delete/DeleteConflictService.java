@@ -68,6 +68,7 @@ public class DeleteConflictService {
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
 		DeleteConflictList newConflicts = new DeleteConflictList();
+		newConflicts.setResourcesMarkedForDeletion(theDeleteConflicts.getResourcesMarkedForDeletion());
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
@@ -104,6 +105,10 @@ public class DeleteConflictService {
 
 		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
 
+		if (theDeleteConflicts.isEmpty()) {
+			return new DeleteConflictOutcome();
+		}
+
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
 			.add(DeleteConflictList.class, theDeleteConflicts)
@@ -117,6 +122,12 @@ public class DeleteConflictService {
 			IdDt targetId = theEntity.getIdDt();
 			IdDt sourceId = link.getSourceResource().getIdDt();
 			String sourcePath = link.getSourcePath();
+			if (theDeleteConflicts.getResourcesMarkedForDeletion().contains(sourceId.toUnqualifiedVersionless().getValue())) {
+				if (theDeleteConflicts.getResourcesMarkedForDeletion().contains(targetId.toUnqualifiedVersionless().getValue())) {
+					continue;
+				}
+			}
+
 			theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
 		}
 	}

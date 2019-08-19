@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.delete;
  */
 
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,6 +30,15 @@ import java.util.function.Predicate;
 
 public class DeleteConflictList implements Iterable<DeleteConflict> {
 	private final List<DeleteConflict> myList = new ArrayList<>();
+	private List<String> myResourcesMarkedForDeletion = new ArrayList<>();
+
+	public List<String> getResourcesMarkedForDeletion() {
+		return myResourcesMarkedForDeletion;
+	}
+
+	public void setResourcesMarkedForDeletion(List<String> theResourcesMarkedForDeletion) {
+		myResourcesMarkedForDeletion = theResourcesMarkedForDeletion;
+	}
 
 	public void add(DeleteConflict theDeleteConflict) {
 		myList.add(theDeleteConflict);
