@@ -214,6 +214,8 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@Version
 	@Column(name = "RES_VER")
 	private long myVersion;
+	@OneToOne(mappedBy = "myResourceTable", fetch = FetchType.LAZY)
+	private ResourceHistoryProvenanceEntity myProvenance;
 
 	public Collection<ResourceLink> getResourceLinksAsTarget() {
 		if (myResourceLinksAsTarget == null) {

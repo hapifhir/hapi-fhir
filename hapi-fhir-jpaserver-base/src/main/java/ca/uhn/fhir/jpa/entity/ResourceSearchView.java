@@ -48,9 +48,12 @@ import java.util.Date;
 	",  h.res_updated       as res_updated    " +
 	",  h.res_text          as res_text       " +
 	",  h.res_encoding      as res_encoding   " +
+	",  p.SOURCE_URI        as prov_source_uri" +
+	",  p.REQUEST_ID        as prov_request_id" +
 	",  f.forced_id         as FORCED_PID      " +
 	"FROM HFJ_RES_VER h "
 	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
+	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid "
 	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
 // @formatter:on
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
@@ -73,34 +76,39 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
-
+	@Column(name = "prov_request_id")
+	private String myProvenanceRequestId;
+	@Column(name = "prov_source_uri")
+	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;
-
 	@Column(name = "RES_DELETED_AT")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED")
 	private Date myPublished;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED")
 	private Date myUpdated;
-
 	@Column(name = "RES_TEXT")
 	@Lob()
 	private byte[] myResource;
-
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
-
-	@Column(name = "FORCED_PID", length= ForcedId.MAX_FORCED_ID_LENGTH)
+	@Column(name = "FORCED_PID", length = ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 
 	public ResourceSearchView() {
+	}
+
+	public String getProvenanceRequestId() {
+		return myProvenanceRequestId;
+	}
+
+	public String getProvenanceSourceUri() {
+		return myProvenanceSourceUri;
 	}
 
 	@Override

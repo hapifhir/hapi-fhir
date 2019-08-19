@@ -168,6 +168,7 @@ public class Constants {
 	public static final String PARAM_SORT = "_sort";
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
+	public static final String PARAM_SOURCE = "_source";
 	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
 	public static final String PARAM_TAGS = "_tags";
@@ -220,6 +221,7 @@ public class Constants {
 	public static final String CACHE_CONTROL_PRIVATE = "private";
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
+	public static final int REQUEST_ID_LENGTH = 16;
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);

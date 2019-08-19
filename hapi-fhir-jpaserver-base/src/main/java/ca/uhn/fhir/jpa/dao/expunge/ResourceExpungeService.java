@@ -87,6 +87,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
 
 	@Override
 	@Transactional
@@ -146,6 +148,10 @@ class ResourceExpungeService implements IResourceExpungeService {
 
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
+		if (version.getProvenance() != null) {
+			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
+		}
+		
 		myResourceHistoryTagDao.deleteAll(version.getTags());
 		myResourceHistoryTableDao.delete(version);
 

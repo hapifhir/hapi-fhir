@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -41,13 +39,12 @@ import java.util.Collection;
 //@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
-	private static final long serialVersionUID = 1L;
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	/**
 	 * @see ResourceEncodingEnum
 	 */
 	public static final int ENCODING_COL_LENGTH = 5;
-
+	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
@@ -76,8 +73,19 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
+	@OneToOne(mappedBy = "myResourceHistoryTable")
+	private ResourceHistoryProvenanceEntity myProvenance;
+
 	public ResourceHistoryTable() {
 		super();
+	}
+
+	public ResourceHistoryProvenanceEntity getProvenance() {
+		return myProvenance;
+	}
+
+	public void setProvenance(ResourceHistoryProvenanceEntity theProvenance) {
+		myProvenance = theProvenance;
 	}
 
 	public void addTag(ResourceHistoryTag theTag) {

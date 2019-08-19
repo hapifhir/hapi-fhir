@@ -7,6 +7,15 @@
 	</properties>
 	<body>
 		<release version="4.1.0" date="TBD" description="Igloo">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+				</ul>
+				]]>
+			</action>
 		<!--
 		<action type="add" issue="1321">
 			Support has been added for RDF encoding and parsing in the

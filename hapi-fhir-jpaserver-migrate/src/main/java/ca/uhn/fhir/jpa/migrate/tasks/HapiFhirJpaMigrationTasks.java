@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.entity.*;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.VersionEnum;
 
 import java.util.Arrays;
@@ -55,6 +56,28 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init350();
 		init360();
 		init400();
+		init410();
+	}
+
+	protected void init410() {
+		Builder version = forVersion(VersionEnum.V4_1_0);
+
+		version.startSectionWithMessage("Processing table: HFJ_RES_VER_PROV");
+		Builder.BuilderAddTableByColumns resVerProv = version.addTableByColumns("HFJ_RES_VER_PROV", "RES_VER_PID");
+		resVerProv.addColumn("RES_VER_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		resVerProv
+			.addForeignKey("FK_RESVERPROV_RESVER_PID")
+			.toColumn("RES_VER_PID")
+			.references("HFJ_RES_VER", "PID");
+		resVerProv.addColumn("RES_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		resVerProv
+			.addForeignKey("FK_RESVERPROV_RES_PID")
+			.toColumn("RES_PID")
+			.references("HFJ_RESOURCE", "RES_ID");
+		resVerProv.addColumn("SOURCE_URI").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH);
+		resVerProv.addColumn("REQUEST_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, Constants.REQUEST_ID_LENGTH);
+
+
 	}
 
 	protected void init400() {
