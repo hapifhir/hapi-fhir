@@ -397,7 +397,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandInvalidParams() throws IOException {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -407,11 +406,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: $expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request.", e.getMessage());
 		}
-		//@formatter:on
 
-		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
 			ourClient
@@ -425,9 +422,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
-		//@formatter:on
 
-		//@formatter:off
 		try {
 			ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-dstu3.xml");
 			ourClient
@@ -441,8 +436,30 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: $expand must EITHER be invoked at the instance level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
-		//@formatter:on
 
+		try {
+			ourClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "offset", new IntegerType(-1))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: offset parameter for $expand operation must be >= 0 when specified. offset: -1", e.getMessage());
+		}
+
+		try {
+			ourClient
+				.operation()
+				.onInstance(myExtensionalVsId)
+				.named("expand")
+				.withParameter(Parameters.class, "count", new IntegerType(-1))
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("HTTP 400 Bad Request: count parameter for $expand operation must be >= 0 when specified. count: -1", e.getMessage());
+		}
 	}
 
 	@Test

@@ -149,6 +149,18 @@ public class DaoConfig {
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
 	 */
 	private boolean myPreExpandValueSetsExperimental = false;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 0}!
+	 */
+	private int myPreExpandValueSetsDefaultOffsetExperimental = 0;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 */
+	private int myPreExpandValueSetsDefaultCountExperimental = 1000;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 */
+	private int myPreExpandValueSetsMaxCountExperimental = 1000;
 
 	/**
 	 * Constructor
@@ -1630,6 +1642,86 @@ public class DaoConfig {
 	 */
 	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
 		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 0}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsDefaultOffsetExperimental() {
+		return myPreExpandValueSetsDefaultOffsetExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsDefaultCountExperimental() {
+		return myPreExpandValueSetsDefaultCountExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsDefaultCountExperimental} is greater than
+	 * {@link DaoConfig#getPreExpandValueSetsMaxCountExperimental()}, the lesser value is used.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsDefaultCountExperimental(int thePreExpandValueSetsDefaultCountExperimental) {
+		myPreExpandValueSetsDefaultCountExperimental = Math.min(thePreExpandValueSetsDefaultCountExperimental, getPreExpandValueSetsMaxCountExperimental());
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsMaxCountExperimental() {
+		return myPreExpandValueSetsMaxCountExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsMaxCountExperimental} is lesser than
+	 * {@link DaoConfig#getPreExpandValueSetsDefaultCountExperimental()}, the default {@code count} is lowered to the
+	 * new max {@code count}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsMaxCountExperimental(int thePreExpandValueSetsMaxCountExperimental) {
+		myPreExpandValueSetsMaxCountExperimental = thePreExpandValueSetsMaxCountExperimental;
+		setPreExpandValueSetsDefaultCountExperimental(Math.min(getPreExpandValueSetsDefaultCountExperimental(), getPreExpandValueSetsMaxCountExperimental()));
 	}
 
 	public enum IndexEnabledEnum {

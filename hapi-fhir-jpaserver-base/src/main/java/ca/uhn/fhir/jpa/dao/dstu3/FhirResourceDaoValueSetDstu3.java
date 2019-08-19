@@ -75,6 +75,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		return expand(source, theFilter);
 	}
 
+	@Override
+	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequestDetails) {
+		ValueSet source = read(theId, theRequestDetails);
+		return expand(source, theFilter, theOffset, theCount);
+	}
+
 	private ValueSet doExpand(ValueSet theSource) {
 
 		validateIncludes("include", theSource.getCompose().getInclude());
@@ -105,7 +111,38 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		ValueSet retVal = outcome.getValueset();
 		retVal.setStatus(PublicationStatus.ACTIVE);
 		return retVal;
+	}
 
+	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {
+
+		validateIncludes("include", theSource.getCompose().getInclude());
+		validateIncludes("exclude", theSource.getCompose().getExclude());
+
+		/*
+		 * If all of the code systems are supported by the HAPI FHIR terminology service, let's
+		 * use that as it's more efficient.
+		 */
+
+		boolean allSystemsAreSuppportedByTerminologyService = true;
+		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
+			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+				allSystemsAreSuppportedByTerminologyService = false;
+			}
+		}
+		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
+			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+				allSystemsAreSuppportedByTerminologyService = false;
+			}
+		}
+		if (allSystemsAreSuppportedByTerminologyService) {
+			return (ValueSet) myTerminologySvc.expandValueSet(theSource, theOffset, theCount);
+		}
+
+		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
+		ValueSetExpansionOutcome outcome = workerContext.expand(theSource, null);
+		ValueSet retVal = outcome.getValueset();
+		retVal.setStatus(PublicationStatus.ACTIVE);
+		return retVal;
 	}
 
 	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
@@ -148,7 +185,28 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		// }
 		//
 		// return expand(defaultValueSet, theFilter);
+	}
 
+	@Override
+	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
+		if (isBlank(theUri)) {
+			throw new InvalidRequestException("URI must not be blank or missing");
+		}
+
+		ValueSet source = new ValueSet();
+
+		source.getCompose().addInclude().addValueSet(theUri);
+
+		if (isNotBlank(theFilter)) {
+			ConceptSetComponent include = source.getCompose().addInclude();
+			ConceptSetFilterComponent filter = include.addFilter();
+			filter.setProperty("display");
+			filter.setOp(FilterOperator.EQUAL);
+			filter.setValue(theFilter);
+		}
+
+		ValueSet retVal = doExpand(source, theOffset, theCount);
+		return retVal;
 	}
 
 	@Override
@@ -179,7 +237,30 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		}
 
 		return retVal;
+	}
 
+	@Override
+	public ValueSet expand(ValueSet source, String theFilter, int theOffset, int theCount) {
+		ValueSet toExpand = new ValueSet();
+
+		for (ConceptSetComponent next : source.getCompose().getInclude()) {
+			toExpand.getCompose().addInclude(next);
+			addFilterIfPresent(theFilter, next);
+		}
+
+		if (toExpand.getCompose().isEmpty()) {
+			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
+		}
+
+		toExpand.getCompose().getExclude().addAll(source.getCompose().getExclude());
+
+		ValueSet retVal = doExpand(toExpand, theOffset, theCount);
+
+		if (isNotBlank(theFilter)) {
+			applyFilter(retVal.getExpansion().getTotalElement(), retVal.getExpansion().getContains(), theFilter);
+		}
+
+		return retVal;
 	}
 
 	private void applyFilter(IntegerType theTotalElement, List<ValueSetExpansionContainsComponent> theContains, String theFilter) {
@@ -246,9 +327,8 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		}
 
 		if (vs != null) {
-			ValueSet expansion = doExpand(vs);
+			ValueSet expansion = doExpand(vs); // FIXME: DM 2019-08-17 - Need to account for concepts in terminology tables.
 			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-
 			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
 			if (result != null) {
 				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {

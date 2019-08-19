@@ -480,6 +480,65 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
+	public ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
+		ValidateUtil.isTrueOrThrowInvalidRequest(theValueSetToExpand.hasUrl(), "ValueSet to be expanded must provide ValueSet.url", theValueSetToExpand);
+		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSetToExpand.getUrl(), theValueSetToExpand.getIdElement().toUnqualifiedVersionless().getValue() + " to be expanded must provide ValueSet.url");
+
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
+		if (!optionalTermValueSet.isPresent()) {
+			throw new InvalidRequestException("ValueSet is not present in terminology tables: " + theValueSetToExpand.getUrl());
+		}
+
+		TermValueSet termValueSet = optionalTermValueSet.get();
+
+		if (TermValueSetExpansionStatusEnum.EXPANDED != termValueSet.getExpansionStatus()) {
+			throw new UnprocessableEntityException("ValueSet is not ready for expansion; current status: " + termValueSet.getExpansionStatus());
+		}
+
+		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
+		expansionComponent.setIdentifier(UUID.randomUUID().toString());
+		expansionComponent.setTimestamp(new Date());
+
+		int numberOfConcepts = termValueSet.getConcepts().size();
+		expansionComponent.setTotal(numberOfConcepts);
+		expansionComponent.setOffset(theOffset);
+
+		List<TermValueSetConcept> subListOfConcepts = new ArrayList<>();
+		if (theCount != 0 && numberOfConcepts != 0) {
+			int toIndex = Math.min(theOffset + theCount, numberOfConcepts);
+			subListOfConcepts = termValueSet.getConcepts().subList(theOffset, toIndex);
+		}
+
+		for (TermValueSetConcept concept : subListOfConcepts) {
+			ValueSet.ValueSetExpansionContainsComponent containsComponent = expansionComponent.addContains();
+			containsComponent.setSystem(concept.getSystem());
+			containsComponent.setCode(concept.getCode());
+			containsComponent.setDisplay(concept.getDisplay());
+
+			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation.
+			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
+				ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.addDesignation();
+				designationComponent.setLanguage(designation.getLanguage());
+				if (isNoneBlank(designation.getUseSystem(), designation.getUseCode())) {
+					designationComponent.setUse(new Coding(
+						designation.getUseSystem(),
+						designation.getUseCode(),
+						designation.getUseDisplay()));
+				}
+				designationComponent.setValue(designation.getValue());
+			}
+		}
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.setCompose(theValueSetToExpand.getCompose());
+		valueSet.setExpansion(expansionComponent);
+		return valueSet;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED)
 	public void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		expandValueSet(theValueSetToExpand, theValueSetCodeAccumulator, new AtomicInteger(0));
 	}
@@ -496,9 +555,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		// Handle excludes
 		ourLog.debug("Handling excludes");
-		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getExclude()) {
+		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
 			boolean add = false;
-			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter);
+			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter);
 		}
 	}
 

@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<ValueSet> {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaResourceProviderValueSetR5.class);
 
 	@Operation(name = JpaConstants.OPERATION_EXPAND, idempotent = true)
 	public ValueSet expand(
@@ -43,31 +44,65 @@ public class BaseJpaResourceProviderValueSetR5 extends JpaResourceProviderR5<Val
 		@OperationParam(name = "valueSet", min = 0, max = 1) ValueSet theValueSet,
 		@OperationParam(name = "url", min = 0, max = 1) UriType theUrl,
 		@OperationParam(name = "filter", min = 0, max = 1) StringType theFilter,
+		@OperationParam(name = "offset", min = 0, max = 1) IntegerType theOffset,
+		@OperationParam(name = "count", min = 0, max = 1) IntegerType theCount,
 		RequestDetails theRequestDetails) {
 
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
-		boolean haveValueSet = theValueSet != null && theValueSet.isEmpty() == false;
+		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
 
 		if (!haveId && !haveIdentifier && !haveValueSet) {
-			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request");
+			throw new InvalidRequestException("$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
 		}
 
 		if (moreThanOneTrue(haveId, haveIdentifier, haveValueSet)) {
 			throw new InvalidRequestException("$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
+		int offset = myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental();
+		if (theOffset != null && theOffset.hasValue()) {
+			if (theOffset.getValue() >= 0) {
+				offset = theOffset.getValue();
+			} else {
+				throw new InvalidRequestException("offset parameter for $expand operation must be >= 0 when specified. offset: " + theOffset.getValue());
+			}
+		}
+
+		int count = myDaoConfig.getPreExpandValueSetsDefaultCountExperimental();
+		if (theCount != null && theCount.hasValue()) {
+			if (theCount.getValue() >= 0) {
+				count = theCount.getValue();
+			} else {
+				throw new InvalidRequestException("count parameter for $expand operation must be >= 0 when specified. count: " + theCount.getValue());
+			}
+		}
+		int countMax = myDaoConfig.getPreExpandValueSetsMaxCountExperimental();
+		if (count > countMax) {
+			ourLog.warn("count parameter for $expand operation of {} exceeds maximum value of {}; using maximum value.", count, countMax);
+			count = countMax;
+		}
+
 		startRequest(theServletRequest);
 		try {
 			IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> dao = (IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept>) getDao();
-			if (haveId) {
-				return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
-			} else if (haveIdentifier) {
-				return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
+			if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+				if (haveId) {
+					return dao.expand(theId, toFilterString(theFilter), offset, count, theRequestDetails);
+				} else if (haveIdentifier) {
+					return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter), offset, count);
+				} else {
+					return dao.expand(theValueSet, toFilterString(theFilter), offset, count);
+				}
 			} else {
-				return dao.expand(theValueSet, toFilterString(theFilter));
+				if (haveId) {
+					return dao.expand(theId, toFilterString(theFilter), theRequestDetails);
+				} else if (haveIdentifier) {
+					return dao.expandByIdentifier(theUrl.getValue(), toFilterString(theFilter));
+				} else {
+					return dao.expand(theValueSet, toFilterString(theFilter));
+				}
 			}
-
 		} finally {
 			endRequest(theServletRequest);
 		}

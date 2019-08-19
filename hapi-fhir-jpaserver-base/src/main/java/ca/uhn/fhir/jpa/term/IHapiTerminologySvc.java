@@ -44,12 +44,19 @@ public interface IHapiTerminologySvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
+	ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount);
+
 	void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	/**
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
+
+	/**
+	 * Version independent
+	 */
+	IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount);
 
 	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
