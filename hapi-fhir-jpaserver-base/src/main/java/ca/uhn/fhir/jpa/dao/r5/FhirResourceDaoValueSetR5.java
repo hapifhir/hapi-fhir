@@ -196,6 +196,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 		}
 
 		ValueSet source = new ValueSet();
+		source.setUrl(theUri);
 
 		source.getCompose().addInclude().addValueSet(theUri);
 
@@ -212,16 +213,16 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 	}
 
 	@Override
-	public ValueSet expand(ValueSet source, String theFilter) {
+	public ValueSet expand(ValueSet theSource, String theFilter) {
 		ValueSet toExpand = new ValueSet();
 
-		// for (UriType next : source.getCompose().getInclude()) {
+		// for (UriType next : theSource.getCompose().getInclude()) {
 		// ConceptSetComponent include = toExpand.getCompose().addInclude();
 		// include.setSystem(next.getValue());
 		// addFilterIfPresent(theFilter, include);
 		// }
 
-		for (ConceptSetComponent next : source.getCompose().getInclude()) {
+		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);
 			addFilterIfPresent(theFilter, next);
 		}
@@ -230,7 +231,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
 		}
 
-		toExpand.getCompose().getExclude().addAll(source.getCompose().getExclude());
+		toExpand.getCompose().getExclude().addAll(theSource.getCompose().getExclude());
 
 		ValueSet retVal = doExpand(toExpand);
 
@@ -242,10 +243,12 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 	}
 
 	@Override
-	public ValueSet expand(ValueSet source, String theFilter, int theOffset, int theCount) {
+	public ValueSet expand(ValueSet theSource, String theFilter, int theOffset, int theCount) {
 		ValueSet toExpand = new ValueSet();
+		toExpand.setId(theSource.getId());
+		toExpand.setUrl(theSource.getUrl());
 
-		for (ConceptSetComponent next : source.getCompose().getInclude()) {
+		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
 			toExpand.getCompose().addInclude(next);
 			addFilterIfPresent(theFilter, next);
 		}
@@ -254,7 +257,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 			throw new InvalidRequestException("ValueSet does not have any compose.include or compose.import values, can not expand");
 		}
 
-		toExpand.getCompose().getExclude().addAll(source.getCompose().getExclude());
+		toExpand.getCompose().getExclude().addAll(theSource.getCompose().getExclude());
 
 		ValueSet retVal = doExpand(toExpand, theOffset, theCount);
 

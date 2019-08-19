@@ -22,15 +22,23 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.model.api.annotation.Block;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.Collection;
 
 @Block()
 public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.ValueSetExpansionComponent implements IValueSetConceptAccumulator {
+	private final int myMaxResults = 50000;
+	private int myConceptsCount;
+
+	public ValueSetExpansionComponentWithConceptAccumulator() {
+		myConceptsCount = 0;
+	}
 
 	@Override
 	public void includeConcept(String theSystem, String theCode, String theDisplay) {
+		incrementConceptsCount();
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		contains.setSystem(theSystem);
 		contains.setCode(theCode);
@@ -39,6 +47,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 	@Override
 	public void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations) {
+		incrementConceptsCount();
 		ValueSet.ValueSetExpansionContainsComponent contains = this.addContains();
 		contains.setSystem(theSystem);
 		contains.setCode(theCode);
@@ -64,5 +73,11 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			.removeIf(t ->
 				theSystem.equals(t.getSystem()) &&
 					theCode.equals(t.getCode()));
+	}
+
+	private void incrementConceptsCount() {
+		if (++myConceptsCount > myMaxResults) {
+			throw new InternalErrorException("Expansion produced too many (>= " + myMaxResults + ") results");
+		}
 	}
 }

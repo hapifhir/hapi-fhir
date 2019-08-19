@@ -482,10 +482,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Transactional(propagation = Propagation.REQUIRED)
 	public ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount) {
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
-		ValidateUtil.isTrueOrThrowInvalidRequest(theValueSetToExpand.hasUrl(), "ValueSet to be expanded must provide ValueSet.url", theValueSetToExpand);
-		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSetToExpand.getUrl(), theValueSetToExpand.getIdElement().toUnqualifiedVersionless().getValue() + " to be expanded must provide ValueSet.url");
 
-		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
+		Optional<TermValueSet> optionalTermValueSet;
+		// FIXME: DM 2019-08-19 - This is no good. I need pageable results while querying TRM_VALUESET_CONCEPT
+		if (theValueSetToExpand.hasId()) {
+			optionalTermValueSet = myValueSetDao.findByResourcePid(theValueSetToExpand.getIdElement().getIdPartAsLong());
+		} else if (theValueSetToExpand.hasUrl()) {
+			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
+		} else {
+			throw new UnprocessableEntityException("ValueSet to be expanded must provide either ValueSet.id or ValueSet.url");
+		}
+
 		if (!optionalTermValueSet.isPresent()) {
 			throw new InvalidRequestException("ValueSet is not present in terminology tables: " + theValueSetToExpand.getUrl());
 		}
@@ -705,8 +712,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 */
 
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
-				int maxResult = 50000;
-				jpaQuery.setMaxResults(maxResult);
 
 				StopWatch sw = new StopWatch();
 				AtomicInteger count = new AtomicInteger(0);
@@ -715,11 +720,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					count.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
 					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
-				}
-
-
-				if (maxResult == count.get()) {
-					throw new InternalErrorException("Expansion fragment produced too many (>= " + maxResult + ") results");
 				}
 
 				ourLog.info("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
@@ -1554,25 +1554,31 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap.");
 	}
 
-	@Scheduled(fixedDelay = 600000) // 10 minutes.
+//	@Scheduled(fixedDelay = 600000) // 10 minutes.
+	@Scheduled(fixedDelay = 60000) // FIXME: DM 2019-08-19 - Remove this!
 	@Override
 	public synchronized void preExpandValueSetToTerminologyTables() {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
-				if (optionalTermValueSet.isPresent()) {
-					TermValueSet termValueSet = optionalTermValueSet.get();
-					termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-					myValueSetDao.saveAndFlush(termValueSet);
+				boolean hasNextTermValueSetNotExpanded = true;
+				do {
+					Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
+					if (optionalTermValueSet.isPresent()) {
+						TermValueSet termValueSet = optionalTermValueSet.get();
+						termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+						myValueSetDao.saveAndFlush(termValueSet);
 
-					ValueSet valueSet = getValueSetFromResourceTable(termValueSet.getResource());
+						ValueSet valueSet = getValueSetFromResourceTable(termValueSet.getResource());
 
-					expandValueSet(valueSet, new ValueSetConceptAccumulator(termValueSet, myValueSetConceptDao, myValueSetConceptDesignationDao));
+						expandValueSet(valueSet, new ValueSetConceptAccumulator(termValueSet, myValueSetConceptDao, myValueSetConceptDesignationDao));
 
-					termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANDED);
-					myValueSetDao.saveAndFlush(termValueSet);
-				}
+						termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANDED);
+						myValueSetDao.saveAndFlush(termValueSet);
+					} else {
+						hasNextTermValueSetNotExpanded = false;
+					}
+				} while (hasNextTermValueSetNotExpanded);
 			}
 		});
 	}
