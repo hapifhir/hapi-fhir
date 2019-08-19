@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -74,9 +75,9 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
-	@Column(name = "PROV_REQUEST_ID")
+	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)
 	private String myProvenanceRequestId;
-	@Column(name = "PROV_SOURCE_URI")
+	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH)
 	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;
