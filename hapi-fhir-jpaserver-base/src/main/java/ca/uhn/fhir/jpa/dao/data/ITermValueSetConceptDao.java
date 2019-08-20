@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -30,11 +32,17 @@ import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
 
+	@Query("SELECT COUNT(vsc) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
+
 	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
+	@Query("SELECT vsc from TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	Slice<TermValueSetConcept> findByTermValueSetId(Pageable thePage, @Param("pid") Long theValueSetId);
+
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
-	Optional<TermValueSetConcept> findByValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
+	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 
 }

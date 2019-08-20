@@ -420,7 +420,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		count = 0;
 		while (true) {
 			Slice<T> link = theLoader.get();
-			if (link.hasContent() == false) {
+			if (!link.hasContent()) {
 				break;
 			}
 
@@ -484,7 +484,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSetToExpand, "ValueSet to expand can not be null");
 
 		Optional<TermValueSet> optionalTermValueSet;
-		// FIXME: DM 2019-08-19 - This is no good. I need pageable results while querying TRM_VALUESET_CONCEPT
 		if (theValueSetToExpand.hasId()) {
 			optionalTermValueSet = myValueSetDao.findByResourcePid(theValueSetToExpand.getIdElement().getIdPartAsLong());
 		} else if (theValueSetToExpand.hasUrl()) {
@@ -507,41 +506,98 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
 		expansionComponent.setTimestamp(new Date());
 
-		int numberOfConcepts = termValueSet.getConcepts().size();
-		expansionComponent.setTotal(numberOfConcepts);
-		expansionComponent.setOffset(theOffset);
-
-		List<TermValueSetConcept> subListOfConcepts = new ArrayList<>();
-		if (theCount != 0 && numberOfConcepts != 0) {
-			int toIndex = Math.min(theOffset + theCount, numberOfConcepts);
-			subListOfConcepts = termValueSet.getConcepts().subList(theOffset, toIndex);
-		}
-
-		for (TermValueSetConcept concept : subListOfConcepts) {
-			ValueSet.ValueSetExpansionContainsComponent containsComponent = expansionComponent.addContains();
-			containsComponent.setSystem(concept.getSystem());
-			containsComponent.setCode(concept.getCode());
-			containsComponent.setDisplay(concept.getDisplay());
-
-			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation.
-			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
-				ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.addDesignation();
-				designationComponent.setLanguage(designation.getLanguage());
-				if (isNoneBlank(designation.getUseSystem(), designation.getUseCode())) {
-					designationComponent.setUse(new Coding(
-						designation.getUseSystem(),
-						designation.getUseCode(),
-						designation.getUseDisplay()));
-				}
-				designationComponent.setValue(designation.getValue());
-			}
-		}
+		populateExpansionComponent(expansionComponent, termValueSet, theOffset, theCount);
 
 		ValueSet valueSet = new ValueSet();
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
+	}
+
+	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
+		int total = myValueSetConceptDao.countByTermValueSetId(theTermValueSet.getId());
+		theExpansionComponent.setTotal(total);
+		theExpansionComponent.setOffset(theOffset);
+		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
+		theExpansionComponent.addParameter().setName("count").setValue(new IntegerType(theCount));
+
+		if (theCount == 0 || total == 0) {
+			return;
+		}
+
+		expandConcepts(theExpansionComponent, theTermValueSet, theOffset, theCount);
+	}
+
+	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
+		int conceptsExpanded = 0;
+		for (int i = theOffset; i < (theOffset + theCount); i++) {
+			final int page = i;
+			Supplier<Slice<TermValueSetConcept>> loader = () -> myValueSetConceptDao.findByTermValueSetId(PageRequest.of(page, 1), theTermValueSet.getId());
+
+			Slice<TermValueSetConcept> slice = loader.get();
+			if (!slice.hasContent()) {
+				break;
+			}
+
+			for (TermValueSetConcept concept : slice.getContent()) {
+				ValueSet.ValueSetExpansionContainsComponent containsComponent = theExpansionComponent.addContains();
+				containsComponent.setSystem(concept.getSystem());
+				containsComponent.setCode(concept.getCode());
+				containsComponent.setDisplay(concept.getDisplay());
+
+				// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
+				expandDesignations(theTermValueSet, concept, containsComponent);
+
+				if (++conceptsExpanded % 250 == 0) {
+					ourLog.info("Have expanded {} concepts in ValueSet[{}]", conceptsExpanded, theTermValueSet.getUrl());
+				}
+			}
+
+			if (!slice.hasNext()) {
+				break;
+			}
+		}
+
+		if (conceptsExpanded > 0) {
+			ourLog.info("Have expanded {} concepts in ValueSet[{}]", conceptsExpanded, theTermValueSet.getUrl());
+		}
+	}
+
+	private void expandDesignations(TermValueSet theValueSet, TermValueSetConcept theConcept, ValueSet.ValueSetExpansionContainsComponent theContainsComponent) {
+		int designationsExpanded = 0;
+		int index = 0;
+		while (true) {
+			final int page = index++;
+			Supplier<Slice<TermValueSetConceptDesignation>> loader = () -> myValueSetConceptDesignationDao.findByTermValueSetConceptId(PageRequest.of(page, 1000), theConcept.getId());
+
+			Slice<TermValueSetConceptDesignation> slice = loader.get();
+			if (!slice.hasContent()) {
+				break;
+			}
+
+			for (TermValueSetConceptDesignation designation : slice.getContent()) {
+				ValueSet.ConceptReferenceDesignationComponent designationComponent = theContainsComponent.addDesignation();
+				designationComponent.setLanguage(designation.getLanguage());
+				designationComponent.setUse(new Coding(
+					designation.getUseSystem(),
+					designation.getUseCode(),
+					designation.getUseDisplay()));
+				designationComponent.setValue(designation.getValue());
+
+				if (++designationsExpanded % 250 == 0) {
+					ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", designationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+				}
+			}
+
+			if (!slice.hasNext()) {
+				break;
+			}
+		}
+
+		if (designationsExpanded > 0) {
+			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", designationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+		}
 	}
 
 	@Override
@@ -658,10 +714,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 								String value = nextFilter.getValue();
 								if (value.endsWith("$")) {
 									value = value.substring(0, value.length() - 1);
-								} else if (value.endsWith(".*") == false) {
+								} else if (!value.endsWith(".*")) {
 									value = value + ".*";
 								}
-								if (value.startsWith("^") == false && value.startsWith(".*") == false) {
+								if (!value.startsWith("^") && !value.startsWith(".*")) {
 									value = ".*" + value;
 								} else if (value.startsWith("^")) {
 									value = value.substring(1);
@@ -732,7 +788,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					throw new InvalidRequestException("Unknown code system: " + system);
 				}
 
-				if (theInclude.getConcept().isEmpty() == false) {
+				if (!theInclude.getConcept().isEmpty()) {
 					for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
@@ -857,7 +913,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		StopWatch stopwatch = new StopWatch();
 
 		Optional<TermConcept> concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
-		if (concept.isPresent() == false) {
+		if (!concept.isPresent()) {
 			return Collections.emptySet();
 		}
 
@@ -888,7 +944,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Stopwatch stopwatch = Stopwatch.createStarted();
 
 		Optional<TermConcept> concept = fetchLoadedCode(theCodeSystemResourcePid, theCode);
-		if (concept.isPresent() == false) {
+		if (!concept.isPresent()) {
 			return Collections.emptySet();
 		}
 
@@ -1073,8 +1129,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
 				int maxResult = 1000;
-				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(new PageRequest(0, maxResult));
-				if (concepts.hasContent() == false) {
+				Page<TermConcept> concepts = myConceptDao.findResourcesRequiringReindexing(PageRequest.of(0, maxResult));
+				if (!concepts.hasContent()) {
 					if (myChildToParentPidCache != null) {
 						ourLog.info("Clearing parent concept cache");
 						myNextReindexPass = System.currentTimeMillis() + DateUtils.MILLIS_PER_MINUTE;
@@ -1587,7 +1643,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
 		Optional<TermValueSet> retVal = Optional.empty();
-		Page<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetExpansionStatusEnum.NOT_EXPANDED);
+		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetExpansionStatusEnum.NOT_EXPANDED);
 
 		if (!page.getContent().isEmpty()) {
 			retVal = Optional.of(page.getContent().get(0));

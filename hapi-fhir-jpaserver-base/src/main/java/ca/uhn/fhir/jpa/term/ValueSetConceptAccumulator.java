@@ -71,7 +71,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 
 		// Get existing entity so it can be deleted.
-		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
+		Optional<TermValueSetConcept> optionalConcept = myValueSetConceptDao.findByTermValueSetIdSystemAndCode(myTermValueSet.getId(), theSystem, theCode);
 
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();

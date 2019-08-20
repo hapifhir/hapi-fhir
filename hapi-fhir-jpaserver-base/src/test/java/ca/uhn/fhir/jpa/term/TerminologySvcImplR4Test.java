@@ -614,6 +614,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 
 		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
@@ -683,6 +689,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
 		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
 
 		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
@@ -746,6 +758,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
 		assertFalse(expandedValueSet.getExpansion().hasContains());
 	}
 
@@ -768,6 +786,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
 
 		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
@@ -823,6 +847,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(1, expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(22, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
 		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
 
 		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
