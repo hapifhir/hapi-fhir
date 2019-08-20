@@ -1152,7 +1152,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				}
 			}
 			boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
-			boolean haveRequestId = isNotBlank(requestId) &&  && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
+			boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 			if (haveSource || haveRequestId) {
 				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 				provenance.setResourceHistoryTable(historyEntry);
