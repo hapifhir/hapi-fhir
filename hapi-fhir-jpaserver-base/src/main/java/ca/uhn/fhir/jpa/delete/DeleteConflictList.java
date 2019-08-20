@@ -21,14 +21,43 @@ package ca.uhn.fhir.jpa.delete;
  */
 
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IIdType;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class DeleteConflictList implements Iterable<DeleteConflict> {
 	private final List<DeleteConflict> myList = new ArrayList<>();
+	private final Set<String> myResourceIdsMarkedForDeletion;
+
+	/**
+	 * Constructor
+	 */
+	public DeleteConflictList() {
+		myResourceIdsMarkedForDeletion = new HashSet<>();
+	}
+
+	/**
+	 * Constructor that shares (i.e. uses the same list, as opposed to cloning it)
+	 * of {@link #isResourceIdMarkedForDeletion(IIdType) resources marked for deletion}
+	 */
+	public DeleteConflictList(DeleteConflictList theParentList) {
+		myResourceIdsMarkedForDeletion = theParentList.myResourceIdsMarkedForDeletion;
+	}
+
+
+	public boolean isResourceIdMarkedForDeletion(IIdType theIdType) {
+		Validate.notNull(theIdType);
+		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
+		return myResourceIdsMarkedForDeletion.contains(theIdType.toUnqualifiedVersionless().getValue());
+	}
+
+	public void setResourceIdMarkedForDeletion(IIdType theIdType) {
+		Validate.notNull(theIdType);
+		Validate.notBlank(theIdType.toUnqualifiedVersionless().getValue());
+		myResourceIdsMarkedForDeletion.add(theIdType.toUnqualifiedVersionless().getValue());
+	}
 
 	public void add(DeleteConflict theDeleteConflict) {
 		myList.add(theDeleteConflict);

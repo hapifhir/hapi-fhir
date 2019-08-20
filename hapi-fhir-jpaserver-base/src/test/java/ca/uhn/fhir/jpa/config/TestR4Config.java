@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 
@@ -111,7 +112,7 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		DataSource dataSource = ProxyDataSourceBuilder
 			.create(retVal)
 //			.logQueryBySlf4j(level, "SQL")
-//			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
+			.logSlowQueryBySlf4j(10, TimeUnit.SECONDS)
 //			.countQuery(new ThreadQueryCountHolder())
 			.beforeQuery(new BlockLargeNumbersOfParamsListener())
 			.afterQuery(captureQueriesListener())
