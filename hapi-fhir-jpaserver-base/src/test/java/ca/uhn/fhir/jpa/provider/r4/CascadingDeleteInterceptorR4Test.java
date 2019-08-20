@@ -137,6 +137,48 @@ public class CascadingDeleteInterceptorR4Test extends BaseResourceProviderR4Test
 	}
 
 	@Test
+	public void testDeleteCascadingWithCircularReference() throws IOException {
+
+		Organization o0 = new Organization();
+		o0.setName("O0");
+		IIdType o0id = myOrganizationDao.create(o0).getId().toUnqualifiedVersionless();
+
+		Organization o1 = new Organization();
+		o1.setName("O1");
+		o1.getPartOf().setReference(o0id.getValue());
+		IIdType o1id = myOrganizationDao.create(o1).getId().toUnqualifiedVersionless();
+
+		o0.getPartOf().setReference(o1id.getValue());
+		myOrganizationDao.update(o0);
+
+		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
+
+		HttpDelete delete = new HttpDelete(ourServerBase + "/Organization/" + o0id.getIdPart() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
+		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", deleteResponse);
+			assertThat(deleteResponse, containsString("Cascaded delete to "));
+		}
+
+		try {
+			ourLog.info("Reading {}", o0id);
+			ourClient.read().resource(Organization.class).withId(o0id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+		try {
+			ourLog.info("Reading {}", o1id);
+			ourClient.read().resource(Organization.class).withId(o1id).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+	}
+
+	@Test
 	public void testDeleteCascadingByHeader() throws IOException {
 		createResources();
 
