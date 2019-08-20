@@ -69,6 +69,11 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+		IBaseResource responseResource = theResponseDetails.getResponseResource();
+		if (responseResource == null) {
+			return true;
+		}
+
 		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
 		String accept = null;
 		if (formatParams != null && formatParams.length > 0) {
@@ -92,7 +97,6 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 			wantVersion = FhirVersionEnum.forVersionString(wantVersionString);
 		}
 
-		IBaseResource responseResource = theResponseDetails.getResponseResource();
 		FhirVersionEnum haveVersion = responseResource.getStructureFhirVersionEnum();
 
 		IBaseResource converted = null;
