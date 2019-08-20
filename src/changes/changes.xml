@@ -45,6 +45,10 @@
 				has been corrected.
 			</action>
 			<action type="fix">
+				When using the VersionedApiConverterInterceptor, GraphQL responses failed with an HTTP
+				500 error.
+			</action>
+			<action type="fix">
 				Cascading deletes now correctly handle circular references. Previously this failed with
 				an HTTP 500 error.
 			</action>
