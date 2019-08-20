@@ -404,6 +404,21 @@ public class ResponseHighlightingInterceptorTest {
 	}
 
 	@Test
+	public void testHighlightGraphQLResponseNonHighlighted() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		httpGet.addHeader("Accept", "application/jon");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+
+		ourLog.info("Resp: {}", responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, stringContainsInOrder("{\"foo\":\"bar\"}"));
+
+	}
+
+	@Test
 	public void testHighlightException() throws Exception {
 		ResponseHighlighterInterceptor ic = ourInterceptor;
 

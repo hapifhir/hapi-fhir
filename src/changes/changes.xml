@@ -44,6 +44,10 @@
 				SubscriptionDstu2Config incorrectly pointed to a DSTU3 configuration file. This
 				has been corrected.
 			</action>
+			<action type="fix">
+				When using the VersionedApiConverterInterceptor, GraphQL responses failed with an HTTP
+				500 error.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
