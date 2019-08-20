@@ -1063,22 +1063,6 @@
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
 				<version>4.0.0-rc1</version>
-				<!-- TODO KHS With this version bump, these excludes should no longer be necessary
-				<exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>java-hamcrest</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-library</artifactId>
-					</exclusion>
-				</exclusions>
-				-->
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
