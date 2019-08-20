@@ -48,6 +48,14 @@
 				When using the VersionedApiConverterInterceptor, GraphQL responses failed with an HTTP
 				500 error.
 			</action>
+			<action type="fix">
+				Cascading deletes now correctly handle circular references. Previously this failed with
+				an HTTP 500 error.
+			</action>
+			<action type="fix">
+				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
+				contained an incorrect example. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
