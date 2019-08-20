@@ -70,7 +70,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	private volatile Map<String, Map<String, RuntimeSearchParam>> myActiveSearchParams;
 	private volatile long myLastRefresh;
 
-	@autowired
+	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Override
