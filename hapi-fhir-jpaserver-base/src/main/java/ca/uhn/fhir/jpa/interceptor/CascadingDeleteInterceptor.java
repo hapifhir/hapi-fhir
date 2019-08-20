@@ -58,8 +58,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * </p>
  * <p>
  * When using this interceptor, client requests must include the parameter
- * <code>_cascade=true</code> on the DELETE URL in order to activate
- * cascading delete, or include the request header <code>X-Cascade-Delete: true</code>
+ * <code>_cascade=delete</code> on the DELETE URL in order to activate
+ * cascading delete, or include the request header <code>X-Cascade-Delete: delete</code>
  * </p>
  */
 @Interceptor
