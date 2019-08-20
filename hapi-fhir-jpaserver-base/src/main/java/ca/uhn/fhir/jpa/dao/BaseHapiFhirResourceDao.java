@@ -220,7 +220,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		StopWatch w = new StopWatch();
 
 		T resourceToDelete = toResource(myResourceType, entity, null, false);
-		theDeleteConflicts.getResourceIdsMarkedForDeletion().add(theId.toUnqualifiedVersionless().getValue());
+		theDeleteConflicts.setResourceIdMarkedForDeletion(theId);
 
 		// Notify IServerOperationInterceptors about pre-action call
 		HookParams hook = new HookParams()
@@ -269,7 +269,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		deleteConflicts.getResourceIdsMarkedForDeletion().add(theId.toUnqualifiedVersionless().getValue());
+		deleteConflicts.setResourceIdMarkedForDeletion(theId);
 		StopWatch w = new StopWatch();
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);

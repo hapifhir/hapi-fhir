@@ -64,12 +64,11 @@ public class DeleteConflictService {
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
-		DeleteConflictList newConflicts = new DeleteConflictList();
 
 		// We want the list of resources that are marked to be the same list even as we
 		// drill into conflict resolution stacks.. this allows us to not get caught by
 		// circular references
-		newConflicts.setResourceIdsMarkedForDeletion(theDeleteConflicts.getResourceIdsMarkedForDeletion());
+		DeleteConflictList newConflicts = new DeleteConflictList(theDeleteConflicts);
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
@@ -123,8 +122,8 @@ public class DeleteConflictService {
 			IdDt targetId = theEntity.getIdDt();
 			IdDt sourceId = link.getSourceResource().getIdDt();
 			String sourcePath = link.getSourcePath();
-			if (theDeleteConflicts.getResourceIdsMarkedForDeletion().contains(sourceId.toUnqualifiedVersionless().getValue())) {
-				if (theDeleteConflicts.getResourceIdsMarkedForDeletion().contains(targetId.toUnqualifiedVersionless().getValue())) {
+			if (theDeleteConflicts.isResourceIdMarkedForDeletion(sourceId)) {
+				if (theDeleteConflicts.isResourceIdMarkedForDeletion(targetId)) {
 					continue;
 				}
 			}

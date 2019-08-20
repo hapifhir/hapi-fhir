@@ -102,10 +102,6 @@ public class CascadingDeleteInterceptor {
 
 				IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextSource.getResourceType());
 
-//				if (theConflictList.getResourcesMarkedForDeletion().contains(nextSource.toUnqualifiedVersionless())) {
-//					continue;
-//				}
-
 				// Interceptor call: STORAGE_CASCADE_DELETE
 				IBaseResource resource = dao.read(nextSource);
 				HookParams params = new HookParams()
