@@ -57,13 +57,5 @@ public interface IBaseMetaType extends ICompositeType {
  	 */
 	IBaseCoding getSecurity(String theSystem, String theCode);
 
-//	/**
-//	 * Resource the Meta.source element, which will be of type URI. Note that this
-//	 * element did not exist in FHIR versions prior to DSTU3 so this method will
-//	 * throw an {@link UnsupportedOperationException} if used on a DSTU2 structure.
-//	 */
-//	default IPrimitiveType<String> getSourceElement() {
-//		throw new UnsupportedOperationException("Meta.source is not supported in this version of FHIR");
-//	};
 
 }
