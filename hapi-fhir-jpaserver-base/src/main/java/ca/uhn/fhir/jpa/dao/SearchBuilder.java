@@ -825,6 +825,11 @@ public class SearchBuilder implements ISearchBuilder {
 
 
 	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+		if (myDaoConfig.isStoreMetaSourceInformation()==false) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
+			throw new InvalidRequestException(msg);
+		}
+
 		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
 
 		List<Predicate> codePredicates = new ArrayList<>();
@@ -841,6 +846,7 @@ public class SearchBuilder implements ISearchBuilder {
 				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
 				requestId = nextParamValue.substring(lastHashValueIndex + 1);
 			}
+			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
 
 			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
 			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);

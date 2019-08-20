@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.api;
  */
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Constants {
@@ -221,11 +222,14 @@ public class Constants {
 	public static final String CACHE_CONTROL_PRIVATE = "private";
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
+	/**
+	 * Note that this constant is used in a number of places including DB column lengths! Be careful if you decide to change it.
+	 */
 	public static final int REQUEST_ID_LENGTH = 16;
 
 	static {
-		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
-		CHARSET_US_ASCII = Charset.forName("ISO-8859-1");
+		CHARSET_UTF8 = StandardCharsets.UTF_8;
+		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");
@@ -241,7 +245,6 @@ public class Constants {
 		statusNames.put(300, "Multiple Choices");
 		statusNames.put(301, "Moved Permanently");
 		statusNames.put(302, "Found");
-		statusNames.put(302, "Moved Temporarily");
 		statusNames.put(303, "See Other");
 		statusNames.put(304, "Not Modified");
 		statusNames.put(305, "Use Proxy");
@@ -261,9 +264,7 @@ public class Constants {
 		statusNames.put(411, "Length Required");
 		statusNames.put(412, "Precondition Failed");
 		statusNames.put(413, "Payload Too Large");
-		statusNames.put(413, "Request Entity Too Large");
 		statusNames.put(414, "URI Too Long");
-		statusNames.put(414, "Request-URI Too Long");
 		statusNames.put(415, "Unsupported Media Type");
 		statusNames.put(416, "Requested range not satisfiable");
 		statusNames.put(417, "Expectation Failed");

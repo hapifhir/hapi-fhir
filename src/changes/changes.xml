@@ -23,7 +23,15 @@
 			format. Thanks to Raul Estrada for the pull request!
 		</action>
 		-->
-			<action type="add" issye="1357">
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now saves and supports searching on <code>Resource.meta.source</code>. The server automatically
+				appends the Request ID as a hash value on the URI as well in order to provide request level tracking. Searches
+				 can use either the source URI, the request ID, or both.
+				]]>
+			</action>
+			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
 				pull request!
@@ -540,7 +548,7 @@
 				not any values contained within. This has been corrected.
 			</action>
 			<action type="add">
-				The JPA terminology service can now detect when Hibvernate Search (Lucene)
+				The JPA terminology service can now detect when Hibernate Search (Lucene)
 				is not enabled, and will perform simple ValueSet expansions without relying
 				on Hibenrate Search in such cases.
 			</action>

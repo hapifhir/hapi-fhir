@@ -1151,18 +1151,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 						.orElse(null);
 				}
 			}
-			boolean haveSource = isNotBlank(source);
-			boolean haveRequestId = isNotBlank(requestId);
+			boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
+			boolean haveRequestId = isNotBlank(requestId) &&  && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
 			if (haveSource || haveRequestId) {
 				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
 				provenance.setResourceHistoryTable(historyEntry);
 				provenance.setResourceTable(theEntity);
-				provenance.setRequestId(requestId);
-				provenance.setSourceUri(source);
+				if (haveRequestId) {
+					provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
+				}
+				if (haveSource) {
+					provenance.setSourceUri(source);
+				}
 				myEntityManager.persist(provenance);
 			}
-
-
 		}
 
 		/*

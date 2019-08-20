@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -7,13 +8,17 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import org.apache.commons.text.RandomStringGenerator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.matchesPattern;
@@ -27,10 +32,12 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 	@After
 	public final void after() {
 		when(mySrd.getRequestId()).thenReturn(null);
+		myDaoConfig.setStoreMetaSourceInformation(new DaoConfig().getStoreMetaSourceInformation());
 	}
 
 	@Before
 	public void before() {
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformation.SOURCE_URI_AND_REQUEST_ID);
 	}
 
 	@Test
@@ -136,7 +143,27 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSourceNotPreservedOnUpdate() {
+	public void testSearchLongRequestId() {
+		String requestId = new RandomStringGenerator.Builder().build().generate(5000);
+		when(mySrd.getRequestId()).thenReturn(requestId);
+
+		Patient pt0 = new Patient();
+		pt0.getMeta().setSource("urn:source:0");
+		pt0.setActive(true);
+		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
+
+		// Search
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
+			.addAnd(new TokenParam("urn:source:0"), new TokenParam("#" + requestId)));
+		IBundleProvider result = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+
+	}
+
+	@Test
+	public void testSourceNotPreservedAcrossUpdate() {
 
 		Patient pt0 = new Patient();
 		pt0.getMeta().setSource("urn:source:0");
@@ -155,6 +182,43 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testSourceDisabled() {
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformation.NONE);
+		when(mySrd.getRequestId()).thenReturn("0000000000000000");
+
+		Patient pt0 = new Patient();
+		pt0.getMeta().setSource("urn:source:0");
+		pt0.setActive(true);
+		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
+
+		pt0 = myPatientDao.read(pt0id);
+		assertEquals(null, pt0.getMeta().getSource());
+
+		pt0.getMeta().setSource("urn:source:1");
+		pt0.setActive(false);
+		myPatientDao.update(pt0);
+
+		pt0 = myPatientDao.read(pt0id.withVersion("2"));
+		assertEquals(null, pt0.getMeta().getSource());
+
+		// Search without source param
+		SearchParameterMap params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		IBundleProvider result = myPatientDao.search(params);
+		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
+
+		// Search with source param
+		 params = new SearchParameterMap();
+		params.setLoadSynchronous(true);
+		params.add(Constants.PARAM_SOURCE, new TokenAndListParam()
+			.addAnd(new TokenParam("urn:source:0"), new TokenParam("@a_request_id")));
+		try {
+			myPatientDao.search(params);
+		} catch (InvalidRequestException e) {
+			assertEquals(e.getMessage(), "The _source parameter is disabled on this server");
+		}
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
