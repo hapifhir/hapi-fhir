@@ -825,7 +825,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 
 	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
-		if (myDaoConfig.isStoreMetaSourceInformation()==false) {
+		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformation.NONE) {
 			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
 			throw new InvalidRequestException(msg);
 		}
