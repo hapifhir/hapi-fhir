@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.migrate;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Migrator {
 
@@ -83,7 +85,12 @@ public class Migrator {
 				try {
 					next.execute();
 				} catch (SQLException e) {
-					throw new InternalErrorException("Failure executing task \"" + next.getDescription() + "\", aborting! Cause: " + e.toString(), e);
+					String description = next.getDescription();
+					if (isBlank(description)) {
+						description = next.getClass().getSimpleName();
+					}
+					String prefix = "Failure executing task \"" + description + "\", aborting! Cause: ";
+					throw new InternalErrorException(prefix + e.toString(), e);
 				}
 
 				myChangesCount += next.getChangesCount();

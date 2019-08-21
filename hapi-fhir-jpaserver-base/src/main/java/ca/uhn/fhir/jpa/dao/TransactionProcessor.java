@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,18 +22,22 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.HapiFhirHibernateJpaDialect;
+import ca.uhn.fhir.jpa.delete.DeleteConflictList;
+import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -46,6 +50,7 @@ import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.*;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.apache.http.NameValuePair;
@@ -90,6 +95,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private DaoRegistry myDaoRegistry;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
+	@Autowired
+	private DeleteConflictService myDeleteConflictService;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public BUNDLE transaction(RequestDetails theRequestDetails, BUNDLE theRequest) {
 		if (theRequestDetails != null) {
@@ -176,9 +185,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(prefer);
+				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer);
 				if (preferReturn != null) {
 					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+						outcome.fireResourceViewCallbacks();
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
 					}
 				}
@@ -242,16 +252,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			BaseServerResponseExceptionHolder caughtEx = new BaseServerResponseExceptionHolder();
 
-			TransactionCallback<BUNDLE> callback = theStatus -> {
+			try {
 				BUNDLE subRequestBundle = myVersionAdapter.createBundle(org.hl7.fhir.r4.model.Bundle.BundleType.TRANSACTION.toCode());
 				myVersionAdapter.addEntry(subRequestBundle, nextRequestEntry);
 
-				return processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
-			};
-
-			try {
-				// FIXME: this doesn't need to be a callback
-				BUNDLE nextResponseBundle = callback.doInTransaction(null);
+				BUNDLE nextResponseBundle = processTransactionAsSubRequest((ServletRequestDetails) theRequestDetails, subRequestBundle, "Batch sub-request");
 
 				BUNDLEENTRY subResponseEntry = myVersionAdapter.getEntries(nextResponseBundle).get(0);
 				myVersionAdapter.addEntry(resp, subResponseEntry);
@@ -358,7 +363,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				placeholderIds.add(fullUrl);
 			}
 		}
-		Collections.sort(entries, new TransactionSorter(placeholderIds));
+		entries.sort(new TransactionSorter(placeholderIds));
 
 		/*
 		 * All of the write operations in the transaction (PUT, POST, etc.. basically anything
@@ -418,6 +423,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				url = url.substring(0, qIndex);
 			}
 
+			if (url.length() > 0 && url.charAt(0) == '/') {
+				url = url.substring(1);
+			}
+
 			requestDetails.setRequestPath(url);
 			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
 
@@ -439,7 +448,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 			Validate.isTrue(method instanceof BaseResourceReturningMethodBinding, "Unable to handle GET {}", url);
 			try {
-				IBaseResource resource = ((BaseResourceReturningMethodBinding) method).doInvokeServer(theRequestDetails.getServer(), requestDetails);
+
+				BaseResourceReturningMethodBinding methodBinding = (BaseResourceReturningMethodBinding) method;
+				requestDetails.setRestOperationType(methodBinding.getRestOperationType());
+
+				IBaseResource resource = methodBinding.doInvokeServer(theRequestDetails.getServer(), requestDetails);
 				if (paramValues.containsKey(Constants.PARAM_SUMMARY) || paramValues.containsKey(Constants.PARAM_CONTENT)) {
 					resource = filterNestedBundle(requestDetails, resource);
 				}
@@ -456,7 +469,17 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 		transactionStopWatch.endCurrentTask();
 
-		ourLog.debug("Transaction timing:\n{}", transactionStopWatch.formatTaskDurations());
+		// Interceptor broadcast: JPA_PERFTRACE_INFO
+		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.JPA_PERFTRACE_INFO, myInterceptorBroadcaster, theRequestDetails)) {
+			String taskDurations = transactionStopWatch.formatTaskDurations();
+			StorageProcessingMessage message = new StorageProcessingMessage();
+			message.setMessage("Transaction timing:\n" + taskDurations);
+			HookParams params = new HookParams()
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(StorageProcessingMessage.class, message);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_INFO, params);
+		}
 
 		return response;
 	}
@@ -495,19 +518,20 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	}
 
 
-	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequestDetails, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
+	private Map<BUNDLEENTRY, ResourceTable> doTransactionWriteOperations(final ServletRequestDetails theRequest, String theActionName, Date theUpdateTime, Set<IIdType> theAllIds,
 																								Map<IIdType, IIdType> theIdSubstitutions, Map<IIdType, DaoMethodOutcome> theIdToPersistedOutcome, BUNDLE theResponse, IdentityHashMap<BUNDLEENTRY, Integer> theOriginalRequestOrder, List<BUNDLEENTRY> theEntries, StopWatch theTransactionStopWatch) {
 
-		if (theRequestDetails != null) {
-			theRequestDetails.startDeferredOperationCallback();
+		if (theRequest != null) {
+			theRequest.startDeferredOperationCallback();
 		}
 		try {
 
 			Set<String> deletedResources = new HashSet<>();
-			List<DeleteConflict> deleteConflicts = new ArrayList<>();
+			DeleteConflictList deleteConflicts = new DeleteConflictList();
 			Map<BUNDLEENTRY, ResourceTable> entriesToProcess = new IdentityHashMap<>();
 			Set<ResourceTable> nonUpdatedEntities = new HashSet<>();
 			Set<ResourceTable> updatedEntities = new HashSet<>();
+			List<IBaseResource> updatedResources = new ArrayList<>();
 			Map<String, Class<? extends IBaseResource>> conditionalRequestUrls = new HashMap<>();
 
 			/*
@@ -633,15 +657,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				switch (verb) {
 					case "POST": {
 						// CREATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 						res.setId((String) null);
 						DaoMethodOutcome outcome;
 						String matchUrl = myVersionAdapter.getEntryRequestIfNoneExist(nextReqEntry);
 						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequestDetails);
+						outcome = resourceDao.create(res, matchUrl, false, theUpdateTime, theRequest);
 						if (nextResourceId != null) {
-							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+							handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						}
 						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						if (outcome.getCreated() == false) {
@@ -663,7 +688,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						if (parts.getResourceId() != null) {
 							IIdType deleteId = newIdType(parts.getResourceType(), parts.getResourceId());
 							if (!deletedResources.contains(deleteId.getValueAsString())) {
-								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequestDetails);
+								DaoMethodOutcome outcome = dao.delete(deleteId, deleteConflicts, theRequest);
 								if (outcome.getEntity() != null) {
 									deletedResources.add(deleteId.getValueAsString());
 									entriesToProcess.put(nextRespEntry, outcome.getEntity());
@@ -672,7 +697,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						} else {
 							String matchUrl = parts.getResourceType() + '?' + parts.getParams();
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequestDetails);
+							DeleteMethodOutcome deleteOutcome = dao.deleteByUrl(matchUrl, deleteConflicts, theRequest);
 							List<ResourceTable> allDeleted = deleteOutcome.getDeletedEntities();
 							for (ResourceTable deleted : allDeleted) {
 								deletedResources.add(deleted.getIdDt().toUnqualifiedVersionless().getValueAsString());
@@ -690,6 +715,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					}
 					case "PUT": {
 						// UPDATE
+						validateResourcePresent(res, order, verb);
 						@SuppressWarnings("rawtypes")
 						IFhirResourceDao resourceDao = getDaoOrThrowException(res.getClass());
 
@@ -703,7 +729,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								version = ParameterUtil.parseETagValue(myVersionAdapter.getEntryRequestIfMatch(nextReqEntry));
 							}
 							res.setId(newIdType(parts.getResourceType(), parts.getResourceId(), version));
-							outcome = resourceDao.update(res, null, false, false, theRequestDetails);
+							outcome = resourceDao.update(res, null, false, false, theRequest);
 						} else {
 							res.setId((String) null);
 							String matchUrl;
@@ -713,7 +739,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 								matchUrl = parts.getResourceType();
 							}
 							matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
-							outcome = resourceDao.update(res, matchUrl, false, false, theRequestDetails);
+							outcome = resourceDao.update(res, matchUrl, false, false, theRequest);
 							if (Boolean.TRUE.equals(outcome.getCreated())) {
 								conditionalRequestUrls.put(matchUrl, res.getClass());
 							}
@@ -722,15 +748,59 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 						if (outcome.getCreated() == Boolean.FALSE
 							|| (outcome.getCreated() == Boolean.TRUE && outcome.getId().getVersionIdPartAsLong() > 1)) {
 							updatedEntities.add(outcome.getEntity());
+							if (outcome.getResource() != null) {
+								updatedResources.add(outcome.getResource());
+							}
 						}
 
-						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequestDetails);
+						handleTransactionCreateOrUpdateOutcome(theIdSubstitutions, theIdToPersistedOutcome, nextResourceId, outcome, nextRespEntry, resourceType, res, theRequest);
 						entriesToProcess.put(nextRespEntry, outcome.getEntity());
 						break;
 					}
-					case "GET":
-					default:
+					case "PATCH": {
+						// PATCH
+						validateResourcePresent(res, order, verb);
+
+						String url = extractTransactionUrlOrThrowException(nextReqEntry, verb);
+						UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+
+						String matchUrl = toMatchUrl(nextReqEntry);
+						matchUrl = performIdSubstitutionsInMatchUrl(theIdSubstitutions, matchUrl);
+						String patchBody = null;
+						String contentType = null;
+
+						if (res instanceof IBaseBinary) {
+							IBaseBinary binary = (IBaseBinary) res;
+							if (binary.getContent() != null && binary.getContent().length > 0) {
+								patchBody = new String(binary.getContent(), Charsets.UTF_8);
+							}
+							contentType = binary.getContentType();
+						}
+
+						if (isBlank(patchBody)) {
+							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchBody");
+							throw new InvalidRequestException(msg);
+						}
+						if (isBlank(contentType)) {
+							String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingPatchContentType");
+							throw new InvalidRequestException(msg);
+						}
+
+						ca.uhn.fhir.jpa.dao.IFhirResourceDao<? extends IBaseResource> dao = toDao(parts, verb, url);
+						PatchTypeEnum patchType = PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
+						IIdType patchId = myContext.getVersion().newIdType().setValue(parts.getResourceId());
+						DaoMethodOutcome outcome = dao.patch(patchId, matchUrl, patchType, patchBody, theRequest);
+						updatedEntities.add(outcome.getEntity());
+						if (outcome.getResource() != null) {
+							updatedResources.add(outcome.getResource());
+						}
+
 						break;
+					}
+					case "GET":
+						break;
+					default:
+						throw new InvalidRequestException("Unable to handle verb in transaction: " + verb);
 
 				}
 
@@ -744,10 +814,42 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * was also deleted as a part of this transaction, which is why we check this now at the
 			 * end.
 			 */
+			for (Iterator<DeleteConflict> iter = deleteConflicts.iterator(); iter.hasNext(); ) {
+				DeleteConflict nextDeleteConflict = iter.next();
 
-			deleteConflicts.removeIf(next ->
-				deletedResources.contains(next.getTargetId().toUnqualifiedVersionless().getValue()));
-			myDao.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
+				/*
+				 * If we have a conflict, it means we can't delete Resource/A because
+				 * Resource/B has a reference to it. We'll ignore that conflict though
+				 * if it turns out we're also deleting Resource/B in this transaction.
+				 */
+				if (deletedResources.contains(nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue())) {
+					iter.remove();
+					continue;
+				}
+
+				/*
+				 * And then, this is kind of a last ditch check. It's also ok to delete
+				 * Resource/A if Resource/B isn't being deleted, but it is being UPDATED
+				 * in this transaction, and the updated version of it has no references
+				 * to Resource/A any more.
+				 */
+				String sourceId = nextDeleteConflict.getSourceId().toUnqualifiedVersionless().getValue();
+				String targetId = nextDeleteConflict.getTargetId().toUnqualifiedVersionless().getValue();
+				Optional<IBaseResource> updatedSource = updatedResources
+					.stream()
+					.filter(t -> sourceId.equals(t.getIdElement().toUnqualifiedVersionless().getValue()))
+					.findFirst();
+				if (updatedSource.isPresent()) {
+					List<ResourceReferenceInfo> referencesInSource = myContext.newTerser().getAllResourceReferences(updatedSource.get());
+					boolean sourceStillReferencesTarget = referencesInSource
+						.stream()
+						.anyMatch(t -> targetId.equals(t.getResourceReference().getReferenceElement().toUnqualifiedVersionless().getValue()));
+					if (!sourceStillReferencesTarget) {
+						iter.remove();
+					}
+				}
+			}
+			myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 			/*
 			 * Perform ID substitutions and then index each resource we have saved
@@ -806,9 +908,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateInternal(theRequestDetails, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					myDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateEntity(theRequestDetails, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+					myDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 				}
 			}
 
@@ -839,7 +941,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				Class<? extends IBaseResource> resType = nextEntry.getValue();
 				if (isNotBlank(matchUrl)) {
 					IFhirResourceDao<?> resourceDao = myDao.getDao(resType);
-					Set<Long> val = resourceDao.processMatchUrl(matchUrl);
+					Set<Long> val = resourceDao.processMatchUrl(matchUrl, theRequest);
 					if (val.size() > 1) {
 						throw new InvalidRequestException(
 							"Unable to process " + theActionName + " - Request would cause multiple resources to match URL: \"" + matchUrl + "\". Does transaction request contain duplicates?");
@@ -862,9 +964,16 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return entriesToProcess;
 
 		} finally {
-			if (theRequestDetails != null) {
-				theRequestDetails.stopDeferredRequestOperationCallbackAndRunDeferredItems();
+			if (theRequest != null) {
+				theRequest.stopDeferredRequestOperationCallbackAndRunDeferredItems();
 			}
+		}
+	}
+
+	private void validateResourcePresent(IBaseResource theResource, Integer theOrder, String theVerb) {
+		if (theResource == null) {
+			String msg = myContext.getLocalizer().getMessage(TransactionProcessor.class, "missingMandatoryResource", theVerb, theOrder);
+			throw new InvalidRequestException(msg);
 		}
 	}
 
@@ -985,6 +1094,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	 * Process any DELETE interactions
 	 * Process any POST interactions
 	 * Process any PUT interactions
+	 * Process any PATCH interactions
 	 * Process any GET interactions
 	 */
 	//@formatter:off
@@ -1041,21 +1151,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			return o1 - o2;
 		}
 
-		private String toMatchUrl(BUNDLEENTRY theEntry) {
-			String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
-			if (verb.equals("POST")) {
-				return myVersionAdapter.getEntryIfNoneExist(theEntry);
-			}
-			if (verb.equals("PUT") || verb.equals("DELETE")) {
-				String url = extractTransactionUrlOrThrowException(theEntry, verb);
-				UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
-				if (isBlank(parts.getResourceId())) {
-					return parts.getResourceType() + '?' + parts.getParams();
-				}
-			}
-			return null;
-		}
-
 		private int toOrder(BUNDLEENTRY theO1) {
 			int o1 = 0;
 			if (myVersionAdapter.getEntryRequestVerb(theO1) != null) {
@@ -1069,8 +1164,11 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					case "PUT":
 						o1 = 3;
 						break;
-					case "GET":
+					case "PATCH":
 						o1 = 4;
+						break;
+					case "GET":
+						o1 = 5;
 						break;
 					default:
 						o1 = 0;
@@ -1103,6 +1201,24 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 	private static String toStatusString(int theStatusCode) {
 		return Integer.toString(theStatusCode) + " " + defaultString(Constants.HTTP_STATUS_NAMES.get(theStatusCode));
+	}
+
+	private String toMatchUrl(BUNDLEENTRY theEntry) {
+		String verb = myVersionAdapter.getEntryRequestVerb(theEntry);
+		if (verb.equals("POST")) {
+			return myVersionAdapter.getEntryIfNoneExist(theEntry);
+		}
+		if (verb.equals("PATCH")) {
+			return myVersionAdapter.getEntryRequestIfMatch(theEntry);
+		}
+		if (verb.equals("PUT") || verb.equals("DELETE")) {
+			String url = extractTransactionUrlOrThrowException(theEntry, verb);
+			UrlUtil.UrlParts parts = UrlUtil.parseUrl(url);
+			if (isBlank(parts.getResourceId())) {
+				return parts.getResourceType() + '?' + parts.getParams();
+			}
+		}
+		return null;
 	}
 
 }

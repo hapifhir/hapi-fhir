@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -14,22 +15,24 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.rp.dstu3.*;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+
+import javax.validation.constraints.NotNull;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
@@ -77,13 +80,10 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 			restServer.setPlainProviders(mySystemProvider);
 
-			int myPort = RandomServerPortProvider.findFreePort();
-			ourServer = new Server(myPort);
+			ourServer = new Server(0);
 
 			ServletContextHandler proxyHandler = new ServletContextHandler();
-			proxyHandler.setContextPath("/");
-
-			ourServerBase = "http://localhost:" + myPort + "/fhir/context";
+			proxyHandler.setContextPath("/");			
 
 			ServletHolder servletHolder = new ServletHolder();
 			servletHolder.setServlet(restServer);
@@ -93,7 +93,9 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			restServer.setFhirContext(ourCtx);
 
 			ourServer.setHandler(proxyHandler);
-			ourServer.start();
+			JettyUtil.startServer(ourServer);
+            int myPort = JettyUtil.getPortForStartedServer(ourServer);
+            ourServerBase = "http://localhost:" + myPort + "/fhir/context";
 
 			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 			HttpClientBuilder builder = HttpClientBuilder.create();
@@ -263,6 +265,24 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		}
 	}
 
+	@Test
+	public void testTransactionGetStartsWithSlash() {
+		IIdType patientId = ourClient.create().resource(new Patient()).execute().getId().toUnqualifiedVersionless();
+
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+		input.setId("bundle-batch-test");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET)
+			.setUrl("/Patient?_id="+patientId.getIdPart());
+
+		Bundle output = ourClient.transaction().withBundle(input).execute();
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		assertThat(output.getEntryFirstRep().getResponse().getStatus(), startsWith("200"));
+		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
+		List<String> actualIds = toIds(respBundle);
+		assertThat(actualIds, containsInAnyOrder(patientId.getValue()));
+	}
+
 	private List<String> toIds(Bundle theRespBundle) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (BundleEntryComponent next : theRespBundle.getEntry()) {
@@ -273,7 +293,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 

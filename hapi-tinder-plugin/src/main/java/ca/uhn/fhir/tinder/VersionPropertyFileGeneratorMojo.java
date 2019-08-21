@@ -15,6 +15,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
@@ -98,7 +99,8 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 		FileWriter w = null;
 		try {
 			w = new FileWriter(targetFile, false);
-			w.write("# This file contains version definitions\n\n");
+			w.write("# This file contains version definitions\n");
+			w.write("# Generated: " + InstantType.now().getValueAsString() + "\n\n");
 			for (Entry<String, Class<?>> nextEntry : resourceTypes.entrySet()) {
 				w.write("resource.");
 				w.write(nextEntry.getKey());
@@ -125,8 +127,8 @@ public class VersionPropertyFileGeneratorMojo extends AbstractMojo {
 	public static void main(String[] theArgs) throws MojoFailureException {
 
 		VersionPropertyFileGeneratorMojo m = new VersionPropertyFileGeneratorMojo();
-		m.packageName = "org.hl7.fhir.r4.model";
-		m.targetFile = new File("hapi-fhir-structures-r4/src/main/resources/org/hl7/fhir/r4/model/fhirversion.properties");
+		m.packageName = "org.hl7.fhir.r5.model";
+		m.targetFile = new File("hapi-fhir-structures-r5/src/main/resources/org/hl7/fhir/r5/model/fhirversion.properties");
 
 //		m.packageName = "org.hl7.fhir.dstu3.model";
 //		m.targetFile = new File("../hapi-fhir-structures-dstu3/src/main/resources/org/hl7/fhir/dstu3/model/fhirversion.properties");

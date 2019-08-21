@@ -1,16 +1,20 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.containsStringIgnoringCase;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
+import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
+import ca.uhn.fhir.model.dstu2.resource.Patient;
+import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.annotation.IdParam;
+import ca.uhn.fhir.rest.annotation.Read;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -21,28 +25,26 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
-import ca.uhn.fhir.model.dstu2.resource.MedicationOrder;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.MaritalStatusCodesEnum;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.annotation.*;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.util.PortUtil;
-import ca.uhn.fhir.util.TestUtil;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 public class SummaryParamDstu2Test {
 
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamDstu2Test.class);
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu2();
 	private static SummaryEnum ourLastSummary;
 	private static List<SummaryEnum> ourLastSummaryList;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SummaryParamDstu2Test.class);
 	private static int ourPort;
 
 	private static Server ourServer;
@@ -52,6 +54,7 @@ public class SummaryParamDstu2Test {
 		ourLastSummary = null;
 		ourLastSummaryList = null;
 	}
+
 	@Test
 	public void testReadSummaryData() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1?_summary=" + SummaryEnum.DATA.getCode());
@@ -69,7 +72,6 @@ public class SummaryParamDstu2Test {
 		assertThat(responseContent, (containsString("maritalStatus")));
 		assertEquals(SummaryEnum.DATA, ourLastSummary);
 	}
-
 
 
 	@Test
@@ -251,40 +253,13 @@ public class SummaryParamDstu2Test {
 		assertThat(responseContent, containsString("Can not combine _summary=text with other values for _summary"));
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		RestfulServer servlet = new RestfulServer(ourCtx);
-
-		servlet.setResourceProviders(new DummyPatientResourceProvider(), new DummyMedicationOrderProvider());
-		ServletHolder servletHolder = new ServletHolder(servlet);
-		proxyHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(proxyHandler);
-		ourServer.start();
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-
-	}
-
-	public static class DummyMedicationOrderProvider implements IResourceProvider{
+	public static class DummyMedicationOrderProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return MedicationOrder.class;
 		}
-		
+
 		@Read
 		public MedicationOrder read(@IdParam IdDt theId) {
 			MedicationOrder retVal = new MedicationOrder();
@@ -294,14 +269,14 @@ public class SummaryParamDstu2Test {
 			retVal.setId(theId);
 			return retVal;
 		}
-		
+
 		@Search
 		public List<MedicationOrder> read() {
 			return Arrays.asList(read(new IdDt("999")));
 		}
 
 	}
-	
+
 	public static class DummyPatientResourceProvider implements IResourceProvider {
 
 		@Override
@@ -330,7 +305,7 @@ public class SummaryParamDstu2Test {
 			patient.setMaritalStatus(MaritalStatusCodesEnum.D);
 			return patient;
 		}
-		
+
 		@Search()
 		public Patient search(SummaryEnum theSummary) {
 			ourLastSummary = theSummary;
@@ -341,6 +316,35 @@ public class SummaryParamDstu2Test {
 			patient.setMaritalStatus(MaritalStatusCodesEnum.D);
 			return patient;
 		}
+
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		ServletHandler proxyHandler = new ServletHandler();
+
+		RestfulServer servlet = new RestfulServer(ourCtx);
+		servlet.setResourceProviders(new DummyPatientResourceProvider(), new DummyMedicationOrderProvider());
+		servlet.setDefaultResponseEncoding(EncodingEnum.XML);
+
+		ServletHolder servletHolder = new ServletHolder(servlet);
+		proxyHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(proxyHandler);
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
+		HttpClientBuilder builder = HttpClientBuilder.create();
+		builder.setConnectionManager(connectionManager);
+		ourClient = builder.build();
 
 	}
 

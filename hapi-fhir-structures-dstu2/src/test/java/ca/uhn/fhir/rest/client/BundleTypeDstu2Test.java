@@ -74,7 +74,7 @@ public class BundleTypeDstu2Test {
 		p1.addIdentifier().setSystem("urn:system").setValue("value");
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
-		client.transaction().withResources(Arrays.asList((IBaseResource) p1)).execute();
+		client.transaction().withResources(Arrays.asList((IBaseResource) p1)).encodedXml().execute();
 
 		HttpUriRequest value = capt.getValue();
 

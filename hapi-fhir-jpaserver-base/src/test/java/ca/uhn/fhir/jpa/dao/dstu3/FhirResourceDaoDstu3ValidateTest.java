@@ -10,13 +10,14 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.Observation.ObservationStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Ignore;
@@ -35,6 +36,10 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3ValidateTest.class);
 	@Autowired
 	private IValidatorModule myValidatorModule;
+	@Autowired
+	private CachingValidationSupport myValidationSupport;
+	@Autowired
+	private FhirInstanceValidator myFhirInstanceValidator;
 
 	@Test
 	public void testValidateChangedQuestionnaire() {
@@ -70,7 +75,10 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 		MethodOutcome results = myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(results.getOperationOutcome()));
 
-		TestUtil.sleepAtLeast(2500);
+		ourLog.info("Clearing cache");
+		myValidationSupport.flushCaches();
+		myFhirInstanceValidator.flushCaches();
+
 		try {
 			myQuestionnaireResponseDao.validate(qr, null, null, null, null, null, null);
 			fail();
@@ -84,14 +92,14 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	@After
 	public void after() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
+		val.setBestPracticeWarningLevel(org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel.Warning);
 	}
 
 
 	@Test
 	public void testValidateWithCanonicalReference() {
 		FhirInstanceValidator val = AopTestUtils.getTargetObject(myValidatorModule);
-		IResourceValidator.BestPracticeWarningLevel a = IResourceValidator.BestPracticeWarningLevel.Ignore;
+		org.hl7.fhir.r5.utils.IResourceValidator.BestPracticeWarningLevel a = IResourceValidator.BestPracticeWarningLevel.Ignore;
 		val.setBestPracticeWarningLevel(a);
 
 		ValueSet vs = new ValueSet();
@@ -273,7 +281,7 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testValidateResourceContainingProfileDeclarationInvalid() throws Exception {
+	public void testValidateResourceContainingProfileDeclarationInvalid() {
 		String methodName = "testValidateResourceContainingProfileDeclarationInvalid";
 
 		Observation input = new Observation();
@@ -287,11 +295,14 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 
 		ValidationModeEnum mode = ValidationModeEnum.CREATE;
 		String encoded = myFhirCtx.newJsonParser().encodeResourceToString(input);
-		MethodOutcome outcome = myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
-
-		String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
-		ourLog.info(ooString);
-		assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+		try {
+			myObservationDao.validate(input, null, encoded, EncodingEnum.JSON, mode, null, mySrd);
+			fail();
+		} catch (PreconditionFailedException e) {
+			String ooString = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
+			ourLog.info(ooString);
+			assertThat(ooString, containsString("StructureDefinition reference \\\"" + profileUri + "\\\" could not be resolved"));
+		}
 
 	}
 
@@ -424,6 +435,23 @@ public class FhirResourceDaoDstu3ValidateTest extends BaseJpaDstu3Test {
 			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			throw e;
 		}
+	}
+
+	@Test
+	public void testValidateUsingDifferentialProfile() throws IOException {
+		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
+		myStructureDefinitionDao.create(sd);
+
+		Patient p = new Patient();
+		p.getMeta().addProfile("http://hl7.org/fhir/StructureDefinition/MyPatient421");
+		p.setActive(true);
+
+		String raw = myFhirCtx.newJsonParser().encodeResourceToString(p);
+		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
+		ourLog.info("OO: {}", encoded);
+		assertThat(encoded, containsString("No issues detected"));
 	}
 
 	@AfterClass

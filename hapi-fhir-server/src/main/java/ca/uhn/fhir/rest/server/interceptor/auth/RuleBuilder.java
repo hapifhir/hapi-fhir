@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +20,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -29,12 +30,14 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 public class RuleBuilder implements IAuthRuleBuilder {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final ConcurrentHashMap<Class<? extends IBaseResource>, String> ourTypeToName = new ConcurrentHashMap<>();
 	private ArrayList<IAuthRule> myRules;
 	private IAuthRuleBuilderRule myAllow;
 	private IAuthRuleBuilderRule myDeny;
@@ -195,7 +198,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
-		public IAuthRuleBuilderRuleOp delete() {
+		public IAuthRuleBuilderRuleOpDelete delete() {
 			return new RuleBuilderRuleOp(RuleOpEnum.DELETE);
 		}
 
@@ -257,7 +260,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		private class RuleBuilderRuleConditional implements IAuthRuleBuilderRuleConditional {
 
 			private AppliesTypeEnum myAppliesTo;
-			private Set<?> myAppliesToTypes;
+			private Set<String> myAppliesToTypes;
 			private RestOperationTypeEnum myOperationType;
 
 			RuleBuilderRuleConditional(RestOperationTypeEnum theOperationType) {
@@ -273,6 +276,13 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			@Override
 			public IAuthRuleBuilderRuleConditionalClassifier resourcesOfType(Class<? extends IBaseResource> theType) {
 				Validate.notNull(theType, "theType must not be null");
+
+				String typeName = toTypeName(theType);
+				return resourcesOfType(typeName);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleConditionalClassifier resourcesOfType(String theType) {
 				myAppliesTo = AppliesTypeEnum.TYPES;
 				myAppliesToTypes = Collections.singleton(theType);
 				return new RuleBuilderRuleConditionalClassifier();
@@ -300,12 +310,13 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		}
 
-		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp {
+		private class RuleBuilderRuleOp implements IAuthRuleBuilderRuleOp, IAuthRuleBuilderRuleOpDelete {
 
 			private final RuleOpEnum myRuleOp;
 			private RuleBuilderRuleOpClassifier myInstancesBuilder;
+			private boolean myOnCascade;
 
-			public RuleBuilderRuleOp(RuleOpEnum theRuleOp) {
+			RuleBuilderRuleOp(RuleOpEnum theRuleOp) {
 				myRuleOp = theRuleOp;
 			}
 
@@ -344,16 +355,30 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 			}
 
+
 			@Override
 			public IAuthRuleBuilderRuleOpClassifier resourcesOfType(Class<? extends IBaseResource> theType) {
 				Validate.notNull(theType, "theType must not be null");
+				String resourceName = toTypeName(theType);
+				return resourcesOfType(resourceName);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleOpClassifier resourcesOfType(String theType) {
+				Validate.notNull(theType, "theType must not be null");
 				return new RuleBuilderRuleOpClassifier(AppliesTypeEnum.TYPES, Collections.singleton(theType));
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleOp onCascade() {
+				myOnCascade = true;
+				return this;
 			}
 
 			private class RuleBuilderRuleOpClassifier implements IAuthRuleBuilderRuleOpClassifier {
 
 				private final AppliesTypeEnum myAppliesTo;
-				private final Set<?> myAppliesToTypes;
+				private final Set<String> myAppliesToTypes;
 				private ClassifierTypeEnum myClassifierType;
 				private String myInCompartmentName;
 				private Collection<? extends IIdType> myInCompartmentOwners;
@@ -363,7 +388,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				/**
 				 * Constructor
 				 */
-				RuleBuilderRuleOpClassifier(AppliesTypeEnum theAppliesTo, Set<Class<? extends IBaseResource>> theAppliesToTypes) {
+				RuleBuilderRuleOpClassifier(AppliesTypeEnum theAppliesTo, Set<String> theAppliesToTypes) {
 					super();
 					myAppliesTo = theAppliesTo;
 					myAppliesToTypes = theAppliesToTypes;
@@ -389,6 +414,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					myRule.setClassifierType(myClassifierType);
 					myRule.setClassifierCompartmentName(myInCompartmentName);
 					myRule.setClassifierCompartmentOwners(myInCompartmentOwners);
+					myRule.setAppliesToDeleteCascade(myOnCascade);
 					myRules.add(myRule);
 
 					return new RuleBuilderFinished(myRule);
@@ -543,7 +569,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 					private final OperationRule myRule;
 
-					public RuleBuilderOperationNamedAndScoped(OperationRule theRule) {
+					RuleBuilderOperationNamedAndScoped(OperationRule theRule) {
 						myRule = theRule;
 					}
 
@@ -591,7 +617,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 		private class PatchBuilder implements IAuthRuleBuilderPatch {
 
-			public PatchBuilder() {
+			PatchBuilder() {
 				super();
 			}
 
@@ -615,6 +641,17 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				return new RuleBuilderFinished(rule);
 			}
 		}
+	}
+
+	private static String toTypeName(Class<? extends IBaseResource> theType) {
+		String retVal = ourTypeToName.get(theType);
+		if (retVal == null) {
+			ResourceDef resourceDef = theType.getAnnotation(ResourceDef.class);
+			retVal = resourceDef.name();
+			Validate.notBlank(retVal, "Could not determine resource type of class %s", theType);
+			ourTypeToName.put(theType, retVal);
+		}
+		return retVal;
 	}
 
 }

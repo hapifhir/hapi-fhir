@@ -68,6 +68,89 @@
 
 		<section name="Announcements">
 			<p>
+				<b>August 14, 2019 - HAPI FHIR 4.0.0 (Igloo) Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release features a number of significant performance improvements,
+				and has some notable changes:
+			</p>
+			<ul>
+				<li>
+					A new consent framework called ConsentInterceptor that can be used to apply local consent directives and policies, and potentially filter or mask data has been added.
+				</li>
+				<li>
+					Initial support for draft FHIR R5 resources has been added.
+				</li>
+				<li>
+					Support for GraphQL and the _filter search parameter has been added.
+				</li>
+				<li>
+					The ability to perform cascading deletes has been added.
+				</li>
+			</ul>
+			<p>
+				As always, see the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes. You can also <a href="https://youtu.be/0breejA_xe4">watch the release webinar</a>!
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<p>
+				<b>May 30, 2019 - HAPI FHIR 3.8.0 (Hippo) Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release features a number of significant performance improvements,
+				and has some notable changes:
+			</p>
+			<ul>
+				<li>
+					A new interceptor framework has been added. Existing interceptors will continue to work, and no code changes
+					are needed in order to use this new version, but existing interceptors can be modified to use the new
+					framework and can then take advantage of even more functionality. Updated migration documentation will be
+					produced in the coming weeks.
+				</li>
+				<li>
+					A security issue in the hapi-fhir-testpage-overlay (the web-based testing UI that powers
+					<a href="http://hapi.fhir.org">hapi.fhir.org</a> and can be embedded into other applications)
+					has been corrected. Users of this module are recommended to upgrade right away.
+				</li>
+				<li>
+					The
+					<a href="https://github.com/hapifhir/hapi-fhir-jpaserver-starter">hapi-fhir-jpaserver-starter</a>
+					project now uses a properties file for much easier configuration. Please use this project
+					as the basis for any new JPA Server projects, as we are deprecating the existing
+					duplicate
+					<a href="https://github.com/jamesagnew/hapi-fhir/tree/master/hapi-fhir-jpaserver-example">hapi-fhir-jpaserver-example</a>
+					project.
+				</li>
+				<li>
+					A number of improvements have been made to the validator.
+				</li>
+			</ul>
+			<p>
+				As always, see the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes.
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
+
+			<p>
 				<b>Feb 6, 2019 - HAPI FHIR 3.7.0 (Gale) Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
 				GitHub's releases section.
@@ -149,7 +232,7 @@
 
 
 			
-			
+			<!--
 			<p>
 				<b>Sep 17, 2018 - HAPI FHIR 3.5.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
@@ -219,6 +302,7 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
+			-->
 
 <!--
 			<p>

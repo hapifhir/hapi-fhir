@@ -5,7 +5,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -70,6 +71,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -111,6 +113,21 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 	}
+
+	@Test
+	public void testSearchForTokenValueOnlyUsesValueHash() {
+
+		myCaptureQueriesListener.clear();
+
+		ourClient
+			.loadPage()
+			.byUrl(ourServerBase + "/Practitioner?identifier=" + UrlUtil.escapeUrlParam("ABC|,DEF"))
+			.andReturnBundle(Bundle.class)
+			.execute();
+
+		myCaptureQueriesListener.logSelectQueries();
+	}
+
 
 	@Test
 	public void testSearchWithContainsLowerCase() {
@@ -358,6 +375,34 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		} catch (ResourceGoneException e) {
 			// good
 		}
+
+	}
+
+	@Test
+	public void testResourceGoneIncludesVersion() {
+
+		Patient p = new Patient();
+		p.addName().setFamily("FAM").addGiven("GIV");
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		ourClient
+			.delete()
+			.resourceById(id)
+			.execute();
+
+		CapturingInterceptor captureInterceptor = new CapturingInterceptor();
+		ourClient.registerInterceptor(captureInterceptor);
+
+		try {
+			ourClient.read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
+			fail();
+		} catch (ResourceGoneException e) {
+			// good
+		}
+
+		List<String> locationHeader = captureInterceptor.getLastResponse().getHeaders(Constants.HEADER_LOCATION);
+		assertEquals(1, locationHeader.size());
+		assertThat(locationHeader.get(0), containsString(id.getValue() + "/_history/2"));
 	}
 
 	@Test
@@ -480,9 +525,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, exts.size());
 	}
 
-	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
+	private List<String> searchAndReturnUnqualifiedIdValues(String theUri) throws IOException {
 		List<String> ids;
-		HttpGet get = new HttpGet(uri);
+		HttpGet get = new HttpGet(theUri);
+
+		ourLog.info("About to perform search for: {}", theUri);
 
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
@@ -2275,12 +2322,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<Date> preDates = Lists.newArrayList();
 		List<String> ids = Lists.newArrayList();
 		for (int i = 0; i < 10; i++) {
-			Thread.sleep(100);
+			sleepOneClick();
 			preDates.add(new Date());
-			Thread.sleep(100);
+			sleepOneClick();
 			patient.setId(id);
 			patient.getName().get(0).getFamilyElement().setValue(methodName + "_i" + i);
 			ids.add(myPatientDao.update(patient, mySrd).getId().toUnqualified().getValue());
+			sleepOneClick();
 		}
 
 		List<String> idValues;
@@ -3138,6 +3186,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testEncounterWithReason() {
+		Encounter enc = new Encounter();
+		enc.addReasonCode()
+			.addCoding().setSystem("http://myorg").setCode("hugs").setDisplay("Hugs for better wellness");
+		enc.getPeriod().setStartElement(new DateTimeType("2012"));
+		IIdType id = ourClient.create().resource(enc).execute().getId().toUnqualifiedVersionless();
+
+		enc = ourClient.read().resource(Encounter.class).withId(id).execute();
+		assertEquals("hugs", enc.getReasonCodeFirstRep().getCodingFirstRep().getCode());
+	}
+
+
+	@Test
 	public void testTerminologyWithCompleteCs_SearchForConceptIn() throws Exception {
 
 		CodeSystem cs = new CodeSystem();
@@ -3931,7 +3992,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid1));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
-		TestUtil.sleepOneClick();
+		sleepOneClick();
 
 		Bundle result2 = ourClient
 			.search()
@@ -5118,7 +5179,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
 			assertThat(resp,
-				stringContainsInOrder(">ERROR<", "[Patient.contact]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
+				stringContainsInOrder(">ERROR<", "[Patient.contact[0]]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();

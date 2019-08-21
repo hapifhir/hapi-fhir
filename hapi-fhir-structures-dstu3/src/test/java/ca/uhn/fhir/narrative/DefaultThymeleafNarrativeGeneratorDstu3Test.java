@@ -205,6 +205,71 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 
 	}
 
+	/**
+	 * See #1399
+	 */
+	@Test
+	public void testDiagnosticReport() {
+		String input = "{\n" +
+			"            \"resourceType\": \"DiagnosticReport\",\n" +
+			"            \"extension\": [\n" +
+			"               {\n" +
+			"                  \"url\": \"http://mihin.org/extension/copyright\",\n" +
+			"                  \"valueString\": \"Copyright 2014-2019 Michigan Health Information Network Shared Services. Licensed under the Apache License, Version 2.0 (the 'License'); you may not use this file except in compliance with the License. You may obtain a copy of the License at   http://www.apache.org/licenses/LICENSE-2.0.   Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.\"\n" +
+			"               }\n" +
+			"            ],\n" +
+			"            \"identifier\": [\n" +
+			"               {\n" +
+			"                  \"use\": \"official\",\n" +
+			"                  \"system\": \"http://mihin.org/fhir/sid/elementId\",\n" +
+			"                  \"value\": \"b13e2d3a-f37b-4137-abbf-2a93f90c0e1c\"\n" +
+			"               }\n" +
+			"            ],\n" +
+			"            \"status\": \"final\",\n" +
+			"            \"code\": {\n" +
+			"               \"coding\": [\n" +
+			"                  {\n" +
+			"                     \"system\": \"http://loinc.org\",\n" +
+			"                     \"code\": \"47527-7\"\n" +
+			"                  }\n" +
+			"               ]\n" +
+			"            },\n" +
+			"            \"subject\": {\n" +
+			"               \"reference\": \"http://localhost:8080/hapi-fhir-jpaserver/fhir/Patient/2940\"\n" +
+			"            },\n" +
+			"            \"encounter\": {\n" +
+			"               \"reference\": \"Encounter/Encounter-184\",\n" +
+			"               \"display\": \"Wellness Visit\"\n" +
+			"            },\n" +
+			"            \"effectivePeriod\": {\n" +
+			"               \"start\": \"2016-01-13T10:40:00-05:00\",\n" +
+			"               \"end\": \"2016-01-13T10:40:00-05:00\"\n" +
+			"            },\n" +
+			"            \"issued\": \"2016-01-13T10:40:00.000-05:00\",\n" +
+			"            \"performer\": [\n" +
+			"               {\n" +
+			"                  \"reference\": \"http://localhost:8080/hapi-fhir-jpaserver/fhir/Practitioner/1600\"\n" +
+			"               }\n" +
+			"            ],\n" +
+			"            \"result\": [\n" +
+			"               {\n" +
+			"                  \"reference\": \"Observation/Observation-16492\",\n" +
+			"                  \"display\": \"Negative_HPV_Report_Observation_1\"\n" +
+			"               }\n" +
+			"            ]\n" +
+			"         }";
+
+
+		DiagnosticReport value = ourCtx.newJsonParser().parseResource(DiagnosticReport.class, input);
+		myGen.populateResourceNarrative(ourCtx, value);
+		String output = value.getText().getDiv().getValueAsString();
+
+		ourLog.info(output);
+		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Untitled Diagnostic Report </div>"));
+
+	}
+
+
 	@Test
 	@Ignore
 	public void testGenerateMedicationPrescription() {

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 public enum EncodingEnum {
 
 	JSON(Constants.CT_FHIR_JSON, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_JSON) {
@@ -42,16 +44,27 @@ public enum EncodingEnum {
 		public IParser newParser(FhirContext theContext) {
 			return theContext.newXmlParser();
 		}
-	};
+	},
+
+	RDF(Constants.CT_RDF_TURTLE, Constants.CT_RDF_TURTLE, Constants.FORMAT_TURTLE) {
+		@Override
+		public IParser newParser(FhirContext theContext) {
+			return theContext.newRDFParser();
+		}
+	},
+
+	;
 
 	/**
 	 * "json"
 	 */
 	public static final String JSON_PLAIN_STRING = "json";
+
 	/**
 	 * "xml"
 	 */
 	public static final String XML_PLAIN_STRING = "xml";
+
 	private static Map<String, EncodingEnum> ourContentTypeToEncoding;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingLegacy;
 	private static Map<String, EncodingEnum> ourContentTypeToEncodingStrict;
@@ -127,9 +140,9 @@ public enum EncodingEnum {
 		return myResourceContentTypeNonLegacy;
 	}
 
-	public abstract IParser newParser(FhirContext theContext);
+	public abstract IParser newParser(final FhirContext theContext);
 
-	public static EncodingEnum detectEncoding(String theBody) {
+	public static EncodingEnum detectEncoding(final String theBody) {
 		EncodingEnum retVal = detectEncodingNoDefault(theBody);
 		retVal = ObjectUtils.defaultIfNull(retVal, EncodingEnum.XML);
 		return retVal;
@@ -155,10 +168,13 @@ public enum EncodingEnum {
 	 * is found.
 	 * <p>
 	 * <b>This method is lenient!</b> Things like "application/xml" will return {@link EncodingEnum#XML}
-	 * even if the "+fhir" part is missing from the expected content type.
+	 * even if the "+fhir" part is missing from the expected content type. Also,
+	 * spaces are treated as a plus (i.e. "application/fhir json" will be treated as
+	 * "application/fhir+json" in order to account for unescaped spaces in URL
+	 * parameters)
 	 * </p>
 	 */
-	public static EncodingEnum forContentType(String theContentType) {
+	public static EncodingEnum forContentType(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return null;
@@ -177,7 +193,7 @@ public enum EncodingEnum {
 	 *
 	 * @see #forContentType(String)
 	 */
-	public static EncodingEnum forContentTypeStrict(String theContentType) {
+	public static EncodingEnum forContentTypeStrict(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return null;
@@ -186,19 +202,42 @@ public enum EncodingEnum {
 		}
 	}
 
-	private static String getTypeWithoutCharset(String theContentType) {
-		if (theContentType == null) {
+	static String getTypeWithoutCharset(final String theContentType) {
+		if (isBlank(theContentType)) {
 			return null;
 		} else {
-			String[] contentTypeSplitted = theContentType.split(";");
-			return contentTypeSplitted[0];
+
+			int start = 0;
+			for (; start < theContentType.length(); start++) {
+				if (theContentType.charAt(start) != ' ') {
+					break;
+				}
+			}
+			int end = start;
+			for (; end < theContentType.length(); end++) {
+				if (theContentType.charAt(end) == ';') {
+					break;
+				}
+			}
+			for (; end > start; end--) {
+				if (theContentType.charAt(end - 1) != ' ') {
+					break;
+				}
+			}
+
+			String retVal = theContentType.substring(start, end);
+
+			if (retVal.contains(" ")) {
+				retVal = retVal.replace(' ', '+');
+			}
+			return retVal;
 		}
 	}
 
 	/**
 	 * Is the given type a FHIR legacy (pre-DSTU3) content type?
 	 */
-	public static boolean isLegacy(String theContentType) {
+	public static boolean isLegacy(final String theContentType) {
 		String contentTypeSplitted = getTypeWithoutCharset(theContentType);
 		if (contentTypeSplitted == null) {
 			return false;

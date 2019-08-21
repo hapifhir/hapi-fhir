@@ -9,7 +9,6 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
-import ca.uhn.fhir.jpa.provider.r4.TerminologyUploaderProviderR4;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -22,12 +21,13 @@ import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.hapi.rest.server.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.r4.utils.IResourceValidator.BestPracticeWarningLevel;
+import org.hl7.fhir.r5.utils.IResourceValidator;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,9 +44,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -86,23 +86,18 @@ public class BaseR4Config extends BaseConfig {
 		return new TransactionProcessor<>();
 	}
 
-	@Bean(name = "myGraphQLProvider")
+	@Bean(name = GRAPHQL_PROVIDER_NAME)
 	@Lazy
 	public GraphQLProvider graphQLProvider() {
 		return new GraphQLProvider(fhirContextR4(), validationSupportChainR4(), graphqlStorageServices());
-	}
-
-	@Bean
-	@Lazy
-	public GraphQLEngine.IGraphQLStorageServices graphqlStorageServices() {
-		return new JpaStorageServices();
 	}
 
 	@Bean(name = "myInstanceValidatorR4")
 	@Lazy
 	public IValidatorModule instanceValidatorR4() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
-		val.setBestPracticeWarningLevel(BestPracticeWarningLevel.Warning);
+		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
+		val.setBestPracticeWarningLevel(level);
 		val.setValidationSupport(validationSupportChainR4());
 		return val;
 	}
@@ -163,13 +158,6 @@ public class BaseR4Config extends BaseConfig {
 	@Bean(autowire = Autowire.BY_TYPE)
 	public IHapiTerminologySvcR4 terminologyService() {
 		return new HapiTerminologySvcR4();
-	}
-
-	@Bean(autowire = Autowire.BY_TYPE)
-	public TerminologyUploaderProviderR4 terminologyUploaderProvider() {
-		TerminologyUploaderProviderR4 retVal = new TerminologyUploaderProviderR4();
-		retVal.setContext(fhirContextR4());
-		return retVal;
 	}
 
 	@Primary

@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.collect.Lists;
 import net.ttddyy.dsproxy.QueryCount;
 import net.ttddyy.dsproxy.listener.SingleQueryCountHolder;
@@ -37,6 +37,7 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSubscriptionsR4Test.class);
 
 	private static Server ourListenerServer;
+    protected static int ourListenerPort;
 	protected static List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
 	protected static List<String> ourHeaders = Collections.synchronizedList(new ArrayList<>());
 	private static SingleQueryCountHolder ourCountHolder;
@@ -211,14 +212,12 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 
 	@BeforeClass
 	public static void startListenerServer() throws Exception {
-		int ourListenerPort = PortUtil.findFreePort();
 		RestfulServer ourListenerRestServer = new RestfulServer(FhirContext.forR4());
-		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-
+		
 		ObservationListener obsListener = new ObservationListener();
 		ourListenerRestServer.setResourceProviders(obsListener);
 
-		ourListenerServer = new Server(ourListenerPort);
+		ourListenerServer = new Server(0);
 
 		ServletContextHandler proxyHandler = new ServletContextHandler();
 		proxyHandler.setContextPath("/");
@@ -228,12 +227,14 @@ public abstract class BaseSubscriptionsR4Test extends BaseResourceProviderR4Test
 		proxyHandler.addServlet(servletHolder, "/fhir/context/*");
 
 		ourListenerServer.setHandler(proxyHandler);
-		ourListenerServer.start();
+		JettyUtil.startServer(ourListenerServer);
+        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
 	}
 
 	@AfterClass
 	public static void stopListenerServer() throws Exception {
-		ourListenerServer.stop();
+		JettyUtil.closeServer(ourListenerServer);
 	}
 
 }

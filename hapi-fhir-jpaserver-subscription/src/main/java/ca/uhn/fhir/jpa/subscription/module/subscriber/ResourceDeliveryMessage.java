@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -73,6 +74,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return retVal;
 	}
 
+	public String getPayloadString() {
+		if (this.myPayloadString != null) {
+			return this.myPayloadString;
+		}
+
+		return "";
+	}
+
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
 		if (myPayloadId != null) {
@@ -89,9 +98,9 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		mySubscription = theSubscription;
 	}
 
-	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
 		myPayload = thePayload;
-		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
 		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
 

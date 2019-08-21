@@ -143,4 +143,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
 	}
 
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		for (IValidationSupport next : myChain) {
+			if (next.isCodeSystemSupported(theContext, theSystem)) {
+				return next.lookupCode(theContext, theSystem, theCode);
+			}
+		}
+		return null;
+	}
+
+
 }

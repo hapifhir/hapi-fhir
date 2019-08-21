@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.dbmatcher;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,10 +26,10 @@ import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
-import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchResult;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -52,7 +52,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 	private PlatformTransactionManager myTxManager;
 
 	@Override
-	public SubscriptionMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
+	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		IIdType id = theMsg.getId(myCtx);
 		String resourceType = id.getResourceType();
 		String resourceId = id.getIdPart();
@@ -65,7 +65,7 @@ public class DaoSubscriptionMatcher implements ISubscriptionMatcher {
 
 		ourLog.debug("Subscription check found {} results for query: {}", results.size(), criteria);
 
-		return SubscriptionMatchResult.fromBoolean(results.size() > 0);
+		return InMemoryMatchResult.fromBoolean(results.size() > 0);
 	}
 
 	/**

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.matcher.SubscriptionMatchingStrategy;
@@ -33,6 +34,8 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Extension;
+import org.hl7.fhir.r4.model.codesystems.SubscriptionStatus;
+import org.hl7.fhir.r5.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +69,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 				return canonicalizeDstu3(theSubscription);
 			case R4:
 				return canonicalizeR4(theSubscription);
+			case R5:
+				return canonicalizeR5(theSubscription);
 			case DSTU2_HL7ORG:
 			case DSTU2_1:
 			default:
@@ -111,8 +116,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 				String subjectTemplate;
 
 				try {
-					from = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
-					subjectTemplate = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+					from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+					subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
 				} catch (FHIRException theE) {
 					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 				}
@@ -125,8 +130,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 				String stripVersionIds;
 				String deliverLatestVersion;
 				try {
-					stripVersionIds = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-					deliverLatestVersion = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+					stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+					deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
 				} catch (FHIRException theE) {
 					throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 				}
@@ -168,6 +173,14 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 						.stream()
 						.collect(Collectors.groupingBy(t -> t.getUrl(), mapping(t -> t.getValueAsPrimitive().getValueAsString(), toList())));
 				}
+				case R5: {
+					org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
+					return subscription
+						.getChannel()
+						.getExtension()
+						.stream()
+						.collect(Collectors.groupingBy(t -> t.getUrl(), mapping(t -> t.getValueAsPrimitive().getValueAsString(), toList())));
+				}
 				case DSTU2_HL7ORG:
 				case DSTU2_1:
 				default: {
@@ -198,8 +211,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			String from;
 			String subjectTemplate;
 			try {
-				from = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
-				subjectTemplate = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
@@ -211,8 +224,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 			String stripVersionIds;
 			String deliverLatestVersion;
 			try {
-				stripVersionIds = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
-				deliverLatestVersion = subscription.getChannel().getExtensionString(SubscriptionConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+				stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+				deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
 			} catch (FHIRException theE) {
 				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
 			}
@@ -231,6 +244,56 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		return retVal;
 	}
 
+	private CanonicalSubscription canonicalizeR5(IBaseResource theSubscription) {
+		org.hl7.fhir.r5.model.Subscription subscription = (org.hl7.fhir.r5.model.Subscription) theSubscription;
+
+		CanonicalSubscription retVal = new CanonicalSubscription();
+		retVal.setStatus(org.hl7.fhir.r4.model.Subscription.SubscriptionStatus.fromCode(subscription.getStatus().toCode()));
+		retVal.setChannelType(CanonicalSubscriptionChannelType.fromCode(subscription.getChannel().getType().toCode()));
+		retVal.setCriteriaString(subscription.getCriteria());
+		retVal.setEndpointUrl(subscription.getChannel().getEndpoint());
+		retVal.setHeaders(subscription.getChannel().getHeader());
+		retVal.setChannelExtensions(extractExtension(subscription));
+		retVal.setIdElement(subscription.getIdElement());
+		retVal.setPayloadString(subscription.getChannel().getPayload());
+
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+			String from;
+			String subjectTemplate;
+			try {
+				from = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_EMAIL_FROM);
+				subjectTemplate = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_SUBJECT_TEMPLATE);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getEmailDetails().setFrom(from);
+			retVal.getEmailDetails().setSubjectTemplate(subjectTemplate);
+		}
+
+		if (retVal.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+			String stripVersionIds;
+			String deliverLatestVersion;
+			try {
+				stripVersionIds = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS);
+				deliverLatestVersion = subscription.getChannel().getExtensionString(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_DELIVER_LATEST_VERSION);
+			} catch (FHIRException theE) {
+				throw new ConfigurationException("Failed to extract subscription extension(s): " + theE.getMessage(), theE);
+			}
+			retVal.getRestHookDetails().setStripVersionId(Boolean.parseBoolean(stripVersionIds));
+			retVal.getRestHookDetails().setDeliverLatestVersion(Boolean.parseBoolean(deliverLatestVersion));
+		}
+
+		List<org.hl7.fhir.r5.model.Extension> topicExts = subscription.getExtensionsByUrl("http://hl7.org/fhir/subscription/topics");
+		if (topicExts.size() > 0) {
+			IBaseReference ref = (IBaseReference) topicExts.get(0).getValueAsPrimitive();
+			if (!"EventDefinition".equals(ref.getReferenceElement().getResourceType())) {
+				throw new PreconditionFailedException("Topic reference must be an EventDefinition");
+			}
+		}
+
+		return retVal;
+	}
+
 	public String getCriteria(IBaseResource theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
@@ -239,6 +302,8 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 				return ((org.hl7.fhir.dstu3.model.Subscription) theSubscription).getCriteria();
 			case R4:
 				return ((org.hl7.fhir.r4.model.Subscription) theSubscription).getCriteria();
+			case R5:
+				return ((org.hl7.fhir.r5.model.Subscription) theSubscription).getCriteria();
 			case DSTU2_1:
 			case DSTU2_HL7ORG:
 			default:
@@ -259,7 +324,7 @@ public class SubscriptionCanonicalizer<S extends IBaseResource> {
 		} else {
 			throw new IllegalStateException("Unknown " + SubscriptionMatchingStrategy.class.getSimpleName() + ": " + theStrategy);
 		}
-		meta.addTag().setSystem(SubscriptionConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY).setCode(value).setDisplay(display);
+		meta.addTag().setSystem(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY).setCode(value).setDisplay(display);
 	}
 
 	public String getSubscriptionStatus(IBaseResource theSubscription) {

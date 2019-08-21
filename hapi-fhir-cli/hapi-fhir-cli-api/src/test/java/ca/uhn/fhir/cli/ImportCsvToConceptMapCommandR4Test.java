@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -25,6 +24,8 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.junit.Assert.*;
+
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class ImportCsvToConceptMapCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandR4Test.class);
@@ -60,14 +61,13 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
+		ourServer = new Server(0);
 
 		ServletHandler servletHandler = new ServletHandler();
 
@@ -79,7 +79,8 @@ public class ImportCsvToConceptMapCommandR4Test {
 		servletHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(servletHandler);
 
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		ourBase = "http://localhost:" + ourPort;
 
@@ -362,6 +363,81 @@ public class ImportCsvToConceptMapCommandR4Test {
 			.search()
 			.forResource(ConceptMap.class)
 			.where(ConceptMap.URL.matches().value(CM_URL))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/2", conceptMap.getId());
+	}
+
+	@Test
+	public void testImportCsvToConceptMapCommandWithByteOrderMark() throws FHIRException {
+		ClassLoader classLoader = getClass().getClassLoader();
+		File fileToImport = new File(classLoader.getResource("loinc-to-phenx.csv").getFile());
+		ImportCsvToConceptMapCommandR4Test.file = fileToImport.getAbsolutePath();
+
+		App.main(new String[] {"import-csv-to-conceptmap",
+			"-v", ourVersion,
+			"-t", ourBase,
+			"-u", "http://loinc.org/cm/loinc-to-phenx",
+			"-i", "http://loinc.org",
+			"-o", "http://phenxtoolkit.org",
+			"-f", file,
+			"-l"});
+
+		Bundle response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
+			.returnBundle(Bundle.class)
+			.execute();
+
+		ConceptMap conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
+
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		assertEquals("http://localhost:" + ourPort + "/ConceptMap/1/_history/1", conceptMap.getId());
+
+		assertEquals("http://loinc.org/cm/loinc-to-phenx", conceptMap.getUrl());
+		assertEquals("http://loinc.org", conceptMap.getSourceUriType().getValueAsString());
+		assertEquals("http://phenxtoolkit.org", conceptMap.getTargetUriType().getValueAsString());
+
+		assertEquals(1, conceptMap.getGroup().size());
+
+		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
+		assertEquals("http://loinc.org", group.getSource());
+		assertNull(group.getSourceVersion());
+		assertEquals("http://phenxtoolkit.org", group.getTarget());
+		assertNull(group.getTargetVersion());
+
+		assertEquals(1, group.getElement().size());
+
+		SourceElementComponent source = group.getElement().get(0);
+		assertEquals("65191-9", source.getCode());
+		assertEquals("During the past 30 days, about how often did you feel restless or fidgety [Kessler 6 Distress]", source.getDisplay());
+
+		assertEquals(1, source.getTarget().size());
+
+		TargetElementComponent target = source.getTarget().get(0);
+		assertEquals("PX121301010300", target.getCode());
+		assertEquals("PX121301_Restless", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUIVALENT, target.getEquivalence());
+		assertNull(target.getComment());
+
+		App.main(new String[] {"import-csv-to-conceptmap",
+			"-v", ourVersion,
+			"-t", ourBase,
+			"-u", "http://loinc.org/cm/loinc-to-phenx",
+			"-i", "http://loinc.org",
+			"-o", "http://phenxtoolkit.org",
+			"-f", file,
+			"-l"});
+
+		response = ourClient
+			.search()
+			.forResource(ConceptMap.class)
+			.where(ConceptMap.URL.matches().value("http://loinc.org/cm/loinc-to-phenx"))
 			.returnBundle(Bundle.class)
 			.execute();
 

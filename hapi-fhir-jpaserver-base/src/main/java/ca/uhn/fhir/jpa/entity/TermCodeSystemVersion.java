@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,11 +22,14 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ValidateUtil;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.length;
 
 //@formatter:off
 @Table(name = "TRM_CODESYSTEM_VER"
@@ -36,6 +39,8 @@ import java.util.Collection;
 //@formatter:on
 public class TermCodeSystemVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	public static final int MAX_VERSION_LENGTH = 200;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
@@ -50,7 +55,7 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
-	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false)
+	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
@@ -60,8 +65,12 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
 	@SuppressWarnings("unused")
+
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
+
+	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemDisplayName;
 
 	/**
 	 * Constructor
@@ -103,16 +112,21 @@ public class TermCodeSystemVersion implements Serializable {
 		return myCodeSystem;
 	}
 
-	public void setCodeSystem(TermCodeSystem theCodeSystem) {
+	public TermCodeSystemVersion setCodeSystem(TermCodeSystem theCodeSystem) {
 		myCodeSystem = theCodeSystem;
+		return this;
 	}
 
 	public String getCodeSystemVersionId() {
 		return myCodeSystemVersionId;
 	}
 
-	public void setCodeSystemVersionId(String theCodeSystemVersionId) {
+	public TermCodeSystemVersion setCodeSystemVersionId(String theCodeSystemVersionId) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemVersionId, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemVersionId));
 		myCodeSystemVersionId = theCodeSystemVersionId;
+		return this;
 	}
 
 	public Collection<TermConcept> getConcepts() {
@@ -130,8 +144,9 @@ public class TermCodeSystemVersion implements Serializable {
 		return myResource;
 	}
 
-	public void setResource(ResourceTable theResource) {
+	public TermCodeSystemVersion setResource(ResourceTable theResource) {
 		myResource = theResource;
+		return this;
 	}
 
 	@Override
@@ -143,4 +158,14 @@ public class TermCodeSystemVersion implements Serializable {
 		return result;
 	}
 
+	public String getCodeSystemDisplayName() {
+		return myCodeSystemDisplayName;
+	}
+
+	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+		myCodeSystemDisplayName = theCodeSystemDisplayName;
+	}
 }

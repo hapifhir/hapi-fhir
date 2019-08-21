@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server.test;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.ejb.Stateless;
@@ -8,6 +10,11 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.mockito.Mockito;
 
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsResourceProvider;
@@ -68,8 +75,18 @@ public class TestJaxRsMockPatientRestProvider extends AbstractJaxRsResourceProvi
 	}
 
 	@Read(version = true)
-	public Patient findHistory(@IdParam final IdDt theId) {
-		return mock.findHistory(theId);
+	public Patient findVersion(@IdParam final IdDt theId) {
+		return mock.findVersion(theId);
+	}
+
+	@History
+	public IBundleProvider getHistoryForInstance(@IdParam IIdType theId) {
+		return mock.getHistoryForInstance(theId);
+	}
+
+	@History
+	public IBundleProvider getHistoryForType() {
+		return mock.getHistoryForType();
 	}
 
 	@Create

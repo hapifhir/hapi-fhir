@@ -3,17 +3,18 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -37,9 +38,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,18 +53,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 	private AppliesTypeEnum myAppliesTo;
-	private Set<?> myAppliesToTypes;
+	private Set<String> myAppliesToTypes;
 	private String myClassifierCompartmentName;
 	private Collection<? extends IIdType> myClassifierCompartmentOwners;
 	private ClassifierTypeEnum myClassifierType;
 	private RuleOpEnum myOp;
 	private TransactionAppliesToEnum myTransactionAppliesToOp;
 	private Collection<IIdType> myAppliesToInstances;
+	private boolean myAppliesToDeleteCascade;
 
 	/**
 	 * Constructor
 	 */
-	public RuleImplOp(String theRuleName) {
+	RuleImplOp(String theRuleName) {
 		super(theRuleName);
 	}
 
@@ -72,13 +74,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return myAppliesToInstances;
 	}
 
-	public void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
+	void setAppliesToInstances(Collection<IIdType> theAppliesToInstances) {
 		myAppliesToInstances = theAppliesToInstances;
 	}
 
 	@Override
 	public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource,
-									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags) {
+									 IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 
 		if (isOtherTenant(theRequestDetails)) {
 			return null;
@@ -207,10 +209,23 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				break;
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
-					if (theInputResource == null) {
+					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
+						return null;
+					}
+					if (theInputResourceId == null) {
+						return null;
+					}
+					if (theInputResourceId.hasIdPart() == false) {
+						// This is a conditional DELETE, so we'll authorize it using STORAGE events instead
+						// so just let it through for now..
 						return newVerdict();
 					}
+					if (theInputResource== null && myClassifierCompartmentOwners != null && myClassifierCompartmentOwners.size() > 0) {
+						return newVerdict();
+					}
+
 					appliesToResource = theInputResource;
+					appliesToResourceId = Collections.singleton(theInputResourceId);
 				} else {
 					return null;
 				}
@@ -236,6 +251,15 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					for (BundleEntryParts nextPart : inputResources) {
 
 						IBaseResource inputResource = nextPart.getResource();
+						IIdType inputResourceId = null;
+						if (isNotBlank(nextPart.getUrl())) {
+
+							UrlUtil.UrlParts parts = UrlUtil.parseUrl(nextPart.getUrl());
+
+								inputResourceId = theRequestDetails.getFhirContext().getVersion().newIdType();
+								inputResourceId.setParts(null, parts.getResourceType(), parts.getResourceId(), null);
+						}
+
 						RestOperationTypeEnum operation;
 						if (nextPart.getRequestType() == RequestTypeEnum.GET) {
 							continue;
@@ -264,7 +288,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 						}
 
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, null, null);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -292,7 +316,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						if (nextResource == null) {
 							continue;
 						}
-						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource);
+						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(RestOperationTypeEnum.READ, theRequestDetails, null, null, nextResource, thePointcut);
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {
@@ -371,7 +395,8 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case TYPES:
 				if (appliesToResource != null) {
 					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-						if (myAppliesToTypes.contains(appliesToResource.getClass()) == false) {
+						String type = theRequestDetails.getFhirContext().getResourceDefinition(appliesToResource).getName();
+						if (myAppliesToTypes.contains(type) == false) {
 							return null;
 						}
 					}
@@ -379,24 +404,24 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (appliesToResourceId != null) {
 					for (IIdType nextRequestAppliesToResourceId : appliesToResourceId) {
 						if (nextRequestAppliesToResourceId.hasResourceType()) {
-							Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(nextRequestAppliesToResourceId.getResourceType()).getImplementingClass();
-							if (myAppliesToTypes.contains(type) == false) {
+							String nextRequestAppliesToResourceIdType = nextRequestAppliesToResourceId.getResourceType();
+							if (myAppliesToTypes.contains(nextRequestAppliesToResourceIdType) == false) {
 								return null;
 							}
 						}
 					}
 				}
 				if (appliesToResourceType != null) {
-					Class<? extends IBaseResource> type = theRequestDetails.getServer().getFhirContext().getResourceDefinition(appliesToResourceType).getImplementingClass();
-					if (myAppliesToTypes.contains(type)) {
-						if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-							return null;
-						}
-						if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-							return new Verdict(PolicyEnum.ALLOW, this);
-						} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
-							// ok we'll check below
-						}
+					if (!myAppliesToTypes.contains(appliesToResourceType)) {
+						return null;
+					}
+					if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+						return null;
+					}
+					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
+						return newVerdict();
+					} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
+						// ok we'll check below
 					}
 				}
 				break;
@@ -548,19 +573,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		myAppliesTo = theAppliesTo;
 	}
 
-	public void setAppliesToTypes(Set<?> theAppliesToTypes) {
+	void setAppliesToTypes(Set<String> theAppliesToTypes) {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
-	public void setClassifierCompartmentName(String theClassifierCompartmentName) {
+	void setClassifierCompartmentName(String theClassifierCompartmentName) {
 		myClassifierCompartmentName = theClassifierCompartmentName;
 	}
 
-	public void setClassifierCompartmentOwners(Collection<? extends IIdType> theInCompartmentOwners) {
+	void setClassifierCompartmentOwners(Collection<? extends IIdType> theInCompartmentOwners) {
 		myClassifierCompartmentOwners = theInCompartmentOwners;
 	}
 
-	public void setClassifierType(ClassifierTypeEnum theClassifierType) {
+	void setClassifierType(ClassifierTypeEnum theClassifierType) {
 		myClassifierType = theClassifierType;
 	}
 
@@ -582,6 +607,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		builder.append("classifierCompartmentOwners", myClassifierCompartmentOwners);
 		builder.append("classifierType", myClassifierType);
 		return builder.toString();
+	}
+
+	void setAppliesToDeleteCascade(boolean theAppliesToDeleteCascade) {
+		myAppliesToDeleteCascade = theAppliesToDeleteCascade;
 	}
 
 }

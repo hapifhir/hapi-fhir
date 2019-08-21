@@ -33,9 +33,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,6 +53,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	private IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 	@Autowired
 	private FhirContext myDstu3Ctx;
 	private ApplicationContext myApplicationContext;
@@ -128,7 +129,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 			}
 		} else if ("StructureDefinition".equals(resourceName)) {
 			if (theUri.startsWith("http://hl7.org/fhir/StructureDefinition/")) {
-				return null;
+				// Don't allow the core FHIR definitions to be overwritten
+				String typeName = theUri.substring("http://hl7.org/fhir/StructureDefinition/".length());
+				if (myDstu3Ctx.getElementDefinition(typeName) != null) {
+					return null;
+				}
 			}
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLoadSynchronousUpTo(1);
@@ -144,6 +149,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
 			search = myCodeSystemDao.search(params);
+		} else if ("ImplementationGuide".equals(resourceName)) {
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			search = myImplementationGuideDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -167,7 +177,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return fetchCodeSystem(theCtx, theSystem) != null;
+		return false;
 	}
 
 	@Override
@@ -181,11 +191,22 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 		myValueSetDao = myApplicationContext.getBean("myValueSetDaoDstu3", IFhirResourceDao.class);
 		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoDstu3", IFhirResourceDao.class);
 		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoDstu3", IFhirResourceDao.class);
+		myImplementationGuideDao = myApplicationContext.getBean("myImplementationGuideDaoDstu3", IFhirResourceDao.class);
 	}
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
 		return null;
 	}
 

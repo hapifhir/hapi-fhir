@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
@@ -30,12 +31,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements ApplicationContextAware {
+public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
@@ -100,7 +101,16 @@ public class DaoRegistry implements ApplicationContextAware {
 		return retVal;
 	}
 
+	/**
+	 * Use getResourceDaoOrNull
+	 */
+	@Deprecated
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(Class<T> theResourceType) {
+		return getResourceDaoOrNull(theResourceType);
+	}
+
+	@Nullable
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(Class<T> theResourceType) {
 		String resourceName = myContext.getResourceDefinition(theResourceType).getName();
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(resourceName);
@@ -109,12 +119,26 @@ public class DaoRegistry implements ApplicationContextAware {
 		}
 	}
 
+	/**
+	 * Use getResourceDaoOrNull
+	 */
+	@Deprecated
 	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoIfExists(String theResourceType) {
+		return getResourceDaoOrNull(theResourceType);
+	}
+
+	@Nullable
+	public <T extends IBaseResource> IFhirResourceDao<T> getResourceDaoOrNull(String theResourceType) {
 		try {
 			return (IFhirResourceDao<T>) getResourceDao(theResourceType);
 		} catch (InvalidRequestException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public boolean isResourceTypeSupported(String theResourceType) {
+		return mySupportedResourceTypes == null || mySupportedResourceTypes.contains(theResourceType);
 	}
 
 	private void init() {
@@ -137,6 +161,12 @@ public class DaoRegistry implements ApplicationContextAware {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}
 		}
+	}
+
+	public void register(IFhirResourceDao theResourceDao) {
+		RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceDao.getResourceType());
+		String resourceName = resourceDef.getName();
+		myResourceNameToResourceDao.put(resourceName, theResourceDao);
 	}
 
 	public IFhirResourceDao getDaoOrThrowException(Class<? extends IBaseResource> theClass) {
@@ -171,5 +201,9 @@ public class DaoRegistry implements ApplicationContextAware {
 			retVal = Arrays.asList(theResourceTypes);
 		}
 		return retVal;
+	}
+
+	public Set<String> getRegisteredDaoTypes() {
+		return Collections.unmodifiableSet(myResourceNameToResourceDao.keySet());
 	}
 }

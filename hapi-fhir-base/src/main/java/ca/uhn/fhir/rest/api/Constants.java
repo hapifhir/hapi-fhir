@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,6 +25,7 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
@@ -42,6 +43,7 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	public static final String CT_RDF_TURTLE = "application/x-turtle";
 	/**
 	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
 	 */
@@ -70,6 +72,9 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
+	public static final String FORMAT_TURTLE = "text/turtle";
+
+
 	/**
 	 * "text/html" and "html"
 	 */
@@ -133,6 +138,7 @@ public class Constants {
 	 * Used in paging links
 	 */
 	public static final String PARAM_BUNDLETYPE = "_bundletype";
+	public static final String PARAM_FILTER = "_filter";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -207,6 +213,13 @@ public class Constants {
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
+	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
+	public static final String HEADER_CASCADE = "X-Cascade";
+	public static final String CASCADE_DELETE = "delete";
+	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
+	public static final String CACHE_CONTROL_PRIVATE = "private";
+	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
+	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
 
 	static {
 		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
