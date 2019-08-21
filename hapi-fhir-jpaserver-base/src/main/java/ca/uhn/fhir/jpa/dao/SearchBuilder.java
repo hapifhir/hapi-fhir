@@ -823,6 +823,48 @@ public class SearchBuilder implements ISearchBuilder {
 		return null;
 	}
 
+
+	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformation.NONE) {
+			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
+			throw new InvalidRequestException(msg);
+		}
+
+		Join<ResourceTable, ResourceHistoryProvenanceEntity> join = myResourceTableRoot.join("myProvenance", JoinType.LEFT);
+
+		List<Predicate> codePredicates = new ArrayList<>();
+
+		for (IQueryParameterType nextParameter : theList) {
+			String nextParamValue = nextParameter.getValueAsQueryToken(myContext);
+			int lastHashValueIndex = nextParamValue.lastIndexOf('#');
+			String sourceUri;
+			String requestId;
+			if (lastHashValueIndex == -1) {
+				sourceUri = nextParamValue;
+				requestId = null;
+			} else {
+				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
+				requestId = nextParamValue.substring(lastHashValueIndex + 1);
+			}
+			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
+
+			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
+			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
+			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
+				codePredicates.add(myBuilder.and(sourceUriPredicate, requestIdPredicate));
+			} else if (isNotBlank(sourceUri)) {
+				codePredicates.add(sourceUriPredicate);
+			} else if (isNotBlank(requestId)) {
+				codePredicates.add(requestIdPredicate);
+			}
+		}
+
+		Predicate retVal = myBuilder.or(toArray(codePredicates));
+		myPredicates.add(retVal);
+		return retVal;
+	}
+
+
 	private Predicate addPredicateString(String theResourceName,
 													 String theParamName,
 													 List<? extends IQueryParameterType> theList) {
@@ -2680,6 +2722,14 @@ public class SearchBuilder implements ISearchBuilder {
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
+		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
+			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
+				TokenParam param = new TokenParam();
+				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
+				return addPredicateSource(Collections.singletonList(param), theFilter.getOperation(), theRequest);
+			} else {
+				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
+			}
 		}
 //		else if ((searchParam.getName().equals(Constants.PARAM_TAG)) ||
 //			(searchParam.equals(Constants.PARAM_SECURITY))) {
@@ -2797,6 +2847,12 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (theParamName.equals(Constants.PARAM_TAG) || theParamName.equals(Constants.PARAM_PROFILE) || theParamName.equals(Constants.PARAM_SECURITY)) {
 
 			addPredicateTag(theAndOrParams, theParamName);
+
+		} else if (theParamName.equals(Constants.PARAM_SOURCE)) {
+
+			for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+				addPredicateSource(nextAnd, SearchFilterParser.CompareOperation.eq, theRequest);
+			}
 
 		} else {
 

@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -129,6 +130,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	protected IdHelperService myIdHelperService;
 	@Autowired
 	protected IForcedIdDao myForcedIdDao;
+	@Autowired
+	protected IResourceProvenanceDao myResourceProvenanceDao;
 	@Autowired
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired
@@ -282,6 +285,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				}
 			}
 		}
+
 	}
 
 	private void findMatchingTagIds(RequestDetails theRequest, String theResourceName, IIdType theResourceId, Set<Long> tagIds, Class<? extends BaseTag> entityClass) {
@@ -611,7 +615,10 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			if (theEntity.getId() == null) {
 				changed = true;
 			} else {
-				ResourceHistoryTable currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), theEntity.getVersion());
+				ResourceHistoryTable currentHistoryVersion = theEntity.getCurrentVersionEntity();
+				if (currentHistoryVersion == null) {
+					currentHistoryVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), theEntity.getVersion());
+				}
 				if (currentHistoryVersion == null || currentHistoryVersion.getResource() == null) {
 					changed = true;
 				} else {
@@ -832,11 +839,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			metaSnapshotModeTokens = Collections.singleton(TagTypeEnum.PROFILE);
 		}
 
-		if (metaSnapshotModeTokens.contains(theTag.getTag().getTagType())) {
-			return true;
-		}
-
-		return false;
+		return metaSnapshotModeTokens.contains(theTag.getTag().getTagType());
 	}
 
 	@Override
@@ -851,10 +854,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	public <R extends IBaseResource> R toResource(Class<R> theResourceType, IBaseResourceEntity theEntity, Collection<ResourceTag> theTagList, boolean theForHistoryOperation) {
 
 		// 1. get resource, it's encoding and the tags if any
-		byte[] resourceBytes = null;
-		ResourceEncodingEnum resourceEncoding = null;
-		Collection<? extends BaseTag> myTagList = null;
-		Long version = null;
+		byte[] resourceBytes;
+		ResourceEncodingEnum resourceEncoding;
+		Collection<? extends BaseTag> myTagList;
+		Long version;
+		String provenanceSourceUri = null;
+		String provenanceRequestId = null;
 
 		if (theEntity instanceof ResourceHistoryTable) {
 			ResourceHistoryTable history = (ResourceHistoryTable) theEntity;
@@ -862,14 +867,20 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			resourceEncoding = history.getEncoding();
 			myTagList = history.getTags();
 			version = history.getVersion();
+			if (history.getProvenance() != null) {
+				provenanceRequestId = history.getProvenance().getRequestId();
+				provenanceSourceUri = history.getProvenance().getSourceUri();
+			}
 		} else if (theEntity instanceof ResourceTable) {
 			ResourceTable resource = (ResourceTable) theEntity;
 			version = theEntity.getVersion();
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
+			((ResourceTable)theEntity).setCurrentVersionEntity(history);
+
 			while (history == null) {
 				if (version > 1L) {
 					version--;
-					history = myResourceHistoryTableDao.findForIdAndVersion(theEntity.getId(), version);
+					history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
 				} else {
 					return null;
 				}
@@ -878,12 +889,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			resourceEncoding = history.getEncoding();
 			myTagList = resource.getTags();
 			version = history.getVersion();
+			if (history.getProvenance() != null) {
+				provenanceRequestId = history.getProvenance().getRequestId();
+				provenanceSourceUri = history.getProvenance().getSourceUri();
+			}
 		} else if (theEntity instanceof ResourceSearchView) {
 			// This is the search View
-			ResourceSearchView myView = (ResourceSearchView) theEntity;
-			resourceBytes = myView.getResource();
-			resourceEncoding = myView.getEncoding();
-			version = myView.getVersion();
+			ResourceSearchView view = (ResourceSearchView) theEntity;
+			resourceBytes = view.getResource();
+			resourceEncoding = view.getEncoding();
+			version = view.getVersion();
+			provenanceRequestId = view.getProvenanceRequestId();
+			provenanceSourceUri = view.getProvenanceSourceUri();
 			if (theTagList == null)
 				myTagList = new HashSet<>();
 			else
@@ -952,6 +969,23 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		} else {
 			IAnyResource res = (IAnyResource) retVal;
 			retVal = populateResourceMetadataRi(resourceType, theEntity, myTagList, theForHistoryOperation, res, version);
+		}
+
+		// 6. Handle source (provenance)
+		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
+			String sourceString = defaultString(provenanceSourceUri)
+				+ (isNotBlank(provenanceRequestId) ? "#" : "")
+				+ defaultString(provenanceRequestId);
+
+			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+				IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) retVal.getMeta()).addExtension();
+				sourceExtension.setUrl(JpaConstants.EXT_META_SOURCE);
+				IPrimitiveType<String> value = (IPrimitiveType<String>) myContext.getElementDefinition("uri").newInstance();
+				value.setValue(sourceString);
+				sourceExtension.setValue(value);
+			} else if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+				MetaUtil.setSource(myContext, retVal.getMeta(), sourceString);
+			}
 		}
 
 		return retVal;
@@ -1097,6 +1131,40 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 			ourLog.debug("Saving history entry {}", historyEntry.getIdDt());
 			myResourceHistoryTableDao.save(historyEntry);
+
+			// Save resource source
+			String source = null;
+			String requestId = theRequest != null ? theRequest.getRequestId() : null;
+			if (theResource != null) {
+				if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+					IBaseMetaType meta = theResource.getMeta();
+					source = MetaUtil.getSource(myContext, meta);
+				}
+				if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+					source = ((IBaseHasExtensions) theResource.getMeta())
+						.getExtension()
+						.stream()
+						.filter(t -> JpaConstants.EXT_META_SOURCE.equals(t.getUrl()))
+						.filter(t -> t.getValue() instanceof IPrimitiveType)
+						.map(t -> ((IPrimitiveType) t.getValue()).getValueAsString())
+						.findFirst()
+						.orElse(null);
+				}
+			}
+			boolean haveSource = isNotBlank(source) && myConfig.getStoreMetaSourceInformation().isStoreSourceUri();
+			boolean haveRequestId = isNotBlank(requestId) && myConfig.getStoreMetaSourceInformation().isStoreRequestId();
+			if (haveSource || haveRequestId) {
+				ResourceHistoryProvenanceEntity provenance = new ResourceHistoryProvenanceEntity();
+				provenance.setResourceHistoryTable(historyEntry);
+				provenance.setResourceTable(theEntity);
+				if (haveRequestId) {
+					provenance.setRequestId(left(requestId, Constants.REQUEST_ID_LENGTH));
+				}
+				if (haveSource) {
+					provenance.setSourceUri(source);
+				}
+				myEntityManager.persist(provenance);
+			}
 		}
 
 		/*

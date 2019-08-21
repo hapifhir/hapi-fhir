@@ -269,7 +269,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		deleteConflicts.setResourceIdMarkedForDeletion(theId);
+		if (theId != null && isNotBlank(theId.getValue())) {
+			deleteConflicts.setResourceIdMarkedForDeletion(theId);
+		}
+
 		StopWatch w = new StopWatch();
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
@@ -673,7 +676,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaAdd(theMetaAdd, latestVersion);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(entity.getId(), entity.getVersion());
 			doMetaAdd(theMetaAdd, history);
 		}
 
@@ -705,7 +708,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			doMetaDelete(theMetaDel, latestVersion);
 
 			// Also update history entry
-			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersion(entity.getId(), entity.getVersion());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(entity.getId(), entity.getVersion());
 			doMetaDelete(theMetaDel, history);
 		}
 

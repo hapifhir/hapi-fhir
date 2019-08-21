@@ -19,7 +19,6 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
-import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -3017,7 +3016,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
@@ -3038,15 +3037,18 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p2.setActive(false);
 		IIdType id2 = ourClient.create().resource(p2).execute().getId();
 
+		myCaptureQueriesListener.clear();
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersion(id1.getIdPartAsLong(), 1);
+				ResourceHistoryTable version = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id1.getIdPartAsLong(), 1);
 				myResourceHistoryTableDao.delete(version);
 			}
 		});
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
 		Bundle bundle = ourClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
+		ourLog.info("Result: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		assertEquals(2, bundle.getTotal());
 		assertEquals(1, bundle.getEntry().size());
 		assertEquals(id2.getIdPart(), bundle.getEntry().get(0).getResource().getIdElement().getIdPart());

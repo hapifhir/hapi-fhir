@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -1124,7 +1123,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		if (isBlank(requestId)) {
 			requestId = Long.toHexString(RANDOM.nextLong());
-			requestId = leftPad(requestId, 16, '0');
+			requestId = leftPad(requestId, Constants.REQUEST_ID_LENGTH, '0');
 		}
 
 		return requestId;
