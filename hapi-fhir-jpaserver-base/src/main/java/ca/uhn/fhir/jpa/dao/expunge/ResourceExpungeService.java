@@ -87,6 +87,8 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
 
 	@Override
 	@Transactional
@@ -94,7 +96,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		if (theResourceId != null) {
 			if (theVersion != null) {
-				return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+				return toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
 			} else {
 				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
 			}
@@ -146,6 +148,10 @@ class ResourceExpungeService implements IResourceExpungeService {
 
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
+		if (version.getProvenance() != null) {
+			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
+		}
+		
 		myResourceHistoryTagDao.deleteAll(version.getTags());
 		myResourceHistoryTableDao.delete(version);
 
@@ -194,7 +200,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private void expungeCurrentVersionOfResource(RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
+		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
 			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}

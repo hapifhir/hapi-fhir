@@ -187,7 +187,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
 			ResourceHistoryTable newHistory = table.toHistory();
-			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(table.getId(), 1L);
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResource(currentHistory.getResource());
 			myResourceHistoryTableDao.save(newHistory);
@@ -2724,7 +2724,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResource(newContent.getBytes(Charsets.UTF_8));

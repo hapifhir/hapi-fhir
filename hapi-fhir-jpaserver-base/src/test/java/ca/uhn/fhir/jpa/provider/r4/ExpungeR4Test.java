@@ -75,6 +75,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		Patient p = new Patient();
 		p.setId("PT-ONEVERSION");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		p.getMeta().setSource("http://foo_source");
 		p.setActive(true);
 		p.addIdentifier().setSystem("foo").setValue("bar");
 		p.addName().setFamily("FAM");

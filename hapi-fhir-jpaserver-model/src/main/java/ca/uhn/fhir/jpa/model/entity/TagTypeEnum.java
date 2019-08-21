@@ -32,5 +32,5 @@ public enum TagTypeEnum {
 	PROFILE,
 	
 	SECURITY_LABEL
-	
+
 }
