@@ -269,7 +269,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		deleteConflicts.setResourceIdMarkedForDeletion(theId);
+		if (theId != null && isNotBlank(theId.getValue())) {
+			deleteConflicts.setResourceIdMarkedForDeletion(theId);
+		}
 		StopWatch w = new StopWatch();
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
