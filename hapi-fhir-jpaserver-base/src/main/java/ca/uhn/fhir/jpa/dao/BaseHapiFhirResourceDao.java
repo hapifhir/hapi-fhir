@@ -272,7 +272,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (theId != null && isNotBlank(theId.getValue())) {
 			deleteConflicts.setResourceIdMarkedForDeletion(theId);
 		}
-		
+
 		StopWatch w = new StopWatch();
 
 		DaoMethodOutcome retVal = delete(theId, deleteConflicts, theRequestDetails);
