@@ -42,11 +42,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class DeleteConflictService {
@@ -67,7 +64,11 @@ public class DeleteConflictService {
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
-		DeleteConflictList newConflicts = new DeleteConflictList();
+
+		// We want the list of resources that are marked to be the same list even as we
+		// drill into conflict resolution stacks.. this allows us to not get caught by
+		// circular references
+		DeleteConflictList newConflicts = new DeleteConflictList(theDeleteConflicts);
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
@@ -104,6 +105,10 @@ public class DeleteConflictService {
 
 		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
 
+		if (theDeleteConflicts.isEmpty()) {
+			return new DeleteConflictOutcome();
+		}
+
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
 			.add(DeleteConflictList.class, theDeleteConflicts)
@@ -117,6 +122,12 @@ public class DeleteConflictService {
 			IdDt targetId = theEntity.getIdDt();
 			IdDt sourceId = link.getSourceResource().getIdDt();
 			String sourcePath = link.getSourcePath();
+			if (theDeleteConflicts.isResourceIdMarkedForDeletion(sourceId)) {
+				if (theDeleteConflicts.isResourceIdMarkedForDeletion(targetId)) {
+					continue;
+				}
+			}
+
 			theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
 		}
 	}

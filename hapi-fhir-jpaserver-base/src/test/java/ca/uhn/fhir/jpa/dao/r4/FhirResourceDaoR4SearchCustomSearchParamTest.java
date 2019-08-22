@@ -1298,6 +1298,34 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	}
 
+	@Test
+	public void testCustomCodeableConcept() {
+		SearchParameter fooSp = new SearchParameter();
+		fooSp.addBase("ChargeItem");
+		fooSp.setName("Product");
+		fooSp.setCode("product");
+		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+		fooSp.setTitle("Product within a ChargeItem");
+		fooSp.setExpression("ChargeItem.product.as(CodeableConcept)");
+		fooSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		mySearchParameterDao.create(fooSp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		ChargeItem ci = new ChargeItem();
+		ci.setProduct(new CodeableConcept());
+		ci.getProductCodeableConcept().addCoding().setCode("1");
+		myChargeItemDao.create(ci);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("product", new TokenParam(null, "1"));
+		IBundleProvider results = myChargeItemDao.search(map);
+		assertEquals(1, results.size().intValue());
+
+
+	}
+
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();

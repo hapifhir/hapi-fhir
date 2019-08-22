@@ -2,14 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -19,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
@@ -42,11 +36,11 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		// Current version should be marked as deleted
 		runInTransaction(()->{
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1);
 			assertNull(resourceTable.getDeleted());
 		});
 		runInTransaction(()->{
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
 			assertNotNull(resourceTable.getDeleted());
 		});
 
@@ -169,7 +163,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Mark the current history version as not-deleted even though the actual resource
 		// table entry is marked deleted
 		runInTransaction(()->{
-			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 2);
+			ResourceHistoryTable resourceTable = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 2);
 			resourceTable.setDeleted(null);
 			myResourceHistoryTableDao.save(resourceTable);
 		});

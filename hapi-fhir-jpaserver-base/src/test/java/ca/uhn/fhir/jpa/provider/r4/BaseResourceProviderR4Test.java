@@ -64,7 +64,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static String ourServerBase;
 	protected static SearchParamRegistryR4 ourSearchParamRegistry;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
@@ -165,7 +164,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 			ourSubscriptionMatcherInterceptor.start();
