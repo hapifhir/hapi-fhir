@@ -30,13 +30,13 @@ import org.springframework.data.repository.query.Param;
 
 public interface ITermValueSetConceptDesignationDao extends JpaRepository<TermValueSetConceptDesignation, Long> {
 
-	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myId = :pid")
-	Integer countByTermValueSetConceptId(@Param("pid") Long theValueSetConceptId);
+	@Query("SELECT COUNT(vscd) FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet.myId = :pid")
+	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myValueSet.myId = :pid")
+	@Query("DELETE FROM TermValueSetConceptDesignation vscd WHERE vscd.myValueSet.myId = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vscd from TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myId = :pid")
+	@Query("SELECT vscd FROM TermValueSetConceptDesignation vscd WHERE vscd.myConcept.myId = :pid")
 	Slice<TermValueSetConceptDesignation> findByTermValueSetConceptId(Pageable thePage, @Param("pid") Long theValueSetConceptId);
 }

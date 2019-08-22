@@ -116,6 +116,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 
 		TermValueSetConceptDesignation designation = new TermValueSetConceptDesignation();
 		designation.setConcept(theConcept);
+		designation.setValueSet(myTermValueSet);
 		designation.setLanguage(theDesignation.getLanguage());
 		if (isNoneBlank(theDesignation.getUseSystem(), theDesignation.getUseCode())) {
 			designation.setUseSystem(theDesignation.getUseSystem());

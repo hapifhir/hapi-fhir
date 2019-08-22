@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
 
-	@Query("SELECT COUNT(vsc) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
 	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")

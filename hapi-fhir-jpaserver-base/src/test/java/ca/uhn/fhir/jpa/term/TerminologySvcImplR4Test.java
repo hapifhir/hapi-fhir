@@ -563,6 +563,40 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		Long termValueSetId = myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).get().getId();
+		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				assertFalse(myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isPresent());
+			}
+		});
+	}
+
+	@Test
 	public void testDuplicateCodeSystemUrls() throws Exception {
 		loadAndPersistCodeSystem();
 
@@ -893,17 +927,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
 		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
-	}
-
-	@Test
-	public void testValidateCode() {
-		createCodeSystem();
-
-		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
-		assertEquals(true, validation.isOk());
-
-		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
-		assertEquals(false, validation.isOk());
 	}
 
 	@Test
@@ -2577,6 +2600,17 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
+	}
+
+	@Test
+	public void testValidateCode() {
+		createCodeSystem();
+
+		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
+		assertEquals(true, validation.isOk());
+
+		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
+		assertEquals(false, validation.isOk());
 	}
 
 	@AfterClass

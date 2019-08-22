@@ -612,6 +612,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Handle includes
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
+			ourLog.info("Working with " + identifyValueSetForLogging(theValueSetToExpand));
 			boolean add = true;
 			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter);
 		}
@@ -619,9 +620,46 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
+			ourLog.info("Working with " + identifyValueSetForLogging(theValueSetToExpand));
 			boolean add = false;
 			expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter);
 		}
+	}
+
+	private String identifyValueSetForLogging(ValueSet theValueSet) {
+		StringBuilder sb = new StringBuilder();
+		boolean isIdentified = false;
+		sb
+			.append("ValueSet:");
+		if (theValueSet.hasId()) {
+			isIdentified = true;
+			sb
+				.append(" ValueSet.id[")
+				.append(theValueSet.getId())
+				.append("]");
+		}
+		if (theValueSet.hasUrl()) {
+			isIdentified = true;
+			sb
+				.append(" ValueSet.url[")
+				.append(theValueSet.getUrl())
+				.append("]");
+		}
+		if (theValueSet.hasIdentifier()) {
+			isIdentified = true;
+			sb
+				.append(" ValueSet.identifier[")
+				.append(theValueSet.getIdentifierFirstRep().getSystem())
+				.append("|")
+				.append(theValueSet.getIdentifierFirstRep().getValue())
+				.append("]");
+		}
+
+		if (!isIdentified) {
+			sb.append(" None of ValueSet.id, ValueSet.url, and ValueSet.identifier are provided.");
+		}
+
+		return sb.toString();
 	}
 
 	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {
@@ -768,6 +806,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 */
 
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+				/*
+				 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
+				 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
+				 */
+				BooleanQuery.setMaxClauseCount(10000);
 
 				StopWatch sw = new StopWatch();
 				AtomicInteger count = new AtomicInteger(0);
