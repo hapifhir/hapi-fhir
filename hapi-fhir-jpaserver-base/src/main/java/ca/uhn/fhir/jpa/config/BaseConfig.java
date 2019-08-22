@@ -14,6 +14,8 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
@@ -141,6 +143,11 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Lazy
 	public BinaryStorageInterceptor binaryStorageInterceptor() {
 		return new BinaryStorageInterceptor();
+	}
+
+	@Bean
+	public ISearchResultCacheSvc searchResultCacheSvc() {
+		return new DatabaseSearchResultCacheSvcImpl();
 	}
 
 	@Bean

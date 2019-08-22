@@ -31,7 +31,7 @@ import java.util.Date;
  * #L%
  */
 
-public interface ISearchDao extends JpaRepository<Search, Long> {
+public interface IAAAAAAAAASearchDao extends JpaRepository<Search, Long> {
 
 	@Query("SELECT s FROM Search s WHERE s.myUuid = :uuid")
 	Search findByUuid(@Param("uuid") String theUuid);

@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.*;
@@ -64,7 +65,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private EntityManager myEntityManager;
 	private PlatformTransactionManager myPlatformTransactionManager;
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	private ISearchDao mySearchDao;
+	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;
@@ -196,8 +197,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
 			return txTemplate.execute(s -> {
-				try {
-					setSearchEntity(mySearchDao.findByUuid(myUuid));
+					Optional<Search> search = mySearchResultCacheSvc.fetchByUuid(myUuid);
+					if (!search.isPresent()) {
+						return false;
+					}
+
+					setSearchEntity(search);
 
 					if (mySearchEntity == null) {
 						return false;
@@ -209,10 +214,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 					mySearchEntity.getIncludes().size();
 
 					return true;
-				} catch (NoResultException e) {
-					return false;
-				}
-			});
+				});
 		}
 		return true;
 	}

@@ -34,7 +34,7 @@ import java.util.Set;
  * #L%
  */
 
-public interface ISearchResultDao  extends JpaRepository<SearchResult, Long> {
+public interface IAAAAAAAASearchResultDao  extends JpaRepository<SearchResult, Long> {
 	
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
 	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
