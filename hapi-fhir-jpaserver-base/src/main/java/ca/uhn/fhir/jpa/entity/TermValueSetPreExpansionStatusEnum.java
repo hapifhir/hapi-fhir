@@ -32,9 +32,11 @@ public enum TermValueSetPreExpansionStatusEnum {
 	/**
 	 * Sorting agnostic.
 	 */
+	// FIXME: add a unit test that verifies a message exists for each code
 	NOT_EXPANDED("notExpanded"),
 	EXPANSION_IN_PROGRESS("expansionInProgress"),
-	EXPANDED("expanded");
+	EXPANDED("expanded"),
+	FAILED_TO_EXPAND("failedToExpand");
 
 	private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
 	private String myCode;
