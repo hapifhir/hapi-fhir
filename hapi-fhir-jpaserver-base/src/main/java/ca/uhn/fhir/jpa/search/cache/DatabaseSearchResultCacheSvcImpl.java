@@ -137,7 +137,7 @@ public class DatabaseSearchResultCacheSvcImpl extends BaseSearchResultCacheSvcIm
 	}
 
 	@Override
-	public Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Date theCreatedAfter) {
+	public Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter) {
 		int hashCode = theQueryString.hashCode();
 		return mySearchDao.find(theResourceType, hashCode, theCreatedAfter);
 

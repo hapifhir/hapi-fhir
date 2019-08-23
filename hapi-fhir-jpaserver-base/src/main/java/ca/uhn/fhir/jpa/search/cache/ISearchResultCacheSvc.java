@@ -28,25 +28,8 @@ public interface ISearchResultCacheSvc {
 	Optional<Search> fetchByUuid(String theUuid);
 
 	/**
-	 * Fetch a sunset of the search result IDs from the cache
-	 *
-	 * @param theSearch The search to fetch IDs for
-	 * @param theFrom   The starting index (inclusive)
-	 * @param theTo     The ending index (exclusive)
-	 * @return A list of resource PIDs
-	 */
-	List<Long> fetchResultPids(Search theSearch, int theFrom, int theTo);
-
-	/**
-	 * Fetch all result PIDs for a given search with no particular order required
-	 * @param theSearch
-	 * @return
-	 */
-	List<Long> fetchAllResultPids(Search theSearch);
-
-	/**
 	 * TODO: this is perhaps an inappropriate responsibility for this service
-	 * 
+	 *
 	 * <p>
 	 * This method marks a search as in progress, but should only allow exactly one call to do so across the cluster. This
 	 * is done so that if two client threads request the next page at the exact same time (which is unlikely but not
@@ -70,10 +53,11 @@ public interface ISearchResultCacheSvc {
 	 *
 	 * @param theResourceType The resource type of the search. Results MUST match this type
 	 * @param theQueryString  The query string. Results SHOULD match this type
+	 * @param theQueryStringHash The query string hash. Results SHOULD match this type
 	 * @param theCreatedAfter Results SHOULD not include any searches created before this cutoff timestamp
 	 * @return A collection of candidate searches
 	 */
-	Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, Date theCreatedAfter);
+	Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter);
 
 	/**
 	 * Mark a search as having been "last used" at the given time. This method may (and probably should) be implemented
@@ -102,4 +86,21 @@ public interface ISearchResultCacheSvc {
 	 * @param theNewResourcePids              A list of new resoure PIDs to add to this search (these ones have not been previously saved)
 	 */
 	void storeResults(Search theSearch, List<Long> thePreviouslyStoredResourcePids, List<Long> theNewResourcePids);
+
+	/**
+	 * Fetch a sunset of the search result IDs from the cache
+	 *
+	 * @param theSearch The search to fetch IDs for
+	 * @param theFrom   The starting index (inclusive)
+	 * @param theTo     The ending index (exclusive)
+	 * @return A list of resource PIDs
+	 */
+	List<Long> fetchResultPids(Search theSearch, int theFrom, int theTo);
+
+	/**
+	 * Fetch all result PIDs for a given search with no particular order required
+	 * @param theSearch
+	 * @return
+	 */
+	List<Long> fetchAllResultPids(Search theSearch);
 }

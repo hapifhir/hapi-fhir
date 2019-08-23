@@ -357,7 +357,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					// Check for a search matching the given hash
-					Collection<Search> candidates = mySearchResultCacheSvc.findCandidatesForReuse(resourceType, queryString, createdCutoff);
+					Collection<Search> candidates = mySearchResultCacheSvc.findCandidatesForReuse(resourceType, queryString, queryString.hashCode(), createdCutoff);
 					for (Search nextCandidateSearch : candidates) {
 						if (queryString.equals(nextCandidateSearch.getSearchQueryString()) && nextCandidateSearch.getCreated().after(createdCutoff)) {
 							searchToUse = nextCandidateSearch;
