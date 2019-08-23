@@ -3938,6 +3938,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchResultCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
