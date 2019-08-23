@@ -648,7 +648,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
 				int maxResult = 50000;
 				jpaQuery.setMaxResults(maxResult);
-				jpaQuery.setFirstResult()
 
 				StopWatch sw = new StopWatch();
 				AtomicInteger count = new AtomicInteger(0);
