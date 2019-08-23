@@ -103,10 +103,9 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 		myValueSetConceptDao.save(concept);
 
-//		if (myConceptsSaved++ % 2 == 0) { // FIXME: DM 2019-08-23 - Reset to 250.
+		if (myConceptsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
 			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
-//			myValueSetConceptDao.flush();
-//		}
+		}
 
 		return concept;
 	}
@@ -128,9 +127,8 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		designation.setValue(theDesignation.getValue());
 		myValueSetConceptDesignationDao.save(designation);
 
-		if (myDesignationsSaved++ % 2 == 0) { // FIXME: DM 2019-08-23 - Reset to 250.
-			ourLog.info("Have pre-expanded {} designations in ValueSet[{}]", myDesignationsSaved, myTermValueSet.getUrl());
-			myValueSetConceptDesignationDao.flush();
+		if (myDesignationsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
+			ourLog.info("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
 		}
 
 		return designation;

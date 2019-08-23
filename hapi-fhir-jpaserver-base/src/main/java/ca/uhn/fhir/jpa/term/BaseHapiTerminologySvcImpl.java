@@ -351,7 +351,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		if (optionalExistingTermConceptMapById.isPresent()) {
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapById.get();
 
-			ourLog.info("Deleting existing TermConceptMap {} and its children...", existingTermConceptMap.getId());
+			ourLog.info("Deleting existing TermConceptMap[{}] and its children...", existingTermConceptMap.getId());
 			for (TermConceptMapGroup group : existingTermConceptMap.getConceptMapGroups()) {
 
 				for (TermConceptMapGroupElement element : group.getConceptMapGroupElements()) {
@@ -368,7 +368,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 
 			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
-			ourLog.info("Done deleting existing TermConceptMap {} and its children.", existingTermConceptMap.getId());
+			ourLog.info("Done deleting existing TermConceptMap[{}] and its children.", existingTermConceptMap.getId());
 
 			ourLog.info("Flushing...");
 			myConceptMapGroupElementTargetDao.flush();
@@ -392,11 +392,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		if (optionalExistingTermValueSetById.isPresent()) {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetById.get();
 
-			ourLog.info("Deleting existing TermValueSet {} and its children...", existingTermValueSet.getId());
+			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			ourLog.info("Done deleting existing TermValueSet {} and its children.", existingTermValueSet.getId());
+			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 
 			ourLog.info("Flushing...");
 			myValueSetConceptDesignationDao.flush();
@@ -622,13 +622,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator, AtomicInteger theCodeCounter) {
 		Set<String> addedCodes = new HashSet<>();
 
+		StopWatch sw = new StopWatch();
+		String valueSetInfo = getValueSetInfo(theValueSetToExpand);
+		ourLog.info("Working with {}", valueSetInfo);
+
 		// Handle includes
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
-			ourLog.info("Working with " + identifyValueSetForLogging(theValueSetToExpand));
 			for (int i = 0; ; i++) {
 				int finalI = i;
-				boolean shouldContinue = myTxTemplate.execute(t -> {
+				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = true;
 					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, finalI);
 				});
@@ -641,10 +644,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
-			ourLog.info("Working with " + identifyValueSetForLogging(theValueSetToExpand));
 			for (int i = 0; ; i++) {
 				int finalI = i;
-				boolean shouldContinue = myTxTemplate.execute(t -> {
+				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = false;
 					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, finalI);
 				});
@@ -653,9 +655,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 			}
 		}
+
+		ourLog.info("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
 	}
 
-	private String identifyValueSetForLogging(ValueSet theValueSet) {
+	private String getValueSetInfo(ValueSet theValueSet) {
 		StringBuilder sb = new StringBuilder();
 		boolean isIdentified = false;
 		sb
@@ -703,16 +707,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	/**
-	 * @return Returns true if there are potentially more results to return
+	 * @return Returns true if there are potentially more results to process.
 	 */
-	private boolean expandValueSetHandleIncludeOrExclude(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex) {
+	private Boolean expandValueSetHandleIncludeOrExclude(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex) {
 
 		String system = theInclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = theInclude.getValueSet().size() > 0;
 
 		if (hasSystem) {
-			ourLog.info("Starting {} expansion around code system: {}", (theAdd ? "inclusion" : "exclusion"), system);
+			ourLog.info("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
@@ -859,7 +863,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				AtomicInteger countForBatch = new AtomicInteger(0);
 
 				List resultList = jpaQuery.getResultList();
-				int resultsInBatch = jpaQuery.getResultSize();
+				int resultsInBatch = resultList.size();
 				int firstResult = jpaQuery.getFirstResult();
 				for (Object next : resultList) {
 					count.incrementAndGet();
@@ -910,7 +914,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		} else if (hasValueSet) {
 
 			for (CanonicalType nextValueSet : theInclude.getValueSet()) {
-				ourLog.info("Starting {} expansion around ValueSet URI: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
+				ourLog.info("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
 				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
 				for (VersionIndependentConcept nextConcept : expanded) {
@@ -1750,8 +1754,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap.");
 	}
 
-	//	@Scheduled(fixedDelay = 600000) // 10 minutes.
-	@Scheduled(fixedDelay = 60000) // FIXME: DM 2019-08-19 - Remove this!
+	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
 	public synchronized void preExpandValueSetToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
@@ -1761,10 +1764,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 
 		while (true) {
-
 			TermValueSet valueSetToExpand = txTemplate.execute(t -> {
 				Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
-				if (optionalTermValueSet.isPresent() == false) {
+				if (!optionalTermValueSet.isPresent()) {
 					return null;
 				}
 
@@ -1776,12 +1778,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				return;
 			}
 
-			// Ok so we have a VS to expand
+			// We have a ValueSet to pre-expand.
 			try {
-				ValueSet valueSet = txTemplate.execute(t -> getValueSetFromResourceTable(valueSetToExpand.getResource()));
+				ValueSet valueSet = txTemplate.execute(t -> {
+					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
+					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
+				});
 				expandValueSet(valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetConceptDao, myValueSetConceptDesignationDao));
 
-				// We're done with this guy
+				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 					myValueSetDao.saveAndFlush(valueSetToExpand);
@@ -1789,7 +1794,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				});
 
 			} catch (Exception e) {
-				ourLog.error("Failed to expand valueset: " + e.getMessage(), e);
+				ourLog.error("Failed to pre-expand ValueSet: " + e.getMessage(), e);
 				txTemplate.execute(t -> {
 					valueSetToExpand.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
 					myValueSetDao.saveAndFlush(valueSetToExpand);
@@ -1797,8 +1802,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				});
 			}
 		}
-
-
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {
