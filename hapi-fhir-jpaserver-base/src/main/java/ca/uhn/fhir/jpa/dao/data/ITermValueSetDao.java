@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSet;
-import ca.uhn.fhir.jpa.entity.TermValueSetExpansionStatusEnum;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -44,6 +44,6 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long> {
 	Optional<TermValueSet> findByUrl(@Param("url") String theUrl);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
-	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetExpansionStatusEnum theExpansionStatus);
+	Slice<TermValueSet> findByExpansionStatus(Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
 
 }

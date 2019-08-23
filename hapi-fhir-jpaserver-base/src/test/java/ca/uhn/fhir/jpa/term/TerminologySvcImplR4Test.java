@@ -607,6 +607,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testTest() {
+		ourLog.info("as is: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+		ourLog.info("toString: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.toString());
+		ourLog.info("name: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.name());
+		ourLog.info("getCode: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.getCode());
+	}
+
+	@Test
 	public void testDuplicateConceptMapUrls() {
 		createAndPersistConceptMap();
 
@@ -1296,7 +1304,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
 		myTermSvc.preExpandValueSetToTerminologyTables();
@@ -1314,7 +1322,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Code:\n" + concept.toString());
@@ -1394,7 +1402,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
 		myTermSvc.preExpandValueSetToTerminologyTables();
@@ -1412,7 +1420,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Code:\n" + concept.toString());

@@ -498,9 +498,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
 
-		if (TermValueSetExpansionStatusEnum.EXPANDED != termValueSet.getExpansionStatus()) {
-			throw new UnprocessableEntityException("ValueSet is not ready for expansion; current status: " + termValueSet.getExpansionStatus());
-		}
+		validatePreExpansionStatusOfValueSetOrThrowException(termValueSet.getExpansionStatus());
 
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
@@ -513,6 +511,20 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
+	}
+
+	private void validatePreExpansionStatusOfValueSetOrThrowException(TermValueSetPreExpansionStatusEnum thePreExpansionStatus) {
+		if (TermValueSetPreExpansionStatusEnum.EXPANDED != thePreExpansionStatus) {
+			String statusMsg = myContext.getLocalizer().getMessage(
+				TermValueSetPreExpansionStatusEnum.class,
+				thePreExpansionStatus.getCode());
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"valueSetNotReadyForExpand",
+				thePreExpansionStatus.name(),
+				statusMsg);
+			throw new UnprocessableEntityException(msg);
+		}
 	}
 
 	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
@@ -815,11 +827,34 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				StopWatch sw = new StopWatch();
 				AtomicInteger count = new AtomicInteger(0);
 
-				for (Object next : jpaQuery.getResultList()) {
-					count.incrementAndGet();
-					TermConcept concept = (TermConcept) next;
-					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
-				}
+				int maxResultsPerBatch = 10000;
+				jpaQuery.setMaxResults(maxResultsPerBatch);
+				jpaQuery.setFirstResult(0);
+
+				ourLog.info("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
+
+				do {
+					StopWatch swForBatch = new StopWatch();
+					AtomicInteger countForBatch = new AtomicInteger(0);
+
+					List resultList = jpaQuery.getResultList();
+					int resultsInBatch = jpaQuery.getResultSize();
+					int firstResult = jpaQuery.getFirstResult();
+					for (Object next : resultList) {
+						count.incrementAndGet();
+						countForBatch.incrementAndGet();
+						TermConcept concept = (TermConcept) next;
+						addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+					}
+
+					ourLog.info("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
+
+					if (resultsInBatch < maxResultsPerBatch) {
+						break;
+					} else {
+						jpaQuery.setFirstResult(firstResult + maxResultsPerBatch);
+					}
+				} while (true);
 
 				ourLog.info("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
 
@@ -1280,34 +1315,70 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void saveDeferred() {
-		if (!myProcessDeferred) {
+		if (isProcessDeferredPaused()) {
 			return;
-		} else if (myDeferredConcepts.isEmpty() && myConceptLinksToSaveLater.isEmpty()) {
+		} else if (isNoDeferredConceptsAndNoConceptLinksToSaveLater()) {
 			processReindexing();
 		}
 
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		if (!myDeferredConcepts.isEmpty() || !myConceptLinksToSaveLater.isEmpty()) {
+		if (isDeferredConceptsOrConceptLinksToSaveLater()) {
 			tt.execute(t -> {
 				processDeferredConcepts();
 				return null;
 			});
 		}
 
-		if (myDeferredValueSets.size() > 0) {
+		if (isDeferredValueSets()) {
 			tt.execute(t -> {
 				processDeferredValueSets();
 				return null;
 			});
 		}
-		if (myDeferredConceptMaps.size() > 0) {
+		if (isDeferredConceptMaps()) {
 			tt.execute(t -> {
 				processDeferredConceptMaps();
 				return null;
 			});
 		}
 
+	}
+
+	private boolean isProcessDeferredPaused() {
+		return !myProcessDeferred;
+	}
+
+	private boolean isNoDeferredConceptsAndNoConceptLinksToSaveLater() {
+		return isNoDeferredConcepts() && isNoConceptLinksToSaveLater();
+	}
+
+	private boolean isDeferredConceptsOrConceptLinksToSaveLater() {
+		return isDeferredConcepts() || isConceptLinksToSaveLater();
+	}
+
+	private boolean isDeferredConcepts() {
+		return !myDeferredConcepts.isEmpty();
+	}
+
+	private boolean isNoDeferredConcepts() {
+		return myDeferredConcepts.isEmpty();
+	}
+
+	private boolean isConceptLinksToSaveLater() {
+		return !myConceptLinksToSaveLater.isEmpty();
+	}
+
+	private boolean isNoConceptLinksToSaveLater() {
+		return myConceptLinksToSaveLater.isEmpty();
+	}
+
+	private boolean isDeferredValueSets() {
+		return !myDeferredValueSets.isEmpty();
+	}
+
+	private boolean isDeferredConceptMaps() {
+		return !myDeferredConceptMaps.isEmpty();
 	}
 
 	@Override
@@ -1657,6 +1728,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Scheduled(fixedDelay = 60000) // FIXME: DM 2019-08-19 - Remove this!
 	@Override
 	public synchronized void preExpandValueSetToTerminologyTables() {
+		if (isNotSafeToPreExpandValueSets()) {
+			ourLog.info("Skipping scheduled pre-expansion of ValueSets while deferred entities are being loaded.");
+			return;
+		}
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
@@ -1665,14 +1740,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					Optional<TermValueSet> optionalTermValueSet = getNextTermValueSetNotExpanded();
 					if (optionalTermValueSet.isPresent()) {
 						TermValueSet termValueSet = optionalTermValueSet.get();
-						termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANSION_IN_PROGRESS);
+						termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
 						myValueSetDao.saveAndFlush(termValueSet);
 
 						ValueSet valueSet = getValueSetFromResourceTable(termValueSet.getResource());
 
 						expandValueSet(valueSet, new ValueSetConceptAccumulator(termValueSet, myValueSetConceptDao, myValueSetConceptDesignationDao));
 
-						termValueSet.setExpansionStatus(TermValueSetExpansionStatusEnum.EXPANDED);
+						termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
 						myValueSetDao.saveAndFlush(termValueSet);
 					} else {
 						hasNextTermValueSetNotExpanded = false;
@@ -1682,11 +1757,39 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		});
 	}
 
+	private boolean isNotSafeToPreExpandValueSets() {
+		return !isSafeToPreExpandValueSets();
+	}
+
+	private boolean isSafeToPreExpandValueSets() {
+		if (isProcessDeferredPaused()) {
+			return false;
+		}
+
+		if (isDeferredConcepts()) {
+			return false;
+		}
+
+		if (isConceptLinksToSaveLater()) {
+			return false;
+		}
+
+		if (isDeferredValueSets()) {
+			return false;
+		}
+
+		if (isDeferredConceptMaps()) {
+			return false;
+		}
+
+		return true;
+	}
+
 	protected abstract ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable);
 
 	private Optional<TermValueSet> getNextTermValueSetNotExpanded() {
 		Optional<TermValueSet> retVal = Optional.empty();
-		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetExpansionStatusEnum.NOT_EXPANDED);
+		Slice<TermValueSet> page = myValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
 
 		if (!page.getContent().isEmpty()) {
 			retVal = Optional.of(page.getContent().get(0));
