@@ -251,12 +251,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
-	protected ISearchDao mySearchEntityDao;
-	@Autowired
-	protected ISearchResultDao mySearchResultDao;
-	@Autowired
-	protected ISearchIncludeDao mySearchIncludeDao;
-	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired
 	@Qualifier("mySearchParameterDaoR4")

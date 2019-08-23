@@ -467,7 +467,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		}
 
-		search = mySearchResultCacheSvc.saveNew(search);
+		search = mySearchResultCacheSvc.save(search);
 
 		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this);
 	}
@@ -493,7 +493,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theProvider.setContext(getContext());
 		theProvider.setEntityManager(myEntityManager);
 		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
-		theProvider.setSearchDao(mySearchDao);
+		theProvider.setSearchResultCacheSvc(mySearchResultCacheSvc);
 		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
 		theProvider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}

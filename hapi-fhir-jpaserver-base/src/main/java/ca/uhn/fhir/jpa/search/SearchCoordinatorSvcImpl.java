@@ -25,16 +25,13 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
-import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.Include;
@@ -56,7 +53,6 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -64,7 +60,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AbstractPageRequest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaDialect;
@@ -106,15 +101,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	@Autowired
-	private ISearchDao mySearchDao;
-	@Autowired
-	private ISearchIncludeDao mySearchIncludeDao;
-	@Autowired
-	private ISearchResultDao mySearchResultDao;
-	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
+	@Autowired
+	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -132,6 +123,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public SearchCoordinatorSvcImpl() {
 		CustomizableThreadFactory threadFactory = new CustomizableThreadFactory("search_coord_");
 		myExecutor = Executors.newCachedThreadPool(threadFactory);
+	}
+
+	@VisibleForTesting
+	public void setSearchResultCacheSvcForUnitTest(ISearchResultCacheSvc theSearchResultCacheSvc) {
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
 	}
 
 	@PostConstruct
@@ -184,13 +180,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			}
 
-			search = txTemplate.execute(t -> mySearchDao.findByUuid(theUuid));
-
-			if (search == null) {
-				ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
-				String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
-				throw new ResourceGoneException(msg);
-			}
+			search = mySearchResultCacheSvc
+				.fetchByUuid(theUuid)
+				.orElseThrow(() -> {
+					ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
+					String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
+					return new ResourceGoneException(msg);
+				});
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -210,7 +206,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If the search was saved in "pass complete mode" it's probably time to
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
-				Optional<Search> newSearch = tryToMarkSearchAsInProgress(search);
+				Optional<Search> newSearch = mySearchResultCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
@@ -229,53 +225,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
-		final Pageable page = toPage(theFrom, theTo);
-		if (page == null) {
-			return Collections.emptyList();
-		}
 
-		final Search foundSearch = search;
-
-		ourLog.trace("Loading stored search");
-		List<Long> retVal = txTemplate.execute(theStatus -> {
-			final List<Long> resultPids = new ArrayList<>();
-			Page<Long> searchResultPids = mySearchResultDao.findWithSearchUuid(foundSearch, page);
-			for (Long next : searchResultPids) {
-				resultPids.add(next);
-			}
-			return resultPids;
-		});
-		return retVal;
+		return mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 	}
 
-	private Optional<Search> tryToMarkSearchAsInProgress(Search theSearch) {
-		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
-		try {
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-			txTemplate.afterPropertiesSet();
-			return txTemplate.execute(t -> {
-				Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
-
-				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-					throw new IllegalStateException("Can't change to LOADING because state is " + theSearch.getStatus());
-				}
-				search.setStatus(SearchStatusEnum.LOADING);
-				Search newSearch = mySearchDao.save(search);
-				return Optional.of(newSearch);
-			});
-		} catch (Exception e) {
-			ourLog.warn("Failed to activate search: {}", e.toString());
-			ourLog.trace("Failed to activate search", e);
-			return Optional.empty();
-		}
-	}
 
 	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
 		theRetVal.setContext(myContext);
 		theRetVal.setEntityManager(myEntityManager);
 		theRetVal.setPlatformTransactionManager(myManagedTxManager);
-		theRetVal.setSearchDao(mySearchDao);
+		theRetVal.setSearchResultCacheSvc(mySearchResultCacheSvc);
 		theRetVal.setSearchCoordinatorSvc(this);
 		theRetVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
@@ -398,10 +357,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					// Check for a search matching the given hash
-					int hashCode = queryString.hashCode();
-					Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
+					Collection<Search> candidates = mySearchResultCacheSvc.findCandidatesForReuse(resourceType, queryString, createdCutoff);
 					for (Search nextCandidateSearch : candidates) {
-						if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
+						if (queryString.equals(nextCandidateSearch.getSearchQueryString()) && nextCandidateSearch.getCreated().after(createdCutoff)) {
 							searchToUse = nextCandidateSearch;
 							break;
 						}
@@ -418,8 +376,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
-						searchToUse.setSearchLastReturned(new Date());
-						mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
+						mySearchResultCacheSvc.updateSearchLastReturned(searchToUse, new Date());
 
 						retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao);
 						retVal.setCacheHit(true);
@@ -498,21 +455,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@VisibleForTesting
 	public void setNeverUseLocalSearchForUnitTests(boolean theNeverUseLocalSearchForUnitTests) {
 		myNeverUseLocalSearchForUnitTests = theNeverUseLocalSearchForUnitTests;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
-		mySearchDao = theSearchDao;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoIncludeForUnitTest(ISearchIncludeDao theSearchIncludeDao) {
-		mySearchIncludeDao = theSearchIncludeDao;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoResultForUnitTest(ISearchResultDao theSearchResultDao) {
-		mySearchResultDao = theSearchResultDao;
 	}
 
 	@VisibleForTesting
@@ -696,20 +638,10 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						}
 					}
 
-					List<SearchResult> resultsToSave = Lists.newArrayList();
-					for (Long nextPid : unsyncedPids) {
-						SearchResult nextResult = new SearchResult(mySearch);
-						nextResult.setResourcePid(nextPid);
-						nextResult.setOrder(myCountSavedTotal);
-						resultsToSave.add(nextResult);
-						int order = nextResult.getOrder();
-						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
-
-						myCountSavedTotal++;
-						myCountSavedThisPass++;
-					}
-
-					mySearchResultDao.saveAll(resultsToSave);
+					// Actually store the results in the query cache storage
+					myCountSavedTotal += unsyncedPids.size();
+					myCountSavedThisPass += unsyncedPids.size();
+					mySearchResultCacheSvc.storeResults(mySearch, mySyncedPids, unsyncedPids);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = unsyncedPids.size();
@@ -877,15 +809,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private void doSaveSearch() {
 
-			Search newSearch;
-			if (mySearch.getId() == null) {
-				newSearch = mySearchDao.save(mySearch);
-				for (SearchInclude next : mySearch.getIncludes()) {
-					mySearchIncludeDao.save(next);
-				}
-			} else {
-				newSearch = mySearchDao.save(mySearch);
-			}
+			Search newSearch = mySearchResultCacheSvc.save(mySearch);
 
 			// mySearchDao.save is not supposed to return null, but in unit tests
 			// it can if the mock search dao isn't set up to handle that
@@ -928,7 +852,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 						doSaveSearch();
-						mySearchDao.flush();
 					}
 				});
 				if (wantOnlyCount) {
@@ -1058,7 +981,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
-					List<Long> previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuidOrderIndependent(getSearch());
+					List<Long> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;

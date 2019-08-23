@@ -27,7 +27,7 @@ import org.springframework.data.repository.query.Param;
 
 import ca.uhn.fhir.jpa.entity.SearchInclude;
 
-public interface IAAAAAAAAASearchIncludeDao  extends JpaRepository<SearchInclude, Long> {
+public interface ISearchIncludeDao extends JpaRepository<SearchInclude, Long> {
 	
 	@Modifying
 	@Query(value="DELETE FROM SearchInclude r WHERE r.mySearchPid = :search")

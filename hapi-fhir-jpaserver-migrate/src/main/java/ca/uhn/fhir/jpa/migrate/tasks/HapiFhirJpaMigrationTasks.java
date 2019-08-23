@@ -79,6 +79,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv.addIndex("IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");
 		resVerProv.addIndex("IDX_RESVERPROV_REQUESTID").unique(false).withColumns("REQUEST_ID");
 
+		// Drop HFJ_SEARCH_RESULT foreign keys
+		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_RES");
+		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH");
 	}
 
 	protected void init400() {

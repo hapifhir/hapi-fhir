@@ -241,6 +241,13 @@ public class BaseMigrationTasks<T extends Enum> {
 				return this;
 			}
 
+			public void dropForeignKey(String theFkName) {
+				DropForeignKeyTask task = new DropForeignKeyTask();
+				task.setConstraintName(theFkName);
+				task.setTableName(getTableName());
+				addTask(task);
+			}
+
 			public class BuilderAddIndexWithName {
 				private final String myIndexName;
 

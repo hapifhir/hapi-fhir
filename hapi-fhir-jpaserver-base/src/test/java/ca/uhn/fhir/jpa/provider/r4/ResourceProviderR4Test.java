@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -21,10 +22,7 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
@@ -54,6 +52,7 @@ import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionChannelType;
 import org.hl7.fhir.r4.model.Subscription.SubscriptionStatus;
 import org.junit.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
@@ -82,6 +81,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	public static final int LARGE_NUMBER = 77;
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
+	@Autowired
+	private ISearchDao mySearchEntityDao;
 
 	@Override
 	@After
@@ -3939,7 +3940,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid1));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		Bundle result2 = ourClient
@@ -3949,9 +3950,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchResultCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid2));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
@@ -3965,6 +3967,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchResultCacheSvc.flushLastUpdated();
 
 		String uuid3 = toSearchUuidFromLinkNext(result3);
 
@@ -3989,9 +3992,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchResultCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid1));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		sleepOneClick();
@@ -4001,9 +4005,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchResultCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuid(uuid2));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());

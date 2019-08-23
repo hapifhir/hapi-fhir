@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
@@ -47,7 +46,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -193,28 +191,16 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
 
-			TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			txTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
-			return txTemplate.execute(s -> {
-					Optional<Search> search = mySearchResultCacheSvc.fetchByUuid(myUuid);
-					if (!search.isPresent()) {
-						return false;
-					}
+			Optional<Search> search = mySearchResultCacheSvc.fetchByUuid(myUuid);
+			if (!search.isPresent()) {
+				return false;
+			}
 
-					setSearchEntity(search);
+			setSearchEntity(search.get());
 
-					if (mySearchEntity == null) {
-						return false;
-					}
+			ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
 
-					ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
-
-					// Load the includes now so that they are available outside of this transaction
-					mySearchEntity.getIncludes().size();
-
-					return true;
-				});
+			return true;
 		}
 		return true;
 	}
@@ -294,10 +280,6 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		mySearchCoordinatorSvc = theSearchCoordinatorSvc;
 	}
 
-	public void setSearchDao(ISearchDao theSearchDao) {
-		mySearchDao = theSearchDao;
-	}
-
 	// Note: Leave as protected, HSPC depends on this
 	@SuppressWarnings("WeakerAccess")
 	protected void setSearchEntity(Search theSearchEntity) {
@@ -354,5 +336,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	public void setInterceptorBroadcaster(IInterceptorBroadcaster theInterceptorBroadcaster) {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	public void setSearchResultCacheSvc(ISearchResultCacheSvc theSearchResultCacheSvc) {
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
 	}
 }

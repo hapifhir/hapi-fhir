@@ -34,20 +34,16 @@ import java.util.Set;
  * #L%
  */
 
-public interface IAAAAAAAASearchResultDao  extends JpaRepository<SearchResult, Long> {
+public interface ISearchResultDao extends JpaRepository<SearchResult, Long> {
 	
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search ORDER BY r.myOrder ASC")
-	Page<Long> findWithSearchUuid(@Param("search") Search theSearch, Pageable thePage);
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
+	Slice<Long> findWithSearchUuid(@Param("search") Long theSearch, Pageable thePage);
 
-	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearch = :search")
-	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Search theSearch);
+	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
+	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Long theSearch);
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);
-
-	@Modifying
-	@Query("DELETE FROM SearchResult s WHERE s.myResourcePid IN :ids")
-	void deleteByResourceIds(@Param("ids") List<Long> theContent);
 
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")

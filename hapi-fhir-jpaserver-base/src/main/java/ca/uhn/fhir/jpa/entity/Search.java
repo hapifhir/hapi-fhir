@@ -80,8 +80,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
-	private Collection<SearchResult> myResults;
+	// FIXME JA: delete this if we can - I don't want to imply that the results are a part of the search, they link to it but they don't need to be loaded just because we're loading the search
+	//	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
+	//	private Collection<SearchResult> myResults;
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)

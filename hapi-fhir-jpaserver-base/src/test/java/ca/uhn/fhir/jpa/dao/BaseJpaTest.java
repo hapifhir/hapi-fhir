@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.provider.SystemProviderDstu2Test;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
@@ -91,6 +92,8 @@ public abstract class BaseJpaTest {
 	protected IInterceptorService myInterceptorRegistry;
 	@Autowired
 	protected CircularQueueCaptureQueriesListener myCaptureQueriesListener;
+	@Autowired
+	protected ISearchResultCacheSvc mySearchResultCacheSvc;
 
 	@After
 	public void afterPerformCleanup() {

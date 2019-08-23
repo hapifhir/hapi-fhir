@@ -73,6 +73,10 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
+			<action type="change">
+				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
+				constraints did not add value and caused unneccessary contention when used under high load.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
