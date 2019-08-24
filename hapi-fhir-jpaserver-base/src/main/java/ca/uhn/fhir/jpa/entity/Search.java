@@ -319,4 +319,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	public void setCannotBeReused() {
 		mySearchQueryStringHash = null;
 	}
+
+	public Integer getSearchQueryStringHash() {
+		return mySearchQueryStringHash;
+	}
 }
