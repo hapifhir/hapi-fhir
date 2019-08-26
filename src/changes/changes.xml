@@ -73,6 +73,11 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
+			<action type="change" issue="1366">
+				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
+				Note that this means that data in any existing installations will need to be
+				re-uploaded to the new database platform.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
