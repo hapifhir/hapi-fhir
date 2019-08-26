@@ -78,6 +78,10 @@
 				Note that this means that data in any existing installations will need to be
 				re-uploaded to the new database platform.
 			</action>
+			<action type="add" issue="1443">
+				LOINC concepts now include multiaxial hierarchical properties (e.g. <![CDATA[<code>parent</code>]]> and
+				<![CDATA[<code>child</code>]]>, which identify parent and child concepts.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
