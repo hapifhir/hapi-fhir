@@ -144,6 +144,13 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theInput);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(valueSetToExpand, theOffset, theCount);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
+	}
+
+	@Override
 	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theValueSetToExpand);
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);

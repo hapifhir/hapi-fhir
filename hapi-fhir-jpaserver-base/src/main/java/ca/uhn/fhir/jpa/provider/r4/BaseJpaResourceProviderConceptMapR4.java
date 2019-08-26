@@ -62,7 +62,7 @@ public class BaseJpaResourceProviderConceptMapR4 extends JpaResourceProviderR4<C
 			&& theSourceValueSet.hasValue();
 		boolean haveSourceCoding = theSourceCoding != null
 			&& theSourceCoding.hasCode();
-		boolean haveSourceCodeableConcept= theSourceCodeableConcept != null
+		boolean haveSourceCodeableConcept = theSourceCodeableConcept != null
 			&& theSourceCodeableConcept.hasCoding()
 			&& theSourceCodeableConcept.getCodingFirstRep().hasCode();
 		boolean haveTargetValueSet = theTargetValueSet != null
