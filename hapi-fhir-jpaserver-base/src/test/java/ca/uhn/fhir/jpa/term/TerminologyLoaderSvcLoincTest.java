@@ -255,6 +255,22 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("42176-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("1,3 beta glucan [Mass/volume] in Serum", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
+		// All LOINC codes
+		assertTrue(valueSets.containsKey("loinc-all"));
+		vs = valueSets.get("loinc-all");
+		assertEquals("http://loinc.org/fhir/ValueSet/loinc-all", vs.getUrl());
+		assertEquals("1.0.0", vs.getVersion());
+		assertEquals("All LOINC codes", vs.getName());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, vs.getStatus());
+		assertTrue(vs.hasDate());
+		assertEquals("Regenstrief Institute, Inc.", vs.getPublisher());
+		assertEquals("A value set that includes all LOINC codes", vs.getDescription());
+		assertEquals("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/", vs.getCopyright());
+		assertTrue(vs.hasCompose());
+		assertTrue(vs.getCompose().hasInclude());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
 		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
