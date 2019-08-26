@@ -82,6 +82,11 @@
 				LOINC concepts now include multiaxial hierarchical properties (e.g. <![CDATA[<code>parent</code>]]> and
 				<![CDATA[<code>child</code>]]>, which identify parent and child concepts.
 			</action>
+			<action type="add" issue="1445">
+				When loading LOINC terminology, a new ValueSet is automatically created with a single include element that
+				identifies the LOINC CodeSystem in <![CDATA[<code>ValueSet.compose.include.system</code>]]>. This ValueSet
+				includes all LOINC codes.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

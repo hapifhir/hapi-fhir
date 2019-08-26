@@ -29,6 +29,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -604,14 +605,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
 
 		loadAndPersistCodeSystem();
-	}
-
-	@Test
-	public void testTest() {
-		ourLog.info("as is: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
-		ourLog.info("toString: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.toString());
-		ourLog.info("name: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.name());
-		ourLog.info("getCode: {}", TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS.getCode());
 	}
 
 	@Test
