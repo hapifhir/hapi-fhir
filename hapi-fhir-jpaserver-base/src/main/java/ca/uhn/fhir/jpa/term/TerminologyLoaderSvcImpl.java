@@ -472,13 +472,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		Properties uploadProperties = new Properties();
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
-			if (next.getFilename().endsWith("loincupload.properties")) {
+			if (next.getFilename().endsWith(LOINC_UPLOAD_PROPERTIES_FILE)) {
 				try {
 					try (InputStream inputStream = next.getInputStream()) {
 						uploadProperties.load(inputStream);
 					}
 				} catch (IOException e) {
-					throw new InternalErrorException("Failed to read loincupload.properties", e);
+					throw new InternalErrorException("Failed to read " + LOINC_UPLOAD_PROPERTIES_FILE, e);
 				}
 			}
 		}

@@ -72,7 +72,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 		}
 
 		// Answer list ValueSet
-		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, "answerlist.version");
+		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, "loinc.answerlist.version");
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier()
 				.setSystem("urn:ietf:rfc:3986")

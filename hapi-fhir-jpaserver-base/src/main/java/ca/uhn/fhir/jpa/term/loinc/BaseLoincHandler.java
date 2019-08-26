@@ -114,7 +114,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
-			conceptMap.setVersion(myUploadProperties.getProperty("conceptmap.version"));
+			conceptMap.setVersion(myUploadProperties.getProperty("loinc.conceptmap.version"));
 			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			conceptMap.addContact()
 				.setName(REGENSTRIEF_INSTITUTE_INC)
