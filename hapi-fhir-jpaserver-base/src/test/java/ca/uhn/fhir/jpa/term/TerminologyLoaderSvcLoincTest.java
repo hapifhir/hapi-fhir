@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -258,7 +259,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// All LOINC codes
 		assertTrue(valueSets.containsKey("loinc-all"));
 		vs = valueSets.get("loinc-all");
-		assertEquals("http://loinc.org/fhir/ValueSet/loinc-all", vs.getUrl());
+		assertEquals("http://loinc.org/vs", vs.getUrl());
 		assertEquals("1.0.0", vs.getVersion());
 		assertEquals("All LOINC codes", vs.getName());
 		assertEquals(Enumerations.PublicationStatus.ACTIVE, vs.getStatus());
@@ -341,8 +342,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 	@Test
 	public void testLoadLoincMissingMandatoryFiles() throws IOException {
-		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
-		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		myFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 
 		// Actually do the load
 		try {
@@ -356,24 +357,24 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	}
 
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_FILE, TerminologyLoaderSvcImpl.LOINC_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
+		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_FILE_DEFAULT.getCode(), LOINC_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_HIERARCHY_FILE_DEFAULT.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_FILE_DEFAULT.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode(), LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode(), LOINC_PART_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 	}
 
 	@Test
