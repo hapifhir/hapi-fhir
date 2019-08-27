@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.ext;
 
 /*
  * #%L
@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -32,7 +33,6 @@ import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
 import org.hl7.fhir.r4.model.Parameters;
 import org.springframework.beans.factory.annotation.Required;
 
@@ -41,57 +41,59 @@ import java.util.Date;
 
 public abstract class TrimmedBaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
-	private IFhirResourceDao<T> myDao;
+    private IFhirResourceDao<T> myDao;
 
 
-	@CoverageIgnore
-	public TrimmedBaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
-		myDao = theDao;
-	}
+    @CoverageIgnore
+    public TrimmedBaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
+        myDao = theDao;
+    }
 
 
-	protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything) {
+    protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
 
-		ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
+        ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
 
-		ExpungeOutcome outcome;
-		if (theIdParam != null) {
-			outcome = getDao().expunge(theIdParam, options);
-		} else {
-			outcome = getDao().expunge(options);
-		}
+        ExpungeOutcome outcome;
+        if (theIdParam != null) {
+            outcome = getDao().expunge(theIdParam, options, theRequest);
+        } else {
+            outcome = getDao().expunge(options, theRequest);
+        }
 
-		return createExpungeResponse(outcome);
-	}
+        return createExpungeResponse(outcome);
+    }
 
-	public IFhirResourceDao<T> getDao() {
-		return myDao;
-	}
+    public IFhirResourceDao<T> getDao() {
+        return myDao;
+    }
 
-	@Required
-	public void setDao(IFhirResourceDao<T> theDao) {
-		myDao = theDao;
-	}
-
-
-	@Override
-	public Class<? extends IBaseResource> getResourceType() {
-		return myDao.getResourceType();
-	}
+    @Required
+    public void setDao(IFhirResourceDao<T> theDao) {
+        myDao = theDao;
+    }
 
 
-	@Read(version = true)
-	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
-		startRequest(theRequest);
-		try {
-			return myDao.read(theId, theRequestDetails);
-		} finally {
-			endRequest(theRequest);
-		}
-	}
 
-	public DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
-		return super.processSinceOrAt(theSince, theAt);
-	}
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+        return myDao.getResourceType();
+    }
+
+
+
+    @Read(version = true)
+    public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
+        startRequest(theRequest);
+        try {
+            return myDao.read(theId, theRequestDetails);
+        } finally {
+            endRequest(theRequest);
+        }
+    }
+
+    public DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
+        return super.processSinceOrAt(theSince, theAt);
+    }
 
 }
