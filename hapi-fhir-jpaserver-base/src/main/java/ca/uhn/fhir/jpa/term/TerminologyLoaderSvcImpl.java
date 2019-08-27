@@ -579,7 +579,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		ValueSet retVal = new ValueSet();
 
 		retVal.setId("loinc-all");
-		retVal.setUrl("http://loinc.org/fhir/ValueSet/loinc-all");
+		retVal.setUrl("http://loinc.org/vs");
 		retVal.setVersion("1.0.0");
 		retVal.setName("All LOINC codes");
 		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);

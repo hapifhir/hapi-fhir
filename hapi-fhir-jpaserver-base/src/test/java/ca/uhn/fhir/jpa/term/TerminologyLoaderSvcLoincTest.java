@@ -259,7 +259,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// All LOINC codes
 		assertTrue(valueSets.containsKey("loinc-all"));
 		vs = valueSets.get("loinc-all");
-		assertEquals("http://loinc.org/fhir/ValueSet/loinc-all", vs.getUrl());
+		assertEquals("http://loinc.org/vs", vs.getUrl());
 		assertEquals("1.0.0", vs.getVersion());
 		assertEquals("All LOINC codes", vs.getName());
 		assertEquals(Enumerations.PublicationStatus.ACTIVE, vs.getStatus());
