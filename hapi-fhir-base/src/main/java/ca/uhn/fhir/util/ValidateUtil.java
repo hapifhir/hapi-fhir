@@ -76,7 +76,7 @@ public class ValidateUtil {
 	}
 
 	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage, Object... theValues) {
-		if (theSuccess == false) {
+		if (!theSuccess) {
 			throw new InvalidRequestException(String.format(theMessage, theValues));
 		}
 	}

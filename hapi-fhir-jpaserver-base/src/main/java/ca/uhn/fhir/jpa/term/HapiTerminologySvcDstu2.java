@@ -93,6 +93,11 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
+	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		throw new UnsupportedOperationException();
 	}

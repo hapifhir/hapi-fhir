@@ -138,6 +138,12 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+		ValueSet valueSetToExpand = (ValueSet) theInput;
+		return super.expandValueSet(valueSetToExpand, theOffset, theCount);
+	}
+
+	@Override
 	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);

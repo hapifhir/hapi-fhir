@@ -32,6 +32,7 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -556,6 +557,8 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		IOUtils.closeQuietly(theDescriptors);
 
+		valueSets.add(getValueSetLoincAll());
+
 		for (Entry<String, TermConcept> next : code2concept.entrySet()) {
 			TermConcept nextConcept = next.getValue();
 			if (nextConcept.getParents().isEmpty()) {
@@ -571,6 +574,23 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, loincCs, valueSets, conceptMaps);
 
 		return new UploadStatistics(conceptCount, target);
+	}
+
+	private ValueSet getValueSetLoincAll() {
+		ValueSet retVal = new ValueSet();
+
+		retVal.setId("loinc-all");
+		retVal.setUrl("http://loinc.org/fhir/ValueSet/loinc-all");
+		retVal.setVersion("1.0.0");
+		retVal.setName("All LOINC codes");
+		retVal.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		retVal.setDate(new Date());
+		retVal.setPublisher("Regenstrief Institute, Inc.");
+		retVal.setDescription("A value set that includes all LOINC codes");
+		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
+		retVal.getCompose().addInclude().setSystem(IHapiTerminologyLoaderSvc.LOINC_URI);
+
+		return retVal;
 	}
 
 	private UploadStatistics processSnomedCtFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
