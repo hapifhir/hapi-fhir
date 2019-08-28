@@ -77,6 +77,26 @@
 				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
 				constraints did not add value and caused unneccessary contention when used under high load.
 			</action>
+			<action type="add">
+				It is now possible to submit a PATCH request as a part of a FHIR transaction in DSTU3 (previously this
+				was only supported in R4+). This is not officially part of the DSTU3 spec, but it can now be performed by
+				leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload
+				as a Binary resource containing a valid patch.
+			</action>
+			<action type="change" issue="1366">
+				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
+				Note that this means that data in any existing installations will need to be
+				re-uploaded to the new database platform.
+			</action>
+			<action type="add" issue="1443">
+				LOINC concepts now include multiaxial hierarchical properties (e.g. <![CDATA[<code>parent</code>]]> and
+				<![CDATA[<code>child</code>]]>, which identify parent and child concepts.
+			</action>
+			<action type="add" issue="1445">
+				When loading LOINC terminology, a new ValueSet is automatically created with a single include element that
+				identifies the LOINC CodeSystem in <![CDATA[<code>ValueSet.compose.include.system</code>]]>. This ValueSet
+				includes all LOINC codes.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

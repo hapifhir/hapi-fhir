@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -563,6 +564,40 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testDeleteValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		Long termValueSetId = myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).get().getId();
+		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
+				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				assertFalse(myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isPresent());
+			}
+		});
+	}
+
+	@Test
 	public void testDuplicateCodeSystemUrls() throws Exception {
 		loadAndPersistCodeSystem();
 
@@ -596,6 +631,294 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testExpandTermValueSetAndChildren() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
+
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8450-9", containsComponent.getCode());
+		assertEquals("Systolic blood pressure--expiration", containsComponent.getDisplay());
+		assertEquals(2, containsComponent.getDesignation().size());
+
+		ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk - expiratie", designationComponent.getValue());
+
+		designationComponent = containsComponent.getDesignation().get(1);
+		assertEquals("sv", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systoliskt blodtryck - utgång", designationComponent.getValue());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("11378-7", containsComponent.getCode());
+		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		// ...
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(22);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8491-3", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
+		assertEquals(1, containsComponent.getDesignation().size());
+
+		designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(23);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8492-1", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+	}
+
+	@Test
+	public void testExpandTermValueSetAndChildrenWithCount() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 23);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
+		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
+
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8450-9", containsComponent.getCode());
+		assertEquals("Systolic blood pressure--expiration", containsComponent.getDisplay());
+		assertEquals(2, containsComponent.getDesignation().size());
+
+		ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk - expiratie", designationComponent.getValue());
+
+		designationComponent = containsComponent.getDesignation().get(1);
+		assertEquals("sv", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systoliskt blodtryck - utgång", designationComponent.getValue());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("11378-7", containsComponent.getCode());
+		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		// ...
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(22);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8491-3", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
+		assertEquals(1, containsComponent.getDesignation().size());
+
+		designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
+	}
+
+	@Test
+	public void testExpandTermValueSetAndChildrenWithCountOfZero() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 0);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
+		assertFalse(expandedValueSet.getExpansion().hasContains());
+	}
+
+	@Test
+	public void testExpandTermValueSetAndChildrenWithOffset() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(1, expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
+		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
+
+		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("11378-7", containsComponent.getCode());
+		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8493-9", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		// ...
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(21);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8491-3", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
+		assertEquals(1, containsComponent.getDesignation().size());
+
+		ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(22);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8492-1", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+	}
+
+	@Test
+	public void testExpandTermValueSetAndChildrenWithOffsetAndCount() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, 22);
+		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
+		assertEquals(1, expandedValueSet.getExpansion().getOffset());
+		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
+		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
+		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
+		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
+		assertEquals(22, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+
+		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
+
+		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("11378-7", containsComponent.getCode());
+		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(1);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8493-9", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 10 hour minimum", containsComponent.getDisplay());
+		assertFalse(containsComponent.hasDesignation());
+
+		// ...
+
+		containsComponent = expandedValueSet.getExpansion().getContains().get(21);
+		assertEquals("http://acme.org", containsComponent.getSystem());
+		assertEquals("8491-3", containsComponent.getCode());
+		assertEquals("Systolic blood pressure 1 hour minimum", containsComponent.getDisplay());
+		assertEquals(1, containsComponent.getDesignation().size());
+
+		ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.getDesignation().get(0);
+		assertEquals("nl", designationComponent.getLanguage());
+		assertEquals("http://snomed.info/sct", designationComponent.getUse().getSystem());
+		assertEquals("900000000000013009", designationComponent.getUse().getCode());
+		assertEquals("Synonym", designationComponent.getUse().getDisplay());
+		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
+	}
+
+	@Test
 	public void testExpandValueSetWithValueSetCodeAccumulator() {
 		createCodeSystem();
 
@@ -605,17 +928,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.expandValueSet(vs, myValueSetCodeAccumulator);
 		verify(myValueSetCodeAccumulator, times(9)).includeConceptWithDesignations(anyString(), anyString(), nullable(String.class), anyCollection());
-	}
-
-	@Test
-	public void testValidateCode() {
-		createCodeSystem();
-
-		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
-		assertEquals(true, validation.isOk());
-
-		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
-		assertEquals(false, validation.isOk());
 	}
 
 	@Test
@@ -985,7 +1297,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
 		myTermSvc.preExpandValueSetToTerminologyTables();
@@ -1003,7 +1315,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size(), termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Code:\n" + concept.toString());
@@ -1083,7 +1395,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(0, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 
 		myTermSvc.preExpandValueSetToTerminologyTables();
@@ -1101,7 +1413,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
 			assertEquals("Terminology Services Connectation #1 Extensional case #2", termValueSet.getName());
 			assertEquals(codeSystem.getConcept().size() - 2, termValueSet.getConcepts().size());
-			assertEquals(TermValueSetExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
 			ourLog.info("Code:\n" + concept.toString());
@@ -2289,6 +2601,67 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
+	}
+
+	@Test
+	public void testValidateCode() {
+		createCodeSystem();
+
+		CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
+		assertEquals(true, validation.isOk());
+
+		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
+		assertEquals(false, validation.isOk());
+	}
+
+	@Test
+	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "BOGUS", null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", null, null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, "http://acme.org", "11378-7", null, null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, coding, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
+		codeableConcept.addCoding(coding);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, null, codeableConcept);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@AfterClass

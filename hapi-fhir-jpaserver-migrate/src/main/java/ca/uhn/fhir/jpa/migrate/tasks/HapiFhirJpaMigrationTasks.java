@@ -79,6 +79,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv.addIndex("IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");
 		resVerProv.addIndex("IDX_RESVERPROV_REQUESTID").unique(false).withColumns("REQUEST_ID");
 
+		// TermValueSetConceptDesignation
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
+		Builder.BuilderWithTableName termValueSetConceptDesignationTable = version.onTable("TRM_VALUESET_C_DESIGNATION");
+		termValueSetConceptDesignationTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetConceptDesignationTable
+			.addForeignKey("FK_TRM_VSCD_VS_PID")
+			.toColumn("VALUESET_PID")
+			.references("TRM_VALUESET", "PID");
 		// Drop HFJ_SEARCH_RESULT foreign keys
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_RES");
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH");

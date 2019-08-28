@@ -21,20 +21,34 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
+
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
 	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
-	Optional<TermValueSetConcept> findByValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
+	@Query("SELECT vsc from TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	Slice<TermValueSetConcept> findByTermValueSetId(Pageable thePage, @Param("pid") Long theValueSetId);
 
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval")
+	List<TermValueSetConcept> findOneByValueSetIdAndCode(@Param("resource_pid") Long theValueSetId, @Param("codeval") String theCode);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	List<TermValueSetConcept> findOneByValueSetIdSystemAndCode(@Param("resource_pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 }
