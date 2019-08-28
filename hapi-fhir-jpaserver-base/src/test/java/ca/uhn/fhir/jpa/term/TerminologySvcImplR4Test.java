@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -13,7 +14,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
@@ -29,7 +30,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -2607,11 +2607,61 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	public void testValidateCode() {
 		createCodeSystem();
 
-		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
+		CodeValidationResult validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ParentWithNoChildrenA", null);
 		assertEquals(true, validation.isOk());
 
 		validation = myTermSvc.validateCode(myFhirCtx, CS_URL, "ZZZZZZZ", null);
 		assertEquals(false, validation.isOk());
+	}
+
+	@Test
+	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations();
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		myTermSvc.preExpandValueSetToTerminologyTables();
+
+		ValidateCodeResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "BOGUS", null, null, null);
+		assertNull(result);
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", null, null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, "http://acme.org", "11378-7", null, null, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, coding, null);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
+		codeableConcept.addCoding(coding);
+		result = myTermSvc.validateCodeIsInPreExpandedValueSet(valueSet, null, null, null, null, codeableConcept);
+		assertTrue(result.isResult());
+		assertEquals("Validation succeeded", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@AfterClass

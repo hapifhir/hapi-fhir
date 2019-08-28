@@ -1,16 +1,12 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.*;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -116,4 +112,9 @@ public interface IHapiTerminologySvc {
 	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
 
 	void preExpandValueSetToTerminologyTables();
+
+	/**
+	 * Version independent
+	 */
+	ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
 }
