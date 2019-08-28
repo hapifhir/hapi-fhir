@@ -28,6 +28,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
@@ -45,4 +46,9 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval")
+	List<TermValueSetConcept> findOneByValueSetIdAndCode(@Param("resource_pid") Long theValueSetId, @Param("codeval") String theCode);
+
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	List<TermValueSetConcept> findOneByValueSetIdSystemAndCode(@Param("resource_pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 }

@@ -286,15 +286,15 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 	}
 
 	@Override
-	public ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
+	public ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode,
 			IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, Coding theCoding,
 			CodeableConcept theCodeableConcept, RequestDetails theRequestDetails) {
 
 		List<IIdType> valueSetIds = Collections.emptyList();
 
 		boolean haveCodeableConcept = theCodeableConcept != null && theCodeableConcept.getCoding().size() > 0;
-		boolean haveCoding = theCoding != null && theCoding.isEmpty() == false;
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
+		boolean haveCoding = theCoding != null && !theCoding.isEmpty();
+		boolean haveCode = theCode != null && !theCode.isEmpty();
 
 		if (!haveCodeableConcept && !haveCoding && !haveCode) {
 			throw new InvalidRequestException("No code, coding, or codeableConcept provided to validate");
@@ -303,7 +303,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			throw new InvalidRequestException("$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
 		}
 
-		boolean haveIdentifierParam = theValueSetIdentifier != null && theValueSetIdentifier.isEmpty() == false;
+		boolean haveIdentifierParam = theValueSetIdentifier != null && !theValueSetIdentifier.isEmpty();
 		ValueSet vs = null;
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
@@ -320,15 +320,20 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			// String system = toStringOrNull(theSystem);
 			IContextValidationSupport.LookupCodeResult result = myCodeSystemDao.lookupCode(theCode, theSystem, null, null);
 			if (result.isFound()) {
-				ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
+				ValidateCodeResult retVal = new ValidateCodeResult(true, "Found code", result.getCodeDisplay());
 				return retVal;
 			}
 		}
 
 		if (vs != null) {
-			ValueSet expansion = doExpand(vs); // TODO: DM 2019-08-17 - Need to account for concepts in terminology tables. See #1431
-			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
+			ValidateCodeResult result;
+			if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+			} else {
+				ValueSet expansion = doExpand(vs);
+				List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
+				result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
+			}
 			if (result != null) {
 				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
 					if (!theDisplay.getValue().equals(result.getDisplay())) {
@@ -347,10 +352,10 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 		return thePrimitive != null ? thePrimitive.getValue() : null;
 	}
 
-	private ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult validateCodeIsInContains(List<ValueSetExpansionContainsComponent> contains, String theSystem, String theCode,
+	private ValidateCodeResult validateCodeIsInContains(List<ValueSetExpansionContainsComponent> contains, String theSystem, String theCode,
 			Coding theCoding, CodeableConcept theCodeableConcept) {
 		for (ValueSetExpansionContainsComponent nextCode : contains) {
-			ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult result = validateCodeIsInContains(nextCode.getContains(), theSystem, theCode, theCoding, theCodeableConcept);
+			ValidateCodeResult result = validateCodeIsInContains(nextCode.getContains(), theSystem, theCode, theCoding, theCodeableConcept);
 			if (result != null) {
 				return result;
 			}

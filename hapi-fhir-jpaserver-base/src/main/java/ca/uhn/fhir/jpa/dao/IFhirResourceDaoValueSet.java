@@ -41,7 +41,7 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
 
-	public class ValidateCodeResult {
+	class ValidateCodeResult {
 		private String myDisplay;
 		private String myMessage;
 		private boolean myResult;
