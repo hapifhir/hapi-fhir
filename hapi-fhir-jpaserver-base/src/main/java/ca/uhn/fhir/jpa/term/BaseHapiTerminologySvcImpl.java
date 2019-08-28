@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -957,6 +958,48 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
 		}
+	}
+
+	protected ValidateCodeResult validateCodeIsInPreExpandedValueSet(
+		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
+
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
+
+		Long valueSetId = theValueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong();
+
+		List<TermValueSetConcept> concepts = new ArrayList<>();
+		if (isNotBlank(theCode)) {
+			if (isNotBlank(theSystem)) {
+				concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, theSystem, theCode);
+			} else {
+				concepts = myValueSetConceptDao.findOneByValueSetIdAndCode(valueSetId, theCode);
+			}
+		} else if (theCoding != null) {
+			if (theCoding.hasSystem() && theCoding.hasCode()) {
+				concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, theCoding.getSystem(), theCoding.getCode());
+			}
+		} else if (theCodeableConcept != null){
+			for (Coding coding : theCodeableConcept.getCoding()) {
+				if (coding.hasSystem() && coding.hasCode()) {
+					concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, coding.getSystem(), coding.getCode());
+					if (!concepts.isEmpty()) {
+						break;
+					}
+				}
+			}
+		}
+
+		for (TermValueSetConcept concept : concepts) {
+			if (isNotBlank(theDisplay) && theDisplay.equals(concept.getDisplay())) {
+				return new ValidateCodeResult(true, "Validation succeeded", concept.getDisplay());
+			}
+		}
+
+		if (!concepts.isEmpty()) {
+			return new ValidateCodeResult(true, "Validation succeeded", concepts.get(0).getDisplay());
+		}
+
+		return null;
 	}
 
 	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {

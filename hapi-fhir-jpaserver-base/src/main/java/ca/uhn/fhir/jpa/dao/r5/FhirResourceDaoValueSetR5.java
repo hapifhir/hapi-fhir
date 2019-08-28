@@ -332,9 +332,14 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 		}
 
 		if (vs != null) {
-			ValueSet expansion = doExpand(vs); // TODO: DM 2019-08-17 - Need to account for concepts in terminology tables. See #1431
-			List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
-			ValidateCodeResult result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
+			ValidateCodeResult result;
+			if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
+			} else {
+				ValueSet expansion = doExpand(vs);
+				List<ValueSetExpansionContainsComponent> contains = expansion.getExpansion().getContains();
+				result = validateCodeIsInContains(contains, toStringOrNull(theSystem), toStringOrNull(theCode), theCoding, theCodeableConcept);
+			}
 			if (result != null) {
 				if (theDisplay != null && isNotBlank(theDisplay.getValue()) && isNotBlank(result.getDisplay())) {
 					if (!theDisplay.getValue().equals(result.getDisplay())) {
