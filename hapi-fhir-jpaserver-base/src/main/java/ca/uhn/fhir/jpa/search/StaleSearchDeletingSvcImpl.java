@@ -21,13 +21,14 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
 
 /**
  * Deletes old searches
@@ -42,12 +43,12 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	@Autowired
 	private DaoConfig myDaoConfig;
 	@Autowired
-	private ISearchResultCacheSvc mySearchResultCacheSvc;
+	private ISearchCacheSvc mySearchCacheSvc;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public void pollForStaleSearchesAndDeleteThem() {
-		mySearchResultCacheSvc.pollForStaleSearchesAndDeleteThem();
+		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
 	}
 
 	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)

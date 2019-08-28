@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
@@ -152,6 +153,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
+	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
 	@Autowired
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
@@ -467,7 +470,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			}
 		}
 
-		search = mySearchResultCacheSvc.save(search);
+		search = mySearchCacheSvc.save(search);
 
 		return new PersistedJpaBundleProvider(theRequest, search.getUuid(), this);
 	}
@@ -493,7 +496,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		theProvider.setContext(getContext());
 		theProvider.setEntityManager(myEntityManager);
 		theProvider.setPlatformTransactionManager(myPlatformTransactionManager);
-		theProvider.setSearchResultCacheSvc(mySearchResultCacheSvc);
+		theProvider.setSearchCacheSvc(mySearchCacheSvc);
 		theProvider.setSearchCoordinatorSvc(mySearchCoordinatorSvc);
 		theProvider.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}

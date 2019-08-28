@@ -37,10 +37,10 @@ import java.util.Set;
 public interface ISearchResultDao extends JpaRepository<SearchResult, Long> {
 	
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search ORDER BY r.myOrder ASC")
-	Slice<Long> findWithSearchUuid(@Param("search") Long theSearch, Pageable thePage);
+	Slice<Long> findWithSearchPid(@Param("search") Long theSearchPid, Pageable thePage);
 
 	@Query(value="SELECT r.myResourcePid FROM SearchResult r WHERE r.mySearchPid = :search")
-	List<Long> findWithSearchUuidOrderIndependent(@Param("search") Long theSearch);
+	List<Long> findWithSearchPidOrderIndependent(@Param("search") Long theSearchPid);
 
 	@Query(value="SELECT r.myId FROM SearchResult r WHERE r.mySearchPid = :search")
 	Slice<Long> findForSearch(Pageable thePage, @Param("search") Long theSearchPid);

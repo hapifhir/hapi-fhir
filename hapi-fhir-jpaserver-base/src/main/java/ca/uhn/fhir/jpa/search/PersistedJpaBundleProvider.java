@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -63,7 +64,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 	private EntityManager myEntityManager;
 	private PlatformTransactionManager myPlatformTransactionManager;
 	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
-	private ISearchResultCacheSvc mySearchResultCacheSvc;
+	private ISearchCacheSvc mySearchCacheSvc;
 	private Search mySearchEntity;
 	private String myUuid;
 	private boolean myCacheHit;
@@ -191,7 +192,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
 
-			Optional<Search> search = mySearchResultCacheSvc.fetchByUuid(myUuid);
+			Optional<Search> search = mySearchCacheSvc.fetchByUuid(myUuid);
 			if (!search.isPresent()) {
 				return false;
 			}
@@ -338,7 +339,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
-	public void setSearchResultCacheSvc(ISearchResultCacheSvc theSearchResultCacheSvc) {
-		mySearchResultCacheSvc = theSearchResultCacheSvc;
+	public void setSearchCacheSvc(ISearchCacheSvc theSearchCacheSvc) {
+		mySearchCacheSvc = theSearchCacheSvc;
 	}
 }

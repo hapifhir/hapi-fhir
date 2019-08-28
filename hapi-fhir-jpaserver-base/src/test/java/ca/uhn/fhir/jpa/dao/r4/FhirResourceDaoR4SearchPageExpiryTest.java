@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
+import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
@@ -45,14 +46,14 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 	@After()
 	public void after() {
-		DatabaseSearchResultCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchResultCacheSvc);
+		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(DEFAULT_CUTOFF_SLACK);
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(null);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(null);
 	}
 
 	@Before
 	public void before() {
-		DatabaseSearchResultCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchResultCacheSvc);
+		DatabaseSearchCacheSvcImpl staleSearchDeletingSvc = AopTestUtils.getTargetObject(mySearchCacheSvc);
 		staleSearchDeletingSvc.setCutoffSlackForUnitTest(0);
 		myDaoConfig.setCountSearchResultsUpTo(new DaoConfig().getCountSearchResultsUpTo());
 	}
@@ -83,7 +84,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		myDaoConfig.setExpireSearchResultsAfterMillis(1000L);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
 		long start = System.currentTimeMillis();
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(start);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start);
 
 		final String searchUuid1;
 		{
@@ -123,7 +124,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		// Search just got used so it shouldn't be deleted
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(start + 500);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start + 500);
 		final AtomicLong search3timestamp = new AtomicLong();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -136,7 +137,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -151,7 +152,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
@@ -162,7 +163,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
@@ -217,7 +218,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 		myDaoConfig.setExpireSearchResultsAfterMillis(500);
 		myDaoConfig.setReuseCachedSearchResultsForMillis(500L);
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(start.get() + 499);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + 499);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -226,7 +227,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(start.get() + 600);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(start.get() + 600);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -308,7 +309,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 800);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
@@ -324,7 +325,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
@@ -373,7 +374,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 
 
 		myDaoConfig.setExpireSearchResults(false);
-		DatabaseSearchResultCacheSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(System.currentTimeMillis() + DateUtils.MILLIS_PER_DAY);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {

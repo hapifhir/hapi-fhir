@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -81,7 +82,6 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -108,6 +108,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
 	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
@@ -129,7 +131,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	public void setSearchResultCacheSvcForUnitTest(ISearchResultCacheSvc theSearchResultCacheSvc) {
+	public void setSearchCacheServicesForUnitTest(ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc) {
+		mySearchCacheSvc = theSearchCacheSvc;
 		mySearchResultCacheSvc = theSearchResultCacheSvc;
 	}
 
@@ -183,7 +186,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			}
 
-			search = mySearchResultCacheSvc
+			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> {
 					ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
@@ -209,7 +212,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If the search was saved in "pass complete mode" it's probably time to
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
-				Optional<Search> newSearch = mySearchResultCacheSvc.tryToMarkSearchAsInProgress(search);
+				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
@@ -237,7 +240,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		theRetVal.setContext(myContext);
 		theRetVal.setEntityManager(myEntityManager);
 		theRetVal.setPlatformTransactionManager(myManagedTxManager);
-		theRetVal.setSearchResultCacheSvc(mySearchResultCacheSvc);
+		theRetVal.setSearchCacheSvc(mySearchCacheSvc);
 		theRetVal.setSearchCoordinatorSvc(this);
 		theRetVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
@@ -336,7 +339,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
 
-			mySearchResultCacheSvc.updateSearchLastReturned(searchToUse, new Date());
+			mySearchCacheSvc.updateSearchLastReturned(searchToUse, new Date());
 
 			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao);
 			retVal.setCacheHit(true);
@@ -357,7 +360,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		// createdCutoff is in recent past
 		final Instant createdCutoff = Instant.now().minus(myDaoConfig.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
-		Collection<Search> candidates = mySearchResultCacheSvc.findCandidatesForReuse(theResourceType, theQueryString, theQueryString.hashCode(), Date.from(createdCutoff));
+		Collection<Search> candidates = mySearchCacheSvc.findCandidatesForReuse(theResourceType, theQueryString, theQueryString.hashCode(), Date.from(createdCutoff));
 
 		for (Search nextCandidateSearch : candidates) {
 			// We should only reuse our search if it was created within the permitted window
@@ -841,7 +844,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private void doSaveSearch() {
 
-			Search newSearch = mySearchResultCacheSvc.save(mySearch);
+			Search newSearch = mySearchCacheSvc.save(mySearch);
 
 			// mySearchDao.save is not supposed to return null, but in unit tests
 			// it can if the mock search dao isn't set up to handle that

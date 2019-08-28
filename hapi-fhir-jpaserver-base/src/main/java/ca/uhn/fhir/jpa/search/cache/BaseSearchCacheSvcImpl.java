@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class BaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
+public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
@@ -23,7 +23,6 @@ public abstract class BaseSearchResultCacheSvcImpl implements ISearchResultCache
 	public void updateSearchLastReturned(Search theSearch, Date theDate) {
 		myUnsyncedLastUpdated.put(theSearch.getId(), theDate);
 	}
-
 
 	@Override
 	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
