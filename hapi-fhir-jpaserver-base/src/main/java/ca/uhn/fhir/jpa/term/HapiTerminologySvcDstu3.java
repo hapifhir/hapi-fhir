@@ -365,23 +365,17 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	@Override
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+
 		Coding coding = (Coding) theCoding;
+		org.hl7.fhir.r4.model.Coding codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+
 		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
-
-		try {
-			org.hl7.fhir.r4.model.ValueSet valueSetR4;
-			valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
-
-			org.hl7.fhir.r4.model.Coding codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
-
-			org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
-			for (Coding nestedCoding : codeableConcept.getCoding()) {
-				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
-			}
-
-			return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
+		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+		for (Coding nestedCoding : codeableConcept.getCoding()) {
+			codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
 		}
+
+		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
 	}
 }

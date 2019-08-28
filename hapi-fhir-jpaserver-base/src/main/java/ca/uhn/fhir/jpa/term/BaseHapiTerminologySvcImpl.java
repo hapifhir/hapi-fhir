@@ -145,6 +145,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Autowired
 	private PlatformTransactionManager myTransactionMgr;
 	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
+	private IFhirResourceDaoValueSet<?, ?, ?> myValueSetResourceDao;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElementTarget>> myTranslationCache;
 	private Cache<TranslationQuery, List<TermConceptMapGroupElement>> myTranslationWithReverseCache;
 	private int myFetchSize = DEFAULT_FETCH_SIZE;
@@ -964,24 +965,24 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-
-		Long valueSetId = theValueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong();
+		ResourceTable resource = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
+		Long resourcePid = resource.getId();
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (isNotBlank(theSystem)) {
-				concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, theSystem, theCode);
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, theSystem, theCode));
 			} else {
-				concepts = myValueSetConceptDao.findOneByValueSetIdAndCode(valueSetId, theCode);
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(resourcePid, theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
-				concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, theCoding.getSystem(), theCoding.getCode());
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, theCoding.getSystem(), theCoding.getCode()));
 			}
 		} else if (theCodeableConcept != null){
 			for (Coding coding : theCodeableConcept.getCoding()) {
 				if (coding.hasSystem() && coding.hasCode()) {
-					concepts = myValueSetConceptDao.findOneByValueSetIdSystemAndCode(valueSetId, coding.getSystem(), coding.getCode());
+					concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, coding.getSystem(), coding.getCode()));
 					if (!concepts.isEmpty()) {
 						break;
 					}
@@ -1000,6 +1001,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		return null;
+	}
+
+	private List<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(Long theResourcePid, String theSystem, String theCode) {
+		List<TermValueSetConcept> retVal = new ArrayList<>();
+		Optional<TermValueSetConcept> optionalTermValueSetConcept = myValueSetConceptDao.findByValueSetResourcePidSystemAndCode(theResourcePid, theSystem, theCode);
+		if (optionalTermValueSetConcept.isPresent()) {
+			retVal.add(optionalTermValueSetConcept.get());
+		}
+		return retVal;
 	}
 
 	private void fetchChildren(TermConcept theConcept, Set<TermConcept> theSetToPopulate) {
@@ -1467,6 +1477,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@PostConstruct
 	public void start() {
 		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
+		myValueSetResourceDao = myApplicationContext.getBean(IFhirResourceDaoValueSet.class);
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
