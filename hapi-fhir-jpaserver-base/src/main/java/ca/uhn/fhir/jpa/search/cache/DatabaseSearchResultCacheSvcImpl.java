@@ -31,6 +31,7 @@ import static ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.toPage;
 public class DatabaseSearchResultCacheSvcImpl extends BaseSearchResultCacheSvcImpl {
 	/*
 	 * Be careful increasing this number! We use the number of params here in a
+	 * // FIXME KHS
 	 * DELETE FROM foo WHERE params IN (aaaa)
 	 * type query and this can fail if we have 1000s of params
 	 */
