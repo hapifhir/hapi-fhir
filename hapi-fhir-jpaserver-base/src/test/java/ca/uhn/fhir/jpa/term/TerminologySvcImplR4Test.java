@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
@@ -53,6 +54,8 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	private IIdType myConceptMapId;
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
+	private Long myExtensionalCsIdOnResourceTable;
+	private Long myExtensionalVsIdOnResourceTable;
 
 	@Before
 	public void before() {
@@ -195,6 +198,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
+		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
 	}
 
 	private void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
@@ -230,6 +234,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			default:
 				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
 		}
+		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
 	}
 
 	@Test
@@ -639,7 +644,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).get().getId();
+		Long termValueSetId = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get().getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
 
@@ -651,7 +656,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
-				assertFalse(myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isPresent());
+				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
 	}
@@ -673,7 +678,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).get().getId();
+		Long termValueSetId = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get().getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
 
@@ -685,7 +690,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
-				assertFalse(myTermValueSetDao.findByResourcePid(valueSet.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isPresent());
+				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
 	}
@@ -1321,7 +1326,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsId.getIdPartAsLong());
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
 				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
 				assertNull(codeSystem.getName());
 
@@ -1388,7 +1393,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsId.getIdPartAsLong());
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
 				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
 				assertNull(codeSystem.getName());
 
@@ -1454,7 +1459,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemId.getIdPartAsLong());
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(IDao.RESOURCE_PID.get(codeSystemResource));
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
 				assertEquals("SYSTEM NAME", codeSystem.getName());
 
@@ -1911,7 +1916,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -1929,7 +1934,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2009,7 +2014,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2027,7 +2032,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2107,7 +2112,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2125,7 +2130,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2205,7 +2210,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
@@ -2223,7 +2228,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		myTermSvc.preExpandValueSetToTerminologyTables();
 
 		runInTransaction(()->{
-			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsId.getIdPartAsLong());
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");

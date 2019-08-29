@@ -487,7 +487,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasId()) {
-			optionalTermValueSet = myValueSetDao.findByResourcePid(theValueSetToExpand.getIdElement().getIdPartAsLong());
+			Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSetToExpand);
+			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 		} else if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
 		} else {
@@ -965,24 +966,23 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		ResourceTable resource = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
-		Long resourcePid = resource.getId();
+		Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSet);
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
 			if (isNotBlank(theSystem)) {
-				concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, theSystem, theCode));
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theSystem, theCode));
 			} else {
-				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(resourcePid, theCode));
+				concepts.addAll(myValueSetConceptDao.findByValueSetResourcePidAndCode(valueSetResourcePid, theCode));
 			}
 		} else if (theCoding != null) {
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
-				concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, theCoding.getSystem(), theCoding.getCode()));
+				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theCoding.getSystem(), theCoding.getCode()));
 			}
 		} else if (theCodeableConcept != null){
 			for (Coding coding : theCodeableConcept.getCoding()) {
 				if (coding.hasSystem() && coding.hasCode()) {
-					concepts.addAll(findByValueSetResourcePidSystemAndCode(resourcePid, coding.getSystem(), coding.getCode()));
+					concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, coding.getSystem(), coding.getCode()));
 					if (!concepts.isEmpty()) {
 						break;
 					}
