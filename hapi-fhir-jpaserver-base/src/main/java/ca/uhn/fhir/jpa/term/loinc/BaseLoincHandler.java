@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public abstract class BaseLoincHandler implements IRecordHandler {
@@ -114,7 +115,7 @@ public abstract class BaseLoincHandler implements IRecordHandler {
 			conceptMap.setId(theMapping.getConceptMapId());
 			conceptMap.setUrl(theMapping.getConceptMapUri());
 			conceptMap.setName(theMapping.getConceptMapName());
-			conceptMap.setVersion(myUploadProperties.getProperty("conceptmap.version"));
+			conceptMap.setVersion(myUploadProperties.getProperty(LOINC_CONCEPTMAP_VERSION.getCode()));
 			conceptMap.setPublisher(REGENSTRIEF_INSTITUTE_INC);
 			conceptMap.addContact()
 				.setName(REGENSTRIEF_INSTITUTE_INC)

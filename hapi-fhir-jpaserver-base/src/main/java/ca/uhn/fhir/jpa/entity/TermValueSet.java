@@ -71,11 +71,11 @@ public class TermValueSet implements Serializable {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
-	private TermValueSetExpansionStatusEnum myExpansionStatus;
+	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
 	public TermValueSet() {
 		super();
-		myExpansionStatus = TermValueSetExpansionStatusEnum.NOT_EXPANDED;
+		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
 	}
 
 	public Long getId() {
@@ -120,11 +120,11 @@ public class TermValueSet implements Serializable {
 		return myConcepts;
 	}
 
-	public TermValueSetExpansionStatusEnum getExpansionStatus() {
+	public TermValueSetPreExpansionStatusEnum getExpansionStatus() {
 		return myExpansionStatus;
 	}
 
-	public void setExpansionStatus(TermValueSetExpansionStatusEnum theExpansionStatus) {
+	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
 	}
 

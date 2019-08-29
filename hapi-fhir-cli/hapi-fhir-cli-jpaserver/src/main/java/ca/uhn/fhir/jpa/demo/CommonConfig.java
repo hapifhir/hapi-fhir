@@ -1,17 +1,16 @@
 package ca.uhn.fhir.jpa.demo;
 
-import java.util.Properties;
-
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.search.LuceneSearchMappingFactory;
-import ca.uhn.fhir.jpa.util.DerbyTenSevenHapiFhirDialect;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.dialect.H2Dialect;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -38,20 +37,20 @@ public class CommonConfig {
 	}
 
 	/**
-	 * The following bean configures the database connection. The 'url' property value of "jdbc:derby:directory:jpaserver_derby_files;create=true" indicates that the server should save resources in a
-	 * directory called "jpaserver_derby_files".
+	 * The following bean configures the database connection. The 'url' property value of "jdbc:h2:file:target./jpaserver_h2_files" indicates that the server should save resources in a
+	 * directory called "jpaserver_h2_files".
 	 *
 	 * A URL to a remote database could also be placed here, along with login credentials and other properties supported by BasicDataSource.
 	 */
 	@Bean(destroyMethod = "close")
 	public DataSource dataSource() {
-		String url = "jdbc:derby:directory:target/jpaserver_derby_files;create=true";
+		String url = "jdbc:h2:file:./target/jpaserver_h2_files";
 		if (isNotBlank(ContextHolder.getDatabaseUrl())) {
 			url = ContextHolder.getDatabaseUrl();
 		}
 
 		BasicDataSource retVal = new BasicDataSource();
-		retVal.setDriver(new org.apache.derby.jdbc.EmbeddedDriver());
+		retVal.setDriver(new org.h2.Driver());
 		retVal.setUrl(url);
 		retVal.setUsername("");
 		retVal.setPassword("");
@@ -61,7 +60,7 @@ public class CommonConfig {
 	@Bean
 	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
-		extraProperties.put("hibernate.dialect", DerbyTenSevenHapiFhirDialect.class.getName());
+		extraProperties.put("hibernate.dialect", H2Dialect.class.getName());
 		extraProperties.put("hibernate.format_sql", "true");
 		extraProperties.put("hibernate.show_sql", "false");
 		extraProperties.put("hibernate.hbm2ddl.auto", "update");
