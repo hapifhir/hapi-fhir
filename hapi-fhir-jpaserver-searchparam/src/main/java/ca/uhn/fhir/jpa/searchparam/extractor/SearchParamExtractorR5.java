@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.Enumeration;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r5.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
@@ -78,6 +80,7 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
+	private FHIRPathEngine myFhirPathEngine;
 
 	/**
 	 * Constructor
@@ -86,11 +89,11 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		super();
 	}
 
-	// This constructor is used by tests
-	@VisibleForTesting
-	public SearchParamExtractorR5(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
-		super(theCtx, theSearchParamRegistry);
-		myValidationSupport = theValidationSupport;
+	@PostConstruct
+	public void initFhirPath() {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
 	}
 
 	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {

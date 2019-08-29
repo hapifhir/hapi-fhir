@@ -78,6 +78,10 @@
 				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions 
 				into the JPA server at the same time (i.e. when loading Synthea data).
 			</action>
+			<action type="fix">
+				The FHIRPath engine used to parse search parameters in the JPA R4/R5 server is now reused across
+				requests, as it is somewhat expensive to create and is thread safe.
+			</action>
 			<action type="add">
 				It is now possible to submit a PATCH request as a part of a FHIR transaction in DSTU3 (previously this
 				was only supported in R4+). This is not officially part of the DSTU3 spec, but it can now be performed by
