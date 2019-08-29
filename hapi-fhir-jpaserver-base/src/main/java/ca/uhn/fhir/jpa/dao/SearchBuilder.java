@@ -2700,8 +2700,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate processFilterParameter(SearchFilterParser.FilterParameter theFilter,
 														  String theResourceName, RequestDetails theRequest) {
 
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,
-			theFilter.getParamPath().getName());
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,	theFilter.getParamPath().getName());
 
 		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {

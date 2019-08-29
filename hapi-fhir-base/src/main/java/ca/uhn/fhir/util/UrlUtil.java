@@ -304,13 +304,23 @@ public class UrlUtil {
 			retVal.setVersionId(id.getVersionIdPart());
 			return retVal;
 		}
+
+		int parsingStart = 0;
+		if (url.length() > 2) {
+			if (url.charAt(0) == '/') {
+				if (Character.isLetter(url.charAt(1))) {
+					parsingStart = 1;
+				}
+			}
+		}
+
 		if (url.matches("/[a-zA-Z]+\\?.*")) {
 			url = url.substring(1);
 		}
 		int nextStart = 0;
 		boolean nextIsHistory = false;
 
-		for (int idx = 0; idx < url.length(); idx++) {
+		for (int idx = parsingStart; idx < url.length(); idx++) {
 			char nextChar = url.charAt(idx);
 			boolean atEnd = (idx + 1) == url.length();
 			if (nextChar == '?' || nextChar == '/' || atEnd) {

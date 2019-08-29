@@ -73,6 +73,11 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
+			<action type="change">
+				An inefficient regex expression in UrlUtil was replaced with a much more efficient hand-written
+				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions 
+				into the JPA server at the same time (i.e. when loading Synthea data).
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

@@ -49,9 +49,9 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		super();
 	}
 
-
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
+
 	private Set<String> mySupportedResourceTypes;
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {
@@ -156,7 +156,9 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 		myResourceNameToResourceDao = new HashMap<>();
 
 		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
-			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(nextResourceDao.getResourceType());
+			Class resourceType = nextResourceDao.getResourceType();
+			assert resourceType != null;
+			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(resourceType);
 			if (mySupportedResourceTypes == null || mySupportedResourceTypes.contains(nextResourceDef.getName())) {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}
