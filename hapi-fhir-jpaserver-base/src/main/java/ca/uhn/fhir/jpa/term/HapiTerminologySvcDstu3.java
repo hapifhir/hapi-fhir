@@ -378,4 +378,11 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
 	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
+	}
 }

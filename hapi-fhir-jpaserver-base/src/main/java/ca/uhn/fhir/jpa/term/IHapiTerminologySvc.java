@@ -111,10 +111,17 @@ public interface IHapiTerminologySvc {
 
 	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
 
-	void preExpandValueSetToTerminologyTables();
+	void preExpandDeferredValueSetsToTerminologyTables();
 
 	/**
 	 * Version independent
 	 */
 	ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
+
+	/**
+	 * Version independent
+	 */
+	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 }

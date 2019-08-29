@@ -496,12 +496,26 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (!optionalTermValueSet.isPresent()) {
-			throw new InvalidRequestException("ValueSet is not present in terminology tables: " + theValueSetToExpand.getUrl());
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSetToExpand));
+			myDeferredValueSets.add(theValueSetToExpand);
+			return expandValueSet(theValueSetToExpand); // In-memory expansion.
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
 
-		validatePreExpansionStatusOfValueSetOrThrowException(termValueSet.getExpansionStatus());
+		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+			String statusMsg = myContext.getLocalizer().getMessage(
+				TermValueSetPreExpansionStatusEnum.class,
+				termValueSet.getExpansionStatus().getCode());
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"valueSetNotReadyForExpand",
+				getValueSetInfo(theValueSetToExpand),
+				termValueSet.getExpansionStatus().name(),
+				statusMsg);
+			ourLog.warn(msg);
+			return expandValueSet(theValueSetToExpand); // In-memory expansion.
+		}
 
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
@@ -514,20 +528,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		valueSet.setCompose(theValueSetToExpand.getCompose());
 		valueSet.setExpansion(expansionComponent);
 		return valueSet;
-	}
-
-	private void validatePreExpansionStatusOfValueSetOrThrowException(TermValueSetPreExpansionStatusEnum thePreExpansionStatus) {
-		if (TermValueSetPreExpansionStatusEnum.EXPANDED != thePreExpansionStatus) {
-			String statusMsg = myContext.getLocalizer().getMessage(
-				TermValueSetPreExpansionStatusEnum.class,
-				thePreExpansionStatus.getCode());
-			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
-				"valueSetNotReadyForExpand",
-				thePreExpansionStatus.name(),
-				statusMsg);
-			throw new UnprocessableEntityException(msg);
-		}
 	}
 
 	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
@@ -960,6 +960,36 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
 		}
+	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
+		Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSet);
+		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
+
+		if (!optionalTermValueSet.isPresent()) {
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSet));
+			myDeferredValueSets.add(theValueSet);
+			return false;
+		}
+
+		TermValueSet termValueSet = optionalTermValueSet.get();
+
+		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
+			String statusMsg = myContext.getLocalizer().getMessage(
+				TermValueSetPreExpansionStatusEnum.class,
+				termValueSet.getExpansionStatus().getCode());
+			String msg = myContext.getLocalizer().getMessage(
+				BaseHapiTerminologySvcImpl.class,
+				"valueSetNotReadyForValidateCode",
+				getValueSetInfo(theValueSet),
+				termValueSet.getExpansionStatus().name(),
+				statusMsg);
+			ourLog.warn(msg);
+			return false;
+		}
+
+		return true;
 	}
 
 	protected ValidateCodeResult validateCodeIsInPreExpandedValueSet(
@@ -1810,7 +1840,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
-	public synchronized void preExpandValueSetToTerminologyTables() {
+	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
 			ourLog.info("Skipping scheduled pre-expansion of ValueSets while deferred entities are being loaded.");
 			return;

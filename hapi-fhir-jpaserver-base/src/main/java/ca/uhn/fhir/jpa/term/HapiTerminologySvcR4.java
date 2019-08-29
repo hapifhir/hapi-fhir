@@ -284,4 +284,10 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
 		return super.validateCodeIsInPreExpandedValueSet(valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
 	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValueSet valueSet = (ValueSet) theValueSet;
+		return super.isValueSetPreExpandedForCodeValidation(valueSet);
+	}
 }
