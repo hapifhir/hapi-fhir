@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.dao.IDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -601,7 +600,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(IDao.RESOURCE_PID.get(codeSystemResource));
+				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
+				Long codeSystemResourcePid = resourceTable.getId();
+				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
 				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
 				assertEquals("SYSTEM NAME", codeSystem.getName());
 

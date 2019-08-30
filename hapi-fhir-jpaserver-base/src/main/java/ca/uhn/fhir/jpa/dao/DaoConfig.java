@@ -149,7 +149,7 @@ public class DaoConfig {
 	/**
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
 	 */
-	private boolean myPreExpandValueSetsExperimental = false;
+	private boolean myPreExpandValueSetsExperimental = true;
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformation myStoreMetaSourceInformation = StoreMetaSourceInformation.SOURCE_URI_AND_REQUEST_ID;
 	/**

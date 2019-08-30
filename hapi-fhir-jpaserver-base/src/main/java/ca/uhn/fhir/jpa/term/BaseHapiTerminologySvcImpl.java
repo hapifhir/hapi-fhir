@@ -487,7 +487,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasId()) {
-			Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSetToExpand);
+			ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSetToExpand.getIdElement(), null);
+			Long valueSetResourcePid = resourceTable.getId();
 			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 		} else if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
@@ -956,7 +957,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSet);
+		ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
+		Long valueSetResourcePid = resourceTable.getId();
 		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 
 		if (!optionalTermValueSet.isPresent()) {
@@ -980,7 +982,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		Long valueSetResourcePid = IDao.RESOURCE_PID.get(theValueSet);
+		ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
+		Long valueSetResourcePid = resourceTable.getId();
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
@@ -1625,7 +1628,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				Long codeSystemResourcePid = IDao.RESOURCE_PID.get(theCodeSystem);
+				ResourceTable resourceTable = (ResourceTable) myCodeSystemResourceDao.readEntity(theCodeSystem.getIdElement(), null);
+				Long codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystemVersion persCs = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
 				if (persCs != null) {
 					ourLog.info("Code system version already exists in database");
@@ -1822,7 +1826,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap.");
 	}
 
-	@Scheduled(fixedDelay = 600000) // 10 minutes.
+	@Scheduled(fixedDelay = 6000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
