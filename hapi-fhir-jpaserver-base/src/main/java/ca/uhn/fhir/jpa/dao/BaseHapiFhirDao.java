@@ -1464,10 +1464,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		List<IPrimitiveType<String>> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, myStringType);
 		for (@SuppressWarnings("rawtypes")
 			IPrimitiveType<String> nextType : childElements) {
-			String nextValue = nextType.getValueAsString();
-			if (isNotBlank(nextValue)) {
-				retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
-				retVal.append("\n");
+			if (myStringType.equals(nextType.getClass())) {
+				String nextValue = nextType.getValueAsString();
+				if (isNotBlank(nextValue)) {
+					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
+					retVal.append("\n");
+				}
 			}
 		}
 		return retVal.toString();
