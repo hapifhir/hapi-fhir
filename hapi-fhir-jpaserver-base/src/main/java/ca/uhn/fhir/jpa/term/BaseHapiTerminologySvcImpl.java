@@ -504,16 +504,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		TermValueSet termValueSet = optionalTermValueSet.get();
 
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
-			String statusMsg = myContext.getLocalizer().getMessage(
-				TermValueSetPreExpansionStatusEnum.class,
-				termValueSet.getExpansionStatus().getCode());
-			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
-				"valueSetNotReadyForExpand",
-				getValueSetInfo(theValueSetToExpand),
-				termValueSet.getExpansionStatus().name(),
-				statusMsg);
-			ourLog.warn(msg);
+			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $expand. Will perform in-memory expansion without parameters. Current status: {} | {}",
+				getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			return expandValueSet(theValueSetToExpand); // In-memory expansion.
 		}
 
@@ -976,16 +968,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		TermValueSet termValueSet = optionalTermValueSet.get();
 
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
-			String statusMsg = myContext.getLocalizer().getMessage(
-				TermValueSetPreExpansionStatusEnum.class,
-				termValueSet.getExpansionStatus().getCode());
-			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
-				"valueSetNotReadyForValidateCode",
-				getValueSetInfo(theValueSet),
-				termValueSet.getExpansionStatus().name(),
-				statusMsg);
-			ourLog.warn(msg);
+			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $validation-code. Will perform in-memory code validation. Current status: {} | {}",
+				getValueSetInfo(theValueSet), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
 			return false;
 		}
 
