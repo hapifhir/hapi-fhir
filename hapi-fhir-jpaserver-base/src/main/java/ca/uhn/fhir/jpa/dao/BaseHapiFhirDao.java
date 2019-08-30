@@ -1482,7 +1482,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	public void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
+	public static void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {
 		if (theEntity.getDeleted() != null) {
 			theEntity.setNarrativeTextParsedIntoWords(null);
 			theEntity.setContentTextParsedIntoWords(null);
