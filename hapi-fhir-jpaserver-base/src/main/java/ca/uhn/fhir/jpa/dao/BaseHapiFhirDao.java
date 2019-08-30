@@ -75,7 +75,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -170,7 +169,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
-	private Class<IPrimitiveType<String>> myStringType;
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -1452,19 +1450,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return mySearchParamRegistry;
 	}
 
-	@PostConstruct
-	@SuppressWarnings({"ResultOfMethodCallIgnored", "unchecked"})
-	public void startSetStringType() {
-		myStringType = (Class<IPrimitiveType<String>>) myContext.getElementDefinition("string").getImplementingClass();
-	}
+	@SuppressWarnings("unchecked")
+	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
 
-	private String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
+		Class<IPrimitiveType<String>> stringType = (Class<IPrimitiveType<String>>) theContext.getElementDefinition("string").getImplementingClass();
 
 		StringBuilder retVal = new StringBuilder();
-		List<IPrimitiveType<String>> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, myStringType);
+		List<IPrimitiveType<String>> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, stringType);
 		for (@SuppressWarnings("rawtypes")
 			IPrimitiveType<String> nextType : childElements) {
-			if (myStringType.equals(nextType.getClass())) {
+			if (stringType.equals(nextType.getClass())) {
 				String nextValue = nextType.getValueAsString();
 				if (isNotBlank(nextValue)) {
 					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
