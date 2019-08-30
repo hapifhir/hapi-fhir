@@ -10,8 +10,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander;
@@ -291,7 +291,8 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theValueSet);
+		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet);
 
 		Coding coding = (Coding) theCoding;
 		org.hl7.fhir.r4.model.Coding codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
@@ -303,5 +304,12 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 		}
 
 		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
+	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet);
+		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
 }

@@ -331,7 +331,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		if (vs != null) {
 			ValidateCodeResult result;
-			if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+			if (myDaoConfig.isPreExpandValueSetsExperimental() && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
 				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 			} else {
 				ValueSet expansion = doExpand(vs);
