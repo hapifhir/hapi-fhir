@@ -46,6 +46,15 @@ public class LogicalReferenceHelper {
 			}
 
 		}
+
+		/*
+		 * Account for common logical references
+		 */
+
+		if (theId.getValue().startsWith("http://fhir.org/guides/argonaut/")) {
+			return true;
+		}
+
 		return false;
 	}
 

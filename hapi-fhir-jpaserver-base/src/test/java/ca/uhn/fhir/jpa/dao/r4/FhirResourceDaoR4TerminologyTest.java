@@ -18,6 +18,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -43,6 +44,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
+	@Autowired
+	private CachingValidationSupport myCachingValidationSupport;
+
 
 	@After
 	public void after() {
@@ -54,7 +58,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
-//		my
+		myCachingValidationSupport.flushCaches();
 	}
 
 	private CodeSystem createExternalCs() {

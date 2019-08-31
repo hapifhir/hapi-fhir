@@ -153,6 +153,26 @@ public class LoggingInterceptorDstu2Test {
 	}
 
 	@Test
+	public void testRequestId() throws Exception {
+
+		LoggingInterceptor interceptor = new LoggingInterceptor();
+		interceptor.setMessageFormat("${requestId}");
+		servlet.getInterceptorService().registerInterceptor(interceptor);
+
+		Logger logger = mock(Logger.class);
+		interceptor.setLogger(logger);
+
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/1");
+
+		HttpResponse status = ourClient.execute(httpGet);
+		IOUtils.closeQuietly(status.getEntity().getContent());
+
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+		verify(logger, timeout(1000).times(1)).info(captor.capture());
+		assertEquals(Constants.REQUEST_ID_LENGTH, captor.getValue().length());
+	}
+
+	@Test
 	public void testRequestProcessingTime() throws Exception {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();

@@ -15,11 +15,12 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 	private List<String> myInputStreamNames;
 	private ArrayList<InputStream> myInputStreams;
 
-	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
+	public ResourceGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) throws MojoFailureException {
 		super(theVersion, theBaseDir);
 		super.setFilenameSuffix("");
 	}
 
+	@Override
 	public List<String> getInputStreamNames() {
 		return myInputStreamNames;
 	}
@@ -51,7 +52,7 @@ public class ResourceGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 
 	public void setBaseResourceNames(List<String> theBaseResourceNames) throws MojoFailureException {
 		myInputStreamNames = theBaseResourceNames;
-		myInputStreams = new ArrayList<InputStream>();
+		myInputStreams = new ArrayList<>();
 
 		for (String next : theBaseResourceNames) {
 			String resName = "/res/" + getVersion() + "/" + next.toLowerCase() + "-spreadsheet.xml";

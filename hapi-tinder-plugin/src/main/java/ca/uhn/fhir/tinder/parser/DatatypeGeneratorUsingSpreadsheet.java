@@ -32,7 +32,7 @@ public class DatatypeGeneratorUsingSpreadsheet extends BaseStructureSpreadsheetP
 		theTarget.setSummary("Y");
 	}
 
-	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) {
+	public DatatypeGeneratorUsingSpreadsheet(String theVersion, String theBaseDir) throws MojoFailureException {
 		super(theVersion, theBaseDir);
 		super.setFilenameSuffix("Dt");
 	}

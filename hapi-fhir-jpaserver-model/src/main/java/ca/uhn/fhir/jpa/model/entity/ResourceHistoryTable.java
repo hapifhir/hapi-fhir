@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -29,7 +27,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-//@formatter:off
 @Entity
 @Table(name = "HFJ_RES_VER", uniqueConstraints = {
 	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
@@ -38,16 +35,14 @@ import java.util.Collection;
 	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
-//@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
-	private static final long serialVersionUID = 1L;
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
 	/**
 	 * @see ResourceEncodingEnum
 	 */
 	public static final int ENCODING_COL_LENGTH = 5;
-
+	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
@@ -76,8 +71,19 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
+	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
+	private ResourceHistoryProvenanceEntity myProvenance;
+
 	public ResourceHistoryTable() {
 		super();
+	}
+
+	public ResourceHistoryProvenanceEntity getProvenance() {
+		return myProvenance;
+	}
+
+	public void setProvenance(ResourceHistoryProvenanceEntity theProvenance) {
+		myProvenance = theProvenance;
 	}
 
 	public void addTag(ResourceHistoryTag theTag) {

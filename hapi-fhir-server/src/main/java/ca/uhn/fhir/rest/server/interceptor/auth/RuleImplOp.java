@@ -412,15 +412,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 					}
 				}
 				if (appliesToResourceType != null) {
-					if (myAppliesToTypes.contains(appliesToResourceType)) {
-						if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
-							return null;
-						}
-						if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-							return newVerdict();
-						} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
-							// ok we'll check below
-						}
+					if (!myAppliesToTypes.contains(appliesToResourceType)) {
+						return null;
+					}
+					if (!applyTesters(theOperation, theRequestDetails, theInputResourceId, theInputResource, theOutputResource)) {
+						return null;
+					}
+					if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
+						return newVerdict();
+					} else if (myClassifierType == ClassifierTypeEnum.IN_COMPARTMENT) {
+						// ok we'll check below
 					}
 				}
 				break;

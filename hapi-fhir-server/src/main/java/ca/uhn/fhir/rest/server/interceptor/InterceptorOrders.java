@@ -23,6 +23,7 @@ package ca.uhn.fhir.rest.server.interceptor;
 public class InterceptorOrders {
 
 	public static final int SERVE_MEDIA_RESOURCE_RAW_INTERCEPTOR = 1000;
+
 	public static final int RESPONSE_HIGHLIGHTER_INTERCEPTOR = 10000;
 
 	/** Non instantiable */

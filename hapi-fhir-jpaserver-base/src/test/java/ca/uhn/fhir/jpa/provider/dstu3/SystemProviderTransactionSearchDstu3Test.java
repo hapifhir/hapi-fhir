@@ -4,20 +4,29 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import ca.uhn.fhir.rest.api.Constants;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Bundle.*;
 import org.hl7.fhir.dstu3.model.Enumerations.AdministrativeGender;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.*;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -30,6 +39,8 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
+
+import javax.validation.constraints.NotNull;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
@@ -177,6 +188,50 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(actualIds, contains(ids.subList(5, 10).toArray(new String[0])));
 	}
 
+
+	@Test
+	public void testPatchUsingJsonPatch_Transaction() throws Exception {
+		String methodName = "testPatchUsingJsonPatch_Transaction";
+		IIdType pid1;
+		{
+			Patient patient = new Patient();
+			patient.setActive(true);
+			patient.addIdentifier().setSystem("urn:system").setValue("0");
+			patient.addName().setFamily(methodName).addGiven("Joe");
+			pid1 = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		}
+
+		String patchString = "[ { \"op\":\"replace\", \"path\":\"/active\", \"value\":false } ]";
+		Binary patch = new Binary();
+		patch.setContentType(ca.uhn.fhir.rest.api.Constants.CT_JSON_PATCH);
+		patch.setContent(patchString.getBytes(Charsets.UTF_8));
+
+		// Note that we don't set the type
+		Bundle input = new Bundle();
+		input.setType(Bundle.BundleType.TRANSACTION);
+		input.addEntry()
+			.setFullUrl(pid1.getValue())
+			.setResource(patch)
+			.getRequest().setUrl(pid1.getValue());
+
+		HttpPost post = new HttpPost(ourServerBase);
+		String encodedRequest = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+		ourLog.info("Requet:\n{}", encodedRequest);
+		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseString);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(responseString, containsString("\"resourceType\":\"Bundle\""));
+		}
+
+		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
+	}
+
+
+
 	@Test
 	public void testTransactionWithGetHardLimitLargeSynchronous() {
 		List<String> ids = create20Patients();
@@ -260,6 +315,24 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds, contains(ids.subList(0, 5).toArray(new String[0])));
 		}
+	}
+
+	@Test
+	public void testTransactionGetStartsWithSlash() {
+		IIdType patientId = ourClient.create().resource(new Patient()).execute().getId().toUnqualifiedVersionless();
+
+		Bundle input = new Bundle();
+		input.setType(BundleType.BATCH);
+		input.setId("bundle-batch-test");
+		input.addEntry().getRequest().setMethod(HTTPVerb.GET)
+			.setUrl("/Patient?_id="+patientId.getIdPart());
+
+		Bundle output = ourClient.transaction().withBundle(input).execute();
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+		assertThat(output.getEntryFirstRep().getResponse().getStatus(), startsWith("200"));
+		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
+		List<String> actualIds = toIds(respBundle);
+		assertThat(actualIds, containsInAnyOrder(patientId.getValue()));
 	}
 
 	private List<String> toIds(Bundle theRespBundle) {

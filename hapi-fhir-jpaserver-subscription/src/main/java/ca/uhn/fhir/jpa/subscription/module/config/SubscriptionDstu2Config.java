@@ -20,9 +20,10 @@ package ca.uhn.fhir.jpa.subscription.module.config;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.searchparam.config.SearchParamDstu2Config;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamDstu3Config;
 import org.springframework.context.annotation.Import;
 
-@Import({SearchParamDstu3Config.class})
+@Import({SearchParamDstu2Config.class})
 public class SubscriptionDstu2Config extends BaseSubscriptionConfig {
 }

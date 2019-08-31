@@ -24,7 +24,7 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
 		assertEquals(0, sd.getSnapshot().getElement().size());
 
-		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(sd, "http://foo", "THE BEST PROFILE");
+		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(sd, "http://foo", null, "THE BEST PROFILE");
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		assertEquals(54, output.getSnapshot().getElement().size());

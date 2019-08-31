@@ -17,6 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import org.hl7.fhir.dstu3.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceCategory;
 import org.hl7.fhir.dstu3.model.AllergyIntolerance.AllergyIntoleranceClinicalStatus;
@@ -45,6 +46,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
+	@Autowired
+	private CachingValidationSupport myCachingValidationSupport;
 
 	@After
 	public void after() {
@@ -56,7 +59,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	@Before
 	public void before() {
 		myDaoConfig.setMaximumExpansionSize(5000);
-//		my
+		myCachingValidationSupport.flushCaches();
 	}
 
 	private CodeSystem createExternalCs() {

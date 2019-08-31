@@ -6,7 +6,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>4.0.0-SNAPSHOT</version>
+	<version>4.1.0-SNAPSHOT</version>
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
 	<url>https://hapifhir.io</url>
@@ -539,6 +539,14 @@
 			<id>uurl</id>
 			<name>Raul Estrada</name>
 		</developer>
+		<developer>
+			<id>anthonys123</id>
+			<name>Anthony Sute</name>
+		</developer>
+		<developer>
+			<id>nickrobison-usds</id>
+			<name>Nick Robison</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -550,7 +558,7 @@
 
 	<properties>
 
-		<fhir_core_version>3.8.12-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.2-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -586,7 +594,7 @@
 		<jetty_version>9.4.14.v20181114</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.2.Final</hibernate_version>
+		<hibernate_version>5.4.4.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.11.1.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
@@ -834,6 +842,11 @@
 				<version>${gson_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.google.code.findbugs</groupId>
+				<artifactId>jsr305</artifactId>
+				<version>3.0.2</version>
+			</dependency>
+			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
 				<!--<version>6.2.2.jre8</version>-->
@@ -1049,21 +1062,7 @@
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>3.1.6</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>java-hamcrest</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-library</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>4.0.0-rc1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
@@ -1268,12 +1267,12 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.28.2</version>
+				<version>3.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.2.5.jre7</version>
+				<version>42.2.6.jre7</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1864,6 +1863,9 @@
 								<copy todir="target/site/apidocs-r4">
 									<fileset dir="hapi-fhir-structures-r4/target/site/apidocs"/>
 								</copy>
+								<copy todir="target/site/apidocs-r5">
+									<fileset dir="hapi-fhir-structures-r5/target/site/apidocs"/>
+								</copy>
 								<copy todir="target/site/apidocs-jpaserver">
 									<fileset dir="hapi-fhir-jpaserver-base/target/site/apidocs"/>
 								</copy>
@@ -2283,6 +2285,16 @@
 								<goals>
 									<goal>sign</goal>
 								</goals>
+								<configuration>
+									<!-- 
+									These arguments are needed for GPG 2.1+ per
+									https://stackoverflow.com/questions/53992950/maven-gpg-plugin-failing-with-inappropriate-ioctl-for-device-when-running-unde
+									-->
+									<gpgArguments>
+										<arg>--pinentry-mode</arg>
+										<arg>loopback</arg>
+									</gpgArguments>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
@@ -2296,6 +2308,7 @@
 				<module>hapi-fhir-structures-dstu2</module>
 				<module>hapi-fhir-structures-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
+				<module>hapi-fhir-structures-r5</module>
 				<module>hapi-fhir-client</module>
 				<module>hapi-fhir-server</module>
 				<module>hapi-fhir-jpaserver-model</module>
@@ -2352,6 +2365,8 @@
 				<module>hapi-fhir-validation-resources-dstu3</module>
 				<module>hapi-fhir-structures-r4</module>
 				<module>hapi-fhir-validation-resources-r4</module>
+				<module>hapi-fhir-structures-r5</module>
+				<module>hapi-fhir-validation-resources-r5</module>
 				<module>hapi-fhir-igpacks</module>
 				<module>hapi-fhir-jpaserver-model</module>
 				<module>hapi-fhir-jpaserver-searchparam</module>

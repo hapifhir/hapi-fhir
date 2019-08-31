@@ -6,18 +6,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.conformance.ProfileUtilities;
-import org.hl7.fhir.r4.context.IWorkerContext;
-import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
-import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +19,6 @@ import org.springframework.context.ApplicationContextAware;
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,6 +51,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	private IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 
 	@Autowired
 	private FhirContext myR4Ctx;
@@ -150,6 +143,11 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
 			search = myCodeSystemDao.search(params);
+		} else if ("ImplementationGuide".equals(resourceName)) {
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			search = myImplementationGuideDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -187,6 +185,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 		myValueSetDao = myApplicationContext.getBean("myValueSetDaoR4", IFhirResourceDao.class);
 		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoR4", IFhirResourceDao.class);
 		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoR4", IFhirResourceDao.class);
+		myImplementationGuideDao = myApplicationContext.getBean("myImplementationGuideDaoR4", IFhirResourceDao.class);
 	}
 
 	@Override
@@ -201,7 +200,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		return null;
 	}
 

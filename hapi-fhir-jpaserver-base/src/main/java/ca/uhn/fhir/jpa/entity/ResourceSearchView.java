@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryProvenanceEntity;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -34,25 +35,26 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
-//@formatter:off
 @Entity
 @Immutable
-@Subselect("SELECT h.pid        as pid            " +
-	",  h.res_id            as res_id         " +
-	",  h.res_type          as res_type       " +
-	",  h.res_version       as res_version    " + // FHIR version
-	",  h.res_ver           as res_ver        " + // resource version
-	",  h.has_tags          as has_tags       " +
-	",  h.res_deleted_at    as res_deleted_at " +
-	",  h.res_published     as res_published  " +
-	",  h.res_updated       as res_updated    " +
-	",  h.res_text          as res_text       " +
-	",  h.res_encoding      as res_encoding   " +
-	",  f.forced_id         as FORCED_PID      " +
+@Subselect("SELECT h.pid               as pid,            " +
+	"               h.res_id            as res_id,         " +
+	"               h.res_type          as res_type,       " +
+	"               h.res_version       as res_version,    " + // FHIR version
+	"               h.res_ver           as res_ver,        " + // resource version
+	"               h.has_tags          as has_tags,       " +
+	"               h.res_deleted_at    as res_deleted_at, " +
+	"               h.res_published     as res_published,  " +
+	"               h.res_updated       as res_updated,    " +
+	"               h.res_text          as res_text,       " +
+	"               h.res_encoding      as res_encoding,   " +
+	"               p.SOURCE_URI        as PROV_SOURCE_URI," +
+	"               p.REQUEST_ID        as PROV_REQUEST_ID," +
+	"               f.forced_id         as FORCED_PID      " +
 	"FROM HFJ_RES_VER h "
 	+ "    LEFT OUTER JOIN HFJ_FORCED_ID f ON f.resource_pid = h.res_id "
+	+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid "
 	+ "    INNER JOIN HFJ_RESOURCE r       ON r.res_id = h.res_id and r.res_ver = h.res_ver")
-// @formatter:on
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -73,34 +75,39 @@ public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	@Column(name = "RES_VER")
 	private Long myResourceVersion;
-
+	@Column(name = "PROV_REQUEST_ID", length = Constants.REQUEST_ID_LENGTH)
+	private String myProvenanceRequestId;
+	@Column(name = "PROV_SOURCE_URI", length = ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH)
+	private String myProvenanceSourceUri;
 	@Column(name = "HAS_TAGS")
 	private boolean myHasTags;
-
 	@Column(name = "RES_DELETED_AT")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_PUBLISHED")
 	private Date myPublished;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "RES_UPDATED")
 	private Date myUpdated;
-
 	@Column(name = "RES_TEXT")
 	@Lob()
 	private byte[] myResource;
-
 	@Column(name = "RES_ENCODING")
 	@Enumerated(EnumType.STRING)
 	private ResourceEncodingEnum myEncoding;
-
-	@Column(name = "FORCED_PID", length= ForcedId.MAX_FORCED_ID_LENGTH)
+	@Column(name = "FORCED_PID", length = ForcedId.MAX_FORCED_ID_LENGTH)
 	private String myForcedPid;
 
 	public ResourceSearchView() {
+	}
+
+	public String getProvenanceRequestId() {
+		return myProvenanceRequestId;
+	}
+
+	public String getProvenanceSourceUri() {
+		return myProvenanceSourceUri;
 	}
 
 	@Override

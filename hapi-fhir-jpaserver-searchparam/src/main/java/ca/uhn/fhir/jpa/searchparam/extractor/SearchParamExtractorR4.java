@@ -39,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -48,6 +49,7 @@ import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
@@ -79,6 +81,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	@Autowired
 	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
 
+	private FHIRPathEngine myFhirPathEngine;
+
 	/**
 	 * Constructor
 	 */
@@ -91,6 +95,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
+		initFhirPath();
+	}
+
+	@PostConstruct
+	public void initFhirPath() {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 	}
 
 	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
@@ -751,16 +763,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
-		FHIRPathEngine fp = new FHIRPathEngine(worker);
-		fp.setHostServices(new SearchParamExtractorR4HostServices());
-
 		List<Object> values = new ArrayList<>();
 		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
 		for (String nextPath : nextPathsSplit) {
 			List<Base> allValues;
 			try {
-				allValues = fp.evaluate((Base) theResource, nextPath);
+				allValues = myFhirPathEngine.evaluate((Base) theResource, nextPath);
 			} catch (FHIRException e) {
 				String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 				throw new InternalErrorException(msg, e);

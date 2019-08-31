@@ -163,7 +163,16 @@ public class UrlUtil {
 		if (theString != null) {
 			for (int i = 0; i < theString.length(); i++) {
 				char nextChar = theString.charAt(i);
-				if (nextChar == '<' || nextChar == '"') {
+				switch (nextChar) {
+					case '\'':
+					case '"':
+					case '<':
+					case '>':
+					case '\n':
+					case '\r':
+						return true;
+				}
+				if (nextChar < ' ') {
 					return true;
 				}
 			}
@@ -295,13 +304,23 @@ public class UrlUtil {
 			retVal.setVersionId(id.getVersionIdPart());
 			return retVal;
 		}
+
+		int parsingStart = 0;
+		if (url.length() > 2) {
+			if (url.charAt(0) == '/') {
+				if (Character.isLetter(url.charAt(1))) {
+					parsingStart = 1;
+				}
+			}
+		}
+
 		if (url.matches("/[a-zA-Z]+\\?.*")) {
 			url = url.substring(1);
 		}
 		int nextStart = 0;
 		boolean nextIsHistory = false;
 
-		for (int idx = 0; idx < url.length(); idx++) {
+		for (int idx = parsingStart; idx < url.length(); idx++) {
 			char nextChar = url.charAt(idx);
 			boolean atEnd = (idx + 1) == url.length();
 			if (nextChar == '?' || nextChar == '/' || atEnd) {
@@ -348,7 +367,17 @@ public class UrlUtil {
 
 	/**
 	 * This method specifically HTML-encodes the &quot; and
-	 * &lt; characters in order to prevent injection attacks
+	 * &lt; characters in order to prevent injection attacks.
+	 *
+	 * The following characters are escaped:
+	 * <ul>
+	 *    <li>&apos;</li>
+	 *    <li>&quot;</li>
+	 *    <li>&lt;</li>
+	 *    <li>&gt;</li>
+	 *    <li>\n (newline)</li>
+	 * </ul>
+	 *
 	 */
 	public static String sanitizeUrlPart(CharSequence theString) {
 		if (theString == null) {
@@ -364,6 +393,10 @@ public class UrlUtil {
 
 				char nextChar = theString.charAt(j);
 				switch (nextChar) {
+					/*
+					 * NB: If you add a constant here, you also need to add it
+					 * to isNeedsSanitization()!!
+					 */
 					case '\'':
 						buffer.append("&apos;");
 						break;
@@ -373,8 +406,19 @@ public class UrlUtil {
 					case '<':
 						buffer.append("&lt;");
 						break;
+					case '>':
+						buffer.append("&gt;");
+						break;
+					case '\n':
+						buffer.append("&#10;");
+						break;
+					case '\r':
+						buffer.append("&#13;");
+						break;
 					default:
-						buffer.append(nextChar);
+						if (nextChar >= ' ') {
+							buffer.append(nextChar);
+						}
 						break;
 				}
 

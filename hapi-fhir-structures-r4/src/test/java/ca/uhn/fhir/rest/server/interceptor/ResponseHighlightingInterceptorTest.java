@@ -30,6 +30,7 @@ import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -81,6 +82,19 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals("text/html", status.getFirstHeader("content-type").getValue());
 		assertEquals("<html>DATA</html>", responseContent);
 		assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue());
+	}
+
+	@Test
+	public void testInvalidRequest() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/html?_elements=Patient:foo");
+		httpGet.addHeader("Accept", "text/html");
+
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getFirstHeader("content-type").getValue(), containsString("text/html"));
+		assertThat(responseContent, containsString("Invalid _elements value"));
 	}
 
 	@Test
@@ -371,6 +385,36 @@ public class ResponseHighlightingInterceptorTest {
 		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name."));
+
+	}
+
+	@Test
+	public void testHighlightGraphQLResponse() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		httpGet.addHeader("Accept", "text/html");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+
+		ourLog.info("Resp: {}", responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, stringContainsInOrder("&quot;foo&quot;"));
+
+	}
+
+	@Test
+	public void testHighlightGraphQLResponseNonHighlighted() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
+		httpGet.addHeader("Accept", "application/jon");
+		CloseableHttpResponse status = ourClient.execute(httpGet);
+		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+		status.close();
+
+		ourLog.info("Resp: {}", responseContent);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(responseContent, stringContainsInOrder("{\"foo\":\"bar\"}"));
 
 	}
 
@@ -786,6 +830,14 @@ public class ResponseHighlightingInterceptorTest {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+
+	public static class GraphQLProvider {
+		@GraphQL
+		public String processGraphQlRequest(ServletRequestDetails theRequestDetails, @IdParam IIdType theId, @GraphQLQuery String theQuery) {
+			return "{\"foo\":\"bar\"}";
+		}
+	}
+
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		ourServer = new Server(0);
@@ -814,7 +866,7 @@ public class ResponseHighlightingInterceptorTest {
 		ourServlet.registerInterceptor(corsInterceptor);
 
 		ourServlet.registerInterceptor(ourInterceptor);
-		ourServlet.setResourceProviders(patientProvider, new DummyBinaryResourceProvider());
+		ourServlet.registerProviders(patientProvider, new DummyBinaryResourceProvider(), new GraphQLProvider());
 		ourServlet.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE);
 		ServletHolder servletHolder = new ServletHolder(ourServlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");

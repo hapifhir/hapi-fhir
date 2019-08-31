@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -107,6 +107,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -125,6 +130,11 @@
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -136,7 +146,11 @@
 			<artifactId>logback-classic</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
@@ -676,21 +690,6 @@
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
-					<!-- 
-					<execution>
-						<id>build_dstu1</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
-						<configuration>
-							<version>dstu</version>
-							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
-							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-						</configuration>
-					</execution>
-					-->
 					<execution>
 						<id>build_dstu2</id>
 						<goals>
@@ -735,6 +734,19 @@
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_r5</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>r5</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
 				</executions>

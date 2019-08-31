@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
@@ -35,7 +36,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class DaoRegistry implements ApplicationContextAware {
+public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	private ApplicationContext myAppCtx;
 
 	@Autowired
@@ -48,9 +49,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		super();
 	}
 
-
 	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
 	private volatile IFhirSystemDao<?, ?> mySystemDao;
+
 	private Set<String> mySupportedResourceTypes;
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {
@@ -135,6 +136,11 @@ public class DaoRegistry implements ApplicationContextAware {
 		}
 	}
 
+	@Override
+	public boolean isResourceTypeSupported(String theResourceType) {
+		return mySupportedResourceTypes == null || mySupportedResourceTypes.contains(theResourceType);
+	}
+
 	private void init() {
 		if (myResourceNameToResourceDao != null && !myResourceNameToResourceDao.isEmpty()) {
 			return;
@@ -150,7 +156,9 @@ public class DaoRegistry implements ApplicationContextAware {
 		myResourceNameToResourceDao = new HashMap<>();
 
 		for (IFhirResourceDao nextResourceDao : theResourceDaos) {
-			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(nextResourceDao.getResourceType());
+			Class resourceType = nextResourceDao.getResourceType();
+			assert resourceType != null;
+			RuntimeResourceDefinition nextResourceDef = myContext.getResourceDefinition(resourceType);
 			if (mySupportedResourceTypes == null || mySupportedResourceTypes.contains(nextResourceDef.getName())) {
 				myResourceNameToResourceDao.put(nextResourceDef.getName(), nextResourceDao);
 			}

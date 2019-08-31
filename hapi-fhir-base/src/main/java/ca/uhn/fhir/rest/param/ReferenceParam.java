@@ -19,6 +19,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+import static ca.uhn.fhir.model.primitive.IdDt.isValidLong;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -279,5 +280,9 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 		TokenParam retVal = new TokenParam();
 		retVal.setValueAsQueryToken(theContext, null, null, getValueAsQueryToken(theContext));
 		return retVal;
+	}
+
+	public boolean isIdPartValidLong() {
+		return isValidLong(getIdPart());
 	}
 }

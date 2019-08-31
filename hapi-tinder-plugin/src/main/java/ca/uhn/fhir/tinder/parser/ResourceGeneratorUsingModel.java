@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.tinder.model.Resource;
 import ca.uhn.fhir.tinder.model.SearchParameter;
+import org.apache.maven.plugin.MojoFailureException;
 
 public class ResourceGeneratorUsingModel extends BaseStructureParser {
 
@@ -17,7 +18,7 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 	private File myTemplateFile;
 	private Collection<String> myResourceNames;
 
-	public ResourceGeneratorUsingModel(String theVersion, String theBaseDir) {
+	public ResourceGeneratorUsingModel(String theVersion, String theBaseDir) throws MojoFailureException {
 		super(theVersion, theBaseDir);
 	}
 
@@ -83,7 +84,7 @@ public class ResourceGeneratorUsingModel extends BaseStructureParser {
 		if (theCompositeOf == null) {
 			return null;
 		}
-		ArrayList<String> retVal = new ArrayList<String>();
+		ArrayList<String> retVal = new ArrayList<>();
 		for (RuntimeSearchParam next : theCompositeOf) {
 			retVal.add(next.getName());
 		}

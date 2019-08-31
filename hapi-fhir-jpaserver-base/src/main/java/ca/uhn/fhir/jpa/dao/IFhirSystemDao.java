@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import com.google.common.annotations.Beta;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -32,6 +33,10 @@ import java.util.Date;
 import java.util.Map;
 
 /**
+ * Note that this interface is not considered a stable interface. While it is possible to build applications
+ * that use it directly, please be aware that we may modify methods, add methods, or even remove methods from
+ * time to time, even within minor point releases.
+ *
  * @param <T>  The bundle type
  * @param <MT> The Meta datatype type
  */

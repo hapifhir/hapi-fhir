@@ -645,16 +645,8 @@ public class IdDt extends UriDt implements /*IPrimitiveDatatype<String>, */IIdTy
 		return new IdDt(value + '/' + Constants.PARAM_HISTORY + '/' + theVersion);
 	}
 
-	private static boolean isValidLong(String id) {
-		if (StringUtils.isBlank(id)) {
-			return false;
-		}
-		for (int i = 0; i < id.length(); i++) {
-			if (Character.isDigit(id.charAt(i)) == false) {
-				return false;
-			}
-		}
-		return true;
+	public static boolean isValidLong(String id) {
+		return StringUtils.isNumeric(id);
 	}
 
 	/**

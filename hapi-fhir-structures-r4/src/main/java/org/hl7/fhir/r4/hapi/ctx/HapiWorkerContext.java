@@ -10,6 +10,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.fhir.ucum.UcumService;
+import org.hl7.fhir.exceptions.DefinitionException;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.r4.context.IWorkerContext;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 
@@ -59,6 +61,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   @Override
   public List<StructureDefinition> allStructures() {
     return myValidationSupport.fetchAllStructureDefinitions(myCtx);
+  }
+
+  @Override
+  public List<StructureDefinition> getStructures() {
+    return allStructures();
   }
 
   @Override
@@ -149,9 +156,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
-      ValidationResult retVal = validateCode(next, theVs);
+      ValidationResult retVal = validateCode(theOptions, next, theVs);
       if (retVal != null && retVal.isOk()) {
         return retVal;
       }
@@ -161,15 +168,15 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(Coding theCode, ValueSet theVs) {
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, Coding theCode, ValueSet theVs) {
     String system = theCode.getSystem();
     String code = theCode.getCode();
     String display = theCode.getDisplay();
-    return validateCode(system, code, display, theVs);
+    return validateCode(theOptions, system, code, display, theVs);
   }
 
   @Override
-  public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay) {
     CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
     if (result == null) {
       return null;
@@ -178,12 +185,12 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ConceptSetComponent theVsi) {
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
     if (theVs != null && isNotBlank(theCode)) {
       for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
@@ -264,13 +271,18 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
-  public ValidationResult validateCode(String code, ValueSet vs) {
-    return validateCode(null, code, null, vs);
+  public ValidationResult validateCode(TerminologyServiceOptions theOptions, String code, ValueSet vs) {
+    return validateCode(theOptions, null, code, null, vs);
   }
 
   @Override
   @CoverageIgnore
   public List<MetadataResource> allConformanceResources() {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void generateSnapshot(StructureDefinition p) throws DefinitionException, FHIRException {
     throw new UnsupportedOperationException();
   }
 

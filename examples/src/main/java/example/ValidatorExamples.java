@@ -195,7 +195,13 @@ public class ValidatorExamples {
       
       // Validate
       ValidationResult result = validator.validateWithResult(obs);
-      
+
+      /*
+       * Note: You can also explicitly declare a profile to validate against
+       * using the block below.
+       */
+		// ValidationResult result = validator.validateWithResult(obs, new ValidationOptions().addProfile("http://myprofile.com"));
+
       // Do we have any errors or fatal errors?
       System.out.println(result.isSuccessful()); // false
       

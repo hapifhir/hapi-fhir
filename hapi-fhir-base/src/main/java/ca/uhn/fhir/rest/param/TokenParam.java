@@ -29,6 +29,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -65,6 +66,16 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 	 */
 	public TokenParam(BaseIdentifierDt theIdentifierDt) {
 		this(toSystemValue(theIdentifierDt.getSystemElement()), theIdentifierDt.getValueElement().getValue());
+	}
+
+	/**
+	 * Construct a {@link TokenParam} from the {@link IBaseCoding#getSystem()} () system} and
+	 * {@link IBaseCoding#getCode()} () code} of a {@link IBaseCoding} instance.
+	 *
+	 * @param theCoding The coding
+	 */
+	public TokenParam(IBaseCoding theCoding) {
+		this(theCoding.getSystem(), theCoding.getCode());
 	}
 
 	public TokenParam(String theSystem, String theValue) {
