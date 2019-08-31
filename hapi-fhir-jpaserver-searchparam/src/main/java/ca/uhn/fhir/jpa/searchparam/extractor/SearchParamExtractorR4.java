@@ -877,6 +877,11 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
 			return false;
 		}
+
+		@Override
+		public ValueSet resolveValueSet(Object theO, String theS) {
+			return null;
+		}
 	}
 
 	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {

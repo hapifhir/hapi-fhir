@@ -732,6 +732,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public String getLinkForUrl(String theS, String theS1) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public List<String> getTypeNames() {
 			throw new UnsupportedOperationException();
 		}

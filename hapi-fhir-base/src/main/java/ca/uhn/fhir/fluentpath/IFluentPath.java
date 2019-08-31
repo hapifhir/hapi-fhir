@@ -52,9 +52,9 @@ public interface IFluentPath {
 	IExpressionNode parse(String path);
 	IExpressionNodeWithOffset parsePartial(String path, int offset);
 
-	String evaluateToString(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
-	boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
-	List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+	String evaluateToString(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+	boolean evaluateToBoolean(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
+	List<IBase> evaluate(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled);
 
 	void setHostServices(INarrativeConstantResolver theNarrativeConstantEvaluator);
 	INarrativeConstantMap createLiquidIncludeMap();

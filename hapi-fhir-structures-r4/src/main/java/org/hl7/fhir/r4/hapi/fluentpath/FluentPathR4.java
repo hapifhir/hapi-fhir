@@ -67,18 +67,18 @@ public class FluentPathR4 implements IFluentPath {
   }
 
   @Override
-  public String evaluateToString(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return myEngine.evaluateToString(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
+  public String evaluateToString(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return myEngine.evaluateToString(theAppInfo, (Resource) theFocusResource, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
-  public boolean evaluateToBoolean(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return myEngine.evaluateToBoolean(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
+  public boolean evaluateToBoolean(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return myEngine.evaluateToBoolean(theAppInfo, (Resource) theFocusResource, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
-  public List<IBase> evaluate(Object theAppInfo, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
-    return (List<IBase>) (List<?>) myEngine.evaluate(theAppInfo, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
+  public List<IBase> evaluate(Object theAppInfo, IBaseResource theFocusResource, IBaseResource theResource, IBase theBase, IExpressionNode theCompiled) {
+    return (List<IBase>) (List<?>) myEngine.evaluate(theAppInfo, (Resource) theFocusResource, (Resource) theResource, (Base) theBase, (ExpressionNode) theCompiled);
   }
 
   @Override
