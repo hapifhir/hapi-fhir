@@ -50,6 +50,8 @@ import java.util.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
+	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative2/narratives.properties";
+
 
 	private IMessageResolver myMessageResolver;
 
@@ -58,6 +60,21 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 	 */
 	public ThymeleafNarrativeGenerator() {
 		super();
+	}
+
+	@Override
+	protected List<String> getPropertyFile() {
+		List<String> retVal = new ArrayList<String>();
+		retVal.add(getNarrativesPropertyFileLocation());
+		addProperties(retVal);
+		return retVal;
+	}
+
+	protected void addProperties(List<String> theRetVal) {
+	}
+
+	protected String getNarrativesPropertyFileLocation() {
+		return NARRATIVES_PROPERTIES;
 	}
 
 	private TemplateEngine getTemplateEngine(FhirContext theFhirContext) {
@@ -80,12 +97,6 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 
 		engine.setDialect(dialect);
 		return engine;
-	}
-
-	@Override
-	protected List<String> getPropertyFile() {
-		// FIXME KHS this class should really be abstract
-		return new ArrayList<>();
 	}
 
 	@Override

@@ -37,13 +37,15 @@ public class DefaultThymeleafNarrativeGenerator extends ThymeleafNarrativeGenera
 	}
 
 	@Override
-	protected List<String> getPropertyFile() {
-		List<String> retVal = new ArrayList<String>();
-		retVal.add(NARRATIVES_PROPERTIES);
+	protected String getNarrativesPropertyFileLocation() {
+		return NARRATIVES_PROPERTIES;
+	}
+
+	@Override
+	protected void addProperties(List<String> properties) {
 		if (myUseHapiServerConformanceNarrative) {
-			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
+			properties.add(HAPISERVER_NARRATIVES_PROPERTIES);
 		}
-		return retVal;
 	}
 
 	/**
