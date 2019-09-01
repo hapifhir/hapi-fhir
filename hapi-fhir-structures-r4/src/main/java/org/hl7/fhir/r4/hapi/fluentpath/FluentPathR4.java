@@ -2,7 +2,6 @@ package org.hl7.fhir.r4.hapi.fluentpath;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fluentpath.*;
-import ca.uhn.fhir.r4.narrative.LiquidHostServices;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -12,6 +11,7 @@ import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.Tuple;
+import org.hl7.fhir.r4.narrative.LiquidHostServices;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.List;
