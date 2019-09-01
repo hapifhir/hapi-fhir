@@ -62,6 +62,7 @@ public class ThymeleafNarrativeGenerator extends BaseNarrativeGenerator {
 		super();
 	}
 
+	// FIXME KHS consolidate with liquid
 	@Override
 	protected List<String> getPropertyFile() {
 		List<String> retVal = new ArrayList<String>();

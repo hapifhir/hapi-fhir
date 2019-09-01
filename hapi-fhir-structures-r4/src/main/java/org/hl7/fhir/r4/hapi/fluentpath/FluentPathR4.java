@@ -23,13 +23,13 @@ public class FluentPathR4 implements IFluentPath {
   private FHIRPathEngine myEngine;
   private LiquidHostServices myLiquidHostServices;
 
-  public FluentPathR4(FhirContext theFhirContext) {
-    myFhirContext = theFhirContext;
-    if (!(theFhirContext.getValidationSupport() instanceof IValidationSupport)) {
+  public FluentPathR4(FhirContext theCxt) {
+    myFhirContext = theCxt;
+    if (!(theCxt.getValidationSupport() instanceof IValidationSupport)) {
       throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
     }
-    IValidationSupport validationSupport = (IValidationSupport) theFhirContext.getValidationSupport();
-    myEngine = new FHIRPathEngine(new HapiWorkerContext(theFhirContext, validationSupport));
+    IValidationSupport validationSupport = (IValidationSupport) theCxt.getValidationSupport();
+    myEngine = new FHIRPathEngine(new HapiWorkerContext(theCxt, validationSupport));
   }
 
   @SuppressWarnings("unchecked")
