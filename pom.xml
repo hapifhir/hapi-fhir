@@ -547,6 +547,10 @@
 			<id>nickrobison-usds</id>
 			<name>Nick Robison</name>
 		</developer>
+		<developer>
+			<id>fitzoh</id>
+			<name>Andrew Fitzgerald</name>
+		</developer>
 	</developers>
 
 	<licenses>
