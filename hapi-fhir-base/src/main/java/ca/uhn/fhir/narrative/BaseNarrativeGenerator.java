@@ -33,6 +33,7 @@ abstract public class BaseNarrativeGenerator implements INarrativeGenerator {
 	protected HashMap<String, String> myNameToNarrativeTemplate;
 
 //	@Override
+	// FIXME KHS is this still used?
 	public void generateNarrative(FhirContext theFhirContext, IBaseResource theResource, INarrative theNarrative) {
 		String name = getName(theFhirContext, theResource);
 		if (name == null) return;

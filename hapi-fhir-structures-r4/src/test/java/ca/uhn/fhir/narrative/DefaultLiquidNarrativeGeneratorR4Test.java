@@ -2,13 +2,11 @@ package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.map.LazyMap;
 import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.utilities.liquid.DefaultLiquidNarrativeGenerator;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

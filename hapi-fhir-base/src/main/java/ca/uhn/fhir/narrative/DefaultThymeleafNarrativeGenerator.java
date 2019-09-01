@@ -22,7 +22,6 @@ package ca.uhn.fhir.narrative;
 
 import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DefaultThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator implements INarrativeGenerator {
