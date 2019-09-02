@@ -55,6 +55,7 @@ import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
@@ -487,8 +488,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		Optional<TermValueSet> optionalTermValueSet;
 		if (theValueSetToExpand.hasId()) {
-			ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSetToExpand.getIdElement(), null);
-			Long valueSetResourcePid = resourceTable.getId();
+			Long valueSetResourcePid = getValueSetResourcePid(theValueSetToExpand.getIdElement());
 			optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 		} else if (theValueSetToExpand.hasUrl()) {
 			optionalTermValueSet = myValueSetDao.findByUrl(theValueSetToExpand.getUrl());
@@ -957,8 +957,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet) {
-		ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
-		Long valueSetResourcePid = resourceTable.getId();
+		Long valueSetResourcePid = getValueSetResourcePid(theValueSet.getIdElement());
 		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 
 		if (!optionalTermValueSet.isPresent()) {
@@ -982,8 +981,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValueSet theValueSet, String theSystem, String theCode, String theDisplay, Coding theCoding, CodeableConcept theCodeableConcept) {
 
 		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet.hasId(), "ValueSet.id is required");
-		ResourceTable resourceTable = (ResourceTable) myValueSetResourceDao.readEntity(theValueSet.getIdElement(), null);
-		Long valueSetResourcePid = resourceTable.getId();
+		Long valueSetResourcePid = getValueSetResourcePid(theValueSet.getIdElement());
 
 		List<TermValueSetConcept> concepts = new ArrayList<>();
 		if (isNotBlank(theCode)) {
@@ -1160,6 +1158,27 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	protected abstract CodeSystem getCodeSystemFromContext(String theSystem);
+
+	private Long getCodeSystemResourcePid(IIdType theIdType) {
+		return getCodeSystemResourcePid(theIdType, null);
+	}
+
+	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
+		return getResourcePid(myCodeSystemResourceDao, theIdType, theRequestDetails);
+	}
+
+	private Long getValueSetResourcePid(IIdType theIdType) {
+		return getValueSetResourcePid(theIdType, null);
+	}
+
+	private Long getValueSetResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
+		return getResourcePid(myValueSetResourceDao, theIdType, theRequestDetails);
+	}
+
+	private Long getResourcePid(IFhirResourceDao<? extends IBaseResource> theResourceDao, IIdType theIdType, RequestDetails theRequestDetails) {
+		ResourceTable resourceTable = (ResourceTable) theResourceDao.readEntity(theIdType, theRequestDetails);
+		return resourceTable.getId();
+	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
 		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
@@ -1628,8 +1647,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				ResourceTable resourceTable = (ResourceTable) myCodeSystemResourceDao.readEntity(theCodeSystem.getIdElement(), null);
-				Long codeSystemResourcePid = resourceTable.getId();
+				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 				TermCodeSystemVersion persCs = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
 				if (persCs != null) {
 					ourLog.info("Code system version already exists in database");
