@@ -31,9 +31,9 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.dstu3.hapi.fluentpath.FluentPathDstu3;
 import org.hl7.fhir.dstu3.hapi.rest.server.Dstu3BundleFactory;
 import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.narrative.FluentPath;
 import org.hl7.fhir.instance.model.api.*;
 
 import java.io.InputStream;
@@ -46,7 +46,11 @@ public class FhirDstu3 implements IFhirVersion {
 
   @Override
   public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-    return new FluentPathDstu3(theFhirContext);
+    if (!(theFhirContext.getValidationSupport() instanceof IValidationSupport)) {
+      throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
+    }
+    IValidationSupport validationSupport = (IValidationSupport) theFhirContext.getValidationSupport();
+    return new FluentPath(new HapiWorkerContext(theFhirContext, validationSupport));
   }
 
   @Override
