@@ -58,10 +58,9 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 
 		value.setBirthDate(new Date());
 
-		Narrative narrative = new Narrative();
-		// FIXME KHS
-//		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
-		String output = narrative.getDiv().getValueAsString();
+		// TODO KHS I tried to get this to work, but I wasn't able to get the array part to work
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
+		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
 
