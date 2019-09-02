@@ -102,6 +102,10 @@
 				identifies the LOINC CodeSystem in <![CDATA[<code>ValueSet.compose.include.system</code>]]>. This ValueSet
 				includes all LOINC codes.
 			</action>
+			<action type="add" issue="1461">
+				A note has been added to the downloads page explaning the removal of the hapi-fhir-utilities
+				module. Thanks to Andrew Fitzgerald for the PR!
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
