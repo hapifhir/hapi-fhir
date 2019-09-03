@@ -6,7 +6,7 @@ import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 
-// FIXME KHS is this used?
+// TODO KHS LIQ is this used?
 public class ValidatorExamplesDstu3 {
 
    public void validateProfileDstu3() {

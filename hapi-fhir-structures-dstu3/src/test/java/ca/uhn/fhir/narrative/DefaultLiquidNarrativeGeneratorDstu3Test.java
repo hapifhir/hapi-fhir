@@ -58,7 +58,7 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 
 		value.setBirthDate(new Date());
 
-		// TODO KHS I tried to get this to work, but I wasn't able to get the array part to work
+		// TODO KHS LIQ I tried to get this to work, but I wasn't able to get the array part to work
 		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
@@ -104,10 +104,8 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 			}
 		});
 
-		Narrative narrative = new Narrative();
-// FIXME KHS
-//		customGen.generateNarrative(ctx, value, narrative);
-		String output = narrative.getDiv().getValueAsString();
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
+		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("Some beautiful proze"));
 		assertThat(output, StringContains.containsString("UNTRANSLATED:other_text"));
@@ -123,10 +121,8 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 		value.addResult().setReference("Observation/2");
 		value.addResult().setReference("Observation/3");
 
-		Narrative narrative = new Narrative();
-		// FIXME KHS
-//		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
-		String output = narrative.getDiv().getValueAsString();
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
+		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString(value.getCode().getTextElement().getValue()));
@@ -148,12 +144,10 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 				"</OperationOutcome>";
 		//@formatter:on
 
-		OperationOutcome oo = ourFhirContext.newXmlParser().parseResource(OperationOutcome.class, parse);
+		OperationOutcome value = ourFhirContext.newXmlParser().parseResource(OperationOutcome.class, parse);
 
-		Narrative narrative = new Narrative();
-		// FIXME KHS
-//		myNarrativeGenerator.generateNarrative(ourFhirContext, oo, narrative);
-		String output = narrative.getDiv().getValueAsString();
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
+		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
 
@@ -191,10 +185,8 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 			value.addResult().setResource(obs);
 		}
 
-		Narrative narrative = new Narrative();
-		// FIXME KHS
-//		myNarrativeGenerator.generateNarrative(ourFhirContext, value, narrative);
-		String output = narrative.getDiv().getValueAsString();
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, value);
+		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
 		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
@@ -213,9 +205,9 @@ public class DefaultLiquidNarrativeGeneratorDstu3Test {
 		mp.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
 		mp.setAuthoredOnElement(new DateTimeType("2014-09-01"));
 
-		Narrative narrative = new Narrative();
-		// FIXME KHS
-//		myNarrativeGenerator.generateNarrative(ourFhirContext, mp, narrative);
+		myNarrativeGenerator.populateResourceNarrative(ourFhirContext, mp);
+		String output = mp.getText().getDiv().getValueAsString();
+		Narrative narrative = mp.getText();
 
 		assertTrue("Expected medication name of ciprofloaxin within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ciprofloaxin") > -1);
 		assertTrue("Expected string status of ACTIVE within narrative: " + narrative.getDiv().toString(), narrative.getDiv().toString().indexOf("ACTIVE") > -1);
