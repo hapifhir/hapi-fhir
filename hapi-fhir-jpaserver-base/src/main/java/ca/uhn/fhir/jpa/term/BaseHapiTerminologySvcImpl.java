@@ -518,7 +518,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
 		theExpansionComponent.addParameter().setName("count").setValue(new IntegerType(theCount));
 
-		if (theCount == 0 || total == 0) {
+		if (theCount == 0) {
 			return;
 		}
 
