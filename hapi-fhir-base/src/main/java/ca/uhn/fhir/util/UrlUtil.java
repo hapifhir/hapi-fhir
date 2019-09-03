@@ -368,7 +368,7 @@ public class UrlUtil {
 	/**
 	 * This method specifically HTML-encodes the &quot; and
 	 * &lt; characters in order to prevent injection attacks.
-	 *
+	 * <p>
 	 * The following characters are escaped:
 	 * <ul>
 	 *    <li>&apos;</li>
@@ -377,7 +377,6 @@ public class UrlUtil {
 	 *    <li>&gt;</li>
 	 *    <li>\n (newline)</li>
 	 * </ul>
-	 *
 	 */
 	public static String sanitizeUrlPart(CharSequence theString) {
 		if (theString == null) {
@@ -457,4 +456,16 @@ public class UrlUtil {
 		return theString;
 	}
 
+	/**
+	 * Removes the a trailing slash from URI if existing
+	 *
+	 * @param uriString
+	 * @return
+	 */
+	public static String normalizeCanonicalUri(String uriString) {
+		if (uriString.endsWith("/")) {
+			uriString = uriString.substring(0, uriString.length() - 1);
+		}
+		return uriString;
+	}
 }
