@@ -459,13 +459,23 @@ public class UrlUtil {
 	/**
 	 * Removes the a trailing slash from URI if existing
 	 *
-	 * @param uriString
+	 * @param uriString the canonical URI string (can be in the form of system|version)
 	 * @return
 	 */
 	public static String normalizeCanonicalUri(String uriString) {
-		if (uriString.endsWith("/")) {
-			uriString = uriString.substring(0, uriString.length() - 1);
+		String system = uriString;
+		String version = "";
+		if (uriString.contains("|")) {
+			version = uriString.substring(uriString.indexOf('|') + 1);
+			system = uriString.substring(0, uriString.indexOf('|'));
 		}
-		return uriString;
+		if (system.endsWith("/")) {
+			system = system.substring(0, system.length() - 1);
+		}
+		if (!version.isEmpty()) {
+			return system;
+		} else {
+			return system + "|" + version;
+		}
 	}
 }
