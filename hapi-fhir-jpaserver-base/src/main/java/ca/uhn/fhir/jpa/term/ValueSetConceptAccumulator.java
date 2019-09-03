@@ -88,12 +88,6 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
 			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
-
-			ourLog.info("Flushing...");
-			myValueSetConceptDesignationDao.flush();
-			myValueSetConceptDao.flush();
-			myValueSetDao.flush();
-			ourLog.info("Done flushing.");
 		}
 	}
 

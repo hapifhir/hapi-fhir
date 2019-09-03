@@ -373,13 +373,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 			myConceptMapDao.deleteTermConceptMapById(existingTermConceptMap.getId());
 			ourLog.info("Done deleting existing TermConceptMap[{}] and its children.", existingTermConceptMap.getId());
-
-			ourLog.info("Flushing...");
-			myConceptMapGroupElementTargetDao.flush();
-			myConceptMapGroupElementDao.flush();
-			myConceptMapGroupDao.flush();
-			myConceptMapDao.flush();
-			ourLog.info("Done flushing.");
 		}
 	}
 
@@ -401,12 +394,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
-
-			ourLog.info("Flushing...");
-			myValueSetConceptDesignationDao.flush();
-			myValueSetConceptDao.flush();
-			myValueSetDao.flush();
-			ourLog.info("Done flushing.");
 		}
 	}
 
