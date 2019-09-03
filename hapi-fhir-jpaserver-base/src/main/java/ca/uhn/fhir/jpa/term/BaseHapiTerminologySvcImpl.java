@@ -1862,7 +1862,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					TermValueSet refreshedValueSetToExpand = myValueSetDao.findById(valueSetToExpand.getId()).get();
 					return getValueSetFromResourceTable(refreshedValueSetToExpand.getResource());
 				});
-				expandValueSet(valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetConceptDao, myValueSetConceptDesignationDao));
+				expandValueSet(valueSet, new ValueSetConceptAccumulator(valueSetToExpand, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao));
 
 				// We are done with this ValueSet.
 				txTemplate.execute(t -> {
