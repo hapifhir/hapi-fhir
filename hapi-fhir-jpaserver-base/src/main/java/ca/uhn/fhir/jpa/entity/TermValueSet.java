@@ -44,8 +44,6 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermValueSet implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_TOTAL_LENGTH = 19;
-
 	public static final int MAX_EXPANSION_STATUS_LENGTH = 50;
 	public static final int MAX_NAME_LENGTH = 200;
 	public static final int MAX_URL_LENGTH = 200;
@@ -72,11 +70,11 @@ public class TermValueSet implements Serializable {
 	@OneToMany(mappedBy = "myValueSet")
 	private List<TermValueSetConcept> myConcepts;
 
-	@Column(name = "TOTAL_CONCEPTS", nullable = false, length = MAX_TOTAL_LENGTH)
+	@Column(name = "TOTAL_CONCEPTS", nullable = false)
 	@ColumnDefault("0")
 	private Long myTotalConcepts;
 
-	@Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false, length = MAX_TOTAL_LENGTH)
+	@Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false)
 	@ColumnDefault("0")
 	private Long myTotalConceptDesignations;
 

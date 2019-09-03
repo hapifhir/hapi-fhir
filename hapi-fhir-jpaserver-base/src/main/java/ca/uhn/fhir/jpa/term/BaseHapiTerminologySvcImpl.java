@@ -541,8 +541,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
 		int toIndex = theOffset + theCount;
-		Supplier<Slice<TermValueSetConcept>> loader = () -> myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
-		Slice<TermValueSetConcept> slice = loader.get();
+		Slice<TermValueSetConcept> slice = myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
 		if (!slice.hasContent()) {
 			logConceptsExpanded(theTermValueSet, conceptsExpanded);
 			return;
