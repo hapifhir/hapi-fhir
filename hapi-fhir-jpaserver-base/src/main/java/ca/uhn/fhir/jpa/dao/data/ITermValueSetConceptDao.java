@@ -40,8 +40,8 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc from TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
-	Slice<TermValueSetConcept> findByTermValueSetId(Pageable thePage, @Param("pid") Long theValueSetId);
+	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSet.myId = :pid")
+	Slice<TermValueSetConcept> findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param("pid") Long theValueSetId);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);

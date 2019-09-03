@@ -87,6 +87,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VSCD_VS_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
+
+		// TermValueSet
+		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		Builder.BuilderWithTableName termValueSetTable = version.onTable("TRM_VALUESET");
+		termValueSetTable.addColumn("TOTAL_CONCEPTS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 	}
 
 	protected void init400() {
