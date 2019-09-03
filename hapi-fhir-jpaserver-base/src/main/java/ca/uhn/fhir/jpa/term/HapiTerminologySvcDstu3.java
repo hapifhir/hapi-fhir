@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
@@ -364,16 +365,23 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 	@Override
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
 
 		Coding coding = (Coding) theCoding;
-		org.hl7.fhir.r4.model.Coding codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		org.hl7.fhir.r4.model.Coding codingR4 = null;
+		if (coding != null) {
+			codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		}
 
 		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
-		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
-		for (Coding nestedCoding : codeableConcept.getCoding()) {
-			codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
+		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = null;
+		if (codeableConcept != null) {
+			codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+			for (Coding nestedCoding : codeableConcept.getCoding()) {
+				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
+			}
 		}
 
 		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
@@ -381,6 +389,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
 		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
