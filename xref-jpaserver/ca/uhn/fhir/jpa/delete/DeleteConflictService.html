@@ -50,113 +50,124 @@
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  <strong class="jxr_keyword">import</strong> org.springframework.beans.factory.annotation.Autowired;
 <a class="jxr_linenumber" name="L43" href="#L43">43</a>  <strong class="jxr_keyword">import</strong> org.springframework.stereotype.Service;
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  
-<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.util.HashSet;
-<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <strong class="jxr_keyword">import</strong> java.util.List;
-<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <strong class="jxr_keyword">import</strong> java.util.Set;
-<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">import</strong> java.util.stream.Collectors;
-<a class="jxr_linenumber" name="L50" href="#L50">50</a>  
-<a class="jxr_linenumber" name="L51" href="#L51">51</a>  @Service
-<a class="jxr_linenumber" name="L52" href="#L52">52</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DeleteConflictService" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictService.html#DeleteConflictService">DeleteConflictService</a> {
-<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.<strong class="jxr_keyword">class</strong>);
-<a class="jxr_linenumber" name="L54" href="#L54">54</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> FIRST_QUERY_RESULT_COUNT = 1;
-<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> RETRY_QUERY_RESULT_COUNT = 60;
-<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_RETRY_ATTEMPTS = 10;
-<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
-<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	@Autowired
-<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	DeleteConflictFinderService myDeleteConflictFinderService;
-<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	@Autowired
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	DaoConfig myDaoConfig;
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	@Autowired
-<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	<strong class="jxr_keyword">protected</strong> <a name="IResourceLinkDao" href="../../../../../ca/uhn/fhir/jpa/dao/data/IResourceLinkDao.html#IResourceLinkDao">IResourceLinkDao</a> myResourceLinkDao;
-<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	@Autowired
-<a class="jxr_linenumber" name="L65" href="#L65">65</a>  	<strong class="jxr_keyword">private</strong> FhirContext myFhirContext;
-<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	@Autowired
-<a class="jxr_linenumber" name="L67" href="#L67">67</a>  	<strong class="jxr_keyword">protected</strong> IInterceptorBroadcaster myInterceptorBroadcaster;
-<a class="jxr_linenumber" name="L68" href="#L68">68</a>  
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> validateOkToDelete(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, RequestDetails theRequest) {
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		DeleteConflictList newConflicts = <strong class="jxr_keyword">new</strong> <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a>();
-<a class="jxr_linenumber" name="L71" href="#L71">71</a>  
-<a class="jxr_linenumber" name="L72" href="#L72">72</a>  		<em class="jxr_comment">// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.</em>
-<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<em class="jxr_comment">// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.</em>
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
-<a class="jxr_linenumber" name="L75" href="#L75">75</a>  		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
-<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
-<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">int</strong> retryCount = 0;
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">while</strong> (outcome != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  			<strong class="jxr_keyword">int</strong> shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
-<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">if</strong> (!(retryCount &lt; shouldRetryCount)) <strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L81" href="#L81">81</a>  			newConflicts = <strong class="jxr_keyword">new</strong> <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a>();
-<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
-<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			++retryCount;
-<a class="jxr_linenumber" name="L84" href="#L84">84</a>  		}
-<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		theDeleteConflicts.addAll(newConflicts);
-<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		<strong class="jxr_keyword">return</strong> retryCount;
-<a class="jxr_linenumber" name="L87" href="#L87">87</a>  	}
-<a class="jxr_linenumber" name="L88" href="#L88">88</a>  
-<a class="jxr_linenumber" name="L89" href="#L89">89</a>  	<strong class="jxr_keyword">private</strong> <a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a> findAndHandleConflicts(RequestDetails theRequest, <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, <strong class="jxr_keyword">int</strong> theMinQueryResultCount) {
-<a class="jxr_linenumber" name="L90" href="#L90">90</a>  		List&lt;ResourceLink&gt; resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
-<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		<strong class="jxr_keyword">if</strong> (resultList.isEmpty()) {
-<a class="jxr_linenumber" name="L92" href="#L92">92</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L93" href="#L93">93</a>  		}
-<a class="jxr_linenumber" name="L94" href="#L94">94</a>  
-<a class="jxr_linenumber" name="L95" href="#L95">95</a>  		<strong class="jxr_keyword">return</strong> handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
-<a class="jxr_linenumber" name="L96" href="#L96">96</a>  	}
-<a class="jxr_linenumber" name="L97" href="#L97">97</a>  
-<a class="jxr_linenumber" name="L98" href="#L98">98</a>  	<strong class="jxr_keyword">private</strong> <a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a> handleConflicts(RequestDetails theRequest, <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, List&lt;ResourceLink&gt; theResultList) {
-<a class="jxr_linenumber" name="L99" href="#L99">99</a>  		<strong class="jxr_keyword">if</strong> (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() &amp;&amp; !theForValidate) {
-<a class="jxr_linenumber" name="L100" href="#L100">100</a> 			ourLog.debug(<span class="jxr_string">"Deleting {} resource dependencies which can no longer be satisfied"</span>, theResultList.size());
-<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			myResourceLinkDao.deleteAll(theResultList);
-<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L103" href="#L103">103</a> 		}
-<a class="jxr_linenumber" name="L104" href="#L104">104</a> 
-<a class="jxr_linenumber" name="L105" href="#L105">105</a> 		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
-<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
-<a class="jxr_linenumber" name="L107" href="#L107">107</a> 		<em class="jxr_comment">// Notify Interceptors about pre-action call</em>
-<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		HookParams hooks = <strong class="jxr_keyword">new</strong> HookParams()
-<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			.add(DeleteConflictList.<strong class="jxr_keyword">class</strong>, theDeleteConflicts)
-<a class="jxr_linenumber" name="L110" href="#L110">110</a> 			.add(RequestDetails.<strong class="jxr_keyword">class</strong>, theRequest)
-<a class="jxr_linenumber" name="L111" href="#L111">111</a> 			.addIfMatchesType(ServletRequestDetails.<strong class="jxr_keyword">class</strong>, theRequest);
-<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">return</strong> (<a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a>)JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
-<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	}
-<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
-<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addConflictsToList(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, List&lt;ResourceLink&gt; theResultList) {
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 		<strong class="jxr_keyword">for</strong> (ResourceLink link : theResultList) {
-<a class="jxr_linenumber" name="L117" href="#L117">117</a> 			IdDt targetId = theEntity.getIdDt();
-<a class="jxr_linenumber" name="L118" href="#L118">118</a> 			IdDt sourceId = link.getSourceResource().getIdDt();
-<a class="jxr_linenumber" name="L119" href="#L119">119</a> 			String sourcePath = link.getSourcePath();
-<a class="jxr_linenumber" name="L120" href="#L120">120</a> 			theDeleteConflicts.add(<strong class="jxr_keyword">new</strong> <a name="DeleteConflict" href="../../../../../ca/uhn/fhir/jpa/util/DeleteConflict.html#DeleteConflict">DeleteConflict</a>(sourceId, sourcePath, targetId));
-<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		}
-<a class="jxr_linenumber" name="L122" href="#L122">122</a> 	}
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateDeleteConflictsEmptyOrThrowException(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts) {
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		<strong class="jxr_keyword">if</strong> (theDeleteConflicts.isEmpty()) {
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			<strong class="jxr_keyword">return</strong>;
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 		}
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		String firstMsg = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		Iterator&lt;DeleteConflict&gt; iterator = theDeleteConflicts.iterator();
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 		<strong class="jxr_keyword">while</strong> (iterator.hasNext()) {
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 			DeleteConflict next = iterator.next();
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 			StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 			b.append(<span class="jxr_string">"Unable to delete "</span>);
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			b.append(<span class="jxr_string">" because at least one resource has a reference to this resource. First reference found was resource "</span>);
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			b.append(<span class="jxr_string">" in path "</span>);
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			b.append(next.getSourcePath());
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 			String msg = b.toString();
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 			<strong class="jxr_keyword">if</strong> (firstMsg == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				firstMsg = msg;
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			}
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"processing"</span>);
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 		}
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResourceVersionConflictException(firstMsg, oo);
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 	}
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> }
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <strong class="jxr_keyword">import</strong> java.util.Iterator;
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <strong class="jxr_keyword">import</strong> java.util.List;
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  @Service
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="DeleteConflictService" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictService.html#DeleteConflictService">DeleteConflictService</a> {
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> Logger ourLog = LoggerFactory.getLogger(DeleteConflictService.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> FIRST_QUERY_RESULT_COUNT = 1;
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> RETRY_QUERY_RESULT_COUNT = 60;
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">int</strong> MAX_RETRY_ATTEMPTS = 10;
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  	@Autowired
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  	DeleteConflictFinderService myDeleteConflictFinderService;
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  	@Autowired
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  	DaoConfig myDaoConfig;
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  	@Autowired
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  	<strong class="jxr_keyword">protected</strong> <a name="IResourceLinkDao" href="../../../../../ca/uhn/fhir/jpa/dao/data/IResourceLinkDao.html#IResourceLinkDao">IResourceLinkDao</a> myResourceLinkDao;
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  	@Autowired
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  	<strong class="jxr_keyword">private</strong> FhirContext myFhirContext;
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  	@Autowired
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  	<strong class="jxr_keyword">protected</strong> IInterceptorBroadcaster myInterceptorBroadcaster;
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> validateOkToDelete(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, RequestDetails theRequest) {
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  		<em class="jxr_comment">// We want the list of resources that are marked to be the same list even as we</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  		<em class="jxr_comment">// drill into conflict resolution stacks.. this allows us to not get caught by</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  		<em class="jxr_comment">// circular references</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  		DeleteConflictList newConflicts = <strong class="jxr_keyword">new</strong> <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a>(theDeleteConflicts);
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  		<em class="jxr_comment">// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<em class="jxr_comment">// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.</em>
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">int</strong> retryCount = 0;
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">while</strong> (outcome != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">int</strong> shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  			<strong class="jxr_keyword">if</strong> (!(retryCount &lt; shouldRetryCount)) <strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  			newConflicts = <strong class="jxr_keyword">new</strong> <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a>();
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			++retryCount;
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  		}
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  		theDeleteConflicts.addAll(newConflicts);
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  		<strong class="jxr_keyword">return</strong> retryCount;
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  	}
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  	<strong class="jxr_keyword">private</strong> <a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a> findAndHandleConflicts(RequestDetails theRequest, <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, <strong class="jxr_keyword">int</strong> theMinQueryResultCount) {
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  		List&lt;ResourceLink&gt; resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  		<strong class="jxr_keyword">if</strong> (resultList.isEmpty()) {
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  		}
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  		<strong class="jxr_keyword">return</strong> handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  	}
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  	<strong class="jxr_keyword">private</strong> <a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a> handleConflicts(RequestDetails theRequest, <a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, <strong class="jxr_keyword">boolean</strong> theForValidate, List&lt;ResourceLink&gt; theResultList) {
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		<strong class="jxr_keyword">if</strong> (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() &amp;&amp; !theForValidate) {
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 			ourLog.debug(<span class="jxr_string">"Deleting {} resource dependencies which can no longer be satisfied"</span>, theResultList.size());
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 			myResourceLinkDao.deleteAll(theResultList);
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		}
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">if</strong> (theDeleteConflicts.isEmpty()) {
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a>();
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 		}
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<em class="jxr_comment">// Notify Interceptors about pre-action call</em>
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 		HookParams hooks = <strong class="jxr_keyword">new</strong> HookParams()
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 			.add(DeleteConflictList.<strong class="jxr_keyword">class</strong>, theDeleteConflicts)
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 			.add(RequestDetails.<strong class="jxr_keyword">class</strong>, theRequest)
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 			.addIfMatchesType(ServletRequestDetails.<strong class="jxr_keyword">class</strong>, theRequest);
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 		<strong class="jxr_keyword">return</strong> (<a name="DeleteConflictOutcome" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictOutcome.html#DeleteConflictOutcome">DeleteConflictOutcome</a>)JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 	}
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">void</strong> addConflictsToList(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts, ResourceTable theEntity, List&lt;ResourceLink&gt; theResultList) {
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 		<strong class="jxr_keyword">for</strong> (ResourceLink link : theResultList) {
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 			IdDt targetId = theEntity.getIdDt();
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 			IdDt sourceId = link.getSourceResource().getIdDt();
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 			String sourcePath = link.getSourcePath();
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 			<strong class="jxr_keyword">if</strong> (theDeleteConflicts.isResourceIdMarkedForDeletion(sourceId)) {
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 				<strong class="jxr_keyword">if</strong> (theDeleteConflicts.isResourceIdMarkedForDeletion(targetId)) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 					<strong class="jxr_keyword">continue</strong>;
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 				}
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 			}
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 			theDeleteConflicts.add(<strong class="jxr_keyword">new</strong> <a name="DeleteConflict" href="../../../../../ca/uhn/fhir/jpa/util/DeleteConflict.html#DeleteConflict">DeleteConflict</a>(sourceId, sourcePath, targetId));
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 		}
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	}
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> validateDeleteConflictsEmptyOrThrowException(<a name="DeleteConflictList" href="../../../../../ca/uhn/fhir/jpa/delete/DeleteConflictList.html#DeleteConflictList">DeleteConflictList</a> theDeleteConflicts) {
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">if</strong> (theDeleteConflicts.isEmpty()) {
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 		}
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 		String firstMsg = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 		Iterator&lt;DeleteConflict&gt; iterator = theDeleteConflicts.iterator();
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 		<strong class="jxr_keyword">while</strong> (iterator.hasNext()) {
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 			DeleteConflict next = iterator.next();
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 			StringBuilder b = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 			b.append(<span class="jxr_string">"Unable to delete "</span>);
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 			b.append(next.getTargetId().toUnqualifiedVersionless().getValue());
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 			b.append(<span class="jxr_string">" because at least one resource has a reference to this resource. First reference found was resource "</span>);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 			b.append(next.getSourceId().toUnqualifiedVersionless().getValue());
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			b.append(<span class="jxr_string">" in path "</span>);
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			b.append(next.getSourcePath());
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			String msg = b.toString();
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			<strong class="jxr_keyword">if</strong> (firstMsg == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 				firstMsg = msg;
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			}
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			OperationOutcomeUtil.addIssue(myFhirContext, oo, BaseHapiFhirDao.OO_SEVERITY_ERROR, msg, <strong class="jxr_keyword">null</strong>, <span class="jxr_string">"processing"</span>);
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 		}
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> ResourceVersionConflictException(firstMsg, oo);
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 	}
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

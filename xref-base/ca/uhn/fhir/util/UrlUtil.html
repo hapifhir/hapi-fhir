@@ -312,150 +312,160 @@
 <a class="jxr_linenumber" name="L304" href="#L304">304</a> 			retVal.setVersionId(id.getVersionIdPart());
 <a class="jxr_linenumber" name="L305" href="#L305">305</a> 			<strong class="jxr_keyword">return</strong> retVal;
 <a class="jxr_linenumber" name="L306" href="#L306">306</a> 		}
-<a class="jxr_linenumber" name="L307" href="#L307">307</a> 		<strong class="jxr_keyword">if</strong> (url.matches(<span class="jxr_string">"/[a-zA-Z]+&#92;&#92;?.*"</span>)) {
-<a class="jxr_linenumber" name="L308" href="#L308">308</a> 			url = url.substring(1);
-<a class="jxr_linenumber" name="L309" href="#L309">309</a> 		}
-<a class="jxr_linenumber" name="L310" href="#L310">310</a> 		<strong class="jxr_keyword">int</strong> nextStart = 0;
-<a class="jxr_linenumber" name="L311" href="#L311">311</a> 		<strong class="jxr_keyword">boolean</strong> nextIsHistory = false;
-<a class="jxr_linenumber" name="L312" href="#L312">312</a> 
-<a class="jxr_linenumber" name="L313" href="#L313">313</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> idx = 0; idx &lt; url.length(); idx++) {
-<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			<strong class="jxr_keyword">char</strong> nextChar = url.charAt(idx);
-<a class="jxr_linenumber" name="L315" href="#L315">315</a> 			<strong class="jxr_keyword">boolean</strong> atEnd = (idx + 1) == url.length();
-<a class="jxr_linenumber" name="L316" href="#L316">316</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '?' || nextChar == '/' || atEnd) {
-<a class="jxr_linenumber" name="L317" href="#L317">317</a> 				<strong class="jxr_keyword">int</strong> endIdx = (atEnd &amp;&amp; nextChar != '?') ? idx + 1 : idx;
-<a class="jxr_linenumber" name="L318" href="#L318">318</a> 				String nextSubstring = url.substring(nextStart, endIdx);
-<a class="jxr_linenumber" name="L319" href="#L319">319</a> 				<strong class="jxr_keyword">if</strong> (retVal.getResourceType() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L320" href="#L320">320</a> 					retVal.setResourceType(nextSubstring);
-<a class="jxr_linenumber" name="L321" href="#L321">321</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (retVal.getResourceId() == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L322" href="#L322">322</a> 					retVal.setResourceId(nextSubstring);
-<a class="jxr_linenumber" name="L323" href="#L323">323</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextIsHistory) {
-<a class="jxr_linenumber" name="L324" href="#L324">324</a> 					retVal.setVersionId(nextSubstring);
-<a class="jxr_linenumber" name="L325" href="#L325">325</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L326" href="#L326">326</a> 					<strong class="jxr_keyword">if</strong> (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
-<a class="jxr_linenumber" name="L327" href="#L327">327</a> 						nextIsHistory = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L328" href="#L328">328</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L329" href="#L329">329</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidRequestException" href="../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html#InvalidRequestException">InvalidRequestException</a>(<span class="jxr_string">"Invalid FHIR resource URL: "</span> + url);
-<a class="jxr_linenumber" name="L330" href="#L330">330</a> 					}
-<a class="jxr_linenumber" name="L331" href="#L331">331</a> 				}
-<a class="jxr_linenumber" name="L332" href="#L332">332</a> 				<strong class="jxr_keyword">if</strong> (nextChar == '?') {
-<a class="jxr_linenumber" name="L333" href="#L333">333</a> 					<strong class="jxr_keyword">if</strong> (url.length() &gt; idx + 1) {
-<a class="jxr_linenumber" name="L334" href="#L334">334</a> 						retVal.setParams(url.substring(idx + 1));
-<a class="jxr_linenumber" name="L335" href="#L335">335</a> 					}
-<a class="jxr_linenumber" name="L336" href="#L336">336</a> 					<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L337" href="#L337">337</a> 				}
-<a class="jxr_linenumber" name="L338" href="#L338">338</a> 				nextStart = idx + 1;
-<a class="jxr_linenumber" name="L339" href="#L339">339</a> 			}
-<a class="jxr_linenumber" name="L340" href="#L340">340</a> 		}
-<a class="jxr_linenumber" name="L341" href="#L341">341</a> 
-<a class="jxr_linenumber" name="L342" href="#L342">342</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L343" href="#L343">343</a> 
-<a class="jxr_linenumber" name="L344" href="#L344">344</a> 	}
-<a class="jxr_linenumber" name="L345" href="#L345">345</a> 
-<a class="jxr_linenumber" name="L346" href="#L346">346</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L347" href="#L347">347</a> <em class="jxr_javadoccomment">	 * This method specifically HTML-encodes the &amp;quot; and</em>
-<a class="jxr_linenumber" name="L348" href="#L348">348</a> <em class="jxr_javadoccomment">	 * &amp;lt; characters in order to prevent injection attacks</em>
-<a class="jxr_linenumber" name="L349" href="#L349">349</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L350" href="#L350">350</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String sanitizeUrlPart(IPrimitiveType&lt;?&gt; theString) {
-<a class="jxr_linenumber" name="L351" href="#L351">351</a> 		String retVal = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		<strong class="jxr_keyword">if</strong> (theString != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L353" href="#L353">353</a> 			retVal = sanitizeUrlPart(theString.getValueAsString());
-<a class="jxr_linenumber" name="L354" href="#L354">354</a> 		}
-<a class="jxr_linenumber" name="L355" href="#L355">355</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L356" href="#L356">356</a> 	}
-<a class="jxr_linenumber" name="L357" href="#L357">357</a> 
-<a class="jxr_linenumber" name="L358" href="#L358">358</a> 	<em class="jxr_javadoccomment">/**</em>
-<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">	 * This method specifically HTML-encodes the &amp;quot; and</em>
-<a class="jxr_linenumber" name="L360" href="#L360">360</a> <em class="jxr_javadoccomment">	 * &amp;lt; characters in order to prevent injection attacks.</em>
-<a class="jxr_linenumber" name="L361" href="#L361">361</a> <em class="jxr_javadoccomment">	 *</em>
-<a class="jxr_linenumber" name="L362" href="#L362">362</a> <em class="jxr_javadoccomment">	 * The following characters are escaped:</em>
-<a class="jxr_linenumber" name="L363" href="#L363">363</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
-<a class="jxr_linenumber" name="L364" href="#L364">364</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;apos;&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L365" href="#L365">365</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;quot;&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L366" href="#L366">366</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;lt;&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L367" href="#L367">367</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;gt;&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L368" href="#L368">368</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;\n (newline)&lt;/li&gt;</em>
-<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
-<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">	 *</em>
-<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">	 */</em>
-<a class="jxr_linenumber" name="L372" href="#L372">372</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String sanitizeUrlPart(CharSequence theString) {
-<a class="jxr_linenumber" name="L373" href="#L373">373</a> 		<strong class="jxr_keyword">if</strong> (theString == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L374" href="#L374">374</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 		}
-<a class="jxr_linenumber" name="L376" href="#L376">376</a> 
-<a class="jxr_linenumber" name="L377" href="#L377">377</a> 		<strong class="jxr_keyword">boolean</strong> needsSanitization = isNeedsSanitization(theString);
-<a class="jxr_linenumber" name="L378" href="#L378">378</a> 
-<a class="jxr_linenumber" name="L379" href="#L379">379</a> 		<strong class="jxr_keyword">if</strong> (needsSanitization) {
-<a class="jxr_linenumber" name="L380" href="#L380">380</a> 			<em class="jxr_comment">// Ok, we're sanitizing</em>
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 			StringBuilder buffer = <strong class="jxr_keyword">new</strong> StringBuilder(theString.length() + 10);
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 			<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> j = 0; j &lt; theString.length(); j++) {
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> 				<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(j);
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 				<strong class="jxr_keyword">switch</strong> (nextChar) {
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 					<em class="jxr_comment">/*</em>
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> <em class="jxr_comment">					 * NB: If you add a constant here, you also need to add it</em>
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> <em class="jxr_comment">					 * to isNeedsSanitization()!!</em>
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> <em class="jxr_comment">					 */</em>
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 					<strong class="jxr_keyword">case</strong> '\'':
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 						buffer.append(<span class="jxr_string">"&amp;apos;"</span>);
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 					<strong class="jxr_keyword">case</strong> '&quot;':
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 						buffer.append(<span class="jxr_string">"&amp;quot;"</span>);
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> 					<strong class="jxr_keyword">case</strong> '&lt;':
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 						buffer.append(<span class="jxr_string">"&amp;lt;"</span>);
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 					<strong class="jxr_keyword">case</strong> '&gt;':
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> 						buffer.append(<span class="jxr_string">"&amp;gt;"</span>);
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 					<strong class="jxr_keyword">case</strong> '\n':
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 						buffer.append(<span class="jxr_string">"&amp;#10;"</span>);
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 					<strong class="jxr_keyword">case</strong> '\r':
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 						buffer.append(<span class="jxr_string">"&amp;#13;"</span>);
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 					<strong class="jxr_keyword">default</strong>:
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 						<strong class="jxr_keyword">if</strong> (nextChar &gt;= ' ') {
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 							buffer.append(nextChar);
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 						}
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 						<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 				}
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 			} <em class="jxr_comment">// for build escaped string</em>
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 			<strong class="jxr_keyword">return</strong> buffer.toString();
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 		}
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">return</strong> theString.toString();
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 	}
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, String[]&gt; toQueryStringMap(HashMap&lt;String, List&lt;String&gt;&gt; map) {
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 		HashMap&lt;String, String[]&gt; retVal = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;String, List&lt;String&gt;&gt; nextEntry : map.entrySet()) {
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(<strong class="jxr_keyword">new</strong> String[0]));
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 		}
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 		<strong class="jxr_keyword">return</strong> retVal;
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 	}
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> 
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String unescape(String theString) {
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 		<strong class="jxr_keyword">if</strong> (theString == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 		}
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theString.length(); i++) {
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 			<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(i);
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '%' || nextChar == '+') {
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 				<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 					<em class="jxr_comment">// Yes it would be nice to not use a string "UTF-8" but the equivalent</em>
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 					<em class="jxr_comment">// method that takes Charset is JDK10+ only... sigh....</em>
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 					<strong class="jxr_keyword">return</strong> URLDecoder.decode(theString, <span class="jxr_string">"UTF-8"</span>);
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 				} <strong class="jxr_keyword">catch</strong> (UnsupportedEncodingException e) {
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Error(<span class="jxr_string">"UTF-8 not supported, this shouldn't happen"</span>, e);
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 				}
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 			}
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 		}
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 		<strong class="jxr_keyword">return</strong> theString;
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 	}
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> }
+<a class="jxr_linenumber" name="L307" href="#L307">307</a> 
+<a class="jxr_linenumber" name="L308" href="#L308">308</a> 		<strong class="jxr_keyword">int</strong> parsingStart = 0;
+<a class="jxr_linenumber" name="L309" href="#L309">309</a> 		<strong class="jxr_keyword">if</strong> (url.length() &gt; 2) {
+<a class="jxr_linenumber" name="L310" href="#L310">310</a> 			<strong class="jxr_keyword">if</strong> (url.charAt(0) == '/') {
+<a class="jxr_linenumber" name="L311" href="#L311">311</a> 				<strong class="jxr_keyword">if</strong> (Character.isLetter(url.charAt(1))) {
+<a class="jxr_linenumber" name="L312" href="#L312">312</a> 					parsingStart = 1;
+<a class="jxr_linenumber" name="L313" href="#L313">313</a> 				}
+<a class="jxr_linenumber" name="L314" href="#L314">314</a> 			}
+<a class="jxr_linenumber" name="L315" href="#L315">315</a> 		}
+<a class="jxr_linenumber" name="L316" href="#L316">316</a> 
+<a class="jxr_linenumber" name="L317" href="#L317">317</a> 		<strong class="jxr_keyword">if</strong> (url.matches(<span class="jxr_string">"/[a-zA-Z]+&#92;&#92;?.*"</span>)) {
+<a class="jxr_linenumber" name="L318" href="#L318">318</a> 			url = url.substring(1);
+<a class="jxr_linenumber" name="L319" href="#L319">319</a> 		}
+<a class="jxr_linenumber" name="L320" href="#L320">320</a> 		<strong class="jxr_keyword">int</strong> nextStart = 0;
+<a class="jxr_linenumber" name="L321" href="#L321">321</a> 		<strong class="jxr_keyword">boolean</strong> nextIsHistory = false;
+<a class="jxr_linenumber" name="L322" href="#L322">322</a> 
+<a class="jxr_linenumber" name="L323" href="#L323">323</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> idx = parsingStart; idx &lt; url.length(); idx++) {
+<a class="jxr_linenumber" name="L324" href="#L324">324</a> 			<strong class="jxr_keyword">char</strong> nextChar = url.charAt(idx);
+<a class="jxr_linenumber" name="L325" href="#L325">325</a> 			<strong class="jxr_keyword">boolean</strong> atEnd = (idx + 1) == url.length();
+<a class="jxr_linenumber" name="L326" href="#L326">326</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '?' || nextChar == '/' || atEnd) {
+<a class="jxr_linenumber" name="L327" href="#L327">327</a> 				<strong class="jxr_keyword">int</strong> endIdx = (atEnd &amp;&amp; nextChar != '?') ? idx + 1 : idx;
+<a class="jxr_linenumber" name="L328" href="#L328">328</a> 				String nextSubstring = url.substring(nextStart, endIdx);
+<a class="jxr_linenumber" name="L329" href="#L329">329</a> 				<strong class="jxr_keyword">if</strong> (retVal.getResourceType() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L330" href="#L330">330</a> 					retVal.setResourceType(nextSubstring);
+<a class="jxr_linenumber" name="L331" href="#L331">331</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (retVal.getResourceId() == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L332" href="#L332">332</a> 					retVal.setResourceId(nextSubstring);
+<a class="jxr_linenumber" name="L333" href="#L333">333</a> 				} <strong class="jxr_keyword">else</strong> <strong class="jxr_keyword">if</strong> (nextIsHistory) {
+<a class="jxr_linenumber" name="L334" href="#L334">334</a> 					retVal.setVersionId(nextSubstring);
+<a class="jxr_linenumber" name="L335" href="#L335">335</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L336" href="#L336">336</a> 					<strong class="jxr_keyword">if</strong> (nextSubstring.equals(Constants.URL_TOKEN_HISTORY)) {
+<a class="jxr_linenumber" name="L337" href="#L337">337</a> 						nextIsHistory = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L338" href="#L338">338</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L339" href="#L339">339</a> 						<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidRequestException" href="../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html#InvalidRequestException">InvalidRequestException</a>(<span class="jxr_string">"Invalid FHIR resource URL: "</span> + url);
+<a class="jxr_linenumber" name="L340" href="#L340">340</a> 					}
+<a class="jxr_linenumber" name="L341" href="#L341">341</a> 				}
+<a class="jxr_linenumber" name="L342" href="#L342">342</a> 				<strong class="jxr_keyword">if</strong> (nextChar == '?') {
+<a class="jxr_linenumber" name="L343" href="#L343">343</a> 					<strong class="jxr_keyword">if</strong> (url.length() &gt; idx + 1) {
+<a class="jxr_linenumber" name="L344" href="#L344">344</a> 						retVal.setParams(url.substring(idx + 1));
+<a class="jxr_linenumber" name="L345" href="#L345">345</a> 					}
+<a class="jxr_linenumber" name="L346" href="#L346">346</a> 					<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L347" href="#L347">347</a> 				}
+<a class="jxr_linenumber" name="L348" href="#L348">348</a> 				nextStart = idx + 1;
+<a class="jxr_linenumber" name="L349" href="#L349">349</a> 			}
+<a class="jxr_linenumber" name="L350" href="#L350">350</a> 		}
+<a class="jxr_linenumber" name="L351" href="#L351">351</a> 
+<a class="jxr_linenumber" name="L352" href="#L352">352</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L353" href="#L353">353</a> 
+<a class="jxr_linenumber" name="L354" href="#L354">354</a> 	}
+<a class="jxr_linenumber" name="L355" href="#L355">355</a> 
+<a class="jxr_linenumber" name="L356" href="#L356">356</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L357" href="#L357">357</a> <em class="jxr_javadoccomment">	 * This method specifically HTML-encodes the &amp;quot; and</em>
+<a class="jxr_linenumber" name="L358" href="#L358">358</a> <em class="jxr_javadoccomment">	 * &amp;lt; characters in order to prevent injection attacks</em>
+<a class="jxr_linenumber" name="L359" href="#L359">359</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L360" href="#L360">360</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String sanitizeUrlPart(IPrimitiveType&lt;?&gt; theString) {
+<a class="jxr_linenumber" name="L361" href="#L361">361</a> 		String retVal = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L362" href="#L362">362</a> 		<strong class="jxr_keyword">if</strong> (theString != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L363" href="#L363">363</a> 			retVal = sanitizeUrlPart(theString.getValueAsString());
+<a class="jxr_linenumber" name="L364" href="#L364">364</a> 		}
+<a class="jxr_linenumber" name="L365" href="#L365">365</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L366" href="#L366">366</a> 	}
+<a class="jxr_linenumber" name="L367" href="#L367">367</a> 
+<a class="jxr_linenumber" name="L368" href="#L368">368</a> 	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L369" href="#L369">369</a> <em class="jxr_javadoccomment">	 * This method specifically HTML-encodes the &amp;quot; and</em>
+<a class="jxr_linenumber" name="L370" href="#L370">370</a> <em class="jxr_javadoccomment">	 * &amp;lt; characters in order to prevent injection attacks.</em>
+<a class="jxr_linenumber" name="L371" href="#L371">371</a> <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L372" href="#L372">372</a> <em class="jxr_javadoccomment">	 * The following characters are escaped:</em>
+<a class="jxr_linenumber" name="L373" href="#L373">373</a> <em class="jxr_javadoccomment">	 * &lt;ul&gt;</em>
+<a class="jxr_linenumber" name="L374" href="#L374">374</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;apos;&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;quot;&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L376" href="#L376">376</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;lt;&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L377" href="#L377">377</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;&amp;gt;&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L378" href="#L378">378</a> <em class="jxr_javadoccomment">	 *    &lt;li&gt;\n (newline)&lt;/li&gt;</em>
+<a class="jxr_linenumber" name="L379" href="#L379">379</a> <em class="jxr_javadoccomment">	 * &lt;/ul&gt;</em>
+<a class="jxr_linenumber" name="L380" href="#L380">380</a> <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String sanitizeUrlPart(CharSequence theString) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 		<strong class="jxr_keyword">if</strong> (theString == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 		}
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 		<strong class="jxr_keyword">boolean</strong> needsSanitization = isNeedsSanitization(theString);
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 		<strong class="jxr_keyword">if</strong> (needsSanitization) {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 			<em class="jxr_comment">// Ok, we're sanitizing</em>
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 			StringBuilder buffer = <strong class="jxr_keyword">new</strong> StringBuilder(theString.length() + 10);
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 			<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> j = 0; j &lt; theString.length(); j++) {
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 				<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(j);
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 				<strong class="jxr_keyword">switch</strong> (nextChar) {
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 					<em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> <em class="jxr_comment">					 * NB: If you add a constant here, you also need to add it</em>
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> <em class="jxr_comment">					 * to isNeedsSanitization()!!</em>
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> <em class="jxr_comment">					 */</em>
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 					<strong class="jxr_keyword">case</strong> '\'':
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 						buffer.append(<span class="jxr_string">"&amp;apos;"</span>);
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 					<strong class="jxr_keyword">case</strong> '&quot;':
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 						buffer.append(<span class="jxr_string">"&amp;quot;"</span>);
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 					<strong class="jxr_keyword">case</strong> '&lt;':
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 						buffer.append(<span class="jxr_string">"&amp;lt;"</span>);
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 					<strong class="jxr_keyword">case</strong> '&gt;':
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 						buffer.append(<span class="jxr_string">"&amp;gt;"</span>);
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 					<strong class="jxr_keyword">case</strong> '\n':
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 						buffer.append(<span class="jxr_string">"&amp;#10;"</span>);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 					<strong class="jxr_keyword">case</strong> '\r':
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 						buffer.append(<span class="jxr_string">"&amp;#13;"</span>);
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 					<strong class="jxr_keyword">default</strong>:
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 						<strong class="jxr_keyword">if</strong> (nextChar &gt;= ' ') {
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 							buffer.append(nextChar);
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 						}
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 						<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 				}
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 			} <em class="jxr_comment">// for build escaped string</em>
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 			<strong class="jxr_keyword">return</strong> buffer.toString();
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 		}
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 		<strong class="jxr_keyword">return</strong> theString.toString();
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 	}
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">static</strong> Map&lt;String, String[]&gt; toQueryStringMap(HashMap&lt;String, List&lt;String&gt;&gt; map) {
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 		HashMap&lt;String, String[]&gt; retVal = <strong class="jxr_keyword">new</strong> HashMap&lt;&gt;();
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 		<strong class="jxr_keyword">for</strong> (Entry&lt;String, List&lt;String&gt;&gt; nextEntry : map.entrySet()) {
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 			retVal.put(nextEntry.getKey(), nextEntry.getValue().toArray(<strong class="jxr_keyword">new</strong> String[0]));
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 		}
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 		<strong class="jxr_keyword">return</strong> retVal;
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 	}
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> String unescape(String theString) {
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 		<strong class="jxr_keyword">if</strong> (theString == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 		}
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 		<strong class="jxr_keyword">for</strong> (<strong class="jxr_keyword">int</strong> i = 0; i &lt; theString.length(); i++) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 			<strong class="jxr_keyword">char</strong> nextChar = theString.charAt(i);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 			<strong class="jxr_keyword">if</strong> (nextChar == '%' || nextChar == '+') {
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 				<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 					<em class="jxr_comment">// Yes it would be nice to not use a string "UTF-8" but the equivalent</em>
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 					<em class="jxr_comment">// method that takes Charset is JDK10+ only... sigh....</em>
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 					<strong class="jxr_keyword">return</strong> URLDecoder.decode(theString, <span class="jxr_string">"UTF-8"</span>);
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				} <strong class="jxr_keyword">catch</strong> (UnsupportedEncodingException e) {
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 					<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> Error(<span class="jxr_string">"UTF-8 not supported, this shouldn't happen"</span>, e);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 				}
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 			}
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 		}
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 		<strong class="jxr_keyword">return</strong> theString;
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 	}
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>

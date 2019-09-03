@@ -84,7 +84,7 @@
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  	}
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  
 <a class="jxr_linenumber" name="L78" href="#L78">78</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">void</strong> isTrueOrThrowInvalidRequest(<strong class="jxr_keyword">boolean</strong> theSuccess, String theMessage, Object... theValues) {
-<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">if</strong> (theSuccess == false) {
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		<strong class="jxr_keyword">if</strong> (!theSuccess) {
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a name="InvalidRequestException" href="../../../../ca/uhn/fhir/rest/server/exceptions/InvalidRequestException.html#InvalidRequestException">InvalidRequestException</a>(String.format(theMessage, theValues));
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  		}
 <a class="jxr_linenumber" name="L82" href="#L82">82</a>  	}

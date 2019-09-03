@@ -79,11 +79,11 @@
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  	@Enumerated(EnumType.STRING)
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  	@Column(name = <span class="jxr_string">"EXPANSION_STATUS"</span>, nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
-<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	<strong class="jxr_keyword">private</strong> <a name="TermValueSetExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetExpansionStatusEnum.html#TermValueSetExpansionStatusEnum">TermValueSetExpansionStatusEnum</a> myExpansionStatus;
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  	<strong class="jxr_keyword">private</strong> <a name="TermValueSetPreExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetPreExpansionStatusEnum.html#TermValueSetPreExpansionStatusEnum">TermValueSetPreExpansionStatusEnum</a> myExpansionStatus;
 <a class="jxr_linenumber" name="L75" href="#L75">75</a>  
 <a class="jxr_linenumber" name="L76" href="#L76">76</a>  	<strong class="jxr_keyword">public</strong> TermValueSet() {
 <a class="jxr_linenumber" name="L77" href="#L77">77</a>  		<strong class="jxr_keyword">super</strong>();
-<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		myExpansionStatus = TermValueSetExpansionStatusEnum.NOT_EXPANDED;
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
 <a class="jxr_linenumber" name="L79" href="#L79">79</a>  	}
 <a class="jxr_linenumber" name="L80" href="#L80">80</a>  
 <a class="jxr_linenumber" name="L81" href="#L81">81</a>  	<strong class="jxr_keyword">public</strong> Long getId() {
@@ -128,11 +128,11 @@
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 		<strong class="jxr_keyword">return</strong> myConcepts;
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	<strong class="jxr_keyword">public</strong> <a name="TermValueSetExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetExpansionStatusEnum.html#TermValueSetExpansionStatusEnum">TermValueSetExpansionStatusEnum</a> getExpansionStatus() {
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	<strong class="jxr_keyword">public</strong> <a name="TermValueSetPreExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetPreExpansionStatusEnum.html#TermValueSetPreExpansionStatusEnum">TermValueSetPreExpansionStatusEnum</a> getExpansionStatus() {
 <a class="jxr_linenumber" name="L124" href="#L124">124</a> 		<strong class="jxr_keyword">return</strong> myExpansionStatus;
 <a class="jxr_linenumber" name="L125" href="#L125">125</a> 	}
 <a class="jxr_linenumber" name="L126" href="#L126">126</a> 
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setExpansionStatus(<a name="TermValueSetExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetExpansionStatusEnum.html#TermValueSetExpansionStatusEnum">TermValueSetExpansionStatusEnum</a> theExpansionStatus) {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">void</strong> setExpansionStatus(<a name="TermValueSetPreExpansionStatusEnum" href="../../../../../ca/uhn/fhir/jpa/entity/TermValueSetPreExpansionStatusEnum.html#TermValueSetPreExpansionStatusEnum">TermValueSetPreExpansionStatusEnum</a> theExpansionStatus) {
 <a class="jxr_linenumber" name="L128" href="#L128">128</a> 		myExpansionStatus = theExpansionStatus;
 <a class="jxr_linenumber" name="L129" href="#L129">129</a> 	}
 <a class="jxr_linenumber" name="L130" href="#L130">130</a> 

@@ -29,9 +29,9 @@
 <a class="jxr_linenumber" name="L21" href="#L21">21</a>  <em class="jxr_comment"> */</em>
 <a class="jxr_linenumber" name="L22" href="#L22">22</a>  
 <a class="jxr_linenumber" name="L23" href="#L23">23</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermValueSet;
-<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermValueSetExpansionStatusEnum;
-<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Page;
-<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Pageable;
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <strong class="jxr_keyword">import</strong> ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Pageable;
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.domain.Slice;
 <a class="jxr_linenumber" name="L27" href="#L27">27</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.JpaRepository;
 <a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Modifying;
 <a class="jxr_linenumber" name="L29" href="#L29">29</a>  <strong class="jxr_keyword">import</strong> org.springframework.data.jpa.repository.Query;
@@ -52,7 +52,7 @@
 <a class="jxr_linenumber" name="L44" href="#L44">44</a>  	Optional&lt;TermValueSet&gt; findByUrl(@Param(<span class="jxr_string">"url"</span>) String theUrl);
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Query(<span class="jxr_string">"SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status"</span>)
-<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Page&lt;TermValueSet&gt; findByExpansionStatus(Pageable pageable, @Param(<span class="jxr_string">"expansion_status"</span>) <a name="TermValueSetExpansionStatusEnum" href="../../../../../../ca/uhn/fhir/jpa/entity/TermValueSetExpansionStatusEnum.html#TermValueSetExpansionStatusEnum">TermValueSetExpansionStatusEnum</a> theExpansionStatus);
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Slice&lt;TermValueSet&gt; findByExpansionStatus(Pageable pageable, @Param(<span class="jxr_string">"expansion_status"</span>) <a name="TermValueSetPreExpansionStatusEnum" href="../../../../../../ca/uhn/fhir/jpa/entity/TermValueSetPreExpansionStatusEnum.html#TermValueSetPreExpansionStatusEnum">TermValueSetPreExpansionStatusEnum</a> theExpansionStatus);
 <a class="jxr_linenumber" name="L48" href="#L48">48</a>  
 <a class="jxr_linenumber" name="L49" href="#L49">49</a>  }
 </pre>

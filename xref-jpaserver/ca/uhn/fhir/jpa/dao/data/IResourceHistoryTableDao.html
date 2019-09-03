@@ -74,8 +74,8 @@
 <a class="jxr_linenumber" name="L66" href="#L66">66</a>  		@Param(<span class="jxr_string">"type"</span>) String theType
 <a class="jxr_linenumber" name="L67" href="#L67">67</a>  	);
 <a class="jxr_linenumber" name="L68" href="#L68">68</a>  
-<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	@Query(<span class="jxr_string">"SELECT t FROM ResourceHistoryTable t WHERE t.myResourceId = :id AND t.myResourceVersion = :version"</span>)
-<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	ResourceHistoryTable findForIdAndVersion(@Param(<span class="jxr_string">"id"</span>) <strong class="jxr_keyword">long</strong> theId, @Param(<span class="jxr_string">"version"</span>) <strong class="jxr_keyword">long</strong> theVersion);
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  	@Query(<span class="jxr_string">"SELECT t FROM ResourceHistoryTable t LEFT OUTER JOIN FETCH t.myProvenance WHERE t.myResourceId = :id AND t.myResourceVersion = :version"</span>)
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  	ResourceHistoryTable findForIdAndVersionAndFetchProvenance(@Param(<span class="jxr_string">"id"</span>) <strong class="jxr_keyword">long</strong> theId, @Param(<span class="jxr_string">"version"</span>) <strong class="jxr_keyword">long</strong> theVersion);
 <a class="jxr_linenumber" name="L71" href="#L71">71</a>  
 <a class="jxr_linenumber" name="L72" href="#L72">72</a>  	@Query(<span class="jxr_string">"SELECT t.myId FROM ResourceHistoryTable t WHERE t.myResourceId = :resId AND t.myResourceVersion != :dontWantVersion"</span>)
 <a class="jxr_linenumber" name="L73" href="#L73">73</a>  	Slice&lt;Long&gt; findForResourceId(Pageable thePage, @Param(<span class="jxr_string">"resId"</span>) Long theId, @Param(<span class="jxr_string">"dontWantVersion"</span>) Long theDontWantVersion);

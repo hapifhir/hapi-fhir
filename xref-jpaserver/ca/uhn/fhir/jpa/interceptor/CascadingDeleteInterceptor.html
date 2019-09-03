@@ -66,8 +66,8 @@
 <a class="jxr_linenumber" name="L58" href="#L58">58</a>  <em class="jxr_javadoccomment"> * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L59" href="#L59">59</a>  <em class="jxr_javadoccomment"> * &lt;p&gt;</em>
 <a class="jxr_linenumber" name="L60" href="#L60">60</a>  <em class="jxr_javadoccomment"> * When using this interceptor, client requests must include the parameter</em>
-<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * &lt;code&gt;_cascade=true&lt;/code&gt; on the DELETE URL in order to activate</em>
-<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * cascading delete, or include the request header &lt;code&gt;X-Cascade-Delete: true&lt;/code&gt;</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  <em class="jxr_javadoccomment"> * &lt;code&gt;_cascade=delete&lt;/code&gt; on the DELETE URL in order to activate</em>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  <em class="jxr_javadoccomment"> * cascading delete, or include the request header &lt;code&gt;X-Cascade-Delete: delete&lt;/code&gt;</em>
 <a class="jxr_linenumber" name="L63" href="#L63">63</a>  <em class="jxr_javadoccomment"> * &lt;/p&gt;</em>
 <a class="jxr_linenumber" name="L64" href="#L64">64</a>  <em class="jxr_javadoccomment"> */</em>
 <a class="jxr_linenumber" name="L65" href="#L65">65</a>  @Interceptor
@@ -121,7 +121,7 @@
 <a class="jxr_linenumber" name="L113" href="#L113">113</a> 
 <a class="jxr_linenumber" name="L114" href="#L114">114</a> 				<em class="jxr_comment">// Actually perform the delete</em>
 <a class="jxr_linenumber" name="L115" href="#L115">115</a> 				ourLog.info(<span class="jxr_string">"Have delete conflict {} - Cascading delete"</span>, next);
-<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				dao.delete(nextSource, theRequest);
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 				dao.delete(nextSource, theConflictList, theRequest);
 <a class="jxr_linenumber" name="L117" href="#L117">117</a> 
 <a class="jxr_linenumber" name="L118" href="#L118">118</a> 				cascadedDeletes.add(nextSourceId);
 <a class="jxr_linenumber" name="L119" href="#L119">119</a> 

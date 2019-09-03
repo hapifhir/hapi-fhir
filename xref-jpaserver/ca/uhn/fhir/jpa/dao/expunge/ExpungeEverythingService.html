@@ -128,55 +128,56 @@
 <a class="jxr_linenumber" name="L120" href="#L120">120</a> 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTag.<strong class="jxr_keyword">class</strong>));
 <a class="jxr_linenumber" name="L121" href="#L121">121</a> 		counter.addAndGet(expungeEverythingByType(ResourceTag.<strong class="jxr_keyword">class</strong>));
 <a class="jxr_linenumber" name="L122" href="#L122">122</a> 		counter.addAndGet(expungeEverythingByType(TagDefinition.<strong class="jxr_keyword">class</strong>));
-<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTable.<strong class="jxr_keyword">class</strong>));
-<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		counter.addAndGet(expungeEverythingByType(ResourceTable.<strong class="jxr_keyword">class</strong>));
-<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		myTxTemplate.execute(t -&gt; {
-<a class="jxr_linenumber" name="L126" href="#L126">126</a> 			counter.addAndGet(doExpungeEverythingQuery(<span class="jxr_string">"DELETE from "</span> + org.hibernate.search.jpa.Search.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" d"</span>));
-<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L128" href="#L128">128</a> 		});
-<a class="jxr_linenumber" name="L129" href="#L129">129</a> 
-<a class="jxr_linenumber" name="L130" href="#L130">130</a> 		ourLog.info(<span class="jxr_string">"COMPLETED GLOBAL $expunge - Deleted {} rows"</span>, counter.get());
-<a class="jxr_linenumber" name="L131" href="#L131">131</a> 	}
-<a class="jxr_linenumber" name="L132" href="#L132">132</a> 
-<a class="jxr_linenumber" name="L133" href="#L133">133</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> expungeEverythingByType(Class&lt;?&gt; theEntityType) {
-<a class="jxr_linenumber" name="L134" href="#L134">134</a> 
-<a class="jxr_linenumber" name="L135" href="#L135">135</a> 		<strong class="jxr_keyword">int</strong> outcome = 0;
-<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
-<a class="jxr_linenumber" name="L137" href="#L137">137</a> 			StopWatch sw = <strong class="jxr_keyword">new</strong> StopWatch();
-<a class="jxr_linenumber" name="L138" href="#L138">138</a> 
-<a class="jxr_linenumber" name="L139" href="#L139">139</a> 			@SuppressWarnings(<span class="jxr_string">"ConstantConditions"</span>)
-<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			<strong class="jxr_keyword">int</strong> count = myTxTemplate.execute(t -&gt; {
-<a class="jxr_linenumber" name="L141" href="#L141">141</a> 				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
-<a class="jxr_linenumber" name="L142" href="#L142">142</a> 				CriteriaQuery&lt;?&gt; cq = cb.createQuery(theEntityType);
-<a class="jxr_linenumber" name="L143" href="#L143">143</a> 				cq.from(theEntityType);
-<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				TypedQuery&lt;?&gt; query = myEntityManager.createQuery(cq);
-<a class="jxr_linenumber" name="L145" href="#L145">145</a> 				query.setMaxResults(1000);
-<a class="jxr_linenumber" name="L146" href="#L146">146</a> 				List&lt;?&gt; results = query.getResultList();
-<a class="jxr_linenumber" name="L147" href="#L147">147</a> 				<strong class="jxr_keyword">for</strong> (Object result : results) {
-<a class="jxr_linenumber" name="L148" href="#L148">148</a> 					myEntityManager.remove(result);
-<a class="jxr_linenumber" name="L149" href="#L149">149</a> 				}
-<a class="jxr_linenumber" name="L150" href="#L150">150</a> 				<strong class="jxr_keyword">return</strong> results.size();
-<a class="jxr_linenumber" name="L151" href="#L151">151</a> 			});
-<a class="jxr_linenumber" name="L152" href="#L152">152</a> 
-<a class="jxr_linenumber" name="L153" href="#L153">153</a> 			outcome += count;
-<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			<strong class="jxr_keyword">if</strong> (count == 0) {
-<a class="jxr_linenumber" name="L155" href="#L155">155</a> 				<strong class="jxr_keyword">break</strong>;
-<a class="jxr_linenumber" name="L156" href="#L156">156</a> 			}
-<a class="jxr_linenumber" name="L157" href="#L157">157</a> 
-<a class="jxr_linenumber" name="L158" href="#L158">158</a> 			ourLog.info(<span class="jxr_string">"Have deleted {} entities of type {} in {}"</span>, outcome, theEntityType.getSimpleName(), sw.toString());
-<a class="jxr_linenumber" name="L159" href="#L159">159</a> 		}
-<a class="jxr_linenumber" name="L160" href="#L160">160</a> 
-<a class="jxr_linenumber" name="L161" href="#L161">161</a> 		<strong class="jxr_keyword">return</strong> outcome;
-<a class="jxr_linenumber" name="L162" href="#L162">162</a> 	}
-<a class="jxr_linenumber" name="L163" href="#L163">163</a> 
-<a class="jxr_linenumber" name="L164" href="#L164">164</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> doExpungeEverythingQuery(String theQuery) {
-<a class="jxr_linenumber" name="L165" href="#L165">165</a> 		StopWatch sw = <strong class="jxr_keyword">new</strong> StopWatch();
-<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		<strong class="jxr_keyword">int</strong> outcome = myEntityManager.createQuery(theQuery).executeUpdate();
-<a class="jxr_linenumber" name="L167" href="#L167">167</a> 		ourLog.debug(<span class="jxr_string">"SqlQuery affected {} rows in {}: {}"</span>, outcome, sw.toString(), theQuery);
-<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		<strong class="jxr_keyword">return</strong> outcome;
-<a class="jxr_linenumber" name="L169" href="#L169">169</a> 	}
-<a class="jxr_linenumber" name="L170" href="#L170">170</a> 
-<a class="jxr_linenumber" name="L171" href="#L171">171</a> }
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 		counter.addAndGet(expungeEverythingByType(ResourceHistoryProvenanceEntity.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTable.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		counter.addAndGet(expungeEverythingByType(ResourceTable.<strong class="jxr_keyword">class</strong>));
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		myTxTemplate.execute(t -&gt; {
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 			counter.addAndGet(doExpungeEverythingQuery(<span class="jxr_string">"DELETE from "</span> + org.hibernate.search.jpa.Search.<strong class="jxr_keyword">class</strong>.getSimpleName() + <span class="jxr_string">" d"</span>));
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> 		});
+<a class="jxr_linenumber" name="L130" href="#L130">130</a> 
+<a class="jxr_linenumber" name="L131" href="#L131">131</a> 		ourLog.info(<span class="jxr_string">"COMPLETED GLOBAL $expunge - Deleted {} rows"</span>, counter.get());
+<a class="jxr_linenumber" name="L132" href="#L132">132</a> 	}
+<a class="jxr_linenumber" name="L133" href="#L133">133</a> 
+<a class="jxr_linenumber" name="L134" href="#L134">134</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">int</strong> expungeEverythingByType(Class&lt;?&gt; theEntityType) {
+<a class="jxr_linenumber" name="L135" href="#L135">135</a> 
+<a class="jxr_linenumber" name="L136" href="#L136">136</a> 		<strong class="jxr_keyword">int</strong> outcome = 0;
+<a class="jxr_linenumber" name="L137" href="#L137">137</a> 		<strong class="jxr_keyword">while</strong> (<strong class="jxr_keyword">true</strong>) {
+<a class="jxr_linenumber" name="L138" href="#L138">138</a> 			StopWatch sw = <strong class="jxr_keyword">new</strong> StopWatch();
+<a class="jxr_linenumber" name="L139" href="#L139">139</a> 
+<a class="jxr_linenumber" name="L140" href="#L140">140</a> 			@SuppressWarnings(<span class="jxr_string">"ConstantConditions"</span>)
+<a class="jxr_linenumber" name="L141" href="#L141">141</a> 			<strong class="jxr_keyword">int</strong> count = myTxTemplate.execute(t -&gt; {
+<a class="jxr_linenumber" name="L142" href="#L142">142</a> 				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
+<a class="jxr_linenumber" name="L143" href="#L143">143</a> 				CriteriaQuery&lt;?&gt; cq = cb.createQuery(theEntityType);
+<a class="jxr_linenumber" name="L144" href="#L144">144</a> 				cq.from(theEntityType);
+<a class="jxr_linenumber" name="L145" href="#L145">145</a> 				TypedQuery&lt;?&gt; query = myEntityManager.createQuery(cq);
+<a class="jxr_linenumber" name="L146" href="#L146">146</a> 				query.setMaxResults(1000);
+<a class="jxr_linenumber" name="L147" href="#L147">147</a> 				List&lt;?&gt; results = query.getResultList();
+<a class="jxr_linenumber" name="L148" href="#L148">148</a> 				<strong class="jxr_keyword">for</strong> (Object result : results) {
+<a class="jxr_linenumber" name="L149" href="#L149">149</a> 					myEntityManager.remove(result);
+<a class="jxr_linenumber" name="L150" href="#L150">150</a> 				}
+<a class="jxr_linenumber" name="L151" href="#L151">151</a> 				<strong class="jxr_keyword">return</strong> results.size();
+<a class="jxr_linenumber" name="L152" href="#L152">152</a> 			});
+<a class="jxr_linenumber" name="L153" href="#L153">153</a> 
+<a class="jxr_linenumber" name="L154" href="#L154">154</a> 			outcome += count;
+<a class="jxr_linenumber" name="L155" href="#L155">155</a> 			<strong class="jxr_keyword">if</strong> (count == 0) {
+<a class="jxr_linenumber" name="L156" href="#L156">156</a> 				<strong class="jxr_keyword">break</strong>;
+<a class="jxr_linenumber" name="L157" href="#L157">157</a> 			}
+<a class="jxr_linenumber" name="L158" href="#L158">158</a> 
+<a class="jxr_linenumber" name="L159" href="#L159">159</a> 			ourLog.info(<span class="jxr_string">"Have deleted {} entities of type {} in {}"</span>, outcome, theEntityType.getSimpleName(), sw.toString());
+<a class="jxr_linenumber" name="L160" href="#L160">160</a> 		}
+<a class="jxr_linenumber" name="L161" href="#L161">161</a> 
+<a class="jxr_linenumber" name="L162" href="#L162">162</a> 		<strong class="jxr_keyword">return</strong> outcome;
+<a class="jxr_linenumber" name="L163" href="#L163">163</a> 	}
+<a class="jxr_linenumber" name="L164" href="#L164">164</a> 
+<a class="jxr_linenumber" name="L165" href="#L165">165</a> 	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">int</strong> doExpungeEverythingQuery(String theQuery) {
+<a class="jxr_linenumber" name="L166" href="#L166">166</a> 		StopWatch sw = <strong class="jxr_keyword">new</strong> StopWatch();
+<a class="jxr_linenumber" name="L167" href="#L167">167</a> 		<strong class="jxr_keyword">int</strong> outcome = myEntityManager.createQuery(theQuery).executeUpdate();
+<a class="jxr_linenumber" name="L168" href="#L168">168</a> 		ourLog.debug(<span class="jxr_string">"SqlQuery affected {} rows in {}: {}"</span>, outcome, sw.toString(), theQuery);
+<a class="jxr_linenumber" name="L169" href="#L169">169</a> 		<strong class="jxr_keyword">return</strong> outcome;
+<a class="jxr_linenumber" name="L170" href="#L170">170</a> 	}
+<a class="jxr_linenumber" name="L171" href="#L171">171</a> 
+<a class="jxr_linenumber" name="L172" href="#L172">172</a> }
 </pre>
 <hr/>
 <div id="footer">Copyright &#169; 2014&#x2013;2019 <a href="http://www.uhn.ca">University Health Network</a>. All rights reserved.</div>
