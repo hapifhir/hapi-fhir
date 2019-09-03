@@ -354,11 +354,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	}
 
 	@Override
-	public String getLinkForUrl(String theS, String theS1) {
-		return null;
-	}
-
-	@Override
 	public boolean isNoTerminologyServer() {
 		return false;
 	}
