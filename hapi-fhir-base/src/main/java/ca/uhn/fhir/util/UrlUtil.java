@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.escape.Escaper;
 import com.google.common.net.PercentEscaper;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.UnsupportedEncodingException;
@@ -463,14 +464,15 @@ public class UrlUtil {
 	 * @return
 	 */
 	public static String normalizeCanonicalUri(String uriString) {
+
 		String system = uriString;
 		String version = "";
-		if (uriString.contains("|")) {
-			version = uriString.substring(uriString.indexOf('|') + 1);
-			system = uriString.substring(0, uriString.indexOf('|'));
+		if (StringUtils.contains(uriString, "|")) {
+			version = StringUtils.substringAfter(uriString, "|");
+			system = StringUtils.substringBefore(uriString, "|");
 		}
-		if (system.endsWith("/")) {
-			system = system.substring(0, system.length() - 1);
+		if (StringUtils.endsWith(system,"/")) {
+			system = StringUtils.removeEnd(system, "/");
 		}
 		if (!version.isEmpty()) {
 			return system;
