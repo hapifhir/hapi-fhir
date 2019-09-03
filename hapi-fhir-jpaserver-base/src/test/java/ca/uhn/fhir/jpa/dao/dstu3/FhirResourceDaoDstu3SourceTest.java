@@ -37,7 +37,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 	@Before
 	public void before() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformation.SOURCE_URI_AND_REQUEST_ID);
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID);
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 	@Test
 	public void testSourceDisabled() {
-		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformation.NONE);
+		myDaoConfig.setStoreMetaSourceInformation(DaoConfig.StoreMetaSourceInformationEnum.NONE);
 		when(mySrd.getRequestId()).thenReturn("0000000000000000");
 
 		Patient pt0 = new Patient();
