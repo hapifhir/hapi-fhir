@@ -151,7 +151,7 @@ public class DaoConfig {
 	 */
 	private boolean myPreExpandValueSetsExperimental = false;
 	private boolean myFilterParameterEnabled = false;
-	private StoreMetaSourceInformation myStoreMetaSourceInformation = StoreMetaSourceInformation.SOURCE_URI_AND_REQUEST_ID;
+	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 0}!
 	 */
@@ -1676,10 +1676,10 @@ public class DaoConfig {
 	 * each resource. This adds extra table and index space so it should be disabled if it is not being
 	 * used.
 	 * <p>
-	 * Default is {@link StoreMetaSourceInformation#SOURCE_URI_AND_REQUEST_ID}
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
 	 * </p>
 	 */
-	public StoreMetaSourceInformation getStoreMetaSourceInformation() {
+	public StoreMetaSourceInformationEnum getStoreMetaSourceInformation() {
 		return myStoreMetaSourceInformation;
 	}
 
@@ -1688,15 +1688,15 @@ public class DaoConfig {
 	 * each resource. This adds extra table and index space so it should be disabled if it is not being
 	 * used.
 	 * <p>
-	 * Default is {@link StoreMetaSourceInformation#SOURCE_URI_AND_REQUEST_ID}
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
 	 * </p>
 	 */
-	public void setStoreMetaSourceInformation(StoreMetaSourceInformation theStoreMetaSourceInformation) {
+	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
 		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
 		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
 	}
 
-	public enum StoreMetaSourceInformation {
+	public enum StoreMetaSourceInformationEnum {
 		NONE(false, false),
 		SOURCE_URI(true, false),
 		REQUEST_ID(false, true),
@@ -1705,7 +1705,7 @@ public class DaoConfig {
 		private final boolean myStoreSourceUri;
 		private final boolean myStoreRequestId;
 
-		StoreMetaSourceInformation(boolean theStoreSourceUri, boolean theStoreRequestId) {
+		StoreMetaSourceInformationEnum(boolean theStoreSourceUri, boolean theStoreRequestId) {
 			myStoreSourceUri = theStoreSourceUri;
 			myStoreRequestId = theStoreRequestId;
 		}
