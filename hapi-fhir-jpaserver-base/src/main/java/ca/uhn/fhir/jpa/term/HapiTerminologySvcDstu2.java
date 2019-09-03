@@ -153,4 +153,9 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		throw new UnsupportedOperationException();
+	}
 }
