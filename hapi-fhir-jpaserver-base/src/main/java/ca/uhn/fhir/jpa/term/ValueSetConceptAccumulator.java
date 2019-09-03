@@ -79,8 +79,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			ourLog.info("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
+				myTermValueSet.decrementTotalConceptDesignations();
 			}
 			myValueSetConceptDao.deleteById(concept.getId());
+			myTermValueSet.decrementTotalConcepts();
 			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 
 			ourLog.info("Flushing...");
@@ -102,6 +104,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			concept.setDisplay(theDisplay);
 		}
 		myValueSetConceptDao.save(concept);
+		myTermValueSet.incrementTotalConcepts();
 
 		if (myConceptsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
 			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
@@ -126,6 +129,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 		designation.setValue(theDesignation.getValue());
 		myValueSetConceptDesignationDao.save(designation);
+		myTermValueSet.incrementTotalConceptDesignations();
 
 		if (myDesignationsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
 			ourLog.info("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());

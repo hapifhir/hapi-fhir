@@ -312,6 +312,7 @@ public class SearchCoordinatorSvcImplTest {
 	public void testGetPage() {
 		Pageable page = SearchCoordinatorSvcImpl.toPage(50, 73);
 		assertEquals(50, page.getOffset());
+		assertEquals(23, page.getPageSize());
 	}
 
 	@Test

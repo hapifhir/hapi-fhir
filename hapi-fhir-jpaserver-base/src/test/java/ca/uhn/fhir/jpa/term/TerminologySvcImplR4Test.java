@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -643,9 +644,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get().getId();
+		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -677,9 +681,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		Long termValueSetId = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get().getId();
+		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
+		Long termValueSetId = termValueSet.getId();
 		assertEquals(3, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(3, termValueSet.getTotalConceptDesignations().intValue());
 		assertEquals(24, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
+		assertEquals(24, termValueSet.getTotalConcepts().intValue());
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
@@ -741,8 +748,16 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
+		myCaptureQueriesListener.clear();
+
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
+
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread(), empty());
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
+		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());

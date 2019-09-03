@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -524,7 +525,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void populateExpansionComponent(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
-		int total = myValueSetConceptDao.countByTermValueSetId(theTermValueSet.getId());
+		int total = theTermValueSet.getTotalConcepts().intValue();
 		theExpansionComponent.setTotal(total);
 		theExpansionComponent.setOffset(theOffset);
 		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
@@ -539,72 +540,59 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
-		for (int i = theOffset; i < (theOffset + theCount); i++) {
-			final int page = i;
-			Supplier<Slice<TermValueSetConcept>> loader = () -> myValueSetConceptDao.findByTermValueSetId(PageRequest.of(page, 1), theTermValueSet.getId());
+		int toIndex = theOffset + theCount;
+		Supplier<Slice<TermValueSetConcept>> loader = () -> myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
+		Slice<TermValueSetConcept> slice = loader.get();
+		if (!slice.hasContent()) {
+			logConceptsExpanded(theTermValueSet, conceptsExpanded);
+			return;
+		}
 
-			Slice<TermValueSetConcept> slice = loader.get();
-			if (!slice.hasContent()) {
-				break;
-			}
+		for (TermValueSetConcept concept : slice.getContent()) {
+			ValueSet.ValueSetExpansionContainsComponent containsComponent = theExpansionComponent.addContains();
+			containsComponent.setSystem(concept.getSystem());
+			containsComponent.setCode(concept.getCode());
+			containsComponent.setDisplay(concept.getDisplay());
 
-			for (TermValueSetConcept concept : slice.getContent()) {
-				ValueSet.ValueSetExpansionContainsComponent containsComponent = theExpansionComponent.addContains();
-				containsComponent.setSystem(concept.getSystem());
-				containsComponent.setCode(concept.getCode());
-				containsComponent.setDisplay(concept.getDisplay());
+			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
+			expandDesignations(theTermValueSet, concept, containsComponent);
 
-				// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
-				expandDesignations(theTermValueSet, concept, containsComponent);
-
-				if (++conceptsExpanded % 250 == 0) {
-					ourLog.info("Have expanded {} concepts in ValueSet[{}]", conceptsExpanded, theTermValueSet.getUrl());
-				}
-			}
-
-			if (!slice.hasNext()) {
-				break;
+			if (++conceptsExpanded % 250 == 0) {
+				logConceptsExpanded(theTermValueSet, conceptsExpanded);
 			}
 		}
 
-		if (conceptsExpanded > 0) {
-			ourLog.info("Have expanded {} concepts in ValueSet[{}]", conceptsExpanded, theTermValueSet.getUrl());
+		logConceptsExpanded(theTermValueSet, conceptsExpanded);
+	}
+
+	private void logConceptsExpanded(TermValueSet theTermValueSet, int theConceptsExpanded) {
+		if (theConceptsExpanded > 0) {
+			ourLog.info("Have expanded {} concepts in ValueSet[{}]", theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
 	private void expandDesignations(TermValueSet theValueSet, TermValueSetConcept theConcept, ValueSet.ValueSetExpansionContainsComponent theContainsComponent) {
 		int designationsExpanded = 0;
-		int index = 0;
-		while (true) {
-			final int page = index++;
-			Supplier<Slice<TermValueSetConceptDesignation>> loader = () -> myValueSetConceptDesignationDao.findByTermValueSetConceptId(PageRequest.of(page, 1000), theConcept.getId());
+		for (TermValueSetConceptDesignation designation : theConcept.getDesignations()) {
+			ValueSet.ConceptReferenceDesignationComponent designationComponent = theContainsComponent.addDesignation();
+			designationComponent.setLanguage(designation.getLanguage());
+			designationComponent.setUse(new Coding(
+				designation.getUseSystem(),
+				designation.getUseCode(),
+				designation.getUseDisplay()));
+			designationComponent.setValue(designation.getValue());
 
-			Slice<TermValueSetConceptDesignation> slice = loader.get();
-			if (!slice.hasContent()) {
-				break;
-			}
-
-			for (TermValueSetConceptDesignation designation : slice.getContent()) {
-				ValueSet.ConceptReferenceDesignationComponent designationComponent = theContainsComponent.addDesignation();
-				designationComponent.setLanguage(designation.getLanguage());
-				designationComponent.setUse(new Coding(
-					designation.getUseSystem(),
-					designation.getUseCode(),
-					designation.getUseDisplay()));
-				designationComponent.setValue(designation.getValue());
-
-				if (++designationsExpanded % 250 == 0) {
-					ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", designationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
-				}
-			}
-
-			if (!slice.hasNext()) {
-				break;
+			if (++designationsExpanded % 250 == 0) {
+				logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
 			}
 		}
 
-		if (designationsExpanded > 0) {
-			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", designationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+		logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
+	}
+
+	private void logDesignationsExpanded(TermValueSet theValueSet, TermValueSetConcept theConcept, int theDesignationsExpanded) {
+		if (theDesignationsExpanded > 0) {
+			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
 		}
 	}
 
