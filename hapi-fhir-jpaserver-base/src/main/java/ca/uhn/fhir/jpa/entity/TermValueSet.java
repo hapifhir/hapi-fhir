@@ -26,6 +26,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -69,6 +70,14 @@ public class TermValueSet implements Serializable {
 	@OneToMany(mappedBy = "myValueSet")
 	private List<TermValueSetConcept> myConcepts;
 
+	@Column(name = "TOTAL_CONCEPTS", nullable = false)
+	@ColumnDefault("0")
+	private Long myTotalConcepts;
+
+	@Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false)
+	@ColumnDefault("0")
+	private Long myTotalConceptDesignations;
+
 	@Enumerated(EnumType.STRING)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
@@ -76,6 +85,8 @@ public class TermValueSet implements Serializable {
 	public TermValueSet() {
 		super();
 		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
+		myTotalConcepts = 0L;
+		myTotalConceptDesignations = 0L;
 	}
 
 	public Long getId() {
@@ -120,6 +131,48 @@ public class TermValueSet implements Serializable {
 		return myConcepts;
 	}
 
+	public Long getTotalConcepts() {
+		return myTotalConcepts;
+	}
+
+	public TermValueSet setTotalConcepts(Long theTotalConcepts) {
+		myTotalConcepts = theTotalConcepts;
+		return this;
+	}
+
+	public TermValueSet decrementTotalConcepts() {
+		if (myTotalConcepts > 0) {
+			myTotalConcepts--;
+		}
+		return this;
+	}
+
+	public TermValueSet incrementTotalConcepts() {
+		myTotalConcepts++;
+		return this;
+	}
+
+	public Long getTotalConceptDesignations() {
+		return myTotalConceptDesignations;
+	}
+
+	public TermValueSet setTotalConceptDesignations(Long theTotalConceptDesignations) {
+		myTotalConceptDesignations = theTotalConceptDesignations;
+		return this;
+	}
+
+	public TermValueSet decrementTotalConceptDesignations() {
+		if (myTotalConceptDesignations > 0) {
+			myTotalConceptDesignations--;
+		}
+		return this;
+	}
+
+	public TermValueSet incrementTotalConceptDesignations() {
+		myTotalConceptDesignations++;
+		return this;
+	}
+
 	public TermValueSetPreExpansionStatusEnum getExpansionStatus() {
 		return myExpansionStatus;
 	}
@@ -157,6 +210,8 @@ public class TermValueSet implements Serializable {
 			.append("myResourcePid", myResourcePid)
 			.append("myName", myName)
 			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
+			.append("myTotalConcepts", myTotalConcepts)
+			.append("myTotalConceptDesignations", myTotalConceptDesignations)
 			.append("myExpansionStatus", myExpansionStatus)
 			.toString();
 	}
