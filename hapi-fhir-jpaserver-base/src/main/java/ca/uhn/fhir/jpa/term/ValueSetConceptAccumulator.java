@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
@@ -38,13 +39,15 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ValueSetConceptAccumulator.class);
 
 	private TermValueSet myTermValueSet;
+	private ITermValueSetDao myValueSetDao;
 	private ITermValueSetConceptDao myValueSetConceptDao;
 	private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
 
-	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
+	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;
+		myValueSetDao = theValueSetDao;
 		myValueSetConceptDao = theValueSetConceptDao;
 		myValueSetConceptDesignationDao = theValueSetConceptDesignationDao;
 		myConceptsSaved = 0;
@@ -79,14 +82,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			ourLog.info("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
+				myTermValueSet.decrementTotalConceptDesignations();
 			}
 			myValueSetConceptDao.deleteById(concept.getId());
+			myTermValueSet.decrementTotalConcepts();
+			myValueSetDao.save(myTermValueSet);
 			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
-
-			ourLog.info("Flushing...");
-			myValueSetConceptDesignationDao.flush();
-			myValueSetConceptDao.flush();
-			ourLog.info("Done flushing.");
 		}
 	}
 
@@ -102,6 +103,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			concept.setDisplay(theDisplay);
 		}
 		myValueSetConceptDao.save(concept);
+		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 
 		if (myConceptsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
 			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
@@ -126,6 +128,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		}
 		designation.setValue(theDesignation.getValue());
 		myValueSetConceptDesignationDao.save(designation);
+		myValueSetDao.save(myTermValueSet.incrementTotalConceptDesignations());
 
 		if (myDesignationsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
 			ourLog.info("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
