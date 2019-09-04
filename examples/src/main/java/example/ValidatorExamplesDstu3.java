@@ -1,12 +1,12 @@
 package example;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.validation.FhirValidator;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.validation.FhirValidator;
-
+// TODO KHS LIQ is this used?
 public class ValidatorExamplesDstu3 {
 
    public void validateProfileDstu3() {

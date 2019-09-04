@@ -31,6 +31,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.INarrative;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
@@ -52,8 +53,36 @@ public abstract class BaseNarrativeGenerator implements INarrativeGenerator {
 		myManifest = theManifest;
 	}
 
+	private boolean myInitialized;
+
 	@Override
 	public boolean populateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
+		if (!myInitialized) {
+			initialize();
+		}
+		doPopulateResourceNarrative(theFhirContext, theResource);
+		return false;
+	}
+
+	protected abstract List<String> getPropertyFile();
+
+	private synchronized void initialize() {
+		if (myInitialized) {
+			return;
+		}
+
+		List<String> propFileName = getPropertyFile();
+		try {
+			NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation(propFileName);
+			setManifest(manifest);
+		} catch (IOException e) {
+			throw new InternalErrorException(e);
+		}
+
+		myInitialized = true;
+	}
+
+	private boolean doPopulateResourceNarrative(FhirContext theFhirContext, IBaseResource theResource) {
 		List<INarrativeTemplate> templateOpt = getTemplateForElement(theFhirContext, theResource);
 		if (templateOpt.size() > 0) {
 			applyTemplate(theFhirContext, templateOpt.get(0), theResource);

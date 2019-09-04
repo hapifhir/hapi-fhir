@@ -20,12 +20,13 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
+import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
+import org.apache.commons.lang3.Validate;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.lang3.Validate;
-
-public class CustomThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator {
+public class CustomThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator {
 
 	private List<String> myPropertyFile;
 

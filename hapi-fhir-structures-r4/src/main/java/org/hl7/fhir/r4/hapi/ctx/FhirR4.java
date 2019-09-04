@@ -20,23 +20,25 @@ package org.hl7.fhir.r4.hapi.ctx;
  * #L%
  */
 
-import java.io.InputStream;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.hapi.fluentpath.FluentPathR4;
-import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
-import org.hl7.fhir.r4.model.*;
-
-import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.fluentpath.IFluentPath;
 import ca.uhn.fhir.model.api.IFhirVersion;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.hapi.rest.server.R4BundleFactory;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.narrative.FluentPath;
+
+import java.io.InputStream;
+import java.util.Date;
+import java.util.List;
 
 public class FhirR4 implements IFhirVersion {
 
@@ -44,7 +46,11 @@ public class FhirR4 implements IFhirVersion {
 
 	@Override
 	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		return new FluentPathR4(theFhirContext);
+     if (!(theFhirContext.getValidationSupport() instanceof IValidationSupport)) {
+       throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
+     }
+     IValidationSupport validationSupport = (IValidationSupport) theFhirContext.getValidationSupport();
+     return new FluentPath(new HapiWorkerContext(theFhirContext, validationSupport));
 	}
 
 	@Override

@@ -32,9 +32,9 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ReflectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r5.hapi.fhirpath.FhirPathR5;
 import org.hl7.fhir.r5.hapi.rest.server.R5BundleFactory;
 import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.narrative.FluentPath;
 
 import java.io.InputStream;
 import java.util.Date;
@@ -46,7 +46,11 @@ public class FhirR5 implements IFhirVersion {
 
 	@Override
 	public IFluentPath createFluentPathExecutor(FhirContext theFhirContext) {
-		return new FhirPathR5(theFhirContext);
+		if (!(theFhirContext.getValidationSupport() instanceof IValidationSupport)) {
+			throw new IllegalStateException("Validation support module configured on context appears to be for the wrong FHIR version- Does not extend " + IValidationSupport.class.getName());
+		}
+		IValidationSupport validationSupport = (IValidationSupport) theFhirContext.getValidationSupport();
+		return new FluentPath(new HapiWorkerContext(theFhirContext, validationSupport));
 	}
 
 	@Override

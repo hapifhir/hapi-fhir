@@ -20,10 +20,11 @@ package ca.uhn.fhir.narrative;
  * #L%
  */
 
-import java.util.ArrayList;
+import ca.uhn.fhir.narrative2.ThymeleafNarrativeGenerator;
+
 import java.util.List;
 
-public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGenerator implements INarrativeGenerator {
+public class DefaultThymeleafNarrativeGenerator extends ThymeleafNarrativeGenerator implements INarrativeGenerator {
 
 	public static final String NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives.properties";
 	static final String HAPISERVER_NARRATIVES_PROPERTIES = "classpath:ca/uhn/fhir/narrative/narratives-hapiserver.properties";
@@ -35,13 +36,15 @@ public class DefaultThymeleafNarrativeGenerator extends BaseThymeleafNarrativeGe
 	}
 
 	@Override
-	protected List<String> getPropertyFile() {
-		List<String> retVal = new ArrayList<String>();
-		retVal.add(NARRATIVES_PROPERTIES);
+	protected String getNarrativesPropertyFileLocation() {
+		return NARRATIVES_PROPERTIES;
+	}
+
+	@Override
+	protected void addProperties(List<String> properties) {
 		if (myUseHapiServerConformanceNarrative) {
-			retVal.add(HAPISERVER_NARRATIVES_PROPERTIES);
+			properties.add(HAPISERVER_NARRATIVES_PROPERTIES);
 		}
-		return retVal;
 	}
 
 	/**

@@ -29,11 +29,12 @@ public class CanonicalSubscriptionTest {
 		CanonicalSubscription s = new CanonicalSubscription();
 		s.setChannelExtensions(inMap);
 
-		s = serializeAndDeserialize(s);
+		CanonicalSubscription s2 = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtension("key1"), Matchers.equalTo("VALUE1"));
-		assertThat(s.getChannelExtension("key2"), Matchers.equalTo("VALUE2a"));
-		assertThat(s.getChannelExtension("key3"), Matchers.nullValue());
+		assertThat(s2.getChannelExtension("key1"), Matchers.equalTo("VALUE1"));
+		assertThat(s2.getChannelExtension("key2"), Matchers.equalTo("VALUE2a"));
+		assertThat(s2.getChannelExtension("key3"), Matchers.nullValue());
+		assertTrue(s2.equals(s));
 	}
 
 	@Test
@@ -46,11 +47,12 @@ public class CanonicalSubscriptionTest {
 		CanonicalSubscription s = new CanonicalSubscription();
 		s.setChannelExtensions(inMap);
 
-		s = serializeAndDeserialize(s);
+		CanonicalSubscription s2 = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtensions("key1"), Matchers.contains("VALUE1"));
-		assertThat(s.getChannelExtensions("key2"), Matchers.contains("VALUE2a", "VALUE2b"));
-		assertThat(s.getChannelExtensions("key3"), Matchers.empty());
+		assertThat(s2.getChannelExtensions("key1"), Matchers.contains("VALUE1"));
+		assertThat(s2.getChannelExtensions("key2"), Matchers.contains("VALUE2a", "VALUE2b"));
+		assertThat(s2.getChannelExtensions("key3"), Matchers.empty());
+		assertTrue(s2.equals(s));
 	}
 
 	@Test

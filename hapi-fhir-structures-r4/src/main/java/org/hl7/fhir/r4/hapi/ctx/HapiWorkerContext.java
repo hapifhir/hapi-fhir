@@ -390,6 +390,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public String getLinkForUrl(String theS, String theS1) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public List<String> getTypeNames() {
     throw new UnsupportedOperationException();
   }

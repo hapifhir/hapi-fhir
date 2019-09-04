@@ -11,7 +11,7 @@
 		<!--/*
 		Show the DiagnosticReport's name.text value, or if that isn't populated, show the
 		display value on the first coding, and if that's missing too show a default "Untitled"
-		value 
+		value
 		*/-->
 		<th:block th:switch="${fhirVersion}">
 			<th:block th:case="'DSTU1'">
@@ -27,7 +27,7 @@
 		</th:block>
 		<!--/*--> Complete Blood Count <!--*/-->
 	</div>
-	
+
 	<table class="hapiPropertyTable">
 		<tbody>
 			<tr th:if="${not resource.statusElement.empty}">
@@ -44,7 +44,7 @@
 			</tr>
 		</tbody>
 	</table>
-	
+
 	<table class="hapiTableOfValues" th:if="${not #lists.isEmpty(resource.result)} and ${resource.result[0].resource != null}">
 		<thead>
 			<tr>
@@ -156,11 +156,11 @@
 				<tr class="hapiTableOfValuesRowEven"><td>Lkc</td><td>198 g/L</td><td>H</td><td>78 g/L - 99 g/L</td><td>final</td></tr>
 				<tr class="hapiTableOfValuesRowEven"><td colspan="5">Yet another comment</td></tr>
 				<!--*/-->
-				
+
 			</th:block>
 		</tbody>
 	</table>
-		
+
 </div>
 
 
