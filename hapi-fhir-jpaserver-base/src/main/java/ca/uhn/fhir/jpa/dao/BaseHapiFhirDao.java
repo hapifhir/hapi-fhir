@@ -16,6 +16,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
@@ -27,7 +28,6 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -37,7 +37,6 @@ import ca.uhn.fhir.model.base.composite.BaseCodingDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
@@ -149,8 +148,13 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	protected ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
+	protected DeleteConflictService myDeleteConflictService;
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	ExpungeService myExpungeService;
+	@Autowired
 	private DaoConfig myConfig;
-
 	@Autowired
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
@@ -167,20 +171,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private DaoSearchParamSynchronizer myDaoSearchParamSynchronizer;
 	@Autowired
 	private SearchBuilderFactory mySearchBuilderFactory;
-	@Autowired
-	ExpungeService myExpungeService;
-	@Autowired
-	protected DeleteConflictService myDeleteConflictService;
-
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
-	@Autowired
-	protected IInterceptorBroadcaster myInterceptorBroadcaster;
-
-	@Autowired
-	public void setContext(FhirContext theContext) {
-		myContext = theContext;
-	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -346,6 +338,11 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Override
 	public FhirContext getContext() {
 		return myContext;
+	}
+
+	@Autowired
+	public void setContext(FhirContext theContext) {
+		myContext = theContext;
 	}
 
 	public FhirContext getContext(FhirVersionEnum theVersion) {
@@ -879,7 +876,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			ResourceTable resource = (ResourceTable) theEntity;
 			version = theEntity.getVersion();
 			ResourceHistoryTable history = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theEntity.getId(), version);
-			((ResourceTable)theEntity).setCurrentVersionEntity(history);
+			((ResourceTable) theEntity).setCurrentVersionEntity(history);
 
 			while (history == null) {
 				if (version > 1L) {
@@ -1457,6 +1454,26 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return mySearchParamRegistry;
 	}
 
+	@SuppressWarnings("unchecked")
+	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
+
+		Class<IPrimitiveType<String>> stringType = (Class<IPrimitiveType<String>>) theContext.getElementDefinition("string").getImplementingClass();
+
+		StringBuilder retVal = new StringBuilder();
+		List<IPrimitiveType<String>> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, stringType);
+		for (@SuppressWarnings("rawtypes")
+			IPrimitiveType<String> nextType : childElements) {
+			if (stringType.equals(nextType.getClass())) {
+				String nextValue = nextType.getValueAsString();
+				if (isNotBlank(nextValue)) {
+					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
+					retVal.append("\n");
+				}
+			}
+		}
+		return retVal.toString();
+	}
+
 	public static void clearRequestAsProcessingSubRequest(ServletRequestDetails theRequestDetails) {
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().remove(PROCESSING_SUB_REQUEST);
@@ -1467,23 +1484,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		if (theRequestDetails != null) {
 			theRequestDetails.getUserData().put(PROCESSING_SUB_REQUEST, Boolean.TRUE);
 		}
-	}
-
-	public static String parseContentTextIntoWords(FhirContext theContext, IBaseResource theResource) {
-		StringBuilder retVal = new StringBuilder();
-		@SuppressWarnings("rawtypes")
-		List<IPrimitiveType> childElements = theContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IPrimitiveType.class);
-		for (@SuppressWarnings("rawtypes")
-			IPrimitiveType nextType : childElements) {
-			if (nextType instanceof StringDt || nextType.getClass().getSimpleName().equals("StringType")) {
-				String nextValue = nextType.getValueAsString();
-				if (isNotBlank(nextValue)) {
-					retVal.append(nextValue.replace("\n", " ").replace("\r", " "));
-					retVal.append("\n");
-				}
-			}
-		}
-		return retVal.toString();
 	}
 
 	public static void populateFullTextFields(final FhirContext theContext, final IBaseResource theResource, ResourceTable theEntity) {

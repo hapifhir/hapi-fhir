@@ -6,7 +6,9 @@ import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.*;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -111,10 +113,17 @@ public interface IHapiTerminologySvc {
 
 	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
 
-	void preExpandValueSetToTerminologyTables();
+	void preExpandDeferredValueSetsToTerminologyTables();
 
 	/**
 	 * Version independent
 	 */
 	ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
+
+	/**
+	 * Version independent
+	 */
+	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 }

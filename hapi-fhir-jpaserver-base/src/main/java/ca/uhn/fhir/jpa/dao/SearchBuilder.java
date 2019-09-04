@@ -825,7 +825,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 
 	private Predicate addPredicateSource(List<? extends IQueryParameterType> theList, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
-		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformation.NONE) {
+		if (myDaoConfig.getStoreMetaSourceInformation() == DaoConfig.StoreMetaSourceInformationEnum.NONE) {
 			String msg = myContext.getLocalizer().getMessage(SearchBuilder.class, "sourceParamDisabled");
 			throw new InvalidRequestException(msg);
 		}
@@ -2700,8 +2700,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate processFilterParameter(SearchFilterParser.FilterParameter theFilter,
 														  String theResourceName, RequestDetails theRequest) {
 
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,
-			theFilter.getParamPath().getName());
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,	theFilter.getParamPath().getName());
 
 		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {

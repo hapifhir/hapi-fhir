@@ -90,6 +90,12 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// Drop HFJ_SEARCH_RESULT foreign keys
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_RES");
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH");
+
+		// TermValueSet
+		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		Builder.BuilderWithTableName termValueSetTable = version.onTable("TRM_VALUESET");
+		termValueSetTable.addColumn("TOTAL_CONCEPTS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		termValueSetTable.addColumn("TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 	}
 
 	protected void init400() {

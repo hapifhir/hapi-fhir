@@ -163,14 +163,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				return;
 			}
 
-			ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(deliveryMsg);
-			MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
-			if (deliveryChannel != null) {
-				resourceMatched = true;
-				deliveryChannel.send(wrappedMsg);
-			} else {
-				ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
-			}
+			resourceMatched |= sendToDeliveryChannel(nextActiveSubscription, deliveryMsg);
 		}
 
 		if (!resourceMatched) {
@@ -178,6 +171,31 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			HookParams params = new HookParams()
 				.add(ResourceModifiedMessage.class, theMsg);
 			myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS, params);
+		}
+	}
+
+	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
+		boolean retval = false;
+		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
+		MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
+		if (deliveryChannel != null) {
+			retval = true;
+			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
+		} else {
+			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
+		}
+		return retval;
+	}
+
+	private void trySendToDeliveryChannel(ResourceDeliveryJsonMessage theWrappedMsg, MessageChannel theDeliveryChannel) {
+		try {
+			boolean success = theDeliveryChannel.send(theWrappedMsg);
+			if (!success) {
+				ourLog.warn("Failed to send message to Delivery Channel.");
+			}
+		} catch (RuntimeException e) {
+			ourLog.error("Failed to send message to Delivery Channel", e);
+			throw new RuntimeException("Failed to send message to Delivery Channel", e);
 		}
 	}
 

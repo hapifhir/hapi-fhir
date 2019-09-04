@@ -30,6 +30,11 @@ import java.util.Collection;
  * #L%
  */
 
+/**
+ * Note that this interface is not considered a stable interface. While it is possible to build applications
+ * that use it directly, please be aware that we may modify methods, add methods, or even remove methods from
+ * time to time, even within minor point releases.
+ */
 public interface IDao {
 
 	MetadataKeyResourcePid RESOURCE_PID = new MetadataKeyResourcePid("RESOURCE_PID");

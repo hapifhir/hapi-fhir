@@ -29,24 +29,30 @@ import java.util.Map;
  * an expanded ValueSet has its included concepts stored in the terminology tables as well.
  */
 public enum TermValueSetPreExpansionStatusEnum {
-	/**
+	/*
 	 * Sorting agnostic.
 	 */
 
-	NOT_EXPANDED("notExpanded"),
-	EXPANSION_IN_PROGRESS("expansionInProgress"),
-	EXPANDED("expanded"),
-	FAILED_TO_EXPAND("failedToExpand");
+	NOT_EXPANDED("notExpanded", "The ValueSet is waiting to be picked up and pre-expanded by a scheduled task."),
+	EXPANSION_IN_PROGRESS("expansionInProgress", "The ValueSet has been picked up by a scheduled task and pre-expansion is in progress."),
+	EXPANDED("expanded", "The ValueSet has been picked up by a scheduled task and pre-expansion is complete."),
+	FAILED_TO_EXPAND("failedToExpand", "The ValueSet has been picked up by a scheduled task and pre-expansion has failed.");
 
 	private static Map<String, TermValueSetPreExpansionStatusEnum> ourValues;
 	private String myCode;
+	private String myDescription;
 
-	TermValueSetPreExpansionStatusEnum(String theCode) {
+	TermValueSetPreExpansionStatusEnum(String theCode, String theDescription) {
 		myCode = theCode;
+		myDescription = theDescription;
 	}
 
 	public String getCode() {
 		return myCode;
+	}
+
+	public String getDescription() {
+		return myDescription;
 	}
 
 	public static TermValueSetPreExpansionStatusEnum fromCode(String theCode) {
