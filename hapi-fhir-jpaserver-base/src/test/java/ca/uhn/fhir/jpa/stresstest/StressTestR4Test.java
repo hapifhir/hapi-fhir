@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
@@ -31,10 +32,8 @@ import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.AopTestUtils;
@@ -337,6 +336,45 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1202, resultsAndIncludes.size());
 	}
 
+	@Ignore
+	@Test
+	public void testUpdateListWithLargeNumberOfEntries() {
+		int numPatients = 3000;
+
+		ListResource lr = new ListResource();
+		lr.setId(IdType.newRandomUuid());
+
+		{
+			Bundle bundle = new Bundle();
+			for (int i = 0; i < numPatients; ++i) {
+				Patient patient = new Patient();
+				patient.setId(IdType.newRandomUuid());
+				bundle.addEntry().setFullUrl(patient.getId()).setResource(patient).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+				lr.addEntry().setItem(new Reference(patient.getId()));
+			}
+			bundle.addEntry().setFullUrl(lr.getId()).setResource(lr).getRequest().setMethod(HTTPVerb.POST).setUrl("List");
+
+			StopWatch sw = new StopWatch();
+			ourLog.info("Saving list with {} entries", lr.getEntry().size());
+			mySystemDao.transaction(null, bundle);
+			ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
+		}
+
+		{
+			Bundle bundle = new Bundle();
+
+			Patient newPatient = new Patient();
+			newPatient.setId(IdType.newRandomUuid());
+			bundle.addEntry().setFullUrl(newPatient.getId()).setResource(newPatient).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+			lr.addEntry().setItem(new Reference(newPatient.getId()));
+			bundle.addEntry().setFullUrl(lr.getId()).setResource(lr).getRequest().setMethod(HTTPVerb.PUT).setUrl(lr.getIdElement().toUnqualifiedVersionless().getValue());
+
+			StopWatch sw = new StopWatch();
+			ourLog.info("Updating list with {} entries", lr.getEntry().size());
+			mySystemDao.transaction(null, bundle);
+			ourLog.info("Updated {} resources in {}", bundle.getEntry().size(), sw);
+		}
+	}
 
 	@Test
 	public void testMultithreadedSearch() throws Exception {
