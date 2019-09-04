@@ -97,6 +97,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 
 		TermValueSetConcept concept = new TermValueSetConcept();
 		concept.setValueSet(myTermValueSet);
+		concept.setOrder(myConceptsSaved);
 		concept.setSystem(theSystem);
 		concept.setCode(theCode);
 		if (isNotBlank(theDisplay)) {

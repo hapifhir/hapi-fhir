@@ -40,7 +40,8 @@ import static org.apache.commons.lang3.StringUtils.length;
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"})
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()
 public class TermValueSetConcept implements Serializable {
@@ -55,6 +56,12 @@ public class TermValueSetConcept implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
+
+	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	private Long myValueSetPid;
+
+	@Column(name = "VALUESET_ORDER", nullable = false)
+	private int myOrder;
 
 	@Transient
 	private String myValueSetUrl;
@@ -84,6 +91,15 @@ public class TermValueSetConcept implements Serializable {
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		return this;
+	}
+
+	public int getOrder() {
+		return myOrder;
+	}
+
+	public TermValueSetConcept setOrder(int theOrder) {
+		myOrder = theOrder;
 		return this;
 	}
 
@@ -173,6 +189,8 @@ public class TermValueSetConcept implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetPid", myValueSetPid)
+			.append("myOrder", myOrder)
 			.append("myValueSetUrl", this.getValueSetUrl())
 			.append("myValueSetName", this.getValueSetName())
 			.append("mySystem", mySystem)

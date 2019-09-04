@@ -93,6 +93,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName termValueSetTable = version.onTable("TRM_VALUESET");
 		termValueSetTable.addColumn("TOTAL_CONCEPTS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		termValueSetTable.addColumn("TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+
+		// TermValueSetConcept
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
+		Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+		termValueSetConceptTable.addColumn("VALUESET_ORDER").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		termValueSetConceptTable
+			.addIndex("IDX_VS_CONCEPT_ORDER")
+			.unique(true)
+			.withColumns("VALUESET_PID", "VALUESET_ORDER");
 	}
 
 	protected void init400() {
