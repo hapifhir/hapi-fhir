@@ -48,8 +48,8 @@
 <a class="jxr_linenumber" name="L40" href="#L40">40</a>  	@Modifying
 <a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<strong class="jxr_keyword">void</strong> deleteByTermValueSetId(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
 <a class="jxr_linenumber" name="L42" href="#L42">42</a>  
-<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	@Query(<span class="jxr_string">"SELECT vsc from TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid"</span>)
-<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	Slice&lt;TermValueSetConcept&gt; findByTermValueSetId(Pageable thePage, @Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  	@Query(<span class="jxr_string">"SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSet.myId = :pid"</span>)
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  	Slice&lt;TermValueSetConcept&gt; findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param(<span class="jxr_string">"pid"</span>) Long theValueSetId);
 <a class="jxr_linenumber" name="L45" href="#L45">45</a>  
 <a class="jxr_linenumber" name="L46" href="#L46">46</a>  	@Query(<span class="jxr_string">"SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval"</span>)
 <a class="jxr_linenumber" name="L47" href="#L47">47</a>  	Optional&lt;TermValueSetConcept&gt; findByTermValueSetIdSystemAndCode(@Param(<span class="jxr_string">"pid"</span>) Long theValueSetId, @Param(<span class="jxr_string">"system_url"</span>) String theSystem, @Param(<span class="jxr_string">"codeval"</span>) String theCode);
