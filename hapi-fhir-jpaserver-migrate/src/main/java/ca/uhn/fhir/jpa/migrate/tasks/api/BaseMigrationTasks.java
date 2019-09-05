@@ -244,7 +244,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			/**
 			 *
 			 * @param theFkName the name of the foreign key
-			 * @param theForeignTableName the name of the table that imports the foreign key (I know it's a confusing name, but it's what java.sql.DatabaseMetaData calls it)
+			 * @param theForeignTableName the name of the table that imports the foreign key (I know it's a confusing name, but that's what java.sql.DatabaseMetaData calls it)
 			 */
 			public void dropForeignKey(String theFkName, String theForeignTableName) {
 				DropForeignKeyTask task = new DropForeignKeyTask();

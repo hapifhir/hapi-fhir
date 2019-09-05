@@ -2,10 +2,7 @@ package ca.uhn.fhir.jpa.search.cache;
 
 import ca.uhn.fhir.jpa.entity.Search;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public interface ISearchResultCacheSvc {
 	/**
