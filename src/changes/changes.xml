@@ -106,6 +106,13 @@
 				A note has been added to the downloads page explaning the removal of the hapi-fhir-utilities
 				module. Thanks to Andrew Fitzgerald for the PR!
 			</action>
+			<action type="change">
+				REST servers will no longer try to guess the content type for HTTP requests where a body 
+				is provided but no Content-Type header is included. These requests are invalid, and will now
+				result in an HTTP 400. This change corrects an error where some interceptors (notably
+				the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) 
+				could be bypassed if a Content Type was not included.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">

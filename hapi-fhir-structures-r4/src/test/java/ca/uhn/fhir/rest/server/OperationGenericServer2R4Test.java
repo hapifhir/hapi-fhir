@@ -232,9 +232,9 @@ public class OperationGenericServer2R4Test {
 
 		HttpGet httpPost = new HttpGet("http://localhost:" + myPort + "/Patient/123/$OP_INSTANCE");
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			status.getEntity().getContent().close();
 
 			assertEquals("123", ourLastId.getIdPart());
