@@ -77,6 +77,23 @@ public class CreateR4Test {
 
 	}
 
+	@Test
+	public void testCreateFailsIfNoContentTypeProvided() throws Exception {
+
+		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/Patient");
+		httpPost.setEntity(new StringEntity("{\"resourceType\":\"Patient\", \"id\":\"999\", \"status\":\"active\"}", (ContentType) null));
+		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
+
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+
+			ourLog.info("Response was:\n{}", responseContent);
+
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation"));
+
+		}
+	}
+
 	/**
 	 * #472
 	 */
