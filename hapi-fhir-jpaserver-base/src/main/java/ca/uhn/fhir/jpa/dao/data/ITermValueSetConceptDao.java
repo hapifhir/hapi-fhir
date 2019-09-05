@@ -33,17 +33,17 @@ import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
 
-	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSet.myId = :pid ORDER BY vsc.myOrder ASC")
+	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myOrder ASC")
 	Slice<TermValueSetConcept> findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval")

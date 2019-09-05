@@ -658,7 +658,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetDao.deleteById(termValueSetId);
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -695,7 +695,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetDao.deleteById(termValueSetId);
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});

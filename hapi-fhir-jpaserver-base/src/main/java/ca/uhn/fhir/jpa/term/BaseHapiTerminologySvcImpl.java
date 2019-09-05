@@ -392,7 +392,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetDao.deleteByTermValueSetId(existingTermValueSet.getId());
+			myValueSetDao.deleteById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
 	}
@@ -578,7 +578,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void logDesignationsExpanded(TermValueSet theValueSet, TermValueSetConcept theConcept, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+			ourLog.debug("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
 		}
 	}
 
