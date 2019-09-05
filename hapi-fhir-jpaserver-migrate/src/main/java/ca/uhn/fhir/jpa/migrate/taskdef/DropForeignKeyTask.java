@@ -30,13 +30,18 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class DropForeignKeyTask extends BaseTableColumnTask<DropForeignKeyTask> {
+public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
 	private String myConstraintName;
+	private String myForeignTableName;
 
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
+	}
+
+	public void setForeignTableName(String theForeignTableName) {
+		myForeignTableName = theForeignTableName;
 	}
 
 	@Override
@@ -44,12 +49,13 @@ public class DropForeignKeyTask extends BaseTableColumnTask<DropForeignKeyTask> 
 		super.validate();
 
 		Validate.isTrue(isNotBlank(myConstraintName));
+		Validate.isTrue(isNotBlank(myForeignTableName));
 	}
 
 	@Override
 	public void execute() throws SQLException {
 
-		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), null, null);
+		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), getTableName(), myForeignTableName);
 		if (!existing.contains(myConstraintName)) {
 			ourLog.info("Don't have constraint named {} - No action performed", myConstraintName);
 			return;

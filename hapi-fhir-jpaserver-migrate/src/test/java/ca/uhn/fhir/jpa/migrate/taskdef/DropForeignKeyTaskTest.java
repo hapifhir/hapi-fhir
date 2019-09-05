@@ -1,33 +1,33 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.sql.SQLException;
 
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 
 public class DropForeignKeyTaskTest extends BaseTest {
 
 	@Test
 	public void testDropForeignKey() throws SQLException {
-		executeSql("create table HOME (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
-		executeSql("create table FOREIGNTBL (PID bigint not null, HOMEREF bigint)");
-		executeSql("alter table HOME add foreign key FK_FOO (PID) references FOREIGNTABLE(HOMEREF)");
+		executeSql("create table PARENT (PID bigint not null, TEXTCOL varchar(255), primary key (PID))");
+		executeSql("create table CHILD (PID bigint not null, PARENTREF bigint)");
+		executeSql("alter table CHILD add constraint FK_MOM foreign key (PARENTREF) references PARENT(PID)");
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "HOME", "FOREIGNTBL"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), hasSize(1));
 
 		DropForeignKeyTask task = new DropForeignKeyTask();
-		task.setTableName("FOREIGNTBL");
-		task.setColumnName("HOMEREF");
-		task.setConstraintName("FK_FOO");
+		task.setTableName("PARENT");
+		task.setForeignTableName("CHILD");
+		task.setConstraintName("FK_MOM");
 		getMigrator().addTask(task);
 
 		getMigrator().migrate();
 
-		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "HOME", "FOREIGNTBL"), empty());
+		assertThat(JdbcUtils.getForeignKeys(getConnectionProperties(), "PARENT", "CHILD"), empty());
 
 		// Make sure additional calls don't crash
 		getMigrator().migrate();
