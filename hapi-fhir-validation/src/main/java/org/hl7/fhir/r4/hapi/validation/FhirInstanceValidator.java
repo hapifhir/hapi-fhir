@@ -669,6 +669,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 			return convertValidationResult(result);
 		}
 
+		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	private static class ResourceKey {

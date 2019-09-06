@@ -523,6 +523,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public Parameters getExpansionParameters() {
 			return myExpansionProfile;
 		}

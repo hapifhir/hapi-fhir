@@ -113,6 +113,10 @@
 				the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) 
 				could be bypassed if a Content Type was not included.
 			</action>
+			<action type="fix">
+				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
+				specification. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.1" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

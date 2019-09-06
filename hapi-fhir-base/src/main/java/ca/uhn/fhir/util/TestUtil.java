@@ -182,4 +182,13 @@ public class TestUtil {
 		return defaultString(theString).replace("\r", "");
 	}
 
+	/**
+	 * <b>THIS IS FOR UNIT TESTS ONLY - DO NOT CALL THIS METHOD FROM USER CODE</b>
+	 * <p>
+	 * Strip \r chars from a string to account for line ending platform differences
+	 */
+	public static String stripWhitespace(String theString) {
+		return stripReturns(theString).replace(" ", "");
+	}
+
 }
