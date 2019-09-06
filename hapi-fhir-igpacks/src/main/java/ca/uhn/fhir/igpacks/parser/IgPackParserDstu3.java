@@ -37,10 +37,12 @@ public class IgPackParserDstu3 extends BaseIgPackParser<IValidationSupport> {
 		super(theCtx);
 	}
 
+	@Override
 	protected IValidationSupport createValidationSupport(Map<IIdType, IBaseResource> theIgResources) {
 		return new IgPackValidationSupportDstu3(theIgResources);
 	}
 
+	@Override
 	protected FhirVersionEnum provideExpectedVersion() {
 		return FhirVersionEnum.DSTU3;
 	}
