@@ -190,6 +190,7 @@ public class InMemoryResourceMatcher {
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param.getQueryParameterQualifier() != null);
 	}
 
+	// FIXME KHS change to hasUnsupportedPrefixes
 	private boolean hasPrefixes(List<List<IQueryParameterType>> theAndOrParams) {
 		Predicate<IQueryParameterType> hasPrefixPredicate = param -> param instanceof BaseParamWithPrefix &&
 			((BaseParamWithPrefix) param).getPrefix() != null;
