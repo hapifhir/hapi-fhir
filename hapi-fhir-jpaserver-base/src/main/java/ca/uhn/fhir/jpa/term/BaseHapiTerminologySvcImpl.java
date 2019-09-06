@@ -68,6 +68,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -159,6 +160,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
@@ -528,21 +531,53 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
 		int toIndex = theOffset + theCount;
-		Slice<TermValueSetConcept> slice = myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
-		if (!slice.hasContent()) {
+
+//		Slice<TermValueSetConcept> slice = myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
+		Pageable page = SearchCoordinatorSvcImpl.toPage(theOffset, toIndex);
+		Collection<TermValueSetConceptView> slice = myTermValueSetConceptViewDao.findConceptsByValueSetPid(theOffset, toIndex, theTermValueSet.getId());
+
+		if (slice.isEmpty()) {
 			logConceptsExpanded(theTermValueSet, conceptsExpanded);
 			return;
 		}
 
-		for (TermValueSetConcept concept : slice.getContent()) {
-			ValueSet.ValueSetExpansionContainsComponent containsComponent = theExpansionComponent.addContains();
-			containsComponent.setSystem(concept.getSystem());
-			containsComponent.setCode(concept.getCode());
-			containsComponent.setDisplay(concept.getDisplay());
+		Map<Long, ValueSet.ValueSetExpansionContainsComponent> pidToConcept = new HashMap<>();
+
+		int designationsExpanded = 0;
+		for (TermValueSetConceptView concept : slice) {
+
+			Long conceptPid = concept.getConceptPid();
+			ValueSet.ValueSetExpansionContainsComponent containsComponent;
+
+			if (!pidToConcept.containsKey(conceptPid)) {
+				containsComponent = theExpansionComponent.addContains();
+				containsComponent.setSystem(concept.getConceptSystemUrl());
+				containsComponent.setCode(concept.getConceptCode());
+				containsComponent.setDisplay(concept.getConceptDisplay());
+				pidToConcept.put(conceptPid, containsComponent);
+			} else {
+				containsComponent = pidToConcept.get(conceptPid);
+			}
+
+			if (concept.getDesigPid() != null) {
+				ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.addDesignation();
+				designationComponent.setLanguage(concept.getDesigLang());
+				designationComponent.setUse(new Coding(
+					concept.getDesigUseSystem(),
+					concept.getDesigUseCode(),
+					concept.getDesigUseDisplay()));
+				designationComponent.setValue(concept.getDesigVal());
+
+				if (++designationsExpanded % 250 == 0) {
+					logDesignationsExpanded(theTermValueSet, designationsExpanded);
+				}
+
+				logDesignationsExpanded(theTermValueSet, designationsExpanded);
+			}
 
 			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
 			// FIXME: DM 2019-09-05 - Let's try removing the pre-fetch and the code in BaseHapiTerminologySvcImpl that handles designations so we can compare the processing time. 2/2
-			expandDesignations(theTermValueSet, concept, containsComponent);
+//			expandDesignations(theTermValueSet, concept, containsComponent);
 
 			if (++conceptsExpanded % 250 == 0) {
 				logConceptsExpanded(theTermValueSet, conceptsExpanded);
@@ -559,30 +594,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	private void expandDesignations(TermValueSet theValueSet, TermValueSetConcept theConcept, ValueSet.ValueSetExpansionContainsComponent theContainsComponent) {
-		int designationsExpanded = 0;
-		for (TermValueSetConceptDesignation designation : theConcept.getDesignations()) {
-			ValueSet.ConceptReferenceDesignationComponent designationComponent = theContainsComponent.addDesignation();
-			designationComponent.setLanguage(designation.getLanguage());
-			designationComponent.setUse(new Coding(
-				designation.getUseSystem(),
-				designation.getUseCode(),
-				designation.getUseDisplay()));
-			designationComponent.setValue(designation.getValue());
-
-			if (++designationsExpanded % 250 == 0) {
-				logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
-			}
-		}
-
-		logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
-	}
-
-	private void logDesignationsExpanded(TermValueSet theValueSet, TermValueSetConcept theConcept, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(TermValueSet theValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
 			// FIXME: DM 2019-09-05 - Account for in progress vs. total.
 			// FIXME: DM 2019-09-06 - Change to debug.
-			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+			ourLog.info("Have expanded {} designations in ValueSet[{}]", theDesignationsExpanded, theValueSet.getUrl());
 		}
 	}
 
@@ -972,7 +988,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theCoding.getSystem(), theCoding.getCode()));
 			}
-		} else if (theCodeableConcept != null){
+		} else if (theCodeableConcept != null) {
 			for (Coding coding : theCodeableConcept.getCoding()) {
 				if (coding.hasSystem() && coding.hasCode()) {
 					concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, coding.getSystem(), coding.getCode()));

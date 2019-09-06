@@ -196,9 +196,7 @@ public class TermValueSet implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getUrl())
-			.toHashCode();
+		return getUrl().hashCode();
 	}
 
 	@Override

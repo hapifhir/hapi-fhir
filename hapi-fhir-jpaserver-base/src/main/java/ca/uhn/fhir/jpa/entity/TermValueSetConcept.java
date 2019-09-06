@@ -53,7 +53,7 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
 
@@ -78,8 +78,11 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
-	@OneToMany(mappedBy = "myConcept")
+	@OneToMany(mappedBy = "myConcept", fetch = FetchType.LAZY)
 	private List<TermValueSetConceptDesignation> myDesignations;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public Long getId() {
 		return myId;
@@ -169,7 +172,7 @@ public class TermValueSetConcept implements Serializable {
 		TermValueSetConcept that = (TermValueSetConcept) theO;
 
 		return new EqualsBuilder()
-			.append(getValueSetUrl(), that.getValueSetUrl())
+			.append(myValueSetPid, that.myValueSetPid)
 			.append(getSystem(), that.getSystem())
 			.append(getCode(), that.getCode())
 			.isEquals();
@@ -177,26 +180,29 @@ public class TermValueSetConcept implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getValueSetUrl())
-			.append(getSystem())
-			.append(getCode())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(myValueSetPid)
+				.append(getSystem())
+				.append(getCode())
+				.toHashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
-			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+//			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
 			.append("myValueSetPid", myValueSetPid)
 			.append("myOrder", myOrder)
-			.append("myValueSetUrl", this.getValueSetUrl())
-			.append("myValueSetName", this.getValueSetName())
+//			.append("myValueSetUrl", this.getValueSetUrl())
+//			.append("myValueSetName", this.getValueSetName())
 			.append("mySystem", mySystem)
 			.append("myCode", myCode)
 			.append("myDisplay", myDisplay)
-			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
+//			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
 	}
 }
