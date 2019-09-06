@@ -541,6 +541,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			containsComponent.setDisplay(concept.getDisplay());
 
 			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
+			// FIXME: DM 2019-09-05 - Let's try removing the pre-fetch and the code in BaseHapiTerminologySvcImpl that handles designations so we can compare the processing time. 2/2
 			expandDesignations(theTermValueSet, concept, containsComponent);
 
 			if (++conceptsExpanded % 250 == 0) {
@@ -553,6 +554,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void logConceptsExpanded(TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
+			// FIXME: DM 2019-09-05 - Account for in progress vs. total.
 			ourLog.info("Have expanded {} concepts in ValueSet[{}]", theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
@@ -578,7 +580,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void logDesignationsExpanded(TermValueSet theValueSet, TermValueSetConcept theConcept, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.debug("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+			// FIXME: DM 2019-09-05 - Account for in progress vs. total.
+			// FIXME: DM 2019-09-06 - Change to debug.
+			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
 		}
 	}
 
@@ -1818,6 +1822,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
+	// FIXME: DM 2019-09-05 - Return to 600000
 	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {

@@ -40,7 +40,11 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myOrder ASC")
+	// FIXME: DM 2019-09-05 - Let's try removing the pre-fetch and the code in BaseHapiTerminologySvcImpl that handles designations so we can compare the processing time. 1/2
+//	@Query("SELECT vsc from TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myOrder")
+//	Slice<TermValueSetConcept> findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param("pid") Long theValueSetId);
+
+	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myOrder")
 	Slice<TermValueSetConcept> findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param("pid") Long theValueSetId);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
