@@ -117,6 +117,11 @@ public class BaseMigrationTasks<T extends Enum> {
 			addTask(task);
 		}
 
+		public void dropIdGenerator(String theIdGeneratorName) {
+			DropIdGeneratorTask task = new DropIdGeneratorTask(theIdGeneratorName);
+			addTask(task);
+		}
+
 		public class BuilderAddTableRawSql {
 
 			private final AddTableRawSqlTask myTask;
