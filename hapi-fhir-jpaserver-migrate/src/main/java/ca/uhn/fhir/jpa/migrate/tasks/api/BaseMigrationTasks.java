@@ -246,6 +246,19 @@ public class BaseMigrationTasks<T extends Enum> {
 				return this;
 			}
 
+			/**
+			 *
+			 * @param theFkName the name of the foreign key
+			 * @param theParentTableName the name of the table that exports the foreign key
+			 */
+			public void dropForeignKey(String theFkName, String theParentTableName) {
+				DropForeignKeyTask task = new DropForeignKeyTask();
+				task.setConstraintName(theFkName);
+				task.setTableName(getTableName());
+				task.setParentTableName(theParentTableName);
+				addTask(task);
+			}
+
 			public class BuilderAddIndexWithName {
 				private final String myIndexName;
 

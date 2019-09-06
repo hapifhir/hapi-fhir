@@ -37,7 +37,5 @@ public interface IResourceExpungeService {
 
 	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
-	void deleteByResourceIdPartitions(List<Long> thePartition);
-
 	void deleteAllSearchParams(Long theResourceId);
 }

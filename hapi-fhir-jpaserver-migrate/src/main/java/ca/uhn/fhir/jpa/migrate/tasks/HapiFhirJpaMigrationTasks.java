@@ -87,6 +87,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VSCD_VS_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
+		// Drop HFJ_SEARCH_RESULT foreign keys
+		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_RES", "HFJ_RESOURCE");
+		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH", "HFJ_SEARCH");
 
 		// TermValueSet
 		version.startSectionWithMessage("Processing table: TRM_VALUESET");

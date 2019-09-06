@@ -74,8 +74,12 @@
 				contained an incorrect example. This has been corrected.
 			</action>
 			<action type="change">
+				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
+				constraints did not add value and caused unneccessary contention when used under high load.
+			</action>
+			<action type="change">
 				An inefficient regex expression in UrlUtil was replaced with a much more efficient hand-written
-				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions 
+				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions
 				into the JPA server at the same time (i.e. when loading Synthea data).
 			</action>
 			<action type="fix">
