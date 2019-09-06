@@ -1,13 +1,10 @@
 package ca.uhn.fhir.jpa.dao.data;
 
-import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptView;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
 import java.util.List;
 
 /*
@@ -33,6 +30,6 @@ import java.util.List;
 public interface ITermValueSetConceptViewDao extends JpaRepository<TermValueSetConceptView, Long> {
 
 	@Query("SELECT v FROM TermValueSetConceptView v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
-	List<TermValueSetConceptView> findConceptsByValueSetPid(@Param("from") int theOffset, @Param("to") int theToIndex, @Param("pid") Long thePid);
+	List<TermValueSetConceptView> findByTermValueSetId(@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
 
 }

@@ -194,15 +194,15 @@ public class TermValueSetConcept implements Serializable {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
-//			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
 			.append("myValueSetPid", myValueSetPid)
 			.append("myOrder", myOrder)
-//			.append("myValueSetUrl", this.getValueSetUrl())
-//			.append("myValueSetName", this.getValueSetName())
+			.append("myValueSetUrl", this.getValueSetUrl())
+			.append("myValueSetName", this.getValueSetName())
 			.append("mySystem", mySystem)
 			.append("myCode", myCode)
 			.append("myDisplay", myDisplay)
-//			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
+			.append(myDesignations != null ? ("myDesignations - size=" + myDesignations.size()) : ("myDesignations=(null)"))
 			.toString();
 	}
 }

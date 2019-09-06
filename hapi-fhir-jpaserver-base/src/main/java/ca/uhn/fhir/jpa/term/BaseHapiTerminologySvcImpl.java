@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -68,7 +67,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -530,75 +528,64 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
+		int designationsExpanded = 0;
 		int toIndex = theOffset + theCount;
+		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
 
-//		Slice<TermValueSetConcept> slice = myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
-		Pageable page = SearchCoordinatorSvcImpl.toPage(theOffset, toIndex);
-		Collection<TermValueSetConceptView> slice = myTermValueSetConceptViewDao.findConceptsByValueSetPid(theOffset, toIndex, theTermValueSet.getId());
-
-		if (slice.isEmpty()) {
-			logConceptsExpanded(theTermValueSet, conceptsExpanded);
+		if (conceptViews.isEmpty()) {
+			logConceptsExpanded("No concepts to expand. ", theTermValueSet, conceptsExpanded);
 			return;
 		}
 
 		Map<Long, ValueSet.ValueSetExpansionContainsComponent> pidToConcept = new HashMap<>();
+		for (TermValueSetConceptView conceptView : conceptViews) {
 
-		int designationsExpanded = 0;
-		for (TermValueSetConceptView concept : slice) {
-
-			Long conceptPid = concept.getConceptPid();
+			Long conceptPid = conceptView.getConceptPid();
 			ValueSet.ValueSetExpansionContainsComponent containsComponent;
 
 			if (!pidToConcept.containsKey(conceptPid)) {
 				containsComponent = theExpansionComponent.addContains();
-				containsComponent.setSystem(concept.getConceptSystemUrl());
-				containsComponent.setCode(concept.getConceptCode());
-				containsComponent.setDisplay(concept.getConceptDisplay());
+				containsComponent.setSystem(conceptView.getConceptSystemUrl());
+				containsComponent.setCode(conceptView.getConceptCode());
+				containsComponent.setDisplay(conceptView.getConceptDisplay());
 				pidToConcept.put(conceptPid, containsComponent);
 			} else {
 				containsComponent = pidToConcept.get(conceptPid);
 			}
 
-			if (concept.getDesigPid() != null) {
+			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to designations optional.
+			if (conceptView.getDesignationPid() != null) {
 				ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.addDesignation();
-				designationComponent.setLanguage(concept.getDesigLang());
+				designationComponent.setLanguage(conceptView.getDesignationLang());
 				designationComponent.setUse(new Coding(
-					concept.getDesigUseSystem(),
-					concept.getDesigUseCode(),
-					concept.getDesigUseDisplay()));
-				designationComponent.setValue(concept.getDesigVal());
+					conceptView.getDesignationUseSystem(),
+					conceptView.getDesignationUseCode(),
+					conceptView.getDesignationUseDisplay()));
+				designationComponent.setValue(conceptView.getDesignationVal());
 
 				if (++designationsExpanded % 250 == 0) {
-					logDesignationsExpanded(theTermValueSet, designationsExpanded);
+					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
 				}
-
-				logDesignationsExpanded(theTermValueSet, designationsExpanded);
 			}
-
-			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
-			// FIXME: DM 2019-09-05 - Let's try removing the pre-fetch and the code in BaseHapiTerminologySvcImpl that handles designations so we can compare the processing time. 2/2
-//			expandDesignations(theTermValueSet, concept, containsComponent);
 
 			if (++conceptsExpanded % 250 == 0) {
-				logConceptsExpanded(theTermValueSet, conceptsExpanded);
+				logConceptsExpanded("Expansion of concepts in progress. ", theTermValueSet, conceptsExpanded);
 			}
 		}
 
-		logConceptsExpanded(theTermValueSet, conceptsExpanded);
+		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
+		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
 	}
 
-	private void logConceptsExpanded(TermValueSet theTermValueSet, int theConceptsExpanded) {
+	private void logConceptsExpanded(String thePrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			// FIXME: DM 2019-09-05 - Account for in progress vs. total.
-			ourLog.info("Have expanded {} concepts in ValueSet[{}]", theConceptsExpanded, theTermValueSet.getUrl());
+			ourLog.info("{}Have expanded {} concepts in ValueSet[{}]", thePrefix, theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
-	private void logDesignationsExpanded(TermValueSet theValueSet, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(String thePrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			// FIXME: DM 2019-09-05 - Account for in progress vs. total.
-			// FIXME: DM 2019-09-06 - Change to debug.
-			ourLog.info("Have expanded {} designations in ValueSet[{}]", theDesignationsExpanded, theValueSet.getUrl());
+			ourLog.info("{}Have expanded {} designations in ValueSet[{}]", thePrefix, theDesignationsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
@@ -645,6 +632,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 			}
 		}
+
+		// FIXME: DM 2019-09-06 - After handling excludes, we need to adjust TermValueSetConcept.myOrder to account for any gaps.
 
 		ourLog.info("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
 	}
@@ -1838,8 +1827,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
-	// FIXME: DM 2019-09-05 - Return to 600000
-	@Scheduled(fixedDelay = 600000) // 10 minutes.
+	// FIXME: DM 2019-09-05 - Return to 600000 before merging into master.
+	@Scheduled(fixedDelay = 6000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
