@@ -17,6 +17,7 @@ public class CustomMedicationOrderDstu2 extends MedicationOrder {
 	@Child(name = "medication", order = Child.REPLACE_PARENT, min = 1, max = 1, summary = false, modifier = false, type = { Medication.class })
 	private ResourceReferenceDt myMedication;
 
+	@Override
 	public ResourceReferenceDt getMedication() {
 		return myMedication;
 	}

@@ -114,7 +114,8 @@ public class NarrativeDt extends BaseNarrativeDt {
      * The status of the narrative - whether it's entirely generated (from just the defined data or the extensions too), or whether a human authored it and it may contain additional data
      * </p> 
 	 */
-	public BoundCodeDt<NarrativeStatusEnum> getStatus() {  
+	@Override
+	public BoundCodeDt<NarrativeStatusEnum> getStatus() {
 		if (myStatus == null) {
 			myStatus = new BoundCodeDt<NarrativeStatusEnum>(NarrativeStatusEnum.VALUESET_BINDER);
 		}
@@ -170,7 +171,8 @@ public class NarrativeDt extends BaseNarrativeDt {
      * The actual narrative content, a stripped down version of XHTML
      * </p> 
 	 */
-	public XhtmlDt getDiv() {  
+	@Override
+	public XhtmlDt getDiv() {
 		if (myDiv == null) {
 			myDiv = new XhtmlDt();
 		}
