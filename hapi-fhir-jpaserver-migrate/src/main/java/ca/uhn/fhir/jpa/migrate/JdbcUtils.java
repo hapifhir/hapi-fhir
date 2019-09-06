@@ -185,7 +185,11 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getCrossReference(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theForeignTable));
+					String catalog = connection.getCatalog();
+					String schema = connection.getSchema();
+					String parentTable = massageIdentifier(metadata, theTableName);
+					String foreignTable = massageIdentifier(metadata, theForeignTable);
+					ResultSet indexes = metadata.getCrossReference(catalog, schema, parentTable, catalog, schema, foreignTable);
 
 					Set<String> columnNames = new HashSet<>();
 					while (indexes.next()) {

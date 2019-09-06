@@ -84,7 +84,6 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	private void expungeDeletedResources() {
 		Slice<Long> resourceIds = findHistoricalVersionsOfDeletedResources();
 
-		deleteSearchResultCacheEntries(resourceIds);
 		deleteHistoricalVersions(resourceIds);
 		if (expungeLimitReached()) {
 			return;
@@ -121,10 +120,6 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 
 	private void deleteHistoricalVersions(Slice<Long> theResourceIds) {
 		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.expungeHistoricalVersionsOfIds(myRequestDetails, partition, myRemainingCount));
-	}
-
-	private void deleteSearchResultCacheEntries(Slice<Long> theResourceIds) {
-		myPartitionRunner.runInPartitionedThreads(theResourceIds, partition -> myExpungeDaoService.deleteByResourceIdPartitions(partition));
 	}
 
 	private ExpungeOutcome expungeOutcome() {

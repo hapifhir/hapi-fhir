@@ -246,6 +246,19 @@ public class BaseMigrationTasks<T extends Enum> {
 				return this;
 			}
 
+			/**
+			 *
+			 * @param theFkName the name of the foreign key
+			 * @param theForeignTableName the name of the table that imports the foreign key (I know it's a confusing name, but that's what java.sql.DatabaseMetaData calls it)
+			 */
+			public void dropForeignKey(String theFkName, String theForeignTableName) {
+				DropForeignKeyTask task = new DropForeignKeyTask();
+				task.setConstraintName(theFkName);
+				task.setForeignTableName(theForeignTableName);
+				task.setTableName(getTableName());
+				addTask(task);
+			}
+
 			public class BuilderAddIndexWithName {
 				private final String myIndexName;
 

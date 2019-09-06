@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -18,10 +19,7 @@ import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.*;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.rest.server.exceptions.*;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -51,7 +49,11 @@ import org.hl7.fhir.dstu3.model.Subscription.SubscriptionStatus;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -74,6 +76,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
+	@Autowired
+	private ISearchDao mySearchEntityDao;
 
 	@Override
 	@After
@@ -2969,12 +2973,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
 		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
 			@Override
 			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid1);
+				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
 		Date lastReturned1 = search1.getSearchLastReturned();
@@ -2986,12 +2991,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.count(5)
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
 		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
 			@Override
 			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid2);
+				return mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException(""));
 			}
 		});
 		Date lastReturned2 = search2.getSearchLastReturned();
@@ -3031,14 +3037,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(new TransactionCallback<Search>() {
-			@Override
-			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid1);
-			}
-		});
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		Bundle result2 = ourClient
@@ -3046,14 +3048,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.forResource("Organization")
 			.returnBundle(Bundle.class)
 			.execute();
+		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(new TransactionCallback<Search>() {
-			@Override
-			public Search doInTransaction(TransactionStatus theStatus) {
-				return mySearchEntityDao.findByUuid(uuid2);
-			}
-		});
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());

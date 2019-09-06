@@ -206,8 +206,6 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
-	protected ISearchDao mySearchEntityDao;
-	@Autowired
 	@Qualifier("mySearchParameterDaoDstu3")
 	protected IFhirResourceDao<SearchParameter> mySearchParameterDao;
 	@Autowired
