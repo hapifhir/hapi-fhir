@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +51,17 @@ public class InMemoryResourceMatcherTest {
 	public void before() {
 		RuntimeSearchParam searchParams = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		when(mySearchParamRegistry.getSearchParamByName(any(), any())).thenReturn(searchParams);
+		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(searchParams);
+	}
+
+	@Test
+	public void testDateAp() {
+		Observation observation = new Observation();
+		observation.setEffective(new DateTimeType("1970-01-01"));
+		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=ap1970-01-01", observation, searchParams);
+		assertFalse(result.supported());
+		assertEquals("Parameter: <date> Reason: The prefix APPROXIMATE is not supported for param type DATE", result.getUnsupportedReason());
 	}
 
 	@Test
