@@ -2332,13 +2332,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22 - 2);
+			concept = termValueSet.getConcepts().get(20);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			assertEquals(20, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2347,13 +2347,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-			concept = termValueSet.getConcepts().get(23 - 2);
+			concept = termValueSet.getConcepts().get(21);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			assertEquals(21, concept.getOrder());
 		});
 	}
 
@@ -2434,13 +2434,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22 - 2);
+			concept = termValueSet.getConcepts().get(20);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
-			assertEquals(22, concept.getOrder());
+			assertEquals(20, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2449,13 +2449,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-			concept = termValueSet.getConcepts().get(23 - 2);
+			concept = termValueSet.getConcepts().get(21);
 			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
-			assertEquals(23, concept.getOrder());
+			assertEquals(21, concept.getOrder());
 		});
 	}
 

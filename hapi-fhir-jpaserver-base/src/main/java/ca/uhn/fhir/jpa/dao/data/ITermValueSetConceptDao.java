@@ -46,4 +46,11 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(@Param("resource_pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
+
+	@Query("SELECT vsc.myId FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myId")
+	List<Long> findIdsByTermValueSetId(@Param("pid") Long theValueSetId);
+
+	@Query("UPDATE TermValueSetConcept vsc SET vsc.myOrder = :order WHERE vsc.myId = :pid")
+	@Modifying
+	void updateOrderById(@Param("pid") Long theId, @Param("order") int theOrder);
 }

@@ -607,10 +607,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
 			for (int i = 0; ; i++) {
-				int finalI = i;
+				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = true;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, finalI);
+					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, queryIndex);
 				});
 				if (!shouldContinue) {
 					break;
@@ -622,10 +622,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
 			for (int i = 0; ; i++) {
-				int finalI = i;
+				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = false;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, finalI);
+					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, queryIndex);
 				});
 				if (!shouldContinue) {
 					break;
@@ -633,7 +633,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 		}
 
-		// FIXME: DM 2019-09-06 - After handling excludes, we need to adjust TermValueSetConcept.myOrder to account for any gaps.
+		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
+			myTxTemplate.execute(t -> ((ValueSetConceptAccumulator) theValueSetCodeAccumulator).removeGapsFromConceptOrder());
+		}
 
 		ourLog.info("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
 	}
