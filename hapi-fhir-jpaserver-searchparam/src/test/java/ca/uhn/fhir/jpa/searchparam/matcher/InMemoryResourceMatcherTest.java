@@ -29,6 +29,8 @@ public class InMemoryResourceMatcherTest {
 	public static final String OBS_DATE = "1970-10-17";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
+	// FIXME KHS move this
+	private static final String NOW = "NOW";
 
 	@Autowired
 	private
@@ -67,13 +69,6 @@ public class InMemoryResourceMatcherTest {
 		mySearchParams = extractDateSearchParam(myObservation);
 	}
 
-	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
-		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
-		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
-		retval.myDateParams.add(dateParam);
-		return retval;
-	}
 
 	@Test
 	public void testUnsupportedOps() {
@@ -115,7 +110,21 @@ public class InMemoryResourceMatcherTest {
 			assertTrue(result.getUnsupportedReason(), result.supported());
 			assertEquals(result.matched(), theLater);
 		}
+	}
 
+	@Test
+	public void testNow() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt%now", myObservation, mySearchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
+		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		retval.myDateParams.add(dateParam);
+		return retval;
 	}
 
 }
