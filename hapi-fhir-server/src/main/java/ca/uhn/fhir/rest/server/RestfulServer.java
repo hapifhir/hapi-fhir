@@ -848,7 +848,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@SuppressWarnings("WeakerAccess")
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String fhirServerBase;
-		ServletRequestDetails requestDetails = new ServletRequestDetails(getInterceptorService());
+		ServletRequestDetails requestDetails = newRequestDetails();
 		requestDetails.setServer(this);
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
@@ -1093,6 +1093,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED, params);
 
 		}
+	}
+
+	protected ServletRequestDetails newRequestDetails() {
+		return new ServletRequestDetails(getInterceptorService());
 	}
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
