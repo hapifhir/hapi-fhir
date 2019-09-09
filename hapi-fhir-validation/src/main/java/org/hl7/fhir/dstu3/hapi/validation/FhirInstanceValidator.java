@@ -340,6 +340,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		}
 
 		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public void generateSnapshot(org.hl7.fhir.r5.model.StructureDefinition p) throws FHIRException {
 			// nothing yet
 		}

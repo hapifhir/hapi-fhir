@@ -283,6 +283,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r5.hapi.validation.BaseV
 		}
 
 		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public org.hl7.fhir.r5.model.Parameters getExpansionParameters() {
 			return myExpansionProfile;
 		}

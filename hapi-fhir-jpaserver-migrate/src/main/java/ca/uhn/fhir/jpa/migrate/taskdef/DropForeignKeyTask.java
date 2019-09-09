@@ -34,14 +34,14 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropForeignKeyTask.class);
 	private String myConstraintName;
-	private String myForeignTableName;
+	private String myParentTableName;
 
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
 	}
 
-	public void setForeignTableName(String theForeignTableName) {
-		myForeignTableName = theForeignTableName;
+	public void setParentTableName(String theParentTableName) {
+		myParentTableName = theParentTableName;
 	}
 
 	@Override
@@ -49,13 +49,13 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 		super.validate();
 
 		Validate.isTrue(isNotBlank(myConstraintName));
-		Validate.isTrue(isNotBlank(myForeignTableName));
+		Validate.isTrue(isNotBlank(myParentTableName));
 	}
 
 	@Override
 	public void execute() throws SQLException {
 
-		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), getTableName(), myForeignTableName);
+		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
 		if (!existing.contains(myConstraintName)) {
 			ourLog.info("Don't have constraint named {} - No action performed", myConstraintName);
 			return;
