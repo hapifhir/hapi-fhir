@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
@@ -20,13 +21,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class InMemoryResourceMatcherTest {
-	public static final String OBS_DATE = "1970-10-17";
+	public static final String OBSERVATION_DATE = "1970-10-17";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
 
@@ -63,7 +68,7 @@ public class InMemoryResourceMatcherTest {
 		when(mySearchParamRegistry.getSearchParamByName(any(), any())).thenReturn(searchParams);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(searchParams);
 		myObservation = new Observation();
-		myObservation.setEffective(new DateTimeType(OBS_DATE));
+		myObservation.setEffective(new DateTimeType(OBSERVATION_DATE));
 		mySearchParams = extractDateSearchParam(myObservation);
 	}
 
@@ -77,7 +82,7 @@ public class InMemoryResourceMatcherTest {
 	}
 
 	private void testDateUnsupportedOp(ParamPrefixEnum theOperator) {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBS_DATE, myObservation, mySearchParams);
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATE, myObservation, mySearchParams);
 		assertFalse(result.supported());
 		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
 	}
@@ -99,7 +104,7 @@ public class InMemoryResourceMatcherTest {
 			assertEquals(result.matched(), theEarly);
 		}
 		{
-			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBS_DATE, myObservation, mySearchParams);
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBSERVATION_DATE, myObservation, mySearchParams);
 			assertTrue(result.getUnsupportedReason(), result.supported());
 			assertEquals(result.matched(), theSame);
 		}
@@ -111,8 +116,32 @@ public class InMemoryResourceMatcherTest {
 	}
 
 	@Test
-	public void testNow() {
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt%now", myObservation, mySearchParams);
+	public void testNowPast() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.NOW_DATE_CONSTANT, myObservation, mySearchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testNowNextWeek() {
+		Observation futureObservation = new Observation();
+		Instant nextWeek = Instant.now().plus(Duration.ofDays(7));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextWeek)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testNowNextMinute() {
+		Observation futureObservation = new Observation();
+		Instant nextMinute = Instant.now().plus(Duration.ofMinutes(1));
+		futureObservation.setEffective(new DateTimeType(Date.from(nextMinute)));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(futureObservation);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertTrue(result.matched());
 	}

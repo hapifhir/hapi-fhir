@@ -41,7 +41,8 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 
 	private static final FastDateFormat ourHumanDateFormat = FastDateFormat.getDateInstance(FastDateFormat.MEDIUM);
 	private static final FastDateFormat ourHumanDateTimeFormat = FastDateFormat.getDateTimeInstance(FastDateFormat.MEDIUM, FastDateFormat.MEDIUM);
-
+	private static final FastDateFormat ourXmlDateTimeFormat = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss");
+	public static final String NOW_DATE_CONSTANT = "%now";
 	private String myFractionalSeconds;
 	private TemporalPrecisionEnum myPrecision = null;
 	private TimeZone myTimeZone;
@@ -342,10 +343,6 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 			throwBadDateFormat(value);
 		}
 
-		if (value.equalsIgnoreCase("%now")) {
-			return new Date();
-		}
-
 		TemporalPrecisionEnum precision = null;
 		cal.set(Calendar.YEAR, parseInt(value, value.substring(0, 4), 0, 9999));
 		precision = TemporalPrecisionEnum.YEAR;
@@ -638,7 +635,12 @@ public abstract class BaseDateTimeDt extends BasePrimitive<Date> {
 	@Override
 	public void setValueAsString(String theValue) throws DataFormatException {
 		clearTimeZone();
-		super.setValueAsString(theValue);
+
+		if (NOW_DATE_CONSTANT.equalsIgnoreCase(theValue)) {
+			super.setValueAsString(ourXmlDateTimeFormat.format(new Date()));
+		} else {
+			super.setValueAsString(theValue);
+		}
 	}
 
 	/**
