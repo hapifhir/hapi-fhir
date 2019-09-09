@@ -1829,8 +1829,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
-	// FIXME: DM 2019-09-05 - Return to 600000 before merging into master.
-	@Scheduled(fixedDelay = 6000) // 10 minutes.
+	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
