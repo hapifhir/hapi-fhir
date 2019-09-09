@@ -488,7 +488,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (!optionalTermValueSet.isPresent()) {
-			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSetToExpand));
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
 			return expandValueSet(theValueSetToExpand); // In-memory expansion.
 		}
 
@@ -947,8 +947,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 
 		if (!optionalTermValueSet.isPresent()) {
-			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSet));
-			myDeferredValueSets.add(theValueSet);
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
 			return false;
 		}
 

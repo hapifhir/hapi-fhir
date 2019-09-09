@@ -885,19 +885,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
 		assertFalse(containsComponent.hasDesignation());
 
-		myTermSvc.saveDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
 		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 

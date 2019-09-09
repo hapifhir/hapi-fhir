@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
@@ -311,8 +312,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
-//			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2")) //FIXME: DM
-			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
@@ -325,21 +325,34 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testExpandByUrlWithPreExpansion() throws Exception {//FIXME: DM
+	public void testExpandByUrlWithBogusUrl() throws Exception {
+		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+
+		try {
+			ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+				.execute();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansion() throws Exception {
 		myDaoConfig.setPreExpandValueSetsExperimental(true);
 
-		ourLog.info("DIEDERIK - before loading CD and VS");
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
-		ourLog.info("DIEDERIK - after loading CD and VS; before pre-expansion");
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-		ourLog.info("DIEDERIK - after pre-expansion");
 
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
 			.named("expand")
-			//			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2")) //FIXME: DM
-			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
@@ -349,6 +362,26 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
 
+	}
+
+	@Test
+	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		try {
+			Parameters respParam = ourClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
+				.execute();
+		} catch (ResourceNotFoundException e) {
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
+		}
 	}
 
 	@Test
