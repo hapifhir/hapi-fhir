@@ -27,6 +27,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
+
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -235,7 +236,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 
-		List<IBaseReference> allReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
+		List<IBaseReference> allReferences = getAllBaseReferences(theResource);
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
 			if (resource == null && next.getReferenceElement().isLocal()) {
@@ -280,6 +281,86 @@ public abstract class BaseParser implements IParser {
 
 	}
 
+	protected List<IBaseReference> getAllBaseReferences(IBaseResource theResource){
+		final ArrayList<IBaseReference> retVal = new ArrayList<IBaseReference>();
+		findBaseReferences(retVal, theResource, myContext.getResourceDefinition(theResource));
+		return retVal;
+	}
+
+	/**
+	 * A customised traversal of the tree to find the 'top level' base references. Nested references are found via the recursive traversal
+	 * of contained resources.
+	 */
+	protected void findBaseReferences(List<IBaseReference> allElements, IBase theElement, BaseRuntimeElementDefinition<?> theDefinition) {
+		if (theElement instanceof IBaseReference) {
+			allElements.add((IBaseReference) theElement);
+		}
+		
+		BaseRuntimeElementDefinition<?> def = theDefinition;
+		if (def.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) {
+			def = myContext.getElementDefinition(theElement.getClass());
+		}
+
+		switch (def.getChildType()) {
+			case ID_DATATYPE:
+			case PRIMITIVE_XHTML_HL7ORG:
+			case PRIMITIVE_XHTML:
+			case PRIMITIVE_DATATYPE:
+				// These are primitive types
+				break;
+			case RESOURCE:
+			case RESOURCE_BLOCK:
+			case COMPOSITE_DATATYPE: {
+				BaseRuntimeElementCompositeDefinition<?> childDef = (BaseRuntimeElementCompositeDefinition<?>) def;
+				for (BaseRuntimeChildDefinition nextChild : childDef.getChildrenAndExtension()) {
+
+					List<?> values = nextChild.getAccessor().getValues(theElement);
+					if (values != null) {
+						for (Object nextValueObject : values) {
+							IBase nextValue;
+							try {
+								nextValue = (IBase) nextValueObject;
+							} catch (ClassCastException e) {
+								String s = "Found instance of " + nextValueObject.getClass() + " - Did you set a field value to the incorrect type? Expected " + IBase.class.getName();
+								throw new ClassCastException(s);
+							}
+							if (nextValue == null) {
+								continue;
+							}
+							if (nextValue.isEmpty()) {
+								continue;
+							}
+							BaseRuntimeElementDefinition<?> childElementDef;
+							childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
+
+							if (childElementDef == null) {
+								childElementDef = myContext.getElementDefinition(nextValue.getClass());
+							}
+
+							if (nextChild instanceof RuntimeChildDirectResource) {
+								// Don't descend into embedded resources
+								if (nextValue instanceof IBaseReference) {
+									allElements.add((IBaseReference) nextValue);
+								}
+							} else {
+								findBaseReferences(allElements, nextValue, childElementDef);
+							}
+						}
+					}
+				}
+				break;
+			}
+			case CONTAINED_RESOURCES:
+				// skip contained resources when looking for resources to contain
+				break;
+			case CONTAINED_RESOURCE_LIST:
+			case EXTENSION_DECLARED:
+			case UNDECL_EXT: {
+				throw new IllegalStateException("state should not happen: " + def.getChildType());
+			}
+		}
+	}
+	
 	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
