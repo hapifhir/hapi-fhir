@@ -438,4 +438,9 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public String getLinkForUrl(String corePath, String url) {
+		throw new UnsupportedOperationException();
+	}
+
 }

@@ -66,7 +66,8 @@ public class GraphQLEngineTest {
 		engine.setGraphQL(Parser.parse("{valueQuantity{value,unit}}"));
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
@@ -100,7 +101,8 @@ public class GraphQLEngineTest {
 		engine.setServices(createStorageServices());
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 

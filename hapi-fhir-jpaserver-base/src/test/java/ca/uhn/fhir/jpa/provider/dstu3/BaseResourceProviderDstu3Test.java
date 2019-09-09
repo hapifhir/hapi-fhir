@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
@@ -18,6 +17,7 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -48,8 +48,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 
 public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 
@@ -62,7 +60,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 	protected static GenericWebApplicationContext ourWebApplicationContext;
 	protected static SearchParamRegistryDstu3 ourSearchParamRegistry;
 	protected static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc ourSearchCoordinatorSvc;
 	private static Server ourServer;
 	protected static SubscriptionTriggeringProvider ourSubscriptionTriggeringProvider;
@@ -156,7 +153,6 @@ public abstract class BaseResourceProviderDstu3Test extends BaseJpaDstu3Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainDstu3.class);
 			ourSearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryDstu3.class);
 			ourSubscriptionTriggeringProvider = wac.getBean(SubscriptionTriggeringProvider.class);
 

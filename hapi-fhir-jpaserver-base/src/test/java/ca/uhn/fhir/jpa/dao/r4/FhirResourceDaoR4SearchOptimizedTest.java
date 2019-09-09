@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -14,6 +16,7 @@ import ca.uhn.fhir.rest.param.ReferenceOrListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -24,6 +27,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.aop.framework.AopProxyUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.test.context.TestPropertySource;
 
@@ -48,6 +52,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchOptimizedTest.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcImpl;
+	@Autowired
+	private ISearchDao mySearchEntityDao;
+	@Autowired
+	private ISearchResultDao mySearchResultDao;
 
 	@Before
 	public void before() {
@@ -288,7 +296,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(200, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
@@ -307,7 +315,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search gets incremented twice as a part of loading the next batch
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 			assertEquals(200, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
@@ -343,7 +351,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
@@ -367,7 +375,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search should be untouched
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(1, search.getVersion().intValue());
 		});
 
@@ -383,7 +391,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search gets incremented twice as a part of loading the next batch
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
 			assertEquals(50, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
@@ -407,7 +415,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search should be untouched
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(3, search.getVersion().intValue());
 		});
 
@@ -423,7 +431,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search gets incremented twice as a part of loading the next batch
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(190, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(190, search.getTotalCount().intValue());
@@ -470,7 +478,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(50, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(null, search.getTotalCount());
@@ -505,7 +513,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
@@ -529,7 +537,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * Search should be untouched
 		 */
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(200, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(200, search.getTotalCount().intValue());
@@ -562,9 +570,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
-		waitForSize(20, () -> runInTransaction(() -> mySearchEntityDao.findByUuid(uuid).getNumFound()));
+		waitForSize(20, () -> runInTransaction(() -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException("")).getNumFound()));
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(20, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertNull(search.getTotalCount());
@@ -625,7 +633,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(1, ids.size());
 
 		runInTransaction(() -> {
-			Search search = mySearchEntityDao.findByUuid(uuid);
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
 			assertEquals(1, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());

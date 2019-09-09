@@ -31,12 +31,10 @@ import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
-//@formatter:off
 @Table(name = "TRM_CODESYSTEM_VER"
 	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
 )
 @Entity()
-//@formatter:on
 public class TermCodeSystemVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
 

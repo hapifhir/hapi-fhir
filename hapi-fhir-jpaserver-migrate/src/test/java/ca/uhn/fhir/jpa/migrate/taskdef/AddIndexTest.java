@@ -1,12 +1,12 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import com.google.common.collect.Lists;
 import org.junit.Test;
 
 import java.sql.SQLException;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertThat;
 
 public class AddIndexTest extends BaseTest {

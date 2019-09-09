@@ -336,6 +336,18 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       expandedValueSet = new ValueSetExpansionOutcome(expansion);
     }
 
+    /*
+     * We'll just accept all mimetypes, since this is pretty much impossible to exhaustively
+     * validate.
+     */
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(wantCode);
+      definition.setDisplay(wantCode);
+      ValidationResult retVal = new ValidationResult(definition);
+      return retVal;
+    }
+
     if (expandedValueSet == null) {
       expandedValueSet = expand(theVs, null);
     }
