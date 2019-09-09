@@ -212,11 +212,22 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean supportedPrefix(ParamPrefixEnum theParam, RestSearchParameterTypeEnum theParamType) {
-		if (theParam == null) {
+		if (theParam == null || theParamType == null) {
 			return true;
 		}
-		if (theParam == ParamPrefixEnum.GREATERTHAN_OR_EQUALS && theParamType == RestSearchParameterTypeEnum.DATE) {
-			return true;
+		switch (theParamType) {
+			case DATE:
+				switch (theParam) {
+					case GREATERTHAN:
+					case GREATERTHAN_OR_EQUALS:
+					case LESSTHAN:
+					case LESSTHAN_OR_EQUALS:
+					case EQUAL:
+						return true;
+				}
+				break;
+			default:
+				return false;
 		}
 		return false;
 	}

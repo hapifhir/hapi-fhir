@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.Before;
@@ -23,11 +26,18 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class InMemoryResourceMatcherTest {
+	public static final String OBS_DATE = "1970-10-17";
+	private static final String EARLY_DATE = "1965-08-09";
+	private static final String LATE_DATE = "2000-06-29";
+
 	@Autowired
+	private
 	InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
+	private Observation myObservation;
+	private ResourceIndexedSearchParams mySearchParams;
 
 	@Configuration
 	public static class SpringConfig {
@@ -52,25 +62,60 @@ public class InMemoryResourceMatcherTest {
 		RuntimeSearchParam searchParams = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 		when(mySearchParamRegistry.getSearchParamByName(any(), any())).thenReturn(searchParams);
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(searchParams);
+		myObservation = new Observation();
+		myObservation.setEffective(new DateTimeType(OBS_DATE));
+		mySearchParams = extractDateSearchParam(myObservation);
+	}
+
+	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
+		ResourceIndexedSearchParams retval = new ResourceIndexedSearchParams();
+		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
+		ResourceIndexedSearchParamDate dateParam = new ResourceIndexedSearchParamDate("date", dateValue.getValue(), dateValue.getValue(), dateValue.getValueAsString());
+		retval.myDateParams.add(dateParam);
+		return retval;
 	}
 
 	@Test
-	public void testDateAp() {
-		Observation observation = new Observation();
-		observation.setEffective(new DateTimeType("1970-01-01"));
-		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=ap1970-01-01", observation, searchParams);
+	public void testUnsupportedOps() {
+		testUnsupportedOp(ParamPrefixEnum.APPROXIMATE);
+		testUnsupportedOp(ParamPrefixEnum.STARTS_AFTER);
+		testUnsupportedOp(ParamPrefixEnum.ENDS_BEFORE);
+		testUnsupportedOp(ParamPrefixEnum.NOT_EQUAL);
+	}
+
+	private void testUnsupportedOp(ParamPrefixEnum theOperator) {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBS_DATE, myObservation, mySearchParams);
 		assertFalse(result.supported());
-		assertEquals("Parameter: <date> Reason: The prefix APPROXIMATE is not supported for param type DATE", result.getUnsupportedReason());
+		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
 	}
 
 	@Test
-	public void testDateGe() {
-		Observation observation = new Observation();
-		observation.setEffective(new DateTimeType("1970-01-01"));
-		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
-		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=ge1965-08-09", observation, searchParams);
-		assertTrue(result.getUnsupportedReason(), result.supported());
-		assertTrue(result.matched());
+	public void testSupportedOps() {
+		testSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
+		testSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
+		testSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
+		testSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
+		testSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
 	}
+
+	private void testSupportedOp(ParamPrefixEnum theOperator, boolean theEarly, boolean theSame, boolean theLater) {
+		String equation = "date=" + theOperator.getValue();
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + EARLY_DATE, myObservation, mySearchParams);
+			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertEquals(result.matched(), theEarly);
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + OBS_DATE, myObservation, mySearchParams);
+			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertEquals(result.matched(), theSame);
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + LATE_DATE, myObservation, mySearchParams);
+			assertTrue(result.getUnsupportedReason(), result.supported());
+			assertEquals(result.matched(), theLater);
+		}
+
+	}
+
 }
