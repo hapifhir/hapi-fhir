@@ -29,8 +29,6 @@ public class InMemoryResourceMatcherTest {
 	public static final String OBS_DATE = "1970-10-17";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
-	// FIXME KHS move this
-	private static final String NOW = "NOW";
 
 	@Autowired
 	private
@@ -71,29 +69,29 @@ public class InMemoryResourceMatcherTest {
 
 
 	@Test
-	public void testUnsupportedOps() {
-		testUnsupportedOp(ParamPrefixEnum.APPROXIMATE);
-		testUnsupportedOp(ParamPrefixEnum.STARTS_AFTER);
-		testUnsupportedOp(ParamPrefixEnum.ENDS_BEFORE);
-		testUnsupportedOp(ParamPrefixEnum.NOT_EQUAL);
+	public void testDateUnsupportedOps() {
+		testDateUnsupportedOp(ParamPrefixEnum.APPROXIMATE);
+		testDateUnsupportedOp(ParamPrefixEnum.STARTS_AFTER);
+		testDateUnsupportedOp(ParamPrefixEnum.ENDS_BEFORE);
+		testDateUnsupportedOp(ParamPrefixEnum.NOT_EQUAL);
 	}
 
-	private void testUnsupportedOp(ParamPrefixEnum theOperator) {
+	private void testDateUnsupportedOp(ParamPrefixEnum theOperator) {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBS_DATE, myObservation, mySearchParams);
 		assertFalse(result.supported());
 		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
 	}
 
 	@Test
-	public void testSupportedOps() {
-		testSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
-		testSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
-		testSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
-		testSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
-		testSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
+	public void testDateSupportedOps() {
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, true, true, false);
+		testDateSupportedOp(ParamPrefixEnum.GREATERTHAN, true, false, false);
+		testDateSupportedOp(ParamPrefixEnum.EQUAL, false, true, false);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN_OR_EQUALS, false, true, true);
+		testDateSupportedOp(ParamPrefixEnum.LESSTHAN, false, false, true);
 	}
 
-	private void testSupportedOp(ParamPrefixEnum theOperator, boolean theEarly, boolean theSame, boolean theLater) {
+	private void testDateSupportedOp(ParamPrefixEnum theOperator, boolean theEarly, boolean theSame, boolean theLater) {
 		String equation = "date=" + theOperator.getValue();
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + EARLY_DATE, myObservation, mySearchParams);

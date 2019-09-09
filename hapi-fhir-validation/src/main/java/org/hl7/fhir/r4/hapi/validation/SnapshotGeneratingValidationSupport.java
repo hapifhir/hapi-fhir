@@ -145,6 +145,12 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		public boolean prependLinks() {
 			return false;
 		}
+
+		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 }

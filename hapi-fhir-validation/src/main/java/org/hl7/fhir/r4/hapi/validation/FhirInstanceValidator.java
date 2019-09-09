@@ -30,9 +30,6 @@ import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -667,6 +664,11 @@ public class FhirInstanceValidator extends org.hl7.fhir.r4.hapi.validation.BaseV
 
 			org.hl7.fhir.r4.context.IWorkerContext.ValidationResult result = myWrap.validateCode(theOptions, system, code, display, conceptSetComponent);
 			return convertValidationResult(result);
+		}
+
+		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
 		}
 
 	}

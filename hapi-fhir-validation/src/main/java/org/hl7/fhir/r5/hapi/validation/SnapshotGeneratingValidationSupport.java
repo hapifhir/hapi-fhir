@@ -132,6 +132,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		}
 
 		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public BindingResolution resolveBinding(StructureDefinition def, String url, String path) throws FHIRException {
 			return null;
 		}

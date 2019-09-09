@@ -5,8 +5,8 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_PREFIX;
+import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_SUFFIX;
 import static org.junit.Assert.assertEquals;
 
 public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
@@ -30,14 +32,14 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +"{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAM\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}"), TestUtil.stripReturns(resp));
+				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -52,7 +54,7 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +"{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -65,7 +67,7 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}"), TestUtil.stripReturns(resp));
+				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}

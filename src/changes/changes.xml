@@ -117,6 +117,10 @@
 				the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) 
 				could be bypassed if a Content Type was not included.
 			</action>
+			<action type="fix">
+				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
+				specification. This has been corrected.
+			</action>
 			<action type="add">
 				Added support for comparing resource dates to the current time via a new variable %now.  E.g.
 				Procedure?date=gt%now would match future procedures.

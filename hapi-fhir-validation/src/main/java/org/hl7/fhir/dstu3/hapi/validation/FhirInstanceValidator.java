@@ -5,7 +5,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.apache.commons.lang3.Validate;
@@ -336,6 +335,11 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 		@Override
 		public List<org.hl7.fhir.r5.model.MetadataResource> allConformanceResources() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String getLinkForUrl(String corePath, String url) {
 			throw new UnsupportedOperationException();
 		}
 

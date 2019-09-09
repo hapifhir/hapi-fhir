@@ -6,7 +6,10 @@ import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.utils.GraphQLEngine;
-import org.hl7.fhir.utilities.graphql.*;
+import org.hl7.fhir.utilities.graphql.EGraphEngine;
+import org.hl7.fhir.utilities.graphql.EGraphQLException;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.hl7.fhir.utilities.graphql.Parser;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -66,7 +69,8 @@ public class GraphQLEngineTest {
 		engine.setGraphQL(Parser.parse("{valueQuantity{value,unit}}"));
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
@@ -100,7 +104,8 @@ public class GraphQLEngineTest {
 		engine.setServices(createStorageServices());
 		engine.execute();
 
-		ObjectValue output = engine.getOutput();
+		GraphQLResponse output = engine.getOutput();
+		output.setWriteWrapper(false);
 		StringBuilder outputBuilder = new StringBuilder();
 		output.write(outputBuilder, 0, "\n");
 
