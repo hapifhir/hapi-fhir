@@ -549,7 +549,7 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 		CommunicationRequest cr = new CommunicationRequest();
 		cr.getRequester().getAgent().setReference("Organization/O1276");
 		cr.setOccurrence(new DateTimeType("2019-02-08T00:01:00-05:00"));
-		assertUnsupported(cr, criteria);
+		assertMatched(cr, criteria);
 	}
 
 
