@@ -156,7 +156,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		for (Long conceptId : conceptIds) {
 			myValueSetConceptDao.updateOrderById(conceptId, order++);
 		}
-		ourLog.info("Have remove gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSet.getUrl());
+		ourLog.info("Have removed gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSet.getUrl());
 
 		return true;
 	}
