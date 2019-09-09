@@ -212,7 +212,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;

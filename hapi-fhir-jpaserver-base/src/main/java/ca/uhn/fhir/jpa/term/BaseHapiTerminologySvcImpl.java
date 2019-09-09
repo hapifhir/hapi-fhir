@@ -32,9 +32,11 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -487,7 +489,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSetToExpand));
-			myDeferredValueSets.add(theValueSetToExpand);
 			return expandValueSet(theValueSetToExpand); // In-memory expansion.
 		}
 
@@ -2364,6 +2365,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
+	}
+
+	protected void throwInvalidValueSet(String theValueSet) {
+		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
 	}
 
 	private static void extractLinksFromConceptAndChildren(TermConcept theConcept, List<TermConceptParentChildLink> theLinks) {

@@ -133,7 +133,7 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		ValueSet valueSetR5 = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (valueSetR5 == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		return expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR5));

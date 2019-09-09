@@ -124,7 +124,7 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {//FIXME: DM COWABUNGA
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		return expandValueSetAndReturnVersionIndependentConcepts(vs);
