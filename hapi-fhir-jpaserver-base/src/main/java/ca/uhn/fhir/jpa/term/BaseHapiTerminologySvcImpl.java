@@ -578,15 +578,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
 	}
 
-	private void logConceptsExpanded(String thePrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
+	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			ourLog.info("{}Have expanded {} concepts in ValueSet[{}]", thePrefix, theConceptsExpanded, theTermValueSet.getUrl());
+			ourLog.info("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
-	private void logDesignationsExpanded(String thePrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.info("{}Have expanded {} designations in ValueSet[{}]", thePrefix, theDesignationsExpanded, theTermValueSet.getUrl());
+			ourLog.info("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
 		}
 	}
 

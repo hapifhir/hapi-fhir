@@ -48,11 +48,12 @@ import java.io.Serializable;
 	"   LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID"
 )
 public class TermValueSetConceptView implements Serializable {
-
 	private static final long serialVersionUID = 1L;
 
+	private static final int MAX_LENGTH = 500;
+
 	@Id
-	@Column(name="PID")
+	@Column(name="PID", length = MAX_LENGTH)
 	private String myPid;
 
 	@Column(name = "CONCEPT_PID")
@@ -64,31 +65,31 @@ public class TermValueSetConceptView implements Serializable {
 	@Column(name = "CONCEPT_VALUESET_ORDER")
 	private int myConceptOrder;
 
-	@Column(name = "CONCEPT_SYSTEM_URL")
+	@Column(name = "CONCEPT_SYSTEM_URL", length = TermCodeSystem.MAX_URL_LENGTH)
 	private String myConceptSystemUrl;
 
-	@Column(name = "CONCEPT_CODEVAL")
+	@Column(name = "CONCEPT_CODEVAL", length = TermConcept.MAX_CODE_LENGTH)
 	private String myConceptCode;
 
-	@Column(name = "CONCEPT_DISPLAY")
+	@Column(name = "CONCEPT_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
 	private String myConceptDisplay;
 
 	@Column(name = "DESIGNATION_PID")
 	private Long myDesignationPid;
 
-	@Column(name = "DESIGNATION_LANG")
+	@Column(name = "DESIGNATION_LANG", length = TermValueSetConceptDesignation.MAX_LENGTH)
 	private String myDesignationLang;
 
-	@Column(name = "DESIGNATION_USE_SYSTEM")
+	@Column(name = "DESIGNATION_USE_SYSTEM", length = TermValueSetConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseSystem;
 
-	@Column(name = "DESIGNATION_USE_CODE")
+	@Column(name = "DESIGNATION_USE_CODE", length = TermValueSetConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseCode;
 
-	@Column(name = "DESIGNATION_USE_DISPLAY")
+	@Column(name = "DESIGNATION_USE_DISPLAY", length = TermValueSetConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseDisplay;
 
-	@Column(name = "DESIGNATION_VAL")
+	@Column(name = "DESIGNATION_VAL", length = TermValueSetConceptDesignation.MAX_LENGTH)
 	private String myDesignationVal;
 
 
