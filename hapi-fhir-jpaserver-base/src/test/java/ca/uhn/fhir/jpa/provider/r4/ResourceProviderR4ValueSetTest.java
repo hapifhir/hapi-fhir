@@ -52,16 +52,6 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	private Long myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
-//	@Before
-//	@Transactional
-//	public void before02() throws IOException {
-//		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
-//		myCodeSystemDao.create(cs, mySrd);
-//
-//		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-//		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
-//	}
-
 	private void loadAndPersistCodeSystemAndValueSet(HttpVerb theVerb) throws IOException {
 		loadAndPersistCodeSystem(theVerb);
 		loadAndPersistValueSet(theVerb);
