@@ -178,7 +178,7 @@ public class ConsentInterceptor {
 						alreadySeenResources.put(newOperationOutcome, true);
 					} else {
 						String resourceId = nextResource.getIdElement().getValue();
-						theRequestDetails.getFhirContext().newTerser().clear(nextResource);
+						thePreResourceShowDetails.setResource(i, null);
 						nextResource.setId(resourceId);
 					}
 					break;

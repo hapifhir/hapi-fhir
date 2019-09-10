@@ -29,7 +29,9 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -42,7 +44,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 @Service
 public class InMemoryResourceMatcher {
@@ -57,11 +58,10 @@ public class InMemoryResourceMatcher {
 	/**
 	 * This method is called in two different scenarios.  With a null theResource, it determines whether database matching might be required.
 	 * Otherwise, it tries to perform the match in-memory, returning UNSUPPORTED if it's not possible.
-	 *
+	 * <p>
 	 * Note that there will be cases where it returns UNSUPPORTED with a null resource, but when a non-null resource it returns supported and no match.
 	 * This is because an earlier parameter may be matchable in-memory in which case processing stops and we never get to the parameter
 	 * that would have required a database call.
-	 *
 	 */
 
 	public InMemoryMatchResult match(String theCriteria, IBaseResource theResource, ResourceIndexedSearchParams theSearchParams) {
@@ -86,7 +86,7 @@ public class InMemoryResourceMatcher {
 			String theParamName = entry.getKey();
 			List<List<IQueryParameterType>> theAndOrParams = entry.getValue();
 			InMemoryMatchResult result = matchIdsWithAndOr(theParamName, theAndOrParams, resourceDefinition, theResource, theSearchParams);
-			if (!result.matched()){
+			if (!result.matched()) {
 				return result;
 			}
 		}
@@ -102,14 +102,18 @@ public class InMemoryResourceMatcher {
 		if (hasQualifiers(theAndOrParams)) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.STANDARD_PARAMETER);
 		}
-		if (hasPrefixes(theAndOrParams)) {
 
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PREFIX);
-
-		}
 		if (hasChain(theAndOrParams)) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.CHAIN);
 		}
+
+		String resourceName = theResourceDefinition.getName();
+		RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
+		InMemoryMatchResult checkUnsupportedResult = checkUnsupportedPrefixes(theParamName, paramDef, theAndOrParams);
+		if (!checkUnsupportedResult.supported()) {
+			return checkUnsupportedResult;
+		}
+
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
 
@@ -125,8 +129,7 @@ public class InMemoryResourceMatcher {
 
 			default:
 
-				String resourceName = theResourceDefinition.getName();
-				RuntimeSearchParam paramDef = mySearchParamRegistry.getActiveSearchParam(resourceName, theParamName);
+
 				return matchResourceParam(theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
 	}
@@ -137,11 +140,12 @@ public class InMemoryResourceMatcher {
 		}
 		return theAndOrParams.stream().allMatch(nextAnd -> matchIdsOr(nextAnd, theResource));
 	}
+
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
 		if (theResource == null) {
 			return true;
 		}
-		return theOrParams.stream().anyMatch(param -> param instanceof StringParam && matchId(((StringParam)param).getValue(), theResource.getIdElement()));
+		return theOrParams.stream().anyMatch(param -> param instanceof StringParam && matchId(((StringParam) param).getValue(), theResource.getIdElement()));
 	}
 
 	private boolean matchId(String theValue, IIdType theId) {
@@ -183,16 +187,48 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean hasChain(List<List<IQueryParameterType>> theAndOrParams) {
-		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param instanceof ReferenceParam && ((ReferenceParam)param).getChain() != null);
+		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param instanceof ReferenceParam && ((ReferenceParam) param).getChain() != null);
 	}
 
 	private boolean hasQualifiers(List<List<IQueryParameterType>> theAndOrParams) {
 		return theAndOrParams.stream().flatMap(List::stream).anyMatch(param -> param.getQueryParameterQualifier() != null);
 	}
 
-	private boolean hasPrefixes(List<List<IQueryParameterType>> theAndOrParams) {
-		Predicate<IQueryParameterType> hasPrefixPredicate = param -> param instanceof BaseParamWithPrefix &&
-			((BaseParamWithPrefix) param).getPrefix() != null;
-		return theAndOrParams.stream().flatMap(List::stream).anyMatch(hasPrefixPredicate);
+	private InMemoryMatchResult checkUnsupportedPrefixes(String theParamName, RuntimeSearchParam theParamDef, List<List<IQueryParameterType>> theAndOrParams) {
+		if (theParamDef != null) {
+			for (List<IQueryParameterType> theAndOrParam : theAndOrParams) {
+				for (IQueryParameterType param : theAndOrParam) {
+					if (param instanceof BaseParamWithPrefix) {
+						ParamPrefixEnum prefix = ((BaseParamWithPrefix) param).getPrefix();
+						RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
+						if (!supportedPrefix(prefix, paramType)) {
+							return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, String.format("The prefix %s is not supported for param type %s", prefix, paramType));
+						}
+					}
+				}
+			}
+		}
+		return InMemoryMatchResult.successfulMatch();
+	}
+
+	private boolean supportedPrefix(ParamPrefixEnum theParam, RestSearchParameterTypeEnum theParamType) {
+		if (theParam == null || theParamType == null) {
+			return true;
+		}
+		switch (theParamType) {
+			case DATE:
+				switch (theParam) {
+					case GREATERTHAN:
+					case GREATERTHAN_OR_EQUALS:
+					case LESSTHAN:
+					case LESSTHAN_OR_EQUALS:
+					case EQUAL:
+						return true;
+				}
+				break;
+			default:
+				return false;
+		}
+		return false;
 	}
 }
