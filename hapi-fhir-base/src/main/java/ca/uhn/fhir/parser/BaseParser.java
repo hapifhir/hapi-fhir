@@ -68,6 +68,47 @@ public abstract class BaseParser implements IParser {
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
 
+	private Map<Key, List<CompositeChildElement>> compositeChildrenCache = new HashMap<>();
+
+	private static class Key {
+		private final BaseRuntimeElementCompositeDefinition<?> resDef;
+		private final boolean theContainedResource;
+		private final CompositeChildElement theParent;
+		private final EncodeContext theEncodeContext;
+		
+		public Key(BaseRuntimeElementCompositeDefinition<?> resDef, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
+			this.resDef = resDef;
+			this.theContainedResource = theContainedResource;
+			this.theParent = theParent;
+			this.theEncodeContext = theEncodeContext;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((resDef == null) ? 0 : resDef.hashCode());
+			result = prime * result + (theContainedResource ? 1231 : 1237);
+			result = prime * result + ((theParent == null) ? 0 : theParent.hashCode());
+			result = prime * result + ((theEncodeContext == null) ? 0 : theEncodeContext.hashCode());
+			return result;
+		}
+		
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof Key) {
+				final Key that = (Key) obj;
+				return Objects.equals(this.resDef, that.resDef) && 
+						this.theContainedResource == that.theContainedResource &&
+						Objects.equals(this.theParent, that.theParent) &&
+						Objects.equals(this.theEncodeContext, that.theEncodeContext);
+			}
+			return false;
+		}
+	}
+	
 	/**
 	 * Constructor
 	 */
@@ -129,85 +170,37 @@ public abstract class BaseParser implements IParser {
 	}
 
 	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
-
 		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theCompositeElement.getClass());
-		final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
+		return compositeChildrenCache.computeIfAbsent(new Key(elementDef, theContainedResource, theParent, theEncodeContext), (k) -> {
+		
+			final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
+			final List<CompositeChildElement> result = new ArrayList<>(children.size());
 
-		return new Iterable<BaseParser.CompositeChildElement>() {
+			for(final BaseRuntimeChildDefinition child: children) {
+				CompositeChildElement myNext = new CompositeChildElement(theParent, child, theEncodeContext);
 
-			@Override
-			public Iterator<CompositeChildElement> iterator() {
-
-				return new Iterator<CompositeChildElement>() {
-					private Iterator<? extends BaseRuntimeChildDefinition> myChildrenIter;
-					private Boolean myHasNext = null;
-					private CompositeChildElement myNext;
-
-					/**
-					 * Constructor
-					 */ {
-						myChildrenIter = children.iterator();
+				/*
+				 * There are lots of reasons we might skip encoding a particular child
+				 */
+				if (myNext.getDef().getElementName().equals("id")) {
+					continue;
+				} else if (!myNext.shouldBeEncoded(theContainedResource)) {
+					continue;
+				} else if (myNext.getDef() instanceof RuntimeChildNarrativeDefinition) {
+					if (isSuppressNarratives() || isSummaryMode()) {
+						continue;
+					} else if (theContainedResource) {
+						continue;
 					}
-
-					@Override
-					public boolean hasNext() {
-						if (myHasNext != null) {
-							return myHasNext;
-						}
-
-						myNext = null;
-						do {
-							if (myChildrenIter.hasNext() == false) {
-								myHasNext = Boolean.FALSE;
-								return false;
-							}
-
-							myNext = new CompositeChildElement(theParent, myChildrenIter.next(), theEncodeContext);
-
-							/*
-							 * There are lots of reasons we might skip encoding a particular child
-							 */
-							if (myNext.getDef().getElementName().equals("id")) {
-								myNext = null;
-							} else if (!myNext.shouldBeEncoded(theContainedResource)) {
-								myNext = null;
-							} else if (myNext.getDef() instanceof RuntimeChildNarrativeDefinition) {
-								if (isSuppressNarratives() || isSummaryMode()) {
-									myNext = null;
-								} else if (theContainedResource) {
-									myNext = null;
-								}
-							} else if (myNext.getDef() instanceof RuntimeChildContainedResources) {
-								if (theContainedResource) {
-									myNext = null;
-								}
-							}
-						} while (myNext == null);
-
-						myHasNext = true;
-						return true;
+				} else if (myNext.getDef() instanceof RuntimeChildContainedResources) {
+					if (theContainedResource) {
+						continue;
 					}
-
-					@Override
-					public CompositeChildElement next() {
-						if (myHasNext == null) {
-							if (!hasNext()) {
-								throw new IllegalStateException();
-							}
-						}
-						CompositeChildElement retVal = myNext;
-						myNext = null;
-						myHasNext = null;
-						return retVal;
-					}
-
-					@Override
-					public void remove() {
-						throw new UnsupportedOperationException();
-					}
-				};
+				}
+				result.add(myNext);
 			}
-		};
+			return result;
+		});
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
@@ -1273,6 +1266,37 @@ public abstract class BaseParser implements IParser {
 			}
 
 			return retVal;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((myDef == null) ? 0 : myDef.hashCode());
+			result = prime * result + ((myParent == null) ? 0 : myParent.hashCode());
+			result = prime * result + ((myResDef == null) ? 0 : myResDef.hashCode());
+			result = prime * result + ((myEncodeContext == null) ? 0 : myEncodeContext.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+
+			if (obj instanceof CompositeChildElement) {
+				final CompositeChildElement that = (CompositeChildElement) obj;
+				return Objects.equals(this.getEnclosingInstance(), that.getEnclosingInstance()) &&
+						Objects.equals(this.myDef, that.myDef) &&
+						Objects.equals(this.myParent, that.myParent) &&
+						Objects.equals(this.myResDef, that.myResDef) &&
+						Objects.equals(this.myEncodeContext, that.myEncodeContext);
+			}
+			return false;
+		}
+
+		private BaseParser getEnclosingInstance() {
+			return BaseParser.this;
 		}
 	}
 
