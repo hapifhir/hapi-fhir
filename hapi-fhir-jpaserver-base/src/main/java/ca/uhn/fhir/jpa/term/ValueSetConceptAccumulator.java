@@ -31,6 +31,7 @@ import ca.uhn.fhir.util.ValidateUtil;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.*;
@@ -44,6 +45,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 	private int myConceptsSaved;
 	private int myDesignationsSaved;
+	private int myConceptsExcluded;
 
 	public ValueSetConceptAccumulator(@Nonnull TermValueSet theTermValueSet, @Nonnull ITermValueSetDao theValueSetDao, @Nonnull ITermValueSetConceptDao theValueSetConceptDao, @Nonnull ITermValueSetConceptDesignationDao theValueSetConceptDesignationDao) {
 		myTermValueSet = theTermValueSet;
@@ -52,6 +54,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		myValueSetConceptDesignationDao = theValueSetConceptDesignationDao;
 		myConceptsSaved = 0;
 		myDesignationsSaved = 0;
+		myConceptsExcluded = 0;
 	}
 
 	@Override
@@ -88,6 +91,10 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
 			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+
+			if (++myConceptsExcluded % 250 == 0) {
+				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
+			}
 		}
 	}
 
@@ -97,6 +104,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 
 		TermValueSetConcept concept = new TermValueSetConcept();
 		concept.setValueSet(myTermValueSet);
+		concept.setOrder(myConceptsSaved);
 		concept.setSystem(theSystem);
 		concept.setCode(theCode);
 		if (isNotBlank(theDisplay)) {
@@ -105,7 +113,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		myValueSetConceptDao.save(concept);
 		myValueSetDao.save(myTermValueSet.incrementTotalConcepts());
 
-		if (myConceptsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
+		if (++myConceptsSaved % 250 == 0) {
 			ourLog.info("Have pre-expanded {} concepts in ValueSet[{}]", myConceptsSaved, myTermValueSet.getUrl());
 		}
 
@@ -130,14 +138,30 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		myValueSetConceptDesignationDao.save(designation);
 		myValueSetDao.save(myTermValueSet.incrementTotalConceptDesignations());
 
-		if (myDesignationsSaved++ % 250 == 0) { // TODO: DM 2019-08-23 - This message never appears in the log. Fix it!
-			ourLog.info("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
+		if (++myDesignationsSaved % 250 == 0) {
+			ourLog.debug("Have pre-expanded {} designations for Concept[{}|{}] in ValueSet[{}]", myDesignationsSaved, theConcept.getSystem(), theConcept.getCode(), myTermValueSet.getUrl());
 		}
 
 		return designation;
 	}
 
-	// TODO: DM 2019-07-16 - We need TermValueSetConceptProperty, similar to TermConceptProperty.
-	// TODO: DM 2019-07-16 - We should also populate TermValueSetConceptProperty entities here.
-	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they are needed to facilitate filters and parameterized expansions.
+	public Boolean removeGapsFromConceptOrder() {
+		if (myConceptsExcluded <= 0) {
+			return false;
+		}
+
+		ourLog.info("Removing gaps from concept order for ValueSet[{}]", myTermValueSet.getUrl());
+		int order = 0;
+		List<Long> conceptIds = myValueSetConceptDao.findIdsByTermValueSetId(myTermValueSet.getId());
+		for (Long conceptId : conceptIds) {
+			myValueSetConceptDao.updateOrderById(conceptId, order++);
+		}
+		ourLog.info("Have removed gaps from concept order for {} concepts in ValueSet[{}]", conceptIds.size(), myTermValueSet.getUrl());
+
+		return true;
+	}
+
+	// TODO: DM 2019-07-16 - We may need TermValueSetConceptProperty, similar to TermConceptProperty.
+	// TODO: DM 2019-07-16 - If so, we should also populate TermValueSetConceptProperty entities here.
+	// TODO: DM 2019-07-30 - Expansions don't include the properties themselves; they may be needed to facilitate filters and parameterized expansions.
 }

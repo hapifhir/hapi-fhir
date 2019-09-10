@@ -21,8 +21,6 @@ package ca.uhn.fhir.jpa.dao.data;
  */
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -33,17 +31,14 @@ import java.util.Optional;
 
 public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConcept, Long> {
 
-	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("SELECT COUNT(*) FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	Integer countByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid")
+	@Query("DELETE FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid")
 	@Modifying
 	void deleteByTermValueSetId(@Param("pid") Long theValueSetId);
 
-	@Query("SELECT vsc from TermValueSetConcept vsc LEFT OUTER JOIN FETCH vsc.myDesignations WHERE vsc.myValueSet.myId = :pid")
-	Slice<TermValueSetConcept> findByTermValueSetIdAndPreFetchDesignations(Pageable thePage, @Param("pid") Long theValueSetId);
-
-	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myId = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
+	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByTermValueSetIdSystemAndCode(@Param("pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.myCode = :codeval")
@@ -51,4 +46,11 @@ public interface ITermValueSetConceptDao extends JpaRepository<TermValueSetConce
 
 	@Query("SELECT vsc FROM TermValueSetConcept vsc WHERE vsc.myValueSet.myResourcePid = :resource_pid AND vsc.mySystem = :system_url AND vsc.myCode = :codeval")
 	Optional<TermValueSetConcept> findByValueSetResourcePidSystemAndCode(@Param("resource_pid") Long theValueSetId, @Param("system_url") String theSystem, @Param("codeval") String theCode);
+
+	@Query("SELECT vsc.myId FROM TermValueSetConcept vsc WHERE vsc.myValueSetPid = :pid ORDER BY vsc.myId")
+	List<Long> findIdsByTermValueSetId(@Param("pid") Long theValueSetId);
+
+	@Query("UPDATE TermValueSetConcept vsc SET vsc.myOrder = :order WHERE vsc.myId = :pid")
+	@Modifying
+	void updateOrderById(@Param("pid") Long theId, @Param("order") int theOrder);
 }
