@@ -55,16 +55,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	private Long myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
-//	@Before
-//	@Transactional
-//	public void before02() throws IOException {
-//		CodeSystem cs = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
-//		myCodeSystemDao.create(cs, mySrd);
-//
-//		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-//		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
-//	}
-
 	private void loadAndPersistCodeSystemAndValueSet(HttpVerb theVerb) throws IOException {
 		loadAndPersistCodeSystem(theVerb);
 		loadAndPersistValueSet(theVerb);
@@ -151,7 +141,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void createLocalCsAndVs() {
-		//@formatter:off
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -165,7 +154,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.addConcept().setCode("B").setDisplay("Code B")
 			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
 			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
-		//@formatter:on
 		myCodeSystemDao.create(codeSystem, mySrd);
 
 		createLocalVs(codeSystem);
@@ -313,7 +301,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -321,7 +308,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withNoParameters(Parameters.class)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -378,7 +364,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByIdWithFilter() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -386,7 +371,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "filter", new StringType("first"))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -508,7 +492,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -516,15 +499,12 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "valueSet", toExpand)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		//@formatter:off
 		assertThat(resp, Matchers.stringContainsInOrder(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
 
 	}
 
@@ -533,7 +513,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -541,7 +520,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "valueSet", myLocalVs)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -555,7 +533,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -563,7 +540,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "valueSet", myLocalVs)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -648,7 +624,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVsPointingAtBuiltInCodeSystem();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
@@ -656,7 +631,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withNoParameters(Parameters.class)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -669,7 +643,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myLocalValueSetId)
@@ -677,7 +650,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withNoParameters(Parameters.class)
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -693,7 +665,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -701,7 +672,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "identifier", new UriType(URL_MY_VALUE_SET))
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
@@ -717,7 +687,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createExternalCsAndLocalVsWithUnknownCode();
 		assertNotNull(myLocalValueSetId);
 
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -728,7 +697,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		} catch (InvalidRequestException e) {
 			assertEquals("HTTP 400 Bad Request: Invalid filter criteria - code does not exist: {http://example.com/my_code_system}childFOOOOOOO", e.getMessage());
 		}
-		//@formatter:on
 	}
 
 	/**
@@ -760,7 +728,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -768,7 +735,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "code", new CodeType("8495-4"))
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
@@ -805,7 +771,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
-		//@formatter:off
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -813,7 +778,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
 			.andParameter("system", new UriType("http://acme.org"))
 			.execute();
-		//@formatter:on
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
