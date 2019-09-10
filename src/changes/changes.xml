@@ -121,6 +121,13 @@
 				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
 				specification. This has been corrected.
 			</action>
+			<action type="add">
+				Added support for comparing resource dates to the current time via a new variable %now.  E.g.
+				Procedure?date=gt%now would match future procedures.
+			</action>
+			<action type="add">
+				Add support for in-memory matching on date comparisons ge,gt,eq,lt,le.
+			</action>
 			<action type="fix">
 				When using the Consent Service and denying a resource via the "Will See Resource" method, the resource ID
 				and version were still returned to the user. This has been corrected so that no details about

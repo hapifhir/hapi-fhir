@@ -562,7 +562,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.8-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.10-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
