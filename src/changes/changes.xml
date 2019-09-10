@@ -121,6 +121,11 @@
 				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
 				specification. This has been corrected.
 			</action>
+			<action type="fix">
+				When using the Consent Service and denying a resource via the "Will See Resource" method, the resource ID
+				and version were still returned to the user. This has been corrected so that no details about
+				the resource are leaked.
+			</action>
 		</release>
 		<release version="4.0.1" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
