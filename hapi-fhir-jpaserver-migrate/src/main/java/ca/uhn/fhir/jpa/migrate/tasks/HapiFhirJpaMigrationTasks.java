@@ -100,6 +100,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.dropIndex("IDX_VALUESET_EXP_STATUS");
 
 		version.dropIdGenerator("SEQ_SEARCHPARM_ID");
+
+		// TermValueSetConcept
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
+		Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+		termValueSetConceptTable.addColumn("VALUESET_ORDER").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		termValueSetConceptTable
+			.addIndex("IDX_VS_CONCEPT_ORDER")
+			.unique(true)
+			.withColumns("VALUESET_PID", "VALUESET_ORDER");
 	}
 
 	protected void init400() {

@@ -93,12 +93,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		boolean allSystemsAreSuppportedByTerminologyService = true;
 		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}
 		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}
@@ -125,12 +125,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 
 		boolean allSystemsAreSuppportedByTerminologyService = true;
 		for (ConceptSetComponent next : theSource.getCompose().getInclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}
 		for (ConceptSetComponent next : theSource.getCompose().getExclude()) {
-			if (!myTerminologySvc.supportsSystem(next.getSystem())) {
+			if (!isBlank(next.getSystem()) && !myTerminologySvc.supportsSystem(next.getSystem())) {
 				allSystemsAreSuppportedByTerminologyService = false;
 			}
 		}
@@ -160,6 +160,7 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		}
 
 		ValueSet source = new ValueSet();
+		source.setUrl(theUri);
 
 		source.getCompose().addInclude().addValueSet(theUri);
 

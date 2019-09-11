@@ -13,6 +13,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -801,8 +802,8 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
-		} catch (InvalidRequestException e) {
-			assertEquals("Unable to find imported value set http://example.com/my_value_set", e.getMessage());
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
 		}
 	}
 
@@ -1117,10 +1118,13 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		myValueSetDao.update(valueSet, mySrd).getId().toUnqualifiedVersionless();
 
-		params = new SearchParameterMap();
-		params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
-		params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params)), empty());
+		try {
+			params = new SearchParameterMap();
+			params.add(Observation.SP_CODE, new TokenParam(null, URL_MY_VALUE_SET).setModifier(TokenParamModifier.IN));
+			params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
+		}
 
 	}
 

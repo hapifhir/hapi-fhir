@@ -658,7 +658,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetDao.deleteById(termValueSetId);
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -695,7 +695,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDao.countByTermValueSetId(termValueSetId).intValue());
-				myTermValueSetDao.deleteByTermValueSetId(termValueSetId);
+				myTermValueSetDao.deleteById(termValueSetId);
 				assertFalse(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isPresent());
 			}
 		});
@@ -885,19 +885,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
 		assertFalse(containsComponent.hasDesignation());
 
-		myTermSvc.saveDeferred();
-		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
-
 		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
 		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
 
@@ -2097,11 +2090,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
+			assertEquals(0, concept.getOrder());
 
 			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2118,20 +2112,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(1, concept.getOrder());
 
 			// ...
 
 			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
+			assertEquals(22, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2141,11 +2137,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(23, concept.getOrder());
 		});
 	}
 
@@ -2195,11 +2192,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
+			assertEquals(0, concept.getOrder());
 
 			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2216,20 +2214,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(1, concept.getOrder());
 
 			// ...
 
 			concept = termValueSet.getConcepts().get(22);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
+			assertEquals(22, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2239,11 +2239,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(23);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(23, concept.getOrder());
 		});
 	}
 
@@ -2293,11 +2294,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
+			assertEquals(0, concept.getOrder());
 
 			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2314,20 +2316,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(1, concept.getOrder());
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22 - 2);
-			ourLog.info("Code:\n" + concept.toString());
+			concept = termValueSet.getConcepts().get(20);
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
+			assertEquals(20, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2336,12 +2340,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-			concept = termValueSet.getConcepts().get(23 - 2);
-			ourLog.info("Code:\n" + concept.toString());
+			concept = termValueSet.getConcepts().get(21);
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(21, concept.getOrder());
 		});
 	}
 
@@ -2391,11 +2396,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8450-9", concept.getCode());
 			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 			assertEquals(2, concept.getDesignations().size());
+			assertEquals(0, concept.getOrder());
 
 			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2412,20 +2418,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
 			concept = termValueSet.getConcepts().get(1);
-			ourLog.info("Code:\n" + concept.toString());
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("11378-7", concept.getCode());
 			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(1, concept.getOrder());
 
 			// ...
 
-			concept = termValueSet.getConcepts().get(22 - 2);
-			ourLog.info("Code:\n" + concept.toString());
+			concept = termValueSet.getConcepts().get(20);
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8491-3", concept.getCode());
 			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
 			assertEquals(1, concept.getDesignations().size());
+			assertEquals(20, concept.getOrder());
 
 			designation = concept.getDesignations().get(0);
 			assertEquals("nl", designation.getLanguage());
@@ -2434,12 +2442,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			assertEquals("Synonym", designation.getUseDisplay());
 			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-			concept = termValueSet.getConcepts().get(23 - 2);
-			ourLog.info("Code:\n" + concept.toString());
+			concept = termValueSet.getConcepts().get(21);
+			ourLog.info("Concept:\n" + concept.toString());
 			assertEquals("http://acme.org", concept.getSystem());
 			assertEquals("8492-1", concept.getCode());
 			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
 			assertEquals(0, concept.getDesignations().size());
+			assertEquals(21, concept.getOrder());
 		});
 	}
 
