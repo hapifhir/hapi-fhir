@@ -20,7 +20,7 @@ public class BulkExportProvider {
 	private IBulkDataExportSvc myBulkDataExportSvc;
 
 	/**
-	 * $binary-access-read
+	 * $export
 	 */
 	@Operation(name = JpaConstants.OPERATION_EXPORT, global = true, manualResponse = true, idempotent = true)
 	public void export(

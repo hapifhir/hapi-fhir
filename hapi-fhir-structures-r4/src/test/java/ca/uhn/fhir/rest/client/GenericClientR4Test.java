@@ -1341,7 +1341,7 @@ public class GenericClientR4Test {
 		client
 			.update()
 			.resource(bundle)
-			.prefer(PreferReturnEnum.REPRESENTATION)
+			.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
 			.encodedXml()
 			.execute();
 

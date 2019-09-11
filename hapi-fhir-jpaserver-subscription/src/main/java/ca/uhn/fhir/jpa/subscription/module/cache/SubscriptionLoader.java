@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.api.IDaoRegistry;
 import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -61,8 +62,6 @@ public class SubscriptionLoader {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired(required = false)
 	private IDaoRegistry myDaoRegistry;
-
-	private final Object mySyncSubscriptionsLock = new Object();
 	private Semaphore mySyncSubscriptionsSemaphore = new Semaphore(1);
 	@Autowired
 	private ISchedulerService mySchedulerService;

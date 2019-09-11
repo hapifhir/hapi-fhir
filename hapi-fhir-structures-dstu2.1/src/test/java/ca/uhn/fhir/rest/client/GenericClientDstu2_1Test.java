@@ -1074,7 +1074,7 @@ public class GenericClientDstu2_1Test {
 		client
 				.update()
 				.resource(bundle)
-				.prefer(PreferReturnEnum.REPRESENTATION)
+				.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
 				.encodedXml()
 				.execute();
 
