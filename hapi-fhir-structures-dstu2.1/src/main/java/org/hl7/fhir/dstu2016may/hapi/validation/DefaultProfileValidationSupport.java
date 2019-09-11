@@ -276,4 +276,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 		return new CodeValidationResult(OperationOutcome.IssueSeverity.WARNING, "Unknown code: " + theCodeSystem + " / " + theCode);
 	}
 
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return validateCode(theContext, theSystem, theCode, null).asLookupCodeResult(theSystem, theCode);
+	}
+
 }

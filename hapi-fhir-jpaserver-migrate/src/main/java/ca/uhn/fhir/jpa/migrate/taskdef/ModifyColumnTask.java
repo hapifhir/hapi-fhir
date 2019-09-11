@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> {
 
@@ -33,10 +34,17 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 
 	@Override
-	public void execute() {
+	public void execute() throws SQLException {
 
 		String existingType;
 		boolean nullable;
+
+		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
+		if (!columnNames.contains(getColumnName())) {
+			ourLog.info("Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			return;
+		}
+
 		try {
 			existingType = JdbcUtils.getColumnType(getConnectionProperties(), getTableName(), getColumnName());
 			nullable = JdbcUtils.isColumnNullable(getConnectionProperties(), getTableName(), getColumnName());
@@ -115,5 +123,4 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}
-
 }

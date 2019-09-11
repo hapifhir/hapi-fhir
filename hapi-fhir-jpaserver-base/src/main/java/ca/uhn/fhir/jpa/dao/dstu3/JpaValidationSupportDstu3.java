@@ -53,6 +53,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	private IFhirResourceDao<ValueSet> myValueSetDao;
 	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
+	private IFhirResourceDao<ImplementationGuide> myImplementationGuideDao;
 	@Autowired
 	private FhirContext myDstu3Ctx;
 	private ApplicationContext myApplicationContext;
@@ -148,6 +149,11 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 			params.setLoadSynchronousUpTo(1);
 			params.add(CodeSystem.SP_URL, new UriParam(theUri));
 			search = myCodeSystemDao.search(params);
+		} else if ("ImplementationGuide".equals(resourceName)) {
+			SearchParameterMap params = new SearchParameterMap();
+			params.setLoadSynchronousUpTo(1);
+			params.add(ImplementationGuide.SP_URL, new UriParam(theUri));
+			search = myImplementationGuideDao.search(params);
 		} else {
 			throw new IllegalArgumentException("Can't fetch resource type: " + resourceName);
 		}
@@ -171,7 +177,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public boolean isCodeSystemSupported(FhirContext theCtx, String theSystem) {
-		return fetchCodeSystem(theCtx, theSystem) != null;
+		return false;
 	}
 
 	@Override
@@ -185,11 +191,17 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 		myValueSetDao = myApplicationContext.getBean("myValueSetDaoDstu3", IFhirResourceDao.class);
 		myQuestionnaireDao = myApplicationContext.getBean("myQuestionnaireDaoDstu3", IFhirResourceDao.class);
 		myCodeSystemDao = myApplicationContext.getBean("myCodeSystemDaoDstu3", IFhirResourceDao.class);
+		myImplementationGuideDao = myApplicationContext.getBean("myImplementationGuideDaoDstu3", IFhirResourceDao.class);
 	}
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
 	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 

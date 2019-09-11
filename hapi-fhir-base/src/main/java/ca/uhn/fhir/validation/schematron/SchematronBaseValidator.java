@@ -69,7 +69,7 @@ public class SchematronBaseValidator implements IValidatorModule {
 			IBaseBundle bundle = (IBaseBundle) theCtx.getResource();
 			List<IBaseResource> subResources = BundleUtil.toListOfResources(myCtx, bundle);
 			for (IBaseResource nextSubResource : subResources) {
-				validateResource(ValidationContext.subContext(theCtx, nextSubResource));
+				validateResource(ValidationContext.subContext(theCtx, nextSubResource, theCtx.getOptions()));
 			}
 		}
 

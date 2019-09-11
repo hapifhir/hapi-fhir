@@ -69,7 +69,7 @@ public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 	public StructureDefinition fetchStructureDefinition(FhirContext theCtx, String theUrl) {
 		StructureDefinition retVal = super.fetchStructureDefinition(theCtx, theUrl);
 		if (retVal != null && !retVal.hasSnapshot()) {
-			retVal = generateSnapshot(retVal, theUrl, null);
+			retVal = generateSnapshot(retVal, theUrl, null, null);
 		}
 		return retVal;
 	}

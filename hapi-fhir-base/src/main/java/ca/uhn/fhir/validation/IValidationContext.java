@@ -25,6 +25,8 @@ import java.util.List;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 
+import javax.annotation.Nonnull;
+
 public interface IValidationContext<T> {
 
 	FhirContext getFhirContext();
@@ -40,5 +42,8 @@ public interface IValidationContext<T> {
 	List<SingleValidationMessage> getMessages();
 	
 	ValidationResult toResult();
+
+	@Nonnull
+	ValidationOptions getOptions();
 
 }

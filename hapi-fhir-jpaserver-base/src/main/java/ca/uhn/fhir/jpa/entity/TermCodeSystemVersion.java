@@ -31,16 +31,14 @@ import java.util.Collection;
 
 import static org.apache.commons.lang3.StringUtils.length;
 
-//@formatter:off
 @Table(name = "TRM_CODESYSTEM_VER"
 	// Note, we used to have a constraint named IDX_CSV_RESOURCEPID_AND_VER (don't reuse this)
 )
 @Entity()
-//@formatter:on
 public class TermCodeSystemVersion implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	static final int MAX_VERSION_LENGTH = 200;
+	public static final int MAX_VERSION_LENGTH = 200;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCodeSystem")
 	private Collection<TermConcept> myConcepts;
@@ -68,6 +66,9 @@ public class TermCodeSystemVersion implements Serializable {
 
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
+
+	@Column(name = "CS_DISPLAY", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
+	private String myCodeSystemDisplayName;
 
 	/**
 	 * Constructor
@@ -155,4 +156,14 @@ public class TermCodeSystemVersion implements Serializable {
 		return result;
 	}
 
+	public String getCodeSystemDisplayName() {
+		return myCodeSystemDisplayName;
+	}
+
+	public void setCodeSystemDisplayName(String theCodeSystemDisplayName) {
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(
+			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
+			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
+		myCodeSystemDisplayName = theCodeSystemDisplayName;
+	}
 }

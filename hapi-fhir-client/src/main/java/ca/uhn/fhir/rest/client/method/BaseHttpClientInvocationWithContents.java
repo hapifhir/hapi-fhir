@@ -116,7 +116,9 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myResource != null && IBaseBinary.class.isAssignableFrom(myResource.getClass())) {
 			IBaseBinary binary = (IBaseBinary) myResource;
 			if (isNotBlank(binary.getContentType()) && EncodingEnum.forContentTypeStrict(binary.getContentType()) == null) {
-				return httpClient.createBinaryRequest(getContext(), binary);
+				if (binary.hasData()) {
+					return httpClient.createBinaryRequest(getContext(), binary);
+				}
 			}
 		}
 
@@ -129,7 +131,7 @@ abstract class BaseHttpClientInvocationWithContents extends BaseHttpClientInvoca
 		if (myParams != null) {
 			return httpClient.createParamRequest(getContext(), myParams, encoding);
 		}
-		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.XML);
+		encoding = ObjectUtils.defaultIfNull(encoding,  EncodingEnum.JSON);
 		String contents = encodeContents(thePrettyPrint, encoding);
 		String contentType = getContentType(encoding);
 		return httpClient.createByteRequest(getContext(), contents, contentType, encoding);

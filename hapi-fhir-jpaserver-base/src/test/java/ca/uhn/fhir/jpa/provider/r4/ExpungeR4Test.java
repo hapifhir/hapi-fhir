@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
@@ -21,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -38,6 +41,10 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private IIdType myOneVersionObservationId;
 	private IIdType myTwoVersionObservationId;
 	private IIdType myDeletedObservationId;
+	@Autowired
+	private ISearchDao mySearchEntityDao;
+	@Autowired
+	private ISearchResultDao mySearchResultDao;
 
 	@After
 	public void afterDisableExpunge() {
@@ -75,6 +82,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		Patient p = new Patient();
 		p.setId("PT-ONEVERSION");
 		p.getMeta().addTag().setSystem("http://foo").setCode("bar");
+		p.getMeta().setSource("http://foo_source");
 		p.setActive(true);
 		p.addIdentifier().setSystem("foo").setValue("bar");
 		p.addName().setFamily("FAM");
@@ -339,12 +347,18 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	public void testExpungeEverythingWhereResourceInSearchResults() {
 		createStandardPatients();
 
-		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
+		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 0);
+			await().until(()->mySearchResultDao.count() == 0);
+		});
+
+		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
 		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
 		assertEquals(2, search.size().intValue());
 		assertEquals(2, search.getResources(0, 2).size());
 
 		runInTransaction(() -> {
+			await().until(()->mySearchEntityDao.count() == 1);
 			await().until(()->mySearchResultDao.count() == 2);
 			ourLog.info("Search results: {}", mySearchResultDao.findAll().toString());
 			assertEquals(mySearchResultDao.findAll().toString(), 2, mySearchResultDao.count());

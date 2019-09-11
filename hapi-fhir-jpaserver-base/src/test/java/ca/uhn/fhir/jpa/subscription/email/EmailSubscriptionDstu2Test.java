@@ -142,7 +142,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(1, messages[msgIdx].getHeader("Content-Type").length);
 		assertEquals("text/plain; charset=us-ascii", messages[msgIdx].getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(messages[msgIdx]);
-		assertEquals("A subscription update has been received", foundBody);
+		assertEquals("", foundBody);
 
 	}
 

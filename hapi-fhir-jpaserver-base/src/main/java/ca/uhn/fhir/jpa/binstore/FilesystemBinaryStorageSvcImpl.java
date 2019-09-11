@@ -26,9 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.base.Charsets;
 import com.google.common.hash.HashingInputStream;
-import com.google.common.io.CountingInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		// Write binary file
 		File storageFilename = getStorageFilename(storagePath, theResourceId, id);
 		ourLog.info("Writing to file: {}", storageFilename.getAbsolutePath());
-		CountingInputStream countingInputStream = new CountingInputStream(theInputStream);
+		CountingInputStream countingInputStream = createCountingInputStream(theInputStream);
 		HashingInputStream hashingInputStream = createHashingInputStream(countingInputStream);
 		try (FileOutputStream outputStream = new FileOutputStream(storageFilename)) {
 			IOUtils.copy(hashingInputStream, outputStream);
@@ -110,7 +110,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public void writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
 		File storagePath = getStoragePath(theBlobId, false);
 		if (storagePath != null) {
 			File file = getStorageFilename(storagePath, theResourceId, theBlobId);
@@ -121,6 +121,26 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 				}
 			}
 		}
+		return false;
+	}
+
+	@Override
+	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+		File storagePath = getStoragePath(theBlobId, false);
+		if (storagePath != null) {
+			File storageFile = getStorageFilename(storagePath, theResourceId, theBlobId);
+			if (storageFile.exists()) {
+				delete(storageFile, theBlobId);
+			}
+			File descriptorFile = getDescriptorFilename(storagePath, theResourceId, theBlobId);
+			if (descriptorFile.exists()) {
+				delete(descriptorFile, theBlobId);
+			}
+		}
+	}
+
+	private void delete(File theStorageFile, String theBlobId) {
+		Validate.isTrue(theStorageFile.delete(), "Failed to delete file for blob %s", theBlobId);
 	}
 
 	@Nonnull

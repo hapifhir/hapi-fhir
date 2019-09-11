@@ -157,9 +157,6 @@ public class ResourceParameter implements IParameter {
 				}
 			}
 			if (isBlank(ctValue)) {
-				/*
-				 * If the client didn't send a content type, try to guess
-				 */
 				String body;
 				try {
 					body = IOUtils.toString(requestReader);
@@ -170,12 +167,9 @@ public class ResourceParameter implements IParameter {
 				if (isBlank(body)) {
 					return null;
 				}
-				encoding = EncodingEnum.detectEncodingNoDefault(body);
-				if (encoding == null) {
-					String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
-					throw new InvalidRequestException(msg);
-				}
-				requestReader = new InputStreamReader(new ByteArrayInputStream(theRequest.loadRequestContents()), charset);
+
+				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "noContentTypeInRequest", restOperationType);
+				throw new InvalidRequestException(msg);
 			} else {
 				String msg = ctx.getLocalizer().getMessage(ResourceParameter.class, "invalidContentTypeInRequest", ctValue, restOperationType);
 				throw new InvalidRequestException(msg);

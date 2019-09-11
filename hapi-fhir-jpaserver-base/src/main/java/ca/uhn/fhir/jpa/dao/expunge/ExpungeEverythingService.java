@@ -120,6 +120,7 @@ public class ExpungeEverythingService {
 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTag.class));
 		counter.addAndGet(expungeEverythingByType(ResourceTag.class));
 		counter.addAndGet(expungeEverythingByType(TagDefinition.class));
+		counter.addAndGet(expungeEverythingByType(ResourceHistoryProvenanceEntity.class));
 		counter.addAndGet(expungeEverythingByType(ResourceHistoryTable.class));
 		counter.addAndGet(expungeEverythingByType(ResourceTable.class));
 		myTxTemplate.execute(t -> {

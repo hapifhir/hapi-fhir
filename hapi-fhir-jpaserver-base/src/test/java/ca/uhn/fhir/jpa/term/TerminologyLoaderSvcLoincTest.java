@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -15,46 +15,31 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.empty;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TerminologyLoaderSvcLoincTest {
+public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
 	private TerminologyLoaderSvcImpl mySvc;
 
 	@Mock
 	private IHapiTerminologySvc myTermSvc;
-
-	@Mock
-	private IHapiTerminologySvcDstu3 myTermSvcDstu3;
-
-	@Captor
-	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
-	@Mock
-	private RequestDetails details;
-	@Captor
-	private ArgumentCaptor<List<ValueSet>> myValueSetsCaptor;
-	@Captor
-	private ArgumentCaptor<List<ConceptMap>> myConceptMapCaptor;
+
 	private ZipCollectionBuilder myFiles;
 
 
@@ -62,33 +47,8 @@ public class TerminologyLoaderSvcLoincTest {
 	public void before() {
 		mySvc = new TerminologyLoaderSvcImpl();
 		mySvc.setTermSvcForUnitTests(myTermSvc);
-		mySvc.setTermSvcDstu3ForUnitTest(myTermSvcDstu3);
 
 		myFiles = new ZipCollectionBuilder();
-	}
-
-	private Map<String, ConceptMap> extractConceptMaps() {
-		Map<String, ConceptMap> conceptMaps = new HashMap<>();
-		for (ConceptMap next : myConceptMapCaptor.getAllValues().get(0)) {
-			conceptMaps.put(next.getId(), next);
-		}
-		return conceptMaps;
-	}
-
-	private Map<String, TermConcept> extractConcepts() {
-		Map<String, TermConcept> concepts = new HashMap<>();
-		for (TermConcept next : myCsvCaptor.getValue().getConcepts()) {
-			concepts.put(next.getCode(), next);
-		}
-		return concepts;
-	}
-
-	private Map<String, ValueSet> extractValueSets() {
-		Map<String, ValueSet> valueSets = new HashMap<>();
-		for (ValueSet next : myValueSetsCaptor.getValue()) {
-			valueSets.put(next.getId(), next);
-		}
-		return valueSets;
 	}
 
 	@Test
@@ -96,9 +56,9 @@ public class TerminologyLoaderSvcLoincTest {
 		addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), details);
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvcDstu3, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -296,6 +256,22 @@ public class TerminologyLoaderSvcLoincTest {
 		assertEquals("42176-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("1,3 beta glucan [Mass/volume] in Serum", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
+		// All LOINC codes
+		assertTrue(valueSets.containsKey("loinc-all"));
+		vs = valueSets.get("loinc-all");
+		assertEquals("http://loinc.org/vs", vs.getUrl());
+		assertEquals("1.0.0", vs.getVersion());
+		assertEquals("All LOINC codes", vs.getName());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, vs.getStatus());
+		assertTrue(vs.hasDate());
+		assertEquals("Regenstrief Institute, Inc.", vs.getPublisher());
+		assertEquals("A value set that includes all LOINC codes", vs.getDescription());
+		assertEquals("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/", vs.getCopyright());
+		assertTrue(vs.hasCompose());
+		assertTrue(vs.getCompose().hasInclude());
+		assertEquals(1, vs.getCompose().getInclude().size());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
 		ourLog.debug(FhirContext.forR4().newXmlParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
@@ -347,9 +323,9 @@ public class TerminologyLoaderSvcLoincTest {
 		addLoincMandatoryFilesToZip(myFiles);
 
 		// Actually do the load
-		mySvc.loadLoinc(myFiles.getFiles(), details);
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvcDstu3, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -366,12 +342,12 @@ public class TerminologyLoaderSvcLoincTest {
 
 	@Test
 	public void testLoadLoincMissingMandatoryFiles() throws IOException {
-		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
-		myFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
+		myFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		myFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
 
 		// Actually do the load
 		try {
-			mySvc.loadLoinc(myFiles.getFiles(), details);
+			mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 			fail();
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), containsString("Could not find the following mandatory files in input:"));
@@ -380,26 +356,129 @@ public class TerminologyLoaderSvcLoincTest {
 		}
 	}
 
-
 	public static void addLoincMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UPLOAD_PROPERTIES_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_FILE, TerminologyLoaderSvcImpl.LOINC_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_FILE, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
-		theFiles.addFileZip("/loinc/", TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
+		theFiles.addFileZip("/loinc/", LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_FILE_DEFAULT.getCode(), LOINC_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_HIERARCHY_FILE_DEFAULT.getCode(), LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_FILE_DEFAULT.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode(), LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_FILE_DEFAULT.getCode(), LOINC_PART_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_LINK_FILE_DEFAULT.getCode(), LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
+		theFiles.addFileZip("/loinc/", LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
+	}
+
+	@Test
+	public void testLoadLoincMultiaxialHierarchySupport() throws Exception {
+		addLoincMandatoryFilesToZip(myFiles);
+
+		// Actually do the load
+		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
+
+		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		Map<String, TermConcept> concepts = extractConcepts();
+		Map<String, ValueSet> valueSets = extractValueSets();
+		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
+
+		ConceptMap conceptMap;
+		TermConcept code;
+		ValueSet vs;
+		ConceptMap.ConceptMapGroupComponent group;
+
+		// Normal loinc code
+		code = concepts.get("10013-1");
+		assertEquals("10013-1", code.getCode());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
+		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
+		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
+		assertEquals("R' wave amplitude in lead I", code.getDisplay());
+
+		// Codes with parent and child properties
+		code = concepts.get("LP31755-9");
+		assertEquals("LP31755-9", code.getCode());
+		List<TermConceptProperty> properties = new ArrayList<>(code.getProperties());
+		assertEquals(1, properties.size());
+		assertEquals("child", properties.get(0).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals("LP14559-6", properties.get(0).getValue());
+		assertEquals("Microorganism", properties.get(0).getDisplay());
+		assertEquals(0, code.getParents().size());
+		assertEquals(1, code.getChildren().size());
+
+		TermConcept childCode = code.getChildren().get(0).getChild();
+		assertEquals("LP14559-6", childCode.getCode());
+		assertEquals("Microorganism", childCode.getDisplay());
+
+		properties = new ArrayList<>(childCode.getProperties());
+		assertEquals(2, properties.size());
+		assertEquals("parent", properties.get(0).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(code.getCode(), properties.get(0).getValue());
+		assertEquals(code.getDisplay(), properties.get(0).getDisplay());
+		assertEquals("child", properties.get(1).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals("LP98185-9", properties.get(1).getValue());
+		assertEquals("Bacteria", properties.get(1).getDisplay());
+		assertEquals(1, childCode.getParents().size());
+		assertEquals(1, childCode.getChildren().size());
+		assertEquals(code.getCode(), new ArrayList<>(childCode.getParents()).get(0).getParent().getCode());
+
+		TermConcept nestedChildCode = childCode.getChildren().get(0).getChild();
+		assertEquals("LP98185-9", nestedChildCode.getCode());
+		assertEquals("Bacteria", nestedChildCode.getDisplay());
+
+		properties = new ArrayList<>(nestedChildCode.getProperties());
+		assertEquals(2, properties.size());
+		assertEquals("parent", properties.get(0).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(childCode.getCode(), properties.get(0).getValue());
+		assertEquals(childCode.getDisplay(), properties.get(0).getDisplay());
+		assertEquals("child", properties.get(1).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals("LP14082-9", properties.get(1).getValue());
+		assertEquals("Bacteria", properties.get(1).getDisplay());
+		assertEquals(1, nestedChildCode.getParents().size());
+		assertEquals(1, nestedChildCode.getChildren().size());
+		assertEquals(childCode.getCode(), new ArrayList<>(nestedChildCode.getParents()).get(0).getParent().getCode());
+
+		TermConcept doublyNestedChildCode = nestedChildCode.getChildren().get(0).getChild();
+		assertEquals("LP14082-9", doublyNestedChildCode.getCode());
+		assertEquals("Bacteria", doublyNestedChildCode.getDisplay());
+
+		properties = new ArrayList<>(doublyNestedChildCode.getProperties());
+		assertEquals(4, properties.size());
+		assertEquals("parent", properties.get(0).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(nestedChildCode.getCode(), properties.get(0).getValue());
+		assertEquals(nestedChildCode.getDisplay(), properties.get(0).getDisplay());
+		assertEquals("child", properties.get(1).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals("LP52258-8", properties.get(1).getValue());
+		assertEquals("Bacteria | Body Fluid", properties.get(1).getDisplay());
+		assertEquals("child", properties.get(2).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(2).getCodeSystem());
+		assertEquals("LP52260-4", properties.get(2).getValue());
+		assertEquals("Bacteria | Cerebral spinal fluid", properties.get(2).getDisplay());
+		assertEquals("child", properties.get(3).getKey());
+		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(3).getCodeSystem());
+		assertEquals("LP52960-9", properties.get(3).getValue());
+		assertEquals("Bacteria | Cervix", properties.get(3).getDisplay());
+		assertEquals(1, doublyNestedChildCode.getParents().size());
+		assertEquals(3, doublyNestedChildCode.getChildren().size());
+		assertEquals(nestedChildCode.getCode(), new ArrayList<>(doublyNestedChildCode.getParents()).get(0).getParent().getCode());
+		assertEquals("LP52258-8", doublyNestedChildCode.getChildren().get(0).getChild().getCode());
+		assertEquals("LP52260-4", doublyNestedChildCode.getChildren().get(1).getChild().getCode());
+		assertEquals("LP52960-9", doublyNestedChildCode.getChildren().get(2).getChild().getCode());
 	}
 
 	@AfterClass

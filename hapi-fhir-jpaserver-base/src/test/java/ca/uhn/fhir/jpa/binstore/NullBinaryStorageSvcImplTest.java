@@ -28,4 +28,10 @@ public class NullBinaryStorageSvcImplTest {
 	public void writeBlob() {
 		mySvc.writeBlob(null, null, null);
 	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void expungeBlob() {
+		mySvc.expungeBlob(null, null);
+	}
+
 }

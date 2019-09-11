@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
-import ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 
 import java.util.Set;
@@ -42,10 +41,9 @@ public class FhirResourceDaoBundleDstu2 extends FhirResourceDaoDstu2<Bundle> {
 		}
 
 		for (Entry next : theResource.getEntry()) {
-			next.setFullUrl((String)null);
+			next.setFullUrl((String) null);
 		}
 	}
-
 
 
 }

@@ -2,8 +2,9 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -20,6 +21,7 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -52,8 +54,6 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.junit.Assert.fail;
 
-import ca.uhn.fhir.test.utilities.JettyUtil;
-
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	protected static JpaValidationSupportChainR4 myValidationSupport;
@@ -63,15 +63,13 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	protected static String ourServerBase;
 	protected static SearchParamRegistryR4 ourSearchParamRegistry;
 	private static DatabaseBackedPagingProvider ourPagingProvider;
-	protected static ISearchDao mySearchEntityDao;
 	protected static ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	private static GenericWebApplicationContext ourWebApplicationContext;
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	protected static Server ourServer;
 	protected IGenericClient ourClient;
 	ResourceCountCache ourResourceCountsCache;
-	private TerminologyUploaderProviderR4 myTerminologyUploaderProvider;
-	private Object ourGraphQLProvider;
+	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
 	@Autowired
@@ -100,14 +98,15 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer = new RestfulServer(myFhirCtx);
 			ourRestServer.registerProviders(myResourceProviders.createProviders());
 			ourRestServer.registerProvider(myBinaryAccessProvider);
+			ourRestServer.getInterceptorService().registerInterceptor(myBinaryStorageInterceptor);
 			ourRestServer.getFhirContext().setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
 			ourRestServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
-			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProviderR4.class);
-			ourGraphQLProvider = myAppCtx.getBean("myGraphQLProvider");
+			myTerminologyUploaderProvider = myAppCtx.getBean(TerminologyUploaderProvider.class);
 			myDaoRegistry = myAppCtx.getBean(DaoRegistry.class);
 
-			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider, ourGraphQLProvider);
+			ourRestServer.registerProviders(mySystemProvider, myTerminologyUploaderProvider);
+			ourRestServer.registerProvider(myAppCtx.getBean(GraphQLProvider.class));
 
 			JpaConformanceProviderR4 confProvider = new JpaConformanceProviderR4(ourRestServer, mySystemDao, myDaoConfig);
 			confProvider.setImplementationDescription("THIS IS THE DESC");
@@ -164,7 +163,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			WebApplicationContext wac = WebApplicationContextUtils.getWebApplicationContext(subsServletHolder.getServlet().getServletConfig().getServletContext());
 			myValidationSupport = wac.getBean(JpaValidationSupportChainR4.class);
 			mySearchCoordinatorSvc = wac.getBean(ISearchCoordinatorSvc.class);
-			mySearchEntityDao = wac.getBean(ISearchDao.class);
 			ourSearchParamRegistry = wac.getBean(SearchParamRegistryR4.class);
 			ourSubscriptionMatcherInterceptor = wac.getBean(SubscriptionMatcherInterceptor.class);
 			ourSubscriptionMatcherInterceptor.start();

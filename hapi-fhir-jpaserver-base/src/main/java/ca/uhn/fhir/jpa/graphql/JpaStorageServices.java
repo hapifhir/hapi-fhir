@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -33,22 +32,21 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.Reference;
-import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.utilities.graphql.Argument;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.hl7.fhir.utilities.graphql.Value;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements GraphQLEngine.IGraphQLStorageServices {
+public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implements IGraphQLStorageServices {
 
+	private static final int MAX_SEARCH_SIZE = 500;
 
 	private IFhirResourceDao<? extends IBaseResource> getDao(String theResourceType) {
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theResourceType);
@@ -57,13 +55,13 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
-	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<Resource> theMatches) throws FHIRException {
+	public void listResources(Object theAppInfo, String theType, List<Argument> theSearchParams, List<IBaseResource> theMatches) throws FHIRException {
 
 		RuntimeResourceDefinition typeDef = getContext().getResourceDefinition(theType);
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(typeDef.getImplementingClass());
 
 		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronousUpTo(500);
+		params.setLoadSynchronousUpTo(MAX_SEARCH_SIZE);
 
 		for (Argument nextArgument : theSearchParams) {
 
@@ -114,40 +112,37 @@ public class JpaStorageServices extends BaseHapiFhirDao<IBaseResource> implement
 			size = response.preferredPageSize();
 		}
 
-		for (IBaseResource next : response.getResources(0, size)) {
-			theMatches.add((Resource) next);
-		}
+		theMatches.addAll(response.getResources(0, size));
 
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
 	@Override
-	public Resource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
+	public IBaseResource lookup(Object theAppInfo, String theType, String theId) throws FHIRException {
 		IIdType refId = getContext().getVersion().newIdType();
 		refId.setValue(theType + "/" + theId);
 		return lookup(theAppInfo, refId);
 	}
 
-	private Resource lookup(Object theAppInfo, IIdType theRefId) {
+	private IBaseResource lookup(Object theAppInfo, IIdType theRefId) {
 		IFhirResourceDao<? extends IBaseResource> dao = getDao(theRefId.getResourceType());
 		RequestDetails requestDetails = (RequestDetails) theAppInfo;
-		return (Resource) dao.read(theRefId, requestDetails, false);
+		return dao.read(theRefId, requestDetails, false);
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
-    @Override
-	public ReferenceResolution lookup(Object theAppInfo, Resource theContext, Reference theReference) throws FHIRException {
-		IdType refId = new IdType(theReference.getReference());
-		Resource outcome = lookup(theAppInfo, refId);
+	@Override
+	public ReferenceResolution lookup(Object theAppInfo, IBaseResource theContext, IBaseReference theReference) throws FHIRException {
+		IBaseResource outcome = lookup(theAppInfo, theReference.getReferenceElement());
 		if (outcome == null) {
-		return null;
-	}
+			return null;
+		}
 		return new ReferenceResolution(theContext, outcome);
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
-	public Bundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
+	public IBaseBundle search(Object theAppInfo, String theType, List<Argument> theSearchParams) throws FHIRException {
 		throw new NotImplementedOperationException("Not yet able to handle this GraphQL request");
 	}
 }

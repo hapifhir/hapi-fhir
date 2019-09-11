@@ -1,14 +1,12 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -22,6 +20,10 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	private IIdType myExtensionalVsId;
 
+	@After
+	public void after() {
+		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {
@@ -125,6 +127,33 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		UriType valueSetIdentifier = null;
+		IIdType id = myExtensionalVsId;
+		CodeType code = null;
+		UriType system = null;
+		StringType display = null;
+		Coding coding = null;
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
+		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.saveDeferred();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+	}
+
+	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystem() {
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -134,6 +163,32 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+	}
+
+	@Test
+	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
+		myDaoConfig.setPreExpandValueSetsExperimental(true);
+
+		UriType valueSetIdentifier = null;
+		IIdType id = myExtensionalVsId;
+		CodeType code = new CodeType("11378-7");
+		UriType system = new UriType("http://acme.org");
+		StringType display = null;
+		Coding coding = null;
+		CodeableConcept codeableConcept = null;
+		ValidateCodeResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.saveDeferred();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
+		assertTrue(result.isResult());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}

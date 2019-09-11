@@ -52,6 +52,16 @@ public class TermValueSetConceptDesignation implements Serializable {
 	@JoinColumn(name = "VALUESET_CONCEPT_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
+	private TermValueSet myValueSet;
+
+	@Transient
+	private String myValueSetUrl;
+
+	@Transient
+	private String myValueSetName;
+
 	@Column(name = "LANG", nullable = true, length = MAX_LENGTH)
 	private String myLanguage;
 
@@ -78,6 +88,31 @@ public class TermValueSetConceptDesignation implements Serializable {
 	public TermValueSetConceptDesignation setConcept(TermValueSetConcept theConcept) {
 		myConcept = theConcept;
 		return this;
+	}
+
+	public TermValueSet getValueSet() {
+		return myValueSet;
+	}
+
+	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
+		myValueSet = theValueSet;
+		return this;
+	}
+
+	public String getValueSetUrl() {
+		if (myValueSetUrl == null) {
+			myValueSetUrl = getValueSet().getUrl();
+		}
+
+		return myValueSetUrl;
+	}
+
+	public String getValueSetName() {
+		if (myValueSetName == null) {
+			myValueSetName = getValueSet().getName();
+		}
+
+		return myValueSetName;
 	}
 
 	public String getLanguage() {
@@ -167,6 +202,9 @@ public class TermValueSetConceptDesignation implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myConcept != null ? ("myConcept - id=" + myConcept.getId()) : ("myConcept=(null)"))
+			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetUrl", this.getValueSetUrl())
+			.append("myValueSetName", this.getValueSetName())
 			.append("myLanguage", myLanguage)
 			.append("myUseSystem", myUseSystem)
 			.append("myUseCode", myUseCode)

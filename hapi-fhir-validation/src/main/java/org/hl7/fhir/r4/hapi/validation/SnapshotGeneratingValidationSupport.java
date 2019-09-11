@@ -76,7 +76,7 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName) {
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
 		IWorkerContext context = new HapiWorkerContext(myCtx, myValidationSupport);
 		ProfileUtilities.ProfileKnowledgeProvider profileKnowledgeProvider = new MyProfileKnowledgeWorker();
 		ArrayList<ValidationMessage> messages = new ArrayList<>();
@@ -86,13 +86,18 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 			throw new PreconditionFailedException("Unknown base definition: " + theInput.getBaseDefinition());
 		}
 
-		new ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, theInput, theUrl, theProfileName);
+		new ProfileUtilities(context, messages, profileKnowledgeProvider).generateSnapshot(base, theInput, theUrl, theWebUrl, theProfileName);
 
 		return theInput;
 	}
 
 	@Override
 	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+		return null;
+	}
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
 		return null;
 	}
 
@@ -127,6 +132,11 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		}
 
 		@Override
+		public BindingResolution resolveBinding(StructureDefinition def, String url, String path) throws FHIRException {
+			return null;
+		}
+
+		@Override
 		public String getLinkForProfile(org.hl7.fhir.r4.model.StructureDefinition profile, String url) {
 			return null;
 		}
@@ -135,6 +145,12 @@ public class SnapshotGeneratingValidationSupport implements IValidationSupport {
 		public boolean prependLinks() {
 			return false;
 		}
+
+		@Override
+		public String getLinkForUrl(String corePath, String url) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 }

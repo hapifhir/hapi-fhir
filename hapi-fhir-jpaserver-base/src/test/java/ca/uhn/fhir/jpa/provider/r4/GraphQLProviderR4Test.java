@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_PREFIX;
+import static ca.uhn.fhir.jpa.provider.JpaGraphQLR4ProviderTest.DATA_SUFFIX;
 import static org.junit.Assert.assertEquals;
 
 public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
@@ -27,20 +29,17 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		String query = "{name{family,given}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns(resp), TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + "{\n" +
 				"  \"name\":[{\n" +
 				"    \"family\":\"FAM\",\n" +
 				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
 				"  },{\n" +
 				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
 				"  }]\n" +
-				"}"));
-		} finally {
-			IOUtils.closeQuietly(response);
+				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -52,11 +51,10 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 		HttpGet httpGet = new HttpGet(ourServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		CloseableHttpResponse response = ourHttpClient.execute(httpGet);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(TestUtil.stripReturns("{\n" +
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + "{\n" +
 				"  \"PatientList\":[{\n" +
 				"    \"name\":[{\n" +
 				"      \"family\":\"FAM\",\n" +
@@ -69,11 +67,8 @@ public class GraphQLProviderR4Test extends BaseResourceProviderR4Test {
 				"      \"given\":[\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
 				"    }]\n" +
 				"  }]\n" +
-				"}"), TestUtil.stripReturns(resp));
-		} finally {
-			IOUtils.closeQuietly(response);
+				"}" + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
-
 	}
 
 	private void initTestPatients() {

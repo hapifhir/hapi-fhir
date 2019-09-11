@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;
@@ -30,13 +31,11 @@ public interface IResourceExpungeService {
 
 	Slice<Long> findHistoricalVersionsOfNonDeletedResources(String theResourceName, Long theResourceId, Long theVersion, int theI);
 
-	void expungeHistoricalVersions(List<Long> thePartition, AtomicInteger theRemainingCount);
+	void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
-	void expungeCurrentVersionOfResources(List<Long> thePartition, AtomicInteger theRemainingCount);
+	void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
-	void expungeHistoricalVersionsOfIds(List<Long> thePartition, AtomicInteger theRemainingCount);
-
-	void deleteByResourceIdPartitions(List<Long> thePartition);
+	void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> thePartition, AtomicInteger theRemainingCount);
 
 	void deleteAllSearchParams(Long theResourceId);
 }

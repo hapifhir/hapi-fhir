@@ -2,7 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.r4.JpaSystemProviderR4;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
@@ -21,7 +21,7 @@ import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
@@ -47,7 +47,7 @@ import org.hl7.fhir.r4.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r4.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r4.model.ConceptMap.TargetElementComponent;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.utils.IResourceValidator;
+import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -99,6 +99,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected BinaryAccessProvider myBinaryAccessProvider;
 	@Autowired
+	protected BinaryStorageInterceptor myBinaryStorageInterceptor;
+	@Autowired
 	protected ApplicationContext myAppCtx;
 	@Autowired
 	@Qualifier("myAppointmentDaoR4")
@@ -123,6 +125,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	protected IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 	@Autowired
 	protected ITermCodeSystemDao myTermCodeSystemDao;
+	@Autowired
+	protected ITermConceptParentChildLinkDao myTermConceptParentChildLinkDao;
 	@Autowired
 	protected ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Autowired
@@ -245,12 +249,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
 	@Autowired
-	protected ISearchDao mySearchEntityDao;
-	@Autowired
-	protected ISearchResultDao mySearchResultDao;
-	@Autowired
-	protected ISearchIncludeDao mySearchIncludeDao;
-	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired
 	@Qualifier("mySearchParameterDaoR4")
@@ -285,7 +283,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoR4")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected IHapiTerminologySvc myTermSvc;
+	protected IHapiTerminologySvcR4 myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired

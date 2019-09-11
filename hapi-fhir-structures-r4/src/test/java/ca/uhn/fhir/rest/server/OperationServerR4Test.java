@@ -915,7 +915,7 @@ public class OperationServerR4Test {
 		}
 
 		@Operation(name= "$manualResponseWithPrimitiveParam", idempotent = true, global = true, manualResponse = true)
-		public void binaryAccess(
+		public void manualResponseWithPrimitiveParam(
 			@IdParam IIdType theResourceId,
 			@OperationParam(name="path", min = 1, max = 1) IPrimitiveType<String> thePath,
 			ServletRequestDetails theRequestDetails,

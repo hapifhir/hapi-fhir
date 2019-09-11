@@ -426,6 +426,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				url = url.substring(0, qIndex);
 			}
 
+			if (url.length() > 0 && url.charAt(0) == '/') {
+				url = url.substring(1);
+			}
+
 			requestDetails.setRequestPath(url);
 			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
 

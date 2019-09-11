@@ -385,7 +385,7 @@ public class FhirInstanceValidatorDstu3Test {
 		QuestionnaireResponse qr = loadResource("/dstu3/fmc02-questionnaireresponse-01.json", QuestionnaireResponse.class);
 		ValidationResult result = myVal.validateWithResult(qr);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(result);
-		assertThat(errors.get(0).getMessage(), containsString("Item has answer, even though it is not enabled BO_ConsDrop"));
+		assertThat(errors.get(0).getMessage(), containsString("Item has answer, even though it is not enabled (item id = 'BO_ConsDrop')"));
 		assertEquals(1, errors.size());
 	}
 
@@ -655,7 +655,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Element 'Medication.ingredient.item[x]': minimum required = 1"));
+		assertThat(outcome.toString(), containsString("Element 'Medication.ingredient[0].item[x]': minimum required = 1"));
 
 	}
 
@@ -985,8 +985,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidationSupport(myMockSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(errors.toString(), 1, errors.size());
-		assertEquals("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved", errors.get(0).getMessage());
+		assertThat(errors.toString(), containsString("StructureDefinition reference \"http://foo/structuredefinition/myprofile\" could not be resolved"));
 	}
 
 	@Test
@@ -1125,7 +1124,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
-		assertEquals("Patient.identifier.type", all.get(0).getLocationString());
+		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertEquals(
 			"None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://example.com/foo/bar#bar)",
 			all.get(0).getMessage());

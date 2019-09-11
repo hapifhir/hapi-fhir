@@ -4,18 +4,20 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
-import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
-import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
+import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
+import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
-import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
-import ca.uhn.fhir.jpa.sched.SchedulerServiceImpl;
+import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
@@ -26,8 +28,7 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -103,6 +104,12 @@ public abstract class BaseConfig {
 	public abstract FhirContext fhirContext();
 
 	@Bean
+	@Lazy
+	public IGraphQLStorageServices graphqlStorageServices() {
+		return new JpaStorageServices();
+	}
+
+	@Bean
 	public ScheduledExecutorFactoryBean scheduledExecutorService() {
 		ScheduledExecutorFactoryBean b = new ScheduledExecutorFactoryBean();
 		b.setPoolSize(5);
@@ -118,8 +125,24 @@ public abstract class BaseConfig {
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")
 	@Lazy
-	public BinaryAccessProvider AttachmentBinaryAccessProvider() {
+	public BinaryAccessProvider binaryAccessProvider() {
 		return new BinaryAccessProvider();
+	}
+
+	@Bean(name = "myBinaryStorageInterceptor")
+	@Lazy
+	public BinaryStorageInterceptor binaryStorageInterceptor() {
+		return new BinaryStorageInterceptor();
+	}
+
+	@Bean
+	public ISearchCacheSvc searchCacheSvc() {
+		return new DatabaseSearchCacheSvcImpl();
+	}
+
+	@Bean
+	public ISearchResultCacheSvc searchResultCacheSvc() {
+		return new DatabaseSearchResultCacheSvcImpl();
 	}
 
 	@Bean
@@ -197,6 +220,13 @@ public abstract class BaseConfig {
 	@Bean
 	public IConsentContextServices consentContextServices() {
 		return new JpaConsentContextServices();
+	}
+
+	@Bean
+	@Lazy
+	public TerminologyUploaderProvider terminologyUploaderProvider() {
+		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
+		return retVal;
 	}
 
 	@Bean

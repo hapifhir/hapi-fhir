@@ -1,19 +1,20 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * #%L
@@ -41,14 +42,21 @@ public interface IHapiTerminologySvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
-	void expandValueSet(ValueSet theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+	ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount);
+
+	void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	/**
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
 
-	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetCodeAccumulator theValueSetCodeAccumulator);
+	/**
+	 * Version independent
+	 */
+	IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount);
+
+	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
@@ -76,12 +84,14 @@ public interface IHapiTerminologySvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, TermCodeSystemVersion theCodeSytemVersion);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion);
 
 	/**
 	 * @return Returns the ID of the created/updated code system
 	 */
 	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
+
+	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 
@@ -89,7 +99,7 @@ public interface IHapiTerminologySvc {
 
 	void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap);
 
-	void storeTermValueSetAndChildren(ResourceTable theResourceTable, ValueSet theValueSet);
+	void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet);
 
 	boolean supportsSystem(String theCodeSystem);
 
@@ -98,4 +108,22 @@ public interface IHapiTerminologySvc {
 	List<TermConceptMapGroupElement> translateWithReverse(TranslationRequest theTranslationRequest);
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
+
+	AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue);
+
+	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
+
+	void preExpandDeferredValueSetsToTerminologyTables();
+
+	/**
+	 * Version independent
+	 */
+	ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
+
+	/**
+	 * Version independent
+	 */
+	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 }

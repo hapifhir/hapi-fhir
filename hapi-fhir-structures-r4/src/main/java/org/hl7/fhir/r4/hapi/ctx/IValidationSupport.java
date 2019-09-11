@@ -78,12 +78,9 @@ public interface IValidationSupport
   /**
    * Generate a snapshot from the given differential profile.
    *
-   * @param theInput
-   * @param theUrl
-   * @param theProfileName
    * @return Returns null if this module does not know how to handle this request
    */
-  StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theProfileName);
+  StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName);
 
   /**
    * Validates that the given code exists and if possible returns a display
@@ -110,6 +107,15 @@ public interface IValidationSupport
 
     public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
       super(severity, message, definition);
+    }
+
+    @Override
+    protected String getDisplay() {
+      String retVal = null;
+      if (isOk()) {
+        retVal = asConceptDefinition().getDisplay();
+      }
+      return retVal;
     }
 
   }

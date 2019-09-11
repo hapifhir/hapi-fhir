@@ -59,7 +59,7 @@ public class ClientMimetypeDstu3Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).execute();
+		MethodOutcome outcome = client.create().resource(pt).encodedXml().execute();
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
@@ -79,7 +79,7 @@ public class ClientMimetypeDstu3Test {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).execute();
+		MethodOutcome outcome = client.create().resource(pt).encodedXml().execute();
 
 		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());

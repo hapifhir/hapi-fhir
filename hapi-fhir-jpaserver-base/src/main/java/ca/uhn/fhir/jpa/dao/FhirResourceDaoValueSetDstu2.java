@@ -20,14 +20,25 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.IContextValidationSupport;
+import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
+import ca.uhn.fhir.model.dstu2.composite.CodingDt;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.CodeSystemConcept;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeInclude;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.ComposeIncludeConcept;
+import ca.uhn.fhir.model.dstu2.resource.ValueSet.ExpansionContains;
+import ca.uhn.fhir.model.primitive.DateTimeDt;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
@@ -37,20 +48,14 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
-import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
-import ca.uhn.fhir.model.dstu2.composite.CodingDt;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet;
-import ca.uhn.fhir.model.dstu2.resource.ValueSet.*;
-import ca.uhn.fhir.model.primitive.DateTimeDt;
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		implements IFhirResourceDaoValueSet<ValueSet, CodingDt, CodeableConceptDt>, IFhirResourceDaoCodeSystem<ValueSet, CodingDt, CodeableConceptDt> {
@@ -94,7 +99,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	public ValueSet expand(IIdType theId, String theFilter, RequestDetails theRequest) {
 		ValueSet source = loadValueSetForExpansion(theId, theRequest);
 		return expand(source, theFilter);
+	}
 
+	@Override
+	public ValueSet expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequest) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -131,6 +140,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
+	public ValueSet expand(ValueSet source, String theFilter, int theOffset, int theCount) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public ValueSet expandByIdentifier(String theUri, String theFilter) {
 		if (isBlank(theUri)) {
 			throw new InvalidRequestException("URI must not be blank or missing");
@@ -152,7 +166,11 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		}
 
 		return expand(source, theFilter);
+	}
 
+	@Override
+	public ValueSet expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -185,13 +203,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		return source;
 	}
 
-	private LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
+	private IContextValidationSupport.LookupCodeResult lookup(List<ExpansionContains> theContains, String theSystem, String theCode) {
 		for (ExpansionContains nextCode : theContains) {
 
 			String system = nextCode.getSystem();
 			String code = nextCode.getCode();
 			if (theSystem.equals(system) && theCode.equals(code)) {
-				LookupCodeResult retVal = new LookupCodeResult();
+				IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
 				retVal.setSearchedForCode(code);
 				retVal.setSearchedForSystem(system);
 				retVal.setFound(true);
@@ -210,7 +228,7 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 	}
 
 	@Override
-	public LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
+	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, CodingDt theCoding, RequestDetails theRequest) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
 		boolean haveCode = theCode != null && theCode.isEmpty() == false;
 		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
@@ -236,13 +254,13 @@ public class FhirResourceDaoValueSetDstu2 extends FhirResourceDaoDstu2<ValueSet>
 		for (IIdType nextId : valueSetIds) {
 			ValueSet expansion = expand(nextId, null, theRequest);
 			List<ExpansionContains> contains = expansion.getExpansion().getContains();
-			LookupCodeResult result = lookup(contains, system, code);
+			IContextValidationSupport.LookupCodeResult result = lookup(contains, system, code);
 			if (result != null) {
 				return result;
 			}
 		}
 
-		LookupCodeResult retVal = new LookupCodeResult();
+		IContextValidationSupport.LookupCodeResult retVal = new IContextValidationSupport.LookupCodeResult();
 		retVal.setFound(false);
 		retVal.setSearchedForCode(code);
 		retVal.setSearchedForSystem(system);

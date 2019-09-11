@@ -31,10 +31,17 @@ abstract class BaseValidationContext<T> implements IValidationContext<T> {
 	protected final FhirContext myFhirContext;
 
 	private List<SingleValidationMessage> myMessages;
+
+	/**
+	 * Constructor
+	 */
 	BaseValidationContext(FhirContext theFhirContext) {
-		this(theFhirContext, new ArrayList<SingleValidationMessage>());
+		this(theFhirContext, new ArrayList<>());
 	}
 
+	/**
+	 * Constructor
+	 */
 	BaseValidationContext(FhirContext theFhirContext, List<SingleValidationMessage> theMessages) {
 		myFhirContext = theFhirContext;
 		myMessages = theMessages;

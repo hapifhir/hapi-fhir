@@ -374,6 +374,61 @@ public enum Pointcut {
 	),
 
 
+
+	/**
+	 * <b>Server Hook:</b>
+	 * This method is called after the server implementation method has been called, but before any attempt
+	 * to stream the response back to the client, specifically for GraphQL requests (as these do not fit
+	 * cleanly into the model provided by {@link #SERVER_OUTGOING_RESPONSE}).
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * java.lang.String - The GraphQL query
+	 * </li>
+	 * <li>
+	 * java.lang.String - The GraphQL response
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletRequest - The servlet request, when running in a servlet environment
+	 * </li>
+	 * <li>
+	 * javax.servlet.http.HttpServletResponse - The servlet response, when running in a servlet environment
+	 * </li>
+	 * </ul>
+	 * </p>
+	 * <p>
+	 * Hook methods may return <code>true</code> or <code>void</code> if processing should continue normally.
+	 * This is generally the right thing to do. If your interceptor is providing a response rather than
+	 * letting HAPI handle the response normally, you must return <code>false</code>. In this case,
+	 * no further processing will occur and no further interceptors will be called.
+	 * </p>
+	 * <p>
+	 * Hook methods may also throw {@link AuthenticationException} to indicate that the interceptor
+	 * has detected an unauthorized access attempt. If thrown, processing will stop and an HTTP 401
+	 * will be returned to the client.
+	 */
+	SERVER_OUTGOING_GRAPHQL_RESPONSE(boolean.class,
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+		"java.lang.String",
+		"java.lang.String",
+		"javax.servlet.http.HttpServletRequest",
+		"javax.servlet.http.HttpServletResponse"
+	),
+
+
 	/**
 	 * <b>Server Hook:</b>
 	 * This method is called when an OperationOutcome is being returned in response to a failure.
@@ -1164,6 +1219,48 @@ public enum Pointcut {
 	),
 
 	/**
+	 * Invoked before a resource is about to be expunged via the <code>$expunge</code> operation.
+	 * <p>
+	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
+	 * If the hook deletes any records, the hook is expected to increment this counter by the number of records deleted.
+	 * </p>
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>java.util.concurrent.atomic.AtomicInteger - The counter holding the number of records deleted.</li>
+	 * <li>org.hl7.fhir.instance.model.api.IIdType - The ID of the resource that is about to be deleted</li>
+	 * <li>org.hl7.fhir.instance.model.api.IBaseResource - The resource that is about to be deleted</li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return void.
+	 * </p>
+	 */
+	STORAGE_PRESTORAGE_EXPUNGE_RESOURCE(
+		// Return type
+		void.class,
+		// Params
+		"java.util.concurrent.atomic.AtomicInteger",
+		"org.hl7.fhir.instance.model.api.IIdType",
+		"org.hl7.fhir.instance.model.api.IBaseResource",
+		"ca.uhn.fhir.rest.api.server.RequestDetails",
+		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"
+	),
+
+	/**
 	 * Invoked before expungeEverything is called.
 	 * <p>
 	 * Hooks will be passed a reference to a counter containing the current number of records that have been deleted.
@@ -1190,7 +1287,6 @@ public enum Pointcut {
 	 * Hooks should return void.
 	 * </p>
 	 */
-
 	STORAGE_PRESTORAGE_EXPUNGE_EVERYTHING(
 		// Return type
 		void.class,

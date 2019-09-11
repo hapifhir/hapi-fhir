@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 public class ModifyColumnTest extends BaseTest {
@@ -109,6 +110,22 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 		getMigrator().migrate();
 
+	}
+
+	@Test
+	public void testColumnDoesntAlreadyExist() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
+
+		ModifyColumnTask task = new ModifyColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("SOMECOLUMN");
+		task.setDescription("Make nullable");
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		assertThat(JdbcUtils.getColumnNames(getConnectionProperties(), "SOMETABLE"), containsInAnyOrder("PID", "TEXTCOL"));
 	}
 
 }

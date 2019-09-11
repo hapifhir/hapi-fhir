@@ -75,6 +75,14 @@ public @interface OperationParam {
 	 * </ul>
 	 */
 	Class<? extends IBase> type() default IBase.class;
+
+	/**
+	 * Optionally specifies the type of the parameter as a string, such as <code>Coding</code> or
+	 * <code>base64Binary</code>. This can be useful if you want to use a generic interface type
+	 * on the actual method,such as {@link org.hl7.fhir.instance.model.api.IPrimitiveType} or
+	 * {@link @org.hl7.fhir.instance.model.api.ICompositeType}.
+	 */
+	String typeName() default "";
 	
 	/**
 	 * The minimum number of repetitions allowed for this child (default is 0)

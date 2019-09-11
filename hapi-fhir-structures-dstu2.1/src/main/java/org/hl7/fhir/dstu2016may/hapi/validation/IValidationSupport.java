@@ -100,7 +100,7 @@ public interface IValidationSupport
 	@Override
 	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
 
-	public class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
+	class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
 
 		public CodeValidationResult(ConceptDefinitionComponent theNext) {
 			super(theNext);
@@ -112,6 +112,15 @@ public interface IValidationSupport
 
 		public CodeValidationResult(OperationOutcome.IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
 			super(severity, message, definition);
+		}
+
+		@Override
+		protected String getDisplay() {
+			String retVal = null;
+			if (isOk()) {
+				retVal = asConceptDefinition().getDisplay();
+			}
+			return retVal;
 		}
 
 	}

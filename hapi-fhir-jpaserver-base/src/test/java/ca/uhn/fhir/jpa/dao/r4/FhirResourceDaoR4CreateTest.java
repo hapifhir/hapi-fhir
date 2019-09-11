@@ -257,6 +257,29 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 	}
 
+	@Test
+	public void testTagsInContainedResourcesPreserved() {
+		Patient p = new Patient();
+		p.setActive(true);
+
+		Organization o = new Organization();
+		o.getMeta().addTag("http://foo", "bar", "FOOBAR");
+		p.getManagingOrganization().setResource(o);
+
+		ourLog.info("Input: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
+
+		p = myPatientDao.read(id);
+
+		ourLog.info("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+		Organization org = (Organization) p.getManagingOrganization().getResource();
+		assertEquals("#1", org.getId());
+		assertEquals(1, org.getMeta().getTag().size());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

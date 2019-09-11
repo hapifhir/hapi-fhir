@@ -313,7 +313,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		patient.setActive(true);
 
 		// Reject output
-		consentService.setTarget(new ConsentSvcRejectSeeingAnything());
+		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
 		HttpPost post = new HttpPost(ourServerBase + "/Patient");
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 		post.setEntity(toEntity(patient));
@@ -356,7 +356,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Reject output
-		consentService.setTarget(new ConsentSvcRejectSeeingAnything());
+		consentService.setTarget(new ConsentSvcRejectCanSeeAnything());
 		patient = new Patient();
 		patient.setId(id);
 		patient.setActive(true);
@@ -390,6 +390,32 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase(), matchesPattern(".*json.*"));
+		}
+
+	}
+
+	@Test
+	public void testRejectWillSeeResource() throws IOException {
+		create50Observations();
+
+		ConsentSvcRejectWillSeeEvenNumbered consentService = new ConsentSvcRejectWillSeeEvenNumbered();
+		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);
+		ourRestServer.getInterceptorService().registerInterceptor(myConsentInterceptor);
+
+		// Search for all
+		String url = ourServerBase + "/Observation?_pretty=true&_count=10";
+		ourLog.info("HTTP GET {}", url);
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
+		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
+			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseString);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+
+			Bundle result = myFhirCtx.newJsonParser().parseResource(Bundle.class, responseString);
+			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, result);
+			List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+			assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
 		}
 
 	}
@@ -727,7 +753,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 	}
 
-	private static class ConsentSvcRejectSeeingAnything implements IConsentService {
+	private static class ConsentSvcRejectCanSeeAnything implements IConsentService {
 
 		@Override
 		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
@@ -756,4 +782,43 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 
 	}
+
+
+	private static class ConsentSvcRejectWillSeeEvenNumbered implements IConsentService {
+
+		@Override
+		public ConsentOutcome startOperation(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome canSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			return ConsentOutcome.PROCEED;
+		}
+
+		@Override
+		public ConsentOutcome willSeeResource(RequestDetails theRequestDetails, IBaseResource theResource, IConsentContextServices theContextServices) {
+			if (theResource.getIdElement().isIdPartValidLong()) {
+				Long resIdLong = theResource.getIdElement().getIdPartAsLong();
+				if (resIdLong % 2 == 0) {
+					return new ConsentOutcome(ConsentOperationStatusEnum.REJECT);
+				}
+			}
+			return new ConsentOutcome(ConsentOperationStatusEnum.PROCEED);
+		}
+
+		@Override
+		public void completeOperationSuccess(RequestDetails theRequestDetails, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+		@Override
+		public void completeOperationFailure(RequestDetails theRequestDetails, BaseServerResponseException theException, IConsentContextServices theContextServices) {
+			// nothing
+		}
+
+
+	}
+
+
 }

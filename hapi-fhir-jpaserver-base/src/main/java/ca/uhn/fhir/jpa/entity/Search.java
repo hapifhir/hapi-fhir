@@ -1,10 +1,10 @@
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.OptimisticLock;
 
@@ -83,8 +83,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Long myResourceId;
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
-	@OneToMany(mappedBy = "mySearch", fetch = FetchType.LAZY)
-	private Collection<SearchResult> myResults;
 	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SEARCH_LAST_RETURNED", nullable = false, updatable = false)

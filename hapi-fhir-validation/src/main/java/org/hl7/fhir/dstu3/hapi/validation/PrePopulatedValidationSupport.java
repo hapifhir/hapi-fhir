@@ -186,6 +186,11 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
   }
 
 	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	@Override
 	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
 		return null;
 	}

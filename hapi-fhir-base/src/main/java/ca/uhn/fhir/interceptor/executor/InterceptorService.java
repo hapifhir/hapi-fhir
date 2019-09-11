@@ -208,11 +208,12 @@ public class InterceptorService implements IInterceptorService, IInterceptorBroa
 	}
 
 	@Override
-	public void unregisterInterceptor(Object theInterceptor) {
+	public boolean unregisterInterceptor(Object theInterceptor) {
 		synchronized (myRegistryMutex) {
-			myInterceptors.removeIf(t -> t == theInterceptor);
-			myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
-			myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			boolean removed = myInterceptors.removeIf(t -> t == theInterceptor);
+			removed |= myGlobalInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			removed |= myAnonymousInvokers.entries().removeIf(t -> t.getValue().getInterceptor() == theInterceptor);
+			return removed;
 		}
 	}
 

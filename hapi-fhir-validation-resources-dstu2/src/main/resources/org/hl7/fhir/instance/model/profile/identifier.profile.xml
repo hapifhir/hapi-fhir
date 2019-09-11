@@ -155,7 +155,7 @@
    <type>
     <code value="uri"/>
    </type>
-   <exampleUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+   <exampleString value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
    <isSummary value="true"/>
    <mapping>
     <identity value="v2"/>
@@ -335,7 +335,7 @@
    <type>
     <code value="uri"/>
    </type>
-   <exampleUri value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
+   <exampleString value="http://www.acme.com/identifiers/patient or urn:ietf:rfc:3986 if the Identifier.value itself is a full uri"/>
    <isSummary value="true"/>
    <mapping>
     <identity value="v2"/>

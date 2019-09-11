@@ -80,7 +80,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setDontEncodeElements(Set<String> theDontEncodeElements) {
+	public IParser setDontEncodeElements(Set<String> theDontEncodeElements) {
 		if (theDontEncodeElements == null || theDontEncodeElements.isEmpty()) {
 			myDontEncodeElements = null;
 		} else {
@@ -89,6 +89,7 @@ public abstract class BaseParser implements IParser {
 				.map(ElementsPath::new)
 				.collect(Collectors.toList());
 		}
+		return this;
 	}
 
 	List<ElementsPath> getEncodeElements() {
@@ -96,7 +97,7 @@ public abstract class BaseParser implements IParser {
 	}
 
 	@Override
-	public void setEncodeElements(Set<String> theEncodeElements) {
+	public IParser setEncodeElements(Set<String> theEncodeElements) {
 
 		if (theEncodeElements == null || theEncodeElements.isEmpty()) {
 			myEncodeElements = null;
@@ -122,6 +123,8 @@ public abstract class BaseParser implements IParser {
 			}
 
 		}
+
+		return this;
 	}
 
 	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
@@ -1112,7 +1115,9 @@ public abstract class BaseParser implements IParser {
 		private boolean checkIfPathMatchesForEncoding(List<ElementsPath> theElements, boolean theCheckingForEncodeElements) {
 
 			boolean retVal = false;
-			myEncodeContext.pushPath(myDef.getElementName(), false);
+			if (myDef != null) {
+				myEncodeContext.pushPath(myDef.getElementName(), false);
+			}
 
 			if (theCheckingForEncodeElements && isEncodeElementsAppliesToChildResourcesOnly() && myEncodeContext.getResourcePath().size() < 2) {
 				retVal = true;
@@ -1144,7 +1149,10 @@ public abstract class BaseParser implements IParser {
 				}
 			}
 
-			myEncodeContext.popPath();
+			if (myDef != null) {
+				myEncodeContext.popPath();
+			}
+
 			return retVal;
 		}
 

@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -73,6 +74,14 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		return retVal;
 	}
 
+	public String getPayloadString() {
+		if (this.myPayloadString != null) {
+			return this.myPayloadString;
+		}
+
+		return "";
+	}
+
 	public IIdType getPayloadId(FhirContext theCtx) {
 		IIdType retVal = null;
 		if (myPayloadId != null) {
@@ -89,9 +98,9 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 		mySubscription = theSubscription;
 	}
 
-	public void setPayload(FhirContext theCtx, IBaseResource thePayload) {
+	public void setPayload(FhirContext theCtx, IBaseResource thePayload, EncodingEnum theEncoding) {
 		myPayload = thePayload;
-		myPayloadString = theCtx.newJsonParser().encodeResourceToString(thePayload);
+		myPayloadString = theEncoding.newParser(theCtx).encodeResourceToString(thePayload);
 		myPayloadId = thePayload.getIdElement().toUnqualified().getValue();
 	}
 

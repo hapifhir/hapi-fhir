@@ -63,15 +63,21 @@ public class ValidateUtil {
 		}
 	}
 
+	public static void isNotNullOrThrowUnprocessableEntity(Object theObject, String theMessage, Object... theValues) {
+		if (theObject == null) {
+			throw new UnprocessableEntityException(String.format(theMessage, theValues));
+		}
+	}
+
 	public static void isNotTooLongOrThrowIllegalArgument(String theString, int theMaxLength, String theMessage) {
 		if (length(theString) > theMaxLength) {
 			throw new IllegalArgumentException(theMessage);
 		}
 	}
 
-	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage) {
-		if (theSuccess == false) {
-			throw new InvalidRequestException(theMessage);
+	public static void isTrueOrThrowInvalidRequest(boolean theSuccess, String theMessage, Object... theValues) {
+		if (!theSuccess) {
+			throw new InvalidRequestException(String.format(theMessage, theValues));
 		}
 	}
 

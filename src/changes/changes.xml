@@ -6,7 +6,144 @@
 		<title>HAPI FHIR Changelog</title>
 	</properties>
 	<body>
-		<release version="4.0.0" date="TBD" description="Igloo">
+		<release version="4.1.0" date="TBD" description="Igloo">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+				</ul>
+				]]>
+			</action>
+		<!--
+		<action type="add" issue="1321">
+			Support has been added for RDF encoding and parsing in the
+			<![CDATA[<a href="https://www.hl7.org/fhir/rdf.html#instance">Turtle</a>]]>
+			format. Thanks to Raul Estrada for the pull request!
+		</action>
+		-->
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now saves and supports searching on <code>Resource.meta.source</code>. The server automatically
+				appends the Request ID as a hash value on the URI as well in order to provide request level tracking. Searches
+				 can use either the source URI, the request ID, or both.
+				]]>
+			</action>
+			<action type="add" issue="1357">
+				The email Subscription deliverer now respects the payload property of the subscription
+				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
+				pull request!
+			</action>
+			<action type="fix">
+				When using the _filter search parameter, string comparisons using the "eq" operator
+				were incorrectly performing a partial match. This has been corrected. Thanks to 
+				Marc Sandberg for pointing this out!
+			</action>
+			<action type="add">
+				When using the AuthorizationInterceptor with a rule to allow all reads by resource type,
+				the server will now reject requests for other resource types earlier in the processing
+				cycle. Thanks to Anders Havn for the suggestion!
+			</action>
+			<action type="fix">
+				Reference search parameters did not work via the _filter parameter
+			</action>
+			<action type="fix">
+				Transaction entries with a resource URL starting with a leading
+				slash (e.g. 
+				<![CDATA[<code>/Organization?identifier=foo</code>]]>
+				instead of
+				<![CDATA[<code>Organization?identifier=foo</code>]]>
+				did not work. These are now supported.
+			</action>
+			<action type="fix">
+				SubscriptionDstu2Config incorrectly pointed to a DSTU3 configuration file. This
+				has been corrected.
+			</action>
+			<action type="fix">
+				When using the VersionedApiConverterInterceptor, GraphQL responses failed with an HTTP
+				500 error.
+			</action>
+			<action type="fix">
+				Cascading deletes now correctly handle circular references. Previously this failed with
+				an HTTP 500 error.
+			</action>
+			<action type="fix">
+				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
+				contained an incorrect example. This has been corrected.
+			</action>
+			<action type="change">
+				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
+				constraints did not add value and caused unneccessary contention when used under high load.
+			</action>
+			<action type="change">
+				An inefficient regex expression in UrlUtil was replaced with a much more efficient hand-written
+				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions
+				into the JPA server at the same time (i.e. when loading Synthea data).
+			</action>
+			<action type="fix">
+				The FHIRPath engine used to parse search parameters in the JPA R4/R5 server is now reused across
+				requests, as it is somewhat expensive to create and is thread safe.
+			</action>
+			<action type="add">
+				It is now possible to submit a PATCH request as a part of a FHIR transaction in DSTU3 (previously this
+				was only supported in R4+). This is not officially part of the DSTU3 spec, but it can now be performed by
+				leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload
+				as a Binary resource containing a valid patch.
+			</action>
+			<action type="change" issue="1366">
+				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
+				Note that this means that data in any existing installations will need to be
+				re-uploaded to the new database platform.
+			</action>
+			<action type="add" issue="1443">
+				LOINC concepts now include multiaxial hierarchical properties (e.g. <![CDATA[<code>parent</code>]]> and
+				<![CDATA[<code>child</code>]]>, which identify parent and child concepts.
+			</action>
+			<action type="add" issue="1445">
+				When loading LOINC terminology, a new ValueSet is automatically created with a single include element that
+				identifies the LOINC CodeSystem in <![CDATA[<code>ValueSet.compose.include.system</code>]]>. This ValueSet
+				includes all LOINC codes.
+			</action>
+			<action type="add" issue="1461">
+				A note has been added to the downloads page explaning the removal of the hapi-fhir-utilities
+				module. Thanks to Andrew Fitzgerald for the PR!
+			</action>
+			<action type="change">
+				REST servers will no longer try to guess the content type for HTTP requests where a body 
+				is provided but no Content-Type header is included. These requests are invalid, and will now
+				result in an HTTP 400. This change corrects an error where some interceptors (notably
+				the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) 
+				could be bypassed if a Content Type was not included.
+			</action>
+			<action type="fix">
+				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
+				specification. This has been corrected.
+			</action>
+			<action type="add">
+				Added support for comparing resource dates to the current time via a new variable %now.  E.g.
+				Procedure?date=gt%now would match future procedures.
+			</action>
+			<action type="add">
+				Add support for in-memory matching on date comparisons ge,gt,eq,lt,le.
+			</action>
+			<action type="fix">
+				When using the Consent Service and denying a resource via the "Will See Resource" method, the resource ID
+				and version were still returned to the user. This has been corrected so that no details about
+				the resource are leaked.
+			</action>
+		</release>
+		<release version="4.0.1" date="2019-09-03" description="Igloo (Point Release)">
+			<action type="fix">
+				This release contains no new or updated functionality, but addressed a dependency 
+				version that was left incorrectly requiring a SNAPSHOT maven build of the
+				org.hl7.fhir.utilities module. Users who are successfully using HAPI FHIR 4.0.0
+				do not need to upgrade, but any users who were blocked from upgrading due to
+				snapshot dependency issues are advised to upgrade immediately.
+			</action>
+		</release>
+		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
 				The version of a few dependencies have been bumped to the
 				latest versions (dependent HAPI modules listed in brackets):
@@ -17,7 +154,6 @@
 					<li>Apache HTTPCore (Client>: 4.4.6 -&gt; 4.4.11</li>
 					<li>Spring (JPA): 5.1.6.RELEASE -&gt; 5.1.8.RELEASE</li>
 					<li>Spring-Data (JPA): 2.1.6.RELEASE -&gt; 2.1.8.RELEASE</li>
-<!--					<li>Derby (CLI and JPA Examples): 10.14.2.0 -&gt; 10.15.1.3</li>-->
 					<li>JANSI (CLI): 1.17.1 -&gt; 1.18</li>
 					<li>json-patch (JPA): 1.10 -&gt; 1.15 (see changelog entry about this change)</li>
 					<li>Jackson-Databind (JPA): 2.9.9 -&gt; 2.9.9.1 (due to a Jackson vulnerability CVE-2019-12384)</li>
@@ -26,8 +162,27 @@
 					<li>commons-lang3 (Core): 3.8.1 -&gt; 3.9</li>
 					<li>commons-text (Core): 1.6 -&gt; 1.7</li>
 					<li>Guava (JPA): 27.1-jre -&gt; 28.0-jre</li>
-					<li>
 				</ul>
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The HL7.org DSTU2 structures (and <i>ONLY</i> the HL7.org DSTU2 structures) have been
+				moved to a new package. Where they were previously found in 
+				<code>org.hl7.fhir.instance.model</code>
+				they are now found in
+				<code>org.hl7.fhir.dstu2.model</code>. This was done in order to complete the harmonization
+				between the 
+				<a href="https://github.com/jamesagnew/hapi-fhir">HAPI FHIR</a>
+				GitHub repository and the 
+				<a href="https://github.com/hapifhir/org.hl7.fhir.core/">org.hl7.fhir.core</a>
+				GitHub repository. This is the kind of change we don't make lightly, as we do know that it
+				will be annoying for users of the existing library. It is a change however that will allow us
+				to apply validator fixes much more quickly, and will greatly reduce the amount of effort
+				required to keep up with R5 changes as they come out, so we're hoping it is worth it.
+				Note that no classes are removed, they have only been moved, so it should be fairly straightforward
+				to migrate existing code with an IDE.
 				]]>
 			</action>
 			<action type="change">
@@ -45,13 +200,76 @@
 				should be an easy fix to existing code.
 				]]>
 			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The HAPI FHIR REST client and server will now default to using JSON encoding instead of XML when
+				the user has not explicitly configured a preference.
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The JPA $upload-external-code-system operation has been moved from being a
+				server level operation (i.e. called on the root of the server) to being
+				a type level operation (i.e. called on the CodeSystem type).
+				]]>
+			</action>
+			<action type="change">
+				<![CDATA[
+				<b>Breaking Change</b>:
+				The FhirValidator#validate(IResource) method has been removed. It was deprecated in HAPI FHIR 0.7 and replaced with
+				FhirValidator#validateWithResults(IBaseResource) so it is unlikely anyone is still depending on the
+				old method.
+				]]>
+			</action>
 			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				Support for the new R5 draft resources has been added. This support includes the client,
+				server, and JPA server. Note that these definitions will change as the R5 standard is
+				modified until it is released, so use with caution!
+				]]>
+			</action>
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
 				A new interceptor called
-				<![CDATA[<code>ConsentInterceptor</code>]]> has been added. This interceptor allows
+				<code>ConsentInterceptor</code> has been added. This interceptor allows
 				JPA based servers to make appropriate consent decisions related to resources that
 				and operations that are being returned. See
-				<![CDATA[<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>]]>
+				<a href="http://hapifhir.io/doc_rest_server_security.html">Server Security</a>
 				for more information.
+				]]>
+			</action>
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now supports GraphQL for DSTU3 / R4 / R5 servers.
+				]]>
+			</action>
+			<action type="add" issue="1220">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now supports the <code>_filter</code> search parameter when configured to
+				do so. The <a href="http://hl7.org/fhir/search_filter.html">filter search parameter</a>
+				is an extremely flexible and powerful feature, allowing for advanced grouping and order of
+				operations on searches. It can be dangerous however, as it potentially allows users to create
+				queries for which no database indexes exist in the default configuration so it is disabled by
+				default. Thanks to Anthony Sute for the pull request and all of his support in what turned
+				out to be a lengthy merge!
+				]]>
+			</action>
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				A new interceptor called CascadingDeleteInterceptor has been added to the
+				JPA project. This interceptor allows deletes to cascade when a specific
+				URL parameter or header is added to the request. Cascading deletes
+				can also be controlled by a new flag in the AuthorizationIntereptor
+				RuleBuilder, in order to ensure that cascading deletes are only available
+				to users with sufficient permission.
+				]]>
 			</action>
 			<action type="add">
 				Several enhancements have been made to the <![CDATA[<code>AuthorizationInterceptor</code>]]>:
@@ -59,7 +277,8 @@
 				<ul>
 				<li>The interceptor now registers against the <code>STORAGE_PRESHOW_RESOURCES</code> interceptor hook,
 				which allows it to successfully authorize JPA operations that don't actually return resource content,
-				such as GraphQL responses.</li>
+				such as GraphQL responses, and resources that have been filtered using the <code>_elements</code>
+				parameter.</li>
 				<li>
 				</li>The rule list is now cached on a per-request basis, which should improve performance</ul>
 				]]>
@@ -110,10 +329,6 @@
 				Hooks have access to the list of resources that have references to the resource being deleted and
 				can delete them.  The boolean return value of the hook indicates whether the server should try
 				checking for conflicts again (true means try again).
-			</action>
-			<action type="change">
-				The default RestfulServer encoding has been changed from XML to JSON in order to
-				reflect the most common usage.
 			</action>
 			<action type="add" issue="1336">
 				The HAPI FHIR unit test suite has been refactored to no longer rely on PortUtil to
@@ -210,14 +425,6 @@
 				version. Thanks to Stig Døssing for the pull request!
 			</action>
 			<action type="add">
-				A new interceptor called CascadingDeleteInterceptor has been added to the
-				JPA project. This interceptor allows deletes to cascade when a specific
-				URL parameter or header is added to the request. Cascading deletes
-				can also be controlled by a new flag in the AuthorizationIntereptor
-				RuleBuilder, in order to ensure that cascading deletes are only available
-				to users with sufficient permission.
-			</action>
-			<action type="add">
 				AuthorizationInterceptor will now try to block delete operations sooner
 				in the processing lifecycle if there is no chance they will be permitted
 				later (i.e. because the type is not authorized at all)
@@ -308,6 +515,11 @@
 				are found on a plain provider.
 			</action>
 			<action type="add">
+				@Operation method parameters may now declare their type via a String name such as
+				"code" or "Coding" in an attribute in @OperationParam. This is useful if you want
+				to make operation methods that can operate across different versions of FHIR.
+			</action>
+			<action type="add">
 				A new resource provider for JPA servers called
 				<![CDATA[<code>BinaryAccessProvider</code>]]>
 				has been added. This provider serves two custom operations called
@@ -331,6 +543,40 @@
 				Two issues in the Thymeleaf Narrative Template which caused an error when generating
 				a narrative on an untitled DiagnosticReport were fixed. Thanks to GitHub
 				user @navyflower for reporting!
+			</action>
+			<action type="add">
+				A new attribute has been added to the @Operation annotation called 
+				<![CDATA[<code>typeName</code>]]>. This annotation can be used to specify a 
+				type for an operation declared on a plain provider without needing to use 
+				a specific version of the FHIR structures.
+			</action>
+			<action type="add">
+				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
+				can now be used to upload custom vocabulary that has been converted into a standard file format
+				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
+			<action type="fix" issue="1404">
+				In the JAX-RS server, the resource type history and instance vread
+				operations had ambiguous paths that could lead to the wrong method
+				being called. Thanks to Seth Rylan Gainey for the pull request!
+			</action>
+			<action type="fix" issue="1414">
+				The profile validator (FhirInstanceValidator) can now be used to validate a resource 
+				using an explicit	profile declaration rather than simply relying on the declared 
+				URL in the resource itself.
+			</action>
+			<action type="fix">
+				When using the ResponseHighlighterInterceptor, some invalid requests that would normally generate an HTTP
+				400 response (e.g. an invalid _elements value) would cause an HTTP 500 crash.
+			</action>
+			<action type="add" issue="1388">
+				When performing a read-if-newer operation on a plain server, the resource ID
+				in Resource.meta.versionId is now used if a version isn't found in the resource
+				ID itself. Thanks to Stig Døssing for the pull request!
+			</action>
+			<action type="fix" issue="1375">
+				An example datatype was corrected in the DSTU2 Identifier datatype
+				StructureDefinition. Thanks to Nick Robison for the pull request!
 			</action>
 		</release>
 		<release version="3.8.0" date="2019-05-30" description="Hippo">
@@ -383,7 +629,7 @@
 				not any values contained within. This has been corrected.
 			</action>
 			<action type="add">
-				The JPA terminology service can now detect when Hibvernate Search (Lucene)
+				The JPA terminology service can now detect when Hibernate Search (Lucene)
 				is not enabled, and will perform simple ValueSet expansions without relying
 				on Hibenrate Search in such cases.
 			</action>

@@ -67,6 +67,67 @@
 		</section>
 
 		<section name="Announcements">
+			<p>
+				<b>September 3, 2019 - Community Survey and HAPI FHIR 4.0.1</b> -
+				It is time for us to do another HAPI FHIR community survey. The survey is a not-quite-annual 
+				tradition that helps us to set priority for the coming year and get a pulse on how people 
+				are using HAPI FHIR.
+			</p>
+			<p>
+				We would very much appreciate if everyone could take a few minutes to fill it out. The 
+				survey is short (2 pages / 5 mins) so it shouldn't be much of a burden.
+			</p>
+			<p>
+				Access the survey here:
+				<a href="http://bit.ly/33HO4cs">http://bit.ly/33HO4cs</a> (note that this URL was originally posted incorrectly. It is now fixed)
+			</p>
+			<p>
+				In addition, a new HAPI FHIR release (4.0.1) has been uploaded to the
+				Maven Central repos.
+				This release contains no new or updated functionality, but addressed a dependency
+            version that was left incorrectly requiring a SNAPSHOT maven build of the
+            org.hl7.fhir.utilities module. Users who are successfully using HAPI FHIR 4.0.0
+            do not need to upgrade, but any users who were blocked from upgrading due to
+            snapshot dependency issues are advised to upgrade immediately.
+			</p>
+
+
+
+			<p>
+				<b>August 14, 2019 - HAPI FHIR 4.0.0 (Igloo) Released</b> -
+				The next release of HAPI has now been uploaded to the Maven repos and
+				GitHub's releases section.
+			</p>
+			<p>
+				This release features a number of significant performance improvements,
+				and has some notable changes:
+			</p>
+			<ul>
+				<li>
+					A new consent framework called ConsentInterceptor that can be used to apply local consent directives and policies, and potentially filter or mask data has been added.
+				</li>
+				<li>
+					Initial support for draft FHIR R5 resources has been added.
+				</li>
+				<li>
+					Support for GraphQL and the _filter search parameter has been added.
+				</li>
+				<li>
+					The ability to perform cascading deletes has been added.
+				</li>
+			</ul>
+			<p>
+				As always, see the
+				<a href="http://hapifhir.io/changes-report.html">changelog</a> for a full list
+				of changes. You can also <a href="https://youtu.be/0breejA_xe4">watch the release webinar</a>!
+			</p>
+			<p>
+				Thanks to everyone who contributed to this release!
+			</p>
+			<p>
+				- <a href="https://github.com/jamesagnew/">James Agnew</a>
+			</p>
+			<br/><br/>
 
 			<p>
 				<b>May 30, 2019 - HAPI FHIR 3.8.0 (Hippo) Released</b> -
@@ -114,7 +175,6 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
-
 
 			<p>
 				<b>Feb 6, 2019 - HAPI FHIR 3.7.0 (Gale) Released</b> -
@@ -198,7 +258,7 @@
 
 
 			
-			
+			<!--
 			<p>
 				<b>Sep 17, 2018 - HAPI FHIR 3.5.0 Released</b> -
 				The next release of HAPI has now been uploaded to the Maven repos and
@@ -268,6 +328,7 @@
 				- <a href="https://github.com/jamesagnew/">James Agnew</a>
 			</p>
 			<br/><br/>
+			-->
 
 <!--
 			<p>

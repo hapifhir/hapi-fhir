@@ -187,7 +187,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			table.setDeleted(new Date());
 			table = myResourceTableDao.saveAndFlush(table);
 			ResourceHistoryTable newHistory = table.toHistory();
-			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersion(table.getId(), 1L);
+			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
 			newHistory.setResource(currentHistory.getResource());
 			myResourceHistoryTableDao.save(newHistory);
@@ -710,7 +710,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testCreateLongString() {
-		//@formatter:off
 		String input = "<NamingSystem>\n" +
 			"        <name value=\"NDF-RT (National Drug File – Reference Terminology)\"/>\n" +
 			"        <status value=\"draft\"/>\n" +
@@ -728,12 +727,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			"          <preferred value=\"false\"/>\n" +
 			"        </uniqueId>\n" +
 			"      </NamingSystem>";
-		//@formatter:on
 
 		NamingSystem res = myFhirCtx.newXmlParser().parseResource(NamingSystem.class, input);
 		IIdType id = myNamingSystemDao.create(res, mySrd).getId().toUnqualifiedVersionless();
 
-		assertThat(toUnqualifiedVersionlessIdValues(myNamingSystemDao.search(new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true))), org.hamcrest.Matchers.contains(id.getValue()));
+		SearchParameterMap params = new SearchParameterMap(NamingSystem.SP_NAME, new StringParam("NDF")).setLoadSynchronous(true);
+		IBundleProvider result = myNamingSystemDao.search(params);
+		assertThat(toUnqualifiedVersionlessIdValues(result), org.hamcrest.Matchers.contains(id.getValue()));
 	}
 
 	@Test
@@ -2724,7 +2724,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		tx.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(id.getIdPartAsLong(), 1L);
+				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirCtx.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
 				table.setResource(newContent.getBytes(Charsets.UTF_8));
@@ -3860,7 +3860,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);
 			search.setFailureMessage("FOO");
-			mySearchEntityDao.save(search);
+			mySearchCacheSvc.save(search);
 		});
 
 		IBundleProvider results = myEncounterDao.search(map);

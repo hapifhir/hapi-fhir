@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
-import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -20,6 +18,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.*;
@@ -37,24 +36,24 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(bos);
 
-		addFile(zos, "loincupload.properties");
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_HIERARCHY_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_ANSWERLIST_LINK_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_GROUP_TERMS_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PARENT_GROUP_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_LINK_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_PART_RELATED_CODE_MAPPING_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_DOCUMENT_ONTOLOGY_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_RSNA_PLAYBOOK_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_CSV);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_IMAGING_DOCUMENT_CODES_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE);
-		addFile(zos, TerminologyLoaderSvcImpl.LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE);
+		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
 
 		zos.close();
 
@@ -85,7 +84,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI + "FOO"))
 				.andParameter("package", new Attachment().setUrl("foo").setData(packageBytes))
@@ -102,7 +101,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -111,7 +110,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 
 		/*
 		 * Try uploading a second time
@@ -119,7 +118,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -136,7 +135,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.andParameter("package", new Attachment().setData(packageBytes))
@@ -154,7 +153,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "package", new Attachment().setUrl("foo").setData(packageBytes))
 				.execute();
@@ -170,7 +169,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		try {
 			ourClient
 				.operation()
-				.onServer()
+				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 				.execute();
@@ -186,7 +185,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
@@ -195,7 +194,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@Test
@@ -212,7 +211,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 
 		Parameters respParam = ourClient
 			.operation()
-			.onServer()
+			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
@@ -221,7 +220,7 @@ public class TerminologyUploaderProviderDstu3Test extends BaseResourceProviderDs
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((IntegerType) respParam.getParameter().get(0).getValue()).getValue(), greaterThan(1));
+		assertThat(((IntegerType) respParam.getParameter().get(1).getValue()).getValue(), greaterThan(1));
 	}
 
 	@AfterClass

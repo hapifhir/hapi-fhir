@@ -124,7 +124,73 @@
 			</macro>
 
 		</section>
-		
+
+		<section name="Resource Validation (Profile/StructureDefinition)">
+
+			<p>
+				HAPI also supports validation against StructureDefinition
+				resources. This functionality uses the HL7 "InstanceValidator", which is able
+				to check a resource for conformance to FHIR profiles
+				(StructureDefinitions, ValueSets, and CodeSystems),
+				including validating fields, extensions, and codes for conformance to their given ValueSets.
+			</p>
+			<p>
+				StructureDefinition validation can be used to validate a resource against the
+				official structure definitions (produced by HL7) as well as against custom
+				definitions provided either by HL7 or by the user.
+			</p>
+
+			<p class="doc_info_bubble">
+				The instance validator is experimental in the DSTU2 mode, but has become very stable
+				and full-featured in DSTU3+ mode. Use with caution when validating DSTU2 resources using
+				instance validator.
+			</p>
+
+			<subsection name="Running the Validator">
+
+				<p>
+					To execute the validator, you simply create an instance of
+					<a href="./apidocs-dstu3/org/hl7/fhir/dstu3/hapi/validation/FhirInstanceValidator.html">FhirInstanceValidator</a>
+					and register it to new validator, as shown in the example below.
+				</p>
+
+				<p>
+					Note that the example below uses the official FHIR StructureDefintions and ValueSets
+					to validate the resource. It will not work unless you include the
+					<code>hapi-fhir-validation-resources-[version].jar</code> to your classpath.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="instanceValidator" />
+					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+				</macro>
+
+			</subsection>
+
+			<subsection name="Supplying your own StructureDefinitions">
+
+				<p>
+					The FhirInstanceValidator relies on the
+					<a href="./apidocs-hl7org-dstu2/ca/uhn/fhir/validation/IValidationSupport.html">IValidationSupport</a>
+					interface to load StructureDefinitions, and validate codes.
+				</p>
+				<p>
+					By default, the
+					<a href="./apidocs-hl7org-dstu2/ca/uhn/fhir/validation/DefaultProfileValidationSupport.html">DefaultProfileValidationSupport</a>
+					implementation is used. This implementation loads the FHIR profiles from the
+					validator resources JAR. If you want to use your own profiles, you may wish to
+					supply your own implementation.
+				</p>
+
+				<macro name="snippet">
+					<param name="id" value="instanceValidatorCustom" />
+					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
+				</macro>
+
+			</subsection>
+
+		</section>
+
 		<section name="Resource Validation Module: Schema/Schematron">
 
 			<p>
@@ -187,100 +253,6 @@
 			</subsection>
 
 			<a name="structure_definition_validation" />
-		</section>
-
-		<section name="Resource Validation (Profile/StructureDefinition)">
-
-			<p>
-				HAPI also supports validation against StructureDefinition
-				resources. This functionality uses the HL7 "InstanceValidator", which is able
-				to check a resource for conformance to FHIR profiles
-				(StructureDefinitions, ValueSets, and CodeSystems),
-				including validating fields, extensions, and codes for conformance to their given ValueSets.
-			</p>
-			<p>
-				StructureDefinition validation can be used to validate a resource against the
-				official structure definitions (produced by HL7) as well as against custom
-				definitions provided either by HL7 or by the user.
-			</p>
-
-			<p class="doc_info_bubble">
-				The instance validator is experimental in the DSTU2 mode, but has become very stable
-				and full-featured in DSTU3 mode. Use with caution when validating DSTU2 resources using
-				instance validator.
-			</p>
-
-			<subsection name="Preparation">
-
-				<p>
-					To use this functionality, you must add the following two dependencies
-					to your classpath (or Maven POM file, Gradle file, etc.):
-				</p>
-				<ul>
-					<li>
-					<!-- TODO: add search.maven.org links to these -->
-						<b>hapi-fhir-structures-hl7org-dstu2</b>
-						: This file contains the "reference implementation"
-						structures and tooling. You need to include it even if you are not using the RI model
-						(the StructureDefinition validation will work against HAPI structures as well)
-					</li>
-					<li>
-						<b>hapi-fhir-validation-resources-dstu2</b>
-						: This file contains the official FHIR
-						StructureDefinition files, and the ValueSets needed to support them.
-					</li>
-				</ul>
-				<p>
-					See the
-					<a href="./download.html">download page</a>
-					for more information.
-				</p>
-
-			</subsection>
-
-			<subsection name="Running the Validator">
-
-				<p>
-					To execute the validator, you simply create an instance of
-					<a href="./apidocs-dstu3/org/hl7/fhir/dstu3/hapi/validation/FhirInstanceValidator.html">FhirInstanceValidator</a>
-					and register it to new validator, as shown in the example below.
-				</p>
-				
-				<p>
-					Note that the example below uses the official FHIR StructureDefintions and ValueSets
-					to validate the resource. It will not work unless you include the 
-					<code>hapi-fhir-validation-resources-[version].jar</code> to your classpath.
-				</p>
-				
-				<macro name="snippet">
-					<param name="id" value="instanceValidator" />
-					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
-				</macro>
-
-			</subsection>
-
-			<subsection name="Supplying your own StructureDefinitions">
-				
-				<p>
-					The FhirInstanceValidator relies on the 
-					<a href="./apidocs-hl7org-dstu2/ca/uhn/fhir/validation/IValidationSupport.html">IValidationSupport</a>
-					interface to load StructureDefinitions, and validate codes. 
-				</p>
-				<p>
-					By default, the
-					<a href="./apidocs-hl7org-dstu2/ca/uhn/fhir/validation/DefaultProfileValidationSupport.html">DefaultProfileValidationSupport</a>
-					implementation is used. This implementation loads the FHIR profiles from the
-					validator resources JAR. If you want to use your own profiles, you may wish to
-					supply your own implementation. 
-				</p>
-
-				<macro name="snippet">
-					<param name="id" value="instanceValidatorCustom" />
-					<param name="file" value="examples/src/main/java/example/ValidatorExamples.java" />
-				</macro>
-			
-			</subsection>
-
 		</section>
 
 	</body>
