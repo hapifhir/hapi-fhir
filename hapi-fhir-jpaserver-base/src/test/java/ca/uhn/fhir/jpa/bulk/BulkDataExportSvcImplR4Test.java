@@ -103,7 +103,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		createResources();
 
 		// Create a bulk job
-		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(Sets.newHashSet("Patient", "Observation"), null, null);
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
 		assertNotNull(jobDetails.getJobId());
 
 		// Check the status

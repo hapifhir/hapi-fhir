@@ -6,11 +6,16 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
+import ca.uhn.fhir.jpa.sched.SchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
@@ -29,6 +34,8 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
@@ -85,7 +92,7 @@ public abstract class BaseConfig {
 		return new DaoRegistry();
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
 		return new DatabaseBackedPagingProvider();
 	}

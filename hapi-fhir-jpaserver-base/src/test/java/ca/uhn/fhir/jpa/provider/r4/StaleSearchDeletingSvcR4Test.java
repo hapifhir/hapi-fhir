@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.gclient.IQuery;
@@ -173,7 +174,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testDontDeleteSearchBeforeExpiry() {
-		StaleSearchDeletingSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
+		DatabaseSearchCacheSvcImpl.setMaximumResultsToDeleteForUnitTest(10);
 
 		runInTransaction(() -> {
 			Search search = new Search();

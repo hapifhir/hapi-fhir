@@ -3887,7 +3887,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
 			runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuid(uuid1);
+				Search search = mySearchEntityDao.findByUuidAndDontFetchIncludes(uuid1).orElseThrow(()->new IllegalStateException());
 				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), 2));
 				mySearchEntityDao.save(search);
 			});

@@ -41,9 +41,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContextType;
 import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -271,7 +268,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo submitJob(Set<String> theResourceTypes, DateTimeType theSince, Set<String> theFilters) {
+	public JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
 		job.setStatus(BulkJobStatusEnum.SUBMITTED);

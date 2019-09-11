@@ -228,6 +228,7 @@ public class Constants {
 	 * Note that this constant is used in a number of places including DB column lengths! Be careful if you decide to change it.
 	 */
 	public static final int REQUEST_ID_LENGTH = 16;
+	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

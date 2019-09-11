@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.DateTimeType;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +13,7 @@ public interface IBulkDataExportSvc {
 	@Transactional(value = Transactional.TxType.NEVER)
 	void purgeExpiredFiles();
 
-	JobInfo submitJob(Set<String> theResourceTypes, DateTimeType theSince, Set<String> theFilters);
+	JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters);
 
 	JobInfo getJobStatus(String theJobId);
 

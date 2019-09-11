@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
