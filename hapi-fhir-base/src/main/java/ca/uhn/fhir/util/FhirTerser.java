@@ -730,6 +730,13 @@ public class FhirTerser {
 								BaseRuntimeElementDefinition<?> childElementDef;
 								childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
 
+								Class<? extends IBase> typeClass = nextValue.getClass();
+								while (childElementDef == null && IBase.class.isAssignableFrom(typeClass)) {
+									//noinspection unchecked
+									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
+								}
+
 								if (childElementDef == null) {
 									StringBuilder b = new StringBuilder();
 									b.append("Found value of type[");

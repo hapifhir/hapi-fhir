@@ -3,12 +3,10 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.junit.AfterClass;
@@ -451,6 +449,46 @@ public class FhirTerserR4Test {
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("modifiedNestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
+	}
+
+
+	@Test
+	public void testVisitWithSubclass() {
+
+		ValueSet vs = new ValueSet();
+		vs.setExpansion(new MyValueSetExpansionComponent());
+		vs.getExpansion().getIdentifierElement().setValue("http://foo");
+
+		List<String> values = new ArrayList<>();
+		IModelVisitor visitor = new IModelVisitor() {
+			@Override
+			public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				if (theElement instanceof IPrimitiveType) {
+					values.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+			}
+		};
+		ourCtx.newTerser().visit(vs, visitor);
+		assertThat(values, org.hamcrest.Matchers.contains("http://foo"));
+
+		values.clear();
+		IModelVisitor2 visitor2 = new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					values.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				return true;
+			}
+		};
+		ourCtx.newTerser().visit(vs, visitor2);
+		assertThat(values, org.hamcrest.Matchers.contains("http://foo"));
+
 	}
 
 	@Test
@@ -1035,6 +1073,14 @@ public class FhirTerserR4Test {
 				return (Class<T>) ((ParameterizedType) type).getOwnerType();
 			}
 			return (Class<T>) type;
+		}
+	}
+
+	@Block
+	public static class MyValueSetExpansionComponent extends ValueSet.ValueSetExpansionComponent {
+		@Override
+		public UriType getIdentifierElement() {
+			return super.getIdentifierElement();
 		}
 	}
 

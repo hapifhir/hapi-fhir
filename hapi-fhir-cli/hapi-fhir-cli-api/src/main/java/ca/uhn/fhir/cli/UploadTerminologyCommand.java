@@ -27,6 +27,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -55,6 +56,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + IHapiTerminologyLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, null, "custom", false, "Indicates that this upload uses the HAPI FHIR custom external terminology format");
+		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
 		addBasicAuthOption(options);
 		addVerboseLoggingOption(options);
 
@@ -64,6 +66,14 @@ public class UploadTerminologyCommand extends BaseCommand {
 	@Override
 	public void run(CommandLine theCommandLine) throws ParseException {
 		parseFhirContext(theCommandLine);
+
+		ModeEnum mode;
+		String modeString = theCommandLine.getOptionValue("m", "SNAPSHOT");
+		try {
+			mode = ModeEnum.valueOf(modeString);
+		} catch (IllegalArgumentException e) {
+			throw new ParseException("Invalid mode: " + modeString);
+		}
 
 		String termUrl = theCommandLine.getOptionValue("u");
 		if (isBlank(termUrl)) {
@@ -77,29 +87,53 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		IGenericClient client = super.newClient(theCommandLine);
 		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
-		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, "url", termUrl);
-		for (String next : datafile) {
-			ParametersUtil.addParameterToParametersString(myFhirCtx, inputParameters, "localfile", next);
-		}
-		if (theCommandLine.hasOption("custom")) {
-			ParametersUtil.addParameterToParametersCode(myFhirCtx, inputParameters, "contentMode", "custom");
-		}
 
 		if (theCommandLine.hasOption(VERBOSE_LOGGING_PARAM)) {
 			client.registerInterceptor(new LoggingInterceptor(true));
 		}
 
+		switch (mode) {
+			case SNAPSHOT:
+				uploadSnapshot(inputParameters, termUrl, datafile, theCommandLine, client);
+				break;
+			case ADD:
+
+				for (String next : datafile) {
+//					String contents = IOUtils.toString()
+				}
+
+
+				break;
+			case REMOVE:
+				break;
+		}
+
+	}
+
+	private void uploadSnapshot(IBaseParameters theInputparameters, String theTermUrl, String[] theDatafile, CommandLine theCommandLine, IGenericClient theClient) {
+		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputparameters, "url", theTermUrl);
+		for (String next : theDatafile) {
+			ParametersUtil.addParameterToParametersString(myFhirCtx, theInputparameters, "localfile", next);
+		}
+		if (theCommandLine.hasOption("custom")) {
+			ParametersUtil.addParameterToParametersCode(myFhirCtx, theInputparameters, "contentMode", "custom");
+		}
+
 		ourLog.info("Beginning upload - This may take a while...");
 
-		IBaseParameters response = client
+		IBaseParameters response = theClient
 			.operation()
 			.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
 			.named(UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameters(inputParameters)
+			.withParameters(theInputparameters)
 			.execute();
 
 		ourLog.info("Upload complete!");
 		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+	}
+
+	private enum ModeEnum {
+		SNAPSHOT, ADD, REMOVE
 	}
 
 }
