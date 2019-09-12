@@ -82,10 +82,19 @@ public class BulkExportProvider {
 	 */
 	@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 	public void exportPollStatus(
-		@OperationParam(name=JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId
+		@OperationParam(name=JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
+		ServletRequestDetails theRequestDetails
 	) {
 
+
+
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatus(theJobId.getValueAsString());
+		switch (status.getStatus()) {
+			case BUILDING:
+
+
+		}
+
 		
 	}
 
