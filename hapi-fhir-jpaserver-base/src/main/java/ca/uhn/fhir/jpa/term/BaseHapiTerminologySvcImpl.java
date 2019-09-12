@@ -35,9 +35,11 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ObjectUtil;
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -163,6 +165,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private IFulltextSearchSvc myFulltextSearchSvc;
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
     @Autowired
     private ISchedulerService mySchedulerService;
 
@@ -398,7 +402,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			ourLog.info("Deleting existing TermValueSet[{}] and its children...", existingTermValueSet.getId());
 			myValueSetConceptDesignationDao.deleteByTermValueSetId(existingTermValueSet.getId());
 			myValueSetConceptDao.deleteByTermValueSetId(existingTermValueSet.getId());
-			myValueSetDao.deleteByTermValueSetId(existingTermValueSet.getId());
+			myValueSetDao.deleteById(existingTermValueSet.getId());
 			ourLog.info("Done deleting existing TermValueSet[{}] and its children.", existingTermValueSet.getId());
 		}
 	}
@@ -491,8 +495,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		if (!optionalTermValueSet.isPresent()) {
-			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSetToExpand));
-			myDeferredValueSets.add(theValueSetToExpand);
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
 			return expandValueSet(theValueSetToExpand); // In-memory expansion.
 		}
 
@@ -524,7 +527,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		theExpansionComponent.addParameter().setName("offset").setValue(new IntegerType(theOffset));
 		theExpansionComponent.addParameter().setName("count").setValue(new IntegerType(theCount));
 
-		if (theCount == 0 || total == 0) {
+		if (theCount == 0) {
 			return;
 		}
 
@@ -533,58 +536,64 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private void expandConcepts(ValueSet.ValueSetExpansionComponent theExpansionComponent, TermValueSet theTermValueSet, int theOffset, int theCount) {
 		int conceptsExpanded = 0;
+		int designationsExpanded = 0;
 		int toIndex = theOffset + theCount;
-		Slice<TermValueSetConcept> slice = myValueSetConceptDao.findByTermValueSetIdAndPreFetchDesignations(SearchCoordinatorSvcImpl.toPage(theOffset, toIndex), theTermValueSet.getId());
-		if (!slice.hasContent()) {
-			logConceptsExpanded(theTermValueSet, conceptsExpanded);
+		Collection<TermValueSetConceptView> conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theOffset, toIndex, theTermValueSet.getId());
+
+		if (conceptViews.isEmpty()) {
+			logConceptsExpanded("No concepts to expand. ", theTermValueSet, conceptsExpanded);
 			return;
 		}
 
-		for (TermValueSetConcept concept : slice.getContent()) {
-			ValueSet.ValueSetExpansionContainsComponent containsComponent = theExpansionComponent.addContains();
-			containsComponent.setSystem(concept.getSystem());
-			containsComponent.setCode(concept.getCode());
-			containsComponent.setDisplay(concept.getDisplay());
+		Map<Long, ValueSet.ValueSetExpansionContainsComponent> pidToConcept = new HashMap<>();
+		for (TermValueSetConceptView conceptView : conceptViews) {
 
-			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to make this optional.
-			expandDesignations(theTermValueSet, concept, containsComponent);
+			Long conceptPid = conceptView.getConceptPid();
+			ValueSet.ValueSetExpansionContainsComponent containsComponent;
+
+			if (!pidToConcept.containsKey(conceptPid)) {
+				containsComponent = theExpansionComponent.addContains();
+				containsComponent.setSystem(conceptView.getConceptSystemUrl());
+				containsComponent.setCode(conceptView.getConceptCode());
+				containsComponent.setDisplay(conceptView.getConceptDisplay());
+				pidToConcept.put(conceptPid, containsComponent);
+			} else {
+				containsComponent = pidToConcept.get(conceptPid);
+			}
+
+			// TODO: DM 2019-08-17 - Implement includeDesignations parameter for $expand operation to designations optional.
+			if (conceptView.getDesignationPid() != null) {
+				ValueSet.ConceptReferenceDesignationComponent designationComponent = containsComponent.addDesignation();
+				designationComponent.setLanguage(conceptView.getDesignationLang());
+				designationComponent.setUse(new Coding(
+					conceptView.getDesignationUseSystem(),
+					conceptView.getDesignationUseCode(),
+					conceptView.getDesignationUseDisplay()));
+				designationComponent.setValue(conceptView.getDesignationVal());
+
+				if (++designationsExpanded % 250 == 0) {
+					logDesignationsExpanded("Expansion of designations in progress. ", theTermValueSet, designationsExpanded);
+				}
+			}
 
 			if (++conceptsExpanded % 250 == 0) {
-				logConceptsExpanded(theTermValueSet, conceptsExpanded);
+				logConceptsExpanded("Expansion of concepts in progress. ", theTermValueSet, conceptsExpanded);
 			}
 		}
 
-		logConceptsExpanded(theTermValueSet, conceptsExpanded);
+		logDesignationsExpanded("Finished expanding designations. ", theTermValueSet, designationsExpanded);
+		logConceptsExpanded("Finished expanding concepts. ", theTermValueSet, conceptsExpanded);
 	}
 
-	private void logConceptsExpanded(TermValueSet theTermValueSet, int theConceptsExpanded) {
+	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			ourLog.info("Have expanded {} concepts in ValueSet[{}]", theConceptsExpanded, theTermValueSet.getUrl());
+			ourLog.info("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
-	private void expandDesignations(TermValueSet theValueSet, TermValueSetConcept theConcept, ValueSet.ValueSetExpansionContainsComponent theContainsComponent) {
-		int designationsExpanded = 0;
-		for (TermValueSetConceptDesignation designation : theConcept.getDesignations()) {
-			ValueSet.ConceptReferenceDesignationComponent designationComponent = theContainsComponent.addDesignation();
-			designationComponent.setLanguage(designation.getLanguage());
-			designationComponent.setUse(new Coding(
-				designation.getUseSystem(),
-				designation.getUseCode(),
-				designation.getUseDisplay()));
-			designationComponent.setValue(designation.getValue());
-
-			if (++designationsExpanded % 250 == 0) {
-				logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
-			}
-		}
-
-		logDesignationsExpanded(theValueSet, theConcept, designationsExpanded);
-	}
-
-	private void logDesignationsExpanded(TermValueSet theValueSet, TermValueSetConcept theConcept, int theDesignationsExpanded) {
+	private void logDesignationsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.info("Have expanded {} designations for Concept[{}|{}] in ValueSet[{}]", theDesignationsExpanded, theConcept.getSystem(), theConcept.getCode(), theValueSet.getUrl());
+			ourLog.info("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
@@ -606,10 +615,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.debug("Handling includes");
 		for (ValueSet.ConceptSetComponent include : theValueSetToExpand.getCompose().getInclude()) {
 			for (int i = 0; ; i++) {
-				int finalI = i;
+				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = true;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, finalI);
+					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, include, add, theCodeCounter, queryIndex);
 				});
 				if (!shouldContinue) {
 					break;
@@ -621,15 +630,19 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
 			for (int i = 0; ; i++) {
-				int finalI = i;
+				int queryIndex = i;
 				Boolean shouldContinue = myTxTemplate.execute(t -> {
 					boolean add = false;
-					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, finalI);
+					return expandValueSetHandleIncludeOrExclude(theValueSetCodeAccumulator, addedCodes, exclude, add, theCodeCounter, queryIndex);
 				});
 				if (!shouldContinue) {
 					break;
 				}
 			}
+		}
+
+		if (theValueSetCodeAccumulator instanceof ValueSetConceptAccumulator) {
+			myTxTemplate.execute(t -> ((ValueSetConceptAccumulator) theValueSetCodeAccumulator).removeGapsFromConceptOrder());
 		}
 
 		ourLog.info("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
@@ -941,8 +954,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermValueSet> optionalTermValueSet = myValueSetDao.findByResourcePid(valueSetResourcePid);
 
 		if (!optionalTermValueSet.isPresent()) {
-			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. Will schedule this ValueSet for pre-expansion. {}", getValueSetInfo(theValueSet));
-			myDeferredValueSets.add(theValueSet);
+			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory code validation. {}", getValueSetInfo(theValueSet));
 			return false;
 		}
 
@@ -974,7 +986,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCoding.hasSystem() && theCoding.hasCode()) {
 				concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, theCoding.getSystem(), theCoding.getCode()));
 			}
-		} else if (theCodeableConcept != null){
+		} else if (theCodeableConcept != null) {
 			for (Coding coding : theCodeableConcept.getCoding()) {
 				if (coding.hasSystem() && coding.hasCode()) {
 					concepts.addAll(findByValueSetResourcePidSystemAndCode(valueSetResourcePid, coding.getSystem(), coding.getCode()));
@@ -1765,7 +1777,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			} catch (FHIRException fe) {
 				throw new InternalErrorException(fe);
 			}
-			myConceptMapDao.save(termConceptMap);
+			termConceptMap = myConceptMapDao.save(termConceptMap);
 			int codesSaved = 0;
 
 			if (theConceptMap.hasGroup()) {
@@ -1808,7 +1820,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
 									myConceptMapGroupElementTargetDao.save(termConceptMapGroupElementTarget);
 
-									if (codesSaved++ % 250 == 0) {
+									if (++codesSaved % 250 == 0) {
 										ourLog.info("Have saved {} codes in ConceptMap", codesSaved);
 										myConceptMapGroupElementTargetDao.flush();
 									}
@@ -1830,7 +1842,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermConceptMap.");
+		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
 	@Scheduled(fixedDelay = 600000) // 10 minutes.
@@ -1947,7 +1959,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		Optional<TermValueSet> optionalExistingTermValueSetByUrl = myValueSetDao.findByUrl(url);
 		if (!optionalExistingTermValueSetByUrl.isPresent()) {
 
-			myValueSetDao.save(termValueSet);
+			termValueSet = myValueSetDao.save(termValueSet);
 
 		} else {
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
@@ -1961,7 +1973,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermValueSet.");
+		ourLog.info("Done storing TermValueSet[{}]", termValueSet.getId());
 	}
 
 	@Override
@@ -2367,6 +2379,10 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		theConceptsStack.remove(theConceptsStack.size() - 1);
 
 		return retVal;
+	}
+
+	protected void throwInvalidValueSet(String theValueSet) {
+		throw new ResourceNotFoundException("Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSet));
 	}
 
 	private static void extractLinksFromConceptAndChildren(TermConcept theConcept, List<TermConceptParentChildLink> theLinks) {

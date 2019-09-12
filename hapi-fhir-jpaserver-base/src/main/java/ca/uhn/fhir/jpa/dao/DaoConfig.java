@@ -146,12 +146,12 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	private boolean myFilterParameterEnabled = false;
+	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
 	 */
 	private boolean myPreExpandValueSetsExperimental = false;
-	private boolean myFilterParameterEnabled = false;
-	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 0}!
 	 */

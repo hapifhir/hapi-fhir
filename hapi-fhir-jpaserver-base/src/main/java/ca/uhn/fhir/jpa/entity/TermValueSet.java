@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
@@ -67,7 +66,7 @@ public class TermValueSet implements Serializable {
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
-	@OneToMany(mappedBy = "myValueSet")
+	@OneToMany(mappedBy = "myValueSet", fetch = FetchType.LAZY)
 	private List<TermValueSetConcept> myConcepts;
 
 	@Column(name = "TOTAL_CONCEPTS", nullable = false)
@@ -81,6 +80,9 @@ public class TermValueSet implements Serializable {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public TermValueSet() {
 		super();
@@ -196,9 +198,10 @@ public class TermValueSet implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getUrl())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = getUrl().hashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override

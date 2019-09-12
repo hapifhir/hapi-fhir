@@ -48,13 +48,19 @@ public class TermValueSetConceptDesignation implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VALUESET_CONCEPT_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
+
+	@Column(name = "VALUESET_CONCEPT_PID", insertable = false, updatable = false, nullable = false)
+	private Long myConceptPid;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
 	private TermValueSet myValueSet;
+
+	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	private Long myValueSetPid;
 
 	@Transient
 	private String myValueSetUrl;
@@ -76,6 +82,9 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	@Column(name = "VAL", nullable = false, length = MAX_LENGTH)
 	private String myValue;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public Long getId() {
 		return myId;
@@ -188,13 +197,16 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getLanguage())
-			.append(getUseSystem())
-			.append(getUseCode())
-			.append(getUseDisplay())
-			.append(getValue())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(getLanguage())
+				.append(getUseSystem())
+				.append(getUseCode())
+				.append(getUseDisplay())
+				.append(getValue())
+				.toHashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override
@@ -202,7 +214,9 @@ public class TermValueSetConceptDesignation implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myConcept != null ? ("myConcept - id=" + myConcept.getId()) : ("myConcept=(null)"))
+			.append("myConceptPid", myConceptPid)
 			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetPid", myValueSetPid)
 			.append("myValueSetUrl", this.getValueSetUrl())
 			.append("myValueSetName", this.getValueSetName())
 			.append("myLanguage", myLanguage)

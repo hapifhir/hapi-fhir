@@ -156,6 +156,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 		}
 
 		ValueSet source = new ValueSet();
+		source.setUrl(theUri);
 
 		source.getCompose().addInclude().addValueSet(theUri);
 
