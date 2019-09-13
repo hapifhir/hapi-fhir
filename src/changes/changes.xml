@@ -133,8 +133,12 @@
 				and version were still returned to the user. This has been corrected so that no details about
 				the resource are leaked.
 			</action>
+			<action type="fix">
+				Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the
+				expected type.
+			</action>
 		</release>
-		<release version="4.0.1" date="2019-09-03" description="Igloo (Point Release)">
+		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
 				This release contains no new or updated functionality, but addressed a dependency 
 				version that was left incorrectly requiring a SNAPSHOT maven build of the
