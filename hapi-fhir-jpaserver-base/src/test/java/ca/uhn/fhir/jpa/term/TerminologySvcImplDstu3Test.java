@@ -148,6 +148,11 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
+			code = new TermConcept(cs, "47239-9");
+			code.addPropertyString("SYSTEM", "^Patient");
+			code.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
+			cs.getConcepts().add(code);
+
 			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION" , cs);
 		});
 	}
@@ -274,6 +279,218 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithExclude3rdParty() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("3rdParty");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("3rdparty");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithExcludeLoinc() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("LOINC");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(CS_URL);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(CS_URL);
+		exclude
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("loinc");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithInclude3rdParty() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("3rdParty");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("3rdparty");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithIncludeLoinc() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("LOINC");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("loinc");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithUnsupportedOp() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("LOINC");
+		try {
+			outcome = myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Don't know how to handle op=ISA on property copyright", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterCopyrightWithUnsupportedValue() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("bogus");
+		try {
+			outcome = myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testExpandValueSetPropertySearchWithRegexExclude() {
 		createLoincSystemWithSomeCodes();
 
@@ -297,7 +514,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue(".*\\^Donor$");
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 	}
 
 	@Test
@@ -324,7 +541,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setValue("12345-1|12345-2");
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("50015-7"));
+		assertThat(codes, containsInAnyOrder("50015-7", "47239-9"));
 	}
 
 	@Test
