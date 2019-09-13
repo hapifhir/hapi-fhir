@@ -481,9 +481,11 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		}
 
 		// FIXME: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
-		String externalCopyRightNoticeCode = "EXTERNAL_COPYRIGHT_NOTICE";
-		CodeSystem.PropertyType externalCopyRightNoticeType = CodeSystem.PropertyType.STRING;
-		propertyNamesToTypes.put(externalCopyRightNoticeCode, externalCopyRightNoticeType);
+		if (!propertyNamesToTypes.containsKey("EXTERNAL_COPYRIGHT_NOTICE")) {
+			String externalCopyRightNoticeCode = "EXTERNAL_COPYRIGHT_NOTICE";
+			CodeSystem.PropertyType externalCopyRightNoticeType = CodeSystem.PropertyType.STRING;
+			propertyNamesToTypes.put(externalCopyRightNoticeCode, externalCopyRightNoticeType);
+		}
 
 		IRecordHandler handler;
 
