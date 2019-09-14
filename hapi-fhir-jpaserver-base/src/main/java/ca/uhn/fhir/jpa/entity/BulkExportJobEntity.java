@@ -15,6 +15,8 @@ import java.util.Date;
 })
 public class BulkExportJobEntity {
 
+	public static final int REQUEST_LENGTH = 500;
+	public static final int STATUS_MESSAGE_LEN = 500;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXJOB_PID")
 	@SequenceGenerator(name = "SEQ_BLKEXJOB_PID", sequenceName = "SEQ_BLKEXJOB_PID")
@@ -31,14 +33,42 @@ public class BulkExportJobEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_TIME", nullable = false)
 	private Date myExpiry;
+
+	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
+	private String myRequest;
+
 	@OneToMany(fetch = FetchType.LAZY)
 	private Collection<BulkExportCollectionEntity> myCollections;
+
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "EXP_SINCE", nullable = true)
+	private Date mySince;
+	@Column(name = "STATUS_MESSAGE", nullable = true, length = STATUS_MESSAGE_LEN)
+	private String myStatusMessage;
+
+	public String getStatusMessage() {
+		return myStatusMessage;
+	}
+
+	public void setStatusMessage(String theStatusMessage) {
+		myStatusMessage = theStatusMessage;
+	}
+
+	public String getRequest() {
+		return myRequest;
+	}
+
+	public void setRequest(String theRequest) {
+		myRequest = theRequest;
+	}
 
 	public void setExpiry(Date theExpiry) {
 		myExpiry = theExpiry;
@@ -86,4 +116,11 @@ public class BulkExportJobEntity {
 		return myId;
 	}
 
+	public Date getSince() {
+		return mySince;
+	}
+
+	public void setSince(Date theSince) {
+		mySince = theSince;
+	}
 }

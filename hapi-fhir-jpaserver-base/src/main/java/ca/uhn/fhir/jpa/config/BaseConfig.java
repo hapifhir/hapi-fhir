@@ -34,9 +34,6 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
@@ -81,7 +78,6 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 public abstract class BaseConfig {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseConfig.class);
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
 
 	@Autowired
@@ -221,7 +217,7 @@ public abstract class BaseConfig {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
+		return daoRegistry().getResourceDaoOrNull(theResourceType) != null;
 	}
 
 	@Bean
@@ -237,12 +233,7 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ISchedulerService schedulerService(Environment theEnvironment) {
-		String schedulingDisabled = theEnvironment.getProperty("scheduling_disabled");
-		if ("true".equals(schedulingDisabled)) {
-			ourLog.warn("Scheduling is DISABLED on this server");
-			return new SchedulerServiceImpl.NullSchedulerService();
-		}
+	public ISchedulerService schedulerService() {
 		return new SchedulerServiceImpl();
 	}
 

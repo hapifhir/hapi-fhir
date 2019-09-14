@@ -1513,9 +1513,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName());
+		jobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_saveDeferred");
 		jobDefinition.setJobClass(SaveDeferredJob.class);
 		mySchedulerService.scheduleFixedDelay(5000, false, jobDefinition);
+
+		// Register scheduled job to save deferred concepts
+		// In the future it would be great to make this a cluster-aware task somehow
+		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
+		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
+		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_MINUTE, true, vsJobDefinition);
+
 	}
 
 	@Override
@@ -1845,7 +1853,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
-	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
@@ -2411,6 +2418,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		@Override
 		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.saveDeferred();
+		}
+	}
+
+	public static class PreExpandValueSetsJob implements Job {
+
+		@Autowired
+		private IHapiTerminologySvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
 		}
 	}
 

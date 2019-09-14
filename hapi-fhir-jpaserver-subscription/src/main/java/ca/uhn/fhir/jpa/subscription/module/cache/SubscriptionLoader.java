@@ -123,11 +123,13 @@ public class SubscriptionLoader {
 
 			IBundleProvider subscriptionBundleList = mySubscriptionProvider.search(map);
 
-			if (subscriptionBundleList.size() >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
+			Integer subscriptionCount = subscriptionBundleList.size();
+			assert subscriptionCount != null;
+			if (subscriptionCount >= SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS) {
 				ourLog.error("Currently over " + SubscriptionConstants.MAX_SUBSCRIPTION_RESULTS + " subscriptions.  Some subscriptions have not been loaded.");
 			}
 
-			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionBundleList.size());
+			List<IBaseResource> resourceList = subscriptionBundleList.getResources(0, subscriptionCount);
 
 			Set<String> allIds = new HashSet<>();
 			int changesCount = 0;

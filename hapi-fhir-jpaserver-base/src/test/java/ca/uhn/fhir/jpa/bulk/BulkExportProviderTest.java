@@ -2,10 +2,14 @@ package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.JsonUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -15,6 +19,7 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -34,8 +39,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,8 +48,8 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class BulkExportProviderTest {
 
+	private static final String A_JOB_ID = "0000000-AAAAAA";
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportProviderTest.class);
-	public static final String A_JOB_ID = "0000000-AAAAAA";
 	private Server myServer;
 	private FhirContext myCtx = FhirContext.forR4();
 	private int myPort;
@@ -73,6 +77,7 @@ public class BulkExportProviderTest {
 
 		BulkExportProvider provider = new BulkExportProvider();
 		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
+		provider.setFhirContextForUnitTest(myCtx);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(myCtx);
@@ -125,7 +130,13 @@ public class BulkExportProviderTest {
 	}
 
 	@Test
-	public void testPollForStatus() throws IOException {
+	public void testPollForStatus_BUILDING() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID)
+			.setStatus(BulkJobStatusEnum.BUILDING)
+			.setStatusTime(InstantType.now().getValue());
+		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
 
 		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
@@ -136,9 +147,96 @@ public class BulkExportProviderTest {
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
 			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=0000000-AAAAAA", response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue(), containsString("Build in progress - Status set to BUILDING at 20"));
 		}
 
 	}
+
+	@Test
+	public void testPollForStatus_ERROR() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID)
+			.setStatus(BulkJobStatusEnum.ERROR)
+			.setStatusTime(InstantType.now().getValue())
+			.setStatusMessage("Some Error Message");
+		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(500, response.getStatusLine().getStatusCode());
+			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
+
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			assertThat(responseContent, containsString("\"diagnostics\": \"Some Error Message\""));
+		}
+
+	}
+
+	@Test
+	public void testPollForStatus_COMPLETED() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID)
+			.setStatus(BulkJobStatusEnum.COMPLETE)
+			.setStatusTime(InstantType.now().getValue());
+		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/111"));
+		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/222"));
+		jobInfo.addFile().setResourceType("Patient").setResourceId(new IdType("Binary/333"));
+		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenReturn(jobInfo);
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals("OK", response.getStatusLine().getReasonPhrase());
+			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
+
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
+			assertEquals(3, responseJson.getOutput().size());
+			assertEquals("Patient", responseJson.getOutput().get(0).getType());
+			assertEquals("http://localhost:" + myPort + "/Binary/111", responseJson.getOutput().get(0).getUrl());
+			assertEquals("Patient", responseJson.getOutput().get(1).getType());
+			assertEquals("http://localhost:" + myPort + "/Binary/222", responseJson.getOutput().get(1).getUrl());
+			assertEquals("Patient", responseJson.getOutput().get(2).getType());
+			assertEquals("http://localhost:" + myPort + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+		}
+
+	}
+
+	@Test
+	public void testPollForStatus_Gone() throws IOException {
+
+		when(myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(eq(A_JOB_ID))).thenThrow(new ResourceNotFoundException("Unknown job: AAA"));
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response content: {}", responseContent);
+
+			assertEquals(404, response.getStatusLine().getStatusCode());
+			assertEquals(Constants.CT_FHIR_JSON_NEW, response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
+			assertThat(responseContent, containsString("\"diagnostics\":\"Unknown job: AAA\""));
+		}
+
+	}
+
 
 }

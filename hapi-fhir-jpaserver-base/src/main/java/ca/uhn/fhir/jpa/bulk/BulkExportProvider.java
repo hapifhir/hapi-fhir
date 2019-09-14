@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.util.JsonUtil;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.Constants;
@@ -9,11 +11,16 @@ import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ArrayUtil;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
 
@@ -21,6 +28,13 @@ public class BulkExportProvider {
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@VisibleForTesting
+	public void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	@VisibleForTesting
 	public void setBulkDataExportSvcForUnitTests(IBulkDataExportSvc theBulkDataExportSvc) {
@@ -64,7 +78,7 @@ public class BulkExportProvider {
 
 		IBulkDataExportSvc.JobInfo outcome = myBulkDataExportSvc.submitJob(outputFormat, resourceTypes, since, filters);
 
-		String serverBase = theRequestDetails.getServerBaseForRequest();
+		String serverBase = getServerBase(theRequestDetails);
 		String pollLocation = serverBase + "/" + JpaConstants.OPERATION_EXPORT_POLL_STATUS + "?" + JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + outcome.getJobId();
 
 		HttpServletResponse response = theRequestDetails.getServletResponse();
@@ -82,20 +96,63 @@ public class BulkExportProvider {
 	 */
 	@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 	public void exportPollStatus(
-		@OperationParam(name=JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
+		@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 		ServletRequestDetails theRequestDetails
-	) {
+	) throws IOException {
 
+		HttpServletResponse response = theRequestDetails.getServletResponse();
+		theRequestDetails.getServer().addHeadersToResponse(response);
 
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(theJobId.getValueAsString());
 
-		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatus(theJobId.getValueAsString());
 		switch (status.getStatus()) {
+			case SUBMITTED:
 			case BUILDING:
 
+				response.setStatus(Constants.STATUS_HTTP_202_ACCEPTED);
+				response.addHeader(Constants.HEADER_X_PROGRESS, "Build in progress - Status set to " + status.getStatus() + " at " + new InstantType(status.getStatusTime()).getValueAsString());
+				response.addHeader(Constants.HEADER_RETRY_AFTER, "120");
+				break;
+
+			case COMPLETE:
+
+				response.setStatus(Constants.STATUS_HTTP_200_OK);
+				response.setContentType(Constants.CT_JSON);
+
+				// Create a JSON response
+				BulkExportResponseJson bulkResponseDocument = new BulkExportResponseJson();
+				bulkResponseDocument.setTransactionTime(status.getStatusTime());
+				bulkResponseDocument.setRequest(status.getRequest());
+				for (IBulkDataExportSvc.FileEntry nextFile : status.getFiles()) {
+					String serverBase = getServerBase(theRequestDetails);
+					String nextUrl = serverBase + "/" + nextFile.getResourceId().toUnqualifiedVersionless().getValue();
+					bulkResponseDocument
+						.addOutput()
+						.setType(nextFile.getResourceType())
+						.setUrl(nextUrl);
+				}
+				JsonUtil.serialize(bulkResponseDocument, response.getWriter());
+				response.getWriter().close();
+				break;
+
+			case ERROR:
+
+				response.setStatus(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
+				response.setContentType(Constants.CT_FHIR_JSON);
+
+				// Create an OperationOutcome response
+				IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(myFhirContext);
+				OperationOutcomeUtil.addIssue(myFhirContext, oo, "error", status.getStatusMessage(), null, null);
+				myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToWriter(oo, response.getWriter());
+				response.getWriter().close();
 
 		}
 
-		
+
+	}
+
+	private String getServerBase(ServletRequestDetails theRequestDetails) {
+		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
 	}
 
 }

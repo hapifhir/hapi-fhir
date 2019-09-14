@@ -5,20 +5,22 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
+import org.quartz.Calendar;
 import org.quartz.*;
 import org.quartz.impl.JobDetailImpl;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
+import org.quartz.spi.JobFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -42,20 +44,45 @@ import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
  * </ul>
  */
 public class SchedulerServiceImpl implements ISchedulerService {
+	public static final String SCHEDULING_DISABLED = "scheduling_disabled";
+	public static final String SCHEDULING_DISABLED_EQUALS_TRUE = SCHEDULING_DISABLED + "=true";
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+	private static int ourNextSchedulerId = 0;
 	private Scheduler myLocalScheduler;
 	private Scheduler myClusteredScheduler;
 	private String myThreadNamePrefix;
+	private boolean myLocalSchedulingEnabled;
+	private boolean myClusteredSchedulingEnabled;
 	@Autowired
 	private AutowiringSpringBeanJobFactory mySpringBeanJobFactory;
 	private AtomicBoolean myStopping = new AtomicBoolean(false);
+	@Autowired
+	private Environment myEnvironment;
 
 	/**
 	 * Constructor
 	 */
 	public SchedulerServiceImpl() {
 		setThreadNamePrefix("hapi-fhir-jpa-scheduler");
+		setLocalSchedulingEnabled(true);
+		setClusteredSchedulingEnabled(true);
+	}
+
+	public boolean isLocalSchedulingEnabled() {
+		return myLocalSchedulingEnabled;
+	}
+
+	public void setLocalSchedulingEnabled(boolean theLocalSchedulingEnabled) {
+		myLocalSchedulingEnabled = theLocalSchedulingEnabled;
+	}
+
+	public boolean isClusteredSchedulingEnabled() {
+		return myClusteredSchedulingEnabled;
+	}
+
+	public void setClusteredSchedulingEnabled(boolean theClusteredSchedulingEnabled) {
+		myClusteredSchedulingEnabled = theClusteredSchedulingEnabled;
 	}
 
 	public String getThreadNamePrefix() {
@@ -87,15 +114,16 @@ public class SchedulerServiceImpl implements ISchedulerService {
 			if (myClusteredScheduler != null) {
 				myClusteredScheduler.start();
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			ourLog.error("Failed to start context", e);
 			throw new SchedulerException(e);
 		}
 	}
 
-	private static int ourNextSchedulerId = 0;
-
 	private Scheduler createLocalScheduler() throws SchedulerException {
+		if (!isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests()) {
+			return new NullScheduler();
+		}
 		Properties localProperties = new Properties();
 		localProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "local-" + ourNextSchedulerId++);
 		quartzPropertiesCommon(localProperties);
@@ -109,6 +137,9 @@ public class SchedulerServiceImpl implements ISchedulerService {
 	}
 
 	private Scheduler createClusteredScheduler() throws SchedulerException {
+		if (!isClusteredSchedulingEnabled() || isSchedulingDisabledForUnitTests()) {
+			return new NullScheduler();
+		}
 		Properties clusteredProperties = new Properties();
 		clusteredProperties.setProperty(PROP_SCHED_INSTANCE_NAME, "clustered-" + ourNextSchedulerId++);
 		quartzPropertiesCommon(clusteredProperties);
@@ -155,7 +186,6 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		}
 	}
 
-
 	@Override
 	public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
 		Validate.isTrue(theIntervalMillis >= 100);
@@ -163,9 +193,6 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		Validate.notNull(theJobDefinition);
 		Validate.notNull(theJobDefinition.getJobClass());
 		Validate.notBlank(theJobDefinition.getId());
-
-		// FIXME: JA remove
-		Validate.isTrue(theJobDefinition.getJobClass().getName().contains(theJobDefinition.getId()), "Definition[" + theJobDefinition.getJobClass().getName() + "] - ID[" + theJobDefinition.getId() + "]");
 
 		JobKey jobKey = new JobKey(theJobDefinition.getId());
 
@@ -207,7 +234,6 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		return myStopping.get();
 	}
 
-
 	/**
 	 * Properties for the local scheduler (see the class docs to learn what this means)
 	 */
@@ -227,6 +253,10 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		theProperties.put("org.quartz.threadPool.threadNamePrefix", getThreadNamePrefix() + "-" + theProperties.get(PROP_SCHED_INSTANCE_NAME));
 	}
 
+	private boolean isSchedulingDisabledForUnitTests() {
+		String schedulingDisabled = myEnvironment.getProperty(SCHEDULING_DISABLED);
+		return "true".equals(schedulingDisabled);
+	}
 
 	private static class NonConcurrentJobDetailImpl extends JobDetailImpl {
 		private static final long serialVersionUID = 5716197221121989740L;
@@ -238,25 +268,292 @@ public class SchedulerServiceImpl implements ISchedulerService {
 		}
 	}
 
-	public static class NullSchedulerService implements ISchedulerService {
+	private static class NullScheduler implements Scheduler {
 		@Override
-		public void purgeAllScheduledJobsForUnitTest() {
-			// nothing
+		public String getSchedulerName() {
+			return null;
 		}
 
 		@Override
-		public void logStatus() {
-			// nothing
+		public String getSchedulerInstanceId() {
+			return null;
 		}
 
 		@Override
-		public void scheduleFixedDelay(long theIntervalMillis, boolean theClusteredTask, ScheduledJobDefinition theJobDefinition) {
-			// nothing
+		public SchedulerContext getContext() {
+			return null;
 		}
 
 		@Override
-		public boolean isStopping() {
+		public void start() {
+
+		}
+
+		@Override
+		public void startDelayed(int seconds) {
+
+		}
+
+		@Override
+		public boolean isStarted() {
 			return false;
 		}
+
+		@Override
+		public void standby() {
+
+		}
+
+		@Override
+		public boolean isInStandbyMode() {
+			return false;
+		}
+
+		@Override
+		public void shutdown() {
+
+		}
+
+		@Override
+		public void shutdown(boolean waitForJobsToComplete) {
+
+		}
+
+		@Override
+		public boolean isShutdown() {
+			return false;
+		}
+
+		@Override
+		public SchedulerMetaData getMetaData() {
+			return null;
+		}
+
+		@Override
+		public List<JobExecutionContext> getCurrentlyExecutingJobs() {
+			return null;
+		}
+
+		@Override
+		public void setJobFactory(JobFactory factory) {
+
+		}
+
+		@Override
+		public ListenerManager getListenerManager() {
+			return null;
+		}
+
+		@Override
+		public Date scheduleJob(JobDetail jobDetail, Trigger trigger) {
+			return null;
+		}
+
+		@Override
+		public Date scheduleJob(Trigger trigger) {
+			return null;
+		}
+
+		@Override
+		public void scheduleJobs(Map<JobDetail, Set<? extends Trigger>> triggersAndJobs, boolean replace) {
+
+		}
+
+		@Override
+		public void scheduleJob(JobDetail jobDetail, Set<? extends Trigger> triggersForJob, boolean replace) {
+
+		}
+
+		@Override
+		public boolean unscheduleJob(TriggerKey triggerKey) {
+			return false;
+		}
+
+		@Override
+		public boolean unscheduleJobs(List<TriggerKey> triggerKeys) {
+			return false;
+		}
+
+		@Override
+		public Date rescheduleJob(TriggerKey triggerKey, Trigger newTrigger) {
+			return null;
+		}
+
+		@Override
+		public void addJob(JobDetail jobDetail, boolean replace) {
+
+		}
+
+		@Override
+		public void addJob(JobDetail jobDetail, boolean replace, boolean storeNonDurableWhileAwaitingScheduling) {
+
+		}
+
+		@Override
+		public boolean deleteJob(JobKey jobKey) {
+			return false;
+		}
+
+		@Override
+		public boolean deleteJobs(List<JobKey> jobKeys) {
+			return false;
+		}
+
+		@Override
+		public void triggerJob(JobKey jobKey) {
+
+		}
+
+		@Override
+		public void triggerJob(JobKey jobKey, JobDataMap data) {
+
+		}
+
+		@Override
+		public void pauseJob(JobKey jobKey) {
+
+		}
+
+		@Override
+		public void pauseJobs(GroupMatcher<JobKey> matcher) {
+
+		}
+
+		@Override
+		public void pauseTrigger(TriggerKey triggerKey) {
+
+		}
+
+		@Override
+		public void pauseTriggers(GroupMatcher<TriggerKey> matcher) {
+
+		}
+
+		@Override
+		public void resumeJob(JobKey jobKey) {
+
+		}
+
+		@Override
+		public void resumeJobs(GroupMatcher<JobKey> matcher) {
+
+		}
+
+		@Override
+		public void resumeTrigger(TriggerKey triggerKey) {
+
+		}
+
+		@Override
+		public void resumeTriggers(GroupMatcher<TriggerKey> matcher) {
+
+		}
+
+		@Override
+		public void pauseAll() {
+
+		}
+
+		@Override
+		public void resumeAll() {
+
+		}
+
+		@Override
+		public List<String> getJobGroupNames() {
+			return null;
+		}
+
+		@Override
+		public Set<JobKey> getJobKeys(GroupMatcher<JobKey> matcher) {
+			return null;
+		}
+
+		@Override
+		public List<? extends Trigger> getTriggersOfJob(JobKey jobKey) {
+			return null;
+		}
+
+		@Override
+		public List<String> getTriggerGroupNames() {
+			return null;
+		}
+
+		@Override
+		public Set<TriggerKey> getTriggerKeys(GroupMatcher<TriggerKey> matcher) {
+			return null;
+		}
+
+		@Override
+		public Set<String> getPausedTriggerGroups() {
+			return null;
+		}
+
+		@Override
+		public JobDetail getJobDetail(JobKey jobKey) {
+			return null;
+		}
+
+		@Override
+		public Trigger getTrigger(TriggerKey triggerKey) {
+			return null;
+		}
+
+		@Override
+		public Trigger.TriggerState getTriggerState(TriggerKey triggerKey) {
+			return null;
+		}
+
+		@Override
+		public void resetTriggerFromErrorState(TriggerKey triggerKey) {
+
+		}
+
+		@Override
+		public void addCalendar(String calName, Calendar calendar, boolean replace, boolean updateTriggers) {
+
+		}
+
+		@Override
+		public boolean deleteCalendar(String calName) {
+			return false;
+		}
+
+		@Override
+		public Calendar getCalendar(String calName) {
+			return null;
+		}
+
+		@Override
+		public List<String> getCalendarNames() {
+			return null;
+		}
+
+		@Override
+		public boolean interrupt(JobKey jobKey) throws UnableToInterruptJobException {
+			return false;
+		}
+
+		@Override
+		public boolean interrupt(String fireInstanceId) throws UnableToInterruptJobException {
+			return false;
+		}
+
+		@Override
+		public boolean checkExists(JobKey jobKey) {
+			return false;
+		}
+
+		@Override
+		public boolean checkExists(TriggerKey triggerKey) {
+			return false;
+		}
+
+		@Override
+		public void clear() {
+
+		}
 	}
+
+
 }

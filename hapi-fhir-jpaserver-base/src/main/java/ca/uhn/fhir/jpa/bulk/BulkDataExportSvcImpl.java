@@ -15,11 +15,13 @@ import ca.uhn.fhir.jpa.model.sched.FireAtIntervalJob;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import org.apache.commons.io.FileUtils;
@@ -27,7 +29,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.DateTimeType;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.PersistJobDataAfterExecution;
@@ -47,6 +48,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
@@ -105,8 +109,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			myTxTemplate.execute(t -> {
 				Optional<BulkExportJobEntity> submittedJobs = myBulkExportJobDao.findByJobId(jobUuid);
 				if (submittedJobs.isPresent()) {
-					submittedJobs.get().setStatus(BulkJobStatusEnum.ERROR);
-					myBulkExportJobDao.save(submittedJobs.get());
+					BulkExportJobEntity jobEntity = submittedJobs.get();
+					jobEntity.setStatus(BulkJobStatusEnum.ERROR);
+					jobEntity.setStatusMessage(e.getMessage());
+					myBulkExportJobDao.save(jobEntity);
 				}
 				return null;
 			});
@@ -180,8 +186,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
-			dao.search(map);
-			try (IResultIterator query = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null)) {
+
+			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
+			try (IResultIterator query = resultIterator) {
 
 				AtomicInteger counter = new AtomicInteger(0);
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -272,6 +279,28 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
 		job.setStatus(BulkJobStatusEnum.SUBMITTED);
+		job.setSince(theSince);
+
+		String outputFormat = Constants.CT_FHIR_NDJSON;
+		if (isNotBlank(theOutputFormat)) {
+			outputFormat = theOutputFormat;
+		}
+		if (!Constants.CT_FHIR_NDJSON.equals(outputFormat)) {
+			throw new InvalidRequestException("Invalid output format: " + theOutputFormat);
+		}
+
+		StringBuilder requestBuilder = new StringBuilder();
+		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
+		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
+		requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+		if (theSince != null) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+		}
+		if (theFilters.size() > 0) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theFilters));
+		}
+		job.setRequest(requestBuilder.toString());
+
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
@@ -294,7 +323,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@Transactional
 	@Override
-	public JobInfo getJobStatus(String theJobId) {
+	public JobInfo getJobStatusOrThrowResourceNotFound(String theJobId) {
 		BulkExportJobEntity job = myBulkExportJobDao
 			.findByJobId(theJobId)
 			.orElseThrow(() -> new ResourceNotFoundException(theJobId));
@@ -302,14 +331,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		JobInfo retVal = new JobInfo();
 		retVal.setJobId(theJobId);
 		retVal.setStatus(job.getStatus());
-		retVal.setFiles(new ArrayList<>());
+		retVal.setStatus(job.getStatus());
+		retVal.setStatusTime(job.getStatusTime());
+		retVal.setStatusMessage(job.getStatusMessage());
+		retVal.setRequest(job.getRequest());
 
 		if (job.getStatus() == BulkJobStatusEnum.COMPLETE) {
 			for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
 				for (BulkExportCollectionFileEntity nextFile : nextCollection.getFiles()) {
-					retVal.getFiles().add(new FileEntry()
+					retVal.addFile()
 						.setResourceType(nextCollection.getResourceType())
-						.setResourceId(toQualifiedBinaryId(nextFile.getResourceId())));
+						.setResourceId(toQualifiedBinaryId(nextFile.getResourceId()));
 				}
 			}
 		}

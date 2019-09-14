@@ -229,6 +229,8 @@ public class Constants {
 	 */
 	public static final int REQUEST_ID_LENGTH = 16;
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
+	public static final String HEADER_X_PROGRESS = "X-Progress";
+	public static final String HEADER_RETRY_AFTER = "Retry-After";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
