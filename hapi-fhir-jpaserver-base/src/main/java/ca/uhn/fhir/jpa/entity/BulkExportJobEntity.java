@@ -33,30 +33,35 @@ public class BulkExportJobEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private BulkJobStatusEnum myStatus;
-
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATED_TIME", nullable = false)
+	private Date myCreated;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_TIME", nullable = false)
 	private Date myExpiry;
-
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
-
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob")
 	private Collection<BulkExportCollectionEntity> myCollections;
-
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_SINCE", nullable = true)
 	private Date mySince;
 	@Column(name = "STATUS_MESSAGE", nullable = true, length = STATUS_MESSAGE_LEN)
 	private String myStatusMessage;
+
+	public Date getCreated() {
+		return myCreated;
+	}
+
+	public void setCreated(Date theCreated) {
+		myCreated = theCreated;
+	}
 
 	public String getStatusMessage() {
 		return myStatusMessage;
@@ -102,7 +107,8 @@ public class BulkExportJobEntity {
 		if (myStatus != null) {
 			b.append("status", myStatus + " " + new InstantType(myStatusTime).getValueAsString());
 		}
-		b.append("expiry", myExpiry);
+		b.append("created", new InstantType(myExpiry).getValueAsString());
+		b.append("expiry", new InstantType(myExpiry).getValueAsString());
 		b.append("request", myRequest);
 		b.append("since", mySince);
 		if (isNotBlank(myStatusMessage)) {

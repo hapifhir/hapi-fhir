@@ -41,4 +41,7 @@ public interface IBulkExportJobDao extends JpaRepository<BulkExportJobEntity, Lo
 
 	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myExpiry < :cutoff")
 	Slice<BulkExportJobEntity> findByExpiry(Pageable thePage, @Param("cutoff") Date theCutoff);
+
+	@Query("SELECT j FROM BulkExportJobEntity j WHERE j.myRequest = :request AND j.myCreated > :createdAfter AND j.myStatus <> :status")
+	Slice<BulkExportJobEntity> findExistingJob(Pageable thePage, @Param("request") String theRequest, @Param("createdAfter") Date theCreatedAfter, @Param("status") BulkJobStatusEnum theNotStatus);
 }

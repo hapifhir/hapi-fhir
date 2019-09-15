@@ -171,6 +171,21 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testSubmitReusesExisting() {
+
+		// Submit
+		IBulkDataExportSvc.JobInfo jobDetails1 = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+		assertNotNull(jobDetails1.getJobId());
+
+		// Submit again
+		IBulkDataExportSvc.JobInfo jobDetails2 = myBulkDataExportSvc.submitJob(null, Sets.newHashSet("Patient", "Observation"), null, null);
+		assertNotNull(jobDetails2.getJobId());
+
+		assertEquals(jobDetails1.getJobId(), jobDetails2.getJobId());
+	}
+
+
+		@Test
 	public void testCreateBulkLoad_WithSince() throws InterruptedException {
 
 		// Create some resources to load

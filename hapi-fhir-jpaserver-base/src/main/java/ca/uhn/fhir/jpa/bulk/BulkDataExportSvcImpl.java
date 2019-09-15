@@ -59,6 +59,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	private static final long REFRESH_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportSvcImpl.class);
+	private int myReuseBulkExportForMillis = (int) (60 * DateUtils.MILLIS_PER_MINUTE);
 
 	@Autowired
 	private IBulkExportJobDao myBulkExportJobDao;
@@ -294,11 +295,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	@Transactional
 	@Override
 	public JobInfo submitJob(String theOutputFormat, Set<String> theResourceTypes, Date theSince, Set<String> theFilters) {
-		BulkExportJobEntity job = new BulkExportJobEntity();
-		job.setJobId(UUID.randomUUID().toString());
-		job.setStatus(BulkJobStatusEnum.SUBMITTED);
-		job.setSince(theSince);
-
 		String outputFormat = Constants.CT_FHIR_NDJSON;
 		if (isNotBlank(theOutputFormat)) {
 			outputFormat = theOutputFormat;
@@ -317,7 +313,21 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (theFilters != null && theFilters.size() > 0) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theFilters));
 		}
-		job.setRequest(requestBuilder.toString());
+		String request = requestBuilder.toString();
+
+		Date cutoff = DateUtils.addMilliseconds(new Date(), -myReuseBulkExportForMillis);
+		Pageable page = PageRequest.of(0, 10);
+		Slice<BulkExportJobEntity> existing = myBulkExportJobDao.findExistingJob(page, request, cutoff, BulkJobStatusEnum.ERROR);
+		if (existing.isEmpty() == false) {
+			return toSubmittedJobInfo(existing.iterator().next());
+		}
+
+		BulkExportJobEntity job = new BulkExportJobEntity();
+		job.setJobId(UUID.randomUUID().toString());
+		job.setStatus(BulkJobStatusEnum.SUBMITTED);
+		job.setSince(theSince);
+		job.setCreated(new Date());
+		job.setRequest(request);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
@@ -340,7 +350,11 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		ourLog.info("Bulk export job submitted: {}", job.toString());
 
-		return new JobInfo().setJobId(job.getJobId());
+		return toSubmittedJobInfo(job);
+	}
+
+	private JobInfo toSubmittedJobInfo(BulkExportJobEntity theJob) {
+		return new JobInfo().setJobId(theJob.getJobId());
 	}
 
 
