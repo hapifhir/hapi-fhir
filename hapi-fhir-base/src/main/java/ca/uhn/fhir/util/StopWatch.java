@@ -234,7 +234,12 @@ public class StopWatch {
 
 		double denominator = ((double) millisElapsed) / ((double) periodMillis);
 
-		return (double) theNumOperations / denominator;
+		double throughput = (double) theNumOperations / denominator;
+		if (throughput > theNumOperations) {
+			throughput = theNumOperations;
+		}
+
+		return throughput;
 	}
 
 	public void restart() {

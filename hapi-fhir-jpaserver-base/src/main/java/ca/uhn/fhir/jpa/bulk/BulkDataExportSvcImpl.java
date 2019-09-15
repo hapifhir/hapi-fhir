@@ -50,6 +50,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
@@ -177,7 +178,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
-		StopWatch sw = new StopWatch();
+		StopWatch jobStopwatch = new StopWatch();
+		AtomicInteger jobResourceCounter = new AtomicInteger();
 
 		BulkExportJobEntity job = jobOpt.get();
 		ourLog.info("Bulk export starting generation for batch export job: {}", job);
@@ -200,7 +202,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			}
 
 			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
-			storeResultsToFiles(nextCollection, sb, resultIterator);
+			storeResultsToFiles(nextCollection, sb, resultIterator, jobResourceCounter, jobStopwatch);
 
 
 		}
@@ -209,17 +211,18 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
-		ourLog.info("Bulk export completed job in {}: {}", sw, job);
+		ourLog.info("Bulk export completed job in {}: {}", jobStopwatch, job);
 
 	}
 
-	private void storeResultsToFiles(BulkExportCollectionEntity theExportCollection, ISearchBuilder theSearchBuilder, IResultIterator theResultIterator) {
+	private void storeResultsToFiles(BulkExportCollectionEntity theExportCollection, ISearchBuilder theSearchBuilder, IResultIterator theResultIterator, AtomicInteger theJobResourceCounter, StopWatch theJobStopwatch) {
+
 		try (IResultIterator query = theResultIterator) {
 			if (!query.hasNext()) {
 				return;
 			}
 
-			AtomicInteger counter = new AtomicInteger(0);
+			AtomicInteger fileCounter = new AtomicInteger(0);
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 			OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
 			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
@@ -228,7 +231,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			List<IBaseResource> resourcesSpool = new ArrayList<>();
 			while (query.hasNext()) {
 				pidsSpool.add(query.next());
-				counter.incrementAndGet();
+				fileCounter.incrementAndGet();
+				theJobResourceCounter.incrementAndGet();
 
 				if (pidsSpool.size() >= 10 || !query.hasNext()) {
 
@@ -242,21 +246,21 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 					pidsSpool.clear();
 					resourcesSpool.clear();
 
-					if (outputStream.size() >= myFileMaxChars) {
-						flushToFiles(theExportCollection, counter, outputStream);
+					if (outputStream.size() >= myFileMaxChars || !query.hasNext()) {
+						Optional<IIdType> createdId = flushToFiles(theExportCollection, fileCounter, outputStream);
+						createdId.ifPresent(theIIdType -> ourLog.info("Created resource {} for bulk export file containing {} resources of type {} - Total {} resources ({}/sec)", theIIdType.toUnqualifiedVersionless().getValue(), fileCounter.get(), theExportCollection.getResourceType(), theJobResourceCounter.get(), theJobStopwatch.formatThroughput(theJobResourceCounter.get(), TimeUnit.SECONDS)));
+						fileCounter.set(0);
 					}
 
 				}
 			}
-
-			flushToFiles(theExportCollection, counter, outputStream);
 
 		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}
 	}
 
-	private void flushToFiles(BulkExportCollectionEntity theCollection, AtomicInteger theCounter, ByteArrayOutputStream theOutputStream) {
+	private Optional<IIdType> flushToFiles(BulkExportCollectionEntity theCollection, AtomicInteger theCounter, ByteArrayOutputStream theOutputStream) {
 		if (theOutputStream.size() > 0) {
 			IBaseBinary binary = BinaryUtil.newBinary(myContext);
 			binary.setContentType(Constants.CT_FHIR_NDJSON);
@@ -271,9 +275,10 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			myBulkExportCollectionFileDao.saveAndFlush(file);
 			theOutputStream.reset();
 
-			ourLog.info("Created resource {} for bulk export file containing {} resources of type {}", createdId, theCounter.get(), theCollection.getResourceType());
-
+			return Optional.of(createdId);
 		}
+
+		return Optional.empty();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -306,7 +311,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+		if (theResourceTypes != null) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+		}
 		if (theSince != null) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(theSince).setTimeZoneZulu(true).getValueAsString());
 		}
