@@ -332,7 +332,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return toSubmittedJobInfo(existing.iterator().next());
 		}
 
-		if (resourceTypes.isEmpty()) {
+		if (theResourceTypes == null || resourceTypes.isEmpty()) {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
