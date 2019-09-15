@@ -75,7 +75,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private PlatformTransactionManager myTxManager;
 	private TransactionTemplate myTxTemplate;
 
-	private long myFileMaxChars = FileUtils.ONE_MB;
+	private long myFileMaxChars = 500 * FileUtils.ONE_KB;
 	private int myRetentionPeriod = (int) DateUtils.MILLIS_PER_DAY;
 
 	/**

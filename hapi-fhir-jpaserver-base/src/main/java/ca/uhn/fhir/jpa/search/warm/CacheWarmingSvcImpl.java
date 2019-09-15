@@ -47,7 +47,7 @@ import java.util.*;
 @Component
 public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
-	public static final long SCHEDULED_JOB_INTERVAL = DateUtils.MILLIS_PER_SECOND;
+	public static final long SCHEDULED_JOB_INTERVAL = 10 * DateUtils.MILLIS_PER_SECOND;
 	private static final Logger ourLog = LoggerFactory.getLogger(CacheWarmingSvcImpl.class);
 	@Autowired
 	private DaoConfig myDaoConfig;
@@ -63,8 +63,7 @@ public class CacheWarmingSvcImpl implements ICacheWarmingSvc {
 
 	@Override
 	public synchronized void performWarmingPass() {
-		// FIXME: JA remove once we only fire once per second
-		ourLog.info("Starting cache warming pass for {} tasks", myCacheEntryToNextRefresh.size());
+		ourLog.trace("Starting cache warming pass for {} tasks", myCacheEntryToNextRefresh.size());
 
 		for (WarmCacheEntry nextCacheEntry : new ArrayList<>(myCacheEntryToNextRefresh.keySet())) {
 
