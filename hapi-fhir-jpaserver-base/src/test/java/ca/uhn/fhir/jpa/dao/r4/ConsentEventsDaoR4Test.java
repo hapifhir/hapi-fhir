@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -53,9 +52,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private InterceptorService myInterceptorService;
 	private List<String> myObservationIdsOddOnly;
 	private List<String> myObservationIdsEvenOnly;
-	private List<String> myObservationIdsEvenOnlyBackwards;
-	private List<String> myObservationIdsBackwards;
+	private List<String> myObservationIdsWithVersions;
 	private List<String> myPatientIdsEvenOnly;
+	private List<String> myObservationIdsEvenOnlyWithVersions;
 
 	@After
 	public void after() {
@@ -78,7 +77,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchCountOnly() throws InterruptedException {
+	public void testSearchCountOnly() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -109,7 +108,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSome() throws InterruptedException {
+	public void testSearchAndBlockSome() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -139,7 +138,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSome_LoadSynchronous() throws InterruptedException {
+	public void testSearchAndBlockSome_LoadSynchronous() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -170,7 +169,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSomeOnRevIncludes() throws InterruptedException {
+	public void testSearchAndBlockSomeOnRevIncludes() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -194,7 +193,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() throws InterruptedException {
+	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -219,7 +218,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnIncludes() throws InterruptedException {
+	public void testSearchAndBlockSomeOnIncludes() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -244,7 +243,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockNoneOnIncludes() throws InterruptedException {
+	public void testSearchAndBlockNoneOnIncludes() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -267,7 +266,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() throws InterruptedException {
+	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -291,7 +290,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testHistoryAndBlockSome() throws InterruptedException {
+	public void testHistoryAndBlockSome() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -313,13 +312,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * returned results because we create it then update it in create50Observations()
 		 */
 		assertEquals(1, hitCount.get());
-		assertEquals(myObservationIdsBackwards.toString() + " - " + interceptedResourceIds, myObservationIdsBackwards.subList(0, 5), sort(interceptedResourceIds));
-		assertEquals(myObservationIdsEvenOnlyBackwards.toString() + " - " + returnedIdValues, myObservationIdsEvenOnlyBackwards.subList(0, 3), sort(returnedIdValues));
+		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
+		assertEquals(myObservationIdsEvenOnlyWithVersions.subList(44, 50), sort(returnedIdValues));
 
 	}
 
 	@Test
-	public void testReadAndBlockSome() throws InterruptedException {
+	public void testReadAndBlockSome() {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -345,9 +344,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-	private void create50Observations() throws InterruptedException {
+	private void create50Observations() {
 		myPatientIds = new ArrayList<>();
 		myObservationIds = new ArrayList<>();
+		myObservationIdsWithVersions = new ArrayList<>();
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -369,6 +369,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			obs1.addIdentifier().setSystem("urn:system").setValue("I" + leftPad("" + i, 5, '0'));
 			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
+			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
 			obs1.setId(obs1id);
 			if (obs1id.getIdPartAsLong() % 2 == 0) {
@@ -377,6 +378,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				obs1.getSubject().setReference(oddPid);
 			}
 			myObservationDao.update(obs1);
+			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
 		}
 
@@ -391,10 +393,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
+		myObservationIdsEvenOnlyWithVersions =
+			myObservationIdsWithVersions
+				.stream()
+				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
+				.collect(Collectors.toList());
 
 		myObservationIdsOddOnly = ListUtils.removeAll(myObservationIds, myObservationIdsEvenOnly);
-		myObservationIdsBackwards = Lists.reverse(myObservationIds);
-		myObservationIdsEvenOnlyBackwards = Lists.reverse(myObservationIdsEvenOnly);
 	}
 
 	static class PreAccessInterceptorCounting implements IAnonymousInterceptor {
