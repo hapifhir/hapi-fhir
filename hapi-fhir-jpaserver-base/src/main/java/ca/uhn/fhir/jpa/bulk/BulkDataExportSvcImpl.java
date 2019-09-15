@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -29,6 +30,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.quartz.PersistJobDataAfterExecution;
@@ -186,45 +188,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
+			if (job.getSince() != null) {
+				map.setLastUpdated(new DateRangeParam(job.getSince(), null));
+			}
 
 			IResultIterator resultIterator = sb.createQuery(map, new SearchRuntimeDetails(null, theJobUuid), null);
-			try (IResultIterator query = resultIterator) {
-
-				AtomicInteger counter = new AtomicInteger(0);
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
-				IParser parser = myContext.newJsonParser().setPrettyPrint(false);
-
-				List<Long> pidsSpool = new ArrayList<>();
-				List<IBaseResource> resourcesSpool = new ArrayList<>();
-				while (query.hasNext()) {
-					pidsSpool.add(query.next());
-					counter.incrementAndGet();
-
-					if (pidsSpool.size() >= 10) {
-
-						sb.loadResourcesByPid(pidsSpool, Collections.emptyList(), resourcesSpool, false, null);
-
-						for (IBaseResource nextFileResource : resourcesSpool) {
-							parser.encodeResourceToWriter(nextFileResource, writer);
-							writer.append("\n");
-						}
-
-						pidsSpool.clear();
-						resourcesSpool.clear();
-
-						if (outputStream.size() >= myFileMaxChars) {
-							flushToFiles(nextCollection, counter, outputStream);
-						}
-
-					}
-				}
-
-				flushToFiles(nextCollection, counter, outputStream);
-
-			} catch (IOException e) {
-				throw new InternalErrorException(e);
-			}
+			storeResultsToFiles(nextCollection, sb, resultIterator);
 
 
 		}
@@ -233,6 +202,49 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
+	}
+
+	private void storeResultsToFiles(BulkExportCollectionEntity theExportCollection, ISearchBuilder theSearchBuilder, IResultIterator theResultIterator) {
+		try (IResultIterator query = theResultIterator) {
+			if (!query.hasNext()) {
+				return;
+			}
+
+			AtomicInteger counter = new AtomicInteger(0);
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			OutputStreamWriter writer = new OutputStreamWriter(outputStream, Constants.CHARSET_UTF8);
+			IParser parser = myContext.newJsonParser().setPrettyPrint(false);
+
+			List<Long> pidsSpool = new ArrayList<>();
+			List<IBaseResource> resourcesSpool = new ArrayList<>();
+			while (query.hasNext()) {
+				pidsSpool.add(query.next());
+				counter.incrementAndGet();
+
+				if (pidsSpool.size() >= 10 || !query.hasNext()) {
+
+					theSearchBuilder.loadResourcesByPid(pidsSpool, Collections.emptyList(), resourcesSpool, false, null);
+
+					for (IBaseResource nextFileResource : resourcesSpool) {
+						parser.encodeResourceToWriter(nextFileResource, writer);
+						writer.append("\n");
+					}
+
+					pidsSpool.clear();
+					resourcesSpool.clear();
+
+					if (outputStream.size() >= myFileMaxChars) {
+						flushToFiles(theExportCollection, counter, outputStream);
+					}
+
+				}
+			}
+
+			flushToFiles(theExportCollection, counter, outputStream);
+
+		} catch (IOException e) {
+			throw new InternalErrorException(e);
+		}
 	}
 
 	private void flushToFiles(BulkExportCollectionEntity theCollection, AtomicInteger theCounter, ByteArrayOutputStream theOutputStream) {
@@ -294,9 +306,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
 		requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
 		if (theSince != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(theSince).setTimeZoneZulu(true).getValueAsString());
 		}
-		if (theFilters.size() > 0) {
+		if (theFilters != null && theFilters.size() > 0) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theFilters));
 		}
 		job.setRequest(requestBuilder.toString());
@@ -304,7 +316,15 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
+		if (theResourceTypes.isEmpty()) {
+			throw new InvalidRequestException("No resource types specified");
+		}
+
 		for (String nextType : theResourceTypes) {
+			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
+				throw new InvalidRequestException("Unknown or unsupported resource type: " + nextType);
+			}
+
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
 			collection.setJob(job);
 			collection.setResourceType(nextType);
@@ -316,6 +336,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		return new JobInfo().setJobId(job.getJobId());
 	}
+
 
 	private void updateExpiry(BulkExportJobEntity theJob) {
 		theJob.setExpiry(DateUtils.addMilliseconds(new Date(), myRetentionPeriod));

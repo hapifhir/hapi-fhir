@@ -25,7 +25,7 @@ public class BulkExportCollectionEntity {
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myCollection")
 	private Collection<BulkExportCollectionFileEntity> myFiles;
 
 	public void setJob(BulkExportJobEntity theJob) {

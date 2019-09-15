@@ -59,6 +59,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			job.setStatus(BulkJobStatusEnum.COMPLETE);
 			job.setExpiry(DateUtils.addHours(new Date(), -1));
 			job.setJobId(UUID.randomUUID().toString());
+			job.setRequest("$export");
 			myBulkExportJobDao.save(job);
 
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
@@ -102,7 +103,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Patient", "Observation"), null, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("AAAA", e.getMessage());
+			assertEquals("Invalid output format: application/fhir+json", e.getMessage());
 		}
 	}
 
@@ -112,10 +113,19 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet(), null, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("AAAA", e.getMessage());
+			assertEquals("No resource types specified", e.getMessage());
 		}
 	}
 
+	@Test
+	public void testCreateBulkLoad_InvalidResourceTypes() {
+		try {
+			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient", "FOO"), null, null);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Unknown or unsupported resource type: FOO", e.getMessage());
+		}
+	}
 
 	@Test
 	public void testCreateBulkLoad() {
@@ -130,7 +140,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("AA", status.getRequest());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient", status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
@@ -184,7 +194,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Check the status
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
-		assertEquals("AA", status.getRequest());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient&_since=" + cutoff.setTimeZoneZulu(true).getValueAsString(), status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
@@ -202,8 +212,8 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
 
 			if ("Patient".equals(next.getResourceType())) {
-				assertThat(nextContents, containsString("\"value\":\"PAT10\"}]}\n"));
-				assertThat(nextContents, containsString("\"value\":\"PAT11\"}]}\n"));
+				assertThat(nextContents, containsString("\"id\":\"PAT10\""));
+				assertThat(nextContents, containsString("\"id\":\"PAT11\""));
 				assertEquals(2, nextContents.split("\n").length);
 			} else {
 				fail(next.getResourceType());

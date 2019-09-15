@@ -41,7 +41,7 @@ public class BulkExportJobEntity {
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
 
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob")
 	private Collection<BulkExportCollectionEntity> myCollections;
 
 	@Version
@@ -117,7 +117,10 @@ public class BulkExportJobEntity {
 	}
 
 	public Date getSince() {
-		return mySince;
+		if (mySince != null) {
+			return new Date(mySince.getTime());
+		}
+		return null;
 	}
 
 	public void setSince(Date theSince) {

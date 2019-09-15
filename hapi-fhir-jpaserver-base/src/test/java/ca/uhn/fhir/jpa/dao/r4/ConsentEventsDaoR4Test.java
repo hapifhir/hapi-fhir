@@ -32,7 +32,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -79,7 +78,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchCountOnly() {
+	public void testSearchCountOnly() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -110,7 +109,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSome() {
+	public void testSearchAndBlockSome() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -140,7 +139,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSome_LoadSynchronous() {
+	public void testSearchAndBlockSome_LoadSynchronous() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -171,7 +170,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 
 	@Test
-	public void testSearchAndBlockSomeOnRevIncludes() {
+	public void testSearchAndBlockSomeOnRevIncludes() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -195,7 +194,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() {
+	public void testSearchAndBlockSomeOnRevIncludes_LoadSynchronous() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -220,7 +219,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnIncludes() {
+	public void testSearchAndBlockSomeOnIncludes() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -245,7 +244,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockNoneOnIncludes() {
+	public void testSearchAndBlockNoneOnIncludes() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -268,7 +267,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() {
+	public void testSearchAndBlockSomeOnIncludes_LoadSynchronous() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -292,7 +291,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testHistoryAndBlockSome() {
+	public void testHistoryAndBlockSome() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -320,7 +319,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	}
 
 	@Test
-	public void testReadAndBlockSome() {
+	public void testReadAndBlockSome() throws InterruptedException {
 		create50Observations();
 
 		AtomicInteger hitCount = new AtomicInteger(0);
@@ -346,7 +345,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 	}
 
-	private void create50Observations() {
+	private void create50Observations() throws InterruptedException {
 		myPatientIds = new ArrayList<>();
 		myObservationIds = new ArrayList<>();
 
@@ -371,6 +370,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
 
+			sleepUntilTimeChanges();
+
 			obs1.setId(obs1id);
 			if (obs1id.getIdPartAsLong() % 2 == 0) {
 				obs1.getSubject().setReference(evenPid);
@@ -378,6 +379,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				obs1.getSubject().setReference(oddPid);
 			}
 			myObservationDao.update(obs1);
+
+			sleepUntilTimeChanges();
 		}
 
 		myPatientIdsEvenOnly =
