@@ -312,9 +312,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * Note: Each observation in the observation list will appear twice in the actual
 		 * returned results because we create it then update it in create50Observations()
 		 */
-		assertEquals(sort(myObservationIdsEvenOnlyBackwards.subList(0, 3), myObservationIdsEvenOnlyBackwards.subList(0, 3)), sort(returnedIdValues));
 		assertEquals(1, hitCount.get());
-		assertEquals(sort(myObservationIdsBackwards.subList(0, 5), myObservationIdsBackwards.subList(0, 5)), sort(interceptedResourceIds));
+		assertEquals(myObservationIdsBackwards.toString() + " - " + interceptedResourceIds, myObservationIdsBackwards.subList(0, 5), sort(interceptedResourceIds));
+		assertEquals(myObservationIdsEvenOnlyBackwards.toString() + " - " + returnedIdValues, myObservationIdsEvenOnlyBackwards.subList(0, 3), sort(returnedIdValues));
 
 	}
 
@@ -370,8 +370,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
 
-			sleepUntilTimeChanges();
-
 			obs1.setId(obs1id);
 			if (obs1id.getIdPartAsLong() % 2 == 0) {
 				obs1.getSubject().setReference(evenPid);
@@ -380,7 +378,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 			myObservationDao.update(obs1);
 
-			sleepUntilTimeChanges();
 		}
 
 		myPatientIdsEvenOnly =

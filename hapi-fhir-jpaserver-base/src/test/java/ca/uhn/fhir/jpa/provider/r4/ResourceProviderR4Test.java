@@ -3887,8 +3887,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
 			runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndDontFetchIncludes(uuid1).orElseThrow(()->new IllegalStateException());
-				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), 2));
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new IllegalStateException());
+				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), -2));
 				mySearchEntityDao.save(search);
 			});
 			sleepOneClick();
@@ -3900,7 +3900,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			// Expiry doesn't affect reusablility
 			final String uuid2 = toSearchUuidFromLinkNext(result2);
-			assertNotEquals(uuid1, uuid2);
+			assertEquals(uuid1, uuid2);
 
 		}
 	}
