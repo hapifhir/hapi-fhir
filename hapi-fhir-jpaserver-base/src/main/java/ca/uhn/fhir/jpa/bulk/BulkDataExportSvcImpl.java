@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
+import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -168,7 +169,6 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	private void processJob(String theJobUuid) {
-		ourLog.info("Starting generation for batch export jobOpt: {}", theJobUuid);
 
 		Optional<BulkExportJobEntity> jobOpt = myBulkExportJobDao.findByJobId(theJobUuid);
 		if (!jobOpt.isPresent()) {
@@ -176,11 +176,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return;
 		}
 
+		StopWatch sw = new StopWatch();
+
 		BulkExportJobEntity job = jobOpt.get();
+		ourLog.info("Bulk export starting generation for batch export job: {}", job);
+
 		for (BulkExportCollectionEntity nextCollection : job.getCollections()) {
 
 			String nextType = nextCollection.getResourceType();
 			IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextType);
+
+			ourLog.info("Bulk export assembling export of type {} for job {}", nextType, theJobUuid);
 
 			ISearchBuilder sb = dao.newSearchBuilder();
 			Class<? extends IBaseResource> nextTypeClass = myContext.getResourceDefinition(nextType).getImplementingClass();
@@ -201,6 +207,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		job.setStatus(BulkJobStatusEnum.COMPLETE);
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
+
+		ourLog.info("Bulk export completed job in {}: {}", sw, job);
 
 	}
 
@@ -274,11 +282,9 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 	@PostConstruct
 	public void start() {
+		ourLog.info("Bulk export service starting with refresh interval {}", StopWatch.formatMillis(REFRESH_INTERVAL));
 		myTxTemplate = new TransactionTemplate(myTxManager);
-	}
 
-	@PostConstruct
-	public void registerScheduledJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(BulkDataExportSvcImpl.class.getName());
 		jobDetail.setJobClass(BulkDataExportSvcImpl.SubmitJob.class);
@@ -332,7 +338,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			myBulkExportCollectionDao.save(collection);
 		}
 
-		ourLog.info("New bulk data export job submitted with ID: {}", job.getJobId());
+		ourLog.info("Bulk export job submitted: {}", job.toString());
 
 		return new JobInfo().setJobId(job.getJobId());
 	}

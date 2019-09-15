@@ -1,11 +1,15 @@
 package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hl7.fhir.r5.model.InstantType;
 
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_JOB", uniqueConstraints = {
@@ -87,6 +91,24 @@ public class BulkExportJobEntity {
 
 	public void setJobId(String theJobId) {
 		myJobId = theJobId;
+	}
+
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this);
+		if (isNotBlank(myJobId)) {
+			b.append("jobId", myJobId);
+		}
+		if (myStatus != null) {
+			b.append("status", myStatus + " " + new InstantType(myStatusTime).getValueAsString());
+		}
+		b.append("expiry", myExpiry);
+		b.append("request", myRequest);
+		b.append("since", mySince);
+		if (isNotBlank(myStatusMessage)) {
+			b.append("statusMessage", myStatusMessage);
+		}
+		return b.toString();
 	}
 
 	public BulkJobStatusEnum getStatus() {
