@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Set;
 
-public class BulkExportProvider {
+public class BulkDataExportProvider {
 
 	@Autowired
 	private IBulkDataExportSvc myBulkDataExportSvc;

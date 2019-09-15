@@ -7,6 +7,7 @@ import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
@@ -243,9 +244,18 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public IBulkDataExportSvc myBulkDataExportSvc() {
+	@Lazy
+	public IBulkDataExportSvc bulkDataExportSvc() {
 		return new BulkDataExportSvcImpl();
 	}
+
+	@Bean
+	@Lazy
+	public BulkDataExportProvider bulkDataExportProvider() {
+		return new BulkDataExportProvider();
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

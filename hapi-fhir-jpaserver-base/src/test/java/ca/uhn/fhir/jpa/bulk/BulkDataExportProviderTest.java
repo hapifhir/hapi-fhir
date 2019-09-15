@@ -46,10 +46,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BulkExportProviderTest {
+public class BulkDataExportProviderTest {
 
 	private static final String A_JOB_ID = "0000000-AAAAAA";
-	private static final Logger ourLog = LoggerFactory.getLogger(BulkExportProviderTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BulkDataExportProviderTest.class);
 	private Server myServer;
 	private FhirContext myCtx = FhirContext.forR4();
 	private int myPort;
@@ -75,7 +75,7 @@ public class BulkExportProviderTest {
 	public void start() throws Exception {
 		myServer = new Server(0);
 
-		BulkExportProvider provider = new BulkExportProvider();
+		BulkDataExportProvider provider = new BulkDataExportProvider();
 		provider.setBulkDataExportSvcForUnitTests(myBulkDataExportSvc);
 		provider.setFhirContextForUnitTest(myCtx);
 

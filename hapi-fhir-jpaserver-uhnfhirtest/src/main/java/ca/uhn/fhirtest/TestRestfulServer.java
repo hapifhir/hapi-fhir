@@ -2,6 +2,7 @@ package ca.uhn.fhirtest;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
@@ -257,6 +258,11 @@ public class TestRestfulServer extends RestfulServer {
 		IInterceptorBroadcaster interceptorBroadcaster = myAppCtx.getBean(IInterceptorBroadcaster.class);
 		CascadingDeleteInterceptor cascadingDeleteInterceptor = new CascadingDeleteInterceptor(daoRegistry, interceptorBroadcaster);
 		registerInterceptor(cascadingDeleteInterceptor);
+
+		/*
+		 * Bulk Export
+		 */
+		registerProvider(myAppCtx.getBean(BulkDataExportProvider.class));
 
 	}
 
