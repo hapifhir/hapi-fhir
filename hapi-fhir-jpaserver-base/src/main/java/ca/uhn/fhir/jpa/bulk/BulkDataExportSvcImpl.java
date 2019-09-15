@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.StopWatch;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -304,18 +305,20 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 		if (isNotBlank(theOutputFormat)) {
 			outputFormat = theOutputFormat;
 		}
-		if (!Constants.CT_FHIR_NDJSON.equals(outputFormat)) {
+		if (!Constants.CTS_NDJSON.contains(outputFormat)) {
 			throw new InvalidRequestException("Invalid output format: " + theOutputFormat);
 		}
 
 		StringBuilder requestBuilder = new StringBuilder();
 		requestBuilder.append("/").append(JpaConstants.OPERATION_EXPORT);
 		requestBuilder.append("?").append(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT).append("=").append(escapeUrlParam(outputFormat));
-		if (theResourceTypes != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theResourceTypes));
+		Set<String> resourceTypes = theResourceTypes;
+		if (resourceTypes != null) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", resourceTypes));
 		}
-		if (theSince != null) {
-			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(theSince).setTimeZoneZulu(true).getValueAsString());
+		Date since = theSince;
+		if (since != null) {
+			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_SINCE).append("=").append(new InstantType(since).setTimeZoneZulu(true).getValueAsString());
 		}
 		if (theFilters != null && theFilters.size() > 0) {
 			requestBuilder.append("&").append(JpaConstants.PARAM_EXPORT_TYPE).append("=").append(String.join(",", theFilters));
@@ -329,21 +332,27 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return toSubmittedJobInfo(existing.iterator().next());
 		}
 
+		if (resourceTypes.isEmpty()) {
+			// This is probably not a useful default, but having the default be "download the whole
+			// server" seems like a risky default too. We'll deal with that by having the default involve
+			// only returning a small time span
+			resourceTypes = myContext.getResourceNames();
+			if (since == null) {
+				since = DateUtils.addDays(new Date(), -1);
+			}
+		}
+
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
 		job.setStatus(BulkJobStatusEnum.SUBMITTED);
-		job.setSince(theSince);
+		job.setSince(since);
 		job.setCreated(new Date());
 		job.setRequest(request);
 
 		updateExpiry(job);
 		myBulkExportJobDao.save(job);
 
-		if (theResourceTypes.isEmpty()) {
-			throw new InvalidRequestException("No resource types specified");
-		}
-
-		for (String nextType : theResourceTypes) {
+		for (String nextType : resourceTypes) {
 			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
 				throw new InvalidRequestException("Unknown or unsupported resource type: " + nextType);
 			}
