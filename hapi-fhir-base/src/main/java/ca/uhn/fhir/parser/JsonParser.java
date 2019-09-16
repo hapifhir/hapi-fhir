@@ -224,9 +224,20 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 			}
 			case PRIMITIVE_DATATYPE: {
 				final IPrimitiveType<?> value = (IPrimitiveType<?>) theNextValue;
-				if (isBlank(value.getValueAsString())) {
+				final String valueStr = value.getValueAsString();
+				if (isBlank(valueStr)) {
 					if (theForceEmpty) {
 						theEventWriter.writeNull();
+					}
+					break;
+				}
+
+				// check for the common case first - String value types
+				if (value.getValue() instanceof String) {
+					if (theChildName != null) {
+						theEventWriter.write(theChildName, valueStr);
+					} else {
+						theEventWriter.write(valueStr);
 					}
 					break;
 				}
@@ -262,7 +273,6 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						}
 					}
 				} else {
-					String valueStr = value.getValueAsString();
 					if (theChildName != null) {
 						write(theEventWriter, theChildName, valueStr);
 					} else {
