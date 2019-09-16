@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.LOINC_URI;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -124,7 +125,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void createLoincSystemWithSomeCodes() {
 		runInTransaction(() -> {
 			CodeSystem codeSystem = new CodeSystem();
-			codeSystem.setUrl(CS_URL);
+			codeSystem.setUrl(LOINC_URI);
 			codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 			IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
 
@@ -133,27 +134,57 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			TermCodeSystemVersion cs = new TermCodeSystemVersion();
 			cs.setResource(table);
 
-			TermConcept code;
-			code = new TermConcept(cs, "50015-7");
-			code.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
-			cs.getConcepts().add(code);
+			TermConcept code1 = new TermConcept(cs, "50015-7");
+			TermConcept code2 = new TermConcept(cs, "43343-3");
+			TermConcept code3 = new TermConcept(cs, "43343-4");
+			TermConcept code4 = new TermConcept(cs, "47239-9");
 
-			code = new TermConcept(cs, "43343-3");
-			code.addPropertyString("SYSTEM", "Ser");
-			code.addPropertyString("HELLO", "12345-1");
-			cs.getConcepts().add(code);
+			code1.addPropertyString("SYSTEM", "Bld/Bone mar^Donor");
+			code1.addPropertyCoding(
+				"child",
+				LOINC_URI,
+				code2.getCode(),
+				code2.getDisplay());
+			cs.getConcepts().add(code1);
 
-			code = new TermConcept(cs, "43343-4");
-			code.addPropertyString("SYSTEM", "Ser");
-			code.addPropertyString("HELLO", "12345-2");
-			cs.getConcepts().add(code);
+			code2.addPropertyString("SYSTEM", "Ser");
+			code2.addPropertyString("HELLO", "12345-1");
+			code2.addPropertyCoding(
+				"parent",
+				LOINC_URI,
+				code1.getCode(),
+				code1.getDisplay());
+			code2.addPropertyCoding(
+				"child",
+				LOINC_URI,
+				code3.getCode(),
+				code3.getDisplay());
+			code2.addPropertyCoding(
+				"child",
+				LOINC_URI,
+				code4.getCode(),
+				code4.getDisplay());
+			cs.getConcepts().add(code2);
 
-			code = new TermConcept(cs, "47239-9");
-			code.addPropertyString("SYSTEM", "^Patient");
-			code.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
-			cs.getConcepts().add(code);
+			code3.addPropertyString("SYSTEM", "Ser");
+			code3.addPropertyString("HELLO", "12345-2");
+			code3.addPropertyCoding(
+				"parent",
+				LOINC_URI,
+				code2.getCode(),
+				code2.getDisplay());
+			cs.getConcepts().add(code3);
 
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION" , cs);
+			code4.addPropertyString("SYSTEM", "^Patient");
+			code4.addPropertyString("EXTERNAL_COPYRIGHT_NOTICE", "Copyright © 2006 World Health Organization...");
+			code4.addPropertyCoding(
+				"parent",
+				LOINC_URI,
+				code2.getCode(),
+				code2.getDisplay());
+			cs.getConcepts().add(code4);
+
+			myTermSvc.storeNewCodeSystemVersion(table.getId(), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION" , cs);
 		});
 	}
 
@@ -279,7 +310,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithExclude3rdParty() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithExclude3rdParty() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -291,10 +322,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 		// Exclude
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("copyright")
@@ -308,10 +339,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 		// Exclude
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("copyright")
@@ -323,7 +354,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithExcludeLoinc() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithExcludeLoinc() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -335,10 +366,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 		// Exclude
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("copyright")
@@ -352,10 +383,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 		// Exclude
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("copyright")
@@ -367,7 +398,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithInclude3rdParty() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithInclude3rdParty() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -378,7 +409,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -391,7 +422,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -403,7 +434,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithIncludeLoinc() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithIncludeLoinc() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -414,7 +445,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -427,7 +458,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -439,7 +470,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithUnsupportedOp() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithUnsupportedOp() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -450,7 +481,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -465,7 +496,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testExpandValueSetPropertyFilterCopyrightWithUnsupportedValue() {
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithUnsupportedValue() {
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -476,7 +507,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("copyright")
@@ -488,6 +519,383 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			assertEquals(400, e.getStatusCode());
 			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithExcludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithExcludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithIncludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithIncludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithExcludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithExcludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithIncludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithIncludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 	}
 
 	@Test
@@ -503,10 +911,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -530,10 +938,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		vs.getCompose()
 			.addInclude()
-			.setSystem(CS_URL);
+			.setSystem(LOINC_URI);
 
 		exclude = vs.getCompose().addExclude();
-		exclude.setSystem(CS_URL);
+		exclude.setSystem(LOINC_URI);
 		exclude
 			.addFilter()
 			.setProperty("HELLO")
@@ -546,7 +954,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 	@Test
 	public void testExpandValueSetPropertySearchWithRegexInclude() {
-		// create codes with "SYSTEM" property "Bld/Bone mar^Donor" and "Ser"
 		createLoincSystemWithSomeCodes();
 
 		List<String> codes;
@@ -557,7 +964,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -570,7 +977,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -583,7 +990,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -596,7 +1003,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -609,7 +1016,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
@@ -622,7 +1029,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(CS_URL);
+		include.setSystem(LOINC_URI);
 		include
 			.addFilter()
 			.setProperty("SYSTEM")
