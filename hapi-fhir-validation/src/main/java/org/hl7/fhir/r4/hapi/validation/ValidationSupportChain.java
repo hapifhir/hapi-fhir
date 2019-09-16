@@ -49,7 +49,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theCtx, ConceptSetComponent theInclude) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theInclude.getSystem())) {
+			boolean codeSystemSupported = next.isCodeSystemSupported(theCtx, theInclude.getSystem());
+			ourLog.trace("Support {} supports: {}", next, codeSystemSupported);
+			if (codeSystemSupported) {
 				ValueSetExpander.ValueSetExpansionOutcome expansion = next.expandValueSet(theCtx, theInclude);
 				if (expansion != null) {
 					return expansion;
@@ -57,7 +59,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			}
 		}
 
-		throw new InvalidRequestException("unable to find code system " + theInclude.getSystem());
+		throw new InvalidRequestException("Unable to find code system " + theInclude.getSystem());
 	}
 
 	@Override

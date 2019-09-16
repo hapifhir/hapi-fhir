@@ -145,6 +145,11 @@
 				Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the
 				expected type.
 			</action>
+			<action type="fix">
+				Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the
+				terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now
+				corrected.
+			</action>
 			<action type="add">
 				The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism
 			</action>

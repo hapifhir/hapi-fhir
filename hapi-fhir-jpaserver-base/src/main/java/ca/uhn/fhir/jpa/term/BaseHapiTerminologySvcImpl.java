@@ -698,11 +698,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	/**
 	 * @return Returns true if there are potentially more results to process.
 	 */
-	private Boolean expandValueSetHandleIncludeOrExclude(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex) {
+	private Boolean expandValueSetHandleIncludeOrExclude(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theIncludeOrExclude, boolean theAdd, AtomicInteger theCodeCounter, int theQueryIndex) {
 
-		String system = theInclude.getSystem();
+		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
-		boolean hasValueSet = theInclude.getValueSet().size() > 0;
+		boolean hasValueSet = theIncludeOrExclude.getValueSet().size() > 0;
 
 		if (hasSystem) {
 			ourLog.info("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
@@ -718,7 +718,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				 * since we're going to do it without the database.
 				 */
 				if (myFulltextSearchSvc == null) {
-					expandWithoutHibernateSearch(theValueSetCodeAccumulator, theAddedCodes, theInclude, system, theAdd, theCodeCounter);
+					expandWithoutHibernateSearch(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, system, theAdd, theCodeCounter);
 					return false;
 				}
 
@@ -733,85 +733,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				/*
 				 * Filters
 				 */
-
-				if (theInclude.getFilter().size() > 0) {
-
-					for (ValueSet.ConceptSetFilterComponent nextFilter : theInclude.getFilter()) {
-						if (isBlank(nextFilter.getValue()) && nextFilter.getOp() == null && isBlank(nextFilter.getProperty())) {
-							continue;
-						}
-
-						if (isBlank(nextFilter.getValue()) || nextFilter.getOp() == null || isBlank(nextFilter.getProperty())) {
-							throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
-						}
-
-
-						if (nextFilter.getProperty().equals("display:exact") && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-							addDisplayFilterExact(qb, bool, nextFilter);
-						} else if ("display".equals(nextFilter.getProperty()) && nextFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-							if (nextFilter.getValue().trim().contains(" ")) {
-								addDisplayFilterExact(qb, bool, nextFilter);
-							} else {
-								addDisplayFilterInexact(qb, bool, nextFilter);
-							}
-						} else if (nextFilter.getProperty().equals("concept") || nextFilter.getProperty().equals("code")) {
-
-							TermConcept code = findCode(system, nextFilter.getValue())
-								.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + system + "}" + nextFilter.getValue()));
-
-							if (nextFilter.getOp() == ValueSet.FilterOperator.ISA) {
-								ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
-								bool.must(qb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
-							} else {
-								throw new InvalidRequestException("Don't know how to handle op=" + nextFilter.getOp() + " on property " + nextFilter.getProperty());
-							}
-
-						} else {
-
-							if (nextFilter.getOp() == ValueSet.FilterOperator.REGEX) {
-
-								/*
-								 * We treat the regex filter as a match on the regex
-								 * anywhere in the property string. The spec does not
-								 * say whether or not this is the right behaviour, but
-								 * there are examples that seem to suggest that it is.
-								 */
-								String value = nextFilter.getValue();
-								if (value.endsWith("$")) {
-									value = value.substring(0, value.length() - 1);
-								} else if (!value.endsWith(".*")) {
-									value = value + ".*";
-								}
-								if (!value.startsWith("^") && !value.startsWith(".*")) {
-									value = ".*" + value;
-								} else if (value.startsWith("^")) {
-									value = value.substring(1);
-								}
-
-								Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + nextFilter.getProperty(), value);
-								RegexpQuery query = new RegexpQuery(term);
-								bool.must(query);
-
-							} else {
-
-								String value = nextFilter.getValue();
-								Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + nextFilter.getProperty(), value);
-								bool.must(new TermsQuery(term));
-
-							}
-
-						}
-					}
-
-				}
+				handleFilters(bool, system, qb, theIncludeOrExclude);
 
 				Query luceneQuery = bool.createQuery();
 
 				/*
-				 * Include Concepts
+				 * Include/Exclude Concepts
 				 */
-
-				List<Term> codes = theInclude
+				List<Term> codes = theIncludeOrExclude
 					.getConcept()
 					.stream()
 					.filter(Objects::nonNull)
@@ -831,8 +760,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				/*
 				 * Execute the query
 				 */
-
 				FullTextQuery jpaQuery = em.createFullTextQuery(luceneQuery, TermConcept.class);
+
 				/*
 				 * DM 2019-08-21 - Processing slows after any ValueSets with many codes explicitly identified. This might
 				 * be due to the dark arts that is memory management. Will monitor but not do anything about this right now.
@@ -871,15 +800,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				}
 
 			} else {
-				// No codesystem matching the URL found in the database
+				// No CodeSystem matching the URL found in the database.
 
 				CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
 				if (codeSystemFromContext == null) {
 					throw new InvalidRequestException("Unknown code system: " + system);
 				}
 
-				if (!theInclude.getConcept().isEmpty()) {
-					for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
+				if (!theIncludeOrExclude.getConcept().isEmpty()) {
+					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
 							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
@@ -902,7 +831,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 		} else if (hasValueSet) {
 
-			for (CanonicalType nextValueSet : theInclude.getValueSet()) {
+			for (CanonicalType nextValueSet : theIncludeOrExclude.getValueSet()) {
 				ourLog.info("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
 				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
@@ -930,6 +859,191 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 
+	}
+
+	private void handleFilters(BooleanJunction<?> theBool, String theSystem, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude) {
+		if (theIncludeOrExclude.getFilter().size() > 0) {
+			for (ValueSet.ConceptSetFilterComponent nextFilter : theIncludeOrExclude.getFilter()) {
+				handleFilter(theSystem, theQb, theBool, nextFilter);
+			}
+		}
+	}
+
+	private void handleFilter(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (isBlank(theFilter.getValue()) && theFilter.getOp() == null && isBlank(theFilter.getProperty())) {
+			return;
+		}
+
+		if (isBlank(theFilter.getValue()) || theFilter.getOp() == null || isBlank(theFilter.getProperty())) {
+			throw new InvalidRequestException("Invalid filter, must have fields populated: property op value");
+		}
+
+		switch (theFilter.getProperty()) {
+			case "display:exact":
+			case "display":
+				handleFilterDisplay(theQb, theBool, theFilter);
+				break;
+			case "concept":
+			case "code":
+				handleFilterConceptAndCode(theSystem, theQb, theBool, theFilter);
+				break;
+			case "parent":
+			case "child":
+				if (isCodeSystemLoinc(theSystem)) {
+					handleFilterLoincParentChild(theQb, theBool, theFilter);
+				} else {
+					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
+				}
+				break;
+			case "copyright":
+				if (isCodeSystemLoinc(theSystem)) {
+					handleFilterLoincCopyright(theQb, theBool, theFilter);
+				} else {
+					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
+				}
+				break;
+			default:
+				handleFilterRegex(theBool, theFilter);
+				break;
+		}
+	}
+
+	private boolean isCodeSystemLoinc(String theSystem) {
+		return IHapiTerminologyLoaderSvc.LOINC_URI.equals(theSystem);
+	}
+
+	private void handleFilterDisplay(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getProperty().equals("display:exact") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			addDisplayFilterExact(theQb, theBool, theFilter);
+		} else if (theFilter.getProperty().equals("display") && theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			if (theFilter.getValue().trim().contains(" ")) {
+				addDisplayFilterExact(theQb, theBool, theFilter);
+			} else {
+				addDisplayFilterInexact(theQb, theBool, theFilter);
+			}
+		}
+	}
+
+	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		TermConcept code = findCode(theSystem, theFilter.getValue())
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
+
+		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
+			ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+			theBool.must(theQb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+		} else {
+			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
+			addLoincFilterParentChildIn(theBool, theFilter);
+		} else {
+			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterParentChildEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
+		logFilteringValueOnProperty(theValue, theProperty);
+		theBool.must(new TermsQuery(getPropertyTerm(theProperty, theValue)));
+	}
+
+	private void addLoincFilterParentChildIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			logFilteringValueOnProperty(value, theFilter.getProperty());
+			terms.add(getPropertyTerm(theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private Term getPropertyTerm(String theProperty, String theValue) {
+		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
+	}
+
+	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+
+			String copyrightFilterValue = defaultString(theFilter.getValue()).toLowerCase();
+			switch (copyrightFilterValue) {
+				case "3rdparty":
+					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+					addFilterLoincCopyright3rdParty(theBool);
+					break;
+				case "loinc":
+					logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+					addFilterLoincCopyrightLoinc(theBool);
+					break;
+				default:
+					throwInvalidRequestForValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+			}
+
+		} else {
+			throwInvalidRequestForOpOnProperty(theFilter.getOp(), theFilter.getProperty());
+		}
+	}
+
+	private void addFilterLoincCopyright3rdParty(BooleanJunction<?> theBool) {
+		theBool.must(getRegexQueryForFilterLoincCopyright());
+	}
+
+	private void addFilterLoincCopyrightLoinc(BooleanJunction<?> theBool) {
+		theBool.must(getRegexQueryForFilterLoincCopyright()).not();
+	}
+
+	private RegexpQuery getRegexQueryForFilterLoincCopyright() {
+		Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + "EXTERNAL_COPYRIGHT_NOTICE", ".*");
+		return new RegexpQuery(term);
+	}
+
+	private void logFilteringValueOnProperty(String theValue, String theProperty) {
+		ourLog.info(" * Filtering with value={} on property {}", theValue, theProperty);
+	}
+
+	private void throwInvalidRequestForOpOnProperty(ValueSet.FilterOperator theOp, String theProperty) {
+		throw new InvalidRequestException("Don't know how to handle op=" + theOp + " on property " + theProperty);
+	}
+
+	private void throwInvalidRequestForValueOnProperty(String theValue, String theProperty) {
+		throw new InvalidRequestException("Don't know how to handle value=" + theValue + " on property " + theProperty);
+	}
+
+	private void handleFilterRegex(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.REGEX) {
+
+			/*
+			 * We treat the regex filter as a match on the regex
+			 * anywhere in the property string. The spec does not
+			 * say whether or not this is the right behaviour, but
+			 * there are examples that seem to suggest that it is.
+			 */
+			String value = theFilter.getValue();
+			if (value.endsWith("$")) {
+				value = value.substring(0, value.length() - 1);
+			} else if (!value.endsWith(".*")) {
+				value = value + ".*";
+			}
+			if (!value.startsWith("^") && !value.startsWith(".*")) {
+				value = ".*" + value;
+			} else if (value.startsWith("^")) {
+				value = value.substring(1);
+			}
+
+			Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
+			RegexpQuery query = new RegexpQuery(term);
+			theBool.must(query);
+
+		} else {
+
+			String value = theFilter.getValue();
+			Term term = new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theFilter.getProperty(), value);
+			theBool.must(new TermsQuery(term));
+
+		}
 	}
 
 	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
@@ -1562,9 +1676,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				codeSystem = new TermCodeSystem();
 			}
 			codeSystem.setResource(theCodeSystemVersion.getResource());
-			codeSystem.setCodeSystemUri(theSystemUri);
-			codeSystem.setName(theSystemName);
-			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
 				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
@@ -1572,6 +1683,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				throw new UnprocessableEntityException(msg);
 			}
 		}
+
+		codeSystem.setCodeSystemUri(theSystemUri);
+		codeSystem.setName(theSystemName);
+		codeSystem = myCodeSystemDao.save(codeSystem);
+
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
@@ -1650,6 +1766,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
 	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
 		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
 			String codeSystemUrl = theCodeSystem.getUrl();
@@ -1657,20 +1774,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
 				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
-				TermCodeSystemVersion persCs = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
-				if (persCs != null) {
-					ourLog.info("Code system version already exists in database");
-				} else {
+				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 
-					persCs = new TermCodeSystemVersion();
-					populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
-					persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
-					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-					storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
-
-				}
-
+				persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
+				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
 			}
 		}
 	}
