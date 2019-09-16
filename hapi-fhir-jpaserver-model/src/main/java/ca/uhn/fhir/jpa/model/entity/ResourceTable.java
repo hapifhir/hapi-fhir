@@ -47,7 +47,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 	@Index(name = "IDX_INDEXSTATUS", columnList = "SP_INDEX_STATUS")
 })
 public class ResourceTable extends BaseHasResource implements Serializable {
-	public static final int RESTYPE_LEN = 30;
+	public static final int RESTYPE_LEN = 35;
 	private static final int MAX_LANGUAGE_LENGTH = 20;
 	private static final int MAX_PROFILE_LENGTH = 200;
 	private static final long serialVersionUID = 1L;
@@ -199,7 +199,7 @@ public class ResourceTable extends BaseHasResource implements Serializable {
 	@OneToMany(mappedBy = "myTargetResource", cascade = {}, fetch = FetchType.LAZY, orphanRemoval = false)
 	@OptimisticLock(excluded = true)
 	private Collection<ResourceLink> myResourceLinksAsTarget;
-	@Column(name = "RES_TYPE", length = RESTYPE_LEN)
+	@Column(name = "RES_TYPE", length = RESTYPE_LEN, nullable = false)
 	@Field
 	@OptimisticLock(excluded = true)
 	private String myResourceType;
