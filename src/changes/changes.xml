@@ -137,6 +137,11 @@
 				Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the
 				expected type.
 			</action>
+			<action type="fix">
+				Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the
+				terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now
+				corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

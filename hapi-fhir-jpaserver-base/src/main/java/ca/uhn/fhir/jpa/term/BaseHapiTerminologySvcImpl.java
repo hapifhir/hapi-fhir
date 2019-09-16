@@ -1538,9 +1538,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				codeSystem = new TermCodeSystem();
 			}
 			codeSystem.setResource(theCodeSystemVersion.getResource());
-			codeSystem.setCodeSystemUri(theSystemUri);
-			codeSystem.setName(theSystemName);
-			myCodeSystemDao.save(codeSystem);
 		} else {
 			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
 				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
@@ -1548,6 +1545,11 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				throw new UnprocessableEntityException(msg);
 			}
 		}
+
+		codeSystem.setCodeSystemUri(theSystemUri);
+		codeSystem.setName(theSystemName);
+		codeSystem = myCodeSystemDao.save(codeSystem);
+
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
 		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
@@ -1626,6 +1628,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.MANDATORY)
 	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
 		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
 			String codeSystemUrl = theCodeSystem.getUrl();
@@ -1633,20 +1636,13 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
 				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
-				TermCodeSystemVersion persCs = myCodeSystemVersionDao.findCurrentVersionForCodeSystemResourcePid(codeSystemResourcePid);
-				if (persCs != null) {
-					ourLog.info("Code system version already exists in database");
-				} else {
+				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 
-					persCs = new TermCodeSystemVersion();
-					populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
+				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
-					persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
-					ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-					storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
-
-				}
-
+				persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
+				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
 			}
 		}
 	}

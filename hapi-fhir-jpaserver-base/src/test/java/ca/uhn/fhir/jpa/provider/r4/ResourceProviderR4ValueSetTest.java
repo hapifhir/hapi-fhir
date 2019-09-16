@@ -612,6 +612,59 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		}
 	}
 
+	@Test
+	public void testExpandValueSetBasedOnCodeSystemWithChangedUrl() throws IOException {
+
+		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/CS");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo1");
+		cs.addConcept().setCode("foo1").setDisplay("foo1");
+		ourClient.update().resource(cs).execute();
+
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/VS179789");
+		vs.setUrl("http://bar");
+		vs.getCompose().addInclude().setSystem("http://foo1").addConcept().setCode("foo1");
+		ourClient.update().resource(vs).execute();
+
+		ValueSet expanded = ourClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+				.execute();
+		ourLog.info("Expanded: {}",myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		assertEquals(1, expanded.getExpansion().getContains().size());
+
+		// Update the CodeSystem URL and Codes
+		cs = new CodeSystem();
+		cs.setId("CodeSystem/CS");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo2");
+		cs.addConcept().setCode("foo2").setDisplay("foo2");
+		ourClient.update().resource(cs).execute();
+
+		vs = new ValueSet();
+		vs.setId("ValueSet/VS179789");
+		vs.setUrl("http://bar");
+		vs.getCompose().addInclude().setSystem("http://foo2").addConcept().setCode("foo2");
+		ourClient.update().resource(vs).execute();
+
+		expanded = ourClient
+			.operation()
+			.onInstance(new IdType("ValueSet/VS179789"))
+			.named("$expand")
+			.withNoParameters(Parameters.class)
+			.returnResourceType(ValueSet.class)
+			.execute();
+		ourLog.info("Expanded: {}",myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		assertEquals(1, expanded.getExpansion().getContains().size());
+	}
+
+
+
 	/**
 	 * #516
 	 */
