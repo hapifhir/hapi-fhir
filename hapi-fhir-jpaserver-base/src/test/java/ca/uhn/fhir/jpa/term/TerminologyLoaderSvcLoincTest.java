@@ -68,7 +68,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		ValueSet vs;
 		ConceptMap.ConceptMapGroupComponent group;
 
-		// Normal loinc code
+		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
@@ -84,9 +84,16 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("http://loinc.org", code.getCodingProperties("COMPONENT").get(0).getSystem());
 		assertEquals("LP19258-0", code.getCodingProperties("COMPONENT").get(0).getCode());
 
-		// Loinc code with answer
+		// LOINC code with answer
 		code = concepts.get("61438-8");
 		assertThat(code.getStringProperties("answer-list"), contains("LL1000-0"));
+
+		// LOINC code with 3rd party copyright
+		code = concepts.get("47239-9");
+		// FIXME: DM 2019-09-13 - We presently truncate down to 500. The longest value for EXTERNAL_COPYRIGHT_NOTICE is 2,597 so we should use a LOB instead of a String.
+//		String expectedExternalCopyrightNotice = "Copyright © 2006 World Health Organization. Used with permission. Publications of the World Health Organization can be obtained from WHO Press, World Health Organization, 20 Avenue Appia, 1211 Geneva 27, Switzerland (tel: +41 22 791 2476; fax: +41 22 791 4857; email: bookorders@who.int). Requests for permission to reproduce or translate WHO publications – whether for sale or for noncommercial distribution – should be addressed to WHO Press, at the above address (fax: +41 22 791 4806; email: permissions@who.int). The designations employed and the presentation of the material in this publication do not imply the expression of any opinion whatsoever on the part of the World Health Organization concerning the legal status of any country, territory, city or area or of its authorities, or concerning the delimitation of its frontiers or boundaries. Dotted lines on maps represent approximate border lines for which there may not yet be full agreement. The mention of specific companies or of certain manufacturers’ products does not imply that they are endorsed or recommended by the World Health Organization in preference to others of a similar nature that are not mentioned. Errors and omissions excepted, the names of proprietary products are distinguished by initial capital letters. All reasonable precautions have been taken by WHO to verify the information contained in this publication. However, the published material is being distributed without warranty of any kind, either express or implied. The responsibility for the interpretation and use of the material lies with the reader. In no event shall the World Health Organization be liable for damages arising from its use.";
+		String expectedExternalCopyrightNotice = "Copyright © 2006 World Health Organization. Used with permission. Publications of the World Health Organization can be obtained from WHO Press, World Health Organization, 20 Avenue Appia, 1211 Geneva 27, Switzerland (tel: +41 22 791 2476; fax: +41 22 791 4857; email: bookorders@who.int). Requests for permission to reproduce or translate WHO publications – whether for sale or for noncommercial distribution – should be addressed to WHO Press, at the above address (fax: +41 22 791 4806; email: perm";
+		assertEquals(expectedExternalCopyrightNotice, code.getStringProperty("EXTERNAL_COPYRIGHT_NOTICE"));
 
 		// Answer list
 		code = concepts.get("LL1001-8");
@@ -330,7 +337,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
 
-		// Normal loinc code
+		// Normal LOINC code
 		TermConcept code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
 
@@ -394,7 +401,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		ValueSet vs;
 		ConceptMap.ConceptMapGroupComponent group;
 
-		// Normal loinc code
+		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
 		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
