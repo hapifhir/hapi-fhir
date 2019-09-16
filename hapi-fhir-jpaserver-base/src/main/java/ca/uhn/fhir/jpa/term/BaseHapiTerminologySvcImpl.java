@@ -882,15 +882,27 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			case "parent":
 			case "child":
-				handleFilterLoincParentChild(theSystem, theQb, theBool, theFilter);
+				if (isCodeSystemLoinc(theSystem)) {
+					handleFilterLoincParentChild(theQb, theBool, theFilter);
+				} else {
+					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
+				}
 				break;
 			case "copyright":
-				handleFilterLoincCopyright(theSystem, theQb, theBool, theFilter);
+				if (isCodeSystemLoinc(theSystem)) {
+					handleFilterLoincCopyright(theQb, theBool, theFilter);
+				} else {
+					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
+				}
 				break;
 			default:
 				handleFilterRegex(theBool, theFilter);
 				break;
 		}
+	}
+
+	private boolean isCodeSystemLoinc(String theSystem) {
+		return IHapiTerminologyLoaderSvc.LOINC_URI.equals(theSystem);
 	}
 
 	private void handleFilterDisplay(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -917,11 +929,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	private void handleFilterLoincParentChild(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (isNotCodeSystemLoinc(theSystem)) {
-			return;
-		}
-
+	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 			addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
 		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
@@ -929,14 +937,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		} else {
 			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
-	}
-
-	private boolean isCodeSystemLoinc(String theSystem) {
-		return IHapiTerminologyLoaderSvc.LOINC_URI.equals(theSystem);
-	}
-
-	private boolean isNotCodeSystemLoinc(String theSystem) {
-		return !isCodeSystemLoinc(theSystem);
 	}
 
 	private void addLoincFilterParentChildEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
@@ -958,11 +958,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
 	}
 
-	private void handleFilterLoincCopyright(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (isNotCodeSystemLoinc(theSystem)) {
-			return;
-		}
-
+	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
 
 			String copyrightFilterValue = defaultString(theFilter.getValue()).toLowerCase();

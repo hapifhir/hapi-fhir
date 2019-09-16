@@ -473,9 +473,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testExpandValueSetPropertyFilterLoincCopyrightWithUnsupportedOp() {
 		createLoincSystemWithSomeCodes();
 
-		List<String> codes;
 		ValueSet vs;
-		ValueSet outcome;
 		ValueSet.ConceptSetComponent include;
 
 		// Include
@@ -488,7 +486,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("LOINC");
 		try {
-			outcome = myTermSvc.expandValueSet(vs);
+			myTermSvc.expandValueSet(vs);
 		} catch (InvalidRequestException e) {
 			assertEquals(400, e.getStatusCode());
 			assertEquals("Don't know how to handle op=ISA on property copyright", e.getMessage());
@@ -496,12 +494,35 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testExpandValueSetPropertyFilterLoincCopyrightWithUnsupportedSystem() {
+		createCodeSystem();
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("copyright")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("LOINC");
+		try {
+			myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testExpandValueSetPropertyFilterLoincCopyrightWithUnsupportedValue() {
 		createLoincSystemWithSomeCodes();
 
-		List<String> codes;
 		ValueSet vs;
-		ValueSet outcome;
 		ValueSet.ConceptSetComponent include;
 
 		// Include
@@ -514,7 +535,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("bogus");
 		try {
-			outcome = myTermSvc.expandValueSet(vs);
+			myTermSvc.expandValueSet(vs);
 		} catch (InvalidRequestException e) {
 			assertEquals(400, e.getStatusCode());
 			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
@@ -711,6 +732,55 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithUnsupportedOp() {
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("50015-7");
+		try {
+			myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Don't know how to handle op=ISA on property child", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincChildWithUnsupportedSystem() {
+		createCodeSystem();
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("child")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		try {
+			myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testExpandValueSetPropertyFilterLoincParentWithExcludeAndEqual() {
 		createLoincSystemWithSomeCodes();
 
@@ -896,6 +966,55 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithUnsupportedOp() {
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("50015-7");
+		try {
+			myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Don't know how to handle op=ISA on property parent", e.getMessage());
+		}
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincParentWithUnsupportedSystem() {
+		createCodeSystem();
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("parent")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		try {
+			myTermSvc.expandValueSet(vs);
+		} catch (InvalidRequestException e) {
+			assertEquals(400, e.getStatusCode());
+			assertEquals("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+		}
 	}
 
 	@Test
