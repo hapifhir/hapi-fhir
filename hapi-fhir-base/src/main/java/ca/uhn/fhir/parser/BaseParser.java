@@ -204,31 +204,6 @@ public abstract class BaseParser implements IParser {
 	}
 
 	private void containResourcesForEncoding(ContainedResources theContained, IBaseResource theResource, IBaseResource theTarget) {
-
-		if (theTarget instanceof IResource) {
-			List<? extends IResource> containedResources = ((IResource) theTarget).getContained().getContainedResources();
-			for (IResource next : containedResources) {
-				String nextId = next.getId().getValue();
-				if (StringUtils.isNotBlank(nextId)) {
-					if (!nextId.startsWith("#")) {
-						nextId = '#' + nextId;
-					}
-					theContained.getExistingIdToContainedResource().put(nextId, next);
-				}
-			}
-		} else if (theTarget instanceof IDomainResource) {
-			List<? extends IAnyResource> containedResources = ((IDomainResource) theTarget).getContained();
-			for (IAnyResource next : containedResources) {
-				String nextId = next.getIdElement().getValue();
-				if (StringUtils.isNotBlank(nextId)) {
-					if (!nextId.startsWith("#")) {
-						nextId = '#' + nextId;
-					}
-					theContained.getExistingIdToContainedResource().put(nextId, next);
-				}
-			}
-		}
-
 		List<IBaseReference> allReferences = getAllBaseReferences(theResource);
 		for (IBaseReference next : allReferences) {
 			IBaseResource resource = next.getResource();
@@ -268,6 +243,31 @@ public abstract class BaseParser implements IParser {
 
 	protected void containResourcesForEncoding(IBaseResource theResource) {
 		ContainedResources contained = new ContainedResources();
+
+		if (theResource instanceof IResource) {
+			List<? extends IResource> containedResources = ((IResource) theResource).getContained().getContainedResources();
+			for (IResource next : containedResources) {
+				String nextId = next.getId().getValue();
+				if (StringUtils.isNotBlank(nextId)) {
+					if (!nextId.startsWith("#")) {
+						nextId = '#' + nextId;
+					}
+					contained.getExistingIdToContainedResource().put(nextId, next);
+				}
+			}
+		} else if (theResource instanceof IDomainResource) {
+			List<? extends IAnyResource> containedResources = ((IDomainResource) theResource).getContained();
+			for (IAnyResource next : containedResources) {
+				String nextId = next.getIdElement().getValue();
+				if (StringUtils.isNotBlank(nextId)) {
+					if (!nextId.startsWith("#")) {
+						nextId = '#' + nextId;
+					}
+					contained.getExistingIdToContainedResource().put(nextId, next);
+				}
+			}
+		}
+
 		containResourcesForEncoding(contained, theResource, theResource);
 		contained.assignIdsToContainedResources();
 		myContainedResources = contained;
