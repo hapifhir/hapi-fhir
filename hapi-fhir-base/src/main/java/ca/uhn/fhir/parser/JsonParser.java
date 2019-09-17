@@ -469,7 +469,7 @@ public class JsonParser extends BaseParser implements IJsonLikeParser {
 						if (nextValue instanceof IBaseHasModifierExtensions) {
 							IBaseHasModifierExtensions element = (IBaseHasModifierExtensions) nextValue;
 							List<? extends IBaseExtension<?, ?>> ext = element.getModifierExtension();
-							force |= addToHeldExtensions(valueIdx, ext, extensions, true, nextChildElem, theParent, theEncodeContext, theContainedResource, theElement);
+							force |= addToHeldExtensions(valueIdx, ext, modifierExtensions, true, nextChildElem, theParent, theEncodeContext, theContainedResource, theElement);
 						}
 					}
 					if (nextValue.hasFormatComment()) {
