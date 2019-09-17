@@ -287,8 +287,6 @@ public abstract class BaseParser implements IParser {
 	protected void findBaseReferences(List<IBaseReference> allElements, IBase theElement, BaseRuntimeElementDefinition<?> theDefinition) {
 		if (theElement instanceof IBaseReference) {
 			allElements.add((IBaseReference) theElement);
-			// end traversal here, we recursively process nested resources later
-			return;
 		}
 		
 		BaseRuntimeElementDefinition<?> def = theDefinition;
