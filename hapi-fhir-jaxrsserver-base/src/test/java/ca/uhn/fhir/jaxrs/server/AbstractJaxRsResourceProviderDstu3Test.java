@@ -7,10 +7,7 @@ import ca.uhn.fhir.jaxrs.server.test.TestJaxRsConformanceRestProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPageProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
 import ca.uhn.fhir.model.primitive.UriDt;
-import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
+import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
@@ -138,7 +135,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		client.setEncoding(EncodingEnum.JSON);
 
 		MethodOutcome response = client.create().resource(toCreate).conditional()
-				.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferReturnEnum.REPRESENTATION).execute();
+				.where(Patient.IDENTIFIER.exactly().identifier("2")).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 
 		assertEquals("myIdentifier", patientCaptor.getValue().getIdentifier().get(0).getValue());
 		IBaseResource resource = response.getResource();
@@ -161,7 +158,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 		when(mock.create(patientCaptor.capture(), isNull(String.class))).thenReturn(outcome);
 		client.setEncoding(EncodingEnum.JSON);
-		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferReturnEnum.REPRESENTATION)
+		final MethodOutcome response = client.create().resource(toCreate).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
 				.execute();
 		IBaseResource resource = response.getResource();
 		compareResultId(1, resource);

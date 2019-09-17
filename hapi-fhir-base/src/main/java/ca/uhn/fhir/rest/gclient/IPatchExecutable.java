@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 
 public interface IPatchExecutable extends IClientExecutable<IPatchExecutable, MethodOutcome>{
 
@@ -32,6 +32,6 @@ public interface IPatchExecutable extends IClientExecutable<IPatchExecutable, Me
 	 * 
 	 * @since HAPI 1.1
 	 */
-	IPatchExecutable prefer(PreferReturnEnum theReturn);
+	IPatchExecutable prefer(PreferHeader.PreferReturnEnum theReturn);
 
 }

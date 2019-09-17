@@ -112,8 +112,8 @@ public abstract class AbstractJaxRsPageProvider extends AbstractJaxRsProvider im
 	}
 
 	@Override
-	public PreferReturnEnum getDefaultPreferReturn() {
-		return PreferReturnEnum.REPRESENTATION;
+	public PreferHeader.PreferReturnEnum getDefaultPreferReturn() {
+		return PreferHeader.PreferReturnEnum.REPRESENTATION;
 	}
 
 }

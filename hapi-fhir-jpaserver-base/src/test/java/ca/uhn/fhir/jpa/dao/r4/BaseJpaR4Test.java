@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -315,6 +316,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private List<Object> mySystemInterceptors;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
 
 	@After()
 	public void afterCleanupDao() {
@@ -376,7 +379,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
 	@Before

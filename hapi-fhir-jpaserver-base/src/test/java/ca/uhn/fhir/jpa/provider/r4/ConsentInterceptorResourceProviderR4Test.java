@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -349,7 +349,7 @@ public class ConsentInterceptorResourceProviderR4Test extends BaseResourceProvid
 
 		Patient patient = new Patient();
 		patient.setActive(true);
-		IIdType id = ourClient.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
+		IIdType id = ourClient.create().resource(patient).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute().getId().toUnqualifiedVersionless();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
 		myConsentInterceptor = new ConsentInterceptor(consentService, IConsentContextServices.NULL_IMPL);

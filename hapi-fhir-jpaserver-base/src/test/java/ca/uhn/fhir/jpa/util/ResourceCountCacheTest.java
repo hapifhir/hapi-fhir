@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.util;
 
-import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -8,29 +7,31 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SingleItemLoadingCacheTest {
+public class ResourceCountCacheTest {
 
 	@Mock
-	private Callable<CapabilityStatement> myFetcher;
+	private Callable<Map<String, Long>> myFetcher;
 
 	@After
 	public void after() {
-		SingleItemLoadingCache.setNowForUnitTest(null);
+		ResourceCountCache.setNowForUnitTest(null);
 	}
 
 	@Before
 	public void before() throws Exception {
-		AtomicInteger id = new AtomicInteger();
+		AtomicLong id = new AtomicLong();
 		when(myFetcher.call()).thenAnswer(t->{
-			CapabilityStatement retVal = new CapabilityStatement();
-			retVal.setId("" + id.incrementAndGet());
+			Map<String, Long> retVal = new HashMap<>();
+			retVal.put("A", id.incrementAndGet());
 			return retVal;
 		});
 	}
@@ -38,36 +39,36 @@ public class SingleItemLoadingCacheTest {
 	@Test
 	public void testCache() {
 		long start = System.currentTimeMillis();
-		SingleItemLoadingCache.setNowForUnitTest(start);
+		ResourceCountCache.setNowForUnitTest(start);
 
 		// Cache is initialized on startup
-		SingleItemLoadingCache<CapabilityStatement> cache = new SingleItemLoadingCache<>(myFetcher);
+		ResourceCountCache cache = new ResourceCountCache(myFetcher);
 		cache.setCacheMillis(500);
 		assertEquals(null, cache.get());
 
 		// Not time to update yet
 		cache.update();
-		assertEquals("1", cache.get().getId());
+		assertEquals(Long.valueOf(1), cache.get().get("A"));
 
 		// Wait a bit, still not time to update
-		SingleItemLoadingCache.setNowForUnitTest(start + 400);
+		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertEquals("1", cache.get().getId());
+		assertEquals(Long.valueOf(1), cache.get().get("A"));
 
 		// Wait a bit more and the cache is expired
-		SingleItemLoadingCache.setNowForUnitTest(start + 800);
+		ResourceCountCache.setNowForUnitTest(start + 800);
 		cache.update();
-		assertEquals("2", cache.get().getId());
+		assertEquals(Long.valueOf(2), cache.get().get("A"));
 
 	}
 
 	@Test
 	public void testCacheWithLoadingDisabled() {
 		long start = System.currentTimeMillis();
-		SingleItemLoadingCache.setNowForUnitTest(start);
+		ResourceCountCache.setNowForUnitTest(start);
 
 		// Cache of 0 means "never load"
-		SingleItemLoadingCache<CapabilityStatement> cache = new SingleItemLoadingCache<>(myFetcher);
+		ResourceCountCache cache = new ResourceCountCache(myFetcher);
 		cache.setCacheMillis(0);
 
 		/*
@@ -79,11 +80,11 @@ public class SingleItemLoadingCacheTest {
 		cache.update();
 		assertEquals(null, cache.get());
 
-		SingleItemLoadingCache.setNowForUnitTest(start + 400);
+		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
 		assertEquals(null, cache.get());
 
-		SingleItemLoadingCache.setNowForUnitTest(start + 80000);
+		ResourceCountCache.setNowForUnitTest(start + 80000);
 		cache.update();
 		assertEquals(null, cache.get());
 

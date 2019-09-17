@@ -185,9 +185,9 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer);
+				PreferHeader.PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 				if (preferReturn != null) {
-					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
+					if (preferReturn == PreferHeader.PreferReturnEnum.REPRESENTATION) {
 						outcome.fireResourceViewCallbacks();
 						myVersionAdapter.setResource(newEntry, outcome.getResource());
 					}
@@ -211,7 +211,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				String nextReplacementIdPart = nextReplacementId.getValueAsString();
 				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
 					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-					matchUrl = matchUrl.replace(UrlUtil.escapeUrlParam(nextTemporaryIdPart), nextReplacementIdPart);
+					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
+					if (isNotBlank(escapedUrlParam)) {
+						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
+					}
 				}
 			}
 		}

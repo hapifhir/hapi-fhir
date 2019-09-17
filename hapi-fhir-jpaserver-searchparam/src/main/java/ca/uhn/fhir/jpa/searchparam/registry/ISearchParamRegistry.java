@@ -41,6 +41,8 @@ public interface ISearchParamRegistry {
 	 */
 	RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName);
 
+	void refreshCacheIfNecessary();
+
 	Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams();
 
 	Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName);

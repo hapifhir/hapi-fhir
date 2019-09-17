@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -256,6 +257,8 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	protected ITermConceptMapGroupElementTargetDao myTermConceptMapGroupElementTargetDao;
 	@Autowired
 	private JpaValidationSupportChainDstu3 myJpaValidationSupportChainDstu3;
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
 
 	@After()
 	public void afterCleanupDao() {
@@ -302,7 +305,7 @@ public abstract class BaseJpaDstu3Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
 	@Before

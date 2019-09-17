@@ -3,7 +3,7 @@ package ca.uhn.fhir.tests.integration.karaf.client;
 import java.io.IOException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.junit.Ignore;
@@ -56,7 +56,7 @@ public class FhirClientTest {
 		patient.setId("PATIENTID");
 		patient.getMeta().addProfile("http://BAR");
 		patient.addName().addGiven("GIVEN");
-		MethodOutcome execute = client.create().resource(patient).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome execute = client.create().resource(patient).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		ourLog.info(execute.toString());
 	}
 
