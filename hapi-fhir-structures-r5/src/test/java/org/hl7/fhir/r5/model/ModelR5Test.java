@@ -1,4 +1,4 @@
-package org.hl7.fhir.r4.model;
+package org.hl7.fhir.r5.model;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.junit.Test;
@@ -6,9 +6,9 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class ModelR4Test {
+public class ModelR5Test {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static FhirContext ourCtx = FhirContext.forR5();
 
 	@Test
 	public void testbase64BinaryName() {
