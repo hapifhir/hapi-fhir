@@ -31,6 +31,14 @@
 				 can use either the source URI, the request ID, or both.
 				]]>
 			</action>
+			<action type="add">
+            <![CDATA[
+				<b>New Feature</b>:
+				Support for the FHIR Bulk Data Export specification has been added to the JPA server. See the
+				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
+				only system level export is currently supported but others will follow.
+            ]]>
+         </action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
@@ -141,6 +149,9 @@
 				Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the
 				terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now
 				corrected.
+			</action>
+			<action type="add">
+				The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

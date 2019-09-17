@@ -138,7 +138,7 @@ public class JaxRsPatientProviderDstu3Test {
         existing.setId((IdType) null);
         existing.getName().add(new HumanName().setFamily("Created Patient 54"));
         client.setEncoding(EncodingEnum.JSON);
-        final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+        final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
         System.out.println(patient);
@@ -154,7 +154,7 @@ public class JaxRsPatientProviderDstu3Test {
         existing.setId((IdType) null);
         existing.getName().add(new HumanName().setFamily("Created Patient 54"));
         client.setEncoding(EncodingEnum.XML);
-        final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+        final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
 
@@ -187,7 +187,7 @@ public class JaxRsPatientProviderDstu3Test {
     public void testDeletePatient() {
         final Patient existing = new Patient();
         existing.getName().add(new HumanName().setFamily("Created Patient XYZ"));
-        final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+        final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
         System.out.println(results.getId());
         final Patient patient = (Patient) results.getResource();
         client.delete().resourceById(patient.getIdElement()).execute();

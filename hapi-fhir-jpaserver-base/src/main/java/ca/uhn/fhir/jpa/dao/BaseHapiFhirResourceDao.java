@@ -80,7 +80,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Transactional(propagation = Propagation.REQUIRED)
 public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends BaseHapiFhirDao<T> implements IFhirResourceDao<T> {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -551,10 +551,22 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myEntityManager.merge(entity);
 	}
 
+    private void validateExpungeEnabled() {
+        if (!myDaoConfig.isExpungeEnabled()) {
+            throw new MethodNotAllowedException("$expunge is not enabled on this server");
+        }
+    }
+    
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
+		validateExpungeEnabled();
+		return forceExpungeInExistingTransaction(theId, theExpungeOptions, theRequest);
+	}
 
+	@Override
+	@Transactional(propagation = Propagation.SUPPORTS)
+	public ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
 		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId, theRequest));

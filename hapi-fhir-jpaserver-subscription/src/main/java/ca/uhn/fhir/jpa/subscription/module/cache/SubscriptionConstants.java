@@ -35,7 +35,7 @@ public class SubscriptionConstants {
 	 * The maximum number of subscriptions that can be active at once
 	 */
 
-	public static final int MAX_SUBSCRIPTION_RESULTS = 1000;
+	public static final int MAX_SUBSCRIPTION_RESULTS = 50000;
 
 	/**
 	 * The size of the queue used for sending resources to the subscription matching processor and by each subscription delivery queue

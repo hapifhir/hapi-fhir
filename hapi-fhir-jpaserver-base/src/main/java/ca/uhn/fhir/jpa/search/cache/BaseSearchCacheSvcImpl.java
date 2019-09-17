@@ -21,12 +21,16 @@ package ca.uhn.fhir.jpa.search.cache;
  */
 
 import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import org.apache.commons.lang3.time.DateUtils;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,6 +40,8 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 
 	@Autowired
 	private PlatformTransactionManager myTxManager;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	private ConcurrentHashMap<Long, Date> myUnsyncedLastUpdated = new ConcurrentHashMap<>();
 
@@ -44,11 +50,18 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 		myUnsyncedLastUpdated.put(theSearch.getId(), theDate);
 	}
 
+	@PostConstruct
+	public void registerScheduledJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(BaseSearchCacheSvcImpl.class.getName());
+		jobDetail.setJobClass(BaseSearchCacheSvcImpl.SubmitJob.class);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, false, jobDetail);
+	}
+
 	@Override
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
 	public void flushLastUpdated() {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
-		txTemplate.execute(t->{
+		txTemplate.execute(t -> {
 			for (Iterator<Map.Entry<Long, Date>> iter = myUnsyncedLastUpdated.entrySet().iterator(); iter.hasNext(); ) {
 				Map.Entry<Long, Date> next = iter.next();
 				flushLastUpdated(next.getKey(), next.getValue());
@@ -59,6 +72,16 @@ public abstract class BaseSearchCacheSvcImpl implements ISearchCacheSvc {
 	}
 
 	protected abstract void flushLastUpdated(Long theSearchId, Date theLastUpdated);
+
+	public static class SubmitJob implements Job {
+		@Autowired
+		private ISearchCacheSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.flushLastUpdated();
+		}
+	}
 
 
 }

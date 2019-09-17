@@ -7,7 +7,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -152,7 +152,7 @@ public class JaxRsPatientProviderR4Test {
 		existing.setId((IdDt) null);
 		existing.getNameFirstRep().setFamily("Created Patient 54");
 		client.setEncoding(EncodingEnum.JSON);
-		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
 		final Patient patient = (Patient) results.getResource();
 		System.out.println(patient);
@@ -167,7 +167,7 @@ public class JaxRsPatientProviderR4Test {
 		existing.setId((IdDt) null);
 		existing.getNameFirstRep().setFamily("Created Patient 54");
 		client.setEncoding(EncodingEnum.XML);
-		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
 		final Patient patient = (Patient) results.getResource();
 
@@ -199,7 +199,7 @@ public class JaxRsPatientProviderR4Test {
 	public void testDeletePatient() {
 		final Patient existing = new Patient();
 		existing.getNameFirstRep().setFamily("Created Patient XYZ");
-		final MethodOutcome results = client.create().resource(existing).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		final MethodOutcome results = client.create().resource(existing).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		System.out.println(results.getId());
 		final Patient patient = (Patient) results.getResource();
 		client.delete().resource(patient).execute();

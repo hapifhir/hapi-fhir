@@ -109,6 +109,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addIndex("IDX_VS_CONCEPT_ORDER")
 			.unique(true)
 			.withColumns("VALUESET_PID", "VALUESET_ORDER");
+
+
+		// Account for RESTYPE_LEN column increasing from 30 to 35
+		version.onTable("HFJ_RESOURCE").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		version.onTable("HFJ_HISTORY_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		version.onTable("HFJ_RES_LINK").modifyColumn("SOURCE_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		version.onTable("HFJ_RES_LINK").modifyColumn("TARGET_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		version.onTable("HFJ_RES_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+
+
 	}
 
 	protected void init400() {

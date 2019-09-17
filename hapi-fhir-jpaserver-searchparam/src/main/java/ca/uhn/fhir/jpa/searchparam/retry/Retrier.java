@@ -24,14 +24,19 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
+import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
+import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class Retrier<T> {
@@ -53,7 +58,17 @@ public class Retrier<T> {
 		backOff.setMultiplier(2);
 		myRetryTemplate.setBackOffPolicy(backOff);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(){
+			private static final long serialVersionUID = -4522467251787518700L;
+
+			@Override
+			public boolean canRetry(RetryContext context) {
+				if (context.getLastThrowable() instanceof BeanCreationException) {
+					return false;
+				}
+				return super.canRetry(context);
+			}
+		};
 		retryPolicy.setMaxAttempts(theMaxRetries);
 		myRetryTemplate.setRetryPolicy(retryPolicy);
 

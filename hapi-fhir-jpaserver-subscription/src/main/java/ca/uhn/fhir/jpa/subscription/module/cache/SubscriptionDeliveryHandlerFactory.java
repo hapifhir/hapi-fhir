@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.Validate;
 
 import java.util.Optional;
 

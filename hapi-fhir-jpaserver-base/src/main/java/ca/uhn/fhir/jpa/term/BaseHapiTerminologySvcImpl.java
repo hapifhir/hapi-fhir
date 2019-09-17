@@ -28,6 +28,9 @@ import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -61,6 +64,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,6 +167,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private PlatformTransactionManager myTxManager;
 	@Autowired
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
+    @Autowired
+    private ISchedulerService mySchedulerService;
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {
 		String codeSystem = theConcept.getCodeSystemVersion().getCodeSystem().getCodeSystemUri();
@@ -1529,7 +1536,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	@Scheduled(fixedRate = 5000)
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void saveDeferred() {
@@ -1616,6 +1622,24 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myTxTemplate = new TransactionTemplate(myTransactionManager);
 	}
 
+	@PostConstruct
+	public void registerScheduledJob() {
+		// Register scheduled job to save deferred concepts
+		// In the future it would be great to make this a cluster-aware task somehow
+		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
+		jobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_saveDeferred");
+		jobDefinition.setJobClass(SaveDeferredJob.class);
+		mySchedulerService.scheduleFixedDelay(5000, false, jobDefinition);
+
+		// Register scheduled job to save deferred concepts
+		// In the future it would be great to make this a cluster-aware task somehow
+		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
+		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
+		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_MINUTE, true, vsJobDefinition);
+
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion) {
@@ -1696,7 +1720,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		ourLog.info("Saving {} concepts...", totalCodeCount);
 
-		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<TermConcept, Object>();
+		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
 		}
@@ -1939,7 +1963,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
 	}
 
-	@Scheduled(fixedDelay = 600000) // 10 minutes.
 	@Override
 	public synchronized void preExpandDeferredValueSetsToTerminologyTables() {
 		if (isNotSafeToPreExpandValueSets()) {
@@ -2495,6 +2518,28 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			system = theCodingType.getSystem();
 		}
 		return new VersionIndependentConcept(system, code);
+	}
+
+	public static class SaveDeferredJob implements Job {
+
+		@Autowired
+		private IHapiTerminologySvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.saveDeferred();
+		}
+	}
+
+	public static class PreExpandValueSetsJob implements Job {
+
+		@Autowired
+		private IHapiTerminologySvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.preExpandDeferredValueSetsToTerminologyTables();
+		}
 	}
 
 	/**

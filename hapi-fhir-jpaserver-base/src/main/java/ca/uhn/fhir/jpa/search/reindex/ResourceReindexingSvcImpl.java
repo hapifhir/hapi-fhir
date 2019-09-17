@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.ResourceReindexJobEntity;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -44,12 +46,13 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.search.util.impl.Executors;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
@@ -101,6 +104,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	private EntityManager myEntityManager;
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	@VisibleForTesting
 	void setReindexJobDaoForUnitTest(IResourceReindexJobDao theReindexJobDao) {
@@ -182,11 +187,12 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		return job.getId();
 	}
 
-	@Override
-	@Transactional(Transactional.TxType.NEVER)
-	@Scheduled(fixedDelay = 10 * DateUtils.MILLIS_PER_SECOND)
-	public void scheduleReindexingPass() {
-		runReindexingPass();
+	@PostConstruct
+	public void registerScheduledJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(ResourceReindexingSvcImpl.class.getName());
+		jobDetail.setJobClass(ResourceReindexingSvcImpl.SubmitJob.class);
+		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, true, jobDetail);
 	}
 
 	@Override
@@ -223,6 +229,8 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	@Override
 	public void cancelAndPurgeAllJobs() {
 		ourLog.info("Cancelling and purging all resource reindexing jobs");
+		myIndexingLock.lock();
+		try {
 		myTxTemplate.execute(t -> {
 			myReindexJobDao.markAllOfTypeAsDeleted();
 			return null;
@@ -232,6 +240,9 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		initExecutor();
 
 		expungeJobsMarkedAsDeleted();
+		} finally {
+			myIndexingLock.unlock();
+		}
 	}
 
 	private int runReindexJobs() {
@@ -277,7 +288,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 	}
 
 	@VisibleForTesting
-	public void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
@@ -306,7 +317,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		Date low = theJob.getThresholdLow() != null ? theJob.getThresholdLow() : BEGINNING_OF_TIME;
 		Date high = theJob.getThresholdHigh();
 
-		// SqlQuery for resources within threshold
+		// Query for resources within threshold
 		StopWatch pageSw = new StopWatch();
 		Slice<Long> range = myTxTemplate.execute(t -> {
 			PageRequest page = PageRequest.of(0, PASS_SIZE);
@@ -527,6 +538,16 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 			}
 
 			return myUpdated;
+		}
+	}
+
+	public static class SubmitJob implements Job {
+		@Autowired
+		private IResourceReindexingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.runReindexingPass();
 		}
 	}
 }

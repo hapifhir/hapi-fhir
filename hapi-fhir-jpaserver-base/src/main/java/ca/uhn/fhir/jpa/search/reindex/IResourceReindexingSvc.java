@@ -37,11 +37,6 @@ public interface IResourceReindexingSvc {
 	Long markAllResourcesForReindexing(String theType);
 
 	/**
-	 * Called automatically by the job scheduler
-	 */
-	void scheduleReindexingPass();
-
-	/**
 	 * @return Returns null if the system did not attempt to perform a pass because one was
 	 * already proceeding. Otherwise, returns the number of resources affected.
 	 */

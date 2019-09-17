@@ -59,6 +59,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Integer myFailureCode;
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "EXPIRY_OR_NULL", nullable = true)
+	private Date myExpiryOrNull;
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SEARCH")
 	@SequenceGenerator(name = "SEQ_SEARCH", sequenceName = "SEQ_SEARCH")
@@ -108,12 +111,19 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
-
 	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	public Date getExpiryOrNull() {
+		return myExpiryOrNull;
+	}
+
+	public void setExpiryOrNull(Date theExpiryOrNull) {
+		myExpiryOrNull = theExpiryOrNull;
 	}
 
 	public Boolean getDeleted() {
@@ -230,11 +240,15 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public void setSearchQueryString(String theSearchQueryString) {
-		if (theSearchQueryString != null && theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
-			mySearchQueryString = null;
+		if (theSearchQueryString == null || theSearchQueryString.length() > MAX_SEARCH_QUERY_STRING) {
+			// We want this field to always have a wide distribution of values in order
+			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
+			// case of null, just put a value that will never be hit
+			mySearchQueryString = UUID.randomUUID().toString();
 		} else {
 			mySearchQueryString = theSearchQueryString;
 		}
+		mySearchQueryStringHash = mySearchQueryString.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {

@@ -1,9 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IResource;
-import ca.uhn.fhir.model.dstu2.resource.OperationOutcome;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -25,6 +22,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -40,12 +41,11 @@ import static org.junit.Assert.*;
 public class PreferTest {
 	private static CloseableHttpClient ourClient;
 
-	private static FhirContext ourCtx = FhirContext.forDstu2();
+	private static FhirContext ourCtx = FhirContext.forR4();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PreferTest.class);
 	private static int ourPort;
 	private static Server ourServer;
-
-	public static IBaseOperationOutcome ourReturnOperationOutcome;
+	private static IBaseOperationOutcome ourReturnOperationOutcome;
 
 	@Before
 	public void before() {
@@ -190,7 +190,7 @@ public class PreferTest {
 
 		@Create()
 		public MethodOutcome createPatient(@ResourceParam Patient thePatient) {
-			IdDt id = new IdDt("Patient/001/_history/002");
+			IdType id = new IdType("Patient/001/_history/002");
 			MethodOutcome retVal = new MethodOutcome(id);
 
 			thePatient.setId(id);
@@ -202,12 +202,12 @@ public class PreferTest {
 		}
 
 		@Override
-		public Class<? extends IResource> getResourceType() {
+		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
 		}
 
 		@Update()
-		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdDt theIdParam) {
+		public MethodOutcome updatePatient(@ResourceParam Patient thePatient, @IdParam IdType theIdParam) {
 			IdDt id = new IdDt("Patient/001/_history/002");
 			MethodOutcome retVal = new MethodOutcome(id);
 

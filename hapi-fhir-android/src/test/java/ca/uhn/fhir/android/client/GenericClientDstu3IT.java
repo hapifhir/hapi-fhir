@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+import ca.uhn.fhir.rest.api.PreferHeader;
 import org.hl7.fhir.dstu3.model.*;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +21,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -246,7 +246,7 @@ public class GenericClientDstu3IT {
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 
-		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		MethodOutcome outcome = client.create().resource(pt).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 
 		assertNull(outcome.getOperationOutcome());
 		assertNotNull(outcome.getResource());
