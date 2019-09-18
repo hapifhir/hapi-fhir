@@ -64,7 +64,7 @@ public class JdbcUtils {
 				try {
 					metadata = connection.getMetaData();
 
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
+					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
 					Set<String> indexNames = new HashSet<>();
 					while (indexes.next()) {
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
@@ -73,7 +73,7 @@ public class JdbcUtils {
 						indexNames.add(indexName);
 					}
 
-					indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), true, false);
+					indexes = getIndexInfo(theTableName, connection, metadata, true);
 					while (indexes.next()) {
 						ourLog.debug("*** Next index: {}", new ColumnMapRowMapper().mapRow(indexes, 0));
 						String indexName = indexes.getString("INDEX_NAME");
@@ -99,7 +99,7 @@ public class JdbcUtils {
 				DatabaseMetaData metadata;
 				try {
 					metadata = connection.getMetaData();
-					ResultSet indexes = metadata.getIndexInfo(connection.getCatalog(), connection.getSchema(), massageIdentifier(metadata, theTableName), false, false);
+					ResultSet indexes = getIndexInfo(theTableName, connection, metadata, false);
 
 					while (indexes.next()) {
 						String indexName = indexes.getString("INDEX_NAME");
@@ -116,6 +116,12 @@ public class JdbcUtils {
 				throw new InternalErrorException("Can't find index: " + theIndexName + " on table " + theTableName);
 			});
 		}
+	}
+
+	private static ResultSet getIndexInfo(String theTableName, Connection theConnection, DatabaseMetaData theMetadata, boolean theUnique) throws SQLException {
+		// FYI Using approximate=false causes a very slow table scan on Oracle
+		boolean approximate = true;
+		return theMetadata.getIndexInfo(theConnection.getCatalog(), theConnection.getSchema(), massageIdentifier(theMetadata, theTableName), theUnique, approximate);
 	}
 
 	/**

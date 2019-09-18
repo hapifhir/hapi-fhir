@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
+import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -59,6 +60,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 			job.setStatus(BulkJobStatusEnum.COMPLETE);
 			job.setExpiry(DateUtils.addHours(new Date(), -1));
 			job.setJobId(UUID.randomUUID().toString());
+			job.setCreated(new Date());
 			job.setRequest("$export");
 			myBulkExportJobDao.save(job);
 
@@ -108,17 +110,17 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateBulkLoad_NoResourceTypes() {
+	public void testCreateBulkLoad_OnlyBinarySelected() {
 		try {
-			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet(), null, null);
+			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_JSON_NEW, Sets.newHashSet("Binary"), null, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("No resource types specified", e.getMessage());
+			assertEquals("Invalid output format: application/fhir+json", e.getMessage());
 		}
 	}
 
 	@Test
-	public void testCreateBulkLoad_InvalidResourceTypes() {
+	public void testSubmit_InvalidResourceTypes() {
 		try {
 			myBulkDataExportSvc.submitJob(Constants.CT_FHIR_NDJSON, Sets.newHashSet("Patient", "FOO"), null, null);
 			fail();
@@ -128,7 +130,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testCreateBulkLoad() {
+	public void testSubmitForSpecificResources() {
 
 		// Create some resources to load
 		createResources();
@@ -141,6 +143,56 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
 		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
 		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson&_type=Observation,Patient", status.getRequest());
+
+		// Run a scheduled pass to build the export
+		myBulkDataExportSvc.buildExportFiles();
+
+		// Fetch the job again
+		status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkJobStatusEnum.COMPLETE, status.getStatus());
+		assertEquals(2, status.getFiles().size());
+
+		// Iterate over the files
+		for (IBulkDataExportSvc.FileEntry next : status.getFiles()) {
+			Binary nextBinary = myBinaryDao.read(next.getResourceId());
+			assertEquals(Constants.CT_FHIR_NDJSON, nextBinary.getContentType());
+			String nextContents = new String(nextBinary.getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Next contents for type {}:\n{}", next.getResourceType(), nextContents);
+
+			if ("Patient".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"value\":\"PAT0\"}]}\n"));
+				assertEquals(10, nextContents.split("\n").length);
+			} else if ("Observation".equals(next.getResourceType())) {
+				assertThat(nextContents, containsString("\"subject\":{\"reference\":\"Patient/PAT0\"}}\n"));
+				assertEquals(10, nextContents.split("\n").length);
+			} else {
+				fail(next.getResourceType());
+			}
+
+		}
+	}
+
+	@Test
+	public void testSubmitWithoutSpecificResources() {
+
+		// Create some resources to load
+		createResources();
+
+		// Binary shouldn't be included in the results so we'll add one here
+		// and make sure it isn't included in the results
+		Binary b = new Binary();
+		b.setContentType("text/plain");
+		b.setContent("text".getBytes(Charsets.UTF_8));
+		myBinaryDao.create(b);
+
+		// Create a bulk job
+		IBulkDataExportSvc.JobInfo jobDetails = myBulkDataExportSvc.submitJob(null, null, null, null);
+		assertNotNull(jobDetails.getJobId());
+
+		// Check the status
+		IBulkDataExportSvc.JobInfo status = myBulkDataExportSvc.getJobStatusOrThrowResourceNotFound(jobDetails.getJobId());
+		assertEquals(BulkJobStatusEnum.SUBMITTED, status.getStatus());
+		assertEquals("/$export?_outputFormat=application%2Ffhir%2Bndjson", status.getRequest());
 
 		// Run a scheduled pass to build the export
 		myBulkDataExportSvc.buildExportFiles();
@@ -186,7 +238,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 
 
 		@Test
-	public void testCreateBulkLoad_WithSince() throws InterruptedException {
+	public void testSubmit_WithSince() throws InterruptedException {
 
 		// Create some resources to load
 		createResources();

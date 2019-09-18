@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.StopWatch;
-import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -53,6 +52,7 @@ import java.io.OutputStreamWriter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -80,7 +80,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	private TransactionTemplate myTxTemplate;
 
 	private long myFileMaxChars = 500 * FileUtils.ONE_KB;
-	private int myRetentionPeriod = (int) DateUtils.MILLIS_PER_DAY;
+	private int myRetentionPeriod = (int) (2 * DateUtils.MILLIS_PER_HOUR);
 
 	/**
 	 * This method is called by the scheduler to run a pass of the
@@ -332,7 +332,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 			return toSubmittedJobInfo(existing.iterator().next());
 		}
 
-		if (theResourceTypes == null || resourceTypes.isEmpty()) {
+		if (resourceTypes != null && resourceTypes.contains("Binary")) {
+			String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "onlyBinarySelected");
+			throw new InvalidRequestException(msg);
+		}
+
+		if (resourceTypes == null || resourceTypes.isEmpty()) {
 			// This is probably not a useful default, but having the default be "download the whole
 			// server" seems like a risky default too. We'll deal with that by having the default involve
 			// only returning a small time span
@@ -341,6 +346,12 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 				since = DateUtils.addDays(new Date(), -1);
 			}
 		}
+
+		resourceTypes =
+			resourceTypes
+				.stream()
+				.filter(t -> !"Binary".equals(t))
+				.collect(Collectors.toSet());
 
 		BulkExportJobEntity job = new BulkExportJobEntity();
 		job.setJobId(UUID.randomUUID().toString());
@@ -354,7 +365,8 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		for (String nextType : resourceTypes) {
 			if (!myDaoRegistry.isResourceTypeSupported(nextType)) {
-				throw new InvalidRequestException("Unknown or unsupported resource type: " + nextType);
+				String msg = myContext.getLocalizer().getMessage(BulkDataExportSvcImpl.class, "unknownResourceType", nextType);
+				throw new InvalidRequestException(msg);
 			}
 
 			BulkExportCollectionEntity collection = new BulkExportCollectionEntity();
