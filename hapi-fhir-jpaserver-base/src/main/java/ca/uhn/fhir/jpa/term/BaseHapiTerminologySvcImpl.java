@@ -1770,10 +1770,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
 		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
 			String codeSystemUrl = theCodeSystem.getUrl();
-			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null
-			//	|| theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT
-			) {
+			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
+
+				// If this is a not-present codesystem, we don't want to store a new version if one
+				// already exists, since that will wipe out the existing concepts
+				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+					TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
+					if (codeSystem != null) {
+						return;
+					}
+				}
 
 				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
@@ -1784,6 +1791,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
 			}
+
 		}
 	}
 

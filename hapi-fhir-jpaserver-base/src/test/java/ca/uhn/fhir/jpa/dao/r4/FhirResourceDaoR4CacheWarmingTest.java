@@ -91,8 +91,11 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		p2.addName().setFamily("Smith");
 		myPatientDao.update(p2);
 
-		Thread.sleep(2000);
+		myCacheWarmingSvc.performWarmingPass();
 
+		Thread.sleep(1000);
+
+		ourLog.info("About to perform search");
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("smith"));
 		IBundleProvider result = myPatientDao.search(params);
