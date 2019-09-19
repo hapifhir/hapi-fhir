@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -75,7 +74,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -1642,7 +1640,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 		ourLog.info("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
@@ -1669,24 +1667,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		 * Do the upload
 		 */
 
-		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
-		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
-			if (codeSystem == null) {
-				codeSystem = new TermCodeSystem();
-			}
-			codeSystem.setResource(theCodeSystemVersion.getResource());
-		} else {
-			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
-					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
-			}
-		}
-
-		codeSystem.setCodeSystemUri(theSystemUri);
-		codeSystem.setName(theSystemName);
-		codeSystem = myCodeSystemDao.save(codeSystem);
+		TermCodeSystem codeSystem = getOrCreateTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemResourceTable);
 
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
@@ -1737,6 +1718,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	@Nonnull
+	private TermCodeSystem getOrCreateTermCodeSystem(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
+		if (codeSystem == null) {
+			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
+			if (codeSystem == null) {
+				codeSystem = new TermCodeSystem();
+			}
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemResourceTable.getId())) {
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
+					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
+		}
+
+		codeSystem.setCodeSystemUri(theSystemUri);
+		codeSystem.setName(theSystemName);
+		codeSystem = myCodeSystemDao.save(codeSystem);
+		return codeSystem;
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -1751,7 +1755,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
-		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion, resource);
 
 		myDeferredConceptMaps.addAll(theConceptMaps);
 		myDeferredValueSets.addAll(theValueSets);
@@ -1773,23 +1777,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				// If this is a not-present codesystem, we don't want to store a new version if one
-				// already exists, since that will wipe out the existing concepts
+				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
+
+				/*
+				 * If this is a not-present codesystem, we don't want to store a new version if one
+				 * already exists, since that will wipe out the existing concepts. We do create or update
+				 * the TermCodeSystem table though, since that allows the DB to reject changes
+				 * that would result in duplicate CodeSysten.url values.
+				 */
 				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 					TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
 					if (codeSystem != null) {
+						getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
 						return;
 					}
 				}
 
-				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
 				persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
+				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs, theResourceEntity);
 			}
 
 		}
