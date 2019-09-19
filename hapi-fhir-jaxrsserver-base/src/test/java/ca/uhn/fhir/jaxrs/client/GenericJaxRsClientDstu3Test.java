@@ -911,6 +911,16 @@ public class GenericJaxRsClientDstu3Test {
 			public List<String> getFormatCommentsPost() {
 				return null;
 			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
+			}
 		};
 
 		//@formatter:off
