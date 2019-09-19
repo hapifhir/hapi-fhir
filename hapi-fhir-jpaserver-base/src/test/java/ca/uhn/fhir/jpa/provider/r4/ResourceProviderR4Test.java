@@ -683,7 +683,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.create()
 			.resource(p)
 			.conditionalByUrl("Patient?identifier=foo|bar")
-			.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
+			.prefer(PreferReturnEnum.REPRESENTATION)
 			.execute();
 
 		assertEquals(id.getIdPart(), outcome.getId().getIdPart());
