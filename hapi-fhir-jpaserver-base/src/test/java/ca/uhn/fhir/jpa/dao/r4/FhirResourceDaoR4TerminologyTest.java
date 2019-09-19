@@ -600,7 +600,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			myValueSetDao.expand(vs, null);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("unable to find code system http://example.com/my_code_systemAA", e.getMessage());
+			assertEquals("Unable to find code system http://example.com/my_code_systemAA", e.getMessage());
 		}
 	}
 

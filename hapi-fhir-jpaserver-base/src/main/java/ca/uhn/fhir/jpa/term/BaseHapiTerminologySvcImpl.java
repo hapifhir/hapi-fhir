@@ -1770,7 +1770,9 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity) {
 		if (theCodeSystem != null && isNotBlank(theCodeSystem.getUrl())) {
 			String codeSystemUrl = theCodeSystem.getUrl();
-			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null
+			//	|| theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT
+			) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
 				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
