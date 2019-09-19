@@ -61,4 +61,14 @@ public interface IBase extends Serializable {
 	 */
 	default String fhirType() { return null; }
 
+	/**
+	 * Retrieves any user suplied data in this element
+	 */
+	Object getUserData(String theName);
+
+	/**
+	 * Sets a user supplied data value in this element
+	 */
+	void setUserData(String theName, Object theValue);
+
 }

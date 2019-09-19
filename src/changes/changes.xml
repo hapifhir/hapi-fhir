@@ -579,6 +579,14 @@
 				can now be used to upload custom vocabulary that has been converted into a standard file format
 				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
 			</action>
+			<action type="change">
+				Two new operations,
+				<![CDATA[<code>$apply-codesystem-delta-add</code>]]>
+				and
+				<![CDATA[<code>$apply-codesystem-delta-remove</code>]]>
+				have been added to the terminology server. These methods allow
+				codes to be dynamically added and removed from external (notpresent) codesystems.
+			</action>
 			<action type="fix" issue="1404">
 				In the JAX-RS server, the resource type history and instance vread
 				operations had ambiguous paths that could lead to the wrong method
