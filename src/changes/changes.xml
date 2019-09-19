@@ -31,6 +31,14 @@
 				 can use either the source URI, the request ID, or both.
 				]]>
 			</action>
+			<action type="add">
+            <![CDATA[
+				<b>New Feature</b>:
+				Support for the FHIR Bulk Data Export specification has been added to the JPA server. See the
+				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
+				only system level export is currently supported but others will follow.
+            ]]>
+         </action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
@@ -134,7 +142,23 @@
 				the resource are leaked.
 			</action>
 			<action type="fix">
-
+				Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the
+				expected type.
+			</action>
+			<action type="fix">
+				Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the
+				terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now
+				corrected.
+			</action>
+			<action type="add">
+				The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism
+			</action>
+			<action type="change">
+				The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being
+				deployed to a servlet path other than "/".
+			</action>
+			<action type="fix">
+                A new command has been added to the HAPI FHIR CLI that allows external (not-present) codesystem deltas to be manually uploaded
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
@@ -557,6 +581,14 @@
 				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
 				can now be used to upload custom vocabulary that has been converted into a standard file format
 				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
+			<action type="change">
+				Two new operations,
+				<![CDATA[<code>$apply-codesystem-delta-add</code>]]>
+				and
+				<![CDATA[<code>$apply-codesystem-delta-remove</code>]]>
+				have been added to the terminology server. These methods allow
+				codes to be dynamically added and removed from external (notpresent) codesystems.
 			</action>
 			<action type="fix" issue="1404">
 				In the JAX-RS server, the resource type history and instance vread

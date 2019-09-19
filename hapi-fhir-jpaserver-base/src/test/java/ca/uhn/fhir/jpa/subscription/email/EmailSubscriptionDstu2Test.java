@@ -39,6 +39,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		ourLog.info("** AFTER **");

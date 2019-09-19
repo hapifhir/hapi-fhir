@@ -85,6 +85,7 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	public void expungeBlob(IIdType theResourceId, String theBlobId) {
 		String key = toKey(theResourceId, theBlobId);
 		myDataMap.remove(key);
+		myDetailsMap.remove(key);
 	}
 
 	private String toKey(IIdType theResourceId, String theBlobId) {

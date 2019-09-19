@@ -21,7 +21,7 @@ package ca.uhn.fhir.rest.gclient;
  */
 
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.PreferHeader;
 
 public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutcome> {
 	
@@ -47,6 +47,6 @@ public interface ICreateTyped extends IClientExecutable<ICreateTyped, MethodOutc
 	 * 
 	 * @since HAPI 1.1
 	 */
-	ICreateTyped prefer(PreferReturnEnum theReturn);
+	ICreateTyped prefer(PreferHeader.PreferReturnEnum theReturn);
 
 }

@@ -49,6 +49,11 @@ public class SearchParamExtractorR4Test {
 			}
 
 			@Override
+			public void refreshCacheIfNecessary() {
+				// nothing
+			}
+
+			@Override
 			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 				throw new UnsupportedOperationException();
 			}

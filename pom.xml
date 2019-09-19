@@ -562,7 +562,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.10-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.19-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -701,7 +701,7 @@
 			<dependency>
 				<groupId>com.github.dnault</groupId>
 				<artifactId>xml-patch</artifactId>
-				<version>0.3.0</version>
+				<version>0.3.1</version>
 			</dependency>
 			<dependency>
             	<groupId>io.dogote</groupId>
@@ -1277,6 +1277,11 @@
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.6.jre7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>

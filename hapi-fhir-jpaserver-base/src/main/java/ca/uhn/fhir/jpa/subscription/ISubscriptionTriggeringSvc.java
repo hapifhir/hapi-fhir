@@ -30,4 +30,6 @@ import java.util.List;
 
 public interface ISubscriptionTriggeringSvc {
 	IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId);
+
+	void runDeliveryPass();
 }

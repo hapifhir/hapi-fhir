@@ -122,9 +122,10 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		return expandValueSetAndReturnVersionIndependentConcepts(vs);

@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -32,7 +31,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import javax.servlet.ServletException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -54,9 +52,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private InterceptorService myInterceptorService;
 	private List<String> myObservationIdsOddOnly;
 	private List<String> myObservationIdsEvenOnly;
-	private List<String> myObservationIdsEvenOnlyBackwards;
-	private List<String> myObservationIdsBackwards;
+	private List<String> myObservationIdsWithVersions;
 	private List<String> myPatientIdsEvenOnly;
+	private List<String> myObservationIdsEvenOnlyWithVersions;
 
 	@After
 	public void after() {
@@ -313,9 +311,9 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * Note: Each observation in the observation list will appear twice in the actual
 		 * returned results because we create it then update it in create50Observations()
 		 */
-		assertEquals(sort(myObservationIdsEvenOnlyBackwards.subList(0, 3), myObservationIdsEvenOnlyBackwards.subList(0, 3)), sort(returnedIdValues));
 		assertEquals(1, hitCount.get());
-		assertEquals(sort(myObservationIdsBackwards.subList(0, 5), myObservationIdsBackwards.subList(0, 5)), sort(interceptedResourceIds));
+		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
+		assertEquals(myObservationIdsEvenOnlyWithVersions.subList(44, 50), sort(returnedIdValues));
 
 	}
 
@@ -349,6 +347,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private void create50Observations() {
 		myPatientIds = new ArrayList<>();
 		myObservationIds = new ArrayList<>();
+		myObservationIdsWithVersions = new ArrayList<>();
 
 		Patient p = new Patient();
 		p.setActive(true);
@@ -370,6 +369,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			obs1.addIdentifier().setSystem("urn:system").setValue("I" + leftPad("" + i, 5, '0'));
 			IIdType obs1id = myObservationDao.create(obs1).getId().toUnqualifiedVersionless();
 			myObservationIds.add(obs1id.toUnqualifiedVersionless().getValue());
+			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
 
 			obs1.setId(obs1id);
 			if (obs1id.getIdPartAsLong() % 2 == 0) {
@@ -378,6 +378,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				obs1.getSubject().setReference(oddPid);
 			}
 			myObservationDao.update(obs1);
+			myObservationIdsWithVersions.add(obs1id.toUnqualifiedVersionless().getValue());
+
 		}
 
 		myPatientIdsEvenOnly =
@@ -391,10 +393,13 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 				.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
+		myObservationIdsEvenOnlyWithVersions =
+			myObservationIdsWithVersions
+				.stream()
+				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
+				.collect(Collectors.toList());
 
 		myObservationIdsOddOnly = ListUtils.removeAll(myObservationIds, myObservationIdsEvenOnly);
-		myObservationIdsBackwards = Lists.reverse(myObservationIds);
-		myObservationIdsEvenOnlyBackwards = Lists.reverse(myObservationIdsEvenOnly);
 	}
 
 	static class PreAccessInterceptorCounting implements IAnonymousInterceptor {

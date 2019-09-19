@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.config.TestR5Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
@@ -46,7 +47,6 @@ import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
-import org.hl7.fhir.r5.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -315,6 +315,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	private List<Object> mySystemInterceptors;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IBulkDataExportSvc myBulkDataExportSvc;
 
 	@After()
 	public void afterCleanupDao() {
@@ -376,7 +378,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Before
 	@Transactional()
 	public void beforePurgeDatabase() {
-		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry);
+		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
 	}
 
 	@Before
@@ -481,7 +483,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		TargetElementComponent target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
 
 		element = group.addElement();
 		element.setCode("23456");
@@ -490,13 +492,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		// Add a duplicate
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
@@ -511,12 +513,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("56789");
 		target.setDisplay("Target Code 56789");
-		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
 
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL_4);
@@ -531,7 +533,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.NARROWER);
 
 		return conceptMap;
 	}

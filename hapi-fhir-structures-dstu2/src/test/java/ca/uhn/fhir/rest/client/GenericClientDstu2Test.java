@@ -416,12 +416,12 @@ public class GenericClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
@@ -1191,6 +1191,16 @@ public class GenericClientDstu2Test {
 			@Override
 			public List<String> getFormatCommentsPost() {
 				return null;
+			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -2465,12 +2475,12 @@ public class GenericClientDstu2Test {
 		p.setId(new IdDt("1"));
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;

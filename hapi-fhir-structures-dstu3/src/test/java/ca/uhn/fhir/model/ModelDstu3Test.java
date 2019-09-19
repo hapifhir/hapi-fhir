@@ -1,25 +1,14 @@
 package ca.uhn.fhir.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.hl7.fhir.dstu3.model.Appointment;
-import org.hl7.fhir.dstu3.model.Claim;
+import ca.uhn.fhir.parser.DataFormatException;
+import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.dstu3.model.Claim.CareTeamComponent;
-import org.hl7.fhir.dstu3.model.CodeableConcept;
-import org.hl7.fhir.dstu3.model.Element;
-import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.HumanName;
-import org.hl7.fhir.dstu3.model.Identifier;
-import org.hl7.fhir.dstu3.model.Patient;
-import org.hl7.fhir.dstu3.model.Practitioner;
 import org.hl7.fhir.dstu3.model.Practitioner.PractitionerQualificationComponent;
 import org.hl7.fhir.instance.model.api.IBaseElement;
 import org.junit.AfterClass;
@@ -30,6 +19,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.TestUtil;
+
+import static org.junit.Assert.*;
 
 public class ModelDstu3Test {
 
@@ -152,5 +143,19 @@ public class ModelDstu3Test {
 		assertFalse(patient1.equalsDeep(patient5));
 
 	}
+
+	@Test
+	public void testInstantPrecision() {
+		new InstantType("2019-01-01T00:00:00Z");
+		new InstantType("2019-01-01T00:00:00.0Z");
+		new InstantType("2019-01-01T00:00:00.000Z");
+		try {
+			new InstantType("2019-01-01T00:00Z");
+			fail();
+		} catch (DataFormatException e) {
+			// good
+		}
+	}
+
 
 }

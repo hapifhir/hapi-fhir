@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -449,46 +447,6 @@ public class FhirTerserR4Test {
 		assertTrue(values.get(0) instanceof Extension);
 		Assert.assertEquals("http://acme.org/childExtension", ((Extension) values.get(0)).getUrl());
 		Assert.assertEquals("modifiedNestedValue", ((StringType) ((Extension) values.get(0)).getValue()).getValueAsString());
-	}
-
-
-	@Test
-	public void testVisitWithSubclass() {
-
-		ValueSet vs = new ValueSet();
-		vs.setExpansion(new MyValueSetExpansionComponent());
-		vs.getExpansion().getIdentifierElement().setValue("http://foo");
-
-		List<String> values = new ArrayList<>();
-		IModelVisitor visitor = new IModelVisitor() {
-			@Override
-			public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
-				if (theElement instanceof IPrimitiveType) {
-					values.add(((IPrimitiveType) theElement).getValueAsString());
-				}
-			}
-		};
-		ourCtx.newTerser().visit(vs, visitor);
-		assertThat(values, org.hamcrest.Matchers.contains("http://foo"));
-
-		values.clear();
-		IModelVisitor2 visitor2 = new IModelVisitor2() {
-			@Override
-			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				if (theElement instanceof IPrimitiveType) {
-					values.add(((IPrimitiveType) theElement).getValueAsString());
-				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				return true;
-			}
-		};
-		ourCtx.newTerser().visit(vs, visitor2);
-		assertThat(values, org.hamcrest.Matchers.contains("http://foo"));
-
 	}
 
 	@Test
@@ -1028,6 +986,43 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
+	public void testVisitWithCustomSubclass() {
+
+		ValueSet.ValueSetExpansionComponent component = new MyValueSetExpansionComponent();
+		ValueSet vs = new ValueSet();
+		vs.setExpansion(component);
+		vs.getExpansion().setIdentifier("http://foo");
+
+		Set<String> strings = new HashSet<>();
+		ourCtx.newTerser().visit(vs, new IModelVisitor() {
+			@Override
+			public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				if (theElement instanceof IPrimitiveType) {
+					strings.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+			}
+		});
+		assertThat(strings, Matchers.contains("http://foo"));
+
+		strings.clear();
+		ourCtx.newTerser().visit(vs, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					strings.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				return true;
+			}
+		});
+		assertThat(strings, Matchers.contains("http://foo"));
+	}
+
+	@Test
 	public void testVisitWithModelVisitor2() {
 		IModelVisitor2 visitor = mock(IModelVisitor2.class);
 
@@ -1078,10 +1073,7 @@ public class FhirTerserR4Test {
 
 	@Block
 	public static class MyValueSetExpansionComponent extends ValueSet.ValueSetExpansionComponent {
-		@Override
-		public UriType getIdentifierElement() {
-			return super.getIdentifierElement();
-		}
+		private static final long serialVersionUID = 2624360513249904086L;
 	}
 
 	@AfterClass
