@@ -54,7 +54,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 	private List<String> myObservationIdsEvenOnly;
 	private List<String> myObservationIdsWithVersions;
 	private List<String> myPatientIdsEvenOnly;
-	private List<String> myObservationIdsEvenOnlyWithVersions;
 
 	@After
 	public void after() {
@@ -307,13 +306,15 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		ourLog.info("Returned values: {}", returnedIdValues);
+
 		/*
 		 * Note: Each observation in the observation list will appear twice in the actual
 		 * returned results because we create it then update it in create50Observations()
 		 */
 		assertEquals(1, hitCount.get());
 		assertEquals(myObservationIdsWithVersions.subList(90, myObservationIdsWithVersions.size()), sort(interceptedResourceIds));
-		assertEquals(myObservationIdsEvenOnlyWithVersions.subList(44, 50), sort(returnedIdValues));
+		returnedIdValues.forEach(t-> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
 
 	}
 
@@ -390,11 +391,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 
 		myObservationIdsEvenOnly =
 			myObservationIds
-				.stream()
-				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
-				.collect(Collectors.toList());
-		myObservationIdsEvenOnlyWithVersions =
-			myObservationIdsWithVersions
 				.stream()
 				.filter(t -> Long.parseLong(t.substring(t.indexOf('/') + 1)) % 2 == 0)
 				.collect(Collectors.toList());
