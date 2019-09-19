@@ -1173,8 +1173,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
 	}
 
+	@Override
 	@PostConstruct
 	public void start() {
+		super.start();
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
 	}
 

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -198,7 +199,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
 
-		// Read it back using the operation
+		// Write the binary using the operation
 
 		String path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
@@ -248,6 +249,26 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertArrayEquals(SOME_BYTES, actualBytes);
 		}
 
+	}
+
+	/**
+	 * Stores a binary large enough that it should live in binary storage
+	 */
+	@Test
+	public void testDontAllowUpdateWithAttachmentId() {
+
+		DocumentReference dr = new DocumentReference();
+		dr.addContent()
+			.getAttachment()
+			.getDataElement()
+			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("XUcR1qL9p4i8Ck6L2RzVbSpHv1ZPHYuBSd50LR39nzhDDR4N4efJ7Q0ywZLyzcLeLIPi60UvCCNmdZBlbyvT1KfNaDeHV1zBHbDp") );
+
+		try {
+			ourClient.create().resource(dr).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Illegal extension found in request payload: http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id"));
+		}
 	}
 
 	/**
@@ -301,7 +322,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLargeBinary() throws IOException {
+	public void testWriteLargeBinaryUsingOperation() throws IOException {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 

@@ -47,14 +47,12 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.MetaUtil;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.XmlUtil;
+import ca.uhn.fhir.util.*;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
@@ -77,6 +75,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -87,6 +86,7 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /*
@@ -173,6 +173,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
+	private Class<? extends IPrimitiveType<byte[]>> myBase64Type;
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -1447,11 +1448,32 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		validateMetaCount(totalMetaCount);
 
+		List<? extends IPrimitiveType<byte[]>> base64fields = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, myBase64Type);
+		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
+			if (nextBase64 instanceof IBaseHasExtensions) {
+				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
+					.getExtension()
+					.stream()
+					.anyMatch(t-> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
+				if (hasExternalizedBinaryReference) {
+					String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
+					throw new InvalidRequestException(msg);
+				}
+			}
+		}
+
+
 	}
 
 	@Override
 	public ISearchParamRegistry getSearchParamRegistry() {
 		return mySearchParamRegistry;
+	}
+
+	@SuppressWarnings("unchecked")
+	@PostConstruct
+	public void start() {
+		myBase64Type = (Class<? extends IPrimitiveType<byte[]>>) myContext.getElementDefinition("base64Binary").getImplementingClass();
 	}
 
 	@SuppressWarnings("unchecked")

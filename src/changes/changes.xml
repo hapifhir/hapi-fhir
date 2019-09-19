@@ -153,6 +153,10 @@
 			<action type="add">
 				The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism
 			</action>
+			<action type="change">
+				The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being
+				deployed to a servlet path other than "/".
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

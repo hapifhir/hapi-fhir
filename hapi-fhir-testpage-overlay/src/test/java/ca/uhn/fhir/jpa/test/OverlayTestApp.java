@@ -3,7 +3,15 @@ package ca.uhn.fhir.jpa.test;
 import java.util.List;
 import java.util.Set;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.subscription.module.subscriber.IResourceRetriever;
+import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -24,19 +32,26 @@ public class OverlayTestApp {
 
 	@SuppressWarnings({ "unchecked" })
 	public static void main(String[] args) throws Exception {
+
 		{
 			int myPort = 8888;
 			Server server = new Server(myPort);
 
-			WebAppContext root = new WebAppContext();
+			WebAppContext overlayHandler = new WebAppContext();
+			overlayHandler.setContextPath("/testpage/base");
+			overlayHandler.setDescriptor("hapi-fhir-testpage-overlay/src/test/resources/web.xml");
+			overlayHandler.setResourceBase("hapi-fhir-testpage-overlay/src/main/webapp");
+			overlayHandler.setParentLoaderPriority(true);
 
-			root.setContextPath("/");
-			root.setDescriptor("src/test/resources/web.xml");
-			root.setResourceBase("src/main/webapp");
+			RestfulServer restfulServer = new RestfulServer(FhirContext.forDstu2());
+			restfulServer.registerProvider(new ProviderWithRequiredAndOptional());
+			ServletContextHandler proxyHandler = new ServletContextHandler();
+			proxyHandler.setContextPath("/");
+			ServletHolder servletHolder = new ServletHolder();
+			servletHolder.setServlet(restfulServer);
+			proxyHandler.addServlet(servletHolder, "/fhir/*");
 
-			root.setParentLoaderPriority(true);
-
-			server.setHandler(root);
+			server.setHandler(new HandlerCollection(overlayHandler, proxyHandler));
 
 			server.start();
 
