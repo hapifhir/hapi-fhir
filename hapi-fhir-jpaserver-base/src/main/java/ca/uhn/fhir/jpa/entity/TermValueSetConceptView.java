@@ -77,19 +77,19 @@ public class TermValueSetConceptView implements Serializable {
 	@Column(name = "DESIGNATION_PID")
 	private Long myDesignationPid;
 
-	@Column(name = "DESIGNATION_LANG", length = TermValueSetConceptDesignation.MAX_LENGTH)
+	@Column(name = "DESIGNATION_LANG", length = TermConceptDesignation.MAX_LENGTH)
 	private String myDesignationLang;
 
-	@Column(name = "DESIGNATION_USE_SYSTEM", length = TermValueSetConceptDesignation.MAX_LENGTH)
+	@Column(name = "DESIGNATION_USE_SYSTEM", length = TermConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseSystem;
 
-	@Column(name = "DESIGNATION_USE_CODE", length = TermValueSetConceptDesignation.MAX_LENGTH)
+	@Column(name = "DESIGNATION_USE_CODE", length = TermConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseCode;
 
-	@Column(name = "DESIGNATION_USE_DISPLAY", length = TermValueSetConceptDesignation.MAX_LENGTH)
+	@Column(name = "DESIGNATION_USE_DISPLAY", length = TermConceptDesignation.MAX_LENGTH)
 	private String myDesignationUseDisplay;
 
-	@Column(name = "DESIGNATION_VAL", length = TermValueSetConceptDesignation.MAX_LENGTH)
+	@Column(name = "DESIGNATION_VAL", length = TermConceptDesignation.MAX_VAL_LENGTH)
 	private String myDesignationVal;
 
 
