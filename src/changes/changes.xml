@@ -38,7 +38,11 @@
 				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
 				only system level export is currently supported but others will follow.
             ]]>
-         </action>
+			</action>
+			<action type="add" issue="1489">
+				A significant performance improvement was made to the parsers (particularly the Json Parser)
+				when serializing resources. Thanks to David Maplesden for the pull request!
+			</action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
