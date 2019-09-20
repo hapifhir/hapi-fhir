@@ -449,12 +449,18 @@ public class JsonParserR4Test {
 	}
 
 	/**
-	 * 2019-09-19
+	 * 2019-09-19 - Pre #1489
 	 * 18:24:48.548 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 200 passes - 50ms / pass - 19.7 / second
 	 * 18:24:52.472 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 300 passes - 47ms / pass - 21.3 / second
 	 * 18:24:56.428 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 400 passes - 45ms / pass - 22.2 / second
 	 * 18:25:00.463 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:483] - Encoded 500 passes - 44ms / pass - 22.6 / second
 	 *
+	 * 2019-09-19 - Post #1489
+	 * 20:43:21.434 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2300 passes - 29ms / pass - 33.5 / second
+	 * 20:43:24.228 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2400 passes - 29ms / pass - 33.6 / second
+	 * 20:43:27.029 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2500 passes - 29ms / pass - 33.7 / second
+	 * 20:43:29.825 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2600 passes - 29ms / pass - 33.8 / second
+	 * 20:43:32.779 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:470] - Encoded 2700 passes - 29ms / pass - 33.8 / second
 	 */
 	@Test
 	@Ignore
@@ -474,11 +480,17 @@ public class JsonParserR4Test {
 	}
 
 	/**
-	 * 2019-09-19
+	 * 2019-09-19 - Pre #1489
 	 * 18:33:08.720 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 200 passes - 47ms / pass - 21.2 / second
 	 * 18:33:12.453 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 300 passes - 43ms / pass - 22.7 / second
 	 * 18:33:16.195 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 400 passes - 42ms / pass - 23.6 / second
 	 * 18:33:19.912 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:495] - Encoded 500 passes - 41ms / pass - 24.2 / second
+	 *
+	 * 2019-09-19 - Post #1489
+	 * 20:44:38.557 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 200 passes - 37ms / pass - 27.0 / second
+	 * 20:44:41.459 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 300 passes - 34ms / pass - 29.1 / second
+	 * 20:44:44.434 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 400 passes - 33ms / pass - 30.1 / second
+	 * 20:44:47.372 [main] INFO  ca.uhn.fhir.parser.JsonParserR4Test [JsonParserR4Test.java:500] - Encoded 500 passes - 32ms / pass - 30.8 / second
 	 */
 	@Test
 	@Ignore

@@ -40,8 +40,12 @@
             ]]>
 			</action>
 			<action type="add" issue="1489">
+            <![CDATA[
+				<b>Improovement</b>:
 				A significant performance improvement was made to the parsers (particularly the Json Parser)
-				when serializing resources. Thanks to David Maplesden for the pull request!
+				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
+				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
 			</action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
