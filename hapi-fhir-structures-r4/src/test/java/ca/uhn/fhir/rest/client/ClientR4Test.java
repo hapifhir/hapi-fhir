@@ -924,7 +924,7 @@ public class ClientR4Test {
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		client.getPatientWithIncludes(new StringParam("aaa"), Arrays.asList(new Include[]{new Include("inc1"), new Include("inc2", true), new Include("inc3", true)}));
 
-		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include%3Arecurse=inc2&_include%3Arecurse=inc3", capt.getValue().getURI().toString());
+		assertEquals("http://foo/Patient?withIncludes=aaa&_include=inc1&_include%3Aiterate=inc2&_include%3Aiterate=inc3", capt.getValue().getURI().toString());
 
 	}
 

@@ -165,6 +165,18 @@
 				The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being
 				deployed to a servlet path other than "/".
 			</action>
+			<action type="fix" issue="1495">
+				A NullPointerException when using the AuthorizationInterceptor RuleBuilder to build a conditional
+				rule with a custom tester has been corrected. Thanks to Tue Toft Nørgård for reporting!
+			</action>
+			<action type="fix" issue="1494">
+				The R4+ client and server modules did not recognize the new
+				<![CDATA[<code>_include:iterate</code>]]>
+				syntax that replaces the previous
+				<![CDATA[<code>_include:recurse</code>]]>
+				syntax. Both are now supported on all servers in order to avoid breaking backwards
+				compatibility, with the new syntax now being emitted in R4+ clients.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

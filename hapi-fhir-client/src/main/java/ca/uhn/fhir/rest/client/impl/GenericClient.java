@@ -1761,7 +1761,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_INCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 				}
@@ -1769,7 +1773,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myRevInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_REVINCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
 				}
