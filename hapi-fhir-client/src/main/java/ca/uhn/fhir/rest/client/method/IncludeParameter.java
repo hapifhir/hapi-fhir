@@ -23,6 +23,7 @@ import java.util.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.api.*;
@@ -64,23 +65,30 @@ class IncludeParameter extends BaseQueryParameter {
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == Include.class) {
-				convertAndAddIncludeToList(retVal, (Include) theObject);
+				convertAndAddIncludeToList(retVal, (Include) theObject, theContext);
 			} else {
 				retVal.add(QualifiedParamList.singleton(((String) theObject)));
 			}
 		} else {
 			Collection<Include> val = (Collection<Include>) theObject;
 			for (Include include : val) {
-				convertAndAddIncludeToList(retVal, include);
+				convertAndAddIncludeToList(retVal, include, theContext);
 			}
 		}
 
 		return retVal;
 	}
 
-	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> retVal, Include include) {
-		String qualifier = include.isRecurse() ? Constants.PARAM_INCLUDE_QUALIFIER_RECURSE : null;
-		retVal.add(QualifiedParamList.singleton(qualifier, include.getValue()));
+	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> theQualifiedParamLists, Include theInclude, FhirContext theContext) {
+		String qualifier = null;
+		if (theInclude.isRecurse()) {
+			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_ITERATE;
+			} else {
+				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE;
+			}
+		}
+		theQualifiedParamLists.add(QualifiedParamList.singleton(qualifier, theInclude.getValue()));
 	}
 
 	public Set<String> getAllow() {
