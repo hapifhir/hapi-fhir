@@ -173,7 +173,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private SearchBuilderFactory mySearchBuilderFactory;
 	private FhirContext myContext;
 	private ApplicationContext myApplicationContext;
-	private Class<? extends IPrimitiveType<byte[]>> myBase64Type;
 
 	@Override
 	public void setApplicationContext(ApplicationContext theApplicationContext) throws BeansException {
@@ -1448,21 +1447,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		validateMetaCount(totalMetaCount);
 
-		List<? extends IPrimitiveType<byte[]>> base64fields = myContext.newTerser().getAllPopulatedChildElementsOfType(theResource, myBase64Type);
-		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
-			if (nextBase64 instanceof IBaseHasExtensions) {
-				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
-					.getExtension()
-					.stream()
-					.anyMatch(t-> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
-				if (hasExternalizedBinaryReference) {
-					String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
-					throw new InvalidRequestException(msg);
-				}
-			}
-		}
-
-
 	}
 
 	@Override
@@ -1470,10 +1454,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return mySearchParamRegistry;
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
-		myBase64Type = (Class<? extends IPrimitiveType<byte[]>>) myContext.getElementDefinition("base64Binary").getImplementingClass();
+		// nothing yet
 	}
 
 	@SuppressWarnings("unchecked")

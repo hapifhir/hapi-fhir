@@ -84,7 +84,7 @@ public interface IHapiTerminologySvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
 
 	/**
 	 * @return Returns the ID of the created/updated code system

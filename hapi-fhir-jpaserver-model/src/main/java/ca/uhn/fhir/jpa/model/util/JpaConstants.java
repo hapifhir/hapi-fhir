@@ -239,6 +239,11 @@ public class JpaConstants {
 	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
+	 * Placed in system-generated extensions
+	 */
+	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+
+	/**
 	 * <p>
 	 * This extension represents the equivalent of the
 	 * <code>Resource.meta.source</code> field within R4+ resources, and is for

@@ -551,6 +551,10 @@
 			<id>fitzoh</id>
 			<name>Andrew Fitzgerald</name>
 		</developer>
+		<developer>
+			<id>dmap</id>
+			<name>David Maplesden</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -562,7 +566,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.10-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.19-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->

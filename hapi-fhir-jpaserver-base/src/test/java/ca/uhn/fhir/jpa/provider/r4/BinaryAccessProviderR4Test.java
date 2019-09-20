@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -41,6 +42,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private MemoryBinaryStorageSvcImpl myStorageSvc;
+	@Autowired
+	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
 	@Before
@@ -165,14 +168,38 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadUnknownBlobId() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		DocumentReference dr = ourClient.read().resource(DocumentReference.class).withId(id).execute();
-		dr.getContentFirstRep()
-			.getAttachment()
-			.getDataElement()
-			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("AAAAA"));
-		ourClient.update().resource(dr).execute();
+		// Write a binary using the operation
 
 		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
+			"?path=DocumentReference.content.attachment";
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+		post.addHeader("Accept", "application/fhir+json; _pretty=true");
+		String attachmentId;
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Response: {}", response);
+
+			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+
+			Attachment attachment = ref.getContentFirstRep().getAttachment();
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
+			assertEquals(15, attachment.getSize());
+			assertEquals(null, attachment.getData());
+			assertEquals("2", ref.getMeta().getVersionId());
+			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+		}
+
+
+		myBinaryStorageSvc.expungeBlob(id, attachmentId);
+
+		path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";

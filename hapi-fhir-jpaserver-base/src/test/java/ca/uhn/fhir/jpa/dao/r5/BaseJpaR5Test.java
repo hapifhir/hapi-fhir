@@ -47,7 +47,6 @@ import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.ConceptMap.ConceptMapGroupComponent;
 import org.hl7.fhir.r5.model.ConceptMap.SourceElementComponent;
 import org.hl7.fhir.r5.model.ConceptMap.TargetElementComponent;
-import org.hl7.fhir.r5.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -484,7 +483,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		TargetElementComponent target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
 
 		element = group.addElement();
 		element.setCode("23456");
@@ -493,13 +492,13 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		// Add a duplicate
 		target = element.addTarget();
 		target.setCode("45678");
 		target.setDisplay("Target Code 45678");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL);
@@ -514,12 +513,12 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("56789");
 		target.setDisplay("Target Code 56789");
-		target.setEquivalence(ConceptMapEquivalence.EQUAL);
+		target.setRelationship(Enumerations.ConceptMapRelationship.EQUIVALENT);
 
 		target = element.addTarget();
 		target.setCode("67890");
 		target.setDisplay("Target Code 67890");
-		target.setEquivalence(ConceptMapEquivalence.WIDER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.BROADER);
 
 		group = conceptMap.addGroup();
 		group.setSource(CS_URL_4);
@@ -534,7 +533,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		target = element.addTarget();
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
-		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+		target.setRelationship(Enumerations.ConceptMapRelationship.NARROWER);
 
 		return conceptMap;
 	}

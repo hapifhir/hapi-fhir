@@ -282,4 +282,14 @@ public class TagList implements Set<Tag>, Serializable, IBase {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public Object getUserData(String theName) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setUserData(String theName, Object theValue) {
+		throw new UnsupportedOperationException();
+	}
+
 }

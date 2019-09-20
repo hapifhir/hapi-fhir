@@ -704,7 +704,7 @@ public class RestfulServerUtils {
                         value = value.substring(1, value.length() - 1);
                     }
                     
-                    retVal.setReturn(PreferHeader.PreferReturnEnum.fromHeaderValue(value));
+                    retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
                     
                 } else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
                     

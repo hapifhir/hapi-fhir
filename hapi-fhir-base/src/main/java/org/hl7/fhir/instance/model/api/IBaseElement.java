@@ -25,5 +25,9 @@ public interface IBaseElement {
 	IBaseElement setId(String theValue);
 
 	String getId();
-	
+
+	Object getUserData(String theName);
+
+	void setUserData(String theName, Object theValue);
+
 }

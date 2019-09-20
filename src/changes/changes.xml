@@ -38,7 +38,15 @@
 				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
 				only system level export is currently supported but others will follow.
             ]]>
-         </action>
+			</action>
+			<action type="add" issue="1489">
+            <![CDATA[
+				<b>Improovement</b>:
+				A significant performance improvement was made to the parsers (particularly the Json Parser)
+				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
+				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
+			</action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
@@ -578,6 +586,14 @@
 				The $upload-external-code-system operation and the corresponding HAPI FHIR CLI command
 				can now be used to upload custom vocabulary that has been converted into a standard file format
 				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
+			</action>
+			<action type="change">
+				Two new operations,
+				<![CDATA[<code>$apply-codesystem-delta-add</code>]]>
+				and
+				<![CDATA[<code>$apply-codesystem-delta-remove</code>]]>
+				have been added to the terminology server. These methods allow
+				codes to be dynamically added and removed from external (notpresent) codesystems.
 			</action>
 			<action type="fix" issue="1404">
 				In the JAX-RS server, the resource type history and instance vread
