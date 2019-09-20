@@ -177,6 +177,11 @@
 				syntax. Both are now supported on all servers in order to avoid breaking backwards
 				compatibility, with the new syntax now being emitted in R4+ clients.
 			</action>
+			<action type="fix" issue="1482">
+				The LOINC terminology distribution includes multiple copies of the same files. Uploading LOINC terminology
+				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
+				filename.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

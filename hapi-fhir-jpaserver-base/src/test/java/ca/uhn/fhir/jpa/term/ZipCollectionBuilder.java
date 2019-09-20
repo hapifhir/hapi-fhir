@@ -77,6 +77,7 @@ public class ZipCollectionBuilder {
 	private byte[] readFile(String theClasspathPrefix, String theClasspathFileName) throws IOException {
 		String classpathName = theClasspathPrefix + theClasspathFileName;
 		InputStream stream = getClass().getResourceAsStream(classpathName);
+		ourLog.info("DIEDERIK: " + classpathName);
 		Validate.notNull(stream, "Couldn't load " + classpathName);
 		byte[] byteArray = IOUtils.toByteArray(stream);
 		Validate.notNull(byteArray);
