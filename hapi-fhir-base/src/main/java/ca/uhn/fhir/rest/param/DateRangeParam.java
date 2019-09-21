@@ -262,9 +262,16 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		if (myLowerBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			// the idea there is that if I say 2019-09-20 we set the calendar to be midnight on that date for the farthest
+			// back timezone that exists… in other words, the earliest possible instant on earth that would be considered
+			// midnight on that date
+			Calendar targetCal = Calendar.getInstance();
+			targetCal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
+			targetCal.clear();
+			targetCal.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+			targetCal.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+			targetCal.set(Calendar.DATE, cal.get(Calendar.DATE));
+			retVal = targetCal.getTime();
 		}
 
 		if (myLowerBound.getPrefix() != null) {
@@ -318,9 +325,16 @@ public class DateRangeParam implements IQueryParameterAnd<DateParam> {
 
 		if (myUpperBound.getPrecision().ordinal() <= TemporalPrecisionEnum.DAY.ordinal()) {
 			Calendar cal = DateUtils.toCalendar(retVal);
-			cal.setTimeZone(TimeZone.getTimeZone("GMT+11:30"));
-			cal = DateUtils.truncate(cal, Calendar.DATE);
-			retVal = cal.getTime();
+			// the idea there is that if I say 2019-09-20 we set the calendar to be midnight on that date for the farthest
+			// forward timezone that exists… in other words, the latest possible instant on earth that would be considered
+			// midnight on that date
+			Calendar targetCal = Calendar.getInstance();
+			targetCal.setTimeZone(TimeZone.getTimeZone("GMT-11:30"));
+			targetCal.clear();
+			targetCal.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+			targetCal.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+			targetCal.set(Calendar.DATE, cal.get(Calendar.DATE));
+			retVal = targetCal.getTime();
 		}
 
 		if (myUpperBound.getPrefix() != null) {

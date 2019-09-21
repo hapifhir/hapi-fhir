@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
@@ -23,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.Assert.*;
@@ -144,6 +146,53 @@ public class InMemoryResourceMatcherR5Test {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams);
 		assertTrue(result.getUnsupportedReason(), result.supported());
 		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testTodayPast() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, myObservation, mySearchParams);
+		assertTrue(result.getUnsupportedReason(), result.supported());
+		assertTrue(result.matched());
+	}
+
+	@Test
+	public void testTodayCmpNow() {
+		if (oneSecondFromMidnight()) {
+			// This test doesn't work near midnight
+			return;
+		}
+		Observation nowObservation = new Observation();
+		nowObservation.setEffective(new DateTimeType(new Date()));
+		ResourceIndexedSearchParams searchParams = extractDateSearchParam(nowObservation);
+
+//		{
+//			InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=ge" + BaseDateTimeDt.TODAY_DATE_CONSTANT, nowObservation, searchParams);
+//			assertTrue(result.matched());
+//		}
+//		{
+//			InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, nowObservation, searchParams);
+//			assertFalse(result.matched());
+//		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=eq" + BaseDateTimeDt.TODAY_DATE_CONSTANT, nowObservation, searchParams);
+			assertTrue(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=lt" + BaseDateTimeDt.TODAY_DATE_CONSTANT, nowObservation, searchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=le" + BaseDateTimeDt.TODAY_DATE_CONSTANT, nowObservation, searchParams);
+			assertTrue(result.matched());
+		}
+	}
+
+	private boolean oneSecondFromMidnight() {
+		Date now = new Date();
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(now);
+		Calendar dayRoundedCal = DateUtils.truncate(cal, Calendar.DATE);
+		return Math.abs(cal.getTimeInMillis() - dayRoundedCal.getTimeInMillis()) < 1000;
 	}
 
 	private ResourceIndexedSearchParams extractDateSearchParam(Observation theObservation) {
