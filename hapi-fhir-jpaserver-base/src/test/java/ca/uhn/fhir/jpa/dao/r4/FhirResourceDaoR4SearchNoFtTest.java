@@ -3943,6 +3943,68 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		));
 	}
 
+	@Test
+	public void testDateSearchParametersShouldBeHourIndependent() {
+
+		createObservationWithEffective("YES01", "2011-01-02T00:00:00");
+		createObservationWithEffective("YES02", "2011-01-02T01:00:00");
+		createObservationWithEffective("YES03", "2011-01-02T02:00:00");
+		createObservationWithEffective("YES04", "2011-01-02T03:00:00");
+		createObservationWithEffective("YES05", "2011-01-02T04:00:00");
+		createObservationWithEffective("YES06", "2011-01-02T05:00:00");
+		createObservationWithEffective("YES07", "2011-01-02T06:00:00");
+		createObservationWithEffective("YES08", "2011-01-02T07:00:00");
+		createObservationWithEffective("YES09", "2011-01-02T08:00:00");
+		createObservationWithEffective("YES10", "2011-01-02T09:00:00");
+		createObservationWithEffective("YES11", "2011-01-02T10:00:00");
+		createObservationWithEffective("YES12", "2011-01-02T11:00:00");
+		createObservationWithEffective("YES13", "2011-01-02T12:00:00");
+		createObservationWithEffective("YES14", "2011-01-02T13:00:00");
+		createObservationWithEffective("YES15", "2011-01-02T14:00:00");
+		createObservationWithEffective("YES16", "2011-01-02T15:00:00");
+		createObservationWithEffective("YES17", "2011-01-02T16:00:00");
+		createObservationWithEffective("YES18", "2011-01-02T17:00:00");
+		createObservationWithEffective("YES19", "2011-01-02T18:00:00");
+		createObservationWithEffective("YES20", "2011-01-02T19:00:00");
+		createObservationWithEffective("YES21", "2011-01-02T20:00:00");
+		createObservationWithEffective("YES22", "2011-01-02T21:00:00");
+		createObservationWithEffective("YES23", "2011-01-02T22:00:00");
+		createObservationWithEffective("YES24", "2011-01-02T23:00:00");
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Observation.SP_DATE, new DateParam("2011-01-02"));
+		IBundleProvider results = myObservationDao.search(map);
+		List<String> values = toUnqualifiedVersionlessIdValues(results);
+		Collections.sort(values);
+		assertThat(values.toString(), values, contains(
+			"Observation/YES01",
+			"Observation/YES02",
+			"Observation/YES03",
+			"Observation/YES04",
+			"Observation/YES05",
+			"Observation/YES06",
+			"Observation/YES07",
+			"Observation/YES08",
+			"Observation/YES09",
+			"Observation/YES10",
+			"Observation/YES11",
+			"Observation/YES12",
+			"Observation/YES13",
+			"Observation/YES14",
+			"Observation/YES15",
+			"Observation/YES16",
+			"Observation/YES17",
+			"Observation/YES18",
+			"Observation/YES19",
+			"Observation/YES20",
+			"Observation/YES21",
+			"Observation/YES22",
+			"Observation/YES23",
+			"Observation/YES24"
+		));
+	}
+
 	private void createObservationWithEffective(String theId, String theEffective) {
 		Observation obs = new Observation();
 		obs.setId(theId);
