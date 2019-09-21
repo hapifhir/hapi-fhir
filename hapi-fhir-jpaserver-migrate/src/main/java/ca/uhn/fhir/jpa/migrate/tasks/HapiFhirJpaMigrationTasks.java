@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.migrate.tasks;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
@@ -28,7 +27,6 @@ import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.VersionEnum;
 
 import javax.persistence.Index;
@@ -114,8 +112,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_RESVERPROV_RES_PID")
 			.toColumn("RES_PID")
 			.references("HFJ_RESOURCE", "RES_ID");
-		resVerProv.addColumn("SOURCE_URI").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, ResourceHistoryProvenanceEntity.SOURCE_URI_LENGTH);
-		resVerProv.addColumn("REQUEST_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, Constants.REQUEST_ID_LENGTH);
+		resVerProv.addColumn("SOURCE_URI").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		resVerProv.addColumn("REQUEST_ID").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 16);
 		resVerProv.addIndex("IDX_RESVERPROV_SOURCEURI").unique(false).withColumns("SOURCE_URI");
 		resVerProv.addIndex("IDX_RESVERPROV_REQUESTID").unique(false).withColumns("REQUEST_ID");
 
@@ -127,6 +125,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VSCD_VS_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
+
 		// Drop HFJ_SEARCH_RESULT foreign keys
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_RES", "HFJ_RESOURCE");
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH", "HFJ_SEARCH");
@@ -158,7 +157,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_RES_LINK").modifyColumn("TARGET_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
 		version.onTable("HFJ_RES_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
 
+		// TermConceptDesignation
+		version.startSectionWithMessage("Processing table: TRM_CONCEPT_DESIG");
+		version.onTable("TRM_CONCEPT_DESIG").modifyColumn("VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
 
+		// TermValueSetConceptDesignation
+		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
+		version.onTable("TRM_VALUESET_C_DESIGNATION").modifyColumn("VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
 	}
 
 	protected void init400() {
@@ -234,7 +239,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.addIdGenerator("SEQ_VALUESET_PID");
 		Builder.BuilderAddTableByColumns termValueSetTable = version.addTableByColumns("TRM_VALUESET", "PID");
 		termValueSetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_URL_LENGTH);
+		termValueSetTable.addColumn("URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 		termValueSetTable
 			.addIndex("IDX_VALUESET_URL")
 			.unique(true)
@@ -244,7 +249,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRMVALUESET_RES")
 			.toColumn("RES_ID")
 			.references("HFJ_RESOURCE", "RES_ID");
-		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_NAME_LENGTH);
+		termValueSetTable.addColumn("NAME").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 
 		version.onTable("TRM_VALUESET")
 			.renameColumn("NAME", "VSNAME", true, true);
@@ -252,7 +257,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.modifyColumn("RES_ID").nullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
 		Builder.BuilderWithTableName termValueSetTableChange = version.onTable("TRM_VALUESET");
-		termValueSetTableChange.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSet.MAX_EXPANSION_STATUS_LENGTH);
+		termValueSetTableChange.addColumn("EXPANSION_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 50);
 		termValueSetTableChange
 			.addIndex("IDX_VALUESET_EXP_STATUS")
 			.unique(false)
@@ -268,9 +273,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VALUESET_PID")
 			.toColumn("VALUESET_PID")
 			.references("TRM_VALUESET", "PID");
-		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystem.MAX_URL_LENGTH);
-		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_CODE_LENGTH);
-		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermConcept.MAX_DESC_LENGTH);
+		termValueSetConceptTable.addColumn("SYSTEM_URL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		termValueSetConceptTable.addColumn("CODEVAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptTable.addColumn("DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 400);
 		version.onTable("TRM_VALUESET_CONCEPT")
 			.renameColumn("CODE", "CODEVAL", true, true)
 			.renameColumn("SYSTEM", "SYSTEM_URL", true, true);
@@ -292,11 +297,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addForeignKey("FK_TRM_VALUESET_CONCEPT_PID")
 			.toColumn("VALUESET_CONCEPT_PID")
 			.references("TRM_VALUESET_CONCEPT", "PID");
-		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
-		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermValueSetConceptDesignation.MAX_LENGTH);
+		termValueSetConceptDesignationTable.addColumn("LANG").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_SYSTEM").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_CODE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("USE_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		termValueSetConceptDesignationTable.addColumn("VAL").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
 		termValueSetConceptDesignationTable
 			.addIndex("IDX_VALUESET_C_DSGNTN_VAL")
 			.unique(false)
@@ -305,13 +310,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermCodeSystemVersion
 		version.startSectionWithMessage("Processing table: TRM_CODESYSTEM_VER");
 		Builder.BuilderWithTableName termCodeSystemVersionTable = version.onTable("TRM_CODESYSTEM_VER");
-		termCodeSystemVersionTable.addColumn("CS_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, TermCodeSystemVersion.MAX_VERSION_LENGTH);
+		termCodeSystemVersionTable.addColumn("CS_DISPLAY").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 
 		// ResourceReindexJobEntry
 		version.addIdGenerator("SEQ_RES_REINDEX_JOB");
 		Builder.BuilderAddTableByColumns reindex = version.addTableByColumns("HFJ_RES_REINDEX_JOB", "PID");
 		reindex.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-		reindex.addColumn("RES_TYPE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, Constants.MAX_RESOURCE_NAME_LENGTH);
+		reindex.addColumn("RES_TYPE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		reindex.addColumn("UPDATE_THRESHOLD_HIGH").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
 		reindex.addColumn("JOB_DELETED").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BOOLEAN);
 		reindex.addColumn("UPDATE_THRESHOLD_LOW").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
@@ -326,7 +331,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH")
 			.addColumn("SEARCH_PARAM_MAP").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
 		version.onTable("HFJ_SEARCH")
-			.modifyColumn("SEARCH_UUID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, Search.UUID_COLUMN_LENGTH);
+			.modifyColumn("SEARCH_UUID").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 36);
 
 		version.onTable("HFJ_SEARCH_PARM").dropThisTable();
 
@@ -359,7 +364,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resourceLink
 			.modifyColumn("SRC_PATH")
 			.nonNullable()
-			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, ResourceLink.SRC_PATH_LENGTH);
+			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 
 		// Search
 		Builder.BuilderWithTableName search = version.onTable("HFJ_SEARCH");
