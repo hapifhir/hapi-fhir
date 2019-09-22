@@ -177,6 +177,12 @@
 				syntax. Both are now supported on all servers in order to avoid breaking backwards
 				compatibility, with the new syntax now being emitted in R4+ clients.
 			</action>
+			<action type="change">
+				The hapi-fhir-jaxrs-server module now lists dependencies on structures JARs as optional
+				dependencies, in order to avoid automatically importing all versions. This means that implementers
+				of JAX-RS servers may now need to add an explicit dependency on one or more structures JARs to
+				their own project.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
