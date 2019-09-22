@@ -1293,7 +1293,7 @@ public class GenericClientTest {
 
 		assertThat(capt.getValue().getURI().toString(), containsString("http://example.com/fhir/Patient?"));
 		assertThat(capt.getValue().getURI().toString(), containsString("_include=" + UrlUtil.escapeUrlParam(Patient.INCLUDE_ORGANIZATION.getValue())));
-		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Arecurse=" + UrlUtil.escapeUrlParam(Patient.INCLUDE_LINK.getValue())));
+		assertThat(capt.getValue().getURI().toString(), containsString("_include%3Aiterate=" + UrlUtil.escapeUrlParam(Patient.INCLUDE_LINK.getValue())));
 		assertThat(capt.getValue().getURI().toString(), containsString("_include=*"));
 
 	}
