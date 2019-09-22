@@ -1006,6 +1006,12 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>3.12.0</version>
 				<type>pom</type>
+		      <exclusions>
+					<exclusion>
+				      <groupId>com.github.jsonld-java</groupId>
+			         <artifactId>jsonld-java</artifactId>
+		         </exclusion>
+	         </exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>

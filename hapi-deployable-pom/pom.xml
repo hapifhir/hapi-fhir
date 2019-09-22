@@ -216,7 +216,8 @@
 							<execution>
 								<phase>package</phase>
 								<goals>
-									<goal>aggregate-jar</goal>
+									<!--<goal>aggregate-jar</goal>-->
+									<goal>jar</goal>
 								</goals>
 							</execution>
 						</executions>
