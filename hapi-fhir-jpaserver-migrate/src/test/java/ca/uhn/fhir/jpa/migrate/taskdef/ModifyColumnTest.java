@@ -34,6 +34,29 @@ public class ModifyColumnTest extends BaseTest {
 	}
 
 	@Test
+	public void testNoShrink_SameNullable() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
+
+		ModifyColumnTask task = new ModifyColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
+		task.setNullable(true);
+		task.setColumnLength(200);
+
+		getMigrator().setNoColumnShrink(true);
+		getMigrator().addTask(task);
+		getMigrator().migrate();
+
+		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+
+		// Make sure additional migrations don't crash
+		getMigrator().migrate();
+		getMigrator().migrate();
+
+	}
+
+	@Test
 	public void testColumnMakeNullable() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255) not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));

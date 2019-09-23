@@ -52,6 +52,13 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
+		if (isNoColumnShrink()) {
+			int existingLength = getColumnType().extractLength(existingType);
+			if (existingLength > getColumnLength()) {
+				setColumnLength(existingLength);
+			}
+		}
+
 		String wantedType = getColumnType().getDescriptor(getColumnLength());
 		boolean alreadyOfCorrectType = existingType.equals(wantedType);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
