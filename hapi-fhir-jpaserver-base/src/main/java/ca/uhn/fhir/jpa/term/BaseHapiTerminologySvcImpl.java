@@ -1629,7 +1629,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		jobDefinition.setJobClass(SaveDeferredJob.class);
 		mySchedulerService.scheduleFixedDelay(5000, false, jobDefinition);
 
-		// Register scheduled job to save deferred concepts
+		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
