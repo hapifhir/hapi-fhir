@@ -183,6 +183,11 @@
 				of JAX-RS servers may now need to add an explicit dependency on one or more structures JARs to
 				their own project.
 			</action>
+			<action type="fix" issue="1482">
+				The LOINC terminology distribution includes multiple copies of the same files. Uploading LOINC terminology
+				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
+				filename.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
