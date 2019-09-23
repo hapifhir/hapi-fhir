@@ -2,18 +2,17 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ConceptMap;
-import org.hl7.fhir.r4.model.StructureDefinition;
-import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -123,9 +122,10 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (vs == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		return expandValueSetAndReturnVersionIndependentConcepts(vs);
@@ -135,6 +135,12 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
 		return super.expandValueSet(valueSetToExpand);
+	}
+
+	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+		ValueSet valueSetToExpand = (ValueSet) theInput;
+		return super.expandValueSet(valueSetToExpand, theOffset, theCount);
 	}
 
 	@Override
@@ -272,4 +278,17 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
+	@Override
+	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+		ValueSet valueSet = (ValueSet) theValueSet;
+		Coding coding = (Coding) theCoding;
+		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
+		return super.validateCodeIsInPreExpandedValueSet(valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
+	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValueSet valueSet = (ValueSet) theValueSet;
+		return super.isValueSetPreExpandedForCodeValidation(valueSet);
+	}
 }

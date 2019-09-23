@@ -2,10 +2,13 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
@@ -128,9 +131,10 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
+		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 		ValueSet valueSetR5 = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
 		if (valueSetR5 == null) {
-			return Collections.emptyList();
+			super.throwInvalidValueSet(theValueSet);
 		}
 
 		return expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR5));
@@ -140,6 +144,13 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theInput);
 		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(valueSetToExpand);
+		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
+	}
+
+	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theInput);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(valueSetToExpand, theOffset, theCount);
 		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
 	}
 
@@ -280,4 +291,35 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 		return super.lookupCode(theContext, theSystem, theCode);
 	}
 
+	@Override
+	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
+		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet);
+
+		Coding coding = (Coding) theCoding;
+		org.hl7.fhir.r4.model.Coding codingR4 = null;
+		if (coding != null) {
+			codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		}
+
+		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
+		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = null;
+		if (codeableConcept != null) {
+			codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+			for (Coding nestedCoding : codeableConcept.getCoding()) {
+				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
+			}
+		}
+
+		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
+	}
+
+	@Override
+	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
+		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet);
+		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
+	}
 }

@@ -146,11 +146,24 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	private boolean myFilterParameterEnabled = false;
+	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
 	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
 	 */
 	private boolean myPreExpandValueSetsExperimental = false;
-	private boolean myFilterParameterEnabled = false;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 0}!
+	 */
+	private int myPreExpandValueSetsDefaultOffsetExperimental = 0;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 */
+	private int myPreExpandValueSetsDefaultCountExperimental = 1000;
+	/**
+	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 */
+	private int myPreExpandValueSetsMaxCountExperimental = 1000;
 
 	/**
 	 * Constructor
@@ -974,6 +987,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 *
 	 * @see CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
@@ -988,6 +1002,7 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 *
 	 * @see CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
@@ -1088,16 +1103,16 @@ public class DaoConfig {
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
 	 * expunge operation.
 	 */
-	public void setExpungeBatchSize(int theExpungeBatchSize) {
-		myExpungeBatchSize = theExpungeBatchSize;
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
 	}
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
 	 * expunge operation.
 	 */
-	public int getExpungeBatchSize() {
-		return myExpungeBatchSize;
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
 	}
 
 	/**
@@ -1654,6 +1669,134 @@ public class DaoConfig {
 	 */
 	public void setFilterParameterEnabled(boolean theFilterParameterEnabled) {
 		myFilterParameterEnabled = theFilterParameterEnabled;
+	}
+
+	/**
+	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
+	 * each resource. This adds extra table and index space so it should be disabled if it is not being
+	 * used.
+	 * <p>
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
+	 * </p>
+	 */
+	public StoreMetaSourceInformationEnum getStoreMetaSourceInformation() {
+		return myStoreMetaSourceInformation;
+	}
+
+	/**
+	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
+	 * each resource. This adds extra table and index space so it should be disabled if it is not being
+	 * used.
+	 * <p>
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
+	 * </p>
+	 */
+	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
+		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
+		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
+	}
+
+	public enum StoreMetaSourceInformationEnum {
+		NONE(false, false),
+		SOURCE_URI(true, false),
+		REQUEST_ID(false, true),
+		SOURCE_URI_AND_REQUEST_ID(true, true);
+
+		private final boolean myStoreSourceUri;
+		private final boolean myStoreRequestId;
+
+		StoreMetaSourceInformationEnum(boolean theStoreSourceUri, boolean theStoreRequestId) {
+			myStoreSourceUri = theStoreSourceUri;
+			myStoreRequestId = theStoreRequestId;
+		}
+
+		public boolean isStoreSourceUri() {
+			return myStoreSourceUri;
+		}
+
+		public boolean isStoreRequestId() {
+			return myStoreRequestId;
+		}
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 0}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsDefaultOffsetExperimental() {
+		return myPreExpandValueSetsDefaultOffsetExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsDefaultCountExperimental() {
+		return myPreExpandValueSetsDefaultCountExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsDefaultCountExperimental} is greater than
+	 * {@link DaoConfig#getPreExpandValueSetsMaxCountExperimental()}, the lesser value is used.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsDefaultCountExperimental(int thePreExpandValueSetsDefaultCountExperimental) {
+		myPreExpandValueSetsDefaultCountExperimental = Math.min(thePreExpandValueSetsDefaultCountExperimental, getPreExpandValueSetsMaxCountExperimental());
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsMaxCountExperimental() {
+		return myPreExpandValueSetsMaxCountExperimental;
+	}
+
+	/**
+	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsMaxCountExperimental} is lesser than
+	 * {@link DaoConfig#getPreExpandValueSetsDefaultCountExperimental()}, the default {@code count} is lowered to the
+	 * new max {@code count}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public void setPreExpandValueSetsMaxCountExperimental(int thePreExpandValueSetsMaxCountExperimental) {
+		myPreExpandValueSetsMaxCountExperimental = thePreExpandValueSetsMaxCountExperimental;
+		setPreExpandValueSetsDefaultCountExperimental(Math.min(getPreExpandValueSetsDefaultCountExperimental(), getPreExpandValueSetsMaxCountExperimental()));
 	}
 
 	public enum IndexEnabledEnum {

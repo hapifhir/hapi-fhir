@@ -633,6 +633,57 @@ public class QuestionnaireResponseValidatorR4Test {
 
 	}
 
+
+	@Test
+	public void testOpenchoiceAnswerWithOptions() {
+		String questionnaireRef = "http://example.com/Questionnaire/q1";
+
+		List<Questionnaire.QuestionnaireItemAnswerOptionComponent> options = new ArrayList<>();
+		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://foo", "foo", "FOOOO")));
+		options.add(new Questionnaire.QuestionnaireItemAnswerOptionComponent().setValue(new Coding("http://bar", "bar", "FOOOO")));
+
+		Questionnaire q = new Questionnaire();
+		QuestionnaireItemComponent item = q.addItem();
+		item.setLinkId("link0")
+			.setRequired(true)
+			.setType(QuestionnaireItemType.OPENCHOICE)
+			.setAnswerOption(options);
+		when(myValSupport.fetchResource(any(FhirContext.class), eq(Questionnaire.class), eq(questionnaireRef))).thenReturn(q);
+
+		QuestionnaireResponse qa;
+		ValidationResult errors;
+
+		qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue(questionnaireRef);
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://foo").setCode("foo"));
+		errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertEquals(true, errors.isSuccessful());
+
+		qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue(questionnaireRef);
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new StringType("Hello"));
+		errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		assertEquals(true, errors.isSuccessful());
+
+		qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue(questionnaireRef);
+		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://foo").setCode("hello"));
+		errors = myVal.validateWithResult(qa);
+		ourLog.info(errors.toString());
+		// This is set in InstanceValidator#validateAnswerCode
+		assertEquals(false, errors.isSuccessful());
+
+	}
+
+
 	@Test
 	public void testUnexpectedAnswer() {
 		Questionnaire q = new Questionnaire();

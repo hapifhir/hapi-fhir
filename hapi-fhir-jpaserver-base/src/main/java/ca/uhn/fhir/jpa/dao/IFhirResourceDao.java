@@ -44,8 +44,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * Note that this interface is not considered a stable interface. While it is possible to build applications
+ * that use it directly, please be aware that we may modify methods, add methods, or even remove methods from
+ * time to time, even within minor point releases.
+ */
 public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest);
@@ -107,6 +115,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	ExpungeOutcome expunge(ExpungeOptions theExpungeOptions, RequestDetails theRequestDetails);
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
+
+	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
 	Class<T> getResourceType();
 

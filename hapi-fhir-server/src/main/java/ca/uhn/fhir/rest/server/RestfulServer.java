@@ -58,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
-import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -849,7 +848,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@SuppressWarnings("WeakerAccess")
 	protected void handleRequest(RequestTypeEnum theRequestType, HttpServletRequest theRequest, HttpServletResponse theResponse) throws ServletException, IOException {
 		String fhirServerBase;
-		ServletRequestDetails requestDetails = new ServletRequestDetails(getInterceptorService());
+		ServletRequestDetails requestDetails = newRequestDetails();
 		requestDetails.setServer(this);
 		requestDetails.setRequestType(theRequestType);
 		requestDetails.setServletRequest(theRequest);
@@ -1096,6 +1095,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 	}
 
+	protected ServletRequestDetails newRequestDetails() {
+		return new ServletRequestDetails(getInterceptorService());
+	}
+
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
 		theRequestDetails.getResponse().addHeader(Constants.HEADER_REQUEST_ID, theRequestId);
 	}
@@ -1124,7 +1127,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		if (isBlank(requestId)) {
 			requestId = Long.toHexString(RANDOM.nextLong());
-			requestId = leftPad(requestId, 16, '0');
+			requestId = leftPad(requestId, Constants.REQUEST_ID_LENGTH, '0');
 		}
 
 		return requestId;

@@ -49,10 +49,6 @@ public abstract class ExpungeService {
 	public ExpungeOutcome expunge(String theResourceName, Long theResourceId, Long theVersion, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
 		ourLog.info("Expunge: ResourceName[{}] Id[{}] Version[{}] Options[{}]", theResourceName, theResourceId, theVersion, theExpungeOptions);
 
-		if (!myConfig.isExpungeEnabled()) {
-			throw new MethodNotAllowedException("$expunge is not enabled on this server");
-		}
-
 		if (theExpungeOptions.getLimit() < 1) {
 			throw new InvalidRequestException("Expunge limit may not be less than 1.  Received expunge limit " + theExpungeOptions.getLimit() + ".");
 		}

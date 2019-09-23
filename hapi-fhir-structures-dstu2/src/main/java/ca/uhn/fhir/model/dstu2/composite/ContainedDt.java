@@ -51,4 +51,14 @@ public class ContainedDt extends BaseContainedDt {
 		return myContainedResources == null || myContainedResources.size() == 0;
 	}
 
+	@Override
+	public Object getUserData(String theName) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setUserData(String theName, Object theValue) {
+		throw new UnsupportedOperationException();
+	}
+
 }

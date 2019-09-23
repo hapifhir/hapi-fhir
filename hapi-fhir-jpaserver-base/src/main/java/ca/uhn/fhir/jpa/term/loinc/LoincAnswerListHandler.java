@@ -31,7 +31,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class LoincAnswerListHandler extends BaseLoincHandler {
 
@@ -72,7 +74,7 @@ public class LoincAnswerListHandler extends BaseLoincHandler {
 		}
 
 		// Answer list ValueSet
-		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, "answerlist.version");
+		ValueSet vs = getValueSet(answerListId, "http://loinc.org/vs/" + answerListId, answerListName, LOINC_ANSWERLIST_VERSION.getCode());
 		if (vs.getIdentifier().isEmpty()) {
 			vs.addIdentifier()
 				.setSystem("urn:ietf:rfc:3986")

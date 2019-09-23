@@ -1,13 +1,11 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IBaseCoding;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -44,12 +42,19 @@ public interface IHapiTerminologySvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
+	ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount);
+
 	void expandValueSet(ValueSet theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
 	/**
 	 * Version independent
 	 */
 	IBaseResource expandValueSet(IBaseResource theValueSetToExpand);
+
+	/**
+	 * Version independent
+	 */
+	IBaseResource expandValueSet(IBaseResource theValueSetToExpand, int theOffset, int theCount);
 
 	void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator);
 
@@ -79,7 +84,7 @@ public interface IHapiTerminologySvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
 
 	/**
 	 * @return Returns the ID of the created/updated code system
@@ -108,5 +113,17 @@ public interface IHapiTerminologySvc {
 
 	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
 
-	void preExpandValueSetToTerminologyTables();
+	void preExpandDeferredValueSetsToTerminologyTables();
+
+	/**
+	 * Version independent
+	 */
+	ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept);
+
+	boolean isValueSetPreExpandedForCodeValidation(ValueSet theValueSet);
+
+	/**
+	 * Version independent
+	 */
+	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
 }

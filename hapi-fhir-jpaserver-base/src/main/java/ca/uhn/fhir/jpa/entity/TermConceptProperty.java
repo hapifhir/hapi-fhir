@@ -62,6 +62,7 @@ public class TermConceptProperty implements Serializable {
 	@Column(name = "PROP_KEY", nullable = false, length = MAX_LENGTH)
 	@NotBlank
 	private String myKey;
+	// FIXME: DM 2019-09-13 - We presently truncate down to 500. The longest value for EXTERNAL_COPYRIGHT_NOTICE is 2,597 so we should use a LOB instead of a String.
 	@Column(name = "PROP_VAL", nullable = true, length = MAX_LENGTH)
 	private String myValue;
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)

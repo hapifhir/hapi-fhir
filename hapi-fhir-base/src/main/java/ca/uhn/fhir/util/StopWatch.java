@@ -63,6 +63,9 @@ public class StopWatch {
 		myStarted = theStart.getTime();
 	}
 
+	public StopWatch(long theL) {
+	}
+
 	private void addNewlineIfContentExists(StringBuilder theB) {
 		if (theB.length() > 0) {
 			theB.append("\n");
@@ -231,7 +234,12 @@ public class StopWatch {
 
 		double denominator = ((double) millisElapsed) / ((double) periodMillis);
 
-		return (double) theNumOperations / denominator;
+		double throughput = (double) theNumOperations / denominator;
+		if (throughput > theNumOperations) {
+			throughput = theNumOperations;
+		}
+
+		return throughput;
 	}
 
 	public void restart() {

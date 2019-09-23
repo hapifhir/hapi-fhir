@@ -23,9 +23,9 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -66,16 +66,29 @@ public class TermValueSet implements Serializable {
 	@Column(name = "VSNAME", nullable = true, length = MAX_NAME_LENGTH)
 	private String myName;
 
-	@OneToMany(mappedBy = "myValueSet")
+	@OneToMany(mappedBy = "myValueSet", fetch = FetchType.LAZY)
 	private List<TermValueSetConcept> myConcepts;
+
+	@Column(name = "TOTAL_CONCEPTS", nullable = false)
+	@ColumnDefault("0")
+	private Long myTotalConcepts;
+
+	@Column(name = "TOTAL_CONCEPT_DESIGNATIONS", nullable = false)
+	@ColumnDefault("0")
+	private Long myTotalConceptDesignations;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
-	private TermValueSetExpansionStatusEnum myExpansionStatus;
+	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public TermValueSet() {
 		super();
-		myExpansionStatus = TermValueSetExpansionStatusEnum.NOT_EXPANDED;
+		myExpansionStatus = TermValueSetPreExpansionStatusEnum.NOT_EXPANDED;
+		myTotalConcepts = 0L;
+		myTotalConceptDesignations = 0L;
 	}
 
 	public Long getId() {
@@ -120,11 +133,53 @@ public class TermValueSet implements Serializable {
 		return myConcepts;
 	}
 
-	public TermValueSetExpansionStatusEnum getExpansionStatus() {
+	public Long getTotalConcepts() {
+		return myTotalConcepts;
+	}
+
+	public TermValueSet setTotalConcepts(Long theTotalConcepts) {
+		myTotalConcepts = theTotalConcepts;
+		return this;
+	}
+
+	public TermValueSet decrementTotalConcepts() {
+		if (myTotalConcepts > 0) {
+			myTotalConcepts--;
+		}
+		return this;
+	}
+
+	public TermValueSet incrementTotalConcepts() {
+		myTotalConcepts++;
+		return this;
+	}
+
+	public Long getTotalConceptDesignations() {
+		return myTotalConceptDesignations;
+	}
+
+	public TermValueSet setTotalConceptDesignations(Long theTotalConceptDesignations) {
+		myTotalConceptDesignations = theTotalConceptDesignations;
+		return this;
+	}
+
+	public TermValueSet decrementTotalConceptDesignations() {
+		if (myTotalConceptDesignations > 0) {
+			myTotalConceptDesignations--;
+		}
+		return this;
+	}
+
+	public TermValueSet incrementTotalConceptDesignations() {
+		myTotalConceptDesignations++;
+		return this;
+	}
+
+	public TermValueSetPreExpansionStatusEnum getExpansionStatus() {
 		return myExpansionStatus;
 	}
 
-	public void setExpansionStatus(TermValueSetExpansionStatusEnum theExpansionStatus) {
+	public void setExpansionStatus(TermValueSetPreExpansionStatusEnum theExpansionStatus) {
 		myExpansionStatus = theExpansionStatus;
 	}
 
@@ -143,9 +198,10 @@ public class TermValueSet implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getUrl())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = getUrl().hashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override
@@ -157,6 +213,8 @@ public class TermValueSet implements Serializable {
 			.append("myResourcePid", myResourcePid)
 			.append("myName", myName)
 			.append(myConcepts != null ? ("myConcepts - size=" + myConcepts.size()) : ("myConcepts=(null)"))
+			.append("myTotalConcepts", myTotalConcepts)
+			.append("myTotalConceptDesignations", myTotalConceptDesignations)
 			.append("myExpansionStatus", myExpansionStatus)
 			.toString();
 	}

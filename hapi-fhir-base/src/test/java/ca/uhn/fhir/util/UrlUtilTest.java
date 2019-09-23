@@ -56,6 +56,8 @@ public class UrlUtilTest {
 		assertEquals("a=b", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams());
 
 		assertEquals("a=b", UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams());
+		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap?a=b").getParams());
+		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap/ussgfht-loincde?a=b").getParams());
 
 	}
 

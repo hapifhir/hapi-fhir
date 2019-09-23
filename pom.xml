@@ -547,6 +547,14 @@
 			<id>nickrobison-usds</id>
 			<name>Nick Robison</name>
 		</developer>
+		<developer>
+			<id>fitzoh</id>
+			<name>Andrew Fitzgerald</name>
+		</developer>
+		<developer>
+			<id>dmap</id>
+			<name>David Maplesden</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -558,7 +566,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.2-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.19-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -594,7 +602,7 @@
 		<jetty_version>9.4.14.v20181114</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
-		<hibernate_version>5.4.2.Final</hibernate_version>
+		<hibernate_version>5.4.4.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
 		<hibernate_search_version>5.11.1.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
@@ -697,7 +705,7 @@
 			<dependency>
 				<groupId>com.github.dnault</groupId>
 				<artifactId>xml-patch</artifactId>
-				<version>0.3.0</version>
+				<version>0.3.1</version>
 			</dependency>
 			<dependency>
             	<groupId>io.dogote</groupId>
@@ -998,6 +1006,12 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>3.12.0</version>
 				<type>pom</type>
+		      <exclusions>
+					<exclusion>
+				      <groupId>com.github.jsonld-java</groupId>
+			         <artifactId>jsonld-java</artifactId>
+		         </exclusion>
+	         </exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -1062,21 +1076,7 @@
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>3.1.6</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>java-hamcrest</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-library</artifactId>
-					</exclusion>
-				</exclusions>
+				<version>4.0.0-rc1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
@@ -1281,12 +1281,17 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.28.2</version>
+				<version>3.0.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
 				<version>42.2.6.jre7</version>
+			</dependency>
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.3.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -1553,7 +1558,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2362,6 +2367,7 @@
                 <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>

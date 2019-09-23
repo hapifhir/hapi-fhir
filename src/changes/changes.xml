@@ -7,6 +7,15 @@
 	</properties>
 	<body>
 		<release version="4.1.0" date="TBD" description="Igloo">
+			<action type="add">
+				The version of a few dependencies have been bumped to the
+				latest versions (dependent HAPI modules listed in brackets):
+				<![CDATA[
+				<ul>
+					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+				</ul>
+				]]>
+			</action>
 		<!--
 		<action type="add" issue="1321">
 			Support has been added for RDF encoding and parsing in the
@@ -14,7 +23,31 @@
 			format. Thanks to Raul Estrada for the pull request!
 		</action>
 		-->
-			<action type="add" issye="1357">
+			<action type="add">
+				<![CDATA[
+				<b>New Feature</b>:
+				The JPA server now saves and supports searching on <code>Resource.meta.source</code>. The server automatically
+				appends the Request ID as a hash value on the URI as well in order to provide request level tracking. Searches
+				 can use either the source URI, the request ID, or both.
+				]]>
+			</action>
+			<action type="add">
+            <![CDATA[
+				<b>New Feature</b>:
+				Support for the FHIR Bulk Data Export specification has been added to the JPA server. See the
+				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
+				only system level export is currently supported but others will follow.
+            ]]>
+			</action>
+			<action type="add" issue="1489">
+            <![CDATA[
+				<b>Improovement</b>:
+				A significant performance improvement was made to the parsers (particularly the Json Parser)
+				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
+				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
+			</action>
+			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
 				pull request!
@@ -61,6 +94,114 @@
                 codes were not correctly deleted from the terminology service tables. This is
                 fixed.
             </action>            
+			<action type="change">
+				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
+				constraints did not add value and caused unneccessary contention when used under high load.
+			</action>
+			<action type="change">
+				An inefficient regex expression in UrlUtil was replaced with a much more efficient hand-written
+				checker. This regex was causing a noticable performance drop when feeding large numbers of transactions
+				into the JPA server at the same time (i.e. when loading Synthea data).
+			</action>
+			<action type="fix">
+				The FHIRPath engine used to parse search parameters in the JPA R4/R5 server is now reused across
+				requests, as it is somewhat expensive to create and is thread safe.
+			</action>
+			<action type="add">
+				It is now possible to submit a PATCH request as a part of a FHIR transaction in DSTU3 (previously this
+				was only supported in R4+). This is not officially part of the DSTU3 spec, but it can now be performed by
+				leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload
+				as a Binary resource containing a valid patch.
+			</action>
+			<action type="change" issue="1366">
+				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
+				Note that this means that data in any existing installations will need to be
+				re-uploaded to the new database platform.
+			</action>
+			<action type="add" issue="1443">
+				LOINC concepts now include multiaxial hierarchical properties (e.g. <![CDATA[<code>parent</code>]]> and
+				<![CDATA[<code>child</code>]]>, which identify parent and child concepts.
+			</action>
+			<action type="add" issue="1445">
+				When loading LOINC terminology, a new ValueSet is automatically created with a single include element that
+				identifies the LOINC CodeSystem in <![CDATA[<code>ValueSet.compose.include.system</code>]]>. This ValueSet
+				includes all LOINC codes.
+			</action>
+			<action type="add" issue="1461">
+				A note has been added to the downloads page explaning the removal of the hapi-fhir-utilities
+				module. Thanks to Andrew Fitzgerald for the PR!
+			</action>
+			<action type="change">
+				REST servers will no longer try to guess the content type for HTTP requests where a body 
+				is provided but no Content-Type header is included. These requests are invalid, and will now
+				result in an HTTP 400. This change corrects an error where some interceptors (notably
+				the RequestValidatingInterceptor, but not including any HAPI FHIR security interceptors) 
+				could be bypassed if a Content Type was not included.
+			</action>
+			<action type="fix">
+				The GraphQL provider did not wrap the respone in a "data" element as described in the FHIR
+				specification. This has been corrected.
+			</action>
+			<action type="add">
+				Added support for comparing resource dates to the current time via a new variable %now.  E.g.
+				Procedure?date=gt%now would match future procedures.
+			</action>
+			<action type="add">
+				Add support for in-memory matching on date comparisons ge,gt,eq,lt,le.
+			</action>
+			<action type="fix">
+				When using the Consent Service and denying a resource via the "Will See Resource" method, the resource ID
+				and version were still returned to the user. This has been corrected so that no details about
+				the resource are leaked.
+			</action>
+			<action type="fix">
+				Fix a failure in FhirTerser#visit when fields in model classes being visited contain custom subclasses of the
+				expected type.
+			</action>
+			<action type="fix">
+				Updating an existing CodeSystem resource with a content mode of COMPLETE did not cause the
+				terminology service to accurately reflect the new CodeSystem URL and/or concepts. This is now
+				corrected.
+			</action>
+			<action type="add">
+				The JPA server now uses the Quartz scheduling library as a lob scheduling mechanism
+			</action>
+			<action type="change">
+				The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being
+				deployed to a servlet path other than "/".
+			</action>
+			<action type="fix" issue="1495">
+				A NullPointerException when using the AuthorizationInterceptor RuleBuilder to build a conditional
+				rule with a custom tester has been corrected. Thanks to Tue Toft Nørgård for reporting!
+			</action>
+			<action type="fix" issue="1494">
+				The R4+ client and server modules did not recognize the new
+				<![CDATA[<code>_include:iterate</code>]]>
+				syntax that replaces the previous
+				<![CDATA[<code>_include:recurse</code>]]>
+				syntax. Both are now supported on all servers in order to avoid breaking backwards
+				compatibility, with the new syntax now being emitted in R4+ clients.
+			</action>
+			<action type="change">
+				The hapi-fhir-jaxrs-server module now lists dependencies on structures JARs as optional
+				dependencies, in order to avoid automatically importing all versions. This means that implementers
+				of JAX-RS servers may now need to add an explicit dependency on one or more structures JARs to
+				their own project.
+			</action>
+			<action type="fix" issue="1482">
+				The LOINC terminology distribution includes multiple copies of the same files. Uploading LOINC terminology
+				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
+				filename.
+			</action>
+		</release>
+		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
+			<action type="fix">
+				This release contains no new or updated functionality, but addressed a dependency 
+				version that was left incorrectly requiring a SNAPSHOT maven build of the
+				org.hl7.fhir.utilities module. Users who are successfully using HAPI FHIR 4.0.0
+				do not need to upgrade, but any users who were blocked from upgrading due to
+				snapshot dependency issues are advised to upgrade immediately.
+			</action>
 		</release>
 		<release version="4.0.0" date="2019-08-14" description="Igloo">
 			<action type="add">
@@ -474,6 +615,14 @@
 				can now be used to upload custom vocabulary that has been converted into a standard file format
 				defined by HAPI FHIR. This is useful for uploading large organizational code systems.
 			</action>
+			<action type="change">
+				Two new operations,
+				<![CDATA[<code>$apply-codesystem-delta-add</code>]]>
+				and
+				<![CDATA[<code>$apply-codesystem-delta-remove</code>]]>
+				have been added to the terminology server. These methods allow
+				codes to be dynamically added and removed from external (notpresent) codesystems.
+			</action>
 			<action type="fix" issue="1404">
 				In the JAX-RS server, the resource type history and instance vread
 				operations had ambiguous paths that could lead to the wrong method
@@ -548,7 +697,7 @@
 				not any values contained within. This has been corrected.
 			</action>
 			<action type="add">
-				The JPA terminology service can now detect when Hibvernate Search (Lucene)
+				The JPA terminology service can now detect when Hibernate Search (Lucene)
 				is not enabled, and will perform simple ValueSet expansions without relying
 				on Hibenrate Search in such cases.
 			</action>

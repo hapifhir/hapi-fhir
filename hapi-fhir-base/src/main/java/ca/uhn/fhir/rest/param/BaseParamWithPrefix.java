@@ -47,7 +47,7 @@ public abstract class BaseParamWithPrefix<T extends BaseParam> extends BaseParam
 				break;
 			} else {
 				char nextChar = theString.charAt(offset);
-				if (nextChar == '-' || Character.isDigit(nextChar)) {
+				if (nextChar == '-' || nextChar == '%' || Character.isDigit(nextChar)) {
 					break;
 				}
 			}

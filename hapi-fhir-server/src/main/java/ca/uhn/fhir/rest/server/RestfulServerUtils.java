@@ -41,6 +41,7 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.*;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
@@ -674,43 +675,54 @@ public class RestfulServerUtils {
 		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
 	}
 
-	/**
-	 * @param theServer If null, no default will be used. If not null, the default will be read from the server.
-	 */
-	public static PreferReturnEnum parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
-		PreferReturnEnum retVal = null;
+	@Nonnull
+    public static PreferHeader parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
+        PreferHeader retVal = new PreferHeader();
+        
+        if (isNotBlank(theValue)) {
+            StringTokenizer tok = new StringTokenizer(theValue, ";");
+            while (tok.hasMoreTokens()) {
+                String next = trim(tok.nextToken());
+                int eqIndex = next.indexOf('=');
+                
+                String key;
+                String value;
+                if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+                    key = next;
+                    value = "";
+                } else {
+                    key = next.substring(0, eqIndex).trim();
+                    value = next.substring(eqIndex + 1).trim();
+                }
+                
+                if (key.equals(Constants.HEADER_PREFER_RETURN)) {
+                    
+                    if (value.length() < 2) {
+                        continue;
+                    }
+                    if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+                        value = value.substring(1, value.length() - 1);
+                    }
+                    
+                    retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
+                    
+                } else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
+                    
+                    retVal.setRespondAsync(true);
+                    
+                }
+            }
+        }
 
-		if (isNotBlank(theValue)) {
-			StringTokenizer tok = new StringTokenizer(theValue, ",");
-			while (tok.hasMoreTokens()) {
-				String next = tok.nextToken();
-				int eqIndex = next.indexOf('=');
-				if (eqIndex == -1 || eqIndex >= next.length() - 2) {
-					continue;
-				}
-
-				String key = next.substring(0, eqIndex).trim();
-				if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
-					continue;
-				}
-
-				String value = next.substring(eqIndex + 1).trim();
-				if (value.length() < 2) {
-					continue;
-				}
-				if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-					value = value.substring(1, value.length() - 1);
-				}
-
-				retVal = PreferReturnEnum.fromHeaderValue(value);
-			}
+		if (retVal.getReturn() == null && theServer != null && theServer.getDefaultPreferReturn() != null) {
+			retVal.setReturn(theServer.getDefaultPreferReturn());
 		}
 
-		if (retVal == null && theServer != null) {
-			retVal = theServer.getDefaultPreferReturn();
-		}
 		return retVal;
-	}
+    }
+    
+    
+
 
 	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();

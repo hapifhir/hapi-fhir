@@ -40,32 +40,49 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermValueSetConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	public static final int MAX_LENGTH = 500;
-
 	@Id()
 	@SequenceGenerator(name = "SEQ_VALUESET_C_DSGNTN_PID", sequenceName = "SEQ_VALUESET_C_DSGNTN_PID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_VALUESET_C_DSGNTN_PID")
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VALUESET_CONCEPT_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_CONCEPT_PID"))
 	private TermValueSetConcept myConcept;
 
-	@Column(name = "LANG", nullable = true, length = MAX_LENGTH)
+	@Column(name = "VALUESET_CONCEPT_PID", insertable = false, updatable = false, nullable = false)
+	private Long myConceptPid;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VSCD_VS_PID"))
+	private TermValueSet myValueSet;
+
+	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	private Long myValueSetPid;
+
+	@Transient
+	private String myValueSetUrl;
+
+	@Transient
+	private String myValueSetName;
+
+	@Column(name = "LANG", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myLanguage;
 
-	@Column(name = "USE_SYSTEM", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_SYSTEM", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseSystem;
 
-	@Column(name = "USE_CODE", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_CODE", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseCode;
 
-	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
+	@Column(name = "USE_DISPLAY", nullable = true, length = TermConceptDesignation.MAX_LENGTH)
 	private String myUseDisplay;
 
-	@Column(name = "VAL", nullable = false, length = MAX_LENGTH)
+	@Column(name = "VAL", nullable = false, length = TermConceptDesignation.MAX_VAL_LENGTH)
 	private String myValue;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public Long getId() {
 		return myId;
@@ -80,13 +97,38 @@ public class TermValueSetConceptDesignation implements Serializable {
 		return this;
 	}
 
+	public TermValueSet getValueSet() {
+		return myValueSet;
+	}
+
+	public TermValueSetConceptDesignation setValueSet(TermValueSet theValueSet) {
+		myValueSet = theValueSet;
+		return this;
+	}
+
+	public String getValueSetUrl() {
+		if (myValueSetUrl == null) {
+			myValueSetUrl = getValueSet().getUrl();
+		}
+
+		return myValueSetUrl;
+	}
+
+	public String getValueSetName() {
+		if (myValueSetName == null) {
+			myValueSetName = getValueSet().getName();
+		}
+
+		return myValueSetName;
+	}
+
 	public String getLanguage() {
 		return myLanguage;
 	}
 
 	public TermValueSetConceptDesignation setLanguage(String theLanguage) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, MAX_LENGTH,
-			"Language exceeds maximum length (" + MAX_LENGTH + "): " + length(theLanguage));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theLanguage, TermConceptDesignation.MAX_LENGTH,
+			"Language exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theLanguage));
 		myLanguage = theLanguage;
 		return this;
 	}
@@ -96,8 +138,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseSystem(String theUseSystem) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, MAX_LENGTH,
-			"Use system exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseSystem));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseSystem, TermConceptDesignation.MAX_LENGTH,
+			"Use system exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseSystem));
 		myUseSystem = theUseSystem;
 		return this;
 	}
@@ -107,8 +149,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseCode(String theUseCode) {
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, MAX_LENGTH,
-			"Use code exceeds maximum length (" + MAX_LENGTH + "): " + length(theUseCode));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theUseCode, TermConceptDesignation.MAX_LENGTH,
+			"Use code exceeds maximum length (" + TermConceptDesignation.MAX_LENGTH + "): " + length(theUseCode));
 		myUseCode = theUseCode;
 		return this;
 	}
@@ -118,7 +160,7 @@ public class TermValueSetConceptDesignation implements Serializable {
 	}
 
 	public TermValueSetConceptDesignation setUseDisplay(String theUseDisplay) {
-		myUseDisplay = left(theUseDisplay, MAX_LENGTH);
+		myUseDisplay = left(theUseDisplay, TermConceptDesignation.MAX_LENGTH);
 		return this;
 	}
 
@@ -128,8 +170,8 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	public TermValueSetConceptDesignation setValue(@Nonnull String theValue) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, MAX_LENGTH,
-			"Value exceeds maximum length (" + MAX_LENGTH + "): " + length(theValue));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, TermConceptDesignation.MAX_VAL_LENGTH,
+			"Value exceeds maximum length (" + TermConceptDesignation.MAX_VAL_LENGTH + "): " + length(theValue));
 		myValue = theValue;
 		return this;
 	}
@@ -153,13 +195,16 @@ public class TermValueSetConceptDesignation implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getLanguage())
-			.append(getUseSystem())
-			.append(getUseCode())
-			.append(getUseDisplay())
-			.append(getValue())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(getLanguage())
+				.append(getUseSystem())
+				.append(getUseCode())
+				.append(getUseDisplay())
+				.append(getValue())
+				.toHashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override
@@ -167,6 +212,11 @@ public class TermValueSetConceptDesignation implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myConcept != null ? ("myConcept - id=" + myConcept.getId()) : ("myConcept=(null)"))
+			.append("myConceptPid", myConceptPid)
+			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetPid", myValueSetPid)
+			.append("myValueSetUrl", this.getValueSetUrl())
+			.append("myValueSetName", this.getValueSetName())
 			.append("myLanguage", myLanguage)
 			.append("myUseSystem", myUseSystem)
 			.append("myUseCode", myUseCode)

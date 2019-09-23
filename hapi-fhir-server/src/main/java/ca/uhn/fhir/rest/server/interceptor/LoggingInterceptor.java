@@ -69,6 +69,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * otherwise</td>
  * </tr>
  * <tr>
+ * <td>${requestId}</td>
+ * <td>The request ID assigned to this request (either automatically, or via the <code>X-Request-ID</code> header in the request)</td>
+ * </tr>
+ * <tr>
  * <td>${operationType}</td>
  * <td>A code indicating the operation type for this request, e.g. "read", "history-instance",
  * "extended-operation-instance", etc.)</td>
@@ -323,6 +327,8 @@ public class LoggingInterceptor {
 					long time = System.currentTimeMillis() - startTime.getTime();
 					return Long.toString(time);
 				}
+			} else if ("requestId".equals(theKey)) {
+				return myRequestDetails.getRequestId();
 			}
 
 			return "!VAL!";

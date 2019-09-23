@@ -27,15 +27,21 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource, CD, CC> exten
 
 	T expand(IIdType theId, String theFilter, RequestDetails theRequestDetails);
 
+	T expand(IIdType theId, String theFilter, int theOffset, int theCount, RequestDetails theRequestDetails);
+
 	T expand(T theSource, String theFilter);
 
+	T expand(T theSource, String theFilter, int theOffset, int theCount);
+
 	T expandByIdentifier(String theUri, String theFilter);
+
+	T expandByIdentifier(String theUri, String theFilter, int theOffset, int theCount);
 
 	void purgeCaches();
 
 	ValidateCodeResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, CD theCoding, CC theCodeableConcept, RequestDetails theRequestDetails);
 
-	public class ValidateCodeResult {
+	class ValidateCodeResult {
 		private String myDisplay;
 		private String myMessage;
 		private boolean myResult;

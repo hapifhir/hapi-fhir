@@ -6,14 +6,24 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.binstore.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.binstore.BinaryStorageInterceptor;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportSvcImpl;
+import ca.uhn.fhir.jpa.bulk.BulkDataExportProvider;
+import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.provider.SubscriptionTriggeringProvider;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
+import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
+import ca.uhn.fhir.jpa.sched.SchedulerServiceImpl;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.IStaleSearchDeletingSvc;
 import ca.uhn.fhir.jpa.search.StaleSearchDeletingSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.ResourceReindexingSvcImpl;
 import ca.uhn.fhir.jpa.subscription.dbmatcher.CompositeInMemoryDaoSubscriptionMatcher;
@@ -25,7 +35,6 @@ import ca.uhn.fhir.jpa.subscription.module.matcher.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
@@ -34,14 +43,9 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.scheduling.concurrent.ScheduledExecutorFactoryBean;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
-
-import javax.annotation.Nonnull;
 
 /*
  * #%L
@@ -65,7 +69,6 @@ import javax.annotation.Nonnull;
 
 
 @Configuration
-@EnableScheduling
 @EnableJpaRepositories(basePackages = "ca.uhn.fhir.jpa.dao.data")
 @ComponentScan(basePackages = "ca.uhn.fhir.jpa", excludeFilters = {
 	@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = BaseConfig.class),
@@ -73,8 +76,7 @@ import javax.annotation.Nonnull;
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*\\.test\\..*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = ".*Test.*"),
 	@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ca.uhn.fhir.jpa.subscription.module.standalone.*")})
-
-public abstract class BaseConfig implements SchedulingConfigurer {
+public abstract class BaseConfig {
 
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
@@ -82,18 +84,12 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Autowired
 	protected Environment myEnv;
 
-
-	@Override
-	public void configureTasks(@Nonnull ScheduledTaskRegistrar theTaskRegistrar) {
-		theTaskRegistrar.setTaskScheduler(taskScheduler());
-	}
-
 	@Bean("myDaoRegistry")
 	public DaoRegistry daoRegistry() {
 		return new DaoRegistry();
 	}
 
-	@Bean(autowire = Autowire.BY_TYPE)
+	@Bean
 	public DatabaseBackedPagingProvider databaseBackedPagingProvider() {
 		return new DatabaseBackedPagingProvider();
 	}
@@ -141,6 +137,16 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	@Lazy
 	public BinaryStorageInterceptor binaryStorageInterceptor() {
 		return new BinaryStorageInterceptor();
+	}
+
+	@Bean
+	public ISearchCacheSvc searchCacheSvc() {
+		return new DatabaseSearchCacheSvcImpl();
+	}
+
+	@Bean
+	public ISearchResultCacheSvc searchResultCacheSvc() {
+		return new DatabaseSearchResultCacheSvcImpl();
 	}
 
 	@Bean
@@ -212,7 +218,7 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 	 * Subclasses may override
 	 */
 	protected boolean isSupported(String theResourceType) {
-		return daoRegistry().getResourceDaoIfExists(theResourceType) != null;
+		return daoRegistry().getResourceDaoOrNull(theResourceType) != null;
 	}
 
 	@Bean
@@ -226,6 +232,30 @@ public abstract class BaseConfig implements SchedulingConfigurer {
 		TerminologyUploaderProvider retVal = new TerminologyUploaderProvider();
 		return retVal;
 	}
+
+	@Bean
+	public ISchedulerService schedulerService() {
+		return new SchedulerServiceImpl();
+	}
+
+	@Bean
+	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
+		return new AutowiringSpringBeanJobFactory();
+	}
+
+	@Bean
+	@Lazy
+	public IBulkDataExportSvc bulkDataExportSvc() {
+		return new BulkDataExportSvcImpl();
+	}
+
+	@Bean
+	@Lazy
+	public BulkDataExportProvider bulkDataExportProvider() {
+		return new BulkDataExportProvider();
+	}
+
+
 
 	public static void configureEntityManagerFactory(LocalContainerEntityManagerFactoryBean theFactory, FhirContext theCtx) {
 		theFactory.setJpaDialect(hibernateJpaDialect(theCtx.getLocalizer()));

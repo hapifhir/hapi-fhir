@@ -73,7 +73,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
 	}
 
@@ -86,7 +86,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
 	}
 
