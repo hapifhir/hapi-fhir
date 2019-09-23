@@ -193,6 +193,10 @@
 				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
 				filename.
 			</action>
+			<action type="fix" issue="1483">
+				Some resource IDs and URLs for LOINC ValueSets and ConceptMaps were inconsistently populated by the
+				terminology uploader. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
