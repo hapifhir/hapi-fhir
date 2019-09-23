@@ -38,7 +38,7 @@ Undeclared extensions can also be added to datatypes (composite or primitive).
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExtensionsDstu3.java|resourceStringExtension}}
 ```
 
-## Sub-Extensions
+# Sub-Extensions
 
 Extensions may also have child extensions as their content, instead of a datatype. This is done by adding a child undeclared extension to the parent extension.
 
@@ -54,7 +54,7 @@ Extensions may also have child extensions as their content, instead of a datatyp
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ExtensionsDstu3.java|subExtension}}
 ```
 
-## Retrieving Extension Values
+# Retrieving Extension Values
 
 HAPI provides a few ways of accessing extension values in resources which are received from other sources (i.e. downloaded by a client).
 
