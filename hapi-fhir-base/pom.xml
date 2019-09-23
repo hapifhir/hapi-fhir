@@ -69,12 +69,21 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+
+		<!-- JENA Dependencies - Used for Turtle encoding -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<optional>true</optional>
 			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.jsonld-java</groupId>
+					<artifactId>jsonld-java</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-text</artifactId>
@@ -110,6 +119,7 @@
 			<artifactId>logback-classic</artifactId>
 			<optional>true</optional>
 		</dependency>
+
 
 	</dependencies>
 

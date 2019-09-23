@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
+import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +61,46 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init410() {
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
-		version.startSectionWithMessage("Processing table: HFJ_RES_VER_PROV");
+		// HFJ_SEARCH
+		version.onTable("HFJ_SEARCH").addColumn("EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+
+		// HFJ_BLK_EXPORT_JOB
+		version.addIdGenerator("SEQ_BLKEXJOB_PID");
+		Builder.BuilderAddTableByColumns bulkExportJob = version.addTableByColumns("HFJ_BLK_EXPORT_JOB", "PID");
+		bulkExportJob.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportJob.addColumn("JOB_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 36);
+		bulkExportJob.addColumn("JOB_STATUS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 10);
+		bulkExportJob.addColumn("CREATED_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("STATUS_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("EXP_TIME").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("REQUEST").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		bulkExportJob.addColumn("OPTLOCK").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+		bulkExportJob.addColumn("EXP_SINCE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		bulkExportJob.addColumn("STATUS_MESSAGE").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);
+		bulkExportJob.addIndex("IDX_BLKEX_EXPTIME").unique(false).withColumns("EXP_TIME");
+		bulkExportJob.addIndex("IDX_BLKEX_JOB_ID").unique(true).withColumns("JOB_ID");
+
+
+			// HFJ_BLK_EXPORT_COLLECTION
+		version.addIdGenerator("SEQ_BLKEXCOL_PID");
+		Builder.BuilderAddTableByColumns bulkExportCollection = version.addTableByColumns("HFJ_BLK_EXPORT_COLLECTION", "PID");
+		bulkExportCollection.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportCollection.addColumn("JOB_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportCollection.addForeignKey("FK_BLKEXCOL_JOB").toColumn("JOB_PID").references("HFJ_BLK_EXPORT_JOB", "PID");
+		bulkExportCollection.addColumn("RES_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		bulkExportCollection.addColumn("TYPE_FILTER").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 1000);
+		bulkExportCollection.addColumn("OPTLOCK").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
+
+		// HFJ_BLK_EXPORT_COLFILE
+		version.addIdGenerator("SEQ_BLKEXCOLFILE_PID");
+		Builder.BuilderAddTableByColumns bulkExportCollectionFile = version.addTableByColumns("HFJ_BLK_EXPORT_COLFILE", "PID");
+		bulkExportCollectionFile.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportCollectionFile.addColumn("COLLECTION_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+		bulkExportCollectionFile.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
+		bulkExportCollectionFile.addForeignKey("FK_BLKEXCOLFILE_COLLECT").toColumn("COLLECTION_PID").references("HFJ_BLK_EXPORT_COLLECTION", "PID");
+
+
+		version.startSectionWithMessage("Processing bulkExportCollectionFile: HFJ_RES_VER_PROV");
 		Builder.BuilderAddTableByColumns resVerProv = version.addTableByColumns("HFJ_RES_VER_PROV", "RES_VER_PID");
 		resVerProv.addColumn("RES_VER_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		resVerProv
@@ -78,7 +118,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		resVerProv.addIndex("IDX_RESVERPROV_REQUESTID").unique(false).withColumns("REQUEST_ID");
 
 		// TermValueSetConceptDesignation
-		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
+		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET_C_DESIGNATION");
 		Builder.BuilderWithTableName termValueSetConceptDesignationTable = version.onTable("TRM_VALUESET_C_DESIGNATION");
 		termValueSetConceptDesignationTable.addColumn("VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		termValueSetConceptDesignationTable
@@ -91,7 +131,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SEARCH_RESULT").dropForeignKey("FK_SEARCHRES_SEARCH", "HFJ_SEARCH");
 
 		// TermValueSet
-		version.startSectionWithMessage("Processing table: TRM_VALUESET");
+		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET");
 		Builder.BuilderWithTableName termValueSetTable = version.onTable("TRM_VALUESET");
 		termValueSetTable.addColumn("TOTAL_CONCEPTS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		termValueSetTable.addColumn("TOTAL_CONCEPT_DESIGNATIONS").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
@@ -101,7 +141,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.dropIdGenerator("SEQ_SEARCHPARM_ID");
 
 		// TermValueSetConcept
-		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
+		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET_CONCEPT");
 		Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
 		termValueSetConceptTable.addColumn("VALUESET_ORDER").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 		termValueSetConceptTable

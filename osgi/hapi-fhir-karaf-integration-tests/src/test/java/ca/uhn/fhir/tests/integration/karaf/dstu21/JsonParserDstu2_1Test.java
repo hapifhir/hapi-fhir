@@ -57,7 +57,7 @@ public class JsonParserDstu2_1Test {
 	private FhirContext ourCtx = FhirContext.forDstu2_1();
 
    @Configuration
-   public Option[] config() throws IOException {
+   public Option[] config() {
       return options(
       	KARAF.option(),
 			WRAP.option(),
@@ -431,7 +431,7 @@ public class JsonParserDstu2_1Test {
 	 */
 	@Test
 	public void testEncodeEmptyTag() {
-		ArrayList<org.hl7.fhir.dstu2016may.model.Coding> tagList = new ArrayList<org.hl7.fhir.dstu2016may.model.Coding>();
+		ArrayList<org.hl7.fhir.dstu2016may.model.Coding> tagList = new ArrayList<>();
 		tagList.add(new org.hl7.fhir.dstu2016may.model.Coding());
 		tagList.add(new org.hl7.fhir.dstu2016may.model.Coding().setDisplay("Label"));
 
@@ -447,7 +447,7 @@ public class JsonParserDstu2_1Test {
 	 */
 	@Test
 	public void testEncodeEmptyTag2() {
-		ArrayList<org.hl7.fhir.dstu2016may.model.Coding> tagList = new ArrayList<org.hl7.fhir.dstu2016may.model.Coding>();
+		ArrayList<org.hl7.fhir.dstu2016may.model.Coding> tagList = new ArrayList<>();
 		tagList.add(new org.hl7.fhir.dstu2016may.model.Coding().setSystem("scheme").setCode("code"));
 		tagList.add(new org.hl7.fhir.dstu2016may.model.Coding().setDisplay("Label"));
 
