@@ -53,6 +53,9 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
+	@Column(name = "RES_ID", insertable = false, updatable = false)
+	private Long myResourcePid;
+
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
 	/**

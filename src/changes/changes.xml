@@ -89,6 +89,11 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
+            <action type="fix">
+                In some cases, deleting a CodeSystem resource would fail because the underlying
+                codes were not correctly deleted from the terminology service tables. This is
+                fixed.
+            </action>            
 			<action type="change">
 				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
 				constraints did not add value and caused unneccessary contention when used under high load.
