@@ -36,7 +36,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	@Override
 	public void execute() throws SQLException {
 
-		String existingType;
+		JdbcUtils.ColumnType existingType;
 		boolean nullable;
 
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
@@ -53,17 +53,16 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 		}
 
 		if (isNoColumnShrink()) {
-			int existingLength = getColumnType().extractLength(existingType);
+			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
 			if (existingLength > getColumnLength()) {
 				setColumnLength(existingLength);
 			}
 		}
 
-		String wantedType = getColumnType().getDescriptor(getColumnLength());
-		boolean alreadyOfCorrectType = existingType.equals(wantedType);
+		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), getColumnLength());
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
-			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), wantedType, nullable);
+			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 

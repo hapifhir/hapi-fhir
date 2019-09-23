@@ -25,7 +25,8 @@ public class ModifyColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		assertEquals("varchar(300)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 300), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(1, task.getExecutedStatements().size());
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -48,7 +49,8 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(0, task.getExecutedStatements().size());
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -61,8 +63,8 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255) not null)");
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals("bigint", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
 		ModifyColumnTask task = new ModifyColumnTask();
@@ -86,8 +88,8 @@ public class ModifyColumnTest extends BaseTest {
 
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals("bigint", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -101,8 +103,8 @@ public class ModifyColumnTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals("bigint", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
 		ModifyColumnTask task = new ModifyColumnTask();
@@ -126,8 +128,8 @@ public class ModifyColumnTest extends BaseTest {
 
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
 		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
-		assertEquals("bigint", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
-		assertEquals("varchar(255)", JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();

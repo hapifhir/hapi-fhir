@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.jdbc.dialect.internal.StandardDialectResolver;
@@ -47,6 +50,73 @@ import static org.thymeleaf.util.StringUtils.toUpperCase;
 
 public class JdbcUtils {
 	private static final Logger ourLog = LoggerFactory.getLogger(JdbcUtils.class);
+
+	public static class ColumnType {
+		private final BaseTableColumnTypeTask.ColumnTypeEnum myColumnTypeEnum;
+		private final Long myLength;
+
+		public ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Long theLength) {
+			myColumnTypeEnum = theColumnType;
+			myLength = theLength;
+		}
+
+		public ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, int theLength) {
+			this(theColumnType, (long) theLength);
+		}
+
+		public ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType) {
+			this(theColumnType, null);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) {
+				return true;
+			}
+
+			if (theO == null || getClass() != theO.getClass()) {
+				return false;
+			}
+
+			ColumnType that = (ColumnType) theO;
+
+			return new EqualsBuilder()
+				.append(myColumnTypeEnum, that.myColumnTypeEnum)
+				.append(myLength, that.myLength)
+				.isEquals();
+		}
+
+		@Override
+		public int hashCode() {
+			return new HashCodeBuilder(17, 37)
+				.append(myColumnTypeEnum)
+				.append(myLength)
+				.toHashCode();
+		}
+
+		@Override
+		public String toString() {
+			ToStringBuilder b = new ToStringBuilder(this);
+			b.append("type", myColumnTypeEnum);
+			if (myLength != null) {
+				b.append("length", myLength);
+			}
+			return b.toString();
+		}
+
+		public BaseTableColumnTypeTask.ColumnTypeEnum getColumnTypeEnum() {
+			return myColumnTypeEnum;
+		}
+
+		public Long getLength() {
+			return myLength;
+		}
+
+		public boolean equals(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Long theColumnLength) {
+			return myColumnTypeEnum == theColumnType && (myLength == null || myLength.equals(theColumnLength));
+		}
+
+	}
 
 	/**
 	 * Retrieve all index names
@@ -127,7 +197,7 @@ public class JdbcUtils {
 	/**
 	 * Retrieve all index names
 	 */
-	public static String getColumnType(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theColumnName) throws SQLException {
+	public static ColumnType getColumnType(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theColumnName) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
 		try (Connection connection = dataSource.getConnection()) {
 			return theConnectionProperties.getTxTemplate().execute(t -> {
@@ -153,18 +223,18 @@ public class JdbcUtils {
 						Long length = indexes.getLong("COLUMN_SIZE");
 						switch (dataType) {
 							case Types.VARCHAR:
-								return BaseTableColumnTypeTask.ColumnTypeEnum.STRING.getDescriptor(length);
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, length);
 							case Types.NUMERIC:
 							case Types.BIGINT:
 							case Types.DECIMAL:
-								return BaseTableColumnTypeTask.ColumnTypeEnum.LONG.getDescriptor(null);
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, length);
 							case Types.INTEGER:
-								return BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null);
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.INT, length);
 							case Types.TIMESTAMP:
 							case Types.TIMESTAMP_WITH_TIMEZONE:
-								return BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP.getDescriptor(null);
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, length);
 							case Types.BLOB:
-								return BaseTableColumnTypeTask.ColumnTypeEnum.BLOB.getDescriptor(null);
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB, length);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}

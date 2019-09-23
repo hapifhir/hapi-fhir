@@ -164,121 +164,24 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnLength;
 	}
 
-	public BaseTableColumnTypeTask<T> setColumnLength(int theColumnLength) {
-		myColumnLength = (long) theColumnLength;
+	public BaseTableColumnTypeTask<T> setColumnLength(long theColumnLength) {
+		myColumnLength = theColumnLength;
 		return this;
 	}
 
 
 	public enum ColumnTypeEnum {
 
-		LONG {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "bigint";
-			}
+		LONG,
+		STRING,
+		DATE_TIMESTAMP,
+		BOOLEAN,
+		FLOAT,
+		INT,
+		BLOB,
+		CLOB
+		;
 
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-		STRING {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength != null, "Must supply a column length");
-				return "varchar(" + theColumnLength + ")";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				int leftParenIdx = theTypeDescriptor.indexOf('(');
-				int rightParenIdx = theTypeDescriptor.indexOf(')', leftParenIdx);
-				if (leftParenIdx == -1 || rightParenIdx == -1) {
-					throw new IllegalStateException("Can not determine length of " + theTypeDescriptor);
-				}
-				return Integer.parseInt(theTypeDescriptor.substring(leftParenIdx + 1, rightParenIdx).trim());
-			}
-		},
-		DATE_TIMESTAMP {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "timestamp";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-		BOOLEAN {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "boolean";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-		FLOAT {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "float";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-		INT {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "int";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-
-		BLOB {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "blob";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		},
-
-		CLOB {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "clob";
-			}
-
-			@Override
-			public int extractLength(String theTypeDescriptor) {
-				return 0;
-			}
-		};
-
-		public abstract String getDescriptor(Long theColumnLength);
-
-		public abstract int extractLength(String theTypeDescriptor);
 	}
 
 }
