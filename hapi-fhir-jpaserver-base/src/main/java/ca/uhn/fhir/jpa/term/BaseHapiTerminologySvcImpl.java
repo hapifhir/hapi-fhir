@@ -295,7 +295,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myCodeSystemDao.flush();
 
 		int i = 0;
-		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
+		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+		for (TermCodeSystemVersion next : codeSystemVersions) {
 			deleteCodeSystemVersion(next.getPid());
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
@@ -1629,7 +1630,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		jobDefinition.setJobClass(SaveDeferredJob.class);
 		mySchedulerService.scheduleFixedDelay(5000, false, jobDefinition);
 
-		// Register scheduled job to save deferred concepts
+		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
@@ -1647,7 +1648,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid);
 
 		/*
 		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.

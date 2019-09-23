@@ -20,5 +20,24 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
-public class NewInterceptors {
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+// START SNIPPET: sampleClass
+@Interceptor
+public class MyInterceptor {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(MyInterceptor.class);
+
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+	public void logRequests(RequestDetails theRequest) {
+		ourLog.info("Request of type {} with request ID: {}", theRequest.getOperation(), theRequest.getRequestId());
+	}
+
 }
+// END SNIPPET: sampleClass

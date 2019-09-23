@@ -5,5 +5,5 @@ HAPI FHIR 3.8.0 introduced a new interceptor framework that is used across the e
 Interceptor classes may "hook into" various points in the processing chain in both the client and the server.
 
 ```java
-{{snippet:classpath:/ca/uhn/hapi/fhir/docs/NewInterceptors.java|resource}}
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/MyInterceptor.java|sampleClass}}
 ```
