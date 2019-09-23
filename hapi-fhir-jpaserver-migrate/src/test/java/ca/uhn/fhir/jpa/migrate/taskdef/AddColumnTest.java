@@ -40,8 +40,8 @@ public class AddColumnTest extends BaseTest {
 
 		getMigrator().migrate();
 
-		String type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
-		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.INT.getDescriptor(null), type);
+		JdbcUtils.ColumnType type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
+		assertEquals(BaseTableColumnTypeTask.ColumnTypeEnum.INT, type.getColumnTypeEnum());
 	}
 
 	@Test
