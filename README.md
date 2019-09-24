@@ -20,4 +20,3 @@ This project is Open Source, licensed under the Apache Software License 2.0.
 
 Please see [this wiki page](https://github.com/jamesagnew/hapi-fhir/wiki/Getting-Help) for information on where to get help with HAPI FHIR. Please see [Smile CDR](https://smilecdr.com) for information on commercial support.
 
----
