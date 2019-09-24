@@ -99,6 +99,45 @@ public class ModifyColumnTest extends BaseTest {
 	}
 
 	@Test
+	public void testNoShrink_ColumnMakeDateNullable() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, DATECOL timestamp not null)");
+		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertFalse(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, 26), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+
+		getMigrator().setNoColumnShrink(true);
+
+		// PID
+		ModifyColumnTask task = new ModifyColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("PID");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		// STRING
+		task = new ModifyColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("DATECOL");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		task.setNullable(true);
+		getMigrator().addTask(task);
+
+		// Do migration
+		getMigrator().migrate();
+
+		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.LONG, 19), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "PID"));
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, 26), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "DATECOL"));
+
+		// Make sure additional migrations don't crash
+		getMigrator().migrate();
+		getMigrator().migrate();
+	}
+
+	@Test
 	public void testColumnMakeNotNullable() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 		assertTrue(JdbcUtils.isColumnNullable(getConnectionProperties(), "SOMETABLE", "PID"));
