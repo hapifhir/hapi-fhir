@@ -212,7 +212,6 @@
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
-			<version>0.3.0</version>
 		</dependency>
 
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->

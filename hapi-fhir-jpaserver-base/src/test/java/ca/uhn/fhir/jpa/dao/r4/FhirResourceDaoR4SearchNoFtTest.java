@@ -1368,11 +1368,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			map.setLastUpdated(new DateRangeParam().setUpperBound(new DateParam(ParamPrefixEnum.LESSTHAN, "2022-01-01")));
 			IBundleProvider found = myPatientDao.search(map);
 			Set<String> dates = new HashSet<>();
+			String searchId = found.getUuid();
 			for (int i = 0; i < 9; i++) {
 				List<IBaseResource> resources = found.getResources(i, i + 1);
-				assertThat("Failed to load range " + i + " - " + (i + 1), resources, hasSize(1));
+				assertThat("Failed to load range " + i + " - " + (i + 1) + " - from provider of type: " + found.getClass(), resources, hasSize(1));
 				Patient nextResource = (Patient) resources.get(0);
 				dates.add(nextResource.getBirthDateElement().getValueAsString());
+
+				found = myPagingProvider.retrieveResultList(null, searchId);
 			}
 
 			assertThat(dates, hasItems(

@@ -193,6 +193,12 @@
 				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
 				filename.
 			</action>
+			<action>
+				A corner case bug in the JPA server was solved: When performing a search that contained chained reference searches
+				where the value contained slashes (e.g.
+				<![CDATA[<code>Observation?derived-from:DocumentReference.contenttype=application/vnd.mfer</code>]]>)
+				the server could fail to load later pages in the search results.
+			</action>
 			<action type="add">
 				A new flag has been added to the JPA migrator tool that causes the migrator to not try to reduce the length
 				of existing columns in the schema.
