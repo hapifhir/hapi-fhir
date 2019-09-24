@@ -124,6 +124,18 @@ public class ReferenceParamTest {
 
 	}
 
+	@Test
+	public void testDuplicatedTypeAndValueType() {
+
+		ReferenceParam rp = new ReferenceParam();
+		rp.setValueAsQueryToken(ourCtx, null, ":Patient", "Patient/123");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient/123", rp.getValue());
+		assertEquals(null, rp.getQueryParameterQualifier());
+
+	}
+
 	// TODO: verify this behavior is correct. Same case as testWithResourceTypeAsQualifier_RelativeUrl()
 	@Test
 	public void testWithResourceTypeAsQualifier_AbsoluteUrl() {
