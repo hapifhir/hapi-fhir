@@ -742,7 +742,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
 		myDaoConfig.setPreExpandValueSetsExperimental(true);
 
-		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
 		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
