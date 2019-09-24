@@ -24,8 +24,8 @@ steps:
 - task: Maven@3
   inputs:
     #mavenPomFile: 'pom.xml' 
-    goals: 'install' # Optional
-    options: ''
+    goals: 'clean install' # Optional
+    options: '-Dmaven.test.skip'
     #publishJUnitResults: true 
     #testResultsFiles: '**/surefire-reports/TEST-*.xml' # Required when publishJUnitResults == True
     #testRunTitle: # Optional
