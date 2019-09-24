@@ -13,6 +13,17 @@ public class ReferenceParamTest {
 	private FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Test
+	public void testValueWithSlash() {
+		ReferenceParam param = new ReferenceParam();
+		param.setValueAsQueryToken(ourCtx, "derived-from", ":DocumentReference.contenttype", "application/vnd.mfer");
+
+		assertEquals("", param.getValueAsQueryToken(ourCtx));
+		assertEquals("", param.getQueryParameterQualifier());
+	}
+
+
+
+	@Test
 	public void testWithResourceType() {
 		
 		ReferenceParam rp = new ReferenceParam();

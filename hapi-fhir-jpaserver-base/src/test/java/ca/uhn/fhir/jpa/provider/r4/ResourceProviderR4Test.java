@@ -169,6 +169,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testSearchWithSlashes() {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
+
 		Procedure procedure = new Procedure();
 		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
 		String procedureId = ourClient.create().resource(procedure).execute().getId().toUnqualifiedVersionless().getValue();
@@ -177,7 +179,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		dr.addContent().getAttachment().setContentType("application/vnd.mfer");
 		String drId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless().getValue();
 
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 60; i++) {
 			Observation obs = new Observation();
 			obs.addPartOf().setReference(procedureId);
 			obs.addDerivedFrom().setReference(drId);
