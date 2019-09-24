@@ -45,6 +45,7 @@
 	</scm>
 
 	<repositories>
+		<!--
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
@@ -52,6 +53,7 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		-->
 		<repository>
 			<id>oss-snapshot</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
