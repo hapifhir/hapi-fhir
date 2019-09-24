@@ -22,6 +22,7 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -115,14 +116,21 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 				if (nextIdx != -1) {
 					myChain = q.substring(nextIdx + 1);
 					myResourceType = q.substring(1, nextIdx);
-					myValue = theValue;
-					myIdPart = theValue;
 				} else {
 					myChain = null;
 					myResourceType = q.substring(1);
-					myValue = theValue;
-					myIdPart = theValue;
 				}
+
+				myValue = theValue;
+				myIdPart = theValue;
+
+				IdDt id = new IdDt(theValue);
+				if (!id.hasBaseUrl() && id.hasIdPart() && id.hasResourceType()) {
+					if (id.getResourceType().equals(myResourceType)) {
+						myIdPart = id.getIdPart();
+					}
+				}
+
 			} else if (q.startsWith(".")) {
 				myChain = q.substring(1);
 				myResourceType = null;
