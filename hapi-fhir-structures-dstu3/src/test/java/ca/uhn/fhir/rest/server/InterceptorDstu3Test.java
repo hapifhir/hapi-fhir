@@ -298,7 +298,7 @@ public class InterceptorDstu3Test {
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient theResource) {
 			ourLastPatient = theResource;
-			return new MethodOutcome();
+			return new MethodOutcome().setCreated(true);
 		}
 
 		@Operation(name="$postOperation")
