@@ -42,6 +42,15 @@ public abstract class BaseTask<T extends BaseTask> {
 	private int myChangesCount;
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private boolean myNoColumnShrink;
+
+	public boolean isNoColumnShrink() {
+		return myNoColumnShrink;
+	}
+
+	public void setNoColumnShrink(boolean theNoColumnShrink) {
+		myNoColumnShrink = theNoColumnShrink;
+	}
 
 	public boolean isDryRun() {
 		return myDryRun;

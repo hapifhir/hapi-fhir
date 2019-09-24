@@ -71,7 +71,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		}
 
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
-			String columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
 				ourLog.info("Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
 				return;

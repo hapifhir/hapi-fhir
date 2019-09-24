@@ -193,9 +193,24 @@
 				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
 				filename.
 			</action>
+			<action>
+				A corner case bug in the JPA server was solved: When performing a search that contained chained reference searches
+				where the value contained slashes (e.g.
+				<![CDATA[<code>Observation?derived-from:DocumentReference.contenttype=application/vnd.mfer</code>]]>)
+				the server could fail to load later pages in the search results.
+			</action>
+			<action type="add">
+				A new flag has been added to the JPA migrator tool that causes the migrator to not try to reduce the length
+				of existing columns in the schema.
+			</action>
 			<action type="fix" issue="1483">
 				Some resource IDs and URLs for LOINC ValueSets and ConceptMaps were inconsistently populated by the
 				terminology uploader. This has been corrected.
+			</action>
+			<action type="fix">
+				When a resource was updated with a meta.source containing a request id, the meta.source was getting appended
+				with the new request id, resulting in an ever growing source.meta value.  E.g. after the first update, it looks
+				like "#9f0a901387128111#5f37835ee38a89e2" when it should only be "#5f37835ee38a89e2". This has been corrected.
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

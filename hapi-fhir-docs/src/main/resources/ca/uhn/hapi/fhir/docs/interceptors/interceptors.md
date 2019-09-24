@@ -7,3 +7,4 @@ Interceptor classes may "hook into" various points in the processing chain in bo
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/MyInterceptor.java|sampleClass}}
 ```
+

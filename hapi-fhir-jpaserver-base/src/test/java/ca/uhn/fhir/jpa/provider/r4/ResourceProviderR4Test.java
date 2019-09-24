@@ -168,6 +168,54 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testSearchWithSlashes() {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
+
+		Procedure procedure = new Procedure();
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		String procedureId = ourClient.create().resource(procedure).execute().getId().toUnqualifiedVersionless().getValue();
+
+		DocumentReference dr = new DocumentReference();
+		dr.addContent().getAttachment().setContentType("application/vnd.mfer");
+		String drId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless().getValue();
+
+		for (int i = 0; i < 60; i++) {
+			Observation obs = new Observation();
+			obs.addPartOf().setReference(procedureId);
+			obs.addDerivedFrom().setReference(drId);
+			ourClient.create().resource(obs).execute();
+		}
+
+		ourLog.info("Starting search");
+
+		Bundle response = ourClient
+			.search()
+			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_count=2")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		int obsCount = 0;
+		int pageCount = 0;
+		while (response != null) {
+			obsCount += response.getEntry().size();
+			pageCount++;
+			if (response.getLink("next") != null) {
+				response = ourClient.loadPage().next(response).execute();
+			} else {
+				response = null;
+			}
+
+
+			ourLog.info("Have loaded {} pages and {} reources", pageCount, obsCount);
+		}
+
+		assertEquals(60, obsCount);
+		assertEquals(30, pageCount);
+
+	}
+
+
+	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
 		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 1000));
 
@@ -5079,6 +5127,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
+	}
+
+	@Test
+	public void testUpdateWithSource() {
+		Patient patient = new Patient();
+		patient.setActive(false);
+		IIdType patientid = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+		}
+
+		patient.setId(patientid);
+		patient.setActive(true);
+		ourClient.update().resource(patient).execute();
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+
+			readPatient.addName().setFamily("testUpdateWithSource");
+			ourClient.update().resource(readPatient).execute();
+			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+		}
 	}
 
 	@Test

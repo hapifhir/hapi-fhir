@@ -120,7 +120,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
 
-		// Seach with count only
+		// Search with count only
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
@@ -142,7 +142,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
-		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
+		IBundleProvider bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
+		Integer bundleSize = bundleProvider.size();
+		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only
 		params = new SearchParameterMap();

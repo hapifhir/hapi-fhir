@@ -47,12 +47,14 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.*;
+import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.MetaUtil;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
@@ -86,7 +88,6 @@ import javax.xml.stream.events.XMLEvent;
 import java.util.*;
 import java.util.Map.Entry;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /*
@@ -974,7 +975,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 		// 6. Handle source (provenance)
 		if (isNotBlank(provenanceRequestId) || isNotBlank(provenanceSourceUri)) {
-			String sourceString = defaultString(provenanceSourceUri)
+			String sourceString = cleanProvenanceSourceUri(provenanceSourceUri)
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);
 
@@ -990,6 +991,16 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 
 		return retVal;
+	}
+
+	static String cleanProvenanceSourceUri(String theProvenanceSourceUri) {
+		if (isNotBlank(theProvenanceSourceUri)) {
+			int hashIndex = theProvenanceSourceUri.indexOf('#');
+			if (hashIndex != -1) {
+				theProvenanceSourceUri = theProvenanceSourceUri.substring(0, hashIndex);
+			}
+		}
+		return defaultString(theProvenanceSourceUri);
 	}
 
 	public String toResourceName(Class<? extends IBaseResource> theResourceType) {
