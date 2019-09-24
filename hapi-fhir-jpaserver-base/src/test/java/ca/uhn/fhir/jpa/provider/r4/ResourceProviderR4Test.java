@@ -209,8 +209,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Have loaded {} pages and {} reources", pageCount, obsCount);
 		}
 
-		assertEquals(100, obsCount);
-		assertEquals(5, pageCount);
+		assertEquals(60, obsCount);
+		assertEquals(30, pageCount);
 
 	}
 
