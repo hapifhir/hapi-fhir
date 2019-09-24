@@ -1870,7 +1870,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
+		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
@@ -1981,7 +1981,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
+		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
@@ -2077,7 +2077,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet {}", theValueSet.getIdElement().getValue());
+		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
@@ -2111,7 +2111,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermValueSet[{}]", termValueSet.getId());
+		ourLog.info("Done storing TermValueSet[{}] for {}", termValueSet.getId(), theValueSet.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
