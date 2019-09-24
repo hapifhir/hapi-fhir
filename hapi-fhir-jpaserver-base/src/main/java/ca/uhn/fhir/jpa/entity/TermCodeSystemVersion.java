@@ -58,6 +58,7 @@ public class TermCodeSystemVersion implements Serializable {
 
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
+
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
 	 * issued. It should be made non-nullable at some point.
@@ -65,8 +66,11 @@ public class TermCodeSystemVersion implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
-	@SuppressWarnings("unused")
 
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	private Long myCodeSystemPid;
+
+	@SuppressWarnings("unused")
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 

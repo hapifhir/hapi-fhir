@@ -20,15 +20,19 @@ jobs:
     steps:
       - task: CacheBeta@0
         inputs:
-          key: maven | **/pom.xml
+          key: maven
           path: $(MAVEN_CACHE_FOLDER)
           displayName: Cache Maven local repo
-         
+
+      - task: Maven@3
+        inputs:
+          goals: 'validate'
+
       - task: Maven@3
         inputs:
           #mavenPomFile: 'pom.xml' 
           goals: 'clean install' # Optional
-          options: '-Dmaven.test.skip'
+          options: ''
           #publishJUnitResults: true 
           #testResultsFiles: '**/surefire-reports/TEST-*.xml' # Required when publishJUnitResults == True
           #testRunTitle: # Optional
