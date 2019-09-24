@@ -758,16 +758,16 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		ValueSet updatedValueSet = valueSet;
 		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
 
-		String requestUrl = ourClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
+		String url = ourClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 		bundle
 			.addEntry()
-			.setFullUrl(updatedValueSet.getUrl())
+			.setFullUrl(url)
 			.setResource(updatedValueSet)
 			.getRequest()
 			.setMethod(Bundle.HTTPVerb.PUT)
-			.setUrl(requestUrl);
+			.setUrl(url);
 		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		ourClient.transaction().withBundle(bundle).execute();
 
