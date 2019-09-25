@@ -93,7 +93,7 @@
 		</dependency>
 	</dependencies>
 
-	<properties>FhirResourceDaoR4SearchOptimizedTest
+	<properties>
 	</properties>
 
 	<build>
