@@ -914,6 +914,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	@Test
 	public void testIndexNoDuplicatesUri() {
 		ValueSet res = new ValueSet();
+		res.setUrl("http://www.example.org/vs");
 		res.getCompose().addInclude().setSystem("http://foo");
 		res.getCompose().addInclude().setSystem("http://bar");
 		res.getCompose().addInclude().setSystem("http://foo");
@@ -927,7 +928,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			Class<ResourceIndexedSearchParamUri> type = ResourceIndexedSearchParamUri.class;
 			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i WHERE i.myMissing = false", type).getResultList();
 			ourLog.info(toStringMultiline(results));
-			assertEquals(2, results.size());
+			assertEquals(3, results.size());
 		});
 
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myValueSetDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ValueSet.SP_REFERENCE, new UriParam("http://foo"))));
@@ -2944,6 +2945,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		ValueSet v2 = new ValueSet();
 		v2.getExpansion().getIdentifierElement().setValue("http://foo");
+		v2.getUrlElement().setValue("http://www.example.org/vs");
 		String id2 = myValueSetDao.create(v2).getId().toUnqualifiedVersionless().getValue();
 
 		{
