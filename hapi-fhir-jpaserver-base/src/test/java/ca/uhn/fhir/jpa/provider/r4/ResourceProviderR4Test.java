@@ -846,7 +846,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stu
+			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stub
 			}
 
 		});
@@ -3919,7 +3919,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			final String uuid2 = toSearchUuidFromLinkNext(result2);
-			assertNotEquals(uuid1, uuid2);
+			assertNotEquals(uuid1, uuid2); // TODO: DM 2019-09-24 - This test fails intermittently; I suspect it's a timing issue with sleepOneClick();
 		}
 
 		/*

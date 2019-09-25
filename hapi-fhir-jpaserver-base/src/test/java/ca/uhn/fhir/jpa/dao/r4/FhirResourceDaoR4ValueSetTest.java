@@ -22,7 +22,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@After
 	public void after() {
-		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@AfterClass
@@ -128,7 +128,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeableConceptWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;
@@ -169,7 +169,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeOperationByResourceIdAndCodeAndSystemWithExistingValueSetAndPreExpansionEnabled() {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		UriType valueSetIdentifier = null;
 		IIdType id = myExtensionalVsId;

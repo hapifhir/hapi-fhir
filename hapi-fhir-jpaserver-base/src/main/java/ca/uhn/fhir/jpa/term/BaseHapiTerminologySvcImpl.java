@@ -63,9 +63,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -202,22 +202,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
-	}
-
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-			.phrase()
-			.withSlop(2)
-			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
-			// .andField("myDisplayPhonetic").boostedTo(0.5f)
-			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
 	}
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
@@ -894,6 +878,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
 				}
 				break;
+			// FIXME: DM 2019-09-24 - Need to implement LOINC-specific filters for "ancestor" and "descendant".
 			case "copyright":
 				if (isCodeSystemLoinc(theSystem)) {
 					handleFilterLoincCopyright(theQb, theBool, theFilter);
@@ -921,6 +906,22 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				addDisplayFilterInexact(theQb, theBool, theFilter);
 			}
 		}
+	}
+
+	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
+	}
+
+	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		Query textQuery = qb
+			.phrase()
+			.withSlop(2)
+			.onField("myDisplay").boostedTo(4.0f)
+			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			// .andField("myDisplayNGram").boostedTo(1.0f)
+			// .andField("myDisplayPhonetic").boostedTo(0.5f)
+			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
+		bool.must(textQuery);
 	}
 
 	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {

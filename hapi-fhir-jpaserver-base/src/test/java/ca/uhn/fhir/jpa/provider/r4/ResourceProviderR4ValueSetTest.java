@@ -244,7 +244,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -296,7 +296,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -355,7 +355,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -378,7 +378,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -420,7 +420,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -711,7 +711,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -740,7 +740,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -951,7 +951,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testValiedateCodeAgainstBuiltInSystem() {
+	public void testValidateCodeAgainstBuiltInSystem() {
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -1023,7 +1023,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@After
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@AfterClass

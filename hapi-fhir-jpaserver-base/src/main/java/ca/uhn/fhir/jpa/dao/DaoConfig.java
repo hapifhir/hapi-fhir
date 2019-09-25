@@ -149,21 +149,21 @@ public class DaoConfig {
 	private boolean myFilterParameterEnabled = false;
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
-	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code false}!
+	 * Do not change default of {@code true}!
 	 */
-	private boolean myPreExpandValueSetsExperimental = false;
+	private boolean myPreExpandValueSets = true;
 	/**
-	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 0}!
+	 * Do not change default of {@code 0}!
 	 */
-	private int myPreExpandValueSetsDefaultOffsetExperimental = 0;
+	private int myPreExpandValueSetsDefaultOffset = 0;
 	/**
-	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 * Do not change default of {@code 1000}!
 	 */
-	private int myPreExpandValueSetsDefaultCountExperimental = 1000;
+	private int myPreExpandValueSetsDefaultCount = 1000;
 	/**
-	 * EXPERIMENTAL - Do not use in production! Do not change default of {@code 1000}!
+	 * Do not change default of {@code 1000}!
 	 */
-	private int myPreExpandValueSetsMaxCountExperimental = 1000;
+	private int myPreExpandValueSetsMaxCount = 1000;
 
 	/**
 	 * Constructor
@@ -920,7 +920,7 @@ public class DaoConfig {
 	 * <p>
 	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this
 	 * feature is now specified in the FHIR specification. (Previously it
-	 * was an experimental/rpposed feature)
+	 * was an experimental/proposed feature)
 	 * </p>
 	 *
 	 * @since 1.5
@@ -1622,34 +1622,6 @@ public class DaoConfig {
 	}
 
 	/**
-	 * EXPERIMENTAL - Do not use in production!
-	 * <p>
-	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
-	 * future optimization of the $expand operation on large ValueSets.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 */
-	public boolean isPreExpandValueSetsExperimental() {
-		return myPreExpandValueSetsExperimental;
-	}
-
-	/**
-	 * EXPERIMENTAL - Do not use in production!
-	 * <p>
-	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
-	 * future optimization of the $expand operation on large ValueSets.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code false}.
-	 * </p>
-	 */
-	public void setPreExpandValueSetsExperimental(boolean thePreExpandValueSetsExperimental) {
-		myPreExpandValueSetsExperimental = thePreExpandValueSetsExperimental;
-	}
-
-	/**
 	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
 	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
 	 * are no indexes or efficient query plans for the database to leverage while performing the query.
@@ -1720,83 +1692,104 @@ public class DaoConfig {
 	}
 
 	/**
-	 * EXPERIMENTAL - Do not use in production!
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code true}.
+	 * </p>
+	 */
+	public boolean isPreExpandValueSets() {
+		return myPreExpandValueSets;
+	}
+
+	/**
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code true}.
+	 * </p>
+	 */
+	public void setPreExpandValueSets(boolean thePreExpandValueSets) {
+		myPreExpandValueSets = thePreExpandValueSets;
+	}
+
+	/**
 	 * <p>
 	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 0}.
 	 * </p>
 	 */
-	public int getPreExpandValueSetsDefaultOffsetExperimental() {
-		return myPreExpandValueSetsDefaultOffsetExperimental;
+	public int getPreExpandValueSetsDefaultOffset() {
+		return myPreExpandValueSetsDefaultOffset;
 	}
 
 	/**
-	 * EXPERIMENTAL - Do not use in production!
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
 	 */
-	public int getPreExpandValueSetsDefaultCountExperimental() {
-		return myPreExpandValueSetsDefaultCountExperimental;
+	public int getPreExpandValueSetsDefaultCount() {
+		return myPreExpandValueSetsDefaultCount;
 	}
 
 	/**
-	 * EXPERIMENTAL - Do not use in production!
 	 * <p>
 	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
-	 * If {@code thePreExpandValueSetsDefaultCountExperimental} is greater than
-	 * {@link DaoConfig#getPreExpandValueSetsMaxCountExperimental()}, the lesser value is used.
-	 * </p>
-	 * <p>
-	 * The default value for this setting is {@code 1000}.
-	 * </p>
-	 */
-	public void setPreExpandValueSetsDefaultCountExperimental(int thePreExpandValueSetsDefaultCountExperimental) {
-		myPreExpandValueSetsDefaultCountExperimental = Math.min(thePreExpandValueSetsDefaultCountExperimental, getPreExpandValueSetsMaxCountExperimental());
-	}
-
-	/**
-	 * EXPERIMENTAL - Do not use in production!
-	 * <p>
-	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * If {@code thePreExpandValueSetsDefaultCount} is greater than
+	 * {@link DaoConfig#getPreExpandValueSetsMaxCount()}, the lesser value is used.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
 	 */
-	public int getPreExpandValueSetsMaxCountExperimental() {
-		return myPreExpandValueSetsMaxCountExperimental;
+	public void setPreExpandValueSetsDefaultCount(int thePreExpandValueSetsDefaultCount) {
+		myPreExpandValueSetsDefaultCount = Math.min(thePreExpandValueSetsDefaultCount, getPreExpandValueSetsMaxCount());
 	}
 
 	/**
-	 * EXPERIMENTAL - Do not use in production!
 	 * <p>
 	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
-	 * {@link DaoConfig#isPreExpandValueSetsExperimental()} returns {@code true}.
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
 	 * </p>
 	 * <p>
-	 * If {@code thePreExpandValueSetsMaxCountExperimental} is lesser than
-	 * {@link DaoConfig#getPreExpandValueSetsDefaultCountExperimental()}, the default {@code count} is lowered to the
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 */
+	public int getPreExpandValueSetsMaxCount() {
+		return myPreExpandValueSetsMaxCount;
+	}
+
+	/**
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsMaxCount} is lesser than
+	 * {@link DaoConfig#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
 	 * new max {@code count}.
 	 * </p>
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
 	 */
-	public void setPreExpandValueSetsMaxCountExperimental(int thePreExpandValueSetsMaxCountExperimental) {
-		myPreExpandValueSetsMaxCountExperimental = thePreExpandValueSetsMaxCountExperimental;
-		setPreExpandValueSetsDefaultCountExperimental(Math.min(getPreExpandValueSetsDefaultCountExperimental(), getPreExpandValueSetsMaxCountExperimental()));
+	public void setPreExpandValueSetsMaxCount(int thePreExpandValueSetsMaxCount) {
+		myPreExpandValueSetsMaxCount = thePreExpandValueSetsMaxCount;
+		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
 	public enum IndexEnabledEnum {

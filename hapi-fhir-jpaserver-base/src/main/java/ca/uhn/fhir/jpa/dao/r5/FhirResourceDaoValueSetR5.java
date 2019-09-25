@@ -312,6 +312,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 
 		boolean haveIdentifierParam = theValueSetIdentifier != null && theValueSetIdentifier.isEmpty() == false;
 		ValueSet vs = null;
+		boolean isBuiltInValueSet = false;
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
@@ -319,6 +320,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 			if (vs == null) {
 				throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
 			}
+			isBuiltInValueSet = true;
 		} else {
 			if (theCode == null || theCode.isEmpty()) {
 				throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
@@ -334,7 +336,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 
 		if (vs != null) {
 			ValidateCodeResult result;
-			if (myDaoConfig.isPreExpandValueSetsExperimental() && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
+			if (myDaoConfig.isPreExpandValueSets() && !isBuiltInValueSet && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
 				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 			} else {
 				ValueSet expansion = doExpand(vs);
@@ -401,7 +403,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+		if (myDaoConfig.isPreExpandValueSets()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
 				myHapiTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet));
