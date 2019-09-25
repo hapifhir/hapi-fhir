@@ -81,6 +81,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Date myLastUpdatedLow;
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
+	@Column(name = "NUM_BLOCKED", nullable = true)
+	private Integer myNumBlocked;
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
 	@Column(name = "RESOURCE_ID", nullable = true)
@@ -115,12 +117,19 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
-
 	/**
 	 * Constructor
 	 */
 	public Search() {
 		super();
+	}
+
+	public int getNumBlocked() {
+		return myNumBlocked != null ? myNumBlocked : 0;
+	}
+
+	public void setNumBlocked(int theNumBlocked) {
+		myNumBlocked = theNumBlocked;
 	}
 
 	public Date getExpiryOrNull() {
