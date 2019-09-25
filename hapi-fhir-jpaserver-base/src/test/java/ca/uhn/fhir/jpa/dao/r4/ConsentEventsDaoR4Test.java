@@ -162,7 +162,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		assertEquals(myObservationIds, interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
@@ -187,7 +186,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
@@ -213,7 +211,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
@@ -237,7 +234,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
@@ -263,7 +259,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
@@ -288,7 +283,6 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		ourLog.info("Search UUID: {}", outcome.getUuid());
 
 		// Fetch the first 10 (don't cross a fetch boundary)
-		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
