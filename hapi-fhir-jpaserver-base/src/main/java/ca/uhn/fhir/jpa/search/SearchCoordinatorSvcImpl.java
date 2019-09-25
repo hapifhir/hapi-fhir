@@ -232,7 +232,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 
-		return mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+
+
+
+		return pids;
 	}
 
 
@@ -1033,10 +1037,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return super.call();
 		}
 
-		@Override
-		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
-			return super.getResourcePids(theFromIndex, theToIndex);
-		}
 	}
 
 	/**

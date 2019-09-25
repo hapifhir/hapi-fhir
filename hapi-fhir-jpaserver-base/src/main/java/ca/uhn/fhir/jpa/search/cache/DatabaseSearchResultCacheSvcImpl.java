@@ -56,9 +56,9 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 			.findWithSearchPid(theSearch.getId(), page)
 			.getContent();
 
-		ourLog.trace("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+		ourLog.info("**JA fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		Validate.isTrue(theSearch.getNumFound() < theTo || retVal.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and git %d with numfound= %d", theFrom, theTo, retVal.size(), theSearch.getNumFound());
+		Validate.isTrue(theSearch.getNumFound() < theTo || retVal.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d", theFrom, theTo, retVal.size(), theSearch.getNumFound());
 
 		return new ArrayList<>(retVal);
 	}
@@ -76,7 +76,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	public void storeResults(Search theSearch, List<Long> thePreviouslyStoredResourcePids, List<Long> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 
-		ourLog.trace("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+		ourLog.info("**JA Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
 		int order = thePreviouslyStoredResourcePids.size();
 		for (Long nextPid : theNewResourcePids) {

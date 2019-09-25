@@ -7,6 +7,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.annotations.OptimisticLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -49,6 +51,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -111,6 +115,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Lob
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
 	/**
 	 * Constructor
 	 */
@@ -196,10 +201,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public int getNumFound() {
+		ourLog.info("**JA getNumFound {}", myNumFound);
 		return myNumFound;
 	}
 
 	public void setNumFound(int theNumFound) {
+		ourLog.info("**JA setNumFound {}", theNumFound);
 		myNumFound = theNumFound;
 	}
 
@@ -260,10 +267,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public SearchStatusEnum getStatus() {
+		ourLog.info("**JA getStatus {}", myStatus);
 		return myStatus;
 	}
 
 	public void setStatus(SearchStatusEnum theStatus) {
+		ourLog.info("**JA setStatus {}", theStatus);
 		myStatus = theStatus;
 	}
 
