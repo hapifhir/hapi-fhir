@@ -28,7 +28,7 @@ jobs:
         inputs:
           #mavenPomFile: 'pom.xml' 
           goals: 'clean install' # Optional
-          options: ''
+          options: '-P ALLMODULES,JACOCO'
           #publishJUnitResults: true 
           #testResultsFiles: '**/surefire-reports/TEST-*.xml' # Required when publishJUnitResults == True
           #testRunTitle: # Optional
@@ -52,5 +52,8 @@ jobs:
           #checkStyleRunAnalysis: false # Optional
           #pmdRunAnalysis: false # Optional
           #findBugsRunAnalysis: false # Optional
+
+      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+        displayName: 'codecov'
 
 
