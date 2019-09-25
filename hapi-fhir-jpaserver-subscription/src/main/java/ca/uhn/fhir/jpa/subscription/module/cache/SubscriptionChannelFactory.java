@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
@@ -30,15 +31,15 @@ public class SubscriptionChannelFactory {
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
 
 	@Autowired
+	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
+
+	@Autowired
 	public SubscriptionChannelFactory(ISubscribableChannelFactory theSubscribableChannelFactory) {
 		mySubscribableChannelFactory = theSubscribableChannelFactory;
 	}
 
-	public SubscribableChannel newDeliveryChannel(String theSubscriptionId, String theChannelType) {
-		String channelName = "subscription-delivery-" +
-			theChannelType +
-			"-" +
-			theSubscriptionId;
+	public SubscribableChannel newDeliveryChannel(CanonicalSubscription theCanonicalSubscription) {
+		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
 		return mySubscribableChannelFactory.createSubscribableChannel(channelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 

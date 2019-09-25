@@ -95,7 +95,7 @@ public class SubscriptionRegistry {
 		Optional<MessageHandler> deliveryHandler;
 
 		if (myModelConfig.isSubscriptionMatchingEnabled()) {
-			deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(subscriptionId, canonicalized.getChannelType().toCode().toLowerCase());
+			deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(canonicalized);
 			deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
 		} else {
 			deliveryChannel = null;
