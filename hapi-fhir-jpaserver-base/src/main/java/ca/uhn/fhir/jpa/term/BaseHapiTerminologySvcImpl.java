@@ -872,24 +872,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			case "parent":
 			case "child":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincParentChild(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincParentChild(theQb, theBool, theFilter);
 				break;
-			// FIXME: DM 2019-09-24 - Need to implement LOINC-specific filters for "ancestor" and "descendant".
+			case "ancestor":
+			case "descendant":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincAncestorDescendant(theQb, theBool, theFilter);
+				break;
 			case "copyright":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincCopyright(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincCopyright(theQb, theBool, theFilter);
 				break;
 			default:
 				handleFilterRegex(theBool, theFilter);
 				break;
 		}
+	}
+
+	private boolean isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
+		if (!isCodeSystemLoinc(theSystem)) {
+			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + theSystem);
+		}
+		return true;
 	}
 
 	private boolean isCodeSystemLoinc(String theSystem) {
@@ -963,6 +968,30 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private Term getPropertyTerm(String theProperty, String theValue) {
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
+	}
+
+	private void handleFilterLoincAncestorDescendant(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
+			addLoincFilterAncestorDescendantEqual(theBool, theFilter.getProperty(), theFilter.getValue());
+		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
+			addLoincFilterAncestorDescendantIn(theBool, theFilter);
+		} else {
+			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterAncestorDescendantEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
+		logFilteringValueOnProperty(theValue, theProperty);
+		// FIXME: DM 2019-09-25 - Filter with op=EQUAL on ancestor/descendant
+	}
+
+	private void addLoincFilterAncestorDescendantIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			logFilteringValueOnProperty(value, theFilter.getProperty());
+			// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor/descendant
+		}
 	}
 
 	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
