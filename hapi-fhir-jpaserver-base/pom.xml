@@ -660,14 +660,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}../hapi-fhir-base/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -677,6 +669,17 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
+					<execution>
+                  <id>post-integration-test</id>
+                  <phase>install</phase>
+                  <goals>
+                     <goal>report</goal>
+                  </goals>
+                  <configuration>
+                     <dataFile>${project.build.directory}/jacoco.exec</dataFile>
+                     <outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
+                  </configuration>
+               </execution>
 				</executions>
 			</plugin>
 			<plugin>
