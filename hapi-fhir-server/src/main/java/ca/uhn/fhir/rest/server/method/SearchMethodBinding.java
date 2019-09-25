@@ -129,22 +129,8 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 	@Override
 	public boolean incomingServerRequestMatchesMethod(RequestDetails theRequest) {
 		
-		String clientPreference = theRequest.getHeader(Constants.HEADER_PREFER);
-		boolean lenientHandling = false;
-		if(clientPreference != null)
-		{
-			String[] preferences = clientPreference.split(";");
-			for( String p : preferences){
-				if("handling:lenient".equalsIgnoreCase(p))
-				{
-					lenientHandling = true;
-					break;
-				}
-			}
-		}
-		
 		if (theRequest.getId() != null && myIdParamIndex == null) {
-			ourLog.trace("Method {} doesn't match because ID is not null: {}", theRequest.getId());
+			ourLog.trace("Method {} doesn't match because ID is not null: {}", getMethod(), theRequest.getId());
 			return false;
 		}
 		if (theRequest.getRequestType() == RequestTypeEnum.GET && theRequest.getOperation() != null && !Constants.PARAM_SEARCH.equals(theRequest.getOperation())) {
@@ -156,16 +142,16 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			return false;
 		}
 		if (theRequest.getRequestType() != RequestTypeEnum.GET && theRequest.getRequestType() != RequestTypeEnum.POST) {
-			ourLog.trace("Method {} doesn't match because request type is {}", getMethod());
+			ourLog.trace("Method {} doesn't match because request type is {}", getMethod(), theRequest.getRequestType());
 			return false;
 		}
 		if (!StringUtils.equals(myCompartmentName, theRequest.getCompartmentName())) {
-			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", new Object[] { getMethod(), myCompartmentName, theRequest.getCompartmentName() });
+			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
 			return false;
 		}
 		// This is used to track all the parameters so we can reject queries that
 		// have additional params we don't understand
-		Set<String> methodParamsTemp = new HashSet<String>();
+		Set<String> methodParamsTemp = new HashSet<>();
 
 		Set<String> unqualifiedNames = theRequest.getUnqualifiedToQualifiedNames().keySet();
 		Set<String> qualifiedParamNames = theRequest.getParameters().keySet();
@@ -237,8 +223,6 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 		}
 		Set<String> keySet = theRequest.getParameters().keySet();
-		if(lenientHandling == true)
-			return true;
 
 		if (myAllowUnknownParams == false) {
 			for (String next : keySet) {
@@ -272,7 +256,7 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 		if (theQualifierWhitelist == null && theQualifierBlacklist == null) {
 			return theQualifiedNames;
 		}
-		ArrayList<String> retVal = new ArrayList<String>(theQualifiedNames.size());
+		ArrayList<String> retVal = new ArrayList<>(theQualifiedNames.size());
 		for (String next : theQualifiedNames) {
 			QualifierDetails qualifiers = extractQualifiersFromParameterName(next);
 			if (!qualifiers.passes(theQualifierWhitelist, theQualifierBlacklist)) {
