@@ -19,7 +19,9 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.TransactionStatus;
@@ -37,6 +39,9 @@ import static org.junit.Assert.*;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
+
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
 
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
@@ -306,7 +311,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		outcome = myTermSvc.expandValueSet(vs);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, empty());
-
 	}
 
 	@Test
@@ -485,12 +489,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("LOINC");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Don't know how to handle op=ISA on property copyright", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle op=ISA on property copyright");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -504,18 +506,16 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		// Include
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
-		include.setSystem(LOINC_URI);
+		include.setSystem(CS_URL);
 		include
 			.addFilter()
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("LOINC");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -534,12 +534,281 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("bogus");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Don't know how to handle value=bogus on property copyright", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle value=bogus on property copyright");
+		myTermSvc.expandValueSet(vs);
+	}
+
+/*
+	FIXME: DM 2019-09-25 - Remove this comment once ancestor/descendant filters are working.
+	code1 = 50015-7
+	code2 = 43343-3
+	code3 = 43343-4
+	code4 = 47239-9
+
+	code1
+		-code2
+			-code3
+			-code4
+
+	testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndEqual
+	exclude
+	ancestor = code1->[code1]
+	ancestor = code2->[code1,code2]
+	ancestor = code3->[code1,code2,code3,code4]
+	ancestor = code4->[code1,code2,code3,code4]
+
+	testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndIn
+	exclude
+	ancestor in code1,code2,code3,code4->[code1]
+
+	testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndEqual
+	include
+	ancestor = code1->[code2,code3,code4]
+	ancestor = code2->[code3,code4]
+	ancestor = code3->[]
+	ancestor = code4->[]
+
+	testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndIn
+	include
+	ancestor in code1,code2,code3,code4->[code2,code3,code4]
+
+	testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedOp
+	testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedSystem
+ */
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedOp() {
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("50015-7");
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle op=ISA on property ancestor");
+		myTermSvc.expandValueSet(vs);
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedSystem() {
+		createCodeSystem();
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("ancestor")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -747,12 +1016,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Don't know how to handle op=ISA on property child", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle op=ISA on property child");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -772,12 +1039,282 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+		myTermSvc.expandValueSet(vs);
+	}
+
+/*
+	FIXME: DM 2019-09-25 - Remove this comment once ancestor/descendant filters are working.
+	code1 = 50015-7
+	code2 = 43343-3
+	code3 = 43343-4
+	code4 = 47239-9
+
+	code1
+		-code2
+			-code3
+			-code4
+
+	testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndEqual
+	exclude
+	descendant = code1->[code1,code2,code3,code4]
+	descendant = code2->[code2,code3,code4]
+	descendant = code3->[code3,code4]
+	descendant = code4->[code3,code4]
+
+	testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndIn
+	exclude
+	descendant in code1,code2,code3,code4->[code3,code4]
+
+	testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndEqual
+	include
+	descendant = code1->[]
+	descendant = code2->[code1]
+	descendant = code3->[code1,code2]
+	descendant = code4->[code1,code2]
+
+	testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndIn
+	include
+	descendant in code1,code2,code3,code4->[code1,code2]
+
+	testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedOp
+	testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedSystem
+*/
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent exclude;
+
+		// Include
+		vs = new ValueSet();
+		vs.getCompose()
+			.addInclude()
+			.setSystem(LOINC_URI);
+		// Exclude
+		exclude = vs.getCompose().addExclude();
+		exclude.setSystem(LOINC_URI);
+		exclude
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndEqual() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+		outcome = myTermSvc.expandValueSet(vs);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-3");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("43343-4");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndIn() {
+		createLoincSystemWithSomeCodes();
+
+		List<String> codes;
+		ValueSet vs;
+		ValueSet outcome;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.IN)
+			.setValue("50015-7,43343-3,43343-4,47239-9");
+		outcome = myTermSvc.expandValueSet(vs);
+		codes = toCodesContains(outcome.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedOp() {
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(LOINC_URI);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.ISA)
+			.setValue("50015-7");
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle op=ISA on property descendant");
+		myTermSvc.expandValueSet(vs);
+	}
+
+	@Test
+	public void testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedSystem() {
+		createCodeSystem();
+		createLoincSystemWithSomeCodes();
+
+		ValueSet vs;
+		ValueSet.ConceptSetComponent include;
+
+		// Include
+		vs = new ValueSet();
+		include = vs.getCompose().addInclude();
+		include.setSystem(CS_URL);
+		include
+			.addFilter()
+			.setProperty("descendant")
+			.setOp(ValueSet.FilterOperator.EQUAL)
+			.setValue("50015-7");
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -984,12 +1521,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.ISA)
 			.setValue("50015-7");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Don't know how to handle op=ISA on property parent", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Don't know how to handle op=ISA on property parent");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
@@ -1009,12 +1544,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		try {
-			myTermSvc.expandValueSet(vs);
-		} catch (InvalidRequestException e) {
-			assertEquals(400, e.getStatusCode());
-			assertEquals("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
-		}
+
+		expectedException.expect(InvalidRequestException.class);
+		expectedException.expectMessage("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+		myTermSvc.expandValueSet(vs);
 	}
 
 	@Test
