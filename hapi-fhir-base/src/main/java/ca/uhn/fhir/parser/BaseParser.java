@@ -27,7 +27,6 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
-
 import com.google.common.base.Charsets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -68,47 +67,6 @@ public abstract class BaseParser implements IParser {
 	private boolean mySuppressNarratives;
 	private Set<String> myDontStripVersionsFromReferencesAtPaths;
 
-	private Map<Key, List<CompositeChildElement>> compositeChildrenCache = new HashMap<>();
-
-	private static class Key {
-		private final BaseRuntimeElementCompositeDefinition<?> resDef;
-		private final boolean theContainedResource;
-		private final CompositeChildElement theParent;
-		private final EncodeContext theEncodeContext;
-		
-		public Key(BaseRuntimeElementCompositeDefinition<?> resDef, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
-			this.resDef = resDef;
-			this.theContainedResource = theContainedResource;
-			this.theParent = theParent;
-			this.theEncodeContext = theEncodeContext;
-		}
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((resDef == null) ? 0 : resDef.hashCode());
-			result = prime * result + (theContainedResource ? 1231 : 1237);
-			result = prime * result + ((theParent == null) ? 0 : theParent.hashCode());
-			result = prime * result + ((theEncodeContext == null) ? 0 : theEncodeContext.hashCode());
-			return result;
-		}
-		
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj instanceof Key) {
-				final Key that = (Key) obj;
-				return Objects.equals(this.resDef, that.resDef) && 
-						this.theContainedResource == that.theContainedResource &&
-						Objects.equals(this.theParent, that.theParent) &&
-						Objects.equals(this.theEncodeContext, that.theEncodeContext);
-			}
-			return false;
-		}
-	}
-	
 	/**
 	 * Constructor
 	 */
@@ -171,12 +129,12 @@ public abstract class BaseParser implements IParser {
 
 	protected Iterable<CompositeChildElement> compositeChildIterator(IBase theCompositeElement, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
 		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(theCompositeElement.getClass());
-		return compositeChildrenCache.computeIfAbsent(new Key(elementDef, theContainedResource, theParent, theEncodeContext), (k) -> {
-		
+		return theEncodeContext.getCompositeChildrenCache().computeIfAbsent(new Key(elementDef, theContainedResource, theParent, theEncodeContext), (k) -> {
+
 			final List<BaseRuntimeChildDefinition> children = elementDef.getChildrenAndExtension();
 			final List<CompositeChildElement> result = new ArrayList<>(children.size());
 
-			for(final BaseRuntimeChildDefinition child: children) {
+			for (final BaseRuntimeChildDefinition child : children) {
 				CompositeChildElement myNext = new CompositeChildElement(theParent, child, theEncodeContext);
 
 				/*
@@ -274,7 +232,7 @@ public abstract class BaseParser implements IParser {
 
 	}
 
-	protected List<IBaseReference> getAllBaseReferences(IBaseResource theResource){
+	protected List<IBaseReference> getAllBaseReferences(IBaseResource theResource) {
 		final ArrayList<IBaseReference> retVal = new ArrayList<IBaseReference>();
 		findBaseReferences(retVal, theResource, myContext.getResourceDefinition(theResource));
 		return retVal;
@@ -288,7 +246,7 @@ public abstract class BaseParser implements IParser {
 		if (theElement instanceof IBaseReference) {
 			allElements.add((IBaseReference) theElement);
 		}
-		
+
 		BaseRuntimeElementDefinition<?> def = theDefinition;
 		if (def.getChildType() == ChildTypeEnum.CONTAINED_RESOURCE_LIST) {
 			def = myContext.getElementDefinition(theElement.getClass());
@@ -353,7 +311,7 @@ public abstract class BaseParser implements IParser {
 			}
 		}
 	}
-	
+
 	private String determineReferenceText(IBaseReference theRef, CompositeChildElement theCompositeChildElement) {
 		IIdType ref = theRef.getReferenceElement();
 		if (isBlank(ref.getIdPart())) {
@@ -1287,10 +1245,10 @@ public abstract class BaseParser implements IParser {
 			if (obj instanceof CompositeChildElement) {
 				final CompositeChildElement that = (CompositeChildElement) obj;
 				return Objects.equals(this.getEnclosingInstance(), that.getEnclosingInstance()) &&
-						Objects.equals(this.myDef, that.myDef) &&
-						Objects.equals(this.myParent, that.myParent) &&
-						Objects.equals(this.myResDef, that.myResDef) &&
-						Objects.equals(this.myEncodeContext, that.myEncodeContext);
+					Objects.equals(this.myDef, that.myDef) &&
+					Objects.equals(this.myParent, that.myParent) &&
+					Objects.equals(this.myResDef, that.myResDef) &&
+					Objects.equals(this.myEncodeContext, that.myEncodeContext);
 			}
 			return false;
 		}
@@ -1369,13 +1327,17 @@ public abstract class BaseParser implements IParser {
 		}
 	}
 
-
 	/**
 	 * EncodeContext is a shared state object that is passed around the
 	 * encode process
 	 */
 	protected class EncodeContext extends EncodeContextPath {
 		private final ArrayList<EncodeContextPathElement> myResourcePath = new ArrayList<>(10);
+		private final Map<Key, List<CompositeChildElement>> myCompositeChildrenCache = new HashMap<>();
+
+		public Map<Key, List<CompositeChildElement>> getCompositeChildrenCache() {
+			return myCompositeChildrenCache;
+		}
 
 		protected ArrayList<EncodeContextPathElement> getResourcePath() {
 			return myResourcePath;
@@ -1505,6 +1467,46 @@ public abstract class BaseParser implements IParser {
 
 		public boolean isResource() {
 			return myResource;
+		}
+	}
+
+	private static class Key {
+		private final BaseRuntimeElementCompositeDefinition<?> resDef;
+		private final boolean theContainedResource;
+		private final CompositeChildElement theParent;
+		private final EncodeContext theEncodeContext;
+
+		public Key(BaseRuntimeElementCompositeDefinition<?> resDef, final boolean theContainedResource, final CompositeChildElement theParent, EncodeContext theEncodeContext) {
+			this.resDef = resDef;
+			this.theContainedResource = theContainedResource;
+			this.theParent = theParent;
+			this.theEncodeContext = theEncodeContext;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((resDef == null) ? 0 : resDef.hashCode());
+			result = prime * result + (theContainedResource ? 1231 : 1237);
+			result = prime * result + ((theParent == null) ? 0 : theParent.hashCode());
+			result = prime * result + ((theEncodeContext == null) ? 0 : theEncodeContext.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj instanceof Key) {
+				final Key that = (Key) obj;
+				return Objects.equals(this.resDef, that.resDef) &&
+					this.theContainedResource == that.theContainedResource &&
+					Objects.equals(this.theParent, that.theParent) &&
+					Objects.equals(this.theEncodeContext, that.theEncodeContext);
+			}
+			return false;
 		}
 	}
 
