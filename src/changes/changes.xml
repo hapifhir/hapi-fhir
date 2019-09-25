@@ -212,6 +212,11 @@
 				with the new request id, resulting in an ever growing source.meta value.  E.g. after the first update, it looks
 				like "#9f0a901387128111#5f37835ee38a89e2" when it should only be "#5f37835ee38a89e2". This has been corrected.
 			</action>
+			<action type="fix" issue="1421">
+				The Plain Server method selector was incorrectly allowing client requests with _include statements to be
+				handled by method implementations that did not have any <![CDATA[<code>@IncludeParam</code>]]> defined. This
+				is now corrected. Thanks to Tuomo Ala-Vannesluoma for reporting and providing a test case!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
