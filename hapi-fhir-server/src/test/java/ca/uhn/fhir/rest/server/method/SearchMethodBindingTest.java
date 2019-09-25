@@ -35,15 +35,15 @@ public class SearchMethodBindingTest {
     }
 
     @Test // fails
-    public void methodShouldNotMatchWhenExtraUnderscoreQueryParameter() throws NoSuchMethodException {
+    public void methodShouldNotMatchWhenUnderscoreQueryParameter() throws NoSuchMethodException {
         Assert.assertThat(getBinding("param", String.class).incomingServerRequestMatchesMethod(
-            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_extra", new String[]{"test"}))),
+            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
             Matchers.is(false));
         Assert.assertThat(getBinding("paramAndTest", String.class, String.class).incomingServerRequestMatchesMethod(
-            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_extra", new String[]{"test"}))),
+            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
             Matchers.is(false));
         Assert.assertThat(getBinding("paramAndUnderscoreTest", String.class, String.class).incomingServerRequestMatchesMethod(
-            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_extra", new String[]{"test"}))),
+            mockSearchRequest(ImmutableMap.of("param", new String[]{"value"}, "_include", new String[]{"test"}))),
             Matchers.is(false));
     }
 
