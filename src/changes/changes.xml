@@ -13,6 +13,7 @@
 				<![CDATA[
 				<ul>
 					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li>
 				</ul>
 				]]>
 			</action>
