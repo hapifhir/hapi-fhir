@@ -5,6 +5,10 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -181,6 +185,13 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	@CoverageIgnore
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theContext, String theSystem) {
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(org.hl7.fhir.r5.model.CodeSystem.SP_URL, new UriParam(theSystem));
+		map.setLoadSynchronousUpTo(1);
+		IBundleProvider outcome = myCodeSystemResourceDao.search(map);
+		if (outcome.size() > 0) {
+			return (org.hl7.fhir.r5.model.CodeSystem) outcome.getResources(0, 1).get(0);
+		}
 		return null;
 	}
 
