@@ -37,4 +37,6 @@ public interface ISearchCoordinatorSvc {
 
 	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
 
+	Integer size(String theUuid);
+
 }
