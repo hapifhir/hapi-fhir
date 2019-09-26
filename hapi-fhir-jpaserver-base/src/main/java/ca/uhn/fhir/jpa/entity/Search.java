@@ -210,12 +210,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public int getNumFound() {
-		ourLog.info("**JA getNumFound {}", myNumFound);
+		ourLog.trace("getNumFound {}", myNumFound);
 		return myNumFound;
 	}
 
 	public void setNumFound(int theNumFound) {
-		ourLog.info("**JA setNumFound {}", theNumFound);
+		ourLog.trace("setNumFound {}", theNumFound);
 		myNumFound = theNumFound;
 	}
 
@@ -276,12 +276,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public SearchStatusEnum getStatus() {
-		ourLog.info("**JA getStatus {}", myStatus);
+		ourLog.trace("getStatus {}", myStatus);
 		return myStatus;
 	}
 
 	public void setStatus(SearchStatusEnum theStatus) {
-		ourLog.info("**JA setStatus {}", theStatus);
+		ourLog.trace("setStatus {}", theStatus);
 		myStatus = theStatus;
 	}
 

@@ -56,9 +56,10 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 			.findWithSearchPid(theSearch.getId(), page)
 			.getContent();
 
-		ourLog.info("**JA fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		Validate.isTrue((theSearch.getNumFound() - theSearch.getNumBlocked()) < theTo || retVal.size() == (theTo - theFrom), "**JA Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, retVal.size(), theSearch.getNumFound(), theSearch.getNumBlocked());
+		// FIXME: should we remove the blocked number from this message?
+		Validate.isTrue((theSearch.getNumFound() - theSearch.getNumBlocked()) < theTo || retVal.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, retVal.size(), theSearch.getNumFound(), theSearch.getNumBlocked());
 
 		return new ArrayList<>(retVal);
 	}
@@ -76,7 +77,7 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 	public void storeResults(Search theSearch, List<Long> thePreviouslyStoredResourcePids, List<Long> theNewResourcePids) {
 		List<SearchResult> resultsToSave = Lists.newArrayList();
 
-		ourLog.info("**JA Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
+		ourLog.trace("Storing {} results with {} previous for search", theNewResourcePids.size(), thePreviouslyStoredResourcePids.size());
 
 		int order = thePreviouslyStoredResourcePids.size();
 		for (Long nextPid : theNewResourcePids) {
