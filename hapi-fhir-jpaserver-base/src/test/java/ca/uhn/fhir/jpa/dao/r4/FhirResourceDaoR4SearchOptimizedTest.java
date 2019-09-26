@@ -120,20 +120,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p);
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		SearchParameterMap params;
+		IBundleProvider results;
+		String uuid;
+		List<String> ids;
 
 		// Search with count only
-		SearchParameterMap params = new SearchParameterMap();
+		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
-		IBundleProvider results = myPatientDao.search(params);
-		String uuid = results.getUuid();
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
-		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
-		// Seach with total explicitly requested
+		// Search with total explicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
