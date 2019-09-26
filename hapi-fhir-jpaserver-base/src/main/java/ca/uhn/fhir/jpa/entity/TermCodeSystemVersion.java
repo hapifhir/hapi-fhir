@@ -173,4 +173,11 @@ public class TermCodeSystemVersion implements Serializable {
 			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
 		myCodeSystemDisplayName = theCodeSystemDisplayName;
 	}
+
+	public TermConcept addConcept() {
+		TermConcept concept = new TermConcept();
+		concept.setCodeSystemVersion(this);
+		getConcepts().add(concept);
+		return concept;
+	}
 }

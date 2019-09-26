@@ -218,6 +218,10 @@
 				handled by method implementations that did not have any <![CDATA[<code>@IncludeParam</code>]]> defined. This
 				is now corrected. Thanks to Tuomo Ala-Vannesluoma for reporting and providing a test case!
 			</action>
+			<action type="fix">
+				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
+				that the CodeSystem did not exist. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
