@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,10 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 			.findWithSearchPid(theSearch.getId(), page)
 			.getContent();
 
-		ourLog.trace("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
+
+		// FIXME: should we remove the blocked number from this message?
+		Validate.isTrue((theSearch.getNumFound() - theSearch.getNumBlocked()) < theTo || retVal.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, retVal.size(), theSearch.getNumFound(), theSearch.getNumBlocked());
 
 		return new ArrayList<>(retVal);
 	}

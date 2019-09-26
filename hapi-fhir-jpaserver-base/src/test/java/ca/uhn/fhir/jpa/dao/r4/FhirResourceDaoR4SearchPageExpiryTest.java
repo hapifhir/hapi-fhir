@@ -324,7 +324,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			}
 		});
 
-		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 1100);
+		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
 		newTxTemplate().execute(new TransactionCallbackWithoutResult() {

@@ -52,7 +52,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
-		if (isNoColumnShrink()) {
+		if (getColumnLength() != null && isNoColumnShrink()) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
 			if (existingLength > getColumnLength()) {
 				setColumnLength(existingLength);
