@@ -53,7 +53,7 @@ jobs:
           #pmdRunAnalysis: false # Optional
           #findBugsRunAnalysis: false # Optional
 
-      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
-        displayName: 'codecov'
+          #      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
+          #displayName: 'codecov'
 
 
