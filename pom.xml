@@ -1603,7 +1603,6 @@
 						<runOrder>random</runOrder>
 						<argLine>-Dfile.encoding=UTF-8 -Xmx1024m</argLine>
 						<forkCount>1.0C</forkCount>
-						<skip>true</skip>
 					</configuration>
 				</plugin>
 				<plugin>

@@ -259,6 +259,18 @@ public class SearchCoordinatorSvcImplTest {
 		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 		when(mySearchCacheSvc.save(any())).thenAnswer(t -> t.getArguments()[0]);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class),  anyBoolean(), any());
+		List<Long> storedPids = new ArrayList<>();
+		doAnswer(t->{
+			List<Long> previousPids = t.getArgument(1, List.class);
+			List<Long> newPids = t.getArgument(2, List.class);
+			storedPids.addAll(newPids);
+			return null;
+		}).when(mySearchResultCacheSvc).storeResults(any(), anyList(), anyList());
+		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenAnswer(t->{
+			int from = t.getArgument(1, Integer.class);
+			int to = t.getArgument(2, Integer.class);
+			return storedPids.subList(from, to);
+		});
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -292,6 +304,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
+
 
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
