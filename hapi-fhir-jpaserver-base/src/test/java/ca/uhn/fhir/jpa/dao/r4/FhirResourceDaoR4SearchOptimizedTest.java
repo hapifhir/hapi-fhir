@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -142,8 +143,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, hasSize(10));
-		IBundleProvider bundleProvider = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
+		PersistedJpaBundleProvider bundleProvider = (PersistedJpaBundleProvider) myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer bundleSize = bundleProvider.size();
+		assertNotNull("Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.isCacheHit(), bundleSize);
 		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only

@@ -148,17 +148,6 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
-               <execution>
-                  <id>post-integration-test</id>
-                  <phase>install</phase>
-                  <goals>
-                     <goal>report</goal>
-                  </goals>
-                  <configuration>
-                     <dataFile>${project.build.directory}/jacoco.exec</dataFile>
-                     <outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
-                  </configuration>
-               </execution>
 				</executions>
 			</plugin>
 			<plugin>

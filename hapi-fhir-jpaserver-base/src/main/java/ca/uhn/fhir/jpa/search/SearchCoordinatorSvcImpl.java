@@ -232,7 +232,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		}
 
 
-		return mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+
+
+
+		return pids;
 	}
 
 
@@ -652,6 +656,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					ArrayList<Long> unsyncedPids = myUnsyncedPids;
+					int countBlocked = 0;
 
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
 					// This can be used to remove results from the search result details before
@@ -669,6 +674,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								unsyncedPids.remove(i);
 								myCountBlockedThisPass++;
 								myCountSavedTotal++;
+								countBlocked++;
 							}
 						}
 					}
@@ -685,7 +691,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						unsyncedPids.clear();
 
 						if (theResultIter.hasNext() == false) {
-							mySearch.setNumFound(myCountSavedTotal);
 							int skippedCount = theResultIter.getSkippedCount();
 							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 							ourLog.trace("MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, skippedCount, myCountSavedThisPass, myCountSavedTotal, myAdditionalPrefetchThresholdsRemaining);
@@ -707,6 +712,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					mySearch.setNumFound(myCountSavedTotal);
+					mySearch.setNumBlocked(mySearch.getNumBlocked() + countBlocked);
 
 					int numSynced;
 					synchronized (mySyncedPids) {
@@ -1033,10 +1039,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return super.call();
 		}
 
-		@Override
-		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
-			return super.getResourcePids(theFromIndex, theToIndex);
-		}
 	}
 
 	/**

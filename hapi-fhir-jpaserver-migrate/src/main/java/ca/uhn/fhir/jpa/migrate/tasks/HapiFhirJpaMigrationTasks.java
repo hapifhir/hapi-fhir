@@ -63,6 +63,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// HFJ_SEARCH
 		version.onTable("HFJ_SEARCH").addColumn("EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
+		version.onTable("HFJ_SEARCH").addColumn("NUM_BLOCKED").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
 		// HFJ_BLK_EXPORT_JOB
 		version.addIdGenerator("SEQ_BLKEXJOB_PID");
