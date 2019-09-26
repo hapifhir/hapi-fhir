@@ -998,13 +998,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		String[] values = theFilter.getValue().split(",");
-		List<Term> terms = new ArrayList<>();
-		for (String value : values) {
-			logFilteringValueOnProperty(value, theFilter.getProperty());
-			// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor
-		}
-		theBool.must(new TermsQuery(terms));
+		throw new UnsupportedOperationException();
+		// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor; see #1512 in GitHub.
+//		String[] values = theFilter.getValue().split(",");
+//		for (String value : values) {
+//			logFilteringValueOnProperty(value, theFilter.getProperty());
+//		}
 	}
 
 	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {

@@ -18,10 +18,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -660,6 +657,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 	}
 
+	@Ignore("Not yet implemented; see #1512 in GitHub.")
 	@Test
 	public void testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndIn() {
 		createLoincSystemWithSomeCodes();
@@ -747,6 +745,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(0, outcome.getExpansion().getContains().size());
 	}
 
+	@Ignore("Not yet implemented; see #1512 in GitHub.")
 	@Test
 	public void testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndIn() {
 		createLoincSystemWithSomeCodes();
