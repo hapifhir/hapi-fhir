@@ -42,6 +42,6 @@ public interface ISearchCoordinatorSvc {
 	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
 	 * the total is known. Will return empty otherwise
 	 */
-	Optional<Integer> getSearchTotalFromRunningSearchIfExists(String theUuid);
+	Optional<Integer> getSearchTotal(String theUuid);
 
 }

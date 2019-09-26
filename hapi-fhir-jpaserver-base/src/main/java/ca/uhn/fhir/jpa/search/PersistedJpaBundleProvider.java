@@ -299,8 +299,9 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
 			return null;
 		} else {
-			return mySearchCoordinatorSvc.getSearchTotalFromRunningSearchIfExists(myUuid).orElse(null);
+			return mySearchCoordinatorSvc.getSearchTotal(myUuid).orElse(null);
 		}
+
 	}
 
 	// Note: Leave as protected, HSPC depends on this

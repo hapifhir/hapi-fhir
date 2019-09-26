@@ -256,12 +256,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		ourLog.trace("Fetched {} results", pids.size());
 
-		if (pids.size() < theTo - theFrom) {
-			if (search.getNumFound() >= theTo) {
-
-			}
-		}
-
 		return pids;
 	}
 
@@ -317,10 +311,31 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public Optional<Integer> getSearchTotalFromRunningSearchIfExists(String theUuid) {
+	public Optional<Integer> getSearchTotal(String theUuid) {
 		SearchTask task = myIdToSearchTask.get(theUuid);
 		if (task != null) {
 			return Optional.ofNullable(task.awaitInitialSync());
+		}
+
+		/*
+		 * In case there is no running search, if the total is listed as accurate we know one is coming
+		 * so let's wait a bit for it to show up
+		 */
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
+		if (search.isPresent()) {
+			if (search.get().getSearchParameterMap().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
+				for (int i = 0; i < 10; i++) {
+					if (search.isPresent()) {
+						verifySearchHasntFailedOrThrowInternalErrorException(search.get());
+						if (search.get().getTotalCount() != null) {
+							return Optional.of(search.get().getTotalCount());
+						}
+					}
+					search = mySearchCacheSvc.fetchByUuid(theUuid);
+				}
+			}
 		}
 
 		return Optional.empty();
@@ -612,6 +627,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 				} catch (InterruptedException e) {
 					// Shouldn't happen
+					Thread.currentThread().interrupt();
 					throw new InternalErrorException(e);
 				}
 			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
