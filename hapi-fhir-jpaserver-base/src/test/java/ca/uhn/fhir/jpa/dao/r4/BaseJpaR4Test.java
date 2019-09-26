@@ -368,6 +368,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	}
 
 	@Before
+	public void beforeUnregisterAllSubscriptions() {
+		mySubscriptionRegistry.unregisterAllSubscriptions();
+	}
+
+	@Before
 	public void beforeFlushFT() {
 		runInTransaction(() -> {
 			FullTextEntityManager ftem = Search.getFullTextEntityManager(myEntityManager);
