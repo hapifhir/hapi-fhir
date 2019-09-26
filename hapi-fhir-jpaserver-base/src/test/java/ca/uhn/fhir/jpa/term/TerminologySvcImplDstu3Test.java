@@ -541,44 +541,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		myTermSvc.expandValueSet(vs);
 	}
 
-/*
-	FIXME: DM 2019-09-25 - Remove this comment once ancestor/descendant filters are working.
-	code1 = 50015-7
-	code2 = 43343-3
-	code3 = 43343-4
-	code4 = 47239-9
-
-	code1
-		-code2
-			-code3
-			-code4
-
-	testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndEqual
-	exclude
-	ancestor = code1->[code1]
-	ancestor = code2->[code1,code2]
-	ancestor = code3->[code1,code2,code3,code4]
-	ancestor = code4->[code1,code2,code3,code4]
-
-	testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndIn
-	exclude
-	ancestor in code1,code2,code3,code4->[code1]
-
-	testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndEqual
-	include
-	ancestor = code1->[code2,code3,code4]
-	ancestor = code2->[code3,code4]
-	ancestor = code3->[]
-	ancestor = code4->[]
-
-	testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndIn
-	include
-	ancestor in code1,code2,code3,code4->[code2,code3,code4]
-
-	testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedOp
-	testExpandValueSetPropertyFilterLoincAncestorWithUnsupportedSystem
- */
-
 	@Test
 	public void testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndEqual() {
 		createLoincSystemWithSomeCodes();
@@ -1047,44 +1009,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		expectedException.expectMessage("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		myTermSvc.expandValueSet(vs);
 	}
-
-/*
-	FIXME: DM 2019-09-25 - Remove this comment once ancestor/descendant filters are working.
-	code1 = 50015-7
-	code2 = 43343-3
-	code3 = 43343-4
-	code4 = 47239-9
-
-	code1
-		-code2
-			-code3
-			-code4
-
-	testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndEqual
-	exclude
-	descendant = code1->[code1,code2,code3,code4]
-	descendant = code2->[code2,code3,code4]
-	descendant = code3->[code3,code4]
-	descendant = code4->[code3,code4]
-
-	testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndIn
-	exclude
-	descendant in code1,code2,code3,code4->[code3,code4]
-
-	testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndEqual
-	include
-	descendant = code1->[]
-	descendant = code2->[code1]
-	descendant = code3->[code1,code2]
-	descendant = code4->[code1,code2]
-
-	testExpandValueSetPropertyFilterLoincDescendantWithIncludeAndIn
-	include
-	descendant in code1,code2,code3,code4->[code1,code2]
-
-	testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedOp
-	testExpandValueSetPropertyFilterLoincDescendantWithUnsupportedSystem
-*/
 
 	@Test
 	public void testExpandValueSetPropertyFilterLoincDescendantWithExcludeAndEqual() {
