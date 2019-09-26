@@ -53,21 +53,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
-
-	@Override
-	public String toString() {
-		return new ToStringBuilder(this)
-			.append("myLastUpdatedHigh", myLastUpdatedHigh)
-			.append("myLastUpdatedLow", myLastUpdatedLow)
-			.append("myNumFound", myNumFound)
-			.append("myNumBlocked", myNumBlocked)
-			.append("myStatus", myStatus)
-			.append("myTotalCount", myTotalCount)
-			.append("myUuid", myUuid)
-			.append("myVersion", myVersion)
-			.toString();
-	}
-
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -137,6 +122,20 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	public Search() {
 		super();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myLastUpdatedHigh", myLastUpdatedHigh)
+			.append("myLastUpdatedLow", myLastUpdatedLow)
+			.append("myNumFound", myNumFound)
+			.append("myNumBlocked", myNumBlocked)
+			.append("myStatus", myStatus)
+			.append("myTotalCount", myTotalCount)
+			.append("myUuid", myUuid)
+			.append("myVersion", myVersion)
+			.toString();
 	}
 
 	public int getNumBlocked() {
@@ -351,8 +350,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myVersion;
 	}
 
-	public SearchParameterMap getSearchParameterMap() {
-		return SerializationUtils.deserialize(mySearchParameterMap);
+	public Optional<SearchParameterMap> getSearchParameterMap() {
+		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {

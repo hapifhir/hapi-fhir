@@ -92,7 +92,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
-	private final ConcurrentHashMap<String, BaseTask> myIdToSearchTask = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -151,7 +151,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@Override
 	public void cancelAllActiveSearches() {
-		for (BaseTask next : myIdToSearchTask.values()) {
+		for (SearchTask next : myIdToSearchTask.values()) {
 			next.requestImmediateAbort();
 			try {
 				next.getCompletionLatch().await(30, TimeUnit.SECONDS);
@@ -171,17 +171,35 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
+		// If we're actively searching right now, don't try to do anything until at least one batch has been
+		// persisted in the DB
+		SearchTask searchTask = myIdToSearchTask.get(theUuid);
+		if (searchTask != null) {
+			searchTask.awaitInitialSync();
+		}
+
+		ourLog.trace("About to start looking for resources {}-{}", theFrom, theTo);
+
 		Search search;
 		StopWatch sw = new StopWatch();
 		while (true) {
 
 			if (myNeverUseLocalSearchForUnitTests == false) {
-				BaseTask task = myIdToSearchTask.get(theUuid);
-				if (task != null) {
+				if (searchTask != null) {
 					ourLog.trace("Local search found");
-					List<Long> resourcePids = task.getResourcePids(theFrom, theTo);
+					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					if (resourcePids != null) {
-						return resourcePids;
+						ourLog.trace("Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
+
+						/*
+						 * Generally, if a search task is open, the fastest possible thing is to just return its results. This
+						 * will work most of the time, but can fail if the task hit a search threshold and the client is requesting
+						 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
+						 * task.
+						 */
+						if ((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
+							return resourcePids;
+						}
 					}
 				}
 			}
@@ -189,18 +207,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> {
-					ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
+					ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
 					String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 					return new ResourceGoneException(msg);
 				});
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
-				ourLog.debug("Search entity marked as finished with {} results", search.getNumFound());
+				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
-				ourLog.debug("Search entity has {} results so far", search.getNumFound());
+				ourLog.trace("Search entity has {} results so far", search.getNumFound());
 				break;
 			}
 
@@ -212,11 +230,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If the search was saved in "pass complete mode" it's probably time to
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
+				ourLog.trace("Going to try to start next search");
 				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
-					SearchParameterMap params = search.getSearchParameterMap();
+					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails);
 					myIdToSearchTask.put(search.getUuid(), task);
@@ -231,10 +250,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
+		ourLog.trace("Finished looping");
 
 		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 
-
+		ourLog.trace("Fetched {} results", pids.size());
 
 		return pids;
 	}
@@ -288,6 +308,38 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		return submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString);
 
+	}
+
+	@Override
+	public Optional<Integer> getSearchTotal(String theUuid) {
+		SearchTask task = myIdToSearchTask.get(theUuid);
+		if (task != null) {
+			return Optional.ofNullable(task.awaitInitialSync());
+		}
+
+		/*
+		 * In case there is no running search, if the total is listed as accurate we know one is coming
+		 * so let's wait a bit for it to show up
+		 */
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
+		if (search.isPresent()) {
+			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
+			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
+				for (int i = 0; i < 10; i++) {
+					if (search.isPresent()) {
+						verifySearchHasntFailedOrThrowInternalErrorException(search.get());
+						if (search.get().getTotalCount() != null) {
+							return Optional.of(search.get().getTotalCount());
+						}
+					}
+					search = mySearchCacheSvc.fetchByUuid(theUuid);
+				}
+			}
+		}
+
+		return Optional.empty();
 	}
 
 	@NotNull
@@ -516,7 +568,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
-	public abstract class BaseTask implements Callable<Void> {
+	/**
+	 * A search task is a Callable task that runs in
+	 * a thread pool to handle an individual search. One instance
+	 * is created for any requested search and runs from the
+	 * beginning to the end of the search.
+	 * <p>
+	 * Understand:
+	 * This class executes in its own thread separate from the
+	 * web server client thread that made the request. We do that
+	 * so that we can return to the client as soon as possible,
+	 * but keep the search going in the background (and have
+	 * the next page of results ready to go when the client asks).
+	 */
+	public class SearchTask implements Callable<Void> {
 		private final SearchParameterMap myParams;
 		private final IDao myCallingDao;
 		private final String myResourceType;
@@ -538,7 +603,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		/**
 		 * Constructor
 		 */
-		protected BaseTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
+		protected SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
 			mySearch = theSearch;
 			myCallingDao = theCallingDao;
 			myParams = theParams;
@@ -547,6 +612,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySearchRuntimeDetails = new SearchRuntimeDetails(theRequest, mySearch.getUuid());
 			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
 			myRequest = theRequest;
+		}
+
+		/**
+		 * This method is called by the server HTTP thread, and
+		 * will block until at least one page of results have been
+		 * fetched from the DB, and will never block after that.
+		 */
+		Integer awaitInitialSync() {
+			ourLog.trace("Awaiting initial sync");
+			do {
+				try {
+					if (getInitialCollectionLatch().await(250, TimeUnit.MILLISECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					// Shouldn't happen
+					Thread.currentThread().interrupt();
+					throw new InternalErrorException(e);
+				}
+			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
+			ourLog.trace("Initial sync completed");
+
+			return getSearch().getTotalCount();
 		}
 
 		protected Search getSearch() {
@@ -1010,7 +1098,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 
-	public class SearchContinuationTask extends BaseTask {
+	public class SearchContinuationTask extends SearchTask {
 
 		public SearchContinuationTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
 			super(theSearch, theCallingDao, theParams, theResourceType, theRequest);
@@ -1041,51 +1129,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	}
 
-	/**
-	 * A search task is a Callable task that runs in
-	 * a thread pool to handle an individual search. One instance
-	 * is created for any requested search and runs from the
-	 * beginning to the end of the search.
-	 * <p>
-	 * Understand:
-	 * This class executes in its own thread separate from the
-	 * web server client thread that made the request. We do that
-	 * so that we can return to the client as soon as possible,
-	 * but keep the search going in the background (and have
-	 * the next page of results ready to go when the client asks).
-	 */
-	class SearchTask extends BaseTask {
-
-		/**
-		 * Constructor
-		 */
-		SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails) {
-			super(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails);
-		}
-
-		/**
-		 * This method is called by the server HTTP thread, and
-		 * will block until at least one page of results have been
-		 * fetched from the DB, and will never block after that.
-		 */
-		Integer awaitInitialSync() {
-			ourLog.trace("Awaiting initial sync");
-			do {
-				try {
-					if (getInitialCollectionLatch().await(250, TimeUnit.MILLISECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					// Shouldn't happen
-					throw new InternalErrorException(e);
-				}
-			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
-			ourLog.trace("Initial sync completed");
-
-			return getSearch().getTotalCount();
-		}
-
-	}
 
 	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch) {
 		theSearch.setDeleted(false);
