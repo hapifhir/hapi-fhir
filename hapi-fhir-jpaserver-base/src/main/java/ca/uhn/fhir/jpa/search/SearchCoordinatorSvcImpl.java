@@ -178,14 +178,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			searchTask.awaitInitialSync();
 		}
 
+		ourLog.info("**JA About to start looking for resources {}-{}", theFrom, theTo);
+
 		Search search;
 		StopWatch sw = new StopWatch();
 		while (true) {
 
 			if (myNeverUseLocalSearchForUnitTests == false) {
-//				SearchTask searchTask = myIdToSearchTask.get(theUuid);
 				if (searchTask != null) {
-					ourLog.trace("Local search found");
+					ourLog.info("Local search found");
 					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					if (resourcePids != null) {
 						// FIXME: JA should we remove the blocked number from this message?
@@ -198,18 +199,18 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
 				.orElseThrow(() -> {
-					ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
+					ourLog.info("**JA Client requested unknown paging ID[{}]", theUuid);
 					String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
 					return new ResourceGoneException(msg);
 				});
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
-				ourLog.debug("Search entity marked as finished with {} results", search.getNumFound());
+				ourLog.info("**JA Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
-				ourLog.debug("Search entity has {} results so far", search.getNumFound());
+				ourLog.info("**JA Search entity has {} results so far", search.getNumFound());
 				break;
 			}
 
@@ -221,6 +222,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If the search was saved in "pass complete mode" it's probably time to
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
+				ourLog.info("**JA Going to try to start next search");
 				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
@@ -240,8 +242,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
+		ourLog.info("**JA Finished looping");
 
 		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+
+		ourLog.info("**JA Fetched {} results", pids.size());
 
 		// FIXME: JA should we remove the blocked number from this message?
 		Validate.isTrue((search.getNumFound() - search.getNumBlocked()) < theTo || pids.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, pids.size(), search.getNumFound(), search.getNumBlocked());
