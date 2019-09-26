@@ -876,9 +876,12 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				handleFilterLoincParentChild(theQb, theBool, theFilter);
 				break;
 			case "ancestor":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincAncestor(theSystem, theQb, theBool, theFilter);
+				break;
 			case "descendant":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
-				handleFilterLoincAncestorDescendant(theQb, theBool, theFilter);
+				handleFilterLoincDescendant(theSystem, theQb, theBool, theFilter);
 				break;
 			case "copyright":
 				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
@@ -942,12 +945,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
-		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
-			addLoincFilterParentChildIn(theBool, theFilter);
-		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
+				break;
+			case IN:
+				addLoincFilterParentChildIn(theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -970,28 +976,81 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
 	}
 
-	private void handleFilterLoincAncestorDescendant(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			addLoincFilterAncestorDescendantEqual(theBool, theFilter.getProperty(), theFilter.getValue());
-		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
-			addLoincFilterAncestorDescendantIn(theBool, theFilter);
-		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+	private void handleFilterLoincAncestor(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterAncestorIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
-	private void addLoincFilterAncestorDescendantEqual(BooleanJunction<?> theBool, String theProperty, String theValue) {
-		logFilteringValueOnProperty(theValue, theProperty);
-		// FIXME: DM 2019-09-25 - Filter with op=EQUAL on ancestor/descendant
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		TermConcept code = findCode(theSystem, theFilter.getValue())
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
+
+		logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
+		theBool.must(theQb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
 	}
 
-	private void addLoincFilterAncestorDescendantIn(BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		String[] values = theFilter.getValue().split(",");
 		List<Term> terms = new ArrayList<>();
 		for (String value : values) {
 			logFilteringValueOnProperty(value, theFilter.getProperty());
-			// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor/descendant
+			// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor
 		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterDescendantIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void addLoincFilterDescendantIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		String[] parentPids = code.getParentPidsAsString().split(" ");
+		for (String parentPid : parentPids) {
+			retVal.add(new Term("myId", parentPid));
+		}
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
 	}
 
 	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {

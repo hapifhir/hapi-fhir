@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -150,6 +151,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				LOINC_URI,
 				code2.getCode(),
 				code2.getDisplay());
+			code1.addChild(code2, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			cs.getConcepts().add(code1);
 
 			code2.addPropertyString("SYSTEM", "Ser");
@@ -164,11 +166,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				LOINC_URI,
 				code3.getCode(),
 				code3.getDisplay());
+			code2.addChild(code3, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			code2.addPropertyCoding(
 				"child",
 				LOINC_URI,
 				code4.getCode(),
 				code4.getDisplay());
+			code2.addChild(code4, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			cs.getConcepts().add(code2);
 
 			code3.addPropertyString("SYSTEM", "Ser");
