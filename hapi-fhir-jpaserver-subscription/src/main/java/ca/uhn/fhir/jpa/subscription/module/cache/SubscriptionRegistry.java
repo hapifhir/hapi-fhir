@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,7 +31,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -91,7 +90,7 @@ public class SubscriptionRegistry {
 		Validate.notNull(theSubscription);
 
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		SubscribableChannel deliveryChannel;
+		ISubscribableChannel deliveryChannel;
 		Optional<MessageHandler> deliveryHandler;
 
 		if (myModelConfig.isSubscriptionMatchingEnabled()) {

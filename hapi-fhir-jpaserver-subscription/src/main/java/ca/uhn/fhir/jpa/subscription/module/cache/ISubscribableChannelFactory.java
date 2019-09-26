@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import org.springframework.messaging.SubscribableChannel;
-
 public interface ISubscribableChannelFactory {
-	SubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers);
+	ISubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers);
 
 	int getDeliveryChannelConcurrentConsumers();
 

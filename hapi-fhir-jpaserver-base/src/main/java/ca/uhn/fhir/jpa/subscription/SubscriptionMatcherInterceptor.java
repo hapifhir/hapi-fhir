@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.*;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriber;
@@ -16,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -48,7 +48,7 @@ import javax.annotation.PreDestroy;
 @Interceptor()
 public class SubscriptionMatcherInterceptor implements IResourceModifiedConsumer {
 	public static final String SUBSCRIPTION_MATCHING_CHANNEL_NAME = "subscription-matching";
-	protected SubscribableChannel myMatchingChannel;
+	protected ISubscribableChannel myMatchingChannel;
 	@Autowired
 	protected SubscriptionChannelFactory mySubscriptionChannelFactory;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionMatcherInterceptor.class);

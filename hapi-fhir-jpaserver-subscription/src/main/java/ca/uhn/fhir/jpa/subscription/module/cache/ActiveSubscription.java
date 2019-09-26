@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 
 import java.io.Closeable;
 import java.util.Collection;
@@ -38,11 +37,11 @@ public class ActiveSubscription implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	private CanonicalSubscription mySubscription;
-	private final SubscribableChannel mySubscribableChannel;
+	private final ISubscribableChannel mySubscribableChannel;
 	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
 	private boolean flagForDeletion;
 
-	public ActiveSubscription(CanonicalSubscription theSubscription, SubscribableChannel theSubscribableChannel) {
+	public ActiveSubscription(CanonicalSubscription theSubscription, ISubscribableChannel theSubscribableChannel) {
 		mySubscription = theSubscription;
 		mySubscribableChannel = theSubscribableChannel;
 	}
@@ -51,7 +50,7 @@ public class ActiveSubscription implements Closeable {
 		return mySubscription;
 	}
 
-	public SubscribableChannel getSubscribableChannel() {
+	public ISubscribableChannel getSubscribableChannel() {
 		return mySubscribableChannel;
 	}
 
@@ -97,11 +96,21 @@ public class ActiveSubscription implements Closeable {
 			unregister(messageHandler);
 		}
 		if (mySubscribableChannel instanceof DisposableBean) {
-			try {
-				((DisposableBean) mySubscribableChannel).destroy();
-			} catch (Exception e) {
-				ourLog.error("Failed to destroy channel bean", e);
+			int subscriberCount = mySubscribableChannel.getSubscriberCount();
+			if (subscriberCount > 0) {
+				ourLog.info("Channel for subscription {} still has {} subscribers.  Not destroying.", mySubscription.getIdPart(), subscriberCount);
+			} else {
+				ourLog.info("Channel for subscription {} has no subscribers.  Destroying channel.", mySubscription.getIdPart());
+				tryDestroyChannel((DisposableBean) mySubscribableChannel);
 			}
+		}
+	}
+
+	private void tryDestroyChannel(DisposableBean theSubscribableChannel) {
+		try {
+			theSubscribableChannel.destroy();
+		} catch (Exception e) {
+			ourLog.error("Failed to destroy channel bean", e);
 		}
 	}
 
