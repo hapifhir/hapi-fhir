@@ -183,11 +183,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		while (true) {
 
 			if (myNeverUseLocalSearchForUnitTests == false) {
-				SearchTask task = myIdToSearchTask.get(theUuid);
-				if (task != null) {
+//				SearchTask searchTask = myIdToSearchTask.get(theUuid);
+				if (searchTask != null) {
 					ourLog.trace("Local search found");
-					List<Long> resourcePids = task.getResourcePids(theFrom, theTo);
+					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					if (resourcePids != null) {
+						// FIXME: JA should we remove the blocked number from this message?
+						Validate.isTrue((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) < theTo || resourcePids.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, resourcePids.size(), searchTask.getSearch().getNumFound(), searchTask.getSearch().getNumBlocked());
 						return resourcePids;
 					}
 				}
@@ -241,7 +243,14 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 
+		// FIXME: JA should we remove the blocked number from this message?
+		Validate.isTrue((search.getNumFound() - search.getNumBlocked()) < theTo || pids.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, pids.size(), search.getNumFound(), search.getNumBlocked());
 
+		if (pids.size() < theTo - theFrom) {
+			if (search.getNumFound() >= theTo) {
+
+			}
+		}
 
 		return pids;
 	}
