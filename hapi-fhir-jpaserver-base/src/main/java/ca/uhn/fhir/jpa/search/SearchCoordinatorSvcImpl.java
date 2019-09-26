@@ -197,7 +197,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
 						 * task.
 						 */
-						if((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
+						if ((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
 							return resourcePids;
 						}
 					}
@@ -235,7 +235,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
-					SearchParameterMap params = search.getSearchParameterMap();
+					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails);
 					myIdToSearchTask.put(search.getUuid(), task);
@@ -325,7 +325,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
 		if (search.isPresent()) {
-			if (search.get().getSearchParameterMap().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
+			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
+			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
 				for (int i = 0; i < 10; i++) {
 					if (search.isPresent()) {
 						verifySearchHasntFailedOrThrowInternalErrorException(search.get());
