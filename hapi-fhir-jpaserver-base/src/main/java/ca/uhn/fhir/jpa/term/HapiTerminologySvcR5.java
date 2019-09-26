@@ -270,7 +270,7 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return txTemplate.execute(t-> {
+		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();

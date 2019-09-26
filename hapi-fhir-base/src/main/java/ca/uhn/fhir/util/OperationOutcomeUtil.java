@@ -108,9 +108,13 @@ public class OperationOutcomeUtil {
 		if (theOutcome == null) {
 			return false;
 		}
+		return getIssueCount(theCtx, theOutcome) > 0;
+	}
+
+	public static int getIssueCount(FhirContext theCtx, IBaseOperationOutcome theOutcome) {
 		RuntimeResourceDefinition ooDef = theCtx.getResourceDefinition(theOutcome);
 		BaseRuntimeChildDefinition issueChild = ooDef.getChildByName("issue");
-		return issueChild.getAccessor().getValues(theOutcome).size() > 0;
+		return issueChild.getAccessor().getValues(theOutcome).size();
 	}
 
 	public static IBaseOperationOutcome newInstance(FhirContext theCtx) {
@@ -152,5 +156,4 @@ public class OperationOutcomeUtil {
 			locationChild.getMutator().addValue(theIssue, locationElem);
 		}
 	}
-
 }
