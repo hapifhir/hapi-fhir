@@ -28,7 +28,7 @@ jobs:
         inputs:
           #mavenPomFile: 'pom.xml' 
           goals: 'clean install' # Optional
-          options: '-P ALLMODULES,JACOCO'
+          options: '-P ALLMODULES,JACOCO -nsu'
           #publishJUnitResults: true 
           #testResultsFiles: '**/surefire-reports/TEST-*.xml' # Required when publishJUnitResults == True
           #testRunTitle: # Optional
