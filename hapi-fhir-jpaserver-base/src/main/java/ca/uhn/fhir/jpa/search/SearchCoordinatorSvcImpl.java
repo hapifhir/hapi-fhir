@@ -186,9 +186,11 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 			if (myNeverUseLocalSearchForUnitTests == false) {
 				if (searchTask != null) {
-					ourLog.info("Local search found");
+					ourLog.info("**JA Local search found");
 					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					if (resourcePids != null) {
+						ourLog.info("**JA Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
+
 						// FIXME: JA should we remove the blocked number from this message?
 						Validate.isTrue((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) < theTo || resourcePids.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, resourcePids.size(), searchTask.getSearch().getNumFound(), searchTask.getSearch().getNumBlocked());
 						return resourcePids;
