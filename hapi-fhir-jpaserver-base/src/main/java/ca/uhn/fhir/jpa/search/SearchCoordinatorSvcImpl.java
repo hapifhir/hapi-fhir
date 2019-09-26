@@ -171,6 +171,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
+		// If we're actively searching right now, don't try to do anything until at least one batch has been
+		// persisted in the DB
 		SearchTask searchTask = myIdToSearchTask.get(theUuid);
 		if (searchTask != null) {
 			searchTask.awaitInitialSync();
@@ -296,12 +298,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@Override
-	public Integer size(String theUuid) {
+	public Optional<Integer> getSearchTotalFromRunningSearchIfExists(String theUuid) {
 		SearchTask task = myIdToSearchTask.get(theUuid);
 		if (task != null) {
-			return task.awaitInitialSync();
+			return Optional.ofNullable(task.awaitInitialSync());
 		}
-		return null;
+
+		return Optional.empty();
 	}
 
 	@NotNull

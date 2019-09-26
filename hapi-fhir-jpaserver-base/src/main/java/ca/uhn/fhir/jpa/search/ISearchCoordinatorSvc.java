@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public interface ISearchCoordinatorSvc {
 
@@ -37,6 +38,10 @@ public interface ISearchCoordinatorSvc {
 
 	IBundleProvider registerSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, @Nullable RequestDetails theRequestDetails);
 
-	Integer size(String theUuid);
+	/**
+	 * Fetch the total number of search results for the given currently executing search, if one is currently executing and
+	 * the total is known. Will return empty otherwise
+	 */
+	Optional<Integer> getSearchTotalFromRunningSearchIfExists(String theUuid);
 
 }

@@ -217,7 +217,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
 
-		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size() != null);
 		results = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer resultsSize = results.size();
 		assertEquals(200, resultsSize.intValue());

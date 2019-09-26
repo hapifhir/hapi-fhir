@@ -289,7 +289,19 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 
 	@Override
 	public Integer size() {
-		return mySearchCoordinatorSvc.size(myUuid);
+		ensureSearchEntityLoaded();
+		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
+
+		Integer size = mySearchEntity.getTotalCount();
+		if (size != null) {
+			return Math.max(0, size);
+		}
+
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
+			return null;
+		} else {
+			return mySearchCoordinatorSvc.getSearchTotalFromRunningSearchIfExists(myUuid).orElse(null);
+		}
 	}
 
 	// Note: Leave as protected, HSPC depends on this
