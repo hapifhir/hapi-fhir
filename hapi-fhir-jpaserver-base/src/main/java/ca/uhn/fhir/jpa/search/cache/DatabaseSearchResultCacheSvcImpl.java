@@ -58,9 +58,6 @@ public class DatabaseSearchResultCacheSvcImpl implements ISearchResultCacheSvc {
 
 		ourLog.debug("fetchResultPids for range {}-{} returned {} pids", theFrom, theTo, retVal.size());
 
-		// FIXME: JA should we remove the blocked number from this message?
-		Validate.isTrue((theSearch.getNumFound() - theSearch.getNumBlocked()) < theTo || retVal.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, retVal.size(), theSearch.getNumFound(), theSearch.getNumBlocked());
-
 		return new ArrayList<>(retVal);
 	}
 

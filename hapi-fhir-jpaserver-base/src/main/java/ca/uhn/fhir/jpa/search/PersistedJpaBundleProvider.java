@@ -195,9 +195,8 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 			if (!searchOpt.isPresent()) {
 				return false;
 			}
-			Search search = searchOpt.get();
 
-			setSearchEntity(search);
+			setSearchEntity(searchOpt.get());
 
 			ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
 
