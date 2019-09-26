@@ -191,9 +191,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					if (resourcePids != null) {
 						ourLog.info("**JA Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
 
-						// FIXME: JA should we remove the blocked number from this message?
-						Validate.isTrue((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) < theTo || resourcePids.size() == (theTo - theFrom), "Failed to find results in cache, requested %d - %d and got %d with total found=%d and blocked %s", theFrom, theTo, resourcePids.size(), searchTask.getSearch().getNumFound(), searchTask.getSearch().getNumBlocked());
-						return resourcePids;
+						/*
+						 * Generally, if a search task is open, the fastest possible thing is to just return its results. This
+						 * will work most of the time, but can fail if the task hit a search threshold and the client is requesting
+						 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
+						 * task.
+						 */
+						if((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
+							return resourcePids;
+						}
 					}
 				}
 			}
