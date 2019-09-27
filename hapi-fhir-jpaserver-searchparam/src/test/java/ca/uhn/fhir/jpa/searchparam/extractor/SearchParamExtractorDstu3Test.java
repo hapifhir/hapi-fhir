@@ -11,8 +11,8 @@ import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.TestUtil;
-import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -44,12 +44,17 @@ public class SearchParamExtractorDstu3Test {
 			}
 
 			@Override
+			public void refreshCacheIfNecessary() {
+				// nothing
+			}
+
+			@Override
 			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public Map<String,RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+			public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
 				Map<String, RuntimeSearchParam> sps = new HashMap<>();
 				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
@@ -98,10 +103,10 @@ public class SearchParamExtractorDstu3Test {
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
-	
+
 	@BeforeClass
 	public static void beforeClass() {
 		ourValidationSupport = new DefaultProfileValidationSupport();
 	}
-	
+
 }

@@ -311,46 +311,48 @@ public class OperationParameter implements IParameter {
 
 	private void translateQueryParametersIntoServerArgumentForPost(RequestDetails theRequest, List<Object> matchingParamValues) {
 		IBaseResource requestContents = (IBaseResource) theRequest.getUserData().get(REQUEST_CONTENTS_USERDATA_KEY);
-		RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
-		if (def.getName().equals("Parameters")) {
+		if (requestContents != null) {
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(requestContents);
+			if (def.getName().equals("Parameters")) {
 
-			BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
-			BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
+				BaseRuntimeChildDefinition paramChild = def.getChildByName("parameter");
+				BaseRuntimeElementCompositeDefinition<?> paramChildElem = (BaseRuntimeElementCompositeDefinition<?>) paramChild.getChildByName("parameter");
 
-			RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
-			BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
-			BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
+				RuntimeChildPrimitiveDatatypeDefinition nameChild = (RuntimeChildPrimitiveDatatypeDefinition) paramChildElem.getChildByName("name");
+				BaseRuntimeChildDefinition valueChild = paramChildElem.getChildByName("value[x]");
+				BaseRuntimeChildDefinition resourceChild = paramChildElem.getChildByName("resource");
 
-			IAccessor paramChildAccessor = paramChild.getAccessor();
-			List<IBase> values = paramChildAccessor.getValues(requestContents);
-			for (IBase nextParameter : values) {
-				List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-				if (nextNames != null && nextNames.size() > 0) {
-					IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
-					if (myName.equals(nextName.getValueAsString())) {
+				IAccessor paramChildAccessor = paramChild.getAccessor();
+				List<IBase> values = paramChildAccessor.getValues(requestContents);
+				for (IBase nextParameter : values) {
+					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
+					if (nextNames != null && nextNames.size() > 0) {
+						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
+						if (myName.equals(nextName.getValueAsString())) {
 
-						if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
-							matchingParamValues.add(nextParameter);
-						} else {
-							List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
-							List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
-							if (paramValues != null && paramValues.size() > 0) {
-								tryToAddValues(paramValues, matchingParamValues);
-							} else if (paramResources != null && paramResources.size() > 0) {
-								tryToAddValues(paramResources, matchingParamValues);
+							if (myParameterType.isAssignableFrom(nextParameter.getClass())) {
+								matchingParamValues.add(nextParameter);
+							} else {
+								List<IBase> paramValues = valueChild.getAccessor().getValues(nextParameter);
+								List<IBase> paramResources = resourceChild.getAccessor().getValues(nextParameter);
+								if (paramValues != null && paramValues.size() > 0) {
+									tryToAddValues(paramValues, matchingParamValues);
+								} else if (paramResources != null && paramResources.size() > 0) {
+									tryToAddValues(paramResources, matchingParamValues);
+								}
 							}
-						}
 
+						}
 					}
 				}
+
+			} else {
+
+				if (myParameterType.isAssignableFrom(requestContents.getClass())) {
+					tryToAddValues(Arrays.asList(requestContents), matchingParamValues);
+				}
+
 			}
-
-		} else {
-
-			if (myParameterType.isAssignableFrom(requestContents.getClass())) {
-				tryToAddValues(Arrays.asList((IBase) requestContents), matchingParamValues);
-			}
-
 		}
 	}
 

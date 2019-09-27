@@ -136,7 +136,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 	@Override
 	public Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter) {
 		int hashCode = theQueryString.hashCode();
-		return mySearchDao.find(theResourceType, hashCode, theCreatedAfter);
+		return mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, theCreatedAfter);
 
 	}
 
@@ -166,7 +166,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 2000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(), PageRequest.of(0, 2000))
 		);
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);

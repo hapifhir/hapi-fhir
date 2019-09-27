@@ -148,6 +148,7 @@ public class FhirContextDstu2Test {
 							afterInitBlocker.await();
 							submittedTestRunnable.run();
 						} catch (final Throwable e) {
+							ourLog.error("Exception", e);
 							exceptions.add(e);
 						} finally {
 							allDone.countDown();

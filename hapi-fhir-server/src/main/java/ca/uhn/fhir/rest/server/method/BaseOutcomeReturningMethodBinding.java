@@ -41,6 +41,8 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Set;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+
 abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<MethodOutcome> {
 	static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseOutcomeReturningMethodBinding.class);
 
@@ -181,9 +183,11 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		boolean allowPrefer = RestfulServerUtils.respectPreferHeader(restOperationType);
 		if (allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
-			PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(theServer, prefer);
+			PreferHeader preferReturn = RestfulServerUtils.parsePreferHeader(theServer, prefer);
+			PreferReturnEnum returnEnum = preferReturn.getReturn();
+			returnEnum = defaultIfNull(returnEnum, PreferReturnEnum.REPRESENTATION);
 
-			switch (preferReturn) {
+			switch (returnEnum) {
 				case REPRESENTATION:
 					if (theMethodOutcome != null) {
 						outcome = theMethodOutcome.getResource();

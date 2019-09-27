@@ -293,6 +293,7 @@ public class SearchCoordinatorSvcImplTest {
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
 
+
 	@Test
 	public void testAsyncSearchSmallResultSetSameCoordinator() {
 		SearchParameterMap params = new SearchParameterMap();

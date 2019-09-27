@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchResult;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -44,4 +45,7 @@ public interface ISearchResultDao extends JpaRepository<SearchResult, Long> {
 	@Modifying
 	@Query("DELETE FROM SearchResult s WHERE s.myId IN :ids")
 	void deleteByIds(@Param("ids") List<Long> theContent);
+
+	@Query("SELECT count(r) FROM SearchResult r WHERE r.mySearchPid = :search")
+	int countForSearch(@Param("search") Long theSearchPid);
 }

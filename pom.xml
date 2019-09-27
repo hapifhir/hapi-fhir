@@ -45,14 +45,7 @@
 	</scm>
 
 	<repositories>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>bintray-dnault-maven</id>
-			<name>bintray</name>
-			<url>https://dl.bintray.com/dnault/maven</url>
-		</repository>
+		<!--
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
@@ -60,12 +53,16 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		-->
 		<repository>
 			<id>oss-snapshot</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
 		</repository>
 	</repositories>
 
@@ -551,6 +548,10 @@
 			<id>fitzoh</id>
 			<name>Andrew Fitzgerald</name>
 		</developer>
+		<developer>
+			<id>dmap</id>
+			<name>David Maplesden</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -562,7 +563,7 @@
 
 	<properties>
 
-		<fhir_core_version>4.0.10-SNAPSHOT</fhir_core_version>
+		<fhir_core_version>4.0.19-SNAPSHOT</fhir_core_version>
 		<ucum_version>1.0.2</ucum_version>
 
 		<!-- configure timestamp in MANIFEST.MF for maven-war-provider -->
@@ -606,7 +607,7 @@
 		<httpcore_version>4.4.11</httpcore_version>
 		<httpclient_version>4.5.9</httpclient_version>
 		<jackson_version>2.9.9</jackson_version>
-		<jackson_databind_version>2.9.9.1</jackson_databind_version>
+		<jackson_databind_version>2.9.10</jackson_databind_version>
 		<maven_assembly_plugin_version>3.1.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<resteasy_version>4.0.0.Beta3</resteasy_version>
@@ -1002,6 +1003,12 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>3.12.0</version>
 				<type>pom</type>
+		      <exclusions>
+					<exclusion>
+				      <groupId>com.github.jsonld-java</groupId>
+			         <artifactId>jsonld-java</artifactId>
+		         </exclusion>
+	         </exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.lucene</groupId>
@@ -1279,6 +1286,11 @@
 				<version>42.2.6.jre7</version>
 			</dependency>
 			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
 				<version>${slf4j_version}</version>
@@ -1543,7 +1555,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2352,6 +2364,7 @@
                 <module>hapi-fhir-bom</module>
 				<module>hapi-deployable-pom</module>
 				<module>hapi-fhir-base</module>
+				<module>hapi-fhir-docs</module>
 				<module>hapi-fhir-test-utilities</module>
 				<module>hapi-tinder-plugin</module>
 				<module>hapi-tinder-test</module>
