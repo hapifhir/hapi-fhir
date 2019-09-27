@@ -90,5 +90,7 @@ In your web.xml file (within the WEB-INF directory in your WAR file), the follow
 <filter-mapping>
 	<filter-name>CORS Filter</filter-name>
 	<url-pattern>/*</url-pattern>
-</filter-mapping>]]></source>
+</filter-mapping>
 ```
+
+
