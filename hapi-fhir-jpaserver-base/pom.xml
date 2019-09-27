@@ -578,7 +578,6 @@
 			<groupId>pl.allegro.tech</groupId>
 			<artifactId>embedded-elasticsearch</artifactId>
 			<version>2.10.0</version>
-			<scope>test</scope>
 		</dependency>
 
 		<dependency>
