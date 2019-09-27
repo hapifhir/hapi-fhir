@@ -51,7 +51,7 @@ public class LuceneSearchMappingFactory {
 			.analyzerDef("autocompletePhoneticAnalyzer", StandardTokenizerFactory.class)
 				.filter(StandardFilterFactory.class)
 				.filter(StopFilterFactory.class)
-				.filter(PhoneticFilterFactory.class)
+				//.filter(PhoneticFilterFactory.class)
 				.param("encoder", "DoubleMetaphone")
 				.filter(SnowballPorterFilterFactory.class)
 				.param("language", "English")

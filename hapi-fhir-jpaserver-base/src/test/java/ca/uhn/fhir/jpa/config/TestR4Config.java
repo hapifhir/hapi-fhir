@@ -138,7 +138,8 @@ public class TestR4Config extends BaseJavaConfigR4 {
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
+	@Bean
+	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");

@@ -1,40 +1,35 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Observation.ObservationStatus;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.*;
-
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl.Suggestion;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Observation.ObservationStatus;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
-	
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchFtTest.class);
 
 	@Before
 	public void beforeDisableResultReuse() {
 		myDaoConfig.setReuseCachedSearchResultsForMillis(null);
 	}
-
-	@AfterClass
-	public static void afterClassClearContext() {
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
 
 	@Test
 	public void testCodeTextSearch() {
@@ -52,7 +47,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Observation.SP_CODE, new TokenParam(null, "systolic").setModifier(TokenParamModifier.TEXT));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
@@ -72,7 +67,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	}
 
-
 	@Test
 	public void testResourceTextSearch() {
 		Observation obs1 = new Observation();
@@ -81,15 +75,15 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs1.setValue(new Quantity(123));
 		obs1.getNoteFirstRep().setText("obs1");
 		IIdType id1 = myObservationDao.create(obs1, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		Observation obs2 = new Observation();
 		obs2.getCode().setText("Diastolic Blood Pressure");
 		obs2.setStatus(ObservationStatus.FINAL);
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Constants.PARAM_CONTENT, new StringParam("systolic"));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1)));
@@ -112,22 +106,21 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs1.setValue(new StringType("Systolic Blood Pressure"));
 		obs1.setStatus(ObservationStatus.FINAL);
 		IIdType id1 = myObservationDao.create(obs1, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		Observation obs2 = new Observation();
 		obs1.getCode().setText("AAAAA");
 		obs1.setValue(new StringType("Diastolic Blood Pressure"));
 		obs2.setStatus(ObservationStatus.FINAL);
 		IIdType id2 = myObservationDao.create(obs2, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		SearchParameterMap map;
-		
+
 		map = new SearchParameterMap();
 		map.add(Observation.SP_VALUE_STRING, new StringParam("sure").setContains(true));
 		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)), containsInAnyOrder(toValues(id1, id2)));
 
 	}
 
-	
 	@Test
 	public void testSuggestIgnoresBase64Content() {
 		Patient patient = new Patient();
@@ -153,11 +146,11 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		Media med = new Media();
 		med.getSubject().setReferenceElement(ptId);
 		med.getContent().setContentType("LCws");
-		med.getContent().setDataElement(new Base64BinaryType(new byte[] {44,44,44,44,44,44,44,44}));
+		med.getContent().setDataElement(new Base64BinaryType(new byte[]{44, 44, 44, 44, 44, 44, 44, 44}));
 		med.getContent().setTitle("bbbb syst");
 		myMediaDao.create(med, mockSrd());
 		ourLog.info(myFhirCtx.newJsonParser().encodeResourceToString(med));
-		
+
 		List<Suggestion> output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "press", null);
 		ourLog.info("Found: " + output);
 		assertEquals(2, output.size());
@@ -177,12 +170,12 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		assertEquals("bbbb syst", output.get(1).getTerm());
 		assertEquals("Systolic", output.get(2).getTerm());
 		assertEquals("Systolic Blood Pressure", output.get(3).getTerm());
-		
+
 		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "LCws", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
 	}
-	
+
 	@Test
 	public void testSuggest() {
 		Patient patient = new Patient();
@@ -238,7 +231,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		assertEquals(2, output.size());
 		assertEquals("HELLO", output.get(0).getTerm());
 		assertEquals("ZXC HELLO", output.get(1).getTerm());
-		
+
 		output = mySearchDao.suggestKeywords("Patient/" + ptId.getIdPart() + "/$everything", "_content", "Z", null);
 		ourLog.info("Found: " + output);
 		assertEquals(0, output.size());
@@ -250,8 +243,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		assertEquals("ZXC HELLO", output.get(1).getTerm());
 
 	}
-	
-	
+
 	@Test
 	public void testSearchAndReindex() {
 		Patient patient;
@@ -311,7 +303,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		Device dev1 = new Device();
 		dev1.setManufacturer("Some Manufacturer");
 		IIdType devId1 = myDeviceDao.create(dev1, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
 		myDeviceDao.create(dev2, mockSrd()).getId().toUnqualifiedVersionless();
@@ -335,14 +327,14 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs3.getCode().addCoding().setCode("CODE3");
 		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		HttpServletRequest request;
 		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
-		
+
 		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
-		
+
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
 		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientInstanceEverything(request, ptId1, null, null, null, param, null, null, mockSrd()));
@@ -360,7 +352,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		/*
 		 * Add another match
 		 */
-		
+
 		Observation obs4 = new Observation();
 		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
@@ -376,7 +368,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		/*
 		 * Make one previous match no longer match
 		 */
-		
+
 		obs1 = new Observation();
 		obs1.setId(obsId1);
 		obs1.getSubject().setReferenceElement(ptId1);
@@ -390,7 +382,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		assertThat(actual, containsInAnyOrder(toValues(ptId1, obsId4)));
 
 	}
-	
+
 	@Test
 	public void testEverythingTypeWithContentFilter() {
 		Patient pt1 = new Patient();
@@ -404,7 +396,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		Device dev1 = new Device();
 		dev1.setManufacturer("Some Manufacturer");
 		IIdType devId1 = myDeviceDao.create(dev1, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		Device dev2 = new Device();
 		dev2.setManufacturer("Some Manufacturer 2");
 		myDeviceDao.create(dev2, mockSrd()).getId().toUnqualifiedVersionless();
@@ -427,14 +419,14 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		obs3.getCode().addCoding().setCode("CODE3");
 		obs3.setValue(new StringType("obsvalue3"));
 		IIdType obsId3 = myObservationDao.create(obs3, mockSrd()).getId().toUnqualifiedVersionless();
-		
+
 		HttpServletRequest request;
 		List<String> actual;
 		request = mock(HttpServletRequest.class);
 		StringAndListParam param;
-		
+
 		ourLog.info("Pt1:{} Pt2:{} Obs1:{} Obs2:{} Obs3:{}", ptId1.getIdPart(), ptId2.getIdPart(), obsId1.getIdPart(), obsId2.getIdPart(), obsId3.getIdPart());
-		
+
 		param = new StringAndListParam();
 		param.addAnd(new StringOrListParam().addOr(new StringParam("obsvalue1")));
 		actual = toUnqualifiedVersionlessIdValues(myPatientDao.patientTypeEverything(request, null, null, null, param, null, null, mockSrd()));
@@ -447,7 +439,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		/*
 		 * Add another match
 		 */
-		
+
 		Observation obs4 = new Observation();
 		obs4.getSubject().setReferenceElement(ptId1);
 		obs4.getCode().addCoding().setCode("CODE1");
@@ -463,7 +455,7 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		/*
 		 * Make one previous match no longer match
 		 */
-		
+
 		obs1 = new Observation();
 		obs1.setId(obsId1);
 		obs1.getSubject().setReferenceElement(ptId1);
@@ -478,7 +470,6 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 
 	}
 
-	
 	/**
 	 * When processing transactions, we do two passes. Make sure we don't update the lucene index twice since that would
 	 * be inefficient
@@ -574,6 +565,11 @@ public class FhirResourceDaoR4SearchFtTest extends BaseJpaR4Test {
 		patients = toUnqualifiedVersionlessIdValues(myObservationDao.search(params));
 		assertThat(patients, containsInAnyOrder(toValues(oId1, oId2)));
 
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() {
+		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
 }

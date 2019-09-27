@@ -1,9 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
-import ca.uhn.fhir.jpa.config.TestR4WithoutLuceneConfig;
+import ca.uhn.fhir.jpa.config.TestR4WithLuceneDisabledConfig;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -27,7 +26,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +38,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {TestR4WithoutLuceneConfig.class})
+@ContextConfiguration(classes = {TestR4WithLuceneDisabledConfig.class})
 public class FhirResourceDaoR4SearchWithLuceneDisabledTest extends BaseJpaTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchWithLuceneDisabledTest.class);
 	@Autowired
