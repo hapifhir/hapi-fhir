@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ElementUtil;
 import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
@@ -64,8 +65,12 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 	private IHapiTerminologySvc myHapiTerminologySvc;
 
 	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
+
+	@Autowired
 	@Qualifier("myJpaValidationSupportChainDstu3")
 	private IValidationSupport myValidationSupport;
+
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;
 
@@ -314,11 +319,15 @@ public class FhirResourceDaoValueSetDstu3 extends FhirResourceDaoDstu3<ValueSet>
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
-			vs = myValidationSupport.fetchResource(getContext(), ValueSet.class, theValueSetIdentifier.getValue());
+			vs = myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 			if (vs == null) {
-				throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
+				vs = myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+				if (vs == null) {
+					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
+				}
+			} else {
+				isBuiltInValueSet = true;
 			}
-			isBuiltInValueSet = true;
 		} else {
 			if (theCode == null || theCode.isEmpty()) {
 				throw new InvalidRequestException("Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");

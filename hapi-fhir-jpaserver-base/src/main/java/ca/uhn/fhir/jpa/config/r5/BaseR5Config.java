@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.FhirInstanceValidator;
@@ -97,6 +98,11 @@ public class BaseR5Config extends BaseConfig {
 		val.setBestPracticeWarningLevel(level);
 		val.setValidationSupport(validationSupportChainR5());
 		return val;
+	}
+
+	@Bean
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport();
 	}
 
 	@Bean

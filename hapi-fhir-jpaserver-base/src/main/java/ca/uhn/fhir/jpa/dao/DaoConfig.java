@@ -150,18 +150,26 @@ public class DaoConfig {
 	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
 	/**
 	 * Do not change default of {@code true}!
+	 *
+	 * @since 4.1.0
 	 */
 	private boolean myPreExpandValueSets = true;
 	/**
 	 * Do not change default of {@code 0}!
+	 *
+	 * @since 4.1.0
 	 */
 	private int myPreExpandValueSetsDefaultOffset = 0;
 	/**
 	 * Do not change default of {@code 1000}!
+	 *
+	 * @since 4.1.0
 	 */
 	private int myPreExpandValueSetsDefaultCount = 1000;
 	/**
 	 * Do not change default of {@code 1000}!
+	 *
+	 * @since 4.1.0
 	 */
 	private int myPreExpandValueSetsMaxCount = 1000;
 
@@ -1699,6 +1707,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code true}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public boolean isPreExpandValueSets() {
 		return myPreExpandValueSets;
@@ -1712,6 +1722,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code true}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public void setPreExpandValueSets(boolean thePreExpandValueSets) {
 		myPreExpandValueSets = thePreExpandValueSets;
@@ -1725,6 +1737,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code 0}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public int getPreExpandValueSetsDefaultOffset() {
 		return myPreExpandValueSetsDefaultOffset;
@@ -1738,6 +1752,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public int getPreExpandValueSetsDefaultCount() {
 		return myPreExpandValueSetsDefaultCount;
@@ -1755,6 +1771,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public void setPreExpandValueSetsDefaultCount(int thePreExpandValueSetsDefaultCount) {
 		myPreExpandValueSetsDefaultCount = Math.min(thePreExpandValueSetsDefaultCount, getPreExpandValueSetsMaxCount());
@@ -1768,6 +1786,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public int getPreExpandValueSetsMaxCount() {
 		return myPreExpandValueSetsMaxCount;
@@ -1786,6 +1806,8 @@ public class DaoConfig {
 	 * <p>
 	 * The default value for this setting is {@code 1000}.
 	 * </p>
+	 *
+	 * @since 4.1.0
 	 */
 	public void setPreExpandValueSetsMaxCount(int thePreExpandValueSetsMaxCount) {
 		myPreExpandValueSetsMaxCount = thePreExpandValueSetsMaxCount;
