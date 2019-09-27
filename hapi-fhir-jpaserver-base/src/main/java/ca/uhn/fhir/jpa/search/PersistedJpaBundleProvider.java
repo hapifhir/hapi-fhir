@@ -191,12 +191,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
 
-			Optional<Search> search = mySearchCacheSvc.fetchByUuid(myUuid);
-			if (!search.isPresent()) {
+			Optional<Search> searchOpt = mySearchCacheSvc.fetchByUuid(myUuid);
+			if (!searchOpt.isPresent()) {
 				return false;
 			}
 
-			setSearchEntity(search.get());
+			setSearchEntity(searchOpt.get());
 
 			ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
 
@@ -292,10 +292,16 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 
 		Integer size = mySearchEntity.getTotalCount();
-		if (size == null) {
-			return null;
+		if (size != null) {
+			return Math.max(0, size);
 		}
-		return Math.max(0, size);
+
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
+			return null;
+		} else {
+			return mySearchCoordinatorSvc.getSearchTotal(myUuid).orElse(null);
+		}
+
 	}
 
 	// Note: Leave as protected, HSPC depends on this

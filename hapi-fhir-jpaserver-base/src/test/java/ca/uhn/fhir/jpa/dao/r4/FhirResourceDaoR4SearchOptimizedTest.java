@@ -120,20 +120,24 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p);
 
 		myDaoConfig.setSearchPreFetchThresholds(Arrays.asList(20, 50, 190));
+		SearchParameterMap params;
+		IBundleProvider results;
+		String uuid;
+		List<String> ids;
 
 		// Search with count only
-		SearchParameterMap params = new SearchParameterMap();
+		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSummaryMode((SummaryEnum.COUNT));
-		IBundleProvider results = myPatientDao.search(params);
-		String uuid = results.getUuid();
+		results = myPatientDao.search(params);
+		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertEquals(201, results.size().intValue());
-		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
+		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids, empty());
 		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
-		// Seach with total explicitly requested
+		// Search with total explicitly requested
 		params = new SearchParameterMap();
 		params.add(Patient.SP_NAME, new StringParam("FAM"));
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
@@ -213,7 +217,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals("Patient/PT00009", ids.get(9));
 
-		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size() != null);
 		results = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer resultsSize = results.size();
 		assertEquals(200, resultsSize.intValue());
@@ -353,6 +356,15 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		/*
 		 * 20 should be prefetched since that's the initial page size
 		 */
+
+		await().until(()->{
+			return runInTransaction(()->{
+				return mySearchEntityDao
+					.findByUuidAndFetchIncludes(uuid)
+					.orElseThrow(() -> new InternalErrorException(""))
+					.getStatus() == SearchStatusEnum.PASSCMPLET;
+			});
+		});
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
@@ -636,6 +648,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertEquals("Patient/PT00000", ids.get(0));
 		assertEquals(1, ids.size());
 
+		await().until(()-> runInTransaction(()-> mySearchEntityDao
+			.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""))
+			.getStatus() == SearchStatusEnum.FINISHED));
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(SearchStatusEnum.FINISHED, search.getStatus());
@@ -778,6 +794,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		search.getResources(0, 20);
 		ourLog.info("** Done retrieving resources");
 
+		await().until(()->myCaptureQueriesListener.countSelectQueries() == 4);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());

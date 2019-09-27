@@ -248,6 +248,10 @@
 				<![CDATA[<code>=</code>]]> or <![CDATA[<code>in</code>]]> operators. At present, the
 				<![CDATA[<code>ancestor</code>]]> filter can only be used with the <![CDATA[<code>=</code>]]> operator.
 			</action>
+			<action type="fix">
+				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
+				that the CodeSystem did not exist. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
