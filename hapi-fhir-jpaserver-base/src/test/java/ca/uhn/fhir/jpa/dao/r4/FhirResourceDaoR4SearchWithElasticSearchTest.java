@@ -223,6 +223,26 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 
 	}
 
+	@Test
+	public void testExpandWithIsAInExternalValueSet() throws InterruptedException {
+		createExternalCsAndLocalVs();
+
+		waitForElasticToCatchUp();
+
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(URL_MY_CODE_SYSTEM);
+		include.addFilter().setOp(ValueSet.FilterOperator.ISA).setValue("childAA").setProperty("concept");
+
+		ValueSet result = myValueSetDao.expand(vs, null);
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+
+
+	}
+
 	private CodeSystem createExternalCs() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
@@ -277,26 +297,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 		valueSet.setUrl(URL_MY_VALUE_SET);
 		valueSet.getCompose().addInclude().setSystem(codeSystem.getUrl());
 		myValueSetDao.create(valueSet, mySrd);
-	}
-
-	@Test
-	public void testExpandWithIsAInExternalValueSet() throws InterruptedException {
-		createExternalCsAndLocalVs();
-
-		waitForElasticToCatchUp();
-
-		ValueSet vs = new ValueSet();
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addFilter().setOp(ValueSet.FilterOperator.ISA).setValue("childAA").setProperty("concept");
-
-		ValueSet result = myValueSetDao.expand(vs, null);
-		logAndValidateValueSet(result);
-
-		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
-
-
 	}
 
 	private ArrayList<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {

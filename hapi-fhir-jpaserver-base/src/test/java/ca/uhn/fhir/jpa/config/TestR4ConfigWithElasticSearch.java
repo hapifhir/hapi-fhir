@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.ConfigurationException;
-import ca.uhn.fhir.jpa.search.elastic.ElasticsearchMappingProvider;
+import ca.uhn.fhir.jpa.search.elastic.ElasticsearchHibernatePropertiesBuilder;
+import org.hibernate.search.elasticsearch.cfg.ElasticsearchIndexStatus;
+import org.hibernate.search.elasticsearch.cfg.IndexSchemaManagementStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -25,19 +27,18 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 	public Properties jpaProperties() {
 		Properties retVal = super.jpaProperties();
 
-		// the belowing properties are used for ElasticSearch integration
-		retVal.put("hibernate.search.elasticsearch.analyzer_definition_provider", ElasticsearchMappingProvider.class.getName());
-		retVal.put("hibernate.search.default.indexmanager", "elasticsearch");
-		retVal.put("hibernate.search.default.elasticsearch.host", "http://127.0.0.1:9200");
-		retVal.put("hibernate.search.default.elasticsearch.index_schema_management_strategy", "CREATE");
-		retVal.put("hibernate.search.default.elasticsearch.index_management_wait_timeout", "10000");
-		retVal.put("hibernate.search.default.elasticsearch.required_index_status", "yellow");
-
-		// Only for unit tests
-		retVal.put("hibernate.search.default.elasticsearch.refresh_after_write", "true");
-
 		// Force elasticsearch to start first
-		ourLog.info("ElasticSearch started on port: {}", embeddedElasticSearch().getHttpPort());
+		int httpPort = embeddedElasticSearch().getHttpPort();
+		ourLog.info("ElasticSearch started on port: {}", httpPort);
+
+		new ElasticsearchHibernatePropertiesBuilder()
+			.setDebugRefreshAfterWrite(true)
+			.setDebugPrettyPrintJsonLog(true)
+			.setIndexSchemaManagementStrategy(IndexSchemaManagementStrategy.CREATE)
+			.setIndexManagementWaitTimeoutMillis(10000)
+			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
+			.setRestUrl("http://localhost:" + httpPort)
+			.apply(retVal);
 
 		return retVal;
 	}
@@ -49,7 +50,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			embeddedElastic = EmbeddedElastic.builder()
 				.withElasticVersion(ELASTIC_VERSION)
 				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
-				.withSetting(PopularProperties.HTTP_PORT, 9200)
+				.withSetting(PopularProperties.HTTP_PORT, 0)
 				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
 				.build()
 				.start();
