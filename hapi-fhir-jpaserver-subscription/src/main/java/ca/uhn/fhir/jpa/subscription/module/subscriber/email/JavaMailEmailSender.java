@@ -35,9 +35,13 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import javax.annotation.PostConstruct;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -109,8 +113,8 @@ public class JavaMailEmailSender implements IEmailSender {
 		engine.setTemplateResolver(templateResolver);
 
 		Context context = new Context();
-
-		String body = engine.process(theDetails.getBodyTemplate(), context);
+		String bodyTemplate = theDetails.getBodyTemplate();
+		String body = bodyTemplate != null && !bodyTemplate.isEmpty() ? engine.process(bodyTemplate, context) : "";
 		String subject = engine.process(theDetails.getSubjectTemplate(), context);
 
 		MimeMessage email = mySender.createMimeMessage();
@@ -122,9 +126,19 @@ public class JavaMailEmailSender implements IEmailSender {
 			email.setFrom(from);
 			email.setRecipients(Message.RecipientType.TO, toTrimmedCommaSeparatedString(theDetails.getTo()));
 			email.setSubject(subject);
-			email.setText(body);
 			email.setSentDate(new Date());
 			email.addHeader("X-FHIR-Subscription", subscriptionId);
+
+			Multipart multipart = new MimeMultipart();
+			BodyPart bodyPart = new MimeBodyPart();
+			bodyPart.setText(body);			// TODO: Should set the content of the part manually, and also set the mime-type accordingly
+			multipart.addBodyPart(bodyPart);
+
+			for (BodyPart attachment : theDetails.getAttachments()) {
+				multipart.addBodyPart(attachment);
+			}
+
+			email.setContent(multipart);
 		} catch (MessagingException e) {
 			throw new InternalErrorException("Failed to create email message", e);
 		}

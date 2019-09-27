@@ -145,7 +145,6 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	}
 
-
 	@AfterClass
 	public static void afterClass() {
 		ourTestSmtp.stop();
@@ -159,6 +158,4 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		ourTestSmtp.start();
         ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
-
-
 }

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -112,12 +113,27 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		return observation;
 	}
 
+	@Test
+	public void testEmailSubscriptionNoPayload() {
+
+	}
+
+	@Test
+	public void testEmailSubscriptionXmlAttach() {
+
+	}
+
+	@Test
+	public void testEmailSubscriptionXmlAttachAndBodyText() {
+
+	}
+
 	/**
 	 * Tests an email subscription with payload set to XML. The email sent must include content in the body of the email that is formatted as XML.
 	 * @throws Exception
 	 */
 	@Test
-	public void testEmailSubscriptionNormal() throws Exception {
+	public void testEmailSubscriptionXml() throws Exception {
 		String payload = "application/fhir+xml";
 
 		String code = "1000000050";
@@ -141,11 +157,16 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("123@hapifhir.io", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
+		assertEquals(true, received.get(0).getContentType().indexOf("multipart/mixed;") == 0);
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as XML
-		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(1, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource((String) multipart.getBodyPart(0).getContent());
 		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
 		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
@@ -155,7 +176,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 	 * @throws Exception
 	 */
 	@Test
-	public void testEmailSubscriptionWithCustom() throws Exception {
+	public void testEmailSubscriptionJson() throws Exception {
 		String payload = "application/fhir+json";
 
 		String code = "1000000050";
@@ -195,12 +216,16 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
-		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
+		assertEquals(true, received.get(0).getContentType().indexOf("multipart/mixed;") == 0);
+		assertEquals("This is a subject", received.get(0).getSubject().trim());
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
-		// Expect the body of the email subscription to be an Observation formatted as JSON
-		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(1, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource((String) multipart.getBodyPart(0).getContent());
 		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
 		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
@@ -249,9 +274,19 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
 		assertEquals(1, received.get(0).getAllRecipients().length);
 		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
-		assertEquals("text/plain; charset=us-ascii", received.get(0).getContentType());
-		assertEquals("This is a subject", received.get(0).getSubject().toString().trim());
-		assertEquals("", received.get(0).getContent().toString().trim());
+		assertEquals(true, received.get(0).getContentType().indexOf("multipart/mixed;") == 0);
+		assertEquals("This is a subject", received.get(0).getSubject().trim());
+
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(1, multipart.getCount());
+
+		String[] contentTypeValues = multipart.getBodyPart(0).getHeader("Content-Type");
+		assertEquals(true, contentTypeValues != null);
+		assertEquals(1, contentTypeValues.length);
+		assertEquals("text/plain; charset=us-ascii", contentTypeValues[0]);
+		assertEquals("", multipart.getBodyPart(0).getContent());
+
 		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		ourLog.info("Subscription: {}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ourClient.history().onInstance(id).andReturnBundle(Bundle.class).execute()));

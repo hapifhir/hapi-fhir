@@ -334,7 +334,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		@Hook(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY)
 		public boolean beforeRestHookDelivery(ResourceDeliveryMessage theDeliveryMessage, CanonicalSubscription theSubscription) {
 			if (ourNextModifyResourceId) {
-				theDeliveryMessage.getPayload(ourCtx).setId(new IdType("Observation/A"));
+				theDeliveryMessage.getResource().setId(new IdType("Observation/A"));
 			}
 			if (ourNextAddHeader) {
 				theSubscription.addHeader("X-Foo: Bar");
