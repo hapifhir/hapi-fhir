@@ -193,11 +193,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				continue;
 			}
 
-			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
-				multiType = true;
-			}
-
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null) {
 					continue;
@@ -248,11 +243,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					// CarePlan.activitydate can be a string
 					continue;
 				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
+					throw new ConfigurationException("Search param " + nextSpDef.getName() + " is of unexpected datatype: " + nextObject.getClass());
 				}
 				if (nextEntity != null) {
 					nextEntity.setResource(theEntity);
@@ -290,10 +281,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				}
 
 				String resourceName = nextSpDef.getName();
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
-				}
 
 				if (nextObject instanceof Duration) {
 					Duration nextValue = (Duration) nextObject;
@@ -355,11 +342,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
+					throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
 				}
 			}
 		}
@@ -393,10 +376,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				}
 
 				String resourceName = nextSpDef.getName();
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
-				}
 
 				if (nextObject instanceof Quantity) {
 					Quantity nextValue = (Quantity) nextObject;
@@ -411,11 +390,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				} else if (ourIgnoredForSearchDatatypes.contains(nextObject.getClass())) {
 					continue;
 				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
+					throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
 				}
 			}
 		}
@@ -460,11 +435,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			for (Object nextObject : extractValues(nextPath, theResource)) {
 				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
 					continue;
-				}
-
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
 				}
 
 				if (nextObject instanceof IPrimitiveType<?>) {
@@ -512,9 +482,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 							}
 						}
 					} else {
-						if (!multiType) {
-							throw new ConfigurationException("Search param " + nextSpName + " is of unexpected datatype: " + nextObject.getClass());
-						}
+						throw new ConfigurationException("Search param " + nextSpName + " is of unexpected datatype: " + nextObject.getClass());
 					}
 				}
 			}
@@ -548,11 +516,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			String nextPath = nextSpDef.getPath();
 			if (isBlank(nextPath)) {
 				continue;
-			}
-
-			boolean multiType = false;
-			if (nextPath.endsWith("[x]")) {
-				multiType = true;
 			}
 
 			List<String> systems = new ArrayList<>();
@@ -639,11 +602,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					// Consent#source-identifier has a path that isn't typed - This is a one-off to deal with that
 					continue;
 				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + nextSpDef.getName() + " with path " + nextPath + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
+					throw new ConfigurationException("Search param " + nextSpDef.getName() + " with path " + nextPath + " is of unexpected datatype: " + nextObject.getClass());
 				}
 			}
 
@@ -703,10 +662,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 				}
 
 				String resourceName = nextSpDef.getName();
-				boolean multiType = false;
-				if (nextPath.endsWith("[x]")) {
-					multiType = true;
-				}
 
 				if (nextObject instanceof UriType) {
 					UriType nextValue = (UriType) nextObject;
@@ -721,11 +676,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					nextEntity.setResource(theEntity);
 					retVal.add(nextEntity);
 				} else {
-					if (!multiType) {
-						throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
-					} else {
-						continue;
-					}
+					throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
 				}
 			}
 		}

@@ -155,6 +155,21 @@ public class SearchParamExtractorR4Test {
 	}
 
 	@Test
+	public void testIndexNumberFromDuration() {
+
+		Duration duration = new Duration();
+		duration.setValue(123);
+		Encounter enc = new Encounter();
+		enc.setLength(duration);
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4();
+		ResourceTable table = new ResourceTable();
+		extractor.extractSearchParamNumber(table, enc);
+
+	}
+
+
+	@Test
 	public void testExtractComponentQuantities() {
 		Observation o1 = new Observation();
 		o1.addComponent()
