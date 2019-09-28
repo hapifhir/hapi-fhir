@@ -15,6 +15,7 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 public class TestR4ConfigWithElasticSearch extends TestR4Config {
@@ -52,6 +53,7 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 				.withSetting(PopularProperties.TRANSPORT_TCP_PORT, 0)
 				.withSetting(PopularProperties.HTTP_PORT, 0)
 				.withSetting(PopularProperties.CLUSTER_NAME, UUID.randomUUID())
+				.withStartTimeout(60, TimeUnit.SECONDS)
 				.build()
 				.start();
 		} catch (IOException | InterruptedException e) {

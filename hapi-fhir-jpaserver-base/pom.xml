@@ -864,7 +864,7 @@
 							<forkCount>2</forkCount>
 							<reuseForks>true</reuseForks>
 							<runOrder>alphabetical</runOrder>
-							<redirectTestOutputToFile>true</redirectTestOutputToFile>
+							<redirectTestOutputToFile>false</redirectTestOutputToFile>
 							<excludes>
 								<exclude>**/*Dstu2*</exclude>
 								<exclude>**/*Dstu3*</exclude>
