@@ -865,6 +865,9 @@
 							<reuseForks>true</reuseForks>
 							<runOrder>alphabetical</runOrder>
 							<redirectTestOutputToFile>false</redirectTestOutputToFile>
+							<includes>
+								<include>**/TestR4ConfigWithElasticSearch.*</include>
+							</includes>
 							<excludes>
 								<exclude>**/*Dstu2*</exclude>
 								<exclude>**/*Dstu3*</exclude>
