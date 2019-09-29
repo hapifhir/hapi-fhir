@@ -39,6 +39,8 @@ public class TestR4ConfigWithElasticSearch extends TestR4Config {
 			.setIndexManagementWaitTimeoutMillis(10000)
 			.setRequiredIndexStatus(ElasticsearchIndexStatus.YELLOW)
 			.setRestUrl("http://localhost:" + httpPort)
+			.setUsername("")
+			.setPassword("")
 			.apply(retVal);
 
 		return retVal;

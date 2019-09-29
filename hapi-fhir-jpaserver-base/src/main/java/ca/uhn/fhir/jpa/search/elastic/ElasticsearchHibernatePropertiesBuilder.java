@@ -16,10 +16,22 @@ public class ElasticsearchHibernatePropertiesBuilder {
 
 	private ElasticsearchIndexStatus myRequiredIndexStatus = ElasticsearchIndexStatus.YELLOW;
 	private String myRestUrl;
+	private String myUsername;
+	private String myPassword;
 	private IndexSchemaManagementStrategy myIndexSchemaManagementStrategy = IndexSchemaManagementStrategy.CREATE;
 	private long myIndexManagementWaitTimeoutMillis = 10000L;
 	private boolean myDebugRefreshAfterWrite = false;
 	private boolean myDebugPrettyPrintJsonLog = false;
+
+	public ElasticsearchHibernatePropertiesBuilder setUsername(String theUsername) {
+		myUsername = theUsername;
+		return this;
+	}
+
+	public ElasticsearchHibernatePropertiesBuilder setPassword(String thePassword) {
+		myPassword = thePassword;
+		return this;
+	}
 
 	public void apply(Properties theProperties) {
 
@@ -31,6 +43,9 @@ public class ElasticsearchHibernatePropertiesBuilder {
 		theProperties.put("hibernate.search." + ElasticsearchEnvironment.ANALYSIS_DEFINITION_PROVIDER, ElasticsearchMappingProvider.class.getName());
 
 		theProperties.put("hibernate.search.default.elasticsearch.host", myRestUrl);
+		theProperties.put("hibernate.search.default.elasticsearch.username", myUsername);
+		theProperties.put("hibernate.search.default.elasticsearch.password", myPassword);
+
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_SCHEMA_MANAGEMENT_STRATEGY, myIndexSchemaManagementStrategy.getExternalName());
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.INDEX_MANAGEMENT_WAIT_TIMEOUT, Long.toString(myIndexManagementWaitTimeoutMillis));
 		theProperties.put("hibernate.search.default." + ElasticsearchEnvironment.REQUIRED_INDEX_STATUS, myRequiredIndexStatus.getElasticsearchString());
