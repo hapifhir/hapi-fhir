@@ -33,7 +33,6 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Bundle.BundleLinkComponent;
-import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.Bundle.SearchEntryMode;
 import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -314,44 +313,6 @@ public class R4BundleFactory implements IVersionSpecificBundleFactory {
       }
     }
     return false;
-  }
-
-  @Override
-  public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-                                               BundleTypeEnum theBundleType) {
-    myBundle = new Bundle();
-
-    myBundle.setId(UUID.randomUUID().toString());
-
-    myBundle.getMeta().setLastUpdated(new Date());
-
-    myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-    myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-    myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-    if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-      for (IBaseResource nextBaseRes : theResources) {
-        Resource next = (Resource) nextBaseRes;
-        BundleEntryComponent nextEntry = myBundle.addEntry();
-
-        nextEntry.setResource(next);
-        if (next.getIdElement().isEmpty()) {
-          nextEntry.getRequest().setMethod(HTTPVerb.POST);
-        } else {
-          nextEntry.getRequest().setMethod(HTTPVerb.PUT);
-          if (next.getIdElement().isAbsolute()) {
-            nextEntry.getRequest().setUrl(next.getId());
-          } else {
-            String resourceType = myContext.getResourceDefinition(next).getName();
-            nextEntry.getRequest().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
-          }
-        }
-      }
-    } else {
-      addResourcesForSearch(theResources);
-    }
-
-    myBundle.getTotalElement().setValue(theTotalResults);
   }
 
   @Override

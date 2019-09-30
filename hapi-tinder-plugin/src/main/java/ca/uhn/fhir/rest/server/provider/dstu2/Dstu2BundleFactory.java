@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +19,32 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.*;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	private Bundle myBundle;
@@ -280,44 +285,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-			BundleTypeEnum theBundleType) {
-		myBundle = new Bundle();
-
-		myBundle.setId(UUID.randomUUID().toString());
-
-		ResourceMetadataKeyEnum.PUBLISHED.put(myBundle, InstantDt.withCurrentTime());
-
-		myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-		myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-		myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-			for (IBaseResource nextBaseRes : theResources) {
-				IResource next = (IResource) nextBaseRes;
-				Entry nextEntry = myBundle.addEntry();
-
-				nextEntry.setResource(next);
-				if (next.getId().isEmpty()) {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.POST);
-				} else {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.PUT);
-					if (next.getId().isAbsolute()) {
-						nextEntry.getRequest().setUrl(next.getId());
-					} else {
-						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getRequest().setUrl(new IdDt(theServerBase, resourceType, next.getId().getIdPart(), next.getId().getVersionIdPart()).getValue());
-					}
-				}
-			}
-		} else {
-			addResourcesForSearch(theResources);
-		}
-
-		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
 	@Override

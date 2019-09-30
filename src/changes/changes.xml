@@ -41,6 +41,16 @@
 				only system level export is currently supported but others will follow.
             ]]>
 			</action>
+			<action type="add">
+            <![CDATA[
+				<b>New Feature</b>:
+				Support for ElasticSearch has been added to the JPA server directly (i.e. without needing a separate
+				module) and a new class called "ElasticsearchHibernatePropertiesBuilder" has been added to facilitate
+				the creation of relevant properties. Instructions have been added to the hapi-fhir-jpaserver-starter
+				project to get started with Elasticsearch. It is likely we will switch our default recommendation
+				to Elastic in the future.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
 				<b>Improvement</b>:
@@ -253,10 +263,14 @@
 				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
 				that the CodeSystem did not exist. This has been corrected.
 			</action>
-			<action type="add">
-				Support for ElasticSearch has been added to the JPA server directly (i.e. without needing a separate
-				module) and a new class called "ElasticsearchHibernatePropertiesBuilder" has been added to facilitate
-				the creation of relevant properties.
+			<action type="remove">
+				The method
+				<![CDATA[
+				<code>IVersionSpecificBundleFactory#initializeBundleFromResourceList</code>
+				]]>
+				has been deprecated, as it provided duplicate functionality to other methods and had an 
+				outdated argument list based on the Bundle needs in DSTU1. We are not aware of any
+				public use of this API, please let us know if this deprecation causes any issues.
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

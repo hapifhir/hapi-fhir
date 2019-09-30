@@ -276,44 +276,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	}
 
 	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-			BundleTypeEnum theBundleType) {
-		ensureBundle();
-
-		myBundle.setId(UUID.randomUUID().toString());
-
-		ResourceMetadataKeyEnum.PUBLISHED.put(myBundle, InstantDt.withCurrentTime());
-
-		myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-		myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-		myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-			for (IBaseResource nextBaseRes : theResources) {
-				IResource next = (IResource) nextBaseRes;
-				Entry nextEntry = myBundle.addEntry();
-
-				nextEntry.setResource(next);
-				if (next.getId().isEmpty()) {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.POST);
-				} else {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.PUT);
-					if (next.getId().isAbsolute()) {
-						nextEntry.getRequest().setUrl(next.getId());
-					} else {
-						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getRequest().setUrl(new IdDt(theServerBase, resourceType, next.getId().getIdPart(), next.getId().getVersionIdPart()).getValue());
-					}
-				}
-			}
-		} else {
-			addResourcesForSearch(theResources);
-		}
-
-		myBundle.getTotalElement().setValue(theTotalResults);
-	}
-
-	@Override
 	public void initializeWithBundleResource(IBaseResource theBundle) {
 		myBundle = (Bundle) theBundle;
 	}

@@ -9,9 +9,9 @@ package org.hl7.fhir.dstu2016may.hapi.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,13 +19,6 @@ package org.hl7.fhir.dstu2016may.hapi.rest.server;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.model.Bundle.*;
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -35,6 +28,18 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import org.hl7.fhir.dstu2016may.model.Bundle;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleEntryComponent;
+import org.hl7.fhir.dstu2016may.model.Bundle.BundleLinkComponent;
+import org.hl7.fhir.dstu2016may.model.Bundle.SearchEntryMode;
+import org.hl7.fhir.dstu2016may.model.DomainResource;
+import org.hl7.fhir.dstu2016may.model.IdType;
+import org.hl7.fhir.dstu2016may.model.Resource;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 
@@ -280,44 +285,6 @@ public class Dstu2_1BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-			BundleTypeEnum theBundleType) {
-		ensureBundle();
-
-		myBundle.setId(UUID.randomUUID().toString());
-
-		myBundle.getMeta().setLastUpdated(new Date());
-
-		myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-		myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-		myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-			for (IBaseResource nextBaseRes : theResources) {
-				Resource next = (Resource) nextBaseRes;
-				BundleEntryComponent nextEntry = myBundle.addEntry();
-
-				nextEntry.setResource(next);
-				if (next.getIdElement().isEmpty()) {
-					nextEntry.getRequest().setMethod(HTTPVerb.POST);
-				} else {
-					nextEntry.getRequest().setMethod(HTTPVerb.PUT);
-					if (next.getIdElement().isAbsolute()) {
-						nextEntry.getRequest().setUrl(next.getId());
-					} else {
-						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getRequest().setUrl(new IdType(theServerBase, resourceType, next.getIdElement().getIdPart(), next.getIdElement().getVersionIdPart()).getValue());
-					}
-				}
-			}
-		} else {
-			addResourcesForSearch(theResources);
-		}
-
-		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
 	@Override
