@@ -61,7 +61,6 @@ To use your own templates for narrative generation, simply create one or more te
 Then create a properties file which describes your templates. In this properties file, each resource to be defined has a pair or properties.
 
 The first (name.class) defines the class name of the resource to define a template for. The second (name.narrative) defines the path/classpath to the template file. The format of this path is `file:/path/foo.html` or  `classpath:/com/classpath/foo.html`.
-</p>
 
 ```properties
 # Two property lines in the file per template
