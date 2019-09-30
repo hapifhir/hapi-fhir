@@ -35,7 +35,8 @@ import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	private FhirContext myFhirContext;

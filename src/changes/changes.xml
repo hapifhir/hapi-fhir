@@ -43,7 +43,7 @@
 			</action>
 			<action type="add" issue="1489">
             <![CDATA[
-				<b>Improovement</b>:
+				<b>Improvement</b>:
 				A significant performance improvement was made to the parsers (particularly the Json Parser)
 				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
 				encoding large resources. Thanks to David Maplesden for the pull request!
@@ -91,11 +91,11 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
-            <action type="fix">
-                In some cases, deleting a CodeSystem resource would fail because the underlying
-                codes were not correctly deleted from the terminology service tables. This is
-                fixed.
-            </action>            
+			<action type="fix">
+				 In some cases, deleting a CodeSystem resource would fail because the underlying
+				 codes were not correctly deleted from the terminology service tables. This is
+				 fixed.
+			</action>
 			<action type="change">
 				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
 				constraints did not add value and caused unneccessary contention when used under high load.
@@ -115,7 +115,7 @@
 				leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload
 				as a Binary resource containing a valid patch.
 			</action>
-			<action type="change" issue="1366">
+			<action type="change">
 				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
 				Note that this means that data in any existing installations will need to be
 				re-uploaded to the new database platform.
@@ -218,6 +218,36 @@
 				The Plain Server method selector was incorrectly allowing client requests with _include statements to be
 				handled by method implementations that did not have any <![CDATA[<code>@IncludeParam</code>]]> defined. This
 				is now corrected. Thanks to Tuomo Ala-Vannesluoma for reporting and providing a test case!
+			</action>
+			<action type="add" issue="1366">
+				The ValueSet operation <![CDATA[<code>$expand</code>]]> has been optimized for large ValueSets. ValueSets are
+				now persistence-backed by the terminology tables, which are populated by a scheduled pre-expansion process.
+				A ValueSet previously stored in an existing FHIR repository will need to be re-created or updated to make
+				it a candidate for pre-expansion. ValueSets that have yet to be pre-expanded will continue to be expanded
+				in-memory.
+			</action>
+			<action type="add" issue="1431">
+				The ValueSet operation <![CDATA[<code>$validate-code</code>]]> has been optimized for large ValueSets.
+				Codes in ValueSets that have yet to be pre-expanded will continue to be validated in-memory.
+			</action>
+			<action type="add" issue="1447">
+				LOINC filenames for terminology upload are now configurable using the
+				<![CDATA[<code>loincupload.properties</code>]]> file.
+			</action>
+			<action type="add" issue="1451">
+				Support for the LOINC <![CDATA[<code>EXTERNAL_COPYRIGHT_NOTICE</code>]]> property and
+				<![CDATA[<code>copyright</code>]]> filter has been added.
+			</action>
+			<action type="add" issue="1453">
+				Support for the LOINC <![CDATA[<code>parent</code>]]> and <![CDATA[<code>child</code>]]> filters has been
+				added. Both filters can be used with either of the <![CDATA[<code>=</code>]]> or
+				<![CDATA[<code>in</code>]]> operators.
+			</action>
+			<action type="add" issue="1454">
+				Support for the LOINC <![CDATA[<code>ancestor</code>]]> and <![CDATA[<code>descendant</code>]]> filters has
+				been added. The <![CDATA[<code>descendant</code>]]> filter can be used with either of the
+				<![CDATA[<code>=</code>]]> or <![CDATA[<code>in</code>]]> operators. At present, the
+				<![CDATA[<code>ancestor</code>]]> filter can only be used with the <![CDATA[<code>=</code>]]> operator.
 			</action>
 			<action type="fix">
 				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
