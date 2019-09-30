@@ -12,7 +12,8 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 				<ul>
-					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>Hibernate Search (JPA): 5.11.1.Final -&gt; 5.11.3.Final</li>
 					<li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li>
 				</ul>
 				]]>
@@ -221,6 +222,11 @@
 			<action type="fix">
 				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
 				that the CodeSystem did not exist. This has been corrected.
+			</action>
+			<action type="add">
+				Support for ElasticSearch has been added to the JPA server directly (i.e. without needing a separate
+				module) and a new class called "ElasticsearchHibernatePropertiesBuilder" has been added to facilitate
+				the creation of relevant properties.
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
