@@ -233,7 +233,7 @@ public class SubscriptionActivatingInterceptor {
 	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext));
+				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext).getIdPart());
 				break;
 			case CREATE:
 			case UPDATE:

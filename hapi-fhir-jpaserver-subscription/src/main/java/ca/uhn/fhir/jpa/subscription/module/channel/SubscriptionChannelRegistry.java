@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
@@ -12,6 +16,8 @@ import java.util.Optional;
 
 @Component
 public class SubscriptionChannelRegistry {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
+
 	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
 	private final Multimap<String, ActiveSubscription> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
@@ -22,6 +28,8 @@ public class SubscriptionChannelRegistry {
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@Autowired
 	ModelConfig myModelConfig;
+	@Autowired
+	FhirContext myFhirContext;
 
 	public void add(ActiveSubscription theActiveSubscription) {
 		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
@@ -47,12 +55,17 @@ public class SubscriptionChannelRegistry {
 
 	public void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
-		myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription);
+		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription);
+		if (!removed) {
+			ourLog.warn("Removing unregistered subscription {}", theActiveSubscription.getIdElement(myFhirContext).getIdPart());
+		}
 
 		// This was the last one.  Shut down the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
 			SubscriptionChannelWithHandlers channel = mySubscriptionChannelCache.get(channelName);
-			channel.close();
+			if (channel != null) {
+				channel.close();
+			}
 			mySubscriptionChannelCache.remove(channelName);
 		}
 	}

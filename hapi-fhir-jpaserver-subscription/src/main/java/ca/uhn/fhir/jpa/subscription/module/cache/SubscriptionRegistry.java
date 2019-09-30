@@ -30,6 +30,8 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +50,7 @@ import java.util.Optional;
 // TODO KHS Does jpa need a subscription registry if matching is disabled?
 @Component
 public class SubscriptionRegistry {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SubscriptionRegistry.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 	@Autowired
 	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
