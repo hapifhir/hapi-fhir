@@ -990,22 +990,33 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		TermConcept code = findCode(theSystem, theFilter.getValue())
-			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
+		addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
 
-		logFilteringValueOnProperty(theFilter.getValue(), theFilter.getProperty());
-		theBool.must(theQb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
 	}
 
 	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		throw new UnsupportedOperationException();
-		// FIXME: DM 2019-09-30 - Working on this presently.
-		// FIXME: DM 2019-09-25 - Filter with op=IN on ancestor; see #1512 in GitHub.
-		// FIXME: DM 2019-09-26 - Once implemented, fix changelog entry for #1454 in changes.xml
-//		String[] values = theFilter.getValue().split(",");
-//		for (String value : values) {
-//			logFilteringValueOnProperty(value, theFilter.getProperty());
-//		}
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		retVal.add(new Term("myParentPids", "" + code.getId()));
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
 	}
 
 	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {

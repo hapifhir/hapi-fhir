@@ -619,7 +619,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 	}
 
-	@Ignore("Not yet implemented; see #1512 in GitHub.")
 	@Test
 	public void testExpandValueSetPropertyFilterLoincAncestorWithExcludeAndIn() {
 		createLoincSystemWithSomeCodes();
@@ -707,7 +706,6 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertEquals(0, outcome.getExpansion().getContains().size());
 	}
 
-	@Ignore("Not yet implemented; see #1512 in GitHub.")
 	@Test
 	public void testExpandValueSetPropertyFilterLoincAncestorWithIncludeAndIn() {
 		createLoincSystemWithSomeCodes();
