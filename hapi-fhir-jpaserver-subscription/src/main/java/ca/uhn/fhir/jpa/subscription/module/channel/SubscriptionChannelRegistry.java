@@ -13,7 +13,7 @@ import java.util.Optional;
 @Component
 public class SubscriptionChannelRegistry {
 	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
-	// This map is a reference count so we know to destroy the channel if there are no more active subscriptions using it
+	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
 	private final Multimap<String, ActiveSubscription> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@Autowired
@@ -48,11 +48,12 @@ public class SubscriptionChannelRegistry {
 	public void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
 		myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription);
-		// FIXME KHS test
+
 		// This was the last one.  Shut down the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
 			SubscriptionChannelWithHandlers channel = mySubscriptionChannelCache.get(channelName);
 			channel.close();
+			mySubscriptionChannelCache.remove(channelName);
 		}
 	}
 
