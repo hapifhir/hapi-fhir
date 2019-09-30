@@ -115,9 +115,6 @@
 						</goals>
 						<configuration>
 							<outputDirectory>${project.reporting.outputDirectory}/jacoco-report</outputDirectory>
-							<excludes>
-								<exclude>**/model/dstu2/*.*</exclude>
-							</excludes>
 						</configuration>
 					</execution>
 				</executions>

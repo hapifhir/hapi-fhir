@@ -45,11 +45,6 @@ public class JpaConstants {
 	public static final String OPERATION_MATCH = "$match";
 
 	/**
-	 * Operation name for the $lastn
-	 */
-	public static final String OPERATION_LASTN = "$lastn";
-
-	/**
 	 * @deprecated Replace with {@link #OPERATION_EXPUNGE}
 	 */
 	@Deprecated
