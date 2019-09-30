@@ -42,14 +42,6 @@ public final class MetadataKeyCurrentlyReindexing extends ResourceMetadataKeySup
 		return (Boolean) theResource.getResourceMetadata().get(IDao.CURRENTLY_REINDEXING);
 	}
 
-	public Boolean get(IBaseResource theResource) {
-		if (theResource instanceof IAnyResource) {
-			return get((IAnyResource) theResource);
-		} else {
-			return get((IResource) theResource);
-		}
-	}
-
 	@Override
 	public void put(IAnyResource theResource, Boolean theObject) {
 		theResource.setUserData(IDao.CURRENTLY_REINDEXING.name(), theObject);

@@ -29,6 +29,7 @@ import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.io.Serializable;
@@ -629,5 +630,5 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		}
 	}
 
-	
+
 }

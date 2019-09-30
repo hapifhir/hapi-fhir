@@ -281,6 +281,12 @@
 				tables. In particular, this was added to facilitate the LOINC EXTERNAL_COPYRIGHT_NOTICE property, for which
 				values can be quite long.
 			</action>
+			<action type="add">
+				The AuthorizationInterceptor has been enhanced so that a user can be authorized to
+				perform create operations specifically, without authorizing all write operations. Also, 
+				conditional creates can now be authorized even if they are happening inside a FHIR
+				transaction.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
