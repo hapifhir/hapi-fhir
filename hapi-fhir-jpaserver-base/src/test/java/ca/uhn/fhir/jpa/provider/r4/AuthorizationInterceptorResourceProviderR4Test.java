@@ -102,7 +102,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	}
 
 	@Test
-	public void testCreateConditional() {
+	public void testUpdateConditional() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
@@ -149,6 +149,68 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 
 	}
+
+	@Test
+	public void testCreateConditionalViaTransaction() {
+		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().createConditional().resourcesOfType("Patient").andThen()
+					.build();
+			}
+		});
+
+		// Create a patient (allowed)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+
+			Bundle request = new Bundle();
+			request.setType(Bundle.BundleType.TRANSACTION);
+			request.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
+			Bundle response = ourClient.transaction().withBundle(request).execute();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+			try {
+				ourClient.update().resource(patient).execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			}
+		}
+
+		// Create a patient (blocked)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+
+			Bundle request = new Bundle();
+			request.setType(Bundle.BundleType.TRANSACTION);
+			request.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
+			Bundle response = ourClient.transaction().withBundle(request).execute();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+			try {
+				ourClient.update().resource(patient).execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			}
+		}
+
+	}
+
 
 	@Test
 	public void testReadInTransaction() {

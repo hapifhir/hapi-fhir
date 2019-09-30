@@ -169,7 +169,7 @@ public class R5BundleFactory implements IVersionSpecificBundleFactory {
 				List<IAnyResource> addedResourcesThisPass = new ArrayList<IAnyResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
+					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
 						continue;
 					}
 
