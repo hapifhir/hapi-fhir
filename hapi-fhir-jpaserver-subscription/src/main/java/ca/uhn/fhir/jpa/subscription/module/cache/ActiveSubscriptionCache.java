@@ -20,16 +20,11 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 class ActiveSubscriptionCache {
@@ -65,7 +60,8 @@ class ActiveSubscriptionCache {
 		return activeSubscription;
 	}
 
-	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
+	List<String> markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(Collection<String> theAllIds) {
+		List<String> retval = new ArrayList<>();
 		for (String next : new ArrayList<>(myCache.keySet())) {
 			ActiveSubscription activeSubscription = myCache.get(next);
 			if (theAllIds.contains(next)) {
@@ -74,11 +70,12 @@ class ActiveSubscriptionCache {
 			} else {
 				if (activeSubscription.isFlagForDeletion()) {
 					ourLog.info("Unregistering Subscription/{}", next);
-					remove(next);
+					retval.add(next);
 				} else {
 					activeSubscription.setFlagForDeletion(true);
 				}
 			}
 		}
+		return retval;
 	}
 }

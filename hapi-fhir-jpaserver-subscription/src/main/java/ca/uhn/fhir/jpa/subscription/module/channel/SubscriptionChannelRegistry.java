@@ -60,4 +60,8 @@ public class SubscriptionChannelRegistry {
 	public SubscriptionChannelWithHandlers get(String theChannelName) {
 		return mySubscriptionChannelCache.get(theChannelName);
 	}
+
+	public int size() {
+		return mySubscriptionChannelCache.size();
+	}
 }

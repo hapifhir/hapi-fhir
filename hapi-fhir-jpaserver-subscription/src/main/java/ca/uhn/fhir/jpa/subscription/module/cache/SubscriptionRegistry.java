@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PreDestroy;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -104,12 +105,11 @@ public class SubscriptionRegistry {
 		return canonicalized;
 	}
 
-	public void unregisterSubscription(IIdType theId) {
-		Validate.notNull(theId);
-		String subscriptionId = theId.getIdPart();
+	public void unregisterSubscription(String theSubscriptionId) {
+		Validate.notNull(theSubscriptionId);
 
-		ourLog.info("Unregistering active subscription {}", theId.toUnqualified().getValue());
-		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(subscriptionId);
+		ourLog.info("Unregistering active subscription {}", theSubscriptionId);
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(theSubscriptionId);
 		if (activeSubscription != null) {
 			mySubscriptionChannelRegistry.remove(activeSubscription);
 		}
@@ -124,7 +124,11 @@ public class SubscriptionRegistry {
 	}
 
 	void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {
-		myActiveSubscriptionCache.unregisterAllSubscriptionsNotInCollection(theAllIds);
+
+		List<String> idsToDelete = myActiveSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(theAllIds);
+		for (String id : idsToDelete) {
+			unregisterSubscription(id);
+		}
 	}
 
 	public synchronized boolean registerSubscriptionUnlessAlreadyRegistered(IBaseResource theSubscription) {
@@ -142,7 +146,7 @@ public class SubscriptionRegistry {
 				updateSubscription(theSubscription);
 				return true;
 			}
-			unregisterSubscription(theSubscription.getIdElement());
+			unregisterSubscription(theSubscription.getIdElement().getIdPart());
 		}
 		if (Subscription.SubscriptionStatus.ACTIVE.equals(newSubscription.getStatus())) {
 			registerSubscription(theSubscription.getIdElement(), theSubscription);
@@ -174,7 +178,7 @@ public class SubscriptionRegistry {
 	public boolean unregisterSubscriptionIfRegistered(IBaseResource theSubscription, String theStatusString) {
 		if (hasSubscription(theSubscription.getIdElement()).isPresent()) {
 			ourLog.info("Removing {} subscription {}", theStatusString, theSubscription.getIdElement().toUnqualified().getValue());
-			unregisterSubscription(theSubscription.getIdElement());
+			unregisterSubscription(theSubscription.getIdElement().getIdPart());
 			return true;
 		}
 		return false;
