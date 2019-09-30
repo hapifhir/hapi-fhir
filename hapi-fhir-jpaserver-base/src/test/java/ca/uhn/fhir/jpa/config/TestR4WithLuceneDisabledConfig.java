@@ -15,7 +15,7 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 
 @Configuration
 @EnableTransactionManagement()
-public class TestR4WithoutLuceneConfig extends TestR4Config {
+public class TestR4WithLuceneDisabledConfig extends TestR4Config {
 
 	/**
 	 * Disable fulltext searching
@@ -34,7 +34,8 @@ public class TestR4WithoutLuceneConfig extends TestR4Config {
 		return retVal;
 	}
 
-	private Properties jpaProperties() {
+	@Override
+	public Properties jpaProperties() {
 		Properties extraProperties = new Properties();
 		extraProperties.put("hibernate.format_sql", "false");
 		extraProperties.put("hibernate.show_sql", "false");
