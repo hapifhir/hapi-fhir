@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +32,13 @@ public class ActiveSubscription {
 
 	private CanonicalSubscription mySubscription;
 	private final String myChannelName;
+	private final String myId;
 	private boolean flagForDeletion;
 
 	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		mySubscription = theSubscription;
 		myChannelName = theChannelName;
+		myId = theSubscription.getIdPart();
 	}
 
 	public CanonicalSubscription getSubscription() {
@@ -44,10 +47,6 @@ public class ActiveSubscription {
 
 	public String getChannelName() {
 		return myChannelName;
-	}
-
-	public IIdType getIdElement(FhirContext theFhirContext) {
-		return mySubscription.getIdElement(theFhirContext);
 	}
 
 	public String getCriteriaString() {
@@ -64,5 +63,13 @@ public class ActiveSubscription {
 
 	public void setFlagForDeletion(boolean theFlagForDeletion) {
 		flagForDeletion = theFlagForDeletion;
+	}
+
+	public String getId() {
+		return myId;
+	}
+
+	public CanonicalSubscriptionChannelType getChannelType() {
+		return mySubscription.getChannelType();
 	}
 }

@@ -20,7 +20,8 @@ public class SubscriptionChannelRegistry {
 
 	private final SubscriptionChannelCache mySubscriptionChannelCache = new SubscriptionChannelCache();
 	// This map is a reference count so we know to destroy the channel when there are no more active subscriptions using it
-	private final Multimap<String, ActiveSubscription> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
+	// Key Channel Name, Value Subscription Id
+	private final Multimap<String, String> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@Autowired
 	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
@@ -28,15 +29,13 @@ public class SubscriptionChannelRegistry {
 	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@Autowired
 	ModelConfig myModelConfig;
-	@Autowired
-	FhirContext myFhirContext;
 
 	public void add(ActiveSubscription theActiveSubscription) {
 		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
 			return;
 		}
 		String channelName = theActiveSubscription.getChannelName();
-		myActiveSubscriptionByChannelName.put(channelName, theActiveSubscription);
+		myActiveSubscriptionByChannelName.put(channelName, theActiveSubscription.getId());
 
 		if (mySubscriptionChannelCache.containsKey(channelName)) {
 			return;
@@ -46,7 +45,7 @@ public class SubscriptionChannelRegistry {
 		Optional<MessageHandler> deliveryHandler;
 
 		deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(channelName);
-		deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getSubscription().getChannelType());
+		deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(theActiveSubscription.getChannelType());
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = new SubscriptionChannelWithHandlers(channelName, deliveryChannel);
 		deliveryHandler.ifPresent(subscriptionChannelWithHandlers::addHandler);
@@ -55,9 +54,9 @@ public class SubscriptionChannelRegistry {
 
 	public void remove(ActiveSubscription theActiveSubscription) {
 		String channelName = theActiveSubscription.getChannelName();
-		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription);
+		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
-			ourLog.warn("Removing unregistered subscription {}", theActiveSubscription.getIdElement(myFhirContext).getIdPart());
+			ourLog.warn("Request to remove subscription {} that was not added", theActiveSubscription.getId());
 		}
 
 		// This was the last one.  Shut down the channel

@@ -136,7 +136,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				continue;
 			}
 			ourLog.debug("Subscription {} was matched by resource {} {}",
-				nextActiveSubscription.getSubscription().getIdElement(myFhirContext).getValue(),
+				nextActiveSubscription.getId(),
 				resourceId.toUnqualifiedVersionless().getValue(),
 				matchResult.isInMemory() ? "in-memory" : "by querying the repository");
 
@@ -185,7 +185,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			retval = true;
 			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);
 		} else {
-			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getIdElement(myFhirContext));
+			ourLog.warn("Do not have delivery channel for subscription {}", nextActiveSubscription.getId());
 		}
 		return retval;
 	}
@@ -203,7 +203,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private String getId(ActiveSubscription theActiveSubscription) {
-		return theActiveSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue();
+		return theActiveSubscription.getId();
 	}
 
 	private boolean validCriteria(ActiveSubscription theActiveSubscription, IIdType theResourceId) {

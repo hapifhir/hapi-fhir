@@ -127,7 +127,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 		private void deliver() {
 			try {
-				String payload = "ping " + myActiveSubscription.getIdElement(myCtx).getIdPart();
+				String payload = "ping " + myActiveSubscription.getId();
 				ourLog.info("Sending WebSocket message: {}", payload);
 				mySession.sendMessage(new TextMessage(payload));
 			} catch (IOException e) {
