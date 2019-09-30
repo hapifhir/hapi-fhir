@@ -67,106 +67,16 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;
 	@Autowired
-	@Qualifier("myAllergyIntoleranceDaoR4")
-	private IFhirResourceDao<AllergyIntolerance> myAllergyIntoleranceDao;
-	@Autowired
-	@Qualifier("myAppointmentDaoR4")
-	private IFhirResourceDao<Appointment> myAppointmentDao;
-	@Autowired
-	@Qualifier("myAuditEventDaoR4")
-	private IFhirResourceDao<AuditEvent> myAuditEventDao;
-	@Autowired
-	@Qualifier("myBundleDaoR4")
-	private IFhirResourceDao<Bundle> myBundleDao;
-	@Autowired
-	@Qualifier("myCarePlanDaoR4")
-	private IFhirResourceDao<CarePlan> myCarePlanDao;
-	@Autowired
 	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemDao;
 	@Autowired
-	@Qualifier("myCompartmentDefinitionDaoR4")
-	private IFhirResourceDao<CompartmentDefinition> myCompartmentDefinitionDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoR4")
-	private IFhirResourceDao<ConceptMap> myConceptMapDao;
-	@Autowired
-	@Qualifier("myConditionDaoR4")
-	private IFhirResourceDao<Condition> myConditionDao;
-	@Autowired
-	@Qualifier("myDeviceDaoR4")
-	private IFhirResourceDao<Device> myDeviceDao;
-	@Autowired
-	@Qualifier("myDiagnosticReportDaoR4")
-	private IFhirResourceDao<DiagnosticReport> myDiagnosticReportDao;
-	@Autowired
-	@Qualifier("myEncounterDaoR4")
-	private IFhirResourceDao<Encounter> myEncounterDao;
-	// @PersistenceContext()
-	@Autowired
-	private EntityManager myEntityManager;
-	@Autowired
 	private FhirContext myFhirCtx;
-	@Autowired
-	@Qualifier("myImmunizationDaoR4")
-	private IFhirResourceDao<Immunization> myImmunizationDao;
-	@Autowired
-	@Qualifier("myLocationDaoR4")
-	private IFhirResourceDao<Location> myLocationDao;
-	@Autowired
-	@Qualifier("myMediaDaoR4")
-	private IFhirResourceDao<Media> myMediaDao;
-	@Autowired
-	@Qualifier("myMedicationDaoR4")
-	private IFhirResourceDao<Medication> myMedicationDao;
-	@Autowired
-	@Qualifier("myMedicationRequestDaoR4")
-	private IFhirResourceDao<MedicationRequest> myMedicationRequestDao;
-	@Autowired
-	@Qualifier("myNamingSystemDaoR4")
-	private IFhirResourceDao<NamingSystem> myNamingSystemDao;
 	@Autowired
 	@Qualifier("myObservationDaoR4")
 	private IFhirResourceDao<Observation> myObservationDao;
 	@Autowired
-	@Qualifier("myOperationDefinitionDaoR4")
-	private IFhirResourceDao<OperationDefinition> myOperationDefinitionDao;
-	@Autowired
-	@Qualifier("myOrganizationDaoR4")
-	private IFhirResourceDao<Organization> myOrganizationDao;
-	@Autowired
-	@Qualifier("myPatientDaoR4")
-	private IFhirResourceDaoPatient<Patient> myPatientDao;
-	@Autowired
-	@Qualifier("myPractitionerDaoR4")
-	private IFhirResourceDao<Practitioner> myPractitionerDao;
-	@Autowired
-	@Qualifier("myQuestionnaireDaoR4")
-	private IFhirResourceDao<Questionnaire> myQuestionnaireDao;
-	@Autowired
-	@Qualifier("myQuestionnaireResponseDaoR4")
-	private IFhirResourceDao<QuestionnaireResponse> myQuestionnaireResponseDao;
-	@Autowired
-	@Qualifier("myResourceProvidersR4")
-	private Object myResourceProviders;
-	@Autowired
-	@Qualifier("myStructureDefinitionDaoR4")
-	private IFhirResourceDao<StructureDefinition> myStructureDefinitionDao;
-	@Autowired
-	@Qualifier("mySubscriptionDaoR4")
-	private IFhirResourceDaoSubscription<Subscription> mySubscriptionDao;
-	@Autowired
-	@Qualifier("mySubstanceDaoR4")
-	private IFhirResourceDao<Substance> mySubstanceDao;
-	@Autowired
 	@Qualifier("mySystemDaoR4")
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-	@Autowired
-	@Qualifier("mySystemProviderR4")
-	private JpaSystemProviderR4 mySystemProvider;
-	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
-	private IValidationSupport myValidationSupport;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
 	@Autowired
@@ -175,13 +85,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 	@Before
 	public void beforePurgeDatabase() {
 		purgeDatabase(myDaoConfig, mySystemDao, myResourceReindexingSvc, mySearchCoordinatorSvc, mySearchParamRegistry, myBulkDataExportSvc);
-	}
-
-	@Before
-	public void beforeResetConfig() {
-		myDaoConfig.setHardSearchLimit(1000);
-		myDaoConfig.setHardTagListLimit(1000);
-		myDaoConfig.setIncludeLimit(2000);
 	}
 
 	@Override
@@ -209,8 +112,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		waitForElasticToCatchUp();
-
 		SearchParameterMap map;
 
 		map = new SearchParameterMap();
@@ -224,10 +125,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 	}
 
 	@Test
-	public void testExpandWithIsAInExternalValueSet() throws InterruptedException {
+	public void testExpandWithIsAInExternalValueSet() {
 		createExternalCsAndLocalVs();
-
-		waitForElasticToCatchUp();
 
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
@@ -320,13 +219,6 @@ public class FhirResourceDaoR4SearchWithElasticSearchTest extends BaseJpaTest {
 
 		assertEquals(0, result.getMessages().size());
 
-	}
-
-
-	private void waitForElasticToCatchUp() throws InterruptedException {
-		ourLog.info("*** Sleeping");
-//		Thread.sleep(2000);
-		ourLog.info("*** Done sleeping");
 	}
 
 

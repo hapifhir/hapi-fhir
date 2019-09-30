@@ -38,12 +38,7 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 
 		builder.analyzer("autocompletePhoneticAnalyzer")
 			.withTokenizer("standard")
-			.withTokenFilters("standard", "stop", "snowball_english" /*, "phonetic_doublemetaphone"*/);
-		/*
-		builder.tokenFilter("phonetic_doublemetaphone")
-			.type("phonetic")
-			.param("encoder", "double_metaphone");
-		*/
+			.withTokenFilters("standard", "stop", "snowball_english");
 		builder.tokenFilter("snowball_english").type("snowball").param("language", "English");
 
 		builder.analyzer("autocompleteNGramAnalyzer")
