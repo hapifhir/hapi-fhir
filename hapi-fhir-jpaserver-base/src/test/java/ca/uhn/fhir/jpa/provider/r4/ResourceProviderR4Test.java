@@ -70,6 +70,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
@@ -846,7 +847,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stu
+			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stub
 			}
 
 		});
@@ -3900,10 +3901,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		/*
-		 * First, make sure that we don't reuse a search if
-		 * it's not marked with an expiry
-		 */
+
 		{
 			myDaoConfig.setReuseCachedSearchResultsForMillis(10L);
 			Bundle result1 = ourClient
@@ -3912,7 +3910,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
-			sleepOneClick();
+			sleepAtLeast(11L);
 			Bundle result2 = ourClient
 				.search()
 				.forResource("Organization")
@@ -3922,10 +3920,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertNotEquals(uuid1, uuid2);
 		}
 
-		/*
-		 * Now try one but mark it with an expiry time
-		 * in the future
-		 */
 		{
 			myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
 			Bundle result1 = ourClient
@@ -3946,7 +3940,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			// Expiry doesn't affect reusablility
 			final String uuid2 = toSearchUuidFromLinkNext(result2);
 			assertEquals(uuid1, uuid2);
 

@@ -4,21 +4,20 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
-import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
-import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
-import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.interceptor.auth.*;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Observation.ObservationStatus;
@@ -102,7 +101,7 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 	}
 
 	@Test
-	public void testCreateConditional() {
+	public void testUpdateConditional() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
@@ -149,6 +148,99 @@ public class AuthorizationInterceptorResourceProviderR4Test extends BaseResource
 		}
 
 	}
+
+	@Test
+	public void testCreateConditionalViaTransaction() {
+		ourRestServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().create().resourcesOfType("Patient").withAnyId().withTester(new IAuthRuleTester() {
+						@Override
+						public boolean matches(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IIdType theInputResourceId, IBaseResource theInputResource) {
+							if (theInputResource instanceof Patient) {
+								Patient patient = (Patient) theInputResource;
+								return patient
+									.getIdentifier()
+									.stream()
+									.filter(t-> "http://uhn.ca/mrns".equals(t.getSystem()))
+									.anyMatch(t-> "100".equals(t.getValue()));
+							}
+							return false;
+						}
+					}).andThen()
+					.allow().createConditional().resourcesOfType("Patient").andThen()
+					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+					.build();
+			}
+		});
+
+		// Create a patient (allowed)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+			patient.addName().setFamily("Tester").addGiven("Raghad");
+
+			Bundle request = new Bundle();
+			request.setType(Bundle.BundleType.TRANSACTION);
+			request.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|100");
+			Bundle response = ourClient.transaction().withBundle(request).execute();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
+
+			// Subsequent calls also shouldn't fail
+			ourClient.transaction().withBundle(request).execute();
+			ourClient.transaction().withBundle(request).execute();
+		}
+
+		// Create a patient with wrong identifier (blocked)
+		{
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("101");
+			patient.addName().setFamily("Tester").addGiven("Fozzie");
+
+			Bundle request = new Bundle();
+			request.setType(Bundle.BundleType.TRANSACTION);
+			request.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setIfNoneExist("Patient?identifier=http://uhn.ca/mrns|101");
+
+			try {
+				ourClient.transaction().withBundle(request).execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			}
+		}
+
+		// Create an organization (blocked)
+		{
+			Organization patient = new Organization();
+			patient.setName("FOO");
+
+			Bundle request = new Bundle();
+			request.setType(Bundle.BundleType.TRANSACTION);
+			request.addEntry()
+				.setResource(patient)
+				.getRequest()
+				.setMethod(Bundle.HTTPVerb.POST)
+				.setIfNoneExist("Organization?name=FOO");
+
+			try {
+				ourClient.transaction().withBundle(request).execute();
+				fail();
+			} catch (ForbiddenOperationException e) {
+				assertEquals("HTTP 403 Forbidden: Access denied by default policy (no applicable rules)", e.getMessage());
+			}
+		}
+
+	}
+
 
 	@Test
 	public void testReadInTransaction() {

@@ -601,7 +601,7 @@
 		<!--<hibernate_version>5.2.10.Final</hibernate_version>-->
 		<hibernate_version>5.4.4.Final</hibernate_version>
 		<!-- Update lucene version when you update hibernate-search version -->
-		<hibernate_search_version>5.11.1.Final</hibernate_search_version>
+		<hibernate_search_version>5.11.3.Final</hibernate_search_version>
 		<lucene_version>5.5.5</lucene_version>
 		<hibernate_validator_version>5.4.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.11</httpcore_version>
@@ -858,18 +858,6 @@
 				<!--<version>6.2.2.jre8</version>-->
 				<version>7.0.0.jre8</version>
 			</dependency>
-			<!--
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>${jaxb_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>${jaxb_core_version}</version>
-			</dependency>
-			-->
 			<dependency>
 				<groupId>javax.mail</groupId>
 				<artifactId>javax.mail-api</artifactId>
@@ -1412,6 +1400,11 @@
 				<version>2.4.0</version>
 			</dependency>
 			<dependency>
+				<groupId>pl.allegro.tech</groupId>
+				<artifactId>embedded-elasticsearch</artifactId>
+				<version>2.10.0</version>
+			</dependency>
+			<dependency>
 				<groupId>xpp3</groupId>
 				<artifactId>xpp3</artifactId>
 				<version>1.1.4c</version>
@@ -1675,6 +1668,11 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>0.8.4</version>
+					<configuration>
+						<excludes>
+							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
+						</excludes>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -2397,7 +2395,6 @@
 				<module>hapi-fhir-jaxrsserver-base</module>
 				<module>hapi-fhir-jaxrsserver-example</module>
 				<module>hapi-fhir-jpaserver-base</module>
-				<module>hapi-fhir-jpaserver-elasticsearch</module>
 				<module>hapi-fhir-jpaserver-migrate</module>
 				<module>restful-server-example</module>
 				<module>hapi-fhir-testpage-overlay</module>

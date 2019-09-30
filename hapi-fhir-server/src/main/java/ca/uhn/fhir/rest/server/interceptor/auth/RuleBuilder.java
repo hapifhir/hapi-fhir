@@ -254,6 +254,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
+		public IAuthRuleBuilderRuleOp create() {
+			if (myWriteRuleBuilder == null) {
+				myWriteRuleBuilder = new RuleBuilderRuleOp(RuleOpEnum.CREATE);
+			}
+			return myWriteRuleBuilder;
+		}
+
+		@Override
 		public IAuthRuleBuilderGraphQL graphQL() {
 			return new RuleBuilderGraphQL();
 		}

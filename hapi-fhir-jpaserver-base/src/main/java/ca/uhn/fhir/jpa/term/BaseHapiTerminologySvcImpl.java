@@ -63,9 +63,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -202,22 +202,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			}
 			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
-	}
-
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-			.phrase()
-			.withSlop(2)
-			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
-			// .andField("myDisplayPhonetic").boostedTo(0.5f)
-			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
 	}
 
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
@@ -888,23 +872,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			case "parent":
 			case "child":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincParentChild(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincParentChild(theQb, theBool, theFilter);
+				break;
+			case "ancestor":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincAncestor(theSystem, theQb, theBool, theFilter);
+				break;
+			case "descendant":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincDescendant(theSystem, theQb, theBool, theFilter);
 				break;
 			case "copyright":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincCopyright(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincCopyright(theQb, theBool, theFilter);
 				break;
 			default:
 				handleFilterRegex(theBool, theFilter);
 				break;
 		}
+	}
+
+	private boolean isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
+		if (!isCodeSystemLoinc(theSystem)) {
+			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + theSystem);
+		}
+		return true;
 	}
 
 	private boolean isCodeSystemLoinc(String theSystem) {
@@ -923,6 +916,22 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
+	}
+
+	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		Query textQuery = qb
+			.phrase()
+			.withSlop(2)
+			.onField("myDisplay").boostedTo(4.0f)
+			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			// .andField("myDisplayNGram").boostedTo(1.0f)
+			// .andField("myDisplayPhonetic").boostedTo(0.5f)
+			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
+		bool.must(textQuery);
+	}
+
 	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		TermConcept code = findCode(theSystem, theFilter.getValue())
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
@@ -936,12 +945,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
-		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
-			addLoincFilterParentChildIn(theBool, theFilter);
-		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
+				break;
+			case IN:
+				addLoincFilterParentChildIn(theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -962,6 +974,95 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private Term getPropertyTerm(String theProperty, String theValue) {
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
+	}
+
+	private void handleFilterLoincAncestor(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterAncestorIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		retVal.add(new Term("myParentPids", "" + code.getId()));
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
+	}
+
+	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterDescendantIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void addLoincFilterDescendantIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		String[] parentPids = code.getParentPidsAsString().split(" ");
+		for (String parentPid : parentPids) {
+			retVal.add(new Term("myId", parentPid));
+		}
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
 	}
 
 	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1870,7 +1971,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
+		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
@@ -1981,7 +2082,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
+		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
@@ -2077,7 +2178,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet {}", theValueSet.getIdElement().getValue());
+		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
@@ -2111,7 +2212,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermValueSet[{}]", termValueSet.getId());
+		ourLog.info("Done storing TermValueSet[{}] for {}", termValueSet.getId(), theValueSet.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
