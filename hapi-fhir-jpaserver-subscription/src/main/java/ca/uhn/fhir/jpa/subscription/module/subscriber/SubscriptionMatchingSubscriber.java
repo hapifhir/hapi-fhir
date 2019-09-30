@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.module.matcher.ISubscriptionMatcher;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -61,6 +62,8 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@Override
 	public void handleMessage(Message<?> theMessage) throws MessagingException {
@@ -177,7 +180,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	private boolean sendToDeliveryChannel(ActiveSubscription nextActiveSubscription, ResourceDeliveryMessage theDeliveryMsg) {
 		boolean retval = false;
 		ResourceDeliveryJsonMessage wrappedMsg = new ResourceDeliveryJsonMessage(theDeliveryMsg);
-		MessageChannel deliveryChannel = nextActiveSubscription.getSubscribableChannel();
+		MessageChannel deliveryChannel = mySubscriptionChannelRegistry.get(nextActiveSubscription.getChannelName()).getChannel();
 		if (deliveryChannel != null) {
 			retval = true;
 			trySendToDeliveryChannel(wrappedMsg, deliveryChannel);

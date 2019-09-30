@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,20 +49,20 @@ class ActiveSubscriptionCache {
 		return myCache.size();
 	}
 
-	public void put(String theSubscriptionId, ActiveSubscription theValue) {
-		myCache.put(theSubscriptionId, theValue);
+	public void put(String theSubscriptionId, ActiveSubscription theActiveSubscription) {
+		myCache.put(theSubscriptionId, theActiveSubscription);
 	}
 
-	public synchronized void remove(String theSubscriptionId) {
+	public synchronized ActiveSubscription remove(String theSubscriptionId) {
 		Validate.notBlank(theSubscriptionId);
 
 		ActiveSubscription activeSubscription = myCache.get(theSubscriptionId);
 		if (activeSubscription == null) {
-			return;
+			return null;
 		}
 
-		activeSubscription.close();
 		myCache.remove(theSubscriptionId);
+		return activeSubscription;
 	}
 
 	public void unregisterAllSubscriptionsNotInCollection(Collection<String> theAllIds) {

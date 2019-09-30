@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import org.springframework.integration.support.management.SubscribableChannelManagement;
 import org.springframework.messaging.SubscribableChannel;

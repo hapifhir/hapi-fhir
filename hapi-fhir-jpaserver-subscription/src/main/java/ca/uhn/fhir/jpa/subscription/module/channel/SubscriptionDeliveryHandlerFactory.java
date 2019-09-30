@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.channel;
 
 /*-
  * #%L
@@ -42,10 +42,10 @@ public abstract class SubscriptionDeliveryHandlerFactory {
 	@Lookup
 	protected abstract SubscriptionDeliveringRestHookSubscriber getSubscriptionDeliveringRestHookSubscriber();
 
-	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscription theSubscription) {
-		if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
+	public Optional<MessageHandler> createDeliveryHandler(CanonicalSubscriptionChannelType theChannelType) {
+		if (theChannelType == CanonicalSubscriptionChannelType.EMAIL) {
 			return Optional.of(getSubscriptionDeliveringEmailSubscriber(myEmailSender));
-		} else if (theSubscription.getChannelType() == CanonicalSubscriptionChannelType.RESTHOOK) {
+		} else if (theChannelType == CanonicalSubscriptionChannelType.RESTHOOK) {
 			return Optional.of(getSubscriptionDeliveringRestHookSubscriber());
 		} else {
 			return Optional.empty();

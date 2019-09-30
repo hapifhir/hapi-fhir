@@ -20,7 +20,7 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.cache.ISubscribableChannel;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;

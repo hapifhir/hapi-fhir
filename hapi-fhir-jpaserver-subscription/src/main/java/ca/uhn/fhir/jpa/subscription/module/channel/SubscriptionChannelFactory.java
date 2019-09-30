@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.channel;
 
 /*-
  * #%L
@@ -21,6 +21,9 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,16 +33,12 @@ public class SubscriptionChannelFactory {
 	private ISubscribableChannelFactory mySubscribableChannelFactory;
 
 	@Autowired
-	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
-
-	@Autowired
 	public SubscriptionChannelFactory(ISubscribableChannelFactory theSubscribableChannelFactory) {
 		mySubscribableChannelFactory = theSubscribableChannelFactory;
 	}
 
-	public ISubscribableChannel newDeliveryChannel(CanonicalSubscription theCanonicalSubscription) {
-		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(theCanonicalSubscription);
-		return mySubscribableChannelFactory.createSubscribableChannel(channelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
+	public ISubscribableChannel newDeliveryChannel(String theChannelName) {
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
 	public ISubscribableChannel newMatchingChannel(String theChannelName) {

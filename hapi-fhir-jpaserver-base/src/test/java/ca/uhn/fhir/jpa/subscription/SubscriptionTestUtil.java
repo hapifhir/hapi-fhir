@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.JavaMailEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
@@ -24,6 +25,8 @@ public class SubscriptionTestUtil {
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
+	@Autowired
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	public int getExecutorQueueSize() {
 		LinkedBlockingQueueSubscribableChannel channel = mySubscriptionMatcherInterceptor.getProcessingChannelForUnitTest();
@@ -76,7 +79,7 @@ public class SubscriptionTestUtil {
 
 	public void setEmailSender(IIdType theIdElement) {
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(theIdElement.getIdPart());
-		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) activeSubscription.getDeliveryHandlerForUnitTest();
+		SubscriptionDeliveringEmailSubscriber subscriber = (SubscriptionDeliveringEmailSubscriber) mySubscriptionChannelRegistry.get(activeSubscription.getChannelName()).getDeliveryHandlerForUnitTest();
 		subscriber.setEmailSender(myEmailSender);
 	}
 

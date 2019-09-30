@@ -1,0 +1,70 @@
+package ca.uhn.fhir.jpa.subscription.module.channel;
+
+import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import com.google.common.annotations.VisibleForTesting;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+
+import java.io.Closeable;
+import java.util.Collection;
+import java.util.HashSet;
+
+public class SubscriptionChannelWithHandlers implements Closeable {
+	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
+
+	private final String myChannelName;
+	private final ISubscribableChannel mySubscribableChannel;
+	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
+
+	public SubscriptionChannelWithHandlers(String theChannelName, ISubscribableChannel theSubscribableChannel) {
+		myChannelName = theChannelName;
+		mySubscribableChannel = theSubscribableChannel;
+	}
+
+	public void addHandler(MessageHandler theHandler) {
+		mySubscribableChannel.subscribe(theHandler);
+		myDeliveryHandlerSet.add(theHandler);
+	}
+
+	public void removeHandler(MessageHandler theMessageHandler) {
+		if (mySubscribableChannel != null) {
+			mySubscribableChannel.unsubscribe(theMessageHandler);
+		}
+	}
+
+	@VisibleForTesting
+	public MessageHandler getDeliveryHandlerForUnitTest() {
+		return myDeliveryHandlerSet.iterator().next();
+	}
+
+	@Override
+	public void close() {
+		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
+			removeHandler(messageHandler);
+		}
+		if (mySubscribableChannel instanceof DisposableBean) {
+			int subscriberCount = mySubscribableChannel.getSubscriberCount();
+			if (subscriberCount > 0) {
+				ourLog.info("Channel {} still has {} subscribers.  Not destroying.", myChannelName, subscriberCount);
+			} else {
+				ourLog.info("Channel for subscription {} has no subscribers.  Destroying channel.", myChannelName);
+				tryDestroyChannel((DisposableBean) mySubscribableChannel);
+			}
+		}
+	}
+
+	private void tryDestroyChannel(DisposableBean theSubscribableChannel) {
+		try {
+			theSubscribableChannel.destroy();
+		} catch (Exception e) {
+			ourLog.error("Failed to destroy channel bean", e);
+		}
+	}
+
+	public MessageChannel getChannel() {
+		return mySubscribableChannel;
+	}
+}

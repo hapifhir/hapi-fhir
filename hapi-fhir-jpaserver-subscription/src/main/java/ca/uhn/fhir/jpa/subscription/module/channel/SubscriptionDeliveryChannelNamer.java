@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.channel;
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import org.springframework.stereotype.Service;

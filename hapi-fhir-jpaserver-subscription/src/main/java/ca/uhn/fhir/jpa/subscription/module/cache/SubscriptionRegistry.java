@@ -23,14 +23,14 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -52,11 +52,9 @@ public class SubscriptionRegistry {
 	@Autowired
 	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
 	@Autowired
-	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
 	@Autowired
-	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
-	@Autowired
-	ModelConfig myModelConfig;
+	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
@@ -90,21 +88,12 @@ public class SubscriptionRegistry {
 		Validate.notNull(theSubscription);
 
 		CanonicalSubscription canonicalized = mySubscriptionCanonicalizer.canonicalize(theSubscription);
-		ISubscribableChannel deliveryChannel;
-		Optional<MessageHandler> deliveryHandler;
 
-		if (myModelConfig.isSubscriptionMatchingEnabled()) {
-			deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(canonicalized);
-			deliveryHandler = mySubscriptionDeliveryHandlerFactory.createDeliveryHandler(canonicalized);
-		} else {
-			deliveryChannel = null;
-			deliveryHandler = Optional.empty();
-		}
+		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
 
 		ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
-		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, deliveryChannel);
-		deliveryHandler.ifPresent(activeSubscription::register);
-
+		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
+		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);
 
 		// Interceptor call: SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED
@@ -120,7 +109,10 @@ public class SubscriptionRegistry {
 		String subscriptionId = theId.getIdPart();
 
 		ourLog.info("Unregistering active subscription {}", theId.toUnqualified().getValue());
-		myActiveSubscriptionCache.remove(subscriptionId);
+		ActiveSubscription activeSubscription = myActiveSubscriptionCache.remove(subscriptionId);
+		if (activeSubscription != null) {
+			mySubscriptionChannelRegistry.remove(activeSubscription);
+		}
 	}
 
 	@PreDestroy

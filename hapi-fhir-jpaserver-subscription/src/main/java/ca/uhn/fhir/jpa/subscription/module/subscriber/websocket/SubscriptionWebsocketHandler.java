@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.websocket;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelWithHandlers;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
@@ -45,6 +47,8 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
 	@Autowired
 	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
+	@Autowired
+	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
 	@Autowired
 	private FhirContext myCtx;
@@ -102,21 +106,23 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 
 	}
 
-	private class BoundStaticSubscipriptionState implements IState, MessageHandler {
+	private class BoundStaticSubscriptionState implements IState, MessageHandler {
 
 		private final WebSocketSession mySession;
 		private final ActiveSubscription myActiveSubscription;
 
-		public BoundStaticSubscipriptionState(WebSocketSession theSession, ActiveSubscription theActiveSubscription) {
+		public BoundStaticSubscriptionState(WebSocketSession theSession, ActiveSubscription theActiveSubscription) {
 			mySession = theSession;
 			myActiveSubscription = theActiveSubscription;
 
-			theActiveSubscription.register(this);
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.get(theActiveSubscription.getChannelName());
+			subscriptionChannelWithHandlers.addHandler(this);
 		}
 
 		@Override
 		public void closing() {
-			myActiveSubscription.unregister(this);
+			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = mySubscriptionChannelRegistry.get(myActiveSubscription.getChannelName());
+			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
 		private void deliver() {
@@ -172,7 +178,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				return null;
 			}
 
-			myState = new BoundStaticSubscipriptionState(theSession, response.getActiveSubscription());
+			myState = new BoundStaticSubscriptionState(theSession, response.getActiveSubscription());
 
 			return id;
 		}
