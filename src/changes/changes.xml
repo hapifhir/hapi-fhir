@@ -276,6 +276,11 @@
 				outdated argument list based on the Bundle needs in DSTU1. We are not aware of any
 				public use of this API, please let us know if this deprecation causes any issues.
 			</action>
+			<action type="add" issue="1517">
+				Support for concept property values with a length exceeding 500 characters has been added in the terminology
+				tables. In particular, this was added to facilitate the LOINC EXTERNAL_COPYRIGHT_NOTICE property, for which
+				values can be quite long.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
