@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search.elastic;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - ElasticSearch Integration
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%

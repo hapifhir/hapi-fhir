@@ -552,6 +552,9 @@
 			<id>dmap</id>
 			<name>David Maplesden</name>
 		</developer>
+		<developer>
+			<id>jaferkhan</id>
+		</developer>
 	</developers>
 
 	<licenses>
