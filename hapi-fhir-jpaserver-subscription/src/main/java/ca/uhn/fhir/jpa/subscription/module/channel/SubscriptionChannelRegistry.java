@@ -60,7 +60,7 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 		String channelName = theActiveSubscription.getChannelName();
-		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
+		ourLog.info("Removing subscription {} from channel {}: {}", theActiveSubscription.getId() ,channelName, myActiveSubscriptionByChannelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
@@ -87,10 +87,11 @@ public class SubscriptionChannelRegistry {
 	@VisibleForTesting
 	public void logForUnitTest() {
 		ourLog.info("{} Channels: {}", this, size());
+		mySubscriptionChannelCache.logForUnitTest();
 		for (String key : myActiveSubscriptionByChannelName.keySet()) {
 			Collection<String> list = myActiveSubscriptionByChannelName.get(key);
 			for (String value : list) {
-				ourLog.info("{}: {}", key, value);
+				ourLog.info("ActiveSubscriptionByChannelName {}: {}", key, value);
 			}
 		}
 	}

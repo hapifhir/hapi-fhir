@@ -122,6 +122,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 
 			if (isNotBlank(theMsg.getSubscriptionId())) {
 				if (!theMsg.getSubscriptionId().equals(nextSubscriptionId)) {
+					// TODO KHS we should use a hash to look it up instead of this full table scan
 					ourLog.debug("Ignoring subscription {} because it is not {}", nextSubscriptionId, theMsg.getSubscriptionId());
 					continue;
 				}

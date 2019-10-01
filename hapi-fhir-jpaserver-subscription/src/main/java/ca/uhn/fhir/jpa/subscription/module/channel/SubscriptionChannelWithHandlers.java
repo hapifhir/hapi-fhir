@@ -46,18 +46,13 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 			removeHandler(messageHandler);
 		}
 		if (mySubscribableChannel instanceof DisposableBean) {
-			int subscriberCount = mySubscribableChannel.getSubscriberCount();
-			if (subscriberCount > 0) {
-				ourLog.info("Channel {} still has {} subscribers.  Not destroying.", myChannelName, subscriberCount);
-			} else {
-				ourLog.info("Channel for subscription {} has no subscribers.  Destroying channel.", myChannelName);
-				tryDestroyChannel((DisposableBean) mySubscribableChannel);
-			}
+			tryDestroyChannel((DisposableBean) mySubscribableChannel);
 		}
 	}
 
 	private void tryDestroyChannel(DisposableBean theSubscribableChannel) {
 		try {
+			ourLog.info("Destroying channel {}", myChannelName);
 			theSubscribableChannel.destroy();
 		} catch (Exception e) {
 			ourLog.error("Failed to destroy channel bean", e);
@@ -66,5 +61,9 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 
 	public MessageChannel getChannel() {
 		return mySubscribableChannel;
+	}
+
+	public String getChannelName() {
+		return myChannelName;
 	}
 }
