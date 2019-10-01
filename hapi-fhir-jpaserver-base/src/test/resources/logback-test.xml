@@ -1,7 +1,7 @@
 <configuration>
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>INFO</level>
+			<level>TRACE</level>
 		</filter>
 		<encoder>
 			<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%file:%line] %msg%n</pattern>
@@ -39,6 +39,11 @@
 	<logger name="org.hibernate.type" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
+
+	<logger name="org.hibernate.search.elasticsearch.request" additivity="false" level="trace">
+		<appender-ref ref="STDOUT" />
+	</logger>
+
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />

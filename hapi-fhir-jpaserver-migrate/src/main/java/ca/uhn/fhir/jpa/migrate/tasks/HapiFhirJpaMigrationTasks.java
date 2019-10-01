@@ -29,7 +29,6 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
-import javax.persistence.Index;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -165,6 +164,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
 		version.onTable("TRM_VALUESET_C_DESIGNATION").modifyColumn("VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
+
+		version.startSectionWithMessage("Processing table: TRM_CONCEPT_PROPERTY");
+		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("PROP_VAL_LOB").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.CLOB);
 	}
 
 	protected void init400() {

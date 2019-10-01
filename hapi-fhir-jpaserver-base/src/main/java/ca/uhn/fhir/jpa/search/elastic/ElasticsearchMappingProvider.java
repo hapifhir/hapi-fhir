@@ -1,8 +1,8 @@
-package ca.uhn.fhir.jpa.search;
+package ca.uhn.fhir.jpa.search.elastic;
 
 /*-
  * #%L
- * HAPI FHIR JPA Server - ElasticSearch Integration
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
@@ -20,9 +20,8 @@ package ca.uhn.fhir.jpa.search;
  * #L%
  */
 
-import org.apache.lucene.analysis.core.WhitespaceTokenizerFactory;
-import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionRegistryBuilder;
 import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionProvider;
+import org.hibernate.search.elasticsearch.analyzer.definition.ElasticsearchAnalysisDefinitionRegistryBuilder;
 
 public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefinitionProvider {
 
@@ -39,10 +38,7 @@ public class ElasticsearchMappingProvider implements ElasticsearchAnalysisDefini
 
 		builder.analyzer("autocompletePhoneticAnalyzer")
 			.withTokenizer("standard")
-			.withTokenFilters("standard", "stop", "snowball_english", "phonetic_doublemetaphone");
-		builder.tokenFilter("phonetic_doublemetaphone")
-			.type("phonetic")
-			.param("encoder", "double_metaphone");
+			.withTokenFilters("standard", "stop", "snowball_english");
 		builder.tokenFilter("snowball_english").type("snowball").param("language", "English");
 
 		builder.analyzer("autocompleteNGramAnalyzer")

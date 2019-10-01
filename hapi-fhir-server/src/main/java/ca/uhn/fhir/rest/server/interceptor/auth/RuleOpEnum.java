@@ -33,5 +33,6 @@ enum RuleOpEnum {
 	DELETE,
 	OPERATION,
 	GRAPHQL,
+	CREATE,
 	PATCH
 }

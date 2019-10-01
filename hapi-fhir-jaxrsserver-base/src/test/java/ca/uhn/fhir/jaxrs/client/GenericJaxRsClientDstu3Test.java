@@ -1758,7 +1758,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		Patient p2 = new Patient(); // Yes ID
 		p2.addName().setFamily("PATIENT2");
-		p2.setId("Patient/2");
+		p2.setId("http://example.com/Patient/2");
 		input.add(p2);
 
 		//@formatter:off
@@ -1776,7 +1776,7 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals(HTTPVerb.POST, requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals(HTTPVerb.PUT, requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals("http://example.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
 
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdType("Patient/1/_history/1"), p1.getIdElement());

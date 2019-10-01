@@ -276,6 +276,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -483,6 +489,8 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.el</artifactId>
 		</dependency>
+
+		<!-- Hibernate Search -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-search-orm</artifactId>
@@ -494,6 +502,16 @@
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-phonetic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-elasticsearch</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Misc -->
@@ -567,6 +585,11 @@
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-spring</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>pl.allegro.tech</groupId>
+			<artifactId>embedded-elasticsearch</artifactId>
+			<version>2.10.0</version>
 		</dependency>
 
 		<dependency>

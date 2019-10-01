@@ -112,7 +112,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("WeakerAccess")
 @Repository
-public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, ApplicationContextAware {
+public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, IJpaDao<T>, ApplicationContextAware {
 
 	public static final long INDEX_STATUS_INDEXED = 1L;
 	public static final long INDEX_STATUS_INDEXING_FAILED = 2L;
@@ -1017,7 +1017,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	}
 
 	@SuppressWarnings("unchecked")
-	protected ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
+	@Override
+	public ResourceTable updateEntity(RequestDetails theRequest, final IBaseResource theResource, ResourceTable
 		theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		Validate.notNull(theEntity);
@@ -1256,6 +1257,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		return theEntity;
 	}
 
+	@Override
 	public ResourceTable updateInternal(RequestDetails theRequestDetails, T theResource, boolean thePerformIndexing, boolean theForceUpdateVersion,
 													ResourceTable theEntity, IIdType theResourceId, IBaseResource theOldResource) {
 
