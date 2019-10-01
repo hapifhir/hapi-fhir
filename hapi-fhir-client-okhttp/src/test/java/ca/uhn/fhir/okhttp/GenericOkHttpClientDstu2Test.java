@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.client.exceptions.InvalidResponseException;
 import ca.uhn.fhir.rest.client.impl.RestfulClientFactory;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 
 public class GenericOkHttpClientDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GenericOkHttpClientDstu2Test.class);
@@ -63,9 +64,7 @@ public class GenericOkHttpClientDstu2Test {
 	public static void beforeClass() throws Exception {
 		ourCtx = FhirContext.forDstu2();
 
-		ourPort = RandomServerPortProvider.findFreePort();
-		ourServer = new Server(ourPort);
-		ourLog.info("Starting server on port {}", ourPort);
+		ourServer = new Server(0);
 		ourServer.setHandler(new AbstractHandler() {
 
 			@Override
@@ -107,12 +106,13 @@ public class GenericOkHttpClientDstu2Test {
 			}
 		});
 
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 	}
 
 	@AfterClass
 	public static void afterClass() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 	}
 
 	/**
@@ -294,7 +294,7 @@ public class GenericOkHttpClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).execute();
+		client.create().resource(p).encodedXml().execute();
 
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
@@ -304,7 +304,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		p.setId("123");
 
-		client.create().resource(p).execute();
+		client.create().resource(p).encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		String body = ourRequestBodyString;
@@ -323,7 +323,7 @@ public class GenericOkHttpClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).conditionalByUrl("Patient?name=foo").execute();
+		client.create().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
 		assertContentTypeEquals(expectedContentTypeHeader);
@@ -332,7 +332,7 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", ourRequestMethod);
 
-		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").execute();
+		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(expectedContentTypeHeader);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
@@ -340,7 +340,7 @@ public class GenericOkHttpClientDstu2Test {
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar", ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
 		assertEquals("POST", ourRequestMethod);
 
-		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).execute();
+		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(expectedContentTypeHeader);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
@@ -528,6 +528,7 @@ public class GenericOkHttpClientDstu2Test {
 				.add()
 				.onResource(new IdDt("Patient/123"))
 				.meta(inMeta)
+			.encodedXml()
 				.execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$meta-add", ourRequestUri);
@@ -761,7 +762,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
-				.withParameters(inParams).execute();
+				.withParameters(inParams).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
@@ -792,6 +793,7 @@ public class GenericOkHttpClientDstu2Test {
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", new StringDt("value1"))
 				.andParameter("name2", new StringDt("value1"))
+			.encodedXml()
 				.execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
@@ -813,6 +815,7 @@ public class GenericOkHttpClientDstu2Test {
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", new IdentifierDt("system1", "value1"))
 				.andParameter("name2", new StringDt("value1"))
+			.encodedXml()
 				.execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
@@ -834,6 +837,7 @@ public class GenericOkHttpClientDstu2Test {
 				.named("$SOMEOPERATION")
 				.withParameter(Parameters.class, "name1", new IdentifierDt("system1", "value1"))
 				.andParameter("name2", new Patient().setActive(true))
+			.encodedXml()
 				.execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
@@ -872,6 +876,16 @@ public class GenericOkHttpClientDstu2Test {
 			@Override
 			public List<String> getFormatCommentsPost() {
 				return null;
+			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
 			}
 		};
 
@@ -915,6 +929,7 @@ public class GenericOkHttpClientDstu2Test {
 				.named("validate-code")
 				.withParameter(Parameters.class, "code", new CodeDt("8495-4"))
 				.andParameter("system", new UriDt("http://loinc.org"))
+			.encodedXml()
 				.execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/1/$validate-code", ourRequestUri);
@@ -947,7 +962,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
-				.withParameters(inParams).execute();
+				.withParameters(inParams).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -960,7 +975,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onType(Patient.class)
 				.named("$SOMEOPERATION")
-				.withParameters(inParams).execute();
+				.withParameters(inParams).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -973,7 +988,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
 				.named("$SOMEOPERATION")
-				.withParameters(inParams).execute();
+				.withParameters(inParams).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -1008,7 +1023,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onServer()
 				.named("$SOMEOPERATION")
-				.withNoParameters(Parameters.class).execute();
+				.withNoParameters(Parameters.class).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -1021,7 +1036,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onType(Patient.class)
 				.named("$SOMEOPERATION")
-				.withNoParameters(Parameters.class).execute();
+				.withNoParameters(Parameters.class).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -1034,7 +1049,7 @@ public class GenericOkHttpClientDstu2Test {
 				.operation()
 				.onInstance(new IdDt("Patient", "123"))
 				.named("$SOMEOPERATION")
-				.withNoParameters(Parameters.class).execute();
+				.withNoParameters(Parameters.class).encodedXml().execute();
 
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123/$SOMEOPERATION", ourRequestUri);
 		assertEquals(respString, p.encodeResourceToString(resp));
@@ -1526,53 +1541,6 @@ public class GenericOkHttpClientDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithListOfResources() throws Exception {
-		ca.uhn.fhir.model.dstu2.resource.Bundle resp = new ca.uhn.fhir.model.dstu2.resource.Bundle();
-		resp.addEntry().getResponse().setLocation("Patient/1/_history/1");
-		resp.addEntry().getResponse().setLocation("Patient/2/_history/2");
-		String respString = ourCtx.newJsonParser().encodeResourceToString(resp);
-
-		ourResponseContentType = Constants.CT_FHIR_JSON + "; charset=UTF-8";
-		ourResponseBody = respString;
-
-		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
-
-		List<IBaseResource> input = new ArrayList<IBaseResource>();
-
-		Patient p1 = new Patient(); // No ID
-		p1.addName().addFamily("PATIENT1");
-		input.add(p1);
-
-		Patient p2 = new Patient(); // Yes ID
-		p2.addName().addFamily("PATIENT2");
-		p2.setId("Patient/2");
-		input.add(p2);
-
-		List<IBaseResource> response = client.transaction()
-				.withResources(input)
-				.encodedJson()
-				.execute();
-
-		assertEquals("http://localhost:" + ourPort + "/fhir", ourRequestUri);
-		assertEquals(2, response.size());
-
-		String requestString = ourRequestBodyString;
-		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
-		assertEquals(2, requestBundle.getEntry().size());
-		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
-		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
-
-		p1 = (Patient) response.get(0);
-		assertEquals(new IdDt("Patient/1/_history/1"), p1.getId().toUnqualified());
-		// assertEquals("PATIENT1", p1.getName().get(0).getFamily().get(0).getValue());
-
-		p2 = (Patient) response.get(1);
-		assertEquals(new IdDt("Patient/2/_history/2"), p2.getId().toUnqualified());
-		// assertEquals("PATIENT2", p2.getName().get(0).getFamily().get(0).getValue());
-	}
-
-	@Test
 	public void testTransactionWithString() throws Exception {
 		ca.uhn.fhir.model.dstu2.resource.Bundle req = new ca.uhn.fhir.model.dstu2.resource.Bundle();
 		Patient patient = new Patient();
@@ -1653,35 +1621,35 @@ public class GenericOkHttpClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).conditionalByUrl("Patient?name=foo").execute();
+		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
 		assertEquals("PUT", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
 
-		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").execute();
+		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
 		assertEquals("PUT", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=http%3A//foo%7Cbar", ourRequestUri);
 
-		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").execute();
+		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
 		assertEquals("PUT", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo", ourRequestUri);
 
-		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).execute();
+		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
 		assertEquals("PUT", ourRequestMethod);
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", ourRequestUri);
 
-		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).execute();
+		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
@@ -1698,6 +1666,7 @@ public class GenericOkHttpClientDstu2Test {
 		ourResponseStatus = Constants.STATUS_HTTP_204_NO_CONTENT;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		client.setEncoding(EncodingEnum.XML);
 
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
@@ -1708,14 +1677,14 @@ public class GenericOkHttpClientDstu2Test {
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
 		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=xml", ourRequestUri);
 		assertEquals("PUT", ourRequestMethod);
 
 		client.update("123", p);
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size());
 		assertThat(getActualContentTypeHeader(), equalToIgnoringCase(expectedContentTypeHeader));
 		assertThat(ourRequestBodyString, containsString("<family value=\"FOOFAMILY\"/>"));
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/123?_format=xml", ourRequestUri);
 		assertEquals("PUT", ourRequestMethod);
 	}
 
@@ -1775,7 +1744,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		MethodOutcome response;
 
-		response = client.validate().resource(p).execute();
+		response = client.validate().resource(p).encodedXml().execute();
 		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertEquals(
@@ -1818,6 +1787,7 @@ public class GenericOkHttpClientDstu2Test {
 		ourResponseBody = msg;
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:" + ourPort + "/fhir");
+		client.setEncoding(EncodingEnum.XML);
 
 		Patient p = new Patient();
 		p.addName().addGiven("GIVEN");
@@ -1826,7 +1796,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		response = client.validate(p);
 
-		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate", ourRequestUri);
+		assertEquals("http://localhost:" + ourPort + "/fhir/Patient/$validate?_format=xml", ourRequestUri);
 		assertEquals("POST", ourRequestMethod);
 		assertEquals(
 				"<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>",

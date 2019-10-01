@@ -1,1 +1,0 @@
-curl -H "Content-Type: application/xml+fhir"   -X POST   -d '<Patient xmlns="http://hl7.org/fhir"><name><family value="Fireman"/><given value="John"/></name></Patient>'   "http://localhost:8080/example03/Patient"

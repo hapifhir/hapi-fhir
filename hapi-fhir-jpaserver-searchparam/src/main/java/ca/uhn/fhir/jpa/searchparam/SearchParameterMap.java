@@ -31,9 +31,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,6 +59,7 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
+	private Long myQueryCacheExpiryTime;
 
 	/**
 	 * Constructor
@@ -74,6 +75,14 @@ public class SearchParameterMap implements Serializable {
 		add(theName, theParam);
 	}
 
+    public Long getQueryCacheExpiryTime() {
+        return myQueryCacheExpiryTime;
+    }
+    
+    public void setQueryCacheExpiryTime(Long theQueryCacheExpiryTime) {
+        myQueryCacheExpiryTime = theQueryCacheExpiryTime;
+    }
+    
 	public SummaryEnum getSummaryMode() {
 		return mySummaryMode;
 	}
@@ -419,12 +428,20 @@ public class SearchParameterMap implements Serializable {
 			b.append(getCount());
 		}
 
-		// Summary
+		// Summary mode (_summary)
 		if (getSummaryMode() != null) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_SUMMARY);
 			b.append('=');
 			b.append(getSummaryMode().getCode());
+		}
+
+		// Search count mode (_total)
+		if (getSearchTotalMode() != null) {
+			addUrlParamSeparator(b);
+			b.append(Constants.PARAM_SEARCH_TOTAL_MODE);
+			b.append('=');
+			b.append(getSearchTotalMode().getCode());
 		}
 
 		if (b.length() == 0) {
@@ -438,7 +455,7 @@ public class SearchParameterMap implements Serializable {
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		if (isEmpty() == false) {
-			b.append("params", super.toString());
+			b.append("params", mySearchParameterMap);
 		}
 		if (getIncludes().isEmpty() == false) {
 			b.append("includes", getIncludes());

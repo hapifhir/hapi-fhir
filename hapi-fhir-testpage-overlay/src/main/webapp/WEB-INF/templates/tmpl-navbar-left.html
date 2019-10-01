@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <div th:fragment="left" class="col-sm-3 col-md-3 sidebar">
 
 	<h4>Options</h4>
@@ -97,7 +97,7 @@
 		var target = $(source);
 		setResource(target, resourceName);
 		
-		$("#outerForm").attr("action", action);
+		$("#outerForm").attr("action", [[@{'/'}]] + action);
 		$('#outerForm').submit();
 	}
 	</script>

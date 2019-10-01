@@ -9,9 +9,9 @@ package ca.uhn.fhir.context;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -68,7 +68,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IAccessor getAccessor() {
 		return new IAccessor() {
 			@Override
-			public List<IBase> getValues(Object theTarget) {
+			public List<IBase> getValues(IBase theTarget) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (target.getValue() != null) {
 					return Collections.singletonList((IBase) target.getValue());
@@ -76,6 +76,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 				ArrayList<IBase> retVal = new ArrayList<IBase>(target.getUndeclaredExtensions());
 				return retVal;
 			}
+
 		};
 	}
 
@@ -113,7 +114,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 	public IMutator getMutator() {
 		return new IMutator() {
 			@Override
-			public void addValue(Object theTarget, IBase theValue) {
+			public void addValue(IBase theTarget, IBase theValue) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (theValue instanceof IDatatype) {
 					target.setValue((IDatatype) theTarget);
@@ -123,7 +124,7 @@ public class RuntimeChildUndeclaredExtensionDefinition extends BaseRuntimeChildD
 			}
 
 			@Override
-			public void setValue(Object theTarget, IBase theValue) {
+			public void setValue(IBase theTarget, IBase theValue) {
 				ExtensionDt target = (ExtensionDt) theTarget;
 				if (theValue instanceof IDatatype) {
 					target.setValue((IDatatype) theTarget);

@@ -1,10 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import org.hl7.fhir.instance.model.Attachment;
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.Patient;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.Attachment;
+import org.hl7.fhir.dstu2.model.BackboneElement;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.Patient;
+import org.hl7.fhir.dstu2.model.StringType;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 
 import ca.uhn.fhir.model.api.annotation.Block;

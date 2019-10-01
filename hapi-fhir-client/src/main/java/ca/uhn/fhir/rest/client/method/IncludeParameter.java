@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ import java.util.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.api.*;
@@ -64,23 +65,30 @@ class IncludeParameter extends BaseQueryParameter {
 
 		if (myInstantiableCollectionType == null) {
 			if (mySpecType == Include.class) {
-				convertAndAddIncludeToList(retVal, (Include) theObject);
+				convertAndAddIncludeToList(retVal, (Include) theObject, theContext);
 			} else {
 				retVal.add(QualifiedParamList.singleton(((String) theObject)));
 			}
 		} else {
 			Collection<Include> val = (Collection<Include>) theObject;
 			for (Include include : val) {
-				convertAndAddIncludeToList(retVal, include);
+				convertAndAddIncludeToList(retVal, include, theContext);
 			}
 		}
 
 		return retVal;
 	}
 
-	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> retVal, Include include) {
-		String qualifier = include.isRecurse() ? Constants.PARAM_INCLUDE_QUALIFIER_RECURSE : null;
-		retVal.add(QualifiedParamList.singleton(qualifier, include.getValue()));
+	private void convertAndAddIncludeToList(ArrayList<QualifiedParamList> theQualifiedParamLists, Include theInclude, FhirContext theContext) {
+		String qualifier = null;
+		if (theInclude.isRecurse()) {
+			if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_ITERATE;
+			} else {
+				qualifier = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE;
+			}
+		}
+		theQualifiedParamLists.add(QualifiedParamList.singleton(qualifier, theInclude.getValue()));
 	}
 
 	public Set<String> getAllow() {

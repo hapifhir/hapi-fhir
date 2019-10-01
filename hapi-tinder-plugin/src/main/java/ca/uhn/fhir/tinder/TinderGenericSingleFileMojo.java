@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.commons.lang.WordUtils;
@@ -278,8 +279,6 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			}
 
 			generator.prepare(context);
-		} catch (ExecutionException e) {
-			throw new MojoExecutionException(e.getMessage(), e.getCause());
 		} catch (FailureException e) {
 			throw new MojoFailureException(e.getMessage(), e.getCause());
 		}
@@ -288,7 +287,7 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			/*
 			 * Deal with the generation target
 			 */
-			TargetType targetType = null;
+			TargetType targetType;
 			File targetDirectory = null;
 			if (null == targetFile) {
 				throw new MojoFailureException("The [targetFile] parameter is required.");
@@ -327,13 +326,13 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			ourLog.info(" * Output ["+targetType.toString()+"] file ["+targetFile+"] in directory: " + targetDirectory.getAbsolutePath());
 			targetDirectory.mkdirs();
 			File target = new File(targetDirectory, targetFile);
-			OutputStreamWriter targetWriter = new OutputStreamWriter(new FileOutputStream(target, false), "UTF-8");
+			OutputStreamWriter targetWriter = new OutputStreamWriter(new FileOutputStream(target, false), StandardCharsets.UTF_8);
 	
 			/*
 			 * Next, deal with the template and initialize velocity
 			 */
 			VelocityEngine v = VelocityHelper.configureVelocityEngine(templateFile, velocityPath, velocityProperties);
-			InputStream templateIs = null;
+			InputStream templateIs;
 			if (templateFile != null) {
 				templateIs = new FileInputStream(templateFile);
 			} else {
@@ -359,10 +358,10 @@ public class TinderGenericSingleFileMojo extends AbstractMojo {
 			ctx.put("targetPackage", targetPackage);
 			ctx.put("targetFolder", targetFolder);
 			ctx.put("version", version);
-			ctx.put("isRi", BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi());
+			ctx.put("isRi", BaseStructureParser.determineVersionEnum(version).isRi());
 			ctx.put("hash", "#");
 			ctx.put("esc", new EscapeTool());
-			if (BaseStructureSpreadsheetParser.determineVersionEnum(version).isRi()) {
+			if (BaseStructureParser.determineVersionEnum(version).isRi()) {
 				ctx.put("resourcePackage", "org.hl7.fhir." + version + ".model");
 			} else {
 				ctx.put("resourcePackage", "ca.uhn.fhir.model." + version + ".resource");

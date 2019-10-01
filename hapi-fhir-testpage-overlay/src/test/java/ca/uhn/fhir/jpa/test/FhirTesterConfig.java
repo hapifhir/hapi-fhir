@@ -40,6 +40,12 @@ public class FhirTesterConfig {
 		TesterConfig retVal = new TesterConfig();
 		retVal
 			.addServer()
+				.withId("internal")
+				.withFhirVersion(FhirVersionEnum.DSTU2)
+				.withBaseUrl("http://localhost:8888/fhir")
+				.withName("Localhost Server")
+				.allowsApiKey()
+			.addServer()
 				.withId("hapi")
 				.withFhirVersion(FhirVersionEnum.DSTU2)
 				.withBaseUrl("http://fhirtest.uhn.ca/baseDstu2")

@@ -7,19 +7,16 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.junit.*;
-import org.mockito.ArgumentCaptor;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.*;
@@ -111,20 +108,12 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			return resourceTable.getUpdated().getValueAsString();
 		});
 
-		myCaptureQueriesListener.clear();
 		runInTransaction(() -> {
 			Patient p = new Patient();
 			p.setId(id.getIdPart());
 			p.addIdentifier().setSystem("urn:system").setValue("2");
-			myPatientDao.update(p);
+			myPatientDao.update(p).getResource();
 		});
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// TODO: it'd be nice if this was lower
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
-		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread(), empty());
-		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
 		runInTransaction(() -> {
 			List<ResourceTable> allResources = myResourceTableDao.findAll();
@@ -160,7 +149,9 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		// Do a read
 		{
+			myCaptureQueriesListener.clear();
 			Patient patient = myPatientDao.read(id, mySrd);
+			myCaptureQueriesListener.logAllQueriesForCurrentThread();
 			List<CanonicalType> tl = patient.getMeta().getProfile();
 			assertEquals(1, tl.size());
 			assertEquals("http://foo/bar", tl.get(0).getValue());
@@ -577,7 +568,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		p2.addName().setFamily("Tester").addGiven("testUpdateMaintainsSearchParamsDstu2BBB");
 		myPatientDao.create(p2, mySrd).getId();
 
-		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
+		Set<Long> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(1, ids.size());
 		assertThat(ids, contains(p1id.getIdPartAsLong()));
 
@@ -586,10 +577,10 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		MethodOutcome update2 = myPatientDao.update(p1, mySrd);
 		IIdType p1id2 = update2.getId();
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
 		assertEquals(0, ids.size());
 
-		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")));
+		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")), null);
 		assertEquals(2, ids.size());
 
 		// Make sure vreads work
@@ -633,7 +624,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		{
 			Patient p1 = myPatientDao.read(p1id, mySrd);
 			List<Coding> tagList = p1.getMeta().getTag();
-			Set<String> secListValues = new HashSet<String>();
+			Set<String> secListValues = new HashSet<>();
 			for (Coding next : tagList) {
 				secListValues.add(next.getSystemElement().getValue() + "|" + next.getCodeElement().getValue());
 			}

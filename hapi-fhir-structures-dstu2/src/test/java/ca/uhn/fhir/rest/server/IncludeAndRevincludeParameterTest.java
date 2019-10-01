@@ -26,7 +26,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.Search;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
 
 /**
@@ -78,7 +78,7 @@ public class IncludeAndRevincludeParameterTest {
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
+		JettyUtil.closeServer(ourServer);
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
@@ -86,7 +86,6 @@ public class IncludeAndRevincludeParameterTest {
 	public static void beforeClass() throws Exception {
 
 		ourCtx = FhirContext.forDstu2();
-		ourPort = PortUtil.findFreePort();
 		ourServer = new Server(ourPort);
 
 		ServletHandler proxyHandler = new ServletHandler();
@@ -96,7 +95,8 @@ public class IncludeAndRevincludeParameterTest {
 		ServletHolder servletHolder = new ServletHolder(servlet);
 		proxyHandler.addServletWithMapping(servletHolder, "/*");
 		ourServer.setHandler(proxyHandler);
-		ourServer.start();
+		JettyUtil.startServer(ourServer);
+        ourPort = JettyUtil.getPortForStartedServer(ourServer);
 
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
 		HttpClientBuilder builder = HttpClientBuilder.create();

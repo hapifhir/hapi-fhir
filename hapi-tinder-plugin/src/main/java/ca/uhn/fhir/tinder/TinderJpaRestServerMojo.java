@@ -65,12 +65,15 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 		} else if ("r4".equals(version)) {
 			fhirContext = FhirContext.forR4();
 			packageSuffix = ".r4";
+		} else if ("r5".equals(version)) {
+			fhirContext = FhirContext.forR5();
+			packageSuffix = ".r5";
 		} else {
 			throw new MojoFailureException("Unknown version configured: " + version);
 		}
 		
 		if (baseResourceNames == null || baseResourceNames.isEmpty()) {
-			baseResourceNames = new ArrayList<String>();
+			baseResourceNames = new ArrayList<>();
 			
 			ourLog.info("No resource names supplied, going to use all resources from version: {}",fhirContext.getVersion().getVersion());
 			
@@ -83,7 +86,7 @@ public class TinderJpaRestServerMojo extends AbstractMojo {
 
 			ourLog.debug("Property file contains: {}",p);
 
-			TreeSet<String> keys = new TreeSet<String>();
+			TreeSet<String> keys = new TreeSet<>();
 			for(Object next : p.keySet()) {
 				keys.add((String) next);
 			}

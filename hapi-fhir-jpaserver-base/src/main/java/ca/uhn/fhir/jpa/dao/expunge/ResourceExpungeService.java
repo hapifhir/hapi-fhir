@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,12 +20,23 @@ package ca.uhn.fhir.jpa.dao.expunge;
  * #L%
  */
 
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +57,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
-	@Autowired
-	private ISearchResultDao mySearchResultDao;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
@@ -72,6 +81,12 @@ class ResourceExpungeService implements IResourceExpungeService {
 	private IdHelperService myIdHelperService;
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
+	@Autowired
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+	@Autowired
+	private IResourceProvenanceDao myResourceHistoryProvenanceTableDao;
 
 	@Override
 	@Transactional
@@ -79,7 +94,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		Pageable page = PageRequest.of(0, theRemainingCount);
 		if (theResourceId != null) {
 			if (theVersion != null) {
-				return toSlice(myResourceHistoryTableDao.findForIdAndVersion(theResourceId, theVersion));
+				return toSlice(myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(theResourceId, theVersion));
 			} else {
 				return myResourceHistoryTableDao.findIdsOfPreviousVersionsOfResourceId(page, theResourceId);
 			}
@@ -115,28 +130,54 @@ class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeCurrentVersionOfResources(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+	public void expungeCurrentVersionOfResources(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount) {
 		for (Long next : theResourceIds) {
-			expungeCurrentVersionOfResource(next, theRemainingCount);
+			expungeCurrentVersionOfResource(theRequestDetails, next, theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
 				return;
 			}
 		}
 	}
 
-	private void expungeHistoricalVersion(Long theNextVersionId) {
+	private void expungeHistoricalVersion(RequestDetails theRequestDetails, Long theNextVersionId, AtomicInteger theRemainingCount) {
 		ResourceHistoryTable version = myResourceHistoryTableDao.findById(theNextVersionId).orElseThrow(IllegalArgumentException::new);
-		ourLog.info("Deleting resource version {}", version.getIdDt().getValue());
+		IdDt id = version.getIdDt();
+		ourLog.info("Deleting resource version {}", id.getValue());
 
+		callHooks(theRequestDetails, theRemainingCount, version, id);
+
+		if (version.getProvenance() != null) {
+			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
+		}
+		
 		myResourceHistoryTagDao.deleteAll(version.getTags());
 		myResourceHistoryTableDao.delete(version);
+
+		theRemainingCount.decrementAndGet();
 	}
+
+	private void callHooks(RequestDetails theRequestDetails, AtomicInteger theRemainingCount, ResourceHistoryTable theVersion, IdDt theId) {
+		final AtomicInteger counter = new AtomicInteger();
+		if (JpaInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, myInterceptorBroadcaster, theRequestDetails)) {
+			IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());
+			IBaseResource resource = resourceDao.toResource(theVersion, false);
+			HookParams params = new HookParams()
+				.add(AtomicInteger.class, counter)
+				.add(IIdType.class, theId)
+				.add(IBaseResource.class, resource)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE, params);
+		}
+		theRemainingCount.addAndGet(-1 * counter.get());
+	}
+
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersionsOfIds(List<Long> theResourceIds, AtomicInteger theRemainingCount) {
+	public void expungeHistoricalVersionsOfIds(RequestDetails theRequestDetails, List<Long> theResourceIds, AtomicInteger theRemainingCount) {
 		for (Long next : theResourceIds) {
-			expungeHistoricalVersionsOfId(next, theRemainingCount);
+			expungeHistoricalVersionsOfId(theRequestDetails, next, theRemainingCount);
 			if (theRemainingCount.get() <= 0) {
 				return;
 			}
@@ -145,21 +186,21 @@ class ResourceExpungeService implements IResourceExpungeService {
 
 	@Override
 	@Transactional
-	public void expungeHistoricalVersions(List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
+	public void expungeHistoricalVersions(RequestDetails theRequestDetails, List<Long> theHistoricalIds, AtomicInteger theRemainingCount) {
 		for (Long next : theHistoricalIds) {
-			expungeHistoricalVersion(next);
-			if (theRemainingCount.decrementAndGet() <= 0) {
+			expungeHistoricalVersion(theRequestDetails, next, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
 				return;
 			}
 		}
 	}
 
-	private void expungeCurrentVersionOfResource(Long myResourceId, AtomicInteger theRemainingCount) {
-		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalStateException::new);
+	private void expungeCurrentVersionOfResource(RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
+		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
-		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersion(resource.getId(), resource.getVersion());
+		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(resource.getId(), resource.getVersion());
 		if (currentVersion != null) {
-			expungeHistoricalVersion(currentVersion.getId());
+			expungeHistoricalVersion(theRequestDetails, currentVersion.getId(), theRemainingCount);
 		}
 
 		ourLog.info("Expunging current version of resource {}", resource.getIdDt().getValue());
@@ -175,8 +216,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 		}
 
 		myResourceTableDao.delete(resource);
-
-		theRemainingCount.decrementAndGet();
 	}
 
 	@Override
@@ -194,7 +233,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceTagDao.deleteByResourceId(theResourceId);
 	}
 
-	private void expungeHistoricalVersionsOfId(Long myResourceId, AtomicInteger theRemainingCount) {
+	private void expungeHistoricalVersionsOfId(RequestDetails theRequestDetails, Long myResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(myResourceId).orElseThrow(IllegalArgumentException::new);
 
 		Pageable page = PageRequest.of(0, theRemainingCount.get());
@@ -202,17 +241,11 @@ class ResourceExpungeService implements IResourceExpungeService {
 		Slice<Long> versionIds = myResourceHistoryTableDao.findForResourceId(page, resource.getId(), resource.getVersion());
 		ourLog.debug("Found {} versions of resource {} to expunge", versionIds.getNumberOfElements(), resource.getIdDt().getValue());
 		for (Long nextVersionId : versionIds) {
-			expungeHistoricalVersion(nextVersionId);
-			if (theRemainingCount.decrementAndGet() <= 0) {
+			expungeHistoricalVersion(theRequestDetails, nextVersionId, theRemainingCount);
+			if (theRemainingCount.get() <= 0) {
 				return;
 			}
 		}
-	}
-
-	@Override
-	@Transactional
-	public void deleteByResourceIdPartitions(List<Long> theResourceIds) {
-		mySearchResultDao.deleteByResourceIds(theResourceIds);
 	}
 
 	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {

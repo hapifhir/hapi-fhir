@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -107,6 +107,11 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -125,6 +130,11 @@
 			<artifactId>hapi-fhir-validation-resources-r4</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-validation-resources-r5</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>net.ttddyy</groupId>
@@ -136,7 +146,11 @@
 			<artifactId>logback-classic</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
@@ -192,13 +206,12 @@
 
 		<!-- Patch Dependencies -->
 		<dependency>
-			<groupId>com.github.java-json-tools</groupId>
-			<artifactId>json-patch</artifactId>
-		</dependency>
+           	<groupId>io.dogote</groupId>
+           	<artifactId>json-patch</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>com.github.dnault</groupId>
 			<artifactId>xml-patch</artifactId>
-			<version>0.3.0</version>
 		</dependency>
 
 		<!-- FHIR RI is pulled in for UCUM support, but we don't want any of its dependencies. -->
@@ -243,10 +256,32 @@
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbyshared</artifactId>
+			<scope>test</scope>
+		</dependency>-->
+		<dependency>
+			<groupId>org.apache.derby</groupId>
+			<artifactId>derbytools</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.4.199</version>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-dbcp2</artifactId>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -259,6 +294,12 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-test-utilities</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 		<!--
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
@@ -271,6 +312,11 @@
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
 		</dependency>
 
 
@@ -443,6 +489,8 @@
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.el</artifactId>
 		</dependency>
+
+		<!-- Hibernate Search -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-search-orm</artifactId>
@@ -454,6 +502,16 @@
 		<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analyzers-phonetic</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-search-elasticsearch</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- Misc -->
@@ -507,8 +565,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-test</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -527,6 +585,11 @@
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-spring</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>pl.allegro.tech</groupId>
+			<artifactId>embedded-elasticsearch</artifactId>
+			<version>2.10.0</version>
 		</dependency>
 
 		<dependency>
@@ -569,9 +632,10 @@
 		<plugins>
 			<plugin>
 				<groupId>de.jpdigital</groupId>
-				<artifactId>hibernate52-ddl-maven-plugin</artifactId>
+				<artifactId>hibernate54-ddl-maven-plugin</artifactId>
 				<configuration>
 					<dialects>
+						<param>h2</param>
 						<param>derby_10_7</param>
 						<param>postgresql92</param>
 						<param>mysql57</param>
@@ -619,14 +683,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}../hapi-fhir-base/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>
@@ -645,6 +701,7 @@
 					<runOrder>alphabetical</runOrder>
 					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx20484M -Xss128M -XX:MetaspaceSize=512M -XX:MaxMetaspaceSize=2048M -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC</argLine>
 					<forkCount>0.6C</forkCount>
+					<excludes>*StressTest*</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -652,21 +709,6 @@
 				<artifactId>hapi-tinder-plugin</artifactId>
 				<version>${project.version}</version>
 				<executions>
-					<!-- 
-					<execution>
-						<id>build_dstu1</id>
-						<goals>
-							<goal>generate-jparest-server</goal>
-						</goals>
-						<configuration>
-							<version>dstu</version>
-							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
-							<packageBase>ca.uhn.fhir.jpa.rp.dstu</packageBase>
-							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu1.xml</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
-						</configuration>
-					</execution>
-					-->
 					<execution>
 						<id>build_dstu2</id>
 						<goals>
@@ -677,7 +719,7 @@
 							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
 							<packageBase>ca.uhn.fhir.jpa.rp.dstu2</packageBase>
 							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-dstu2.xml</targetResourceSpringBeansFile>
-							<baseResourceNames></baseResourceNames>
+							<baseResourceNames/>
 							<excludeResourceNames>
 								<!-- <excludeResourceName>OperationDefinition</excludeResourceName> <excludeResourceName>OperationOutcome</excludeResourceName> -->
 							</excludeResourceNames>
@@ -711,6 +753,19 @@
 							<baseResourceNames></baseResourceNames>
 							<excludeResourceNames>
 							</excludeResourceNames>
+						</configuration>
+					</execution>
+					<execution>
+						<id>build_r5</id>
+						<goals>
+							<goal>generate-jparest-server</goal>
+						</goals>
+						<configuration>
+							<version>r5</version>
+							<configPackageBase>ca.uhn.fhir.jpa.config</configPackageBase>
+							<packageBase>ca.uhn.fhir.jpa.rp.r5</packageBase>
+							<targetResourceSpringBeansFile>hapi-fhir-server-resourceproviders-r5.xml</targetResourceSpringBeansFile>
+							<baseResourceNames></baseResourceNames>
 						</configuration>
 					</execution>
 				</executions>
@@ -818,7 +873,7 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
-							<forkCount>1</forkCount>
+							<forkCount>2</forkCount>
 							<reuseForks>true</reuseForks>
 							<runOrder>alphabetical</runOrder>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>

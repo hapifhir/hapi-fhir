@@ -1,5 +1,20 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -11,9 +26,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,20 +37,41 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.*;
-
-import ca.uhn.fhir.context.*;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-
 /**
  * Fetch resources from a bundle
  */
 public class BundleUtil {
+
+	public static class BundleEntryParts {
+		private final RequestTypeEnum myRequestType;
+		private final IBaseResource myResource;
+		private final String myUrl;
+		private final String myConditionalUrl;
+
+		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
+			super();
+			myRequestType = theRequestType;
+			myUrl = theUrl;
+			myResource = theResource;
+			myConditionalUrl = theConditionalUrl;
+		}
+
+		public RequestTypeEnum getRequestType() {
+			return myRequestType;
+		}
+
+		public IBaseResource getResource() {
+			return myResource;
+		}
+
+		public String getConditionalUrl() {
+			return myConditionalUrl;
+		}
+
+		public String getUrl() {
+			return myUrl;
+		}
+	}
 
 	/**
 	 * @return Returns <code>null</code> if the link isn't found or has no value
@@ -137,6 +173,14 @@ public class BundleUtil {
 		return null;
 	}
 
+	public static void setTotal(FhirContext theContext, IBaseBundle theBundle, Integer theTotal) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theBundle);
+		BaseRuntimeChildDefinition entryChild = def.getChildByName("total");
+		IPrimitiveType<Integer> value = (IPrimitiveType<Integer>) entryChild.getChildByName("total").newInstance();
+		value.setValue(theTotal);
+		entryChild.getMutator().setValue(theBundle, value);
+	}
+
 	/**
 	 * Extract all of the resources from a given bundle
 	 */
@@ -152,19 +196,21 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
 		BaseRuntimeElementCompositeDefinition<?> requestElem = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
-		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName("url");
+		BaseRuntimeChildDefinition requestUrlChild = requestElem.getChildByName("url");
+		BaseRuntimeChildDefinition requestIfNoneExistChild = requestElem.getChildByName("ifNoneExist");
 		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName("method");
 
 		for (IBase nextEntry : entries) {
 			IBaseResource resource = null;
 			String url = null;
 			RequestTypeEnum requestType = null;
+			String conditionalUrl = null;
 
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
 				resource = (IBaseResource) next;
 			}
 			for (IBase nextRequest : requestChild.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrl : urlChild.getAccessor().getValues(nextRequest)) {
+				for (IBase nextUrl : requestUrlChild.getAccessor().getValues(nextRequest)) {
 					url = ((IPrimitiveType<?>) nextUrl).getValueAsString();
 				}
 				for (IBase nextUrl : methodChild.getAccessor().getValues(nextRequest)) {
@@ -173,13 +219,29 @@ public class BundleUtil {
 						requestType = RequestTypeEnum.valueOf(methodString);
 					}
 				}
+
+				if (requestType != null) {
+					//noinspection EnumSwitchStatementWhichMissesCases
+					switch (requestType) {
+						case PUT:
+							conditionalUrl = url != null && url.contains("?") ? url : null;
+							break;
+						case POST:
+							List<IBase> ifNoneExistReps = requestIfNoneExistChild.getAccessor().getValues(nextRequest);
+							if (ifNoneExistReps.size() > 0) {
+								IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
+								conditionalUrl = ifNoneExist.getValueAsString();
+							}
+							break;
+					}
+				}
 			}
 
 			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
-			retVal.add(new BundleEntryParts(requestType, url, resource));
+			retVal.add(new BundleEntryParts(requestType, url, resource, conditionalUrl));
 		}
 
 
@@ -215,30 +277,5 @@ public class BundleUtil {
 			}
 		}
 		return retVal;
-	}
-
-	public static class BundleEntryParts {
-		private final RequestTypeEnum myRequestType;
-		private final IBaseResource myResource;
-		private final String myUrl;
-
-		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
-			super();
-			myRequestType = theRequestType;
-			myUrl = theUrl;
-			myResource = theResource;
-		}
-
-		public RequestTypeEnum getRequestType() {
-			return myRequestType;
-		}
-
-		public IBaseResource getResource() {
-			return myResource;
-		}
-
-		public String getUrl() {
-			return myUrl;
-		}
 	}
 }

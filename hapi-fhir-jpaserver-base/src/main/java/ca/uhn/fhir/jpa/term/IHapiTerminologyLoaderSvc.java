@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.term;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,13 +28,19 @@ import java.util.List;
 
 public interface IHapiTerminologyLoaderSvc {
 
+	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
 	String LOINC_URI = "http://loinc.org";
 	String SCT_URI = "http://snomed.info/sct";
 	String IEEE_11073_10101_URI = "urn:iso:std:iso:11073:10101";
 
+	UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
 	UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
+
+	// FIXME: remove the default implementation before 4.0.0
+	default UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
 
 	interface FileDescriptor {
 

@@ -142,7 +142,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 
   @Override
   public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-    return new ArrayList<StructureDefinition>(myStructureDefinitions.values());
+    return new ArrayList<>(myStructureDefinitions.values());
   }
 
   @Override
@@ -184,5 +184,15 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
   public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
     return null;
   }
+
+	@Override
+	public LookupCodeResult lookupCode(FhirContext theContext, String theSystem, String theCode) {
+		return null;
+	}
+
+	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		return null;
+	}
 
 }

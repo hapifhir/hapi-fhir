@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.After;
 import org.junit.Test;
@@ -18,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -71,7 +73,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
 	}
 
@@ -84,7 +86,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
 	}
 
@@ -111,16 +113,20 @@ public class PartitionRunnerTest {
 		Slice<Long> resourceIds = buildSlice(9);
 		myDaoConfig.setExpungeBatchSize(5);
 
+		// We don't care in which order, but one partition size should be
+		// 5 and one should be 4
+		Set<Integer> nums = Sets.newHashSet(5, 4);
+
 		Consumer<List<Long>> partitionConsumer = buildPartitionConsumer(myLatch);
 		myLatch.setExpectedCount(2);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
 		assertThat(partitionCall1.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-		assertEquals(5, partitionCall1.size);
+		assertEquals(true, nums.remove(partitionCall1.size));
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 		assertThat(partitionCall2.threadName, isOneOf(EXPUNGE_THREADNAME_1, EXPUNGE_THREADNAME_2));
-		assertEquals(4, partitionCall2.size);
+		assertEquals(true, nums.remove(partitionCall2.size));
 		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
 	}
 

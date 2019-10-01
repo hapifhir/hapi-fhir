@@ -9,9 +9,9 @@ package ca.uhn.fhir.context;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,13 +36,15 @@ public enum FhirVersionEnum {
 
 	DSTU2("ca.uhn.fhir.model.dstu2.FhirDstu2", null, false, new Version("1.0.2")),
 
-	DSTU2_HL7ORG("org.hl7.fhir.instance.FhirDstu2Hl7Org", DSTU2, true, new Version("1.0.2")),
+	DSTU2_HL7ORG("org.hl7.fhir.dstu2.hapi.ctx.FhirDstu2Hl7Org", DSTU2, true, new Version("1.0.2")),
 
 	DSTU2_1("org.hl7.fhir.dstu2016may.hapi.ctx.FhirDstu2_1", null, true, new Version("1.4.0")),
 
 	DSTU3("org.hl7.fhir.dstu3.hapi.ctx.FhirDstu3", null, true, new Dstu3Version()),
 
-	R4("org.hl7.fhir.r4.hapi.ctx.FhirR4", null, true, new R4Version()),;
+	R4("org.hl7.fhir.r4.hapi.ctx.FhirR4", null, true, new R4Version()),
+
+	R5("org.hl7.fhir.r5.hapi.ctx.FhirR5", null, true, new R5Version());
 
 	private final FhirVersionEnum myEquivalent;
 	private final boolean myIsRi;
@@ -134,6 +136,8 @@ public enum FhirVersionEnum {
 				return FhirContext.forDstu3();
 			case R4:
 				return FhirContext.forR4();
+			case R5:
+				return FhirContext.forR5();
 		}
 		throw new IllegalStateException("Unknown version: " + this); // should not happen
 	}
@@ -207,6 +211,26 @@ public enum FhirVersionEnum {
 				myVersion = (String) c.getDeclaredField("VERSION").get(null);
 			} catch (Exception e) {
 				myVersion = "4.0.0";
+			}
+		}
+
+		@Override
+		public String provideVersion() {
+			return myVersion;
+		}
+
+	}
+
+	private static class R5Version implements IVersionProvider {
+
+		private String myVersion;
+
+		R5Version() {
+			try {
+				Class<?> c = Class.forName("org.hl7.fhir.r5.model.Constants");
+				myVersion = (String) c.getDeclaredField("VERSION").get(null);
+			} catch (Exception e) {
+				myVersion = "5.0.0";
 			}
 		}
 

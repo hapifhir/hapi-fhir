@@ -13,6 +13,7 @@ fieldset[disabled].btn {
 body {
 	padding-top: 50px;
 	overflow-x: hidden;
+   font-family: sans-serif;
 }
 
 .clientCodeBox

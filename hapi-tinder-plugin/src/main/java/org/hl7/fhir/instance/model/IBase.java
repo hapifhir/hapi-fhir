@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model;
+package org.hl7.fhir.dstu2.model;
 
 /*
  * #%L

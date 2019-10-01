@@ -8,9 +8,9 @@ package ca.uhn.fhir.parser.json;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,15 +50,6 @@ public class GsonStructure implements JsonLikeStructure {
 	
 	public GsonStructure() {
 		super();
-	}
-	
-	public GsonStructure (JsonObject json) {
-		super();
-		setNativeObject(json);
-	}
-	public GsonStructure (JsonArray json) {
-		super();
-		setNativeArray(json);
 	}
 	
 	public void setNativeObject (JsonObject json) {
@@ -111,8 +102,7 @@ public class GsonStructure implements JsonLikeStructure {
 			if (nextInt == '{') {
 				JsonObject root = gson.fromJson(pbr, JsonObject.class);
 				setNativeObject(root);
-			} else
-			if (nextInt == '[') {
+			} else if (nextInt == '[') {
 				JsonArray root = gson.fromJson(pbr, JsonArray.class);
 				setNativeArray(root);
 			}

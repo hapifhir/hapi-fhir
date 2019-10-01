@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,6 +30,7 @@ import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
 import ca.uhn.fhir.rest.api.server.IRestfulResponse;
+import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -40,6 +41,7 @@ import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.*;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.Writer;
@@ -180,19 +182,22 @@ public class RestfulServerUtils {
 					break;
 				}
 			}
-			switch (theRequestDetails.getRestOperationType()) {
-				case SEARCH_SYSTEM:
-				case SEARCH_TYPE:
-				case HISTORY_SYSTEM:
-				case HISTORY_TYPE:
-				case HISTORY_INSTANCE:
-				case GET_PAGE:
-					if (!haveExplicitBundleElement) {
-						parser.setEncodeElementsAppliesToChildResourcesOnly(true);
-					}
-					break;
-				default:
-					break;
+
+			if (theRequestDetails.getRestOperationType() != null) {
+				switch (theRequestDetails.getRestOperationType()) {
+					case SEARCH_SYSTEM:
+					case SEARCH_TYPE:
+					case HISTORY_SYSTEM:
+					case HISTORY_TYPE:
+					case HISTORY_INSTANCE:
+					case GET_PAGE:
+						if (!haveExplicitBundleElement) {
+							parser.setEncodeElementsAppliesToChildResourcesOnly(true);
+						}
+						break;
+					default:
+						break;
+				}
 			}
 
 			parser.setEncodeElements(newElements);
@@ -664,37 +669,60 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
-	public static PreferReturnEnum parsePreferHeader(String theValue) {
-		if (isBlank(theValue)) {
-			return null;
-		}
+	private static EnumSet<RestOperationTypeEnum> ourOperationsWhichAllowPreferHeader = EnumSet.of(RestOperationTypeEnum.CREATE, RestOperationTypeEnum.UPDATE, RestOperationTypeEnum.PATCH);
 
-		StringTokenizer tok = new StringTokenizer(theValue, ",");
-		while (tok.hasMoreTokens()) {
-			String next = tok.nextToken();
-			int eqIndex = next.indexOf('=');
-			if (eqIndex == -1 || eqIndex >= next.length() - 2) {
-				continue;
-			}
-
-			String key = next.substring(0, eqIndex).trim();
-			if (key.equals(Constants.HEADER_PREFER_RETURN) == false) {
-				continue;
-			}
-
-			String value = next.substring(eqIndex + 1).trim();
-			if (value.length() < 2) {
-				continue;
-			}
-			if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
-				value = value.substring(1, value.length() - 1);
-			}
-
-			return PreferReturnEnum.fromHeaderValue(value);
-		}
-
-		return null;
+	public static boolean respectPreferHeader(RestOperationTypeEnum theRestOperationType) {
+		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
 	}
+
+	@Nonnull
+    public static PreferHeader parsePreferHeader(IRestfulServer<?> theServer, String theValue) {
+        PreferHeader retVal = new PreferHeader();
+        
+        if (isNotBlank(theValue)) {
+            StringTokenizer tok = new StringTokenizer(theValue, ";");
+            while (tok.hasMoreTokens()) {
+                String next = trim(tok.nextToken());
+                int eqIndex = next.indexOf('=');
+                
+                String key;
+                String value;
+                if (eqIndex == -1 || eqIndex >= next.length() - 2) {
+                    key = next;
+                    value = "";
+                } else {
+                    key = next.substring(0, eqIndex).trim();
+                    value = next.substring(eqIndex + 1).trim();
+                }
+                
+                if (key.equals(Constants.HEADER_PREFER_RETURN)) {
+                    
+                    if (value.length() < 2) {
+                        continue;
+                    }
+                    if ('"' == value.charAt(0) && '"' == value.charAt(value.length() - 1)) {
+                        value = value.substring(1, value.length() - 1);
+                    }
+                    
+                    retVal.setReturn(PreferReturnEnum.fromHeaderValue(value));
+                    
+                } else if (key.equals(Constants.HEADER_PREFER_RESPOND_ASYNC)) {
+                    
+                    retVal.setRespondAsync(true);
+                    
+                }
+            }
+        }
+
+		if (retVal.getReturn() == null && theServer != null && theServer.getDefaultPreferReturn() != null) {
+			retVal.setReturn(theServer.getDefaultPreferReturn());
+		}
+
+		return retVal;
+    }
+    
+    
+
 
 	public static boolean prettyPrintResponse(IRestfulServerDefaults theServer, RequestDetails theRequest) {
 		Map<String, String[]> requestParams = theRequest.getParameters();
@@ -748,12 +776,20 @@ public class RestfulServerUtils {
 		}
 
 		if (theServer.getETagSupport() == ETagSupportEnum.ENABLED) {
-			if (fullId != null && fullId.hasVersionIdPart()) {
-				String versionIdPart = fullId.getVersionIdPart();
-				response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
-			} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
-				String versionId = theResource.getMeta().getVersionId();
-				response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+			if (theRequestDetails.getRestOperationType() != null) {
+				switch (theRequestDetails.getRestOperationType()) {
+					case CREATE:
+					case UPDATE:
+					case READ:
+					case VREAD:
+						if (fullId != null && fullId.hasVersionIdPart()) {
+							String versionIdPart = fullId.getVersionIdPart();
+							response.addHeader(Constants.HEADER_ETAG, createEtag(versionIdPart));
+						} else if (theResource != null && theResource.getMeta() != null && isNotBlank(theResource.getMeta().getVersionId())) {
+							String versionId = theResource.getMeta().getVersionId();
+							response.addHeader(Constants.HEADER_ETAG, createEtag(versionId));
+						}
+				}
 			}
 		}
 
@@ -889,5 +925,7 @@ public class RestfulServerUtils {
 			throw new InternalErrorException("IBundleProvider returned a null list of resources - This is not allowed");
 		}
 	}
+
+
 
 }

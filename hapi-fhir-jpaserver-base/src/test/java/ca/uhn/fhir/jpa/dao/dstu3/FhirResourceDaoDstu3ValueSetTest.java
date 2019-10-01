@@ -229,7 +229,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testValiedateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
+	public void testValidateCodeAgainstBuiltInValueSetAndCodeSystemWithValidCode() {
 		IPrimitiveType<String> display = null;
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;

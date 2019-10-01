@@ -1,0 +1,126 @@
+<CodeSystem xmlns="http://hl7.org/fhir">
+	<url value="http://acme.org" />
+	<concept>
+		<code value="8450-9" />
+		<display value="Systolic blood pressure--expiration" />
+		<designation>
+			<language value="nl"/>
+			<use>
+				<system value="http://snomed.info/sct"/>
+				<code value="900000000000013009"/>
+				<display value="Synonym"/>
+			</use>
+			<value value="Systolische bloeddruk - expiratie"/>
+		</designation>
+		<designation>
+			<language value="sv"/>
+			<use>
+				<system value="http://snomed.info/sct"/>
+				<code value="900000000000013009"/>
+				<display value="Synonym"/>
+			</use>
+			<value value="Systoliskt blodtryck - utgång"/>
+		</designation>
+	</concept>
+	<concept>
+		<code value="11378-7" />
+		<display value="Systolic blood pressure at First encounter" />
+	</concept>
+	<concept>
+		<code value="8493-9" />
+		<display value="Systolic blood pressure 10 hour minimum" />
+	</concept>
+	<concept>
+		<code value="8494-7" />
+		<display value="Systolic blood pressure 12 hour minimum" />
+	</concept>
+	<concept>
+		<code value="8495-4" />
+		<display value="Systolic blood pressure 24 hour minimum" />
+	</concept>
+	<concept>
+		<code value="8451-7" />
+		<display value="Systolic blood pressure--inspiration" />
+	</concept>
+	<concept>
+		<code value="8452-5" />
+		<display value="Systolic blood pressure.inspiration - expiration" />
+	</concept>
+	<concept>
+		<code value="8459-0" />
+		<display value="Systolic blood pressure--sitting" />
+	</concept>
+	<concept>
+		<code value="8460-8" />
+		<display value="Systolic blood pressure--standing" />
+	</concept>
+	<concept>
+		<code value="8461-6" />
+		<display value="Systolic blood pressure--supine" />
+	</concept>
+	<concept>
+		<code value="8479-8" />
+		<display value="Systolic blood pressure by palpation" />
+	</concept>
+	<concept>
+		<code value="8480-6" />
+		<display value="Systolic blood pressure" />
+	</concept>
+	<concept>
+		<code value="8481-4" />
+		<display value="Systolic blood pressure 1 hour maximum" />
+	</concept>
+	<concept>
+		<code value="8482-2" />
+		<display value="Systolic blood pressure 8 hour maximum" />
+	</concept>
+	<concept>
+		<code value="8483-0" />
+		<display value="Systolic blood pressure 10 hour maximum" />
+	</concept>
+	<concept>
+		<code value="8484-8" />
+		<display value="Systolic blood pressure 12 hour maximum" />
+	</concept>
+	<concept>
+		<code value="8485-5" />
+		<display value="Systolic blood pressure 24 hour maximum" />
+	</concept>
+	<concept>
+		<code value="8486-3" />
+		<display value="Systolic blood pressure 1 hour mean" />
+	</concept>
+	<concept>
+		<code value="8487-1" />
+		<display value="Systolic blood pressure 8 hour mean" />
+	</concept>
+	<concept>
+		<code value="8488-9" />
+		<display value="Systolic blood pressure 10 hour mean" />
+	</concept>
+	<concept>
+		<code value="8489-7" />
+		<display value="Systolic blood pressure 12 hour mean" />
+	</concept>
+	<concept>
+		<code value="8490-5" />
+		<display value="Systolic blood pressure 24 hour mean" />
+	</concept>
+	<concept>
+		<code value="8491-3" />
+		<display value="Systolic blood pressure 1 hour minimum" />
+		<designation>
+			<language value="nl"/>
+			<use>
+				<system value="http://snomed.info/sct"/>
+				<code value="900000000000013009"/>
+				<display value="Synonym"/>
+			</use>
+			<value value="Systolische bloeddruk minimaal 1 uur"/>
+		</designation>
+	</concept>
+	<concept>
+		<code value="8492-1" />
+		<display value="Systolic blood pressure 8 hour minimum" />
+	</concept>
+</CodeSystem>

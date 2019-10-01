@@ -112,7 +112,7 @@
 					class to represent a bundle, and that is that default return type for search
 					methods. If you are implemeting a DSTU2+ server, is recommended to use a
 					Bundle resource class instead (e.g. <code>ca.uhn.fhir.model.dstu2.resource.Bundle</code>
-					or <code>org.hl7.fhir.instance.model.Bundle</code>). Many of the examples below include
+					or <code>org.hl7.fhir.dstu2.model.Bundle</code>). Many of the examples below include
 					a chained invocation similar to 
 					<code>.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)</code>, which 
 					instructs the search method which bundle type should be returned.

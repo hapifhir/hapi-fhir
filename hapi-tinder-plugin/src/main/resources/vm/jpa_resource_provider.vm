@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
 ## RPs implement type specific operations 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition'))
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition' || ${className} == 'StructureDefinition'))
 	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
 	JpaResourceProvider${versionCapitalized}<${className}>
@@ -42,7 +42,11 @@ public class ${className}ResourceProvider extends
 			javax.servlet.http.HttpServletResponse theServletResponse,
 
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
-			
+
+			@Description(shortDefinition="Search the contents of the resource's data using a filter")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)
+			StringAndListParam theFtFilter,
+
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT)
 			StringAndListParam theFtContent, 
@@ -142,6 +146,7 @@ public class ${className}ResourceProvider extends
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER, theFtFilter);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, theFtContent);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, theFtText);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TAG, theSearchForTag);

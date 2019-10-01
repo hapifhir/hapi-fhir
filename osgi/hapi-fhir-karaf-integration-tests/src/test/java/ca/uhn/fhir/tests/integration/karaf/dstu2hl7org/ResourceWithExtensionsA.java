@@ -6,13 +6,13 @@ import ca.uhn.fhir.model.api.annotation.Child;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.api.annotation.Extension;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
-import org.hl7.fhir.instance.model.BackboneElement;
-import org.hl7.fhir.instance.model.CodeableConcept;
-import org.hl7.fhir.instance.model.DateType;
-import org.hl7.fhir.instance.model.DomainResource;
-import org.hl7.fhir.instance.model.Identifier;
-import org.hl7.fhir.instance.model.ResourceType;
-import org.hl7.fhir.instance.model.StringType;
+import org.hl7.fhir.dstu2.model.BackboneElement;
+import org.hl7.fhir.dstu2.model.CodeableConcept;
+import org.hl7.fhir.dstu2.model.DateType;
+import org.hl7.fhir.dstu2.model.DomainResource;
+import org.hl7.fhir.dstu2.model.Identifier;
+import org.hl7.fhir.dstu2.model.ResourceType;
+import org.hl7.fhir.dstu2.model.StringType;
 
 @ResourceDef(name = "ResourceWithExtensionsA", id="0001")
 public class ResourceWithExtensionsA extends DomainResource {

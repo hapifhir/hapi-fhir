@@ -1,0 +1,1689 @@
+{
+  "resourceType": "Conformance",
+  "id": "server",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">\n\t\t\t<span style=\"font-size:larger; font-weight:bold; \">Argonaut Data Query Implementation Guide Server</span>\n\t\t\t<hr/>\n\t\t\t<p>\n\t\t\t\t<span>FHIR Version: </span>\n\t\t\t\t<span>1.0.2</span>\n\t\t\t\t<br/>\n\t\t\t\t<span>Supported formats: </span>\n\t\t\t\t<span>xml</span>\n\t\t\t\t<span>, </span>\n\t\t\t\t<span>json</span>\n\t\t\t\t<br/>\n\t\t\t\t<span>Published: </span>\n\t\t\t\t<span>2016-12-15</span>\n\t\t\t\t<br/>\n\t\t\t\t<span>Published by: </span>\n\t\t\t\t<span>Argonaut Project</span>\n\t\t\t</p>\n\t\t\t<p>\n\t\t\t\t<span>This profile defines the expected capabilities of a Argonaut Data Query server when conforming to the Argonaut Data Query IG  The conformance resource includes the complete list of actual profiles, RESTful operations, and search parameters supported by Argonaut Data Query Servers. Servers have the option of choosing from this list to access necessary data based on their local use cases and other contextual requirements.</span>\n\t\t\t</p>\n\t\t\t<br/>\n\t\t\t<h4>\n\t\t\t\t<span style=\"font-size:larger; font-weight:bold; \">RESTful Behavior</span>\n\t\t\t</h4>\n\t\t\t<br/>\n\t\t\t<hr/>\n\t\t\t<div>\n\t\t\t\t<span>Description: </span>\n\t\t\t\t<p>\n\t\t\t\t\t<strong>The Argonaut Data Query  Server SHALL:</strong>\n\t\t\t\t</p>\n\t\t\t\t<ol>\n\t\t\t\t\t<li>Support the Argonaut Data Query Patient resource profile.</li>\n\t\t\t\t\t<li>Support at least one additional resource profile from the list of Argonaut Data Query Profiles</li>\n\t\t\t\t\t<li>Implement REST behavior according to the FHIR specification</li>\n\t\t\t\t\t<li>Support json resource formats for all Argonaut Data Query interactions.</li>\n\t\t\t\t\t<li>Identify the Argonaut Data Query profile(s) supported as part of the <a href=\"http://build.fhir.org/resource-definitions.html#Meta.profile\">FHIR Meta profile attribute</a> for each instance.</li>\n\t\t\t\t\t<li>Declare a Conformance identifying the list of profiles, operations, search parameter supported.    </li>\n\t\t\t\t</ol>\n\t\t\t\t<p>\n\t\t\t\t\t<strong>The Argonaut Data Query  Server SHOULD:</strong>\n\t\t\t\t</p>\n\t\t\t\t<ol>\n\t\t\t\t\t<li>Support xml resource formats for all Argonaut Data Query interactions.  </li>\n\t\t\t\t</ol>\n\t\t\t\t<br/>\n\t\t\t</div>\n\t\t\t<div>\n\t\t\t\t<span>Security: </span>\n\t\t\t\t<p>\n\t\t\t\t\t<strong>Argonaut Data Query Servers SHALL</strong>\n\t\t\t\t</p>\n\t\t\t\t<ol>\n\t\t\t\t\t<li>implement the <a href=\"index.html#security\">security requirements</a> documented in this guide</li>\n\t\t\t\t\t<li>A server has ensured that every API request includes a valid Authorization token, supplied via: <code>Authorization: Bearer {server-specific-token-here}</code>\n\t\t\t\t\t</li>\n\t\t\t\t\t<li>A server has rejected any unauthorized requests by returning an <code>HTTP 401</code> Unauthorized response code.</li>\n\t\t\t\t</ol>\n\t\t\t\t<br/>\n\t\t\t</div>\n\t\t\t<span>Supported Operations: </span>\n\t\t\t<span style=\"font-weight:bold;\">MAY</span>\n\t\t\t<span> Support </span>\n\t\t\t<a href=\"http://fhir.org/guides/argonaut/OperationDefinition/docref\">\n\t\t\t\t<span>docref</span>\n\t\t\t</a>\n\t\t\t<h4>\n\t\t\t\t<span style=\"font-weight:bold; \">Profile Summary:</span>\n\t\t\t</h4>\n\t\t\t<p>\n\t\t\t\t<br/>\n\t\t\t\t<span>All servers </span>\n\t\t\t\t<span style=\"font-weight:bold; \">SHALL</span>\n\t\t\t\t<span> make available the </span>\n\t\t\t\t<a href=\"http://build.fhir.org/http.html#read\">\n\t\t\t\t\t<span>read</span>\n\t\t\t\t</a>\n\t\t\t\t<span> and </span>\n\t\t\t\t<a href=\"http://build.fhir.org/http.html#search-type\">\n\t\t\t\t\t<span>search-type</span>\n\t\t\t\t</a>\n\t\t\t\t<span> interactions for the Argonaut Profiles the server chooses to support.</span>\n\t\t\t\t<br/>\n\t\t\t\t<span>All servers </span>\n\t\t\t\t<span style=\"font-weight:bold; \">SHOULD</span>\n\t\t\t\t<span> make available the </span>\n\t\t\t\t<a href=\"http://build.fhir.org/http.html#vread\">\n\t\t\t\t\t<span>vread</span>\n\t\t\t\t</a>\n\t\t\t\t<span> and </span>\n\t\t\t\t<a href=\"http://build.fhir.org/http.html#history-instance\">\n\t\t\t\t\t<span>history-instance</span>\n\t\t\t\t</a>\n\t\t\t\t<span> interactions for the Argonaut Profiles the server chooses to support.</span>\n\t\t\t\t<br/>\n\t\t\t</p>\n\t\t\t<br/>\n\t\t\t<p>\n\t\t\t\t<span>Summary of Argonaut Profile search criteria. Specific server search capabilities are described in detail below in each of the resource sections.</span>\n\t\t\t</p>\n\t\t\t<br/>\n\t\t\t<table border=\"1\">\n\t\t\t\t<thead>\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t<span>Resource Type</span>\n\t\t\t\t\t\t</th>\n\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t<span>Supported Profiles</span>\n\t\t\t\t\t\t</th>\n\t\t\t\t\t\t<th style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>Supported Searches</span>\n\t\t\t\t\t\t</th>\n\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t<span>Supported Includes</span>\n\t\t\t\t\t\t</th>\n\t\t\t\t\t</tr>\n\t\t\t\t</thead>\n\t\t\t\t<tbody>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Patient\">\n\t\t\t\t\t\t\t\t<span>Patient</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>family</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>given</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>identifier</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>birthdate</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>birthdate</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>family</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>given</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#AllergyIntolerance\">\n\t\t\t\t\t\t\t\t<span>AllergyIntolerance</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#CarePlan\">\n\t\t\t\t\t\t\t\t<span>CarePlan</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Condition\">\n\t\t\t\t\t\t\t\t<span>Condition</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>clinicalstatus</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>clinicalstatus</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Device\">\n\t\t\t\t\t\t\t\t<span>Device</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#DocumentReference\">\n\t\t\t\t\t\t\t\t<span>DocumentReference</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>period</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>type</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>type</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>period</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Goal\">\n\t\t\t\t\t\t\t\t<span>Goal</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Immunization\">\n\t\t\t\t\t\t\t\t<span>Immunization</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#DiagnosticReport\">\n\t\t\t\t\t\t\t\t<span>DiagnosticReport</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Medication\">\n\t\t\t\t\t\t\t\t<span>Medication</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#MedicationStatement\">\n\t\t\t\t\t\t\t\t<span>MedicationStatement</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<span>MedicationStatement.medicationReference</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#MedicationOrder\">\n\t\t\t\t\t\t\t\t<span>MedicationOrder</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<span>MedicationOrder.medicationReference</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Observation\">\n\t\t\t\t\t\t\t\t<span>Observation</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t\t<tr style=\"height:0.36in; \">\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<a href=\"#Procedure\">\n\t\t\t\t\t\t\t\t<span>Procedure</span>\n\t\t\t\t\t\t\t</a>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td style=\"text-align:center; \">\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t</td>\n\t\t\t\t\t\t<td> </td>\n\t\t\t\t\t</tr>\n\t\t\t\t</tbody>\n\t\t\t</table>\n\t\t\t<br/>\n\t\t\t<h4>\n\t\t\t\t<span style=\"font-weight:bold; \">Resource  Details:</span>\n\t\t\t</h4>\n\t\t\t<br/>\n\t\t\t<ol>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Patient\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Patient</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-patient</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patient using GET [base]/Patient/[id].</li>\n\t\t\t\t\t\t<li>A server returns valid FHIR Patient resources according to the Data Access Framework (DAF) Patient Profile..</li>\n\t\t\t\t\t\t<li>A server has exposed a FHIR Patient search endpoint supporting at a minimum the following search parameters: <ul>\n\t\t\t\t\t\t\t\t<li>identifier</li>\n\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>A server has exposed a FHIR Patient search endpoint supporting at a minimum the following search parameters when at least 2 (example name and gender) are present: <ul>\n\t\t\t\t\t\t\t\t<li>name</li>\n\t\t\t\t\t\t\t\t<li>gender</li>\n\t\t\t\t\t\t\t\t<li>birthdate</li>\n\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>string</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>family</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>string</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>given</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>string</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>identifier</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>birthdate</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>name</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>birthdate</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>family</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>given</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>gender</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"AllergyIntolerance\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">AllergyIntolerance</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-allergyintolerance</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patient’s allergies using GET /AllergyIntolerance?patient=[id].</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"CarePlan\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">CarePlan</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-careplan</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s Assessment and Plan of Treatment information using GET /CarePlan?patient=[id]&amp;category=assess-plan.</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server <strong>SHOULD</strong> be capable of returning a patient’s Assessment and Plan of Treatment information over a specified time period using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;date=[date].</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>A server <strong>SHOULD</strong> be capable returning all of a patient’s active Assessment and Plan of Treatment information using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;status=active.</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server <strong>SHOULD</strong> be capable returning a patient’s active Assessment and Plan of Treatment information over a specified time period using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;status=active&amp;date=[date].</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<h4 id=\"summary-of-argonaut-search-criteria-for-structuredefinition-argo-careteam\">Summary of Argonaut Search Criteria for StructureDefinition-argo-careteam</h4>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patients current care team members using GET[base]/CarePlan?patient=[id]&amp;category=careteam&amp;status=active</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>status</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Condition\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Condition</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-condition</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server is capable of returning a patient’s conditions list using GET/Condition?patient=[id].</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>A server <strong>SHOULD</strong> be capable returning all of a patient’s active problems and health concerns using ‘GET /Condition?patient=[id]&amp;clinicalstatus=active,recurrance,remission’</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server <strong>SHOULD</strong> be capable returning all of a patient’s problems or all of patient’s health concerns using ‘GET /Condition?patient=[id]&amp;category=[problem|health-concern]’</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>clinicalstatus</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>clinicalstatus</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Device\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Device</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-device</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all Unique device identifier(s)(UDI) for a patient’s implanted device(s) using GET /Device?patient=[id].</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"DocumentReference\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">DocumentReference</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<h4>Search Criteria for StructureDefinition-argo-documentreference</h4>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>To fetch document references, the Server <strong>SHALL</strong> support <strong>either</strong>: <ul>\n\t\t\t\t\t\t\t\t<li>a direct query for DocumentReference resources as described here</li>\n\t\t\t\t\t\t\t\t<li>or the <a href=\"OperationDefinition-docref.html\">$docref operation</a>operation</li>\n\t\t\t\t\t\t\t</ul>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p style=\"padding-left: 60px;\">The Client <strong>SHALL</strong> support both methods.</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>If supporting a direct query, a server <strong>SHALL</strong> be capable of returning at least the most recent CCD document references and <strong>MAY</strong> provide most recent references to other document types for a patient using:GET [base]/DocumentReference/$docref?patient=[id]</li>\n\t\t\t\t\t\t<li>If supporting a direct query, A server <strong>SHOULD</strong> be capable of returning references to CCD documents and <strong>MAY</strong> provide references to other document types for a patient searched by type and/or date using:GET [base]/DocumentReference/$docref?patient=[id]{&amp;type=[type]}{&amp;period=[date]}</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>period</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHOULD</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>type</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>type</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>period</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Goal\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Goal</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-device</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s goals using GET [base]/Goal?patient=[id].</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of all of a patient’s goals over a specified time period using GET [base]/Goal?patient=[id]&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Immunization\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Immunization</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-immunization</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A client has connected to a server and fetched all immunizations for a patient using GET /Immunization?patient=[id].</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"DiagnosticReport\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">DiagnosticReport</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-diagnosticreport</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB.</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category code and date range using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category and code using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;code=[LOINC].</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server <strong>SHOULD</strong> be capable of returning all of a patient’s laboratory diagnostic reports queried by category and one or more codes and date range using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;code=[LOINC1{,LOINC2,LOINC3,…}]&amp;date=[date]{&amp;date=[date]}.</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Medication\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Medication</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. If the Medication Resource is used in a MedicationStatement or a MedicationOrder, then the READ and SEARCH Criteria <strong>SHALL</strong> be supported.</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td/>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"MedicationStatement\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">MedicationStatement</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-medicationstatement</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. When referencing a Medication resource, the resource may be <a href=\"http://hl7.org/fhir/2017Jan/references.html#contained\">contained</a> or an external resource. The server application can choose any one way or more than one method, but <strong>IF</strong> the an external reference to Medication is used, the server <strong>SHALL</strong> support the <a href=\"http://hl7.org/fhir/2017Jan/references.html#include\">include</a> parameter for searching this element. The client application must support both methods.</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patient’s medications using one of or both</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<ol>\n\t\t\t\t\t\t<li>GET /MedicationStatement?patient=[id]</li>\n\t\t\t\t\t\t<li>GET /MedicationStatement?patient=[id]&amp;_include=MedicationStatement:medication</li>\n\t\t\t\t\t</ol>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Includes: </span>\n\t\t\t\t\t\t<span>MedicationStatement.medicationReference</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"MedicationOrder\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">MedicationOrder</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-MedicationOrder</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. When referencing a Medication resource, the resource may be <a href=\"http://hl7.org/fhir/2017Jan/references.html#contained\">contained</a> or an external resource. The server application can choose any one way or more than one method, but if the an external reference to Medication is used, the server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/references.html#include\">include</a> parameter for searching this element. The client application must support both methods.</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patient’s medications using one of or both</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<ol>\n\t\t\t\t\t\t<li>GET /MedicationOrder?patient=[id]</li>\n\t\t\t\t\t\t<li>GET /MedicationOrder?patient=[id]&amp;_include=MedicationOrder:medication</li>\n\t\t\t\t\t</ol>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Includes: </span>\n\t\t\t\t\t\t<span>MedicationOrder.medicationReference</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Observation\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Observation</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>. <p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-observationresults</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient's laboratory results queried by category using GET [base]/Observation?patient=[id]&amp;category=laboratory.</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient's laboratory results queried by category code and date range usingGET [base]/Observation?patient=[id]&amp;category=laboratory&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient's laboratory results queried by category and code using GET [base]/Observation?patient=[id]&amp;category=laboratory&amp;code=[LOINC].</li>\n\t\t\t\t\t\t<li>A server SHOULD be capable of returning all of a patient's laboratory results queried by category and one or more codes and date range using GET [base]/Observation?patient=[id]&amp;category=laboratory&amp;code=[LOINC1{,LOINC2,LOINC3,...}]&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-smokingstatus</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a a patient’s smoking status using GET [base]/Observation?patient=[id]&amp;code=72166-2</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-vitalsigns</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s vital signs that it supports using GET [base]/Observation?patient=[id]&amp;category=vital-signs.</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of a patient’s vital signs queried by date range using GET [base]/Observation?patient=[id]&amp;category=vital-signs&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server is capable of returning any of a patient’s vital signs queried by one or more of the codes listed below using GET [base]/Observation?patient=[id]&amp;code[vital sign LOINC{,LOINC2,LOINC3,…}].</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t\t<li>\n\t\t\t\t\t\t\t<p>A server <strong>SHOULD</strong> be capable of returning any of a patient’s vital signs queried by one or more of the codes listed below and date range using GET [base]/Observation?patient=[id]&amp;code=[LOINC{,LOINC2…}]vital-signs&amp;date=[date]{&amp;date=[date]}.</p>\n\t\t\t\t\t\t</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>token</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t<span>, </span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>category</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>code</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t\t<li>\n\t\t\t\t\t<span style=\"font-weight:bold; \">Resource Type: </span>\n\t\t\t\t\t<a name=\"Procedure\">\n\t\t\t\t\t\t<span style=\"font-weight:bold; \">Procedure</span>\n\t\t\t\t\t</a>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Profiles:  </span>\n\t\t\t\t\t\t<br/>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-procedure</strong>\n\t\t\t\t\t</p>\n\t\t\t\t\t<ul>\n\t\t\t\t\t\t<li>A server is capable of returning a patient’s procedures using GET/Procedure?patient=[id].</li>\n\t\t\t\t\t\t<li>A server is capable of returning all of all of a patient’s procedures over a specified time period using GET /Procedure?patient=[id]&amp;date=[date]{&amp;date=[date]}.</li>\n\t\t\t\t\t</ul>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<span>Search Parameters:</span>\n\t\t\t\t\t<table border=\"1\">\n\t\t\t\t\t\t<thead>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<th style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>Conformance</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th>\n\t\t\t\t\t\t\t\t\t<span>Parameter</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>Type</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t\t<th style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<span>Modifiers</span>\n\t\t\t\t\t\t\t\t</th>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</thead>\n\t\t\t\t\t\t<tbody>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>reference</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \"> </td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t\t<tr>\n\t\t\t\t\t\t\t\t<td style=\"width:2.71in; \">\n\t\t\t\t\t\t\t\t\t<span>SHALL</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td>\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.11in; \">\n\t\t\t\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t\t<td style=\"width:2.90in; \">\n\t\t\t\t\t\t\t\t\t<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>\n\t\t\t\t\t\t\t\t</td>\n\t\t\t\t\t\t\t</tr>\n\t\t\t\t\t\t</tbody>\n\t\t\t\t\t</table>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<p>\n\t\t\t\t\t\t<span>Supported Search Combinations:</span>\n\t\t\t\t\t\t<span>patient</span>\n\t\t\t\t\t\t<span> + </span>\n\t\t\t\t\t\t<span>date</span>\n\t\t\t\t\t</p>\n\t\t\t\t\t<p/>\n\t\t\t\t\t<hr/>\n\t\t\t\t</li>\n\t\t\t</ol>\n\t\t\t<br/>\n\t\t\t<br/>\n\t\t\t<br/>\n\t\t</div>"
+  },
+  "url": "http://fhir.org/guides/argonaut/Conformance/server",
+  "name": "Argonaut Data Query Implementation Guide Server",
+  "status": "draft",
+  "publisher": "Argonaut Project",
+  "contact": [
+    {
+      "telecom": [
+        {
+          "system": "other",
+          "value": "http://argonautwiki.hl7.org"
+        }
+      ]
+    }
+  ],
+  "date": "2016-12-15",
+  "description": "This profile defines the expected capabilities of a Argonaut Data Query server when conforming to the Argonaut Data Query IG  The conformance resource includes the complete list of actual profiles, RESTful operations, and search parameters supported by Argonaut Data Query Servers. Servers have the option of choosing from this list to access necessary data based on their local use cases and other contextual requirements.",
+  "kind": "requirements",
+  "fhirVersion": "1.0.2",
+  "acceptUnknown": "extensions",
+  "format": [
+    "xml",
+    "json"
+  ],
+  "profile": [
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "AllergyIntolerance"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-allergyintolerance.html",
+      "display": "Argonaut Data Query AllergyIntolerance Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "CarePlan"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-careplan.html",
+      "display": "Argonaut Data Query CarePlan Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "CarePlan"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-careteam.html",
+      "display": "Argonaut Data Query CareTeam Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Condition"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-condition.html",
+      "display": "Argonaut Data Query Condition Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "DocumentReference"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-documentreference.html",
+      "display": "Argonaut Data Query Document Reference Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Device"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-device.html",
+      "display": "Argonaut Data Query Device Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Goal"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-goal.html",
+      "display": "Argonaut Data Query Goal Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Immunization"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-immunization.html",
+      "display": "Argonaut Data Query Immunization Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "DiagnosticReport"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-diagnosticreport.html",
+      "display": "Argonaut Data Query DiagnosticReport Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Observation"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-observationresults.html",
+      "display": "Argonaut Data Query Result Observation Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Medication"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-medication.html",
+      "display": "Argonaut Data Query Medication Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "MedicationOrder"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-MedicationOrder.html",
+      "display": "Argonaut Data Query MedicationOrder Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "MedicationStatement"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-medicationstatement.html",
+      "display": "Argonaut Data Query MedicationStatement Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Observation"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-vitalsigns.html",
+      "display": "Argonaut Data Query Vital Signs Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Observation"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-smokingstatus.html",
+      "display": "Argonaut Data Query Smoking Status Observation Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Patient"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-patient.html",
+      "display": "Argonaut Data Query Patient Profile"
+    },
+    {
+      "extension": [
+        {
+          "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-profile-link",
+          "valueCode": "Procedure"
+        }
+      ],
+      "reference": "http://fhir.org/guides/argonaut/StructureDefinition-argo-procedure.html",
+      "display": "Argonaut Data Query Procedure Profile"
+    }
+  ],
+  "rest": [
+    {
+      "mode": "server",
+      "documentation": "<p><strong>The Argonaut Data Query  Server SHALL:</strong></p> <ol> <li>Support the Argonaut Data Query Patient resource profile.</li> <li>Support at least one additional resource profile from the list of Argonaut Data Query Profiles</li> <li>Implement REST behavior according to the FHIR specification</li> <li>Support json resource formats for all Argonaut Data Query interactions.</li> <li>Identify the Argonaut Data Query profile(s) supported as part of the <a href=\"http://build.fhir.org/resource-definitions.html#Meta.profile\">FHIR Meta profile attribute</a> for each instance.</li> <li>Declare a Conformance identifying the list of profiles, operations, search parameter supported.    </li> </ol> <p><strong>The Argonaut Data Query  Server SHOULD:</strong> </p> <ol> <li>Support xml resource formats for all Argonaut Data Query interactions.  </li> </ol>",
+      "security": {
+        "description": "<p><strong>Argonaut Data Query Servers SHALL</strong></p>   <ol>   <li>implement the <a href=\"index.html#security\">security requirements</a> documented in this guide</li>   <li>A server has ensured that every API request includes a valid Authorization token, supplied via: <code>Authorization: Bearer {server-specific-token-here}</code></li>   <li>A server has rejected any unauthorized requests by returning an <code>HTTP 401</code> Unauthorized response code.</li>   </ol>"
+      },
+      "resource": [
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-patient</strong></p> <ul> <li>A server is capable of returning a patient using GET [base]/Patient/[id].</li> <li>A server returns valid FHIR Patient resources according to the Data Access Framework (DAF) Patient Profile..</li> <li>A server has exposed a FHIR Patient search endpoint supporting at a minimum the following search parameters: <ul> <li>identifier</li> </ul></li> <li>A server has exposed a FHIR Patient search endpoint supporting at a minimum the following search parameters when at least 2 (example name and gender) are present: <ul> <li>name</li> <li>gender</li> <li>birthdate</li> </ul></li> </ul>   "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "name"
+                },
+                {
+                  "url": "required",
+                  "valueString": "gender"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "name"
+                },
+                {
+                  "url": "required",
+                  "valueString": "birthdate"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "family"
+                },
+                {
+                  "url": "required",
+                  "valueString": "gender"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "given"
+                },
+                {
+                  "url": "required",
+                  "valueString": "gender"
+                }
+              ]
+            }
+          ],
+          "type": "Patient",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query patient resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query patients by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query patient instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query patient instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "name",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-name",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "family",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-family",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "given",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-given",
+              "type": "string"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "identifier",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-identifier",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "gender",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-gender",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "birthdate",
+              "definition": "http://hl7.org/fhir/SearchParameter/Patient-birthdate",
+              "type": "date"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-allergyintolerance</strong></p> <ul> <li>A server is capable of returning a patient’s allergies using GET /AllergyIntolerance?patient=[id].</li> </ul> "
+            }
+          ],
+          "type": "AllergyIntolerance",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query AllergyIntolerance resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query AllergyIntolerance by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query AllergyIntolerance instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query AllergyIntolerance instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/AllergyIntolerance-Patient",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-careplan</strong></p> <ul> <li>A server is capable of returning all of a patient’s Assessment and Plan of Treatment information using GET /CarePlan?patient=[id]&amp;category=assess-plan.</li> <li><p>A server <strong>SHOULD</strong> be capable of returning a patient’s Assessment and Plan of Treatment information over a specified time period using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;date=[date].</p></li> <li>A server <strong>SHOULD</strong> be capable returning all of a patient’s active Assessment and Plan of Treatment information using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;status=active.</li> <li><p>A server <strong>SHOULD</strong> be capable returning a patient’s active Assessment and Plan of Treatment information over a specified time period using GET /CarePlan?patient=[id]&amp;category=assess-plan&amp;status=active&amp;date=[date].</p></li> </ul>       <h4 id=\"summary-of-argonaut-search-criteria-for-structuredefinition-argo-careteam\">Summary of Argonaut Search Criteria for StructureDefinition-argo-careteam</h4>      <ul>      <li>A server is capable of returning a patients current care team members using GET[base]/CarePlan?patient=[id]&amp;category=careteam&amp;status=active</li>      </ul>"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "status"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "status"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            }
+          ],
+          "type": "CarePlan",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query careplan resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query careplan by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query careplan instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query careplan instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/CarePlan-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "category",
+              "definition": "http://hl7.org/fhir/SearchParameter/CarePlan-Category",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "status",
+              "definition": "http://hl7.org/fhir/SearchParameter/CarePlan-Status",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/CarePlan-Date",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-condition</strong></p> <ul> <li><p>A server is capable of returning a patient’s conditions list using GET/Condition?patient=[id].</p></li> <li>A server <strong>SHOULD</strong> be capable returning all of a patient’s active problems and health concerns using ‘GET /Condition?patient=[id]&amp;clinicalstatus=active,recurrance,remission’</li> <li><p>A server <strong>SHOULD</strong> be capable returning all of a patient’s problems or all of patient’s health concerns using ‘GET /Condition?patient=[id]&amp;category=[problem|health-concern]’</p></li> </ul>     "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "clinicalstatus"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                }
+              ]
+            }
+          ],
+          "type": "Condition",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query condition resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query condition by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query condition instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query condition instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Condition-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "category",
+              "definition": "http://hl7.org/fhir/SearchParameter/Condition-Category",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "clinicalstatus",
+              "definition": "http://hl7.org/fhir/SearchParameter/Condition-ClinicalStatus",
+              "type": "token"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-device</strong></p> <ul> <li>A server is capable of returning all Unique device identifier(s)(UDI) for a patient’s implanted device(s) using GET /Device?patient=[id].</li> </ul>    "
+            }
+          ],
+          "type": "Device",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query device resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query device by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query device instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query device instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Device-Patient",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": " <h4>Search Criteria for StructureDefinition-argo-documentreference</h4> <ul> <li>To fetch document references, the Server <strong>SHALL</strong> support <strong>either</strong>: <ul> <li>a direct query for DocumentReference resources as described here</li> <li>or the <a href=\"OperationDefinition-docref.html\">$docref operation</a>&nbsp;operation</li> </ul> </li> </ul> <p style=\"padding-left: 60px;\">The Client <strong>SHALL</strong> support both methods.</p> <ul> <li>If supporting a direct query, a&nbsp;server <strong>SHALL</strong>&nbsp;be capable of returning at least the most recent CCD document references and <strong>MAY</strong> provide most recent references to other document types for a patient using:GET [base]/DocumentReference/$docref?patient=[id]</li> <li>If supporting a direct query, A server <strong>SHOULD</strong>&nbsp;be capable of returning references to CCD documents and <strong>MAY</strong> provide references to other document types for a patient searched by type and/or date using:GET [base]/DocumentReference/$docref?patient=[id]{&amp;type=[type]}{&amp;period=[date]}</li> </ul>"
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "type"
+                },
+                {
+                  "url": "required",
+                  "valueString": "period"
+                }
+              ]
+            }
+          ],
+          "type": "DocumentReference",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Document Query DocumentReference resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Document Query DocumentReference by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Document Query DocumentReference instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Document Query DocumentReference instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/DocumentReference-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "period",
+              "definition": "http://hl7.org/fhir/SearchParameter/DocumentReference-Period",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "name": "type",
+              "definition": "http://hl7.org/fhir/SearchParameter/DocumentReference-Type",
+              "type": "token"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-device</strong></p> <ul> <li>A server is capable of returning all of a patient’s goals using GET [base]/Goal?patient=[id].</li> <li>A server is capable of returning all of all of a patient’s goals over a specified time period using GET [base]/Goal?patient=[id]&amp;date=[date]{&amp;date=[date]}.</li> </ul>     "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            }
+          ],
+          "type": "Goal",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query Goal resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query Goal by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query Goal instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query Goal instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Goal-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/Goal-Date",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-immunization</strong></p> <ul> <li>A client has connected to a server and fetched all immunizations for a patient using GET /Immunization?patient=[id].</li> </ul>     "
+            }
+          ],
+          "type": "Immunization",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query immunization resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query immunization by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query immunization instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query immunization instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Immunization-Patient",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-diagnosticreport</strong></p> <ul> <li>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB.</li> <li>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category code and date range using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;date=[date]{&amp;date=[date]}.</li> <li><p>A server is capable of returning all of a patient’s laboratory diagnostic reports queried by category and code using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;code=[LOINC].</p></li> <li><p>A server <strong>SHOULD</strong> be capable of returning all of a patient’s laboratory diagnostic reports queried by category and one or more codes and date range using GET [base]/DiagnosticReport?patient=[id]&amp;category=LAB&amp;code=[LOINC1{,LOINC2,LOINC3,…}]&amp;date=[date]{&amp;date=[date]}.</p></li> </ul>     "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "code"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "code"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            }
+          ],
+          "type": "DiagnosticReport",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query diagnosticreport resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query diagnosticreport by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query diagnosticreport instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query diagnosticreport instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/DiagnosticReport-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "category",
+              "definition": "http://hl7.org/fhir/SearchParameter/DiagnosticReport-Category",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "code",
+              "definition": "http://hl7.org/fhir/SearchParameter/DiagnosticReport-Code",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/DiagnosticReport-Date",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. If the Medication Resource is used in a MedicationStatement or a MedicationOrder, then the READ and SEARCH Criteria <strong>SHALL</strong> be supported.</p>"
+            }
+          ],
+          "type": "Medication",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "IF the Medication Resource is used in a MedicationStatement or a MedicationOrder.   Allows discovery of existing Argonaut Data Query Medication resources using different search criteria."
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "read",
+              "documentation": "IF the Medication Resource is used in a MedicationStatement or a MedicationOrder.  Allows retrieval of a specific Argonaut Data Query Medication by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query Medication instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query Medication instance"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-medicationstatement</strong></p> <p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. When referencing a Medication resource, the resource may be <a href=\"http://hl7.org/fhir/2017Jan/references.html#contained\">contained</a> or an external resource. The server application can choose any one way or more than one method, but <strong>IF</strong> the an external reference to Medication is used, the server <strong>SHALL</strong> support the <a href=\"http://hl7.org/fhir/2017Jan/references.html#include\">include</a> parameter for searching this element. The client application must support both methods.</p> <ul> <li>A server is capable of returning a patient’s medications using one of or both</li> </ul> <ol> <li>GET /MedicationStatement?patient=[id]</li> <li>GET /MedicationStatement?patient=[id]&amp;_include=MedicationStatement:medication</li> </ol> "
+            }
+          ],
+          "type": "MedicationStatement",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query medicationstatement resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query medicationstatement by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query medicationstatement instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query medicationstatement instance"
+            }
+          ],
+          "searchInclude": [
+            "MedicationStatement.medicationReference"
+          ],
+          "_searchInclude": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "MAY"
+                }
+              ]
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/MedicationStatement-Patient",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": "<p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-MedicationOrder</strong></p> <p>The MedicationStatement and MedicationOrder resources can represent a medication, using either a code or refer to a Medication resource. When referencing a Medication resource, the resource may be <a href=\"http://hl7.org/fhir/2017Jan/references.html#contained\">contained</a> or an external resource. The server application can choose any one way or more than one method, but if the an external reference to Medication is used, the server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/references.html#include\">include</a> parameter for searching this element. The client application must support both methods.</p> <ul> <li>A server is capable of returning a patient’s medications using one of or both</li> </ul> <ol> <li>GET /MedicationOrder?patient=[id]</li> <li>GET /MedicationOrder?patient=[id]&amp;_include=MedicationOrder:medication</li> </ol> "
+            }
+          ],
+          "type": "MedicationOrder",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query MedicationOrder resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query MedicationOrder by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query MedicationOrder instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query MedicationOrder instance"
+            }
+          ],
+          "searchInclude": [
+            "MedicationOrder.medicationReference"
+          ],
+          "_searchInclude": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "MAY"
+                }
+              ]
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/MedicationOrder-Patient",
+              "type": "reference"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": ". <p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-observationresults</strong></p> <ul> <li>A server is capable of returning all of a patient&rsquo;s laboratory results queried by category using GET [base]/Observation?patient=[id]&amp;category=laboratory.</li> <li>A server is capable of returning all of a patient&rsquo;s laboratory results queried by category code and date range usingGET [base]/Observation?patient=[id]&amp;category=laboratory&amp;date=[date]{&amp;date=[date]}.</li> <li>A server is capable of returning all of a patient&rsquo;s laboratory results queried by category and code using GET [base]/Observation?patient=[id]&amp;category=laboratory&amp;code=[LOINC].</li> <li>A server SHOULD be capable of returning all of a patient&rsquo;s laboratory results queried by category and one or more codes and date range using GET [base]/Observation?patient=[id]&amp;category=laboratory&amp;code=[LOINC1{,LOINC2,LOINC3,&hellip;}]&amp;date=[date]{&amp;date=[date]}.</li> </ul> <p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-smokingstatus</strong></p> <ul> <li>A server is capable of returning a a patient’s smoking status using GET [base]/Observation?patient=[id]&amp;code=72166-2</li> </ul> <p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-vitalsigns</strong></p> <ul> <li>A server is capable of returning all of a patient’s vital signs that it supports using GET [base]/Observation?patient=[id]&amp;category=vital-signs.</li> <li>A server is capable of returning all of a patient’s vital signs queried by date range using GET [base]/Observation?patient=[id]&amp;category=vital-signs&amp;date=[date]{&amp;date=[date]}.</li> <li><p>A server is capable of returning any of a patient’s vital signs queried by one or more of the codes listed below using GET [base]/Observation?patient=[id]&amp;code[vital sign LOINC{,LOINC2,LOINC3,…}].</p></li> <li><p>A server <strong>SHOULD</strong> be capable of returning any of a patient’s vital signs queried by one or more of the codes listed below and date range using GET [base]/Observation?patient=[id]&amp;code=[LOINC{,LOINC2…}]vital-signs&amp;date=[date]{&amp;date=[date]}.</p></li> </ul>     "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "code"
+                }
+              ]
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "category"
+                },
+                {
+                  "url": "required",
+                  "valueString": "code"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            }
+          ],
+          "type": "Observation",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query results observation, smokingstatus, and vitals signs observation using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query results observation, smokingstatus, and vitals signs observation by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query results observation, smokingstatus, and vitals signs observation over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query results observation, smokingstatus, and vitals signs observation instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Observation-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "category",
+              "definition": "http://hl7.org/fhir/SearchParameter/Organization-Category",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "code",
+              "definition": "http://hl7.org/fhir/SearchParameter/Organization-Code",
+              "type": "token"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/Organization-Date",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            }
+          ]
+        },
+        {
+          "extension": [
+            {
+              "url": "http://fhir.org/guides/argonaut/StructureDefinition/argo-resource-documentation",
+              "valueMarkdown": " <p><strong>Summary of Argonaut Data Query Search Criteria for StructureDefinition-argo-procedure</strong></p> <ul> <li>A server is capable of returning a patient’s procedures using GET/Procedure?patient=[id].</li> <li>A server is capable of returning all of all of a patient’s procedures over a specified time period using GET /Procedure?patient=[id]&amp;date=[date]{&amp;date=[date]}.</li> </ul>   "
+            },
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-search-parameter-combination",
+              "extension": [
+                {
+                  "url": "required",
+                  "valueString": "patient"
+                },
+                {
+                  "url": "required",
+                  "valueString": "date"
+                }
+              ]
+            }
+          ],
+          "type": "Procedure",
+          "interaction": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "search-type",
+              "documentation": "Allows discovery of existing Argonaut Data Query procedure resources using different search criteria"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "code": "read",
+              "documentation": "Allows retrieval of a specific Argonaut Data Query procedure by id"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "history-instance",
+              "documentation": "Allows review of changes to Argonaut Data Query procedure instance over time"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHOULD"
+                }
+              ],
+              "code": "vread",
+              "documentation": "Allows retrieval of a historical version of a Argonaut Data Query procedure instance"
+            }
+          ],
+          "searchParam": [
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "patient",
+              "definition": "http://hl7.org/fhir/SearchParameter/Procedure-Patient",
+              "type": "reference"
+            },
+            {
+              "extension": [
+                {
+                  "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+                  "valueCode": "SHALL"
+                }
+              ],
+              "name": "date",
+              "definition": "http://hl7.org/fhir/SearchParameter/Procedure-Date",
+              "type": "date",
+              "documentation": "<p>The server SHALL support the <a href=\"http://hl7.org/fhir/2017Jan/search.html#prefix\">date search modifiers</a> ‘ge’,‘le’,‘gt','lt' for this profile</p>"
+            }
+          ]
+        }
+      ],
+      "operation": [
+        {
+          "extension": [
+            {
+              "url": "http://hl7.org/fhir/StructureDefinition/conformance-expectation",
+              "valueCode": "MAY"
+            }
+          ],
+          "name": "docref",
+          "definition": {
+            "reference": "http://fhir.org/guides/argonaut/OperationDefinition/docref",
+            "display": "Argonaut Get DocumentReferences"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -9,9 +9,9 @@ package ca.uhn.hapi.converters.server;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,6 +69,11 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 
 	@Override
 	public boolean outgoingResponse(RequestDetails theRequestDetails, ResponseDetails theResponseDetails, HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws AuthenticationException {
+		IBaseResource responseResource = theResponseDetails.getResponseResource();
+		if (responseResource == null) {
+			return true;
+		}
+
 		String[] formatParams = theRequestDetails.getParameters().get(Constants.PARAM_FORMAT);
 		String accept = null;
 		if (formatParams != null && formatParams.length > 0) {
@@ -92,7 +97,6 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 			wantVersion = FhirVersionEnum.forVersionString(wantVersionString);
 		}
 
-		IBaseResource responseResource = theResponseDetails.getResponseResource();
 		FhirVersionEnum haveVersion = responseResource.getStructureFhirVersionEnum();
 
 		IBaseResource converted = null;
@@ -121,11 +125,11 @@ public class VersionedApiConverterInterceptor extends InterceptorAdapter {
 		return true;
 	}
 
-	private org.hl7.fhir.instance.model.Resource toDstu2(IBaseResource theResponseResource) {
+	private org.hl7.fhir.dstu2.model.Resource toDstu2(IBaseResource theResponseResource) {
 		if (theResponseResource instanceof IResource) {
-			return (org.hl7.fhir.instance.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
+			return (org.hl7.fhir.dstu2.model.Resource) myCtxDstu2Hl7Org.newJsonParser().parseResource(myCtxDstu2.newJsonParser().encodeResourceToString(theResponseResource));
 		}
-		return (org.hl7.fhir.instance.model.Resource) theResponseResource;
+		return (org.hl7.fhir.dstu2.model.Resource) theResponseResource;
 	}
 
 	private Resource toDstu3(IBaseResource theResponseResource) {

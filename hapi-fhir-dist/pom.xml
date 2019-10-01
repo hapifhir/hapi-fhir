@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -93,26 +93,6 @@
 					<scope>provided</scope>
 				</dependency>
 
-
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-utilities</artifactId>
-					<version>${project.version}</version>
-				</dependency>
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-utilities</artifactId>
-					<version>${project.version}</version>
-					<classifier>sources</classifier>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>ca.uhn.hapi.fhir</groupId>
-					<artifactId>hapi-fhir-utilities</artifactId>
-					<version>${project.version}</version>
-					<classifier>javadoc</classifier>
-					<scope>provided</scope>
-				</dependency>
 
 				<dependency>
 					<groupId>ca.uhn.hapi.fhir</groupId>

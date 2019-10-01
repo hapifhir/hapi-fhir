@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
 import org.springframework.jdbc.support.lob.LobCreator;
 
+import javax.validation.constraints.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -31,23 +33,21 @@ import static org.junit.Assert.assertTrue;
 public class HapiMigrateDatabaseCommandTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrateDatabaseCommandTest.class);
+	public static final String DB_DIRECTORY = "target/h2_test";
 
 	static {
 		System.setProperty("test", "true");
 	}
 
 	@Test
-	public void testMigrate_340_370() throws IOException {
+	public void testMigrate_340_current() throws IOException {
 
-		File directory = new File("target/migrator_derby_test_340_360");
-		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
-		}
+		File location = getLocation("migrator_h2_test_340_current");
 
-		String url = "jdbc:derby:directory:" + directory.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "", "");
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
-		String initSql = "/persistence_create_derby107_340.sql";
+		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
 
 		seedDatabase340(connectionProperties);
@@ -58,7 +58,57 @@ public class HapiMigrateDatabaseCommandTest {
 
 		String[] args = new String[]{
 			"migrate-database",
-			"-d", "DERBY_EMBEDDED",
+			"-d", "H2_EMBEDDED",
+			"-u", url,
+			"-n", "",
+			"-p", "",
+			"-f", "V3_4_0",
+			"-t", VersionEnum.latestVersion().toString()
+		};
+		App.main(args);
+
+		connectionProperties.getTxTemplate().execute(t -> {
+			JdbcTemplate jdbcTemplate = connectionProperties.newJdbcTemplate();
+			List<Map<String, Object>> values = jdbcTemplate.queryForList("SELECT * FROM hfj_spidx_token");
+			assertEquals(1, values.size());
+			assertEquals("identifier", values.get(0).get("SP_NAME"));
+			assertEquals("12345678", values.get(0).get("SP_VALUE"));
+			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
+			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
+			return null;
+		});
+	}
+
+	@NotNull
+	private File getLocation(String theDatabaseName) throws IOException {
+		File directory = new File(DB_DIRECTORY);
+		if (directory.exists()) {
+			FileUtils.deleteDirectory(directory);
+		}
+
+		return new File(DB_DIRECTORY + "/" + theDatabaseName);
+	}
+
+	@Test
+	public void testMigrate_340_370() throws IOException {
+
+		File location = getLocation("migrator_h2_test_340_360");
+
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
+
+		String initSql = "/persistence_create_h2_340.sql";
+		executeSqlStatements(connectionProperties, initSql);
+
+		seedDatabase340(connectionProperties);
+
+		ourLog.info("**********************************************");
+		ourLog.info("Done Setup, Starting Migration...");
+		ourLog.info("**********************************************");
+
+		String[] args = new String[]{
+			"migrate-database",
+			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",
 			"-p", "",
@@ -83,15 +133,12 @@ public class HapiMigrateDatabaseCommandTest {
 	@Test
 	public void testMigrate_340_350() throws IOException {
 
-		File directory = new File("target/migrator_derby_test_340_350");
-		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
-		}
+		File location = getLocation("migrator_h2_test_340_350");
 
-		String url = "jdbc:derby:directory:" + directory.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "", "");
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
-		String initSql = "/persistence_create_derby107_340.sql";
+		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
 
 		seedDatabase340(connectionProperties);
@@ -102,7 +149,7 @@ public class HapiMigrateDatabaseCommandTest {
 
 		String[] args = new String[]{
 			"migrate-database",
-			"-d", "DERBY_EMBEDDED",
+			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",
 			"-p", "",
@@ -125,7 +172,7 @@ public class HapiMigrateDatabaseCommandTest {
 
 		args = new String[]{
 			"migrate-database",
-			"-d", "DERBY_EMBEDDED",
+			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",
 			"-p", "",
@@ -263,15 +310,12 @@ public class HapiMigrateDatabaseCommandTest {
 	@Test
 	public void testMigrate_340_350_NoMigrateHashes() throws IOException {
 
-		File directory = new File("target/migrator_derby_test_340_350_nmh");
-		if (directory.exists()) {
-			FileUtils.deleteDirectory(directory);
-		}
+		File location = getLocation("migrator_h2_test_340_350_nmh");
 
-		String url = "jdbc:derby:directory:" + directory.getAbsolutePath() + ";create=true";
-		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.DERBY_EMBEDDED.newConnectionProperties(url, "", "");
+		String url = "jdbc:h2:" + location.getAbsolutePath() + ";create=true";
+		DriverTypeEnum.ConnectionProperties connectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(url, "", "");
 
-		String initSql = "/persistence_create_derby107_340.sql";
+		String initSql = "/persistence_create_h2_340.sql";
 		executeSqlStatements(connectionProperties, initSql);
 
 		seedDatabase340(connectionProperties);
@@ -282,7 +326,7 @@ public class HapiMigrateDatabaseCommandTest {
 
 		String[] args = new String[]{
 			"migrate-database",
-			"-d", "DERBY_EMBEDDED",
+			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",
 			"-p", "",

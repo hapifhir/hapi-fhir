@@ -9,9 +9,9 @@ package ca.uhn.fhir.cli;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -715,7 +715,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
 
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
-			bundleFactory.initializeBundleFromResourceList(null, subResourceList, null, null, 0, BundleTypeEnum.TRANSACTION);
+			bundleFactory.addRootPropertiesToBundle(null, null, null, null, null, subResourceList.size(), BundleTypeEnum.TRANSACTION, null);
+			bundleFactory.addResourcesToBundle(new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
 
 			String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(subBundle);
