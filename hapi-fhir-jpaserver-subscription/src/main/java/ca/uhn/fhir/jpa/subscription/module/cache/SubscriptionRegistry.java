@@ -94,7 +94,7 @@ public class SubscriptionRegistry {
 
 		String channelName = mySubscriptionDeliveryChannelNamer.nameFromSubscription(canonicalized);
 
-		ourLog.info("Registering active subscription {}", theSubscription.getIdElement().toUnqualified().getValue());
+		ourLog.info("Registering active subscription {}", subscriptionId);
 		ActiveSubscription activeSubscription = new ActiveSubscription(canonicalized, channelName);
 		mySubscriptionChannelRegistry.add(activeSubscription);
 		myActiveSubscriptionCache.put(subscriptionId, activeSubscription);

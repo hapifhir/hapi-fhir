@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +42,10 @@ public class SubscriptionChannelRegistryTest {
 		when(myModelConfig.isSubscriptionMatchingEnabled()).thenReturn(true);
 
 		CanonicalSubscription cansubA = new CanonicalSubscription();
+		cansubA.setIdElement(new IdDt("A"));
 		ActiveSubscription activeSubscriptionA = new ActiveSubscription(cansubA, TEST_CHANNEL_NAME);
 		CanonicalSubscription cansubB = new CanonicalSubscription();
+		cansubB.setIdElement(new IdDt("B"));
 		ActiveSubscription activeSubscriptionB = new ActiveSubscription(cansubB, TEST_CHANNEL_NAME);
 
 		assertNull(mySubscriptionChannelRegistry.get(TEST_CHANNEL_NAME));

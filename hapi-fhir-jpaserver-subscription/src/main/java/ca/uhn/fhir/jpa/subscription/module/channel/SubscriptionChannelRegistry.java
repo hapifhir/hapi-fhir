@@ -35,9 +35,11 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 		String channelName = theActiveSubscription.getChannelName();
+		ourLog.info("Adding subscription {} to channel {}", theActiveSubscription.getId(), channelName);
 		myActiveSubscriptionByChannelName.put(channelName, theActiveSubscription.getId());
 
 		if (mySubscriptionChannelCache.containsKey(channelName)) {
+			ourLog.info("Channel {} already exists.  Not creating.", channelName);
 			return;
 		}
 
