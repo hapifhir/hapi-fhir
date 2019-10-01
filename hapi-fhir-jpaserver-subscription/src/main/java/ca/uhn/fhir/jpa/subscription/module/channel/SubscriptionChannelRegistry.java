@@ -1,9 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.slf4j.Logger;
@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.Optional;
 
 @Component
@@ -58,7 +59,7 @@ public class SubscriptionChannelRegistry {
 		String channelName = theActiveSubscription.getChannelName();
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
-			ourLog.warn("Request to remove subscription {} that was not added", theActiveSubscription.getId());
+			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
 		}
 
 		// This was the last one.  Shut down the channel
@@ -77,5 +78,16 @@ public class SubscriptionChannelRegistry {
 
 	public int size() {
 		return mySubscriptionChannelCache.size();
+	}
+
+	@VisibleForTesting
+	public void logForUnitTest() {
+		ourLog.info("Channels: {}", size());
+		for (String key : myActiveSubscriptionByChannelName.keySet()) {
+			Collection<String> list = myActiveSubscriptionByChannelName.get(key);
+			for (String value : list) {
+				ourLog.info("{}: {}", key, value);
+			}
+		}
 	}
 }
