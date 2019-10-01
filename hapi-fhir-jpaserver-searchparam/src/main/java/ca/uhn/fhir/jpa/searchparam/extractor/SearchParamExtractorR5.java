@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
@@ -27,20 +29,18 @@ import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
-import org.hl7.fhir.r5.model.Enumeration;
 import org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestSecurityComponent;
 import org.hl7.fhir.r5.model.Location.LocationPositionComponent;
 import org.hl7.fhir.r5.model.Patient.PatientCommunicationComponent;
@@ -52,6 +52,7 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -59,22 +60,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR5.class);
-	private static final Set<Class<?>> ourIgnoredForSearchDatatypes;
-
-	static {
-		//noinspection unchecked
-		ourIgnoredForSearchDatatypes = Collections.unmodifiableSet(Sets.newHashSet(
-			Age.class,
-			Annotation.class,
-			Attachment.class,
-			Count.class,
-			Distance.class,
-			Ratio.class,
-			SampledData.class,
-			Signature.class,
-			LocationPositionComponent.class
-		));
-	}
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -87,33 +72,51 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		super();
 	}
 
+	@Override
 	@PostConstruct
-	public void initFhirPath() {
+	public void start() {
+		super.start();
 		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR5HostServices());
 	}
 
-	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
-		if (!nextValue.getValueElement().isEmpty()) {
-			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
-			String nextValueString = nextValue.getSystemElement().getValueAsString();
-			String nextValueCode = nextValue.getCode();
-			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
+	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, IBase theQuantity) {
+		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
+		BaseRuntimeChildDefinition quantityValueChild = quantityDefinition.getChildByName("value");
+		BaseRuntimeChildDefinition quantitySystemChild = quantityDefinition.getChildByName("system");
+		BaseRuntimeChildDefinition quantityCodeChild = quantityDefinition.getChildByName("code");
+
+		Optional<IPrimitiveType<BigDecimal>> valueField = quantityValueChild.getAccessor().getFirstValueOrNull(theQuantity);
+		if (valueField.isPresent() && valueField.get().getValue() != null) {
+			BigDecimal nextValueValue = valueField.get().getValue();
+			String system = quantitySystemChild.getAccessor().<IPrimitiveType<String>>getFirstValueOrNull(theQuantity).map(t-> t.getValue()).orElse(null);
+			String code = quantityCodeChild.getAccessor().<IPrimitiveType<String>>getFirstValueOrNull(theQuantity).map(t-> t.getValue()).orElse(null);
+
+			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, system, code);
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
 		}
+
 	}
 
-	private void addMoney(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Money nextValue) {
-		if (!nextValue.getValueElement().isEmpty()) {
-			BigDecimal nextValueValue = nextValue.getValueElement().getValue();
+
+	private void addMoney(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, IBase theMoney) {
+		BaseRuntimeElementCompositeDefinition<?> moneyDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Money");
+		BaseRuntimeChildDefinition moneyValueChild = moneyDefinition.getChildByName("value");
+		BaseRuntimeChildDefinition moneyCurrencyChild = moneyDefinition.getChildByName("currency");
+
+		Optional<IPrimitiveType<BigDecimal>> valueField = moneyValueChild.getAccessor().getFirstValueOrNull(theMoney);
+		if (valueField.isPresent() && valueField.get().getValue() != null) {
+			BigDecimal nextValueValue = valueField.get().getValue();
+
 			String nextValueString = "urn:iso:std:iso:4217";
-			String nextValueCode = nextValue.getCurrency();
+			String nextValueCode = moneyCurrencyChild.getAccessor().<IPrimitiveType<String>>getFirstValueOrNull(theMoney).map(t-> t.getValue()).orElse(null);
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(resourceName, nextValueValue, nextValueString, nextValueCode);
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
 		}
+
 	}
 
 	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
@@ -355,30 +358,24 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 			}
 
 			String nextPath = nextSpDef.getPath();
-			if (isBlank(nextPath)) {
-				continue;
-			}
 
-			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null || ((IBase) nextObject).isEmpty()) {
+			for (IBase nextObject : extractValues(nextPath, theResource)) {
+				if (nextObject == null || nextObject.isEmpty()) {
 					continue;
 				}
 
 				String resourceName = nextSpDef.getName();
+				String typeName = getContext().getElementDefinition(nextObject.getClass()).getName();
 
-				if (nextObject instanceof Quantity) {
-					Quantity nextValue = (Quantity) nextObject;
-					addQuantity(theEntity, retVal, resourceName, nextValue);
-				} else if (nextObject instanceof Money) {
-					Money nextValue = (Money) nextObject;
-					addMoney(theEntity, retVal, resourceName, nextValue);
+				if (typeName.equals("Quantity")) {
+					addQuantity(theEntity, retVal, resourceName, nextObject);
+				} else if (typeName.equals("Money")) {
+					addMoney(theEntity, retVal, resourceName, nextObject);
 				} else if (nextObject instanceof Range) {
 					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
 					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
-				} else if (ourIgnoredForSearchDatatypes.contains(nextObject.getClass())) {
-					continue;
-				} else {
+				} else if (!getIgnoredForSearchDatatypes().contains(nextObject.getClass())) {
 					throw new ConfigurationException("Search param " + resourceName + " is of unexpected datatype: " + nextObject.getClass());
 				}
 			}
@@ -545,8 +542,8 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 					}
 					systems.add(nextValue.getSystemElement().getValueAsString());
 					codes.add(nextValue.getValueElement().getValue());
-				} else if (nextObject instanceof Enumeration<?>) {
-					Enumeration<?> obj = (Enumeration<?>) nextObject;
+				} else if (nextObject instanceof IBaseEnumeration<?>) {
+					IBaseEnumeration<?> obj = (IBaseEnumeration<?>) nextObject;
 					String system = extractSystem(obj);
 					String code = obj.getValueAsString();
 					if (isNotBlank(code)) {
@@ -698,137 +695,112 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 		}
 	}
 
-	/**
-	 * Override parent because we're using FHIRPath here
-	 */
 	@Override
-	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
-		FHIRPathEngine fp = new FHIRPathEngine(worker);
-		fp.setHostServices(new SearchParamExtractorR5HostServices());
-
-		List<Object> values = new ArrayList<>();
-		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
-		for (String nextPath : nextPathsSplit) {
-			List<Base> allValues;
+	protected Supplier<List<? extends IBase>> getPathValueExtractor(IBaseResource theResource, String nextPath) {
+		return () -> {
 			try {
-				allValues = fp.evaluate((Base) theResource, nextPath);
+				IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+				FHIRPathEngine fp = new FHIRPathEngine(worker);
+				fp.setHostServices(new SearchParamExtractorR5HostServices());
+				return fp.evaluate((Base) theResource, nextPath);
 			} catch (FHIRException e) {
 				String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 				throw new InternalErrorException(msg, e);
 			}
-			if (allValues.isEmpty() == false) {
-				values.addAll(allValues);
-			}
-		}
-
-		for (int i = 0; i < values.size(); i++) {
-			Object nextObject = values.get(i);
-			if (nextObject instanceof Extension) {
-				Extension nextExtension = (Extension) nextObject;
-				nextObject = nextExtension.getValue();
-				values.set(i, nextObject);
-			}
-		}
-
-		return values;
+		};
 	}
 
-	@VisibleForTesting
-	void setValidationSupportForTesting(IValidationSupport theValidationSupport) {
-		myValidationSupport = theValidationSupport;
+private static class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
+
+	private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+
+	@Override
+	public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
+		return null;
 	}
 
-	private class SearchParamExtractorR5HostServices implements FHIRPathEngine.IEvaluationContext {
+	@Override
+	public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
+		return null;
+	}
 
-		private Map<String, Base> myResourceTypeToStub = Collections.synchronizedMap(new HashMap<>());
+	@Override
+	public boolean log(String argument, List<Base> focus) {
+		return false;
+	}
 
-		@Override
-		public Base resolveConstant(Object appContext, String name, boolean beforeContext) throws PathEngineException {
-			return null;
-		}
+	@Override
+	public FunctionDetails resolveFunction(String functionName) {
+		return null;
+	}
 
-		@Override
-		public TypeDetails resolveConstantType(Object appContext, String name) throws PathEngineException {
-			return null;
-		}
+	@Override
+	public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
+		return null;
+	}
 
-		@Override
-		public boolean log(String argument, List<Base> focus) {
-			return false;
-		}
+	@Override
+	public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
+		return null;
+	}
 
-		@Override
-		public FunctionDetails resolveFunction(String functionName) {
-			return null;
-		}
+	@Override
+	public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
 
-		@Override
-		public TypeDetails checkFunction(Object appContext, String functionName, List<TypeDetails> parameters) throws PathEngineException {
-			return null;
-		}
+		/*
+		 * When we're doing resolution within the SearchParamExtractor, if we want
+		 * to do a resolve() it's just to check the type, so there is no point
+		 * going through the heavyweight test. We can just return a stub and
+		 * that's good enough since we're just doing something like
+		 *    Encounter.patient.where(resolve() is Patient)
+		 */
+		IdType url = new IdType(theUrl);
+		Base retVal = null;
+		if (isNotBlank(url.getResourceType())) {
 
-		@Override
-		public List<Base> executeFunction(Object appContext, String functionName, List<List<Base>> parameters) {
-			return null;
-		}
-
-		@Override
-		public Base resolveReference(Object theAppContext, String theUrl) throws FHIRException {
-
-			/*
-			 * When we're doing resolution within the SearchParamExtractor, if we want
-			 * to do a resolve() it's just to check the type, so there is no point
-			 * going through the heavyweight test. We can just return a stub and
-			 * that's good enough since we're just doing something like
-			 *    Encounter.patient.where(resolve() is Patient)
-			 */
-			IdType url = new IdType(theUrl);
-			Base retVal = null;
-			if (isNotBlank(url.getResourceType())) {
-
-				retVal = myResourceTypeToStub.get(url.getResourceType());
-				if (retVal != null) {
-					return retVal;
-				}
-
-				ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
-				if (resourceType != null) {
-					retVal = new Resource() {
-						@Override
-						public Resource copy() {
-							return this;
-						}
-
-						@Override
-						public ResourceType getResourceType() {
-							return resourceType;
-						}
-
-						@Override
-						public String fhirType() {
-							return url.getResourceType();
-						}
-
-					};
-					myResourceTypeToStub.put(url.getResourceType(), retVal);
-				}
+			retVal = myResourceTypeToStub.get(url.getResourceType());
+			if (retVal != null) {
+				return retVal;
 			}
-			return retVal;
-		}
 
-		@Override
-		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
-			return false;
-		}
+			ResourceType resourceType = ResourceType.fromCode(url.getResourceType());
+			if (resourceType != null) {
+				retVal = new Resource() {
+					@Override
+					public Resource copy() {
+						return this;
+					}
 
-		@Override
-		public ValueSet resolveValueSet(Object theO, String theS) {
-			return null;
+					@Override
+					public ResourceType getResourceType() {
+						return resourceType;
+					}
+
+					@Override
+					public String fhirType() {
+						return url.getResourceType();
+					}
+
+				};
+				myResourceTypeToStub.put(url.getResourceType(), retVal);
+			}
 		}
+		return retVal;
 	}
 
-	private static <T extends Enum<?>> String extractSystem(Enumeration<T> theBoundCode) {
+	@Override
+	public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
+		return false;
+	}
+
+	@Override
+	public ValueSet resolveValueSet(Object theO, String theS) {
+		return null;
+	}
+
+}
+
+	private static <T extends Enum<?>> String extractSystem(IBaseEnumeration<T> theBoundCode) {
 		if (theBoundCode.getValue() != null) {
 			return theBoundCode.getEnumFactory().toSystem(theBoundCode.getValue());
 		}

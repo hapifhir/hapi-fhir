@@ -20,21 +20,24 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
@@ -47,6 +50,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private ModelConfig myModelConfig;
+	private Set<Class<?>> myIgnoredForSearchDatatypes;
 
 	public BaseSearchParamExtractor() {
 		super();
@@ -58,6 +62,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
+	protected Set<Class<?>> getIgnoredForSearchDatatypes() {
+		return myIgnoredForSearchDatatypes;
+	}
+
 	@Override
 	public List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef) {
 		List<PathAndRef> refs = new ArrayList<PathAndRef>();
@@ -65,16 +73,43 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		for (String nextPath : nextPathsSplit) {
 			nextPath = nextPath.trim();
 			for (Object nextObject : extractValues(nextPath, theResource)) {
-				if (nextObject == null) {
-					continue;
+				if (nextObject != null) {
+					refs.add(new PathAndRef(nextPath, nextObject));
 				}
-				refs.add(new PathAndRef(nextPath, nextObject));
 			}
 		}
 		return refs;
 	}
 
-	protected abstract List<Object> extractValues(String thePaths, IBaseResource theResource);
+	/**
+	 * Override parent because we're using FHIRPath here
+	 */
+	protected List<IBase> extractValues(String thePaths, IBaseResource theResource) {
+		List<IBase> values = new ArrayList<>();
+		if (isNotBlank(thePaths)) {
+			String[] nextPathsSplit = SPLIT_R4.split(thePaths);
+			for (String nextPath : nextPathsSplit) {
+				List<? extends IBase> allValues;
+
+				Supplier<List<? extends IBase>> allValuesFunc = getPathValueExtractor(theResource, nextPath);
+				allValues = allValuesFunc.get();
+
+				values.addAll(allValues);
+			}
+
+			for (int i = 0; i < values.size(); i++) {
+				IBase nextObject = values.get(i);
+				if (nextObject instanceof IBaseExtension) {
+					IBaseExtension nextExtension = (IBaseExtension) nextObject;
+					nextObject = nextExtension.getValue();
+					values.set(i, nextObject);
+				}
+			}
+		}
+		return values;
+	}
+
+	protected abstract Supplier<List<? extends IBase>> getPathValueExtractor(IBaseResource theResource, String theNextPath);
 
 	protected FhirContext getContext() {
 		return myContext;
@@ -92,9 +127,25 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return retVal;
 	}
 
-	@VisibleForTesting
-	void setContextForUnitTest(FhirContext theContext) {
-		myContext = theContext;
+	@PostConstruct
+	public void start() {
+		myIgnoredForSearchDatatypes = new HashSet<>();
+		addIgnoredType(getContext(), "Age", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Annotation", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Attachment", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Count", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Distance", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Ratio", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "SampledData", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Signature", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "LocationPositionComponent", myIgnoredForSearchDatatypes);
+	}
+
+	private static void addIgnoredType(FhirContext theCtx, String theType, Set<Class<?>> theIgnoredTypes) {
+		BaseRuntimeElementDefinition<?> elementDefinition = theCtx.getElementDefinition(theType);
+		if (elementDefinition != null) {
+			theIgnoredTypes.add(elementDefinition.getImplementingClass());
+		}
 	}
 
 

@@ -41,7 +41,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	/**
 	 * @see ResourceEncodingEnum
 	 */
-	public static final int ENCODING_COL_LENGTH = 5;
+	static final int ENCODING_COL_LENGTH = 5;
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -80,19 +80,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
 		return myProvenance;
-	}
-
-	public void setProvenance(ResourceHistoryProvenanceEntity theProvenance) {
-		myProvenance = theProvenance;
-	}
-
-	public void addTag(ResourceHistoryTag theTag) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.equals(theTag)) {
-				return;
-			}
-		}
-		getTags().add(theTag);
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -159,7 +146,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Collection<ResourceHistoryTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<ResourceHistoryTag>();
+			myTags = new ArrayList<>();
 		}
 		return myTags;
 	}
@@ -171,15 +158,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
-	}
-
-	public boolean hasTag(String theTerm, String theScheme) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

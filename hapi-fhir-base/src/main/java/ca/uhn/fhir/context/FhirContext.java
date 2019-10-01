@@ -25,6 +25,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -274,6 +275,7 @@ public class FhirContext {
 	 * Note that this method is case insensitive!
 	 * </p>
 	 */
+	@Nullable
 	public BaseRuntimeElementDefinition<?> getElementDefinition(final String theElementName) {
 		validateInitialized();
 		return myNameToElementDefinition.get(theElementName.toLowerCase());

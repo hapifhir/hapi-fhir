@@ -713,6 +713,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		myValidationSupport = theValidationSupport;
 	}
 
+	@Override
 	@PostConstruct
 	public void start() {
 		myWorkerContext = new HapiWorkerContext(getContext(), myValidationSupport);
