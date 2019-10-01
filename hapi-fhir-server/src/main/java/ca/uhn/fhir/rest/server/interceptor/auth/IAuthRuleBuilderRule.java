@@ -109,7 +109,16 @@ public interface IAuthRuleBuilderRule {
 	IAuthRuleBuilderRuleOp write();
 
 	/**
+	 * This rule specifically allows a user to perform a FHIR create, but not an update or other write operations
+	 *
+	 * @see #write()
+	 * @since 4.1.0
+	 */
+	IAuthRuleBuilderRuleOp create();
+
+	/**
 	 * Allow a GraphQL query
 	 */
 	IAuthRuleBuilderGraphQL graphQL();
+
 }

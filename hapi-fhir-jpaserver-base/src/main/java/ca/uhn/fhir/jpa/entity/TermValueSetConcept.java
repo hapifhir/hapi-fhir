@@ -40,7 +40,8 @@ import static org.apache.commons.lang3.StringUtils.length;
  * bork up migration tasks.
  */
 @Table(name = "TRM_VALUESET_CONCEPT", uniqueConstraints = {
-	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"})
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_CS_CD", columnNames = {"VALUESET_PID", "SYSTEM_URL", "CODEVAL"}),
+	@UniqueConstraint(name = "IDX_VS_CONCEPT_ORDER", columnNames = {"VALUESET_PID", "VALUESET_ORDER"})
 })
 @Entity()
 public class TermValueSetConcept implements Serializable {
@@ -52,9 +53,15 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "PID")
 	private Long myId;
 
-	@ManyToOne()
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "VALUESET_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TRM_VALUESET_PID"))
 	private TermValueSet myValueSet;
+
+	@Column(name = "VALUESET_PID", insertable = false, updatable = false, nullable = false)
+	private Long myValueSetPid;
+
+	@Column(name = "VALUESET_ORDER", nullable = false)
+	private int myOrder;
 
 	@Transient
 	private String myValueSetUrl;
@@ -71,8 +78,11 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "DISPLAY", nullable = true, length = TermConcept.MAX_DESC_LENGTH)
 	private String myDisplay;
 
-	@OneToMany(mappedBy = "myConcept")
+	@OneToMany(mappedBy = "myConcept", fetch = FetchType.LAZY)
 	private List<TermValueSetConceptDesignation> myDesignations;
+
+	@Transient
+	private transient Integer myHashCode;
 
 	public Long getId() {
 		return myId;
@@ -84,6 +94,15 @@ public class TermValueSetConcept implements Serializable {
 
 	public TermValueSetConcept setValueSet(TermValueSet theValueSet) {
 		myValueSet = theValueSet;
+		return this;
+	}
+
+	public int getOrder() {
+		return myOrder;
+	}
+
+	public TermValueSetConcept setOrder(int theOrder) {
+		myOrder = theOrder;
 		return this;
 	}
 
@@ -153,7 +172,7 @@ public class TermValueSetConcept implements Serializable {
 		TermValueSetConcept that = (TermValueSetConcept) theO;
 
 		return new EqualsBuilder()
-			.append(getValueSetUrl(), that.getValueSetUrl())
+			.append(myValueSetPid, that.myValueSetPid)
 			.append(getSystem(), that.getSystem())
 			.append(getCode(), that.getCode())
 			.isEquals();
@@ -161,11 +180,14 @@ public class TermValueSetConcept implements Serializable {
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(getValueSetUrl())
-			.append(getSystem())
-			.append(getCode())
-			.toHashCode();
+		if (myHashCode == null) {
+			myHashCode = new HashCodeBuilder(17, 37)
+				.append(myValueSetPid)
+				.append(getSystem())
+				.append(getCode())
+				.toHashCode();
+		}
+		return myHashCode;
 	}
 
 	@Override
@@ -173,6 +195,8 @@ public class TermValueSetConcept implements Serializable {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("myId", myId)
 			.append(myValueSet != null ? ("myValueSet - id=" + myValueSet.getId()) : ("myValueSet=(null)"))
+			.append("myValueSetPid", myValueSetPid)
+			.append("myOrder", myOrder)
 			.append("myValueSetUrl", this.getValueSetUrl())
 			.append("myValueSetName", this.getValueSetName())
 			.append("mySystem", mySystem)

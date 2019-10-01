@@ -36,7 +36,8 @@ import static org.apache.commons.lang3.StringUtils.length;
 public class TermConceptDesignation implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	private static final int MAX_LENGTH = 500;
+	public static final int MAX_LENGTH = 500;
+	public static final int MAX_VAL_LENGTH = 2000;
 
 	@ManyToOne
 	@JoinColumn(name = "CONCEPT_PID", referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_CONCEPTDESIG_CONCEPT"))
@@ -54,7 +55,7 @@ public class TermConceptDesignation implements Serializable {
 	private String myUseCode;
 	@Column(name = "USE_DISPLAY", nullable = true, length = MAX_LENGTH)
 	private String myUseDisplay;
-	@Column(name = "VAL", nullable = false, length = MAX_LENGTH)
+	@Column(name = "VAL", nullable = false, length = MAX_VAL_LENGTH)
 	private String myValue;
 	/**
 	 * TODO: Make this non-null
@@ -113,8 +114,8 @@ public class TermConceptDesignation implements Serializable {
 
 	public TermConceptDesignation setValue(@Nonnull String theValue) {
 		ValidateUtil.isNotBlankOrThrowIllegalArgument(theValue, "theValue must not be null or empty");
-		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, MAX_LENGTH,
-			"Value exceeds maximum length (" + MAX_LENGTH + "): " + length(theValue));
+		ValidateUtil.isNotTooLongOrThrowIllegalArgument(theValue, MAX_VAL_LENGTH,
+			"Value exceeds maximum length (" + MAX_VAL_LENGTH + "): " + length(theValue));
 		myValue = theValue;
 		return this;
 	}

@@ -58,8 +58,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
 	@Autowired
-	private ISearchResultDao mySearchResultDao;
-	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	private IResourceIndexedSearchParamUriDao myResourceIndexedSearchParamUriDao;
@@ -248,12 +246,6 @@ class ResourceExpungeService implements IResourceExpungeService {
 				return;
 			}
 		}
-	}
-
-	@Override
-	@Transactional
-	public void deleteByResourceIdPartitions(List<Long> theResourceIds) {
-		mySearchResultDao.deleteByResourceIds(theResourceIds);
 	}
 
 	private Slice<Long> toSlice(ResourceHistoryTable myVersion) {

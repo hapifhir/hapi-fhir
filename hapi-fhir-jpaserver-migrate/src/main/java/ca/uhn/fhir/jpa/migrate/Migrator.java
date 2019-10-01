@@ -44,6 +44,7 @@ public class Migrator {
 	private int myChangesCount;
 	private boolean myDryRun;
 	private List<BaseTask.ExecutedStatement> myExecutedStatements = new ArrayList<>();
+	private boolean myNoColumnShrink;
 
 	public int getChangesCount() {
 		return myChangesCount;
@@ -82,6 +83,7 @@ public class Migrator {
 				next.setDriverType(myDriverType);
 				next.setConnectionProperties(myConnectionProperties);
 				next.setDryRun(myDryRun);
+				next.setNoColumnShrink(myNoColumnShrink);
 				try {
 					next.execute();
 				} catch (SQLException e) {
@@ -125,5 +127,9 @@ public class Migrator {
 
 	public void addTasks(List<BaseTask<?>> theTasks) {
 		theTasks.forEach(this::addTask);
+	}
+
+	public void setNoColumnShrink(boolean theNoColumnShrink) {
+		myNoColumnShrink = theNoColumnShrink;
 	}
 }

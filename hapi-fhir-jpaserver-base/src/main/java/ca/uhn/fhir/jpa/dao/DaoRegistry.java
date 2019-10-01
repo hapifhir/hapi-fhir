@@ -41,6 +41,9 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Autowired
 	private FhirContext myContext;
+	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
+	private volatile IFhirSystemDao<?, ?> mySystemDao;
+	private Set<String> mySupportedResourceTypes;
 
 	/**
 	 * Constructor
@@ -48,11 +51,6 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 	public DaoRegistry() {
 		super();
 	}
-
-	private volatile Map<String, IFhirResourceDao<?>> myResourceNameToResourceDao;
-	private volatile IFhirSystemDao<?, ?> mySystemDao;
-
-	private Set<String> mySupportedResourceTypes;
 
 	public void setSupportedResourceTypes(Collection<String> theSupportedResourceTypes) {
 		HashSet<String> supportedResourceTypes = new HashSet<>();
@@ -138,7 +136,10 @@ public class DaoRegistry implements ApplicationContextAware, IDaoRegistry {
 
 	@Override
 	public boolean isResourceTypeSupported(String theResourceType) {
-		return mySupportedResourceTypes == null || mySupportedResourceTypes.contains(theResourceType);
+		if (mySupportedResourceTypes == null) {
+			return getResourceDaoOrNull(theResourceType) != null;
+		}
+		return mySupportedResourceTypes.contains(theResourceType);
 	}
 
 	private void init() {

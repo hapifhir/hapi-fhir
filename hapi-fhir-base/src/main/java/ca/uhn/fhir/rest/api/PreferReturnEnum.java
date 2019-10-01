@@ -1,6 +1,6 @@
 package ca.uhn.fhir.rest.api;
 
-/*
+/*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
@@ -29,26 +29,26 @@ public enum PreferReturnEnum {
 
 	REPRESENTATION("representation"), MINIMAL("minimal"), OPERATION_OUTCOME("OperationOutcome");
 
-	private String myHeaderValue;
 	private static HashMap<String, PreferReturnEnum> ourValues;
+	private String myHeaderValue;
 
-	private PreferReturnEnum(String theHeaderValue) {
+	PreferReturnEnum(String theHeaderValue) {
 		myHeaderValue = theHeaderValue;
+	}
+
+	public String getHeaderValue() {
+		return myHeaderValue;
 	}
 
 	public static PreferReturnEnum fromHeaderValue(String theHeaderValue) {
 		if (ourValues == null) {
-			HashMap<String, PreferReturnEnum> values = new HashMap<String, PreferReturnEnum>();
+			HashMap<String, PreferReturnEnum> values = new HashMap<>();
 			for (PreferReturnEnum next : PreferReturnEnum.values()) {
 				values.put(next.getHeaderValue(), next);
 			}
 			ourValues = values;
 		}
 		return ourValues.get(theHeaderValue);
-	}
-
-	public String getHeaderValue() {
-		return myHeaderValue;
 	}
 
 }

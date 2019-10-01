@@ -64,7 +64,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -185,7 +184,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		if (theRequestDetails != null) {
 			if (outcome.getResource() != null) {
 				String prefer = theRequestDetails.getHeader(Constants.HEADER_PREFER);
-				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer);
+				PreferReturnEnum preferReturn = RestfulServerUtils.parsePreferHeader(null, prefer).getReturn();
 				if (preferReturn != null) {
 					if (preferReturn == PreferReturnEnum.REPRESENTATION) {
 						outcome.fireResourceViewCallbacks();
@@ -211,7 +210,10 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				String nextReplacementIdPart = nextReplacementId.getValueAsString();
 				if (isUrn(nextTemporaryId) && nextTemporaryIdPart.length() > URN_PREFIX.length()) {
 					matchUrl = matchUrl.replace(nextTemporaryIdPart, nextReplacementIdPart);
-					matchUrl = matchUrl.replace(UrlUtil.escapeUrlParam(nextTemporaryIdPart), nextReplacementIdPart);
+					String escapedUrlParam = UrlUtil.escapeUrlParam(nextTemporaryIdPart);
+					if (isNotBlank(escapedUrlParam)) {
+						matchUrl = matchUrl.replace(escapedUrlParam, nextReplacementIdPart);
+					}
 				}
 			}
 		}
@@ -907,10 +909,13 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 				IPrimitiveType<Date> deletedInstantOrNull = ResourceMetadataKeyEnum.DELETED_AT.get((IAnyResource) nextResource);
 				Date deletedTimestampOrNull = deletedInstantOrNull != null ? deletedInstantOrNull.getValue() : null;
 
+				IFhirResourceDao<? extends IBaseResource> dao = myDaoRegistry.getResourceDao(nextResource.getClass());
+				IJpaDao jpaDao = (IJpaDao) dao;
+
 				if (updatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
+					jpaDao.updateInternal(theRequest, nextResource, true, false, nextOutcome.getEntity(), nextResource.getIdElement(), nextOutcome.getPreviousResource());
 				} else if (!nonUpdatedEntities.contains(nextOutcome.getEntity())) {
-					myDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
+					jpaDao.updateEntity(theRequest, nextResource, nextOutcome.getEntity(), deletedTimestampOrNull, true, false, theUpdateTime, false, true);
 				}
 			}
 

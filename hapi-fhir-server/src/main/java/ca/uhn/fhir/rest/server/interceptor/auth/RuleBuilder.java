@@ -107,11 +107,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 	private class RuleBuilderFinished implements IAuthRuleFinished, IAuthRuleBuilderRuleOpClassifierFinished, IAuthRuleBuilderRuleOpClassifierFinishedWithTenantId {
 
-		private final BaseRule myOpRule;
+		protected final BaseRule myOpRule;
 		ITenantApplicabilityChecker myTenantApplicabilityChecker;
 		private List<IAuthRuleTester> myTesters;
 
 		RuleBuilderFinished(BaseRule theRule) {
+			assert theRule != null;
 			myOpRule = theRule;
 		}
 
@@ -253,6 +254,14 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		}
 
 		@Override
+		public IAuthRuleBuilderRuleOp create() {
+			if (myWriteRuleBuilder == null) {
+				myWriteRuleBuilder = new RuleBuilderRuleOp(RuleOpEnum.CREATE);
+			}
+			return myWriteRuleBuilder;
+		}
+
+		@Override
 		public IAuthRuleBuilderGraphQL graphQL() {
 			return new RuleBuilderGraphQL();
 		}
@@ -291,12 +300,12 @@ public class RuleBuilder implements IAuthRuleBuilder {
 			public class RuleBuilderRuleConditionalClassifier extends RuleBuilderFinished implements IAuthRuleBuilderRuleConditionalClassifier {
 
 				RuleBuilderRuleConditionalClassifier() {
-					super(null);
+					super(new RuleImplConditional(myRuleName));
 				}
 
 				@Override
 				protected void doBuildRule() {
-					RuleImplConditional rule = new RuleImplConditional(myRuleName);
+					RuleImplConditional rule = (RuleImplConditional) myOpRule;
 					rule.setMode(myRuleMode);
 					rule.setOperationType(myOperationType);
 					rule.setAppliesTo(myAppliesTo);

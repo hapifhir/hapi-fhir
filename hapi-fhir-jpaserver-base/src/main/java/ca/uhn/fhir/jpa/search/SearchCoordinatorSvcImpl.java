@@ -25,16 +25,14 @@ import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.*;
-import ca.uhn.fhir.jpa.dao.data.ISearchDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchIncludeDao;
-import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.entity.SearchInclude;
-import ca.uhn.fhir.jpa.entity.SearchResult;
 import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.Include;
@@ -56,15 +54,12 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AbstractPageRequest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.orm.jpa.JpaDialect;
@@ -83,7 +78,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -94,7 +92,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	public static final int DEFAULT_SYNC_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchCoordinatorSvcImpl.class);
-	private final ConcurrentHashMap<String, BaseTask> myIdToSearchTask = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, SearchTask> myIdToSearchTask = new ConcurrentHashMap<>();
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
@@ -106,15 +104,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	private long myMaxMillisToWaitForRemoteResults = DateUtils.MILLIS_PER_MINUTE;
 	private boolean myNeverUseLocalSearchForUnitTests;
 	@Autowired
-	private ISearchDao mySearchDao;
-	@Autowired
-	private ISearchIncludeDao mySearchIncludeDao;
-	@Autowired
-	private ISearchResultDao mySearchResultDao;
-	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Autowired
 	private PlatformTransactionManager myManagedTxManager;
+	@Autowired
+	private ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
@@ -134,6 +130,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myExecutor = Executors.newCachedThreadPool(threadFactory);
 	}
 
+	@VisibleForTesting
+	public void setSearchCacheServicesForUnitTest(ISearchCacheSvc theSearchCacheSvc, ISearchResultCacheSvc theSearchResultCacheSvc) {
+		mySearchCacheSvc = theSearchCacheSvc;
+		mySearchResultCacheSvc = theSearchResultCacheSvc;
+	}
+
 	@PostConstruct
 	public void start() {
 		if (myManagedTxManager instanceof JpaTransactionManager) {
@@ -149,7 +151,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 	@Override
 	public void cancelAllActiveSearches() {
-		for (BaseTask next : myIdToSearchTask.values()) {
+		for (SearchTask next : myIdToSearchTask.values()) {
 			next.requestImmediateAbort();
 			try {
 				next.getCompletionLatch().await(30, TimeUnit.SECONDS);
@@ -169,36 +171,54 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
+		// If we're actively searching right now, don't try to do anything until at least one batch has been
+		// persisted in the DB
+		SearchTask searchTask = myIdToSearchTask.get(theUuid);
+		if (searchTask != null) {
+			searchTask.awaitInitialSync();
+		}
+
+		ourLog.trace("About to start looking for resources {}-{}", theFrom, theTo);
+
 		Search search;
 		StopWatch sw = new StopWatch();
 		while (true) {
 
 			if (myNeverUseLocalSearchForUnitTests == false) {
-				BaseTask task = myIdToSearchTask.get(theUuid);
-				if (task != null) {
+				if (searchTask != null) {
 					ourLog.trace("Local search found");
-					List<Long> resourcePids = task.getResourcePids(theFrom, theTo);
+					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
 					if (resourcePids != null) {
-						return resourcePids;
+						ourLog.trace("Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
+
+						/*
+						 * Generally, if a search task is open, the fastest possible thing is to just return its results. This
+						 * will work most of the time, but can fail if the task hit a search threshold and the client is requesting
+						 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
+						 * task.
+						 */
+						if ((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
+							return resourcePids;
+						}
 					}
 				}
 			}
 
-			search = txTemplate.execute(t -> mySearchDao.findByUuid(theUuid));
-
-			if (search == null) {
-				ourLog.debug("Client requested unknown paging ID[{}]", theUuid);
-				String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
-				throw new ResourceGoneException(msg);
-			}
+			search = mySearchCacheSvc
+				.fetchByUuid(theUuid)
+				.orElseThrow(() -> {
+					ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
+					String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
+					return new ResourceGoneException(msg);
+				});
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
-				ourLog.debug("Search entity marked as finished with {} results", search.getNumFound());
+				ourLog.trace("Search entity marked as finished with {} results", search.getNumFound());
 				break;
 			}
 			if (search.getNumFound() >= theTo) {
-				ourLog.debug("Search entity has {} results so far", search.getNumFound());
+				ourLog.trace("Search entity has {} results so far", search.getNumFound());
 				break;
 			}
 
@@ -210,11 +230,12 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			// If the search was saved in "pass complete mode" it's probably time to
 			// start a new pass
 			if (search.getStatus() == SearchStatusEnum.PASSCMPLET) {
-				Optional<Search> newSearch = tryToMarkSearchAsInProgress(search);
+				ourLog.trace("Going to try to start next search");
+				Optional<Search> newSearch = mySearchCacheSvc.tryToMarkSearchAsInProgress(search);
 				if (newSearch.isPresent()) {
 					search = newSearch.get();
 					String resourceType = search.getResourceType();
-					SearchParameterMap params = search.getSearchParameterMap();
+					SearchParameterMap params = search.getSearchParameterMap().orElseThrow(() -> new IllegalStateException("No map in PASSCOMPLET search"));
 					IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(resourceType);
 					SearchContinuationTask task = new SearchContinuationTask(search, resourceDao, params, resourceType, theRequestDetails);
 					myIdToSearchTask.put(search.getUuid(), task);
@@ -229,60 +250,27 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			}
 		}
 
-		final Pageable page = toPage(theFrom, theTo);
-		if (page == null) {
-			return Collections.emptyList();
-		}
+		ourLog.trace("Finished looping");
 
-		final Search foundSearch = search;
+		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
 
-		ourLog.trace("Loading stored search");
-		List<Long> retVal = txTemplate.execute(theStatus -> {
-			final List<Long> resultPids = new ArrayList<>();
-			Page<Long> searchResultPids = mySearchResultDao.findWithSearchUuid(foundSearch, page);
-			for (Long next : searchResultPids) {
-				resultPids.add(next);
-			}
-			return resultPids;
-		});
-		return retVal;
+		ourLog.trace("Fetched {} results", pids.size());
+
+		return pids;
 	}
 
-	private Optional<Search> tryToMarkSearchAsInProgress(Search theSearch) {
-		ourLog.trace("Going to try to change search status from {} to {}", theSearch.getStatus(), SearchStatusEnum.LOADING);
-		try {
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-			txTemplate.afterPropertiesSet();
-			return txTemplate.execute(t -> {
-				Search search = mySearchDao.findById(theSearch.getId()).orElse(theSearch);
-
-				if (search.getStatus() != SearchStatusEnum.PASSCMPLET) {
-					throw new IllegalStateException("Can't change to LOADING because state is " + theSearch.getStatus());
-				}
-				search.setStatus(SearchStatusEnum.LOADING);
-				Search newSearch = mySearchDao.save(search);
-				return Optional.of(newSearch);
-			});
-		} catch (Exception e) {
-			ourLog.warn("Failed to activate search: {}", e.toString());
-			ourLog.trace("Failed to activate search", e);
-			return Optional.empty();
-		}
-	}
 
 	private void populateBundleProvider(PersistedJpaBundleProvider theRetVal) {
 		theRetVal.setContext(myContext);
 		theRetVal.setEntityManager(myEntityManager);
 		theRetVal.setPlatformTransactionManager(myManagedTxManager);
-		theRetVal.setSearchDao(mySearchDao);
+		theRetVal.setSearchCacheSvc(mySearchCacheSvc);
 		theRetVal.setSearchCoordinatorSvc(this);
 		theRetVal.setInterceptorBroadcaster(myInterceptorBroadcaster);
 	}
 
 	@Override
 	public IBundleProvider registerSearch(final IDao theCallingDao, final SearchParameterMap theParams, String theResourceType, CacheControlDirective theCacheControlDirective, RequestDetails theRequestDetails) {
-		StopWatch w = new StopWatch();
 		final String searchUuid = UUID.randomUUID().toString();
 
 		ourLog.debug("Registering new search {}", searchUuid);
@@ -292,6 +280,217 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		sb.setType(resourceTypeClass, theResourceType);
 		sb.setFetchSize(mySyncSize);
 
+		final Integer loadSynchronousUpTo = getLoadSynchronousUpToOrNull(theCacheControlDirective);
+
+		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
+			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
+			return executeQuery(theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo);
+		}
+
+		/*
+		 * See if there are any cached searches whose results we can return
+		 * instead
+		 */
+		boolean useCache = true;
+		if (theCacheControlDirective != null && theCacheControlDirective.isNoCache() == true) {
+			useCache = false;
+		}
+
+		final String queryString = theParams.toNormalizedQueryString(myContext);
+		if (theParams.getEverythingMode() == null) {
+			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null && useCache) {
+				IBundleProvider foundSearchProvider = findCachedQuery(theCallingDao, theParams, theResourceType, theRequestDetails, queryString);
+				if (foundSearchProvider != null) {
+					return foundSearchProvider;
+				}
+			}
+		}
+
+		return submitSearch(theCallingDao, theParams, theResourceType, theRequestDetails, searchUuid, sb, queryString);
+
+	}
+
+	@Override
+	public Optional<Integer> getSearchTotal(String theUuid) {
+		SearchTask task = myIdToSearchTask.get(theUuid);
+		if (task != null) {
+			return Optional.ofNullable(task.awaitInitialSync());
+		}
+
+		/*
+		 * In case there is no running search, if the total is listed as accurate we know one is coming
+		 * so let's wait a bit for it to show up
+		 */
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		Optional<Search> search = mySearchCacheSvc.fetchByUuid(theUuid);
+		if (search.isPresent()) {
+			Optional<SearchParameterMap> searchParameterMap = search.get().getSearchParameterMap();
+			if (searchParameterMap.isPresent() && searchParameterMap.get().getSearchTotalMode() == SearchTotalModeEnum.ACCURATE) {
+				for (int i = 0; i < 10; i++) {
+					if (search.isPresent()) {
+						verifySearchHasntFailedOrThrowInternalErrorException(search.get());
+						if (search.get().getTotalCount() != null) {
+							return Optional.of(search.get().getTotalCount());
+						}
+					}
+					search = mySearchCacheSvc.fetchByUuid(theUuid);
+				}
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	@NotNull
+	private IBundleProvider submitSearch(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, String theQueryString) {
+		StopWatch w = new StopWatch();
+		Search search = new Search();
+		populateSearchEntity(theParams, theResourceType, theSearchUuid, theQueryString, search);
+
+		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
+		HookParams params = new HookParams()
+			.add(ICachedSearchDetails.class, search)
+			.add(RequestDetails.class, theRequestDetails)
+			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
+
+		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails);
+		myIdToSearchTask.put(search.getUuid(), task);
+		myExecutor.submit(task);
+
+		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, theSb, myManagedTxManager, theRequestDetails);
+		populateBundleProvider(retVal);
+
+		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
+		return retVal;
+	}
+
+	@org.jetbrains.annotations.Nullable
+	private IBundleProvider findCachedQuery(IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails, String theQueryString) {
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+		PersistedJpaBundleProvider foundSearchProvider = txTemplate.execute(t -> {
+
+			// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
+			HookParams params = new HookParams()
+				.add(SearchParameterMap.class, theParams)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			Object outcome = JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
+			if (Boolean.FALSE.equals(outcome)) {
+				return null;
+			}
+
+			// Check for a search matching the given hash
+			Search searchToUse = findSearchToUseOrNull(theQueryString, theResourceType);
+			if (searchToUse == null) {
+				return null;
+			}
+
+			ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
+			// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
+			params = new HookParams()
+				.add(SearchParameterMap.class, theParams)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
+
+			mySearchCacheSvc.updateSearchLastReturned(searchToUse, new Date());
+
+			PersistedJpaBundleProvider retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao);
+			retVal.setCacheHit(true);
+			populateBundleProvider(retVal);
+
+			return retVal;
+		});
+
+		if (foundSearchProvider != null) {
+			return foundSearchProvider;
+		}
+		return null;
+	}
+
+	@Nullable
+	private Search findSearchToUseOrNull(String theQueryString, String theResourceType) {
+		Search searchToUse = null;
+
+		// createdCutoff is in recent past
+		final Instant createdCutoff = Instant.now().minus(myDaoConfig.getReuseCachedSearchResultsForMillis(), ChronoUnit.MILLIS);
+		Collection<Search> candidates = mySearchCacheSvc.findCandidatesForReuse(theResourceType, theQueryString, theQueryString.hashCode(), Date.from(createdCutoff));
+
+		for (Search nextCandidateSearch : candidates) {
+			// We should only reuse our search if it was created within the permitted window
+			// Date.after() is unreliable.  Instant.isAfter() always works.
+			if (theQueryString.equals(nextCandidateSearch.getSearchQueryString()) && nextCandidateSearch.getCreated().toInstant().isAfter(createdCutoff)) {
+				searchToUse = nextCandidateSearch;
+				break;
+			}
+		}
+		return searchToUse;
+	}
+
+	private IBundleProvider executeQuery(SearchParameterMap theParams, RequestDetails theRequestDetails, String theSearchUuid, ISearchBuilder theSb, Integer theLoadSynchronousUpTo) {
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
+		searchRuntimeDetails.setLoadSynchronous(true);
+
+		// Execute the query and make sure we return distinct results
+		TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		return txTemplate.execute(t -> {
+
+			// Load the results synchronously
+			final List<Long> pids = new ArrayList<>();
+
+			try (IResultIterator resultIter = theSb.createQuery(theParams, searchRuntimeDetails, theRequestDetails)) {
+				while (resultIter.hasNext()) {
+					pids.add(resultIter.next());
+					if (theLoadSynchronousUpTo != null && pids.size() >= theLoadSynchronousUpTo) {
+						break;
+					}
+					if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
+						break;
+					}
+				}
+			} catch (IOException e) {
+				ourLog.error("IO failure during database access", e);
+				throw new InternalErrorException(e);
+			}
+
+			JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> theSb);
+			HookParams params = new HookParams()
+				.add(IPreResourceAccessDetails.class, accessDetails)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
+
+			for (int i = pids.size() - 1; i >= 0; i--) {
+				if (accessDetails.isDontReturnResourceAtIndex(i)) {
+					pids.remove(i);
+				}
+			}
+
+			/*
+			 * For synchronous queries, we load all the includes right away
+			 * since we're returning a static bundle with all the results
+			 * pre-loaded. This is ok because syncronous requests are not
+			 * expected to be paged
+			 *
+			 * On the other hand for async queries we load includes/revincludes
+			 * individually for pages as we return them to clients
+			 */
+			final Set<Long> includedPids = new HashSet<>();
+			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+			includedPids.addAll(theSb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
+			List<Long> includedPidsList = new ArrayList<>(includedPids);
+
+			List<IBaseResource> resources = new ArrayList<>();
+			theSb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
+			return new SimpleBundleProvider(resources);
+		});
+	}
+
+	@org.jetbrains.annotations.Nullable
+	private Integer getLoadSynchronousUpToOrNull(CacheControlDirective theCacheControlDirective) {
 		final Integer loadSynchronousUpTo;
 		if (theCacheControlDirective != null && theCacheControlDirective.isNoStore()) {
 			if (theCacheControlDirective.getMaxResults() != null) {
@@ -305,158 +504,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		} else {
 			loadSynchronousUpTo = null;
 		}
-
-		if (theParams.isLoadSynchronous() || loadSynchronousUpTo != null) {
-
-			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
-			SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, searchUuid);
-			searchRuntimeDetails.setLoadSynchronous(true);
-
-			// Execute the query and make sure we return distinct results
-			TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-			return txTemplate.execute(t -> {
-
-				// Load the results synchronously
-				final List<Long> pids = new ArrayList<>();
-
-				try (IResultIterator resultIter = sb.createQuery(theParams, searchRuntimeDetails, theRequestDetails)) {
-					while (resultIter.hasNext()) {
-						pids.add(resultIter.next());
-						if (loadSynchronousUpTo != null && pids.size() >= loadSynchronousUpTo) {
-							break;
-						}
-						if (theParams.getLoadSynchronousUpTo() != null && pids.size() >= theParams.getLoadSynchronousUpTo()) {
-							break;
-						}
-					}
-				} catch (IOException e) {
-					ourLog.error("IO failure during database access", e);
-					throw new InternalErrorException(e);
-				}
-
-				JpaPreResourceAccessDetails accessDetails = new JpaPreResourceAccessDetails(pids, () -> sb);
-				HookParams params = new HookParams()
-					.add(IPreResourceAccessDetails.class, accessDetails)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-				JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PREACCESS_RESOURCES, params);
-
-				for (int i = pids.size() - 1; i >= 0; i--) {
-					if (accessDetails.isDontReturnResourceAtIndex(i)) {
-						pids.remove(i);
-					}
-				}
-
-				/*
-				 * For synchronous queries, we load all the includes right away
-				 * since we're returning a static bundle with all the results
-				 * pre-loaded. This is ok because syncronous requests are not
-				 * expected to be paged
-				 *
-				 * On the other hand for async queries we load includes/revincludes
-				 * individually for pages as we return them to clients
-				 */
-				final Set<Long> includedPids = new HashSet<>();
-				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getRevIncludes(), true, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-				includedPids.addAll(sb.loadIncludes(myContext, myEntityManager, pids, theParams.getIncludes(), false, theParams.getLastUpdated(), "(synchronous)", theRequestDetails));
-				List<Long> includedPidsList = new ArrayList<>(includedPids);
-
-				List<IBaseResource> resources = new ArrayList<>();
-				sb.loadResourcesByPid(pids, includedPidsList, resources, false, theRequestDetails);
-				return new SimpleBundleProvider(resources);
-			});
-		}
-
-		/*
-		 * See if there are any cached searches whose results we can return
-		 * instead
-		 */
-		boolean useCache = true;
-		if (theCacheControlDirective != null && theCacheControlDirective.isNoCache() == true) {
-			useCache = false;
-		}
-		final String queryString = theParams.toNormalizedQueryString(myContext);
-		if (theParams.getEverythingMode() == null) {
-			if (myDaoConfig.getReuseCachedSearchResultsForMillis() != null && useCache) {
-
-				final Date createdCutoff = new Date(System.currentTimeMillis() - myDaoConfig.getReuseCachedSearchResultsForMillis());
-				final String resourceType = theResourceType;
-
-				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
-				PersistedJpaBundleProvider foundSearchProvider = txTemplate.execute(t -> {
-					Search searchToUse = null;
-
-					// Interceptor call: STORAGE_PRECHECK_FOR_CACHED_SEARCH
-					HookParams params = new HookParams()
-						.add(SearchParameterMap.class, theParams)
-						.add(RequestDetails.class, theRequestDetails)
-						.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-					Object outcome = JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRECHECK_FOR_CACHED_SEARCH, params);
-					if (Boolean.FALSE.equals(outcome)) {
-						return null;
-					}
-
-					// Check for a search matching the given hash
-					int hashCode = queryString.hashCode();
-					Collection<Search> candidates = mySearchDao.find(resourceType, hashCode, createdCutoff);
-					for (Search nextCandidateSearch : candidates) {
-						if (queryString.equals(nextCandidateSearch.getSearchQueryString())) {
-							searchToUse = nextCandidateSearch;
-							break;
-						}
-					}
-
-					PersistedJpaBundleProvider retVal = null;
-					if (searchToUse != null) {
-						ourLog.debug("Reusing search {} from cache", searchToUse.getUuid());
-
-						// Interceptor call: JPA_PERFTRACE_SEARCH_REUSING_CACHED
-						params = new HookParams()
-							.add(SearchParameterMap.class, theParams)
-							.add(RequestDetails.class, theRequestDetails)
-							.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-						JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_SEARCH_REUSING_CACHED, params);
-
-						searchToUse.setSearchLastReturned(new Date());
-						mySearchDao.updateSearchLastReturned(searchToUse.getId(), new Date());
-
-						retVal = new PersistedJpaBundleProvider(theRequestDetails, searchToUse.getUuid(), theCallingDao);
-						retVal.setCacheHit(true);
-
-						populateBundleProvider(retVal);
-					}
-
-					return retVal;
-				});
-
-				if (foundSearchProvider != null) {
-					return foundSearchProvider;
-				}
-
-			}
-		}
-
-		Search search = new Search();
-		populateSearchEntity(theParams, theResourceType, searchUuid, queryString, search);
-
-		// Interceptor call: STORAGE_PRESEARCH_REGISTERED
-		HookParams params = new HookParams()
-			.add(ICachedSearchDetails.class, search)
-			.add(RequestDetails.class, theRequestDetails)
-			.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
-		JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_PRESEARCH_REGISTERED, params);
-
-		SearchTask task = new SearchTask(search, theCallingDao, theParams, theResourceType, theRequestDetails);
-		myIdToSearchTask.put(search.getUuid(), task);
-		myExecutor.submit(task);
-
-		PersistedJpaSearchFirstPageBundleProvider retVal = new PersistedJpaSearchFirstPageBundleProvider(search, theCallingDao, task, sb, myManagedTxManager, theRequestDetails);
-		populateBundleProvider(retVal);
-
-		ourLog.debug("Search initial phase completed in {}ms", w.getMillis());
-		return retVal;
-
+		return loadSynchronousUpTo;
 	}
 
 	private void callInterceptorStoragePreAccessResources(IInterceptorBroadcaster theInterceptorBroadcaster, RequestDetails theRequestDetails, ISearchBuilder theSb, List<Long> thePids) {
@@ -501,21 +549,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 	@VisibleForTesting
-	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
-		mySearchDao = theSearchDao;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoIncludeForUnitTest(ISearchIncludeDao theSearchIncludeDao) {
-		mySearchIncludeDao = theSearchIncludeDao;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoResultForUnitTest(ISearchResultDao theSearchResultDao) {
-		mySearchResultDao = theSearchResultDao;
-	}
-
-	@VisibleForTesting
 	public void setSyncSizeForUnitTests(int theSyncSize) {
 		mySyncSize = theSyncSize;
 	}
@@ -535,7 +568,20 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 	}
 
-	public abstract class BaseTask implements Callable<Void> {
+	/**
+	 * A search task is a Callable task that runs in
+	 * a thread pool to handle an individual search. One instance
+	 * is created for any requested search and runs from the
+	 * beginning to the end of the search.
+	 * <p>
+	 * Understand:
+	 * This class executes in its own thread separate from the
+	 * web server client thread that made the request. We do that
+	 * so that we can return to the client as soon as possible,
+	 * but keep the search going in the background (and have
+	 * the next page of results ready to go when the client asks).
+	 */
+	public class SearchTask implements Callable<Void> {
 		private final SearchParameterMap myParams;
 		private final IDao myCallingDao;
 		private final String myResourceType;
@@ -557,7 +603,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		/**
 		 * Constructor
 		 */
-		protected BaseTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
+		protected SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
 			mySearch = theSearch;
 			myCallingDao = theCallingDao;
 			myParams = theParams;
@@ -566,6 +612,29 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			mySearchRuntimeDetails = new SearchRuntimeDetails(theRequest, mySearch.getUuid());
 			mySearchRuntimeDetails.setQueryString(theParams.toNormalizedQueryString(theCallingDao.getContext()));
 			myRequest = theRequest;
+		}
+
+		/**
+		 * This method is called by the server HTTP thread, and
+		 * will block until at least one page of results have been
+		 * fetched from the DB, and will never block after that.
+		 */
+		Integer awaitInitialSync() {
+			ourLog.trace("Awaiting initial sync");
+			do {
+				try {
+					if (getInitialCollectionLatch().await(250, TimeUnit.MILLISECONDS)) {
+						break;
+					}
+				} catch (InterruptedException e) {
+					// Shouldn't happen
+					Thread.currentThread().interrupt();
+					throw new InternalErrorException(e);
+				}
+			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
+			ourLog.trace("Initial sync completed");
+
+			return getSearch().getTotalCount();
 		}
 
 		protected Search getSearch() {
@@ -675,6 +744,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					ArrayList<Long> unsyncedPids = myUnsyncedPids;
+					int countBlocked = 0;
 
 					// Interceptor call: STORAGE_PREACCESS_RESOURCES
 					// This can be used to remove results from the search result details before
@@ -692,24 +762,15 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 								unsyncedPids.remove(i);
 								myCountBlockedThisPass++;
 								myCountSavedTotal++;
+								countBlocked++;
 							}
 						}
 					}
 
-					List<SearchResult> resultsToSave = Lists.newArrayList();
-					for (Long nextPid : unsyncedPids) {
-						SearchResult nextResult = new SearchResult(mySearch);
-						nextResult.setResourcePid(nextPid);
-						nextResult.setOrder(myCountSavedTotal);
-						resultsToSave.add(nextResult);
-						int order = nextResult.getOrder();
-						ourLog.trace("Saving ORDER[{}] Resource {}", order, nextResult.getResourcePid());
-
-						myCountSavedTotal++;
-						myCountSavedThisPass++;
-					}
-
-					mySearchResultDao.saveAll(resultsToSave);
+					// Actually store the results in the query cache storage
+					myCountSavedTotal += unsyncedPids.size();
+					myCountSavedThisPass += unsyncedPids.size();
+					mySearchResultCacheSvc.storeResults(mySearch, mySyncedPids, unsyncedPids);
 
 					synchronized (mySyncedPids) {
 						int numSyncedThisPass = unsyncedPids.size();
@@ -718,7 +779,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 						unsyncedPids.clear();
 
 						if (theResultIter.hasNext() == false) {
-							mySearch.setNumFound(myCountSavedTotal);
 							int skippedCount = theResultIter.getSkippedCount();
 							int totalFetched = skippedCount + myCountSavedThisPass + myCountBlockedThisPass;
 							ourLog.trace("MaxToFetch[{}] SkippedCount[{}] CountSavedThisPass[{}] CountSavedThisTotal[{}] AdditionalPrefetchRemaining[{}]", myMaxResultsToFetch, skippedCount, myCountSavedThisPass, myCountSavedTotal, myAdditionalPrefetchThresholdsRemaining);
@@ -740,6 +800,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					mySearch.setNumFound(myCountSavedTotal);
+					mySearch.setNumBlocked(mySearch.getNumBlocked() + countBlocked);
 
 					int numSynced;
 					synchronized (mySyncedPids) {
@@ -877,15 +938,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 		private void doSaveSearch() {
 
-			Search newSearch;
-			if (mySearch.getId() == null) {
-				newSearch = mySearchDao.save(mySearch);
-				for (SearchInclude next : mySearch.getIncludes()) {
-					mySearchIncludeDao.save(next);
-				}
-			} else {
-				newSearch = mySearchDao.save(mySearch);
-			}
+			Search newSearch = mySearchCacheSvc.save(mySearch);
 
 			// mySearchDao.save is not supposed to return null, but in unit tests
 			// it can if the mock search dao isn't set up to handle that
@@ -928,7 +981,6 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 							mySearch.setStatus(SearchStatusEnum.FINISHED);
 						}
 						doSaveSearch();
-						mySearchDao.flush();
 					}
 				});
 				if (wantOnlyCount) {
@@ -1046,7 +1098,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	}
 
 
-	public class SearchContinuationTask extends BaseTask {
+	public class SearchContinuationTask extends SearchTask {
 
 		public SearchContinuationTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequest) {
 			super(theSearch, theCallingDao, theParams, theResourceType, theRequest);
@@ -1058,7 +1110,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				TransactionTemplate txTemplate = new TransactionTemplate(myManagedTxManager);
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
-					List<Long> previouslyAddedResourcePids = mySearchResultDao.findWithSearchUuidOrderIndependent(getSearch());
+					List<Long> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
 					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;
@@ -1075,57 +1127,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return super.call();
 		}
 
-		@Override
-		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
-			return super.getResourcePids(theFromIndex, theToIndex);
-		}
 	}
 
-	/**
-	 * A search task is a Callable task that runs in
-	 * a thread pool to handle an individual search. One instance
-	 * is created for any requested search and runs from the
-	 * beginning to the end of the search.
-	 * <p>
-	 * Understand:
-	 * This class executes in its own thread separate from the
-	 * web server client thread that made the request. We do that
-	 * so that we can return to the client as soon as possible,
-	 * but keep the search going in the background (and have
-	 * the next page of results ready to go when the client asks).
-	 */
-	class SearchTask extends BaseTask {
-
-		/**
-		 * Constructor
-		 */
-		SearchTask(Search theSearch, IDao theCallingDao, SearchParameterMap theParams, String theResourceType, RequestDetails theRequestDetails) {
-			super(theSearch, theCallingDao, theParams, theResourceType, theRequestDetails);
-		}
-
-		/**
-		 * This method is called by the server HTTP thread, and
-		 * will block until at least one page of results have been
-		 * fetched from the DB, and will never block after that.
-		 */
-		Integer awaitInitialSync() {
-			ourLog.trace("Awaiting initial sync");
-			do {
-				try {
-					if (getInitialCollectionLatch().await(250, TimeUnit.MILLISECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					// Shouldn't happen
-					throw new InternalErrorException(e);
-				}
-			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
-			ourLog.trace("Initial sync completed");
-
-			return getSearch().getTotalCount();
-		}
-
-	}
 
 	public static void populateSearchEntity(SearchParameterMap theParams, String theResourceType, String theSearchUuid, String theQueryString, Search theSearch) {
 		theSearch.setDeleted(false);

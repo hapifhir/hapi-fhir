@@ -19,14 +19,17 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 /**
  * This interface should be considered experimental and will likely change in future releases of HAPI. Use with caution!
@@ -39,7 +42,15 @@ public interface IVersionSpecificBundleFactory {
 
 	IBaseResource getResourceBundle();
 
-	void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType);
+	/**
+	 * @deprecated This was deprecated in HAPI FHIR 4.1.0 as it provides duplicate functionality to the {@link #addRootPropertiesToBundle(String, String, String, String, String, Integer, BundleTypeEnum, IPrimitiveType)}
+	 * and {@link #addResourcesToBundle(List, BundleTypeEnum, String, BundleInclusionRule, Set)} methods
+	 */
+	@Deprecated
+	default void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResult, String theServerBase, String theCompleteUrl, int theTotalResults, BundleTypeEnum theBundleType) {
+		addRootPropertiesToBundle(null, null, null, null, null, theResult.size(), theBundleType, null);
+		addResourcesToBundle(new ArrayList<>(theResult), theBundleType, null, null, null);
+	}
 
 	void initializeWithBundleResource(IBaseResource theResource);
 

@@ -5,7 +5,11 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.util.UrlUtil;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.DateTimeType;
+import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -84,6 +88,20 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	}
 
+	@Test
+	public void testDateNowSyntax() {
+		Observation observation = new Observation();
+		observation.setEffective(new DateTimeType("1965-08-09"));
+		IIdType oid = myObservationDao.create(observation).getId().toUnqualified();
+		String nowParam = UrlUtil.escapeUrlParam("%now");
+		Bundle output = ourClient
+			.search()
+			.byUrl("Observation?date=lt" + nowParam)
+			.returnBundle(Bundle.class)
+			.execute();
+		List<IIdType> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualified()).collect(Collectors.toList());
+		assertThat(ids, containsInAnyOrder(oid));
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

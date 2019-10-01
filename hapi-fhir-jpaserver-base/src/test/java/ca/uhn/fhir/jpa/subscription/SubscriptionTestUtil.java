@@ -80,7 +80,4 @@ public class SubscriptionTestUtil {
 		subscriber.setEmailSender(myEmailSender);
 	}
 
-	public IEmailSender getEmailSender() {
-		return myEmailSender;
-	}
 }

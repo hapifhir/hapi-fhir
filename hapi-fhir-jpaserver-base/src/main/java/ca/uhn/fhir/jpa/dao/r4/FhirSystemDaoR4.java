@@ -47,8 +47,10 @@ public class FhirSystemDaoR4 extends BaseHapiFhirSystemDao<Bundle, Meta> {
 	@Autowired
 	private TransactionProcessor<Bundle, BundleEntryComponent> myTransactionProcessor;
 
+	@Override
 	@PostConstruct
 	public void start() {
+		super.start();
 		myTransactionProcessor.setDao(this);
 	}
 

@@ -9,6 +9,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
 
@@ -46,6 +47,13 @@ public class RuleBuilderTest {
 			new IdDt("Patient/WRITE-3"),
 			new IdDt("Patient/WRITE-4")
 		));
+	}
+
+	@Test
+	public void testNullConditional() {
+		IAuthRuleBuilder ruleBuilder = new RuleBuilder().allow().metadata().andThen();
+		IAuthRuleTester writeAccessTester = mock(IAuthRuleTester.class);
+		ruleBuilder.allow().createConditional().resourcesOfType("anystring").withTester(writeAccessTester).andThen();
 	}
 
 }

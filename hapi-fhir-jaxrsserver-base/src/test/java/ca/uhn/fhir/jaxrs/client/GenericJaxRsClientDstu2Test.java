@@ -889,6 +889,16 @@ public class GenericJaxRsClientDstu2Test {
 			public List<String> getFormatCommentsPost() {
 				return null;
 			}
+
+			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
+			}
 		};
 
 		
@@ -1712,7 +1722,7 @@ public class GenericJaxRsClientDstu2Test {
 
 		Patient p2 = new Patient(); // Yes ID
 		p2.addName().addFamily("PATIENT2");
-		p2.setId("Patient/2");
+		p2.setId("http://example.com/Patient/2");
 		input.add(p2);
 
 		
@@ -1730,7 +1740,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals("http://example.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
 
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdDt("Patient/1/_history/1"), p1.getId().toUnqualified());

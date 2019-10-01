@@ -95,6 +95,13 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.POSTGRES_9_4, "oid");
 		setColumnType(ColumnTypeEnum.BLOB, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
 
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.H2_EMBEDDED, "clob");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.DERBY_EMBEDDED, "clob(100000)");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MARIADB_10_1, "longtext");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MYSQL_5_7, "longtext");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.ORACLE_12C, "clob");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.POSTGRES_9_4, "text");
+		setColumnType(ColumnTypeEnum.CLOB, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 	}
 
 	public ColumnTypeEnum getColumnType() {
@@ -157,67 +164,23 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return myColumnLength;
 	}
 
-	public BaseTableColumnTypeTask<T> setColumnLength(int theColumnLength) {
-		myColumnLength = (long) theColumnLength;
+	public BaseTableColumnTypeTask<T> setColumnLength(long theColumnLength) {
+		myColumnLength = theColumnLength;
 		return this;
 	}
 
 
 	public enum ColumnTypeEnum {
 
-		LONG {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "bigint";
-			}
-		},
-		STRING {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength != null, "Must supply a column length");
-				return "varchar(" + theColumnLength + ")";
-			}
-		},
-		DATE_TIMESTAMP {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "timestamp";
-			}
-		},
-		BOOLEAN {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "boolean";
-			}
-		},
-		FLOAT {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "float";
-			}
-		},
-		INT {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "int";
-			}
-		},
-
-		BLOB {
-			@Override
-			public String getDescriptor(Long theColumnLength) {
-				Assert.isTrue(theColumnLength == null, "Must not supply a column length");
-				return "blob";
-			}
-		};
-
-
-		public abstract String getDescriptor(Long theColumnLength);
+		LONG,
+		STRING,
+		DATE_TIMESTAMP,
+		BOOLEAN,
+		FLOAT,
+		INT,
+		BLOB,
+		CLOB
+		;
 
 	}
 

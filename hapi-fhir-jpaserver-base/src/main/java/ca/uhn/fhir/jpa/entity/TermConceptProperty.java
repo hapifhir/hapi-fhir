@@ -29,6 +29,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import javax.annotation.Nonnull;
 import javax.persistence.*;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -64,6 +65,9 @@ public class TermConceptProperty implements Serializable {
 	private String myKey;
 	@Column(name = "PROP_VAL", nullable = true, length = MAX_LENGTH)
 	private String myValue;
+	@Column(name = "PROP_VAL_LOB")
+	@Lob()
+	private byte[] myValueLob;
 	@Column(name = "PROP_TYPE", nullable = false, length = MAX_PROPTYPE_ENUM_LENGTH)
 	private TermConceptPropertyTypeEnum myType;
 
@@ -144,6 +148,9 @@ public class TermConceptProperty implements Serializable {
 	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
 	 */
 	public String getValue() {
+		if (hasValueLob()) {
+			return getValueLobAsString();
+		}
 		return myValue;
 	}
 
@@ -152,7 +159,37 @@ public class TermConceptProperty implements Serializable {
 	 * property, and the code for a {@link TermConceptPropertyTypeEnum#CODING coding} property.
 	 */
 	public TermConceptProperty setValue(String theValue) {
+		if (theValue.length() > MAX_LENGTH) {
+			setValueLob(theValue);
+		} else {
+			myValueLob = null;
+		}
 		myValue = left(theValue, MAX_LENGTH);
+		return this;
+	}
+
+	public boolean hasValueLob() {
+		if (myValueLob != null && myValueLob.length > 0) {
+			return true;
+		}
+		return false;
+	}
+
+	public byte[] getValueLob() {
+		return myValueLob;
+	}
+
+	public String getValueLobAsString() {
+		return new String(myValueLob, StandardCharsets.UTF_8);
+	}
+
+	public TermConceptProperty setValueLob(byte[] theValueLob) {
+		myValueLob = theValueLob;
+		return this;
+	}
+
+	public TermConceptProperty setValueLob(String theValueLob) {
+		myValueLob = theValueLob.getBytes(StandardCharsets.UTF_8);
 		return this;
 	}
 
@@ -170,7 +207,7 @@ public class TermConceptProperty implements Serializable {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("key", myKey)
-			.append("value", myValue)
+			.append("value", getValue())
 			.toString();
 	}
 

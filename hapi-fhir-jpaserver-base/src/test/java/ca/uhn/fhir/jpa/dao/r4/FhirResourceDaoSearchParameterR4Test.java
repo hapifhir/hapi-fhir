@@ -28,6 +28,7 @@ public class FhirResourceDaoSearchParameterR4Test {
 		myDao = new FhirResourceDaoSearchParameterR4();
 		myDao.setContext(myCtx);
 		myDao.setConfig(new DaoConfig());
+		myDao.start();
 	}
 
 	@Test

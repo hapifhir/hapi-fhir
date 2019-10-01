@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +19,32 @@ package ca.uhn.fhir.rest.server.provider.dstu2;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
-import ca.uhn.fhir.model.api.*;
+import ca.uhn.fhir.model.api.IResource;
+import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
-import ca.uhn.fhir.model.dstu2.valueset.HTTPVerbEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchEntryModeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
-import ca.uhn.fhir.model.valueset.*;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.util.ResourceReferenceInfo;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
+
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 	private Bundle myBundle;
@@ -48,86 +53,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 
 	public Dstu2BundleFactory(FhirContext theContext) {
 		myContext = theContext;
-	}
-
-	private void addResourcesForSearch(List<? extends IBaseResource> theResult) {
-		List<IBaseResource> includedResources = new ArrayList<IBaseResource>();
-		Set<IIdType> addedResourceIds = new HashSet<IIdType>();
-
-		for (IBaseResource next : theResult) {
-			if (next.getIdElement().isEmpty() == false) {
-				addedResourceIds.add(next.getIdElement());
-			}
-		}
-
-		for (IBaseResource nextBaseRes : theResult) {
-			IResource next = (IResource) nextBaseRes;
-			Set<String> containedIds = new HashSet<String>();
-			for (IResource nextContained : next.getContained().getContainedResources()) {
-				if (nextContained.getId().isEmpty() == false) {
-					containedIds.add(nextContained.getId().getValue());
-				}
-			}
-
-			List<BaseResourceReferenceDt> references = myContext.newTerser().getAllPopulatedChildElementsOfType(next, BaseResourceReferenceDt.class);
-			do {
-				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
-
-				for (BaseResourceReferenceDt nextRef : references) {
-					IResource nextRes = (IResource) nextRef.getResource();
-					if (nextRes != null) {
-						if (nextRes.getId().hasIdPart()) {
-							if (containedIds.contains(nextRes.getId().getValue())) {
-								// Don't add contained IDs as top level resources
-								continue;
-							}
-
-							IdDt id = nextRes.getId();
-							if (id.hasResourceType() == false) {
-								String resName = myContext.getResourceDefinition(nextRes).getName();
-								id = id.withResourceType(resName);
-							}
-
-							if (!addedResourceIds.contains(id)) {
-								addedResourceIds.add(id);
-								addedResourcesThisPass.add(nextRes);
-							}
-
-						}
-					}
-				}
-
-				// Linked resources may themselves have linked resources
-				references = new ArrayList<BaseResourceReferenceDt>();
-				for (IResource iResource : addedResourcesThisPass) {
-					List<BaseResourceReferenceDt> newReferences = myContext.newTerser().getAllPopulatedChildElementsOfType(iResource, BaseResourceReferenceDt.class);
-					references.addAll(newReferences);
-				}
-
-				includedResources.addAll(addedResourcesThisPass);
-
-			} while (references.isEmpty() == false);
-
-			Entry entry = myBundle.addEntry().setResource(next);
-			if (next.getId().hasBaseUrl()) {
-				entry.setFullUrl(next.getId().getValue());
-			}
-			BundleEntryTransactionMethodEnum httpVerb = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(next);
-			if (httpVerb != null) {
-				entry.getRequest().getMethodElement().setValueAsString(httpVerb.getCode());
-			}
-		}
-
-		/*
-		 * Actually add the resources to the bundle
-		 */
-		for (IBaseResource next : includedResources) {
-			Entry entry = myBundle.addEntry();
-			entry.setResource((IResource) next).getSearch().setMode(SearchEntryModeEnum.INCLUDE);
-			if (next.getIdElement().hasBaseUrl()) {
-				entry.setFullUrl(next.getIdElement().getValue());
-			}
-		}
 	}
 
 	@Override
@@ -280,44 +205,6 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public void initializeBundleFromResourceList(String theAuthor, List<? extends IBaseResource> theResources, String theServerBase, String theCompleteUrl, int theTotalResults,
-			BundleTypeEnum theBundleType) {
-		myBundle = new Bundle();
-
-		myBundle.setId(UUID.randomUUID().toString());
-
-		ResourceMetadataKeyEnum.PUBLISHED.put(myBundle, InstantDt.withCurrentTime());
-
-		myBundle.addLink().setRelation(Constants.LINK_FHIR_BASE).setUrl(theServerBase);
-		myBundle.addLink().setRelation(Constants.LINK_SELF).setUrl(theCompleteUrl);
-		myBundle.getTypeElement().setValueAsString(theBundleType.getCode());
-
-		if (theBundleType.equals(BundleTypeEnum.TRANSACTION)) {
-			for (IBaseResource nextBaseRes : theResources) {
-				IResource next = (IResource) nextBaseRes;
-				Entry nextEntry = myBundle.addEntry();
-
-				nextEntry.setResource(next);
-				if (next.getId().isEmpty()) {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.POST);
-				} else {
-					nextEntry.getRequest().setMethod(HTTPVerbEnum.PUT);
-					if (next.getId().isAbsolute()) {
-						nextEntry.getRequest().setUrl(next.getId());
-					} else {
-						String resourceType = myContext.getResourceDefinition(next).getName();
-						nextEntry.getRequest().setUrl(new IdDt(theServerBase, resourceType, next.getId().getIdPart(), next.getId().getVersionIdPart()).getValue());
-					}
-				}
-			}
-		} else {
-			addResourcesForSearch(theResources);
-		}
-
-		myBundle.getTotalElement().setValue(theTotalResults);
 	}
 
 	@Override

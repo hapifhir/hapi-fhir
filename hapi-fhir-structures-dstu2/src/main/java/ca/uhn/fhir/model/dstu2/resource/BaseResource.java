@@ -169,6 +169,16 @@ public abstract class BaseResource extends BaseElement implements IResource {
 			}
 
 			@Override
+			public Object getUserData(String theName) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void setUserData(String theName, Object theValue) {
+				throw new UnsupportedOperationException();
+			}
+
+			@Override
 			public List<String> getFormatCommentsPre() {
 				return Collections.emptyList();
 			}

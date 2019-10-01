@@ -62,6 +62,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
 
+		mySearchTask.awaitInitialSync();
+
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
 		final List<Long> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
 		ourLog.trace("Done fetching search resource PIDs");

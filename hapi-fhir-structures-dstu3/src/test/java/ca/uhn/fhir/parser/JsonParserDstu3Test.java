@@ -319,6 +319,29 @@ public class JsonParserDstu3Test {
 
 	}
 
+	/**
+	 * See #402
+	 */
+	@Test
+	public void testEncodeCompositionDoesntOverwriteNarrative() {
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
+		Composition composition  = new Composition();
+		composition.getText().setDivAsString("<div>root</div>");
+		composition.addSection().getText().setDivAsString("<div>section0</div>");
+		composition.addSection().getText().setDivAsString("<div>section1</div>");
+
+		String output = ctx.newJsonParser().setPrettyPrint(true).encodeResourceToString(composition);
+		ourLog.info(output);
+
+		assertThat(output, containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">root</div>"));
+		assertThat(output, containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">section0</div>"));
+		assertThat(output, containsString("<div xmlns=\\\"http://www.w3.org/1999/xhtml\\\">section1</div>"));
+
+	}
+
+
 	@Test
 	public void testEncodeAndParseMetaProfileAndTags() {
 		Patient p = new Patient();
