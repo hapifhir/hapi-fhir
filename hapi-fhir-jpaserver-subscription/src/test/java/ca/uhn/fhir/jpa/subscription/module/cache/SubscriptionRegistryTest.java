@@ -54,4 +54,14 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		assertFalse(newActiveSubscription == origActiveSubscription);
 	}
 
+	@Test
+	public void updateRemove() {
+		Subscription subscription = createSubscription();
+		assertRegistrySize(0);
+		mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
+		assertRegistrySize(1);
+		mySubscriptionRegistry.unregisterSubscription(subscription.getId());
+		assertRegistrySize(0);
+	}
+
 }
