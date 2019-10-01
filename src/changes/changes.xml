@@ -287,6 +287,10 @@
 				conditional creates can now be authorized even if they are happening inside a FHIR
 				transaction.
 			</action>
+			<action type="fix" issue="402">
+				When encoding a Composition resource in XML, the section narrative blocks were incorrectly
+				replaced by the main resource narrative. Thanks to Mirjam Baltus for reporting!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
