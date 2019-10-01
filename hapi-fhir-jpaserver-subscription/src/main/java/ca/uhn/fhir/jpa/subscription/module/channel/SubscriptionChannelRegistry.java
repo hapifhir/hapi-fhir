@@ -56,7 +56,11 @@ public class SubscriptionChannelRegistry {
 	}
 
 	public void remove(ActiveSubscription theActiveSubscription) {
+		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
+			return;
+		}
 		String channelName = theActiveSubscription.getChannelName();
+		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
@@ -82,7 +86,7 @@ public class SubscriptionChannelRegistry {
 
 	@VisibleForTesting
 	public void logForUnitTest() {
-		ourLog.info("Channels: {}", size());
+		ourLog.info("{} Channels: {}", this, size());
 		for (String key : myActiveSubscriptionByChannelName.keySet()) {
 			Collection<String> list = myActiveSubscriptionByChannelName.get(key);
 			for (String value : list) {
