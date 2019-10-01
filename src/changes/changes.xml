@@ -296,6 +296,10 @@
 				project has been fixed. Thanks to GitHub user @jaferkhan for the pull
 				request!
 			</action>
+			<action type="add">
+				A docker compose script for the hapi-fhir-jpaserver-starter project was added. Thanks to
+				Long Nguyen for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
