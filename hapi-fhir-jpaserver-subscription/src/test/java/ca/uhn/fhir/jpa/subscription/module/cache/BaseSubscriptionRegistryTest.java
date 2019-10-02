@@ -14,19 +14,9 @@ public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3
 	public static final String ORIG_CRITERIA = "Patient?";
 	public static final String NEW_CRITERIA = "Observation?";
 
-	@Autowired
-	SubscriptionRegistry mySubscriptionRegistry;
-	@Autowired
-	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
-
 	@After
 	public void clearRegistryAfter() {
-		mySubscriptionRegistry.unregisterAllSubscriptions();
-		await().until(this::registryEmpty);
-	}
-
-	public boolean registryEmpty() {
-		return mySubscriptionRegistry.size() == 0 && mySubscriptionChannelRegistry.size() == 0;
+		super.clearRegistry();
 	}
 
 	protected Subscription createSubscription() {
@@ -44,15 +34,5 @@ public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3
 		channel.setPayload("application/json");
 		channel.setEndpoint("http://unused.test.endpoint/");
 		theSubscription.setChannel(channel);
-	}
-
-	protected void assertRegistrySize(int theSize) {
-		assertRegistrySize(theSize, theSize);
-	}
-
-	protected void assertRegistrySize(int theSubscriptionRegistrySize, int theSubscriptionChannelRegistrySize) {
-		assertEquals(theSubscriptionRegistrySize, mySubscriptionRegistry.size());
-		assertEquals(theSubscriptionChannelRegistrySize, mySubscriptionChannelRegistry.size());
-
 	}
 }

@@ -41,9 +41,9 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
-        mySubscriptionActivatedPost.setExpectedCount(2);
+		mySubscriptionActivatedPost.setExpectedCount(2);
 		initSubscriptionLoader(subs, "uuid");
-        mySubscriptionActivatedPost.awaitExpected();
+		mySubscriptionActivatedPost.awaitExpected();
 		assertEquals(0, myMockFhirClientSubscriptionProvider.getFailCount());
 	}
 }

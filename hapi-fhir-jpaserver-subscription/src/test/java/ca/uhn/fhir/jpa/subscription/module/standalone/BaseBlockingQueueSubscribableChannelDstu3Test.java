@@ -102,6 +102,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		mySubscriptionMatchingPost.clear();
 		mySubscriptionActivatedPost.clear();
 		ourObservationListener.clear();
+		super.clearRegistry();
 	}
 
 	public <T extends IBaseResource> T sendResource(T theResource) throws InterruptedException {
