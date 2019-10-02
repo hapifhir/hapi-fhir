@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -44,7 +45,7 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 
-		ISubscribableChannel deliveryChannel;
+		SubscribableChannel deliveryChannel;
 		Optional<MessageHandler> deliveryHandler;
 
 		deliveryChannel = mySubscriptionDeliveryChannelFactory.newDeliveryChannel(channelName);

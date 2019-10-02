@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.subscription.module;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -28,13 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
-public class LinkedBlockingQueueSubscribableChannel implements ISubscribableChannel {
+public class LinkedBlockingQueueSubscribableChannel implements SubscribableChannel {
 	private Logger ourLog = LoggerFactory.getLogger(LinkedBlockingQueueSubscribableChannel.class);
 
 	private final ExecutorSubscribableChannel mySubscribableChannel;
@@ -99,10 +99,5 @@ public class LinkedBlockingQueueSubscribableChannel implements ISubscribableChan
 	@VisibleForTesting
 	public int getQueueSizeForUnitTest() {
 		return myQueue.size();
-	}
-
-	@Override
-	public int getSubscriberCount() {
-		return mySubscribableChannel.getSubscribers().size();
 	}
 }

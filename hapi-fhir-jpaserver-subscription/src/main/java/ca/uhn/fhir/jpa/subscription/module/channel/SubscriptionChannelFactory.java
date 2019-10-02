@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
+import org.springframework.messaging.SubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,11 @@ public class SubscriptionChannelFactory {
 		mySubscribableChannelFactory = theSubscribableChannelFactory;
 	}
 
-	public ISubscribableChannel newDeliveryChannel(String theChannelName) {
+	public SubscribableChannel newDeliveryChannel(String theChannelName) {
 		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
-	public ISubscribableChannel newMatchingChannel(String theChannelName) {
+	public SubscribableChannel newMatchingChannel(String theChannelName) {
 		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getMatchingChannelConcurrentConsumers());
 	}
 }

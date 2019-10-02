@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
@@ -41,6 +40,7 @@ import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.SubscribableChannel;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -77,7 +77,7 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 	protected static final List<Observation> ourCreatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static final List<Observation> ourUpdatedObservations = Collections.synchronizedList(Lists.newArrayList());
 	protected static final List<String> ourContentTypes = Collections.synchronizedList(new ArrayList<>());
-	private static ISubscribableChannel ourSubscribableChannel;
+	private static SubscribableChannel ourSubscribableChannel;
 	protected final PointcutLatch mySubscriptionMatchingPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_PERSISTED_RESOURCE_CHECKED);
 	protected final PointcutLatch mySubscriptionActivatedPost = new PointcutLatch(Pointcut.SUBSCRIPTION_AFTER_ACTIVE_SUBSCRIPTION_REGISTERED);
 

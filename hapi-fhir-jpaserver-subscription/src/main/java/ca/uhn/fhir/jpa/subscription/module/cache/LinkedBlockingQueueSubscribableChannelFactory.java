@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannel;
+import org.springframework.messaging.SubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class LinkedBlockingQueueSubscribableChannelFactory implements ISubscribableChannelFactory {
 	@Override
-	public ISubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers) {
+	public SubscribableChannel createSubscribableChannel(String theChannelName, int theConcurrentConsumers) {
 		return new LinkedBlockingQueueSubscribableChannel(new LinkedBlockingQueue<>(SubscriptionConstants.DELIVERY_EXECUTOR_QUEUE_SIZE), theChannelName + "-%d", theConcurrentConsumers);
 	}
 

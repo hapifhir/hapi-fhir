@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 
 import java.io.Closeable;
 import java.util.Collection;
@@ -16,10 +17,10 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	private final String myChannelName;
-	private final ISubscribableChannel mySubscribableChannel;
+	private final SubscribableChannel mySubscribableChannel;
 	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
 
-	public SubscriptionChannelWithHandlers(String theChannelName, ISubscribableChannel theSubscribableChannel) {
+	public SubscriptionChannelWithHandlers(String theChannelName, SubscribableChannel theSubscribableChannel) {
 		myChannelName = theChannelName;
 		mySubscribableChannel = theSubscribableChannel;
 	}
