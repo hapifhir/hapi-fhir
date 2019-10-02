@@ -26,7 +26,7 @@ public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3
 	}
 
 	public boolean registryEmpty() {
-		return mySubscriptionChannelRegistry.size() == 0;
+		return mySubscriptionRegistry.size() == 0 && mySubscriptionChannelRegistry.size() == 0;
 	}
 
 	protected Subscription createSubscription() {
