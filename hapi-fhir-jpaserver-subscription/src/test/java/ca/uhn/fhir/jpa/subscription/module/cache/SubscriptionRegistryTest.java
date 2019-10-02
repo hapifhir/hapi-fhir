@@ -7,13 +7,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
-
-	@After
-	public void clearRegistryAfter() {
-		mySubscriptionRegistry.unregisterAllSubscriptions();
-		assertRegistrySize(0);
-	}
-
 	@Test
 	public void updateSubscriptionReusesActiveSubscription() {
 		Subscription subscription = createSubscription();
