@@ -310,6 +310,11 @@
 				such as :not or :exact. Thanks to Petro Mykhailyshyn
             for the pull request!
 			</action>
+			<action type="fix">
+				The JPA server contained a restriction on the columns used to hold a resource's type name
+				that was too short to hold the longest name from the final R4 definitions. This has been
+				corrected to account for names up to 40 characters long.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

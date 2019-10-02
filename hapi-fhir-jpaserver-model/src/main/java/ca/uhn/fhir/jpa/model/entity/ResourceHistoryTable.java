@@ -52,7 +52,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE", length = 30, nullable = false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	@Column(name = "RES_VER", nullable = false)
