@@ -365,7 +365,10 @@ public class TermConcept implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("code", myCode).append("display", myDisplay).build();
+		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append("code", myCode)
+			.append("display", myDisplay)
+			.build();
 	}
 
 	public List<IContextValidationSupport.BaseConceptProperty> toValidationProperties() {

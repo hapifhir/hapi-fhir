@@ -39,8 +39,7 @@ public interface IHapiTerminologyLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.0.0
-	default UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+	UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
 	interface FileDescriptor {
 

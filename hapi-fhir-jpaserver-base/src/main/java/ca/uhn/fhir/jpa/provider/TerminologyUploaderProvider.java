@@ -36,7 +36,6 @@ import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +52,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	public static final String CONCEPT_COUNT = "conceptCount";
 	public static final String TARGET = "target";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	public static final String PARENT_CODE = "parentCode";
 	public static final String VALUE = "value";
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
+	private static final String PACKAGE = "package";
 
 	@Autowired
 	private FhirContext myCtx;
@@ -86,12 +86,12 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-add
 	 * </code>
 	 */
-	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
+	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaAdd(
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = PARENT_CODE, min = 0, max = 1) IPrimitiveType<String> theParentCode,
-		@OperationParam(name = VALUE, min = 1, max = 1) IBaseResource theValue,
+		@OperationParam(name = VALUE, min = 0, max = 1) IBaseResource theValue,
 		RequestDetails theRequestDetails
 	) {
 
@@ -105,8 +105,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				value = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theValue);
 			} else if (theValue instanceof org.hl7.fhir.r5.model.CodeSystem) {
 				value = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theValue);
-			} else if (theValue instanceof IBaseBinary) {
-				value = convertBinary((IBaseBinary)theValue);
 			} else {
 				throw new InvalidRequestException("Value must be present and be a CodeSystem");
 			}
@@ -133,7 +131,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $apply-codesystem-delta-remove
 	 * </code>
 	 */
-	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
+	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
 	})
 	public IBaseParameters applyCodeSystemDeltaRemove(
 		HttpServletRequest theServletRequest,
@@ -152,7 +150,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			} else if (theValue instanceof org.hl7.fhir.r5.model.CodeSystem) {
 				value = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theValue);
 			} else if (theValue instanceof IBaseBinary) {
-				value = convertBinary((IBaseBinary)theValue);
+				value = convertBinary((IBaseBinary) theValue);
 			} else {
 				throw new InvalidRequestException("Value must be present and be a CodeSystem");
 			}
@@ -175,7 +173,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private CodeSystem convertBinary(IBaseBinary theValue) {
 		ValidateUtil.isTrueOrThrowInvalidRequest(Constants.CT_TEXT_CSV.equals(theValue.getContentType()), "Binary has non-CSV contents");
 
-		String contents =
+		String contents = null;
+
+		return null;
 	}
 
 
@@ -184,7 +184,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	 * $upload-external-codesystem
 	 * </code>
 	 */
-	@Operation(typeName="CodeSystem", name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
+	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
 //		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
 	})
 	public IBaseParameters uploadExternalCodeSystem(
@@ -192,7 +192,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		@OperationParam(name = "url", min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
 		@OperationParam(name = "contentMode", min = 0, typeName = "code") IPrimitiveType<String> theContentMode,
 		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
-		@OperationParam(name = "package", min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
+		@OperationParam(name = PACKAGE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
 		RequestDetails theRequestDetails
 	) {
 
