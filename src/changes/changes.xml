@@ -304,6 +304,12 @@
 				A number of overridden methods in the HAPI FHIR codebase did not have the
 				@Override annotation. Thanks to Clayton Bodendein for cleaning this up!
 			</action>
+			<action type"add" issue="1373">
+				Plain server resource providers were not correctly matching methods that 
+				had the _id search parameter if a client performed a request using a modifier
+				such as :not or :exact. Thanks to Petro Mykhailyshyn
+            for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
