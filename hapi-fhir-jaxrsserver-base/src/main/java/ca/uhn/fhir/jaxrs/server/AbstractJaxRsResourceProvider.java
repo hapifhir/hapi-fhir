@@ -370,8 +370,8 @@ implements IRestfulServer<JaxRsRequest>, IResourceProvider {
     }
 
 	@Override
-	public PreferHeader.PreferReturnEnum getDefaultPreferReturn() {
-		return PreferHeader.PreferReturnEnum.REPRESENTATION;
+	public PreferReturnEnum getDefaultPreferReturn() {
+		return PreferReturnEnum.REPRESENTATION;
 	}
 
 	/**

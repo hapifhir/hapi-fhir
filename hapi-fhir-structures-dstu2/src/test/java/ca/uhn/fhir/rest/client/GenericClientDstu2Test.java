@@ -416,12 +416,12 @@ public class GenericClientDstu2Test {
 		Patient p = new Patient();
 		p.addName().addFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
@@ -2231,25 +2231,27 @@ public class GenericClientDstu2Test {
 
 		Patient p2 = new Patient(); // Yes ID
 		p2.addName().addFamily("PATIENT2");
-		p2.setId("Patient/2");
+		p2.setId("http://foo.com/Patient/2");
 		input.add(p2);
 
 		//@formatter:off
 		List<IBaseResource> response = client.transaction()
 			.withResources(input)
 			.encodedJson()
+			.prettyPrint()
 			.execute();
 		//@formatter:on
 
-		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
+		assertEquals("http://example.com/fhir?_pretty=true", capt.getValue().getURI().toString());
 		assertEquals(2, response.size());
 
 		String requestString = IOUtils.toString(((HttpEntityEnclosingRequest) capt.getValue()).getEntity().getContent());
+		ourLog.info(requestString);
 		ca.uhn.fhir.model.dstu2.resource.Bundle requestBundle = ourCtx.newJsonParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, requestString);
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals("POST", requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals("PUT", requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals("http://foo.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
 		assertEquals("application/json+fhir", capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
 		p1 = (Patient) response.get(0);
@@ -2475,12 +2477,12 @@ public class GenericClientDstu2Test {
 		p.setId(new IdDt("1"));
 		p.addName().addFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER).length);
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, capt.getAllValues().get(idx).getHeaders(Constants.HEADER_PREFER)[0].getValue());
 		idx++;

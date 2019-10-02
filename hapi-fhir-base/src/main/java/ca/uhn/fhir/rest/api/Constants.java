@@ -152,6 +152,8 @@ public class Constants {
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
+	public static final String PARAM_INCLUDE_ITERATE = "_include" + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
@@ -164,6 +166,7 @@ public class Constants {
 	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_REVINCLUDE_ITERATE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
@@ -235,6 +238,10 @@ public class Constants {
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	/**
+	 * Operation name for the $lastn operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

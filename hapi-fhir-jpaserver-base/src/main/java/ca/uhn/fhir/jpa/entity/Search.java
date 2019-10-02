@@ -6,7 +6,10 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -49,6 +52,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final int MAX_SEARCH_QUERY_STRING = 10000;
 	private static final int FAILURE_MESSAGE_LENGTH = 500;
 	private static final long serialVersionUID = 1L;
+	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
@@ -77,6 +81,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private Date myLastUpdatedLow;
 	@Column(name = "NUM_FOUND", nullable = false)
 	private int myNumFound;
+	@Column(name = "NUM_BLOCKED", nullable = true)
+	private Integer myNumBlocked;
 	@Column(name = "PREFERRED_PAGE_SIZE", nullable = true)
 	private Integer myPreferredPageSize;
 	@Column(name = "RESOURCE_ID", nullable = true)
@@ -116,6 +122,28 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 */
 	public Search() {
 		super();
+	}
+
+	@Override
+	public String toString() {
+		return new ToStringBuilder(this)
+			.append("myLastUpdatedHigh", myLastUpdatedHigh)
+			.append("myLastUpdatedLow", myLastUpdatedLow)
+			.append("myNumFound", myNumFound)
+			.append("myNumBlocked", myNumBlocked)
+			.append("myStatus", myStatus)
+			.append("myTotalCount", myTotalCount)
+			.append("myUuid", myUuid)
+			.append("myVersion", myVersion)
+			.toString();
+	}
+
+	public int getNumBlocked() {
+		return myNumBlocked != null ? myNumBlocked : 0;
+	}
+
+	public void setNumBlocked(int theNumBlocked) {
+		myNumBlocked = theNumBlocked;
 	}
 
 	public Date getExpiryOrNull() {
@@ -196,10 +224,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public int getNumFound() {
+		ourLog.trace("getNumFound {}", myNumFound);
 		return myNumFound;
 	}
 
 	public void setNumFound(int theNumFound) {
+		ourLog.trace("setNumFound {}", theNumFound);
 		myNumFound = theNumFound;
 	}
 
@@ -260,10 +290,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	}
 
 	public SearchStatusEnum getStatus() {
+		ourLog.trace("getStatus {}", myStatus);
 		return myStatus;
 	}
 
 	public void setStatus(SearchStatusEnum theStatus) {
+		ourLog.trace("setStatus {}", theStatus);
 		myStatus = theStatus;
 	}
 
@@ -318,8 +350,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 		return myVersion;
 	}
 
-	public SearchParameterMap getSearchParameterMap() {
-		return SerializationUtils.deserialize(mySearchParameterMap);
+	public Optional<SearchParameterMap> getSearchParameterMap() {
+		return Optional.ofNullable(mySearchParameterMap).map(t -> SerializationUtils.deserialize(mySearchParameterMap));
 	}
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {

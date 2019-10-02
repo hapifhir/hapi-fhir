@@ -76,6 +76,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 	}
 
+	@Override
 	@Hook(Pointcut.CLIENT_REQUEST)
 	public void interceptRequest(IHttpRequest theRequest) {
 		if (myLogRequestSummary) {
@@ -101,6 +102,7 @@ public class LoggingInterceptor implements IClientInterceptor {
 		}
 	}
 
+	@Override
 	@Hook(Pointcut.CLIENT_RESPONSE)
 	public void interceptResponse(IHttpResponse theResponse) throws IOException {
 		if (myLogResponseSummary) {

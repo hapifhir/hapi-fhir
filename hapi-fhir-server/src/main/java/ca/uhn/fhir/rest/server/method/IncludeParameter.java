@@ -136,7 +136,8 @@ class IncludeParameter extends BaseQueryParameter {
 				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
-			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(nextParamList.getQualifier());
+			String qualifier = nextParamList.getQualifier();
+			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(qualifier) || Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(qualifier);
 
 			String value = nextParamList.get(0);
 			if (myAllow != null && !myAllow.isEmpty()) {

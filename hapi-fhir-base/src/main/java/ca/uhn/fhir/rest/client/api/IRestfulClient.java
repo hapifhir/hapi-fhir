@@ -92,10 +92,11 @@ public interface IRestfulClient {
 	/**
 	 * Register a new interceptor for this client. An interceptor can be used to add additional
 	 * logging, or add security headers, or pre-process responses, etc.
-	 *
-	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
+	 * <p>
+	 * This is a convenience method for performing the following call:
+	 * <code>getInterceptorService().registerInterceptor(theInterceptor)</code>
+	 * </p>
 	 */
-	@Deprecated
 	void registerInterceptor(IClientInterceptor theInterceptor);
 
 	/**
@@ -114,11 +115,12 @@ public interface IRestfulClient {
 	void setSummary(SummaryEnum theSummary);
 
 	/**
-	 * Remove an intercaptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}
-	 *
-	 * @deprecated Use {@link #getInterceptorService()} to access the list of inteerceptors, register them, and unregister them
+	 * Remove an interceptor that was previously registered using {@link IRestfulClient#registerInterceptor(IClientInterceptor)}.
+	 * <p>
+	 * This is a convenience method for performing the following call:
+	 * <code>getInterceptorService().unregisterInterceptor(theInterceptor)</code>
+	 * </p>
 	 */
-	@Deprecated
 	void unregisterInterceptor(IClientInterceptor theInterceptor);
 
 	/**

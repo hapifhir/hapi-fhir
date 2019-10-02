@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -8,10 +10,12 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
@@ -28,16 +32,18 @@ import org.springframework.test.util.AopTestUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ValidateTest.class);
 	@Autowired
 	private IValidatorModule myValidatorModule;
+	@Autowired
+	private IHapiTerminologySvc myTerminologySvc;
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
@@ -105,6 +111,43 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(ooString, containsString("Element encounter @ /f:Observation: max allowed = 0, but found 1"));
 		assertThat(ooString, containsString("Element '/f:Observation.device': minimum required = 1, but only found 0"));
 	}
+
+	@Test
+	public void testValidateUsingExternallyDefinedCode() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType csId = myCodeSystemDao.create(codeSystem).getId();
+
+		TermCodeSystemVersion csv = new TermCodeSystemVersion();
+		csv.addConcept().setCode("bar").setDisplay("Bar Code");
+		myTerminologySvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+
+		// Validate a resource containing this codesystem in a field with an extendable binding
+		Patient patient = new Patient();
+		patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>hello</div>");
+		patient
+			.addIdentifier()
+			.setSystem("http://example.com")
+			.setValue("12345")
+			.getType()
+			.addCoding()
+			.setSystem("http://foo")
+			.setCode("bar");
+		MethodOutcome outcome = myPatientDao.validate(patient, null, encode(patient), EncodingEnum.JSON, ValidationModeEnum.CREATE, null, mySrd);
+		IBaseOperationOutcome oo = outcome.getOperationOutcome();
+		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+
+		// It would be ok for this to produce 0 issues, or just an information message too
+		assertEquals(1, OperationOutcomeUtil.getIssueCount(myFhirCtx, oo));
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type (http://hl7.org/fhir/ValueSet/identifier-type, and a code should come from this value set unless it has no suitable code) (codes = http://foo#bar)", OperationOutcomeUtil.getFirstIssueDetails(myFhirCtx, oo));
+
+	}
+
+	private String encode(Patient thePatient) {
+		return myFhirCtx.newJsonParser().encodeResourceToString(thePatient);
+	}
+
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {
 		Bundle vss = loadResourceFromClasspath(Bundle.class, "/org/hl7/fhir/r4/model/valueset/valuesets.xml");

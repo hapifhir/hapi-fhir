@@ -207,6 +207,19 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						return null;
 				}
 				break;
+			case CREATE:
+				if (theInputResource == null && theInputResourceId == null) {
+					return null;
+				}
+				if (theOperation == RestOperationTypeEnum.CREATE) {
+					appliesToResource = theInputResource;
+					if (theInputResourceId != null) {
+						appliesToResourceId = Collections.singletonList(theInputResourceId);
+					}
+				} else {
+					return null;
+				}
+				break;
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
@@ -288,7 +301,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 						}
 
+						String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
+						theRequestDetails.setFixedConditionalUrl(nextPart.getConditionalUrl());
+
 						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
+
+						theRequestDetails.setFixedConditionalUrl(previousFixedConditionalUrl);
+
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {

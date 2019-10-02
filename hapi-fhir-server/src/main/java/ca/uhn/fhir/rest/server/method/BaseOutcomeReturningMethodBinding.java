@@ -184,8 +184,8 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		if (allowPrefer) {
 			String prefer = theRequest.getHeader(Constants.HEADER_PREFER);
 			PreferHeader preferReturn = RestfulServerUtils.parsePreferHeader(theServer, prefer);
-			PreferHeader.PreferReturnEnum returnEnum = preferReturn.getReturn();
-			returnEnum = defaultIfNull(returnEnum, PreferHeader.PreferReturnEnum.REPRESENTATION);
+			PreferReturnEnum returnEnum = preferReturn.getReturn();
+			returnEnum = defaultIfNull(returnEnum, PreferReturnEnum.REPRESENTATION);
 
 			switch (returnEnum) {
 				case REPRESENTATION:

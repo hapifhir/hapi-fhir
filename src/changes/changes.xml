@@ -12,7 +12,9 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 				<ul>
-					<li>Hibernate Core (Core): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>Hibernate Search (JPA): 5.11.1.Final -&gt; 5.11.3.Final</li>
+					<li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li>
 				</ul>
 				]]>
 			</action>
@@ -38,7 +40,25 @@
 				<a href="http://hl7.org/fhir/uv/bulkdata/">specification</a> for information on how this works. Note that
 				only system level export is currently supported but others will follow.
             ]]>
-         </action>
+			</action>
+			<action type="add">
+            <![CDATA[
+				<b>New Feature</b>:
+				Support for ElasticSearch has been added to the JPA server directly (i.e. without needing a separate
+				module) and a new class called "ElasticsearchHibernatePropertiesBuilder" has been added to facilitate
+				the creation of relevant properties. Instructions have been added to the hapi-fhir-jpaserver-starter
+				project to get started with Elasticsearch. It is likely we will switch our default recommendation
+				to Elastic in the future.
+				]]>
+			</action>
+			<action type="add" issue="1489">
+            <![CDATA[
+				<b>Improvement</b>:
+				A significant performance improvement was made to the parsers (particularly the Json Parser)
+				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
+				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
+			</action>
 			<action type="add" issue="1357">
 				The email Subscription deliverer now respects the payload property of the subscription
 				when deciding how to encode the resource being sent. Thanks to Sean McIlvenna for the 
@@ -81,6 +101,11 @@
 				The informational message returned in an OperationOutcome when a delete failed due to cascades not being enabled
 				contained an incorrect example. This has been corrected.
 			</action>
+			<action type="fix">
+				 In some cases, deleting a CodeSystem resource would fail because the underlying
+				 codes were not correctly deleted from the terminology service tables. This is
+				 fixed.
+			</action>
 			<action type="change">
 				Two foreign keys have been dropped from the HFJ_SEARCH_RESULT table used by the FHIR search query cache. These
 				constraints did not add value and caused unneccessary contention when used under high load.
@@ -100,7 +125,7 @@
 				leaving the Bundle.entry.request.method blank in DSTU3 transactions and setting the request payload
 				as a Binary resource containing a valid patch.
 			</action>
-			<action type="change" issue="1366">
+			<action type="change">
 				The HAPI FHIR CLI server now uses H2 as its database platform instead of Derby.
 				Note that this means that data in any existing installations will need to be
 				re-uploaded to the new database platform.
@@ -156,6 +181,139 @@
 			<action type="change">
 				The Testpage Overlay has been upgraded to use FontAwesome 5.x, and now supports being
 				deployed to a servlet path other than "/".
+			</action>
+			<action type="fix" issue="1495">
+				A NullPointerException when using the AuthorizationInterceptor RuleBuilder to build a conditional
+				rule with a custom tester has been corrected. Thanks to Tue Toft Nørgård for reporting!
+			</action>
+			<action type="fix" issue="1494">
+				The R4+ client and server modules did not recognize the new
+				<![CDATA[<code>_include:iterate</code>]]>
+				syntax that replaces the previous
+				<![CDATA[<code>_include:recurse</code>]]>
+				syntax. Both are now supported on all servers in order to avoid breaking backwards
+				compatibility, with the new syntax now being emitted in R4+ clients.
+			</action>
+			<action type="change">
+				The hapi-fhir-jaxrs-server module now lists dependencies on structures JARs as optional
+				dependencies, in order to avoid automatically importing all versions. This means that implementers
+				of JAX-RS servers may now need to add an explicit dependency on one or more structures JARs to
+				their own project.
+			</action>
+			<action type="fix" issue="1482">
+				The LOINC terminology distribution includes multiple copies of the same files. Uploading LOINC terminology
+				resulted in some ValueSets with duplicate codes. This has been corrected by specifying a path with each
+				filename.
+			</action>
+			<action>
+				A corner case bug in the JPA server was solved: When performing a search that contained chained reference searches
+				where the value contained slashes (e.g.
+				<![CDATA[<code>Observation?derived-from:DocumentReference.contenttype=application/vnd.mfer</code>]]>)
+				the server could fail to load later pages in the search results.
+			</action>
+			<action type="add">
+				A new flag has been added to the JPA migrator tool that causes the migrator to not try to reduce the length
+				of existing columns in the schema.
+			</action>
+			<action type="fix" issue="1483">
+				Some resource IDs and URLs for LOINC ValueSets and ConceptMaps were inconsistently populated by the
+				terminology uploader. This has been corrected.
+			</action>
+			<action type="fix">
+				When a resource was updated with a meta.source containing a request id, the meta.source was getting appended
+				with the new request id, resulting in an ever growing source.meta value.  E.g. after the first update, it looks
+				like "#9f0a901387128111#5f37835ee38a89e2" when it should only be "#5f37835ee38a89e2". This has been corrected.
+			</action>
+			<action type="fix" issue="1421">
+				The Plain Server method selector was incorrectly allowing client requests with _include statements to be
+				handled by method implementations that did not have any <![CDATA[<code>@IncludeParam</code>]]> defined. This
+				is now corrected. Thanks to Tuomo Ala-Vannesluoma for reporting and providing a test case!
+			</action>
+			<action type="add" issue="1366">
+				The ValueSet operation <![CDATA[<code>$expand</code>]]> has been optimized for large ValueSets. ValueSets are
+				now persistence-backed by the terminology tables, which are populated by a scheduled pre-expansion process.
+				A ValueSet previously stored in an existing FHIR repository will need to be re-created or updated to make
+				it a candidate for pre-expansion. ValueSets that have yet to be pre-expanded will continue to be expanded
+				in-memory.
+			</action>
+			<action type="add" issue="1431">
+				The ValueSet operation <![CDATA[<code>$validate-code</code>]]> has been optimized for large ValueSets.
+				Codes in ValueSets that have yet to be pre-expanded will continue to be validated in-memory.
+			</action>
+			<action type="add" issue="1447">
+				LOINC filenames for terminology upload are now configurable using the
+				<![CDATA[<code>loincupload.properties</code>]]> file.
+			</action>
+			<action type="add" issue="1451">
+				Support for the LOINC <![CDATA[<code>EXTERNAL_COPYRIGHT_NOTICE</code>]]> property and
+				<![CDATA[<code>copyright</code>]]> filter has been added.
+			</action>
+			<action type="add" issue="1453">
+				Support for the LOINC <![CDATA[<code>parent</code>]]> and <![CDATA[<code>child</code>]]> filters has been
+				added. Both filters can be used with either of the <![CDATA[<code>=</code>]]> or
+				<![CDATA[<code>in</code>]]> operators.
+			</action>
+			<action type="add" issue="1454">
+				Support for the LOINC <![CDATA[<code>ancestor</code>]]> and <![CDATA[<code>descendant</code>]]> filters has
+				been added. The <![CDATA[<code>descendant</code>]]> filter can be used with either of the
+				<![CDATA[<code>=</code>]]> or <![CDATA[<code>in</code>]]> operators. At present, the
+				<![CDATA[<code>ancestor</code>]]> filter can only be used with the <![CDATA[<code>=</code>]]> operator.
+			</action>
+			<action type="add" issue="1512">
+				Support for the LOINC <![CDATA[<code>ancestor</code>]]> filter with the <![CDATA[<code>in</code>]]>
+				operator has been added.
+			</action>
+			<action type="fix">
+				The JPA server failed to find codes defined in not-present codesystems in some cases, and reported
+				that the CodeSystem did not exist. This has been corrected.
+			</action>
+			<action type="remove">
+				The method
+				<![CDATA[
+				<code>IVersionSpecificBundleFactory#initializeBundleFromResourceList</code>
+				]]>
+				has been deprecated, as it provided duplicate functionality to other methods and had an 
+				outdated argument list based on the Bundle needs in DSTU1. We are not aware of any
+				public use of this API, please let us know if this deprecation causes any issues.
+			</action>
+			<action type="add" issue="1517">
+				Support for concept property values with a length exceeding 500 characters has been added in the terminology
+				tables. In particular, this was added to facilitate the LOINC EXTERNAL_COPYRIGHT_NOTICE property, for which
+				values can be quite long.
+			</action>
+			<action type="add">
+				The AuthorizationInterceptor has been enhanced so that a user can be authorized to
+				perform create operations specifically, without authorizing all write operations. Also, 
+				conditional creates can now be authorized even if they are happening inside a FHIR
+				transaction.
+			</action>
+			<action type="fix" issue="402">
+				When encoding a Composition resource in XML, the section narrative blocks were incorrectly
+				replaced by the main resource narrative. Thanks to Mirjam Baltus for reporting!
+			</action>
+			<action type="fix" issue="1473">
+				AN issue with date pickers not working in the hapi-fhir-testpage-overlay
+				project has been fixed. Thanks to GitHub user @jaferkhan for the pull
+				request!
+			</action>
+			<action type="add">
+				A docker compose script for the hapi-fhir-jpaserver-starter project was added. Thanks to
+				Long Nguyen for the pull request!
+			</action>
+			<action type="add" issue="1476">
+				A number of overridden methods in the HAPI FHIR codebase did not have the
+				@Override annotation. Thanks to Clayton Bodendein for cleaning this up!
+			</action>
+			<action type"add" issue="1373">
+				Plain server resource providers were not correctly matching methods that 
+				had the _id search parameter if a client performed a request using a modifier
+				such as :not or :exact. Thanks to Petro Mykhailyshyn
+            for the pull request!
+			</action>
+			<action type="fix">
+				The JPA server contained a restriction on the columns used to hold a resource's type name
+				that was too short to hold the longest name from the final R4 definitions. This has been
+				corrected to account for names up to 40 characters long.
 			</action>
 			<action type="fix">
                 A new command has been added to the HAPI FHIR CLI that allows external (not-present) codesystem deltas to be manually uploaded

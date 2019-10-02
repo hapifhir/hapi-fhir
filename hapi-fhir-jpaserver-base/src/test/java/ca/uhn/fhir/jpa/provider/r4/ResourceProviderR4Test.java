@@ -70,6 +70,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.util.TestUtil.sleepAtLeast;
 import static ca.uhn.fhir.jpa.util.TestUtil.sleepOneClick;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hamcrest.Matchers.*;
@@ -166,6 +167,54 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(ids, containsInAnyOrder(pt1id));
 
 	}
+
+	@Test
+	public void testSearchWithSlashes() {
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(10, 50, 10000));
+
+		Procedure procedure = new Procedure();
+		procedure.setStatus(Procedure.ProcedureStatus.COMPLETED);
+		String procedureId = ourClient.create().resource(procedure).execute().getId().toUnqualifiedVersionless().getValue();
+
+		DocumentReference dr = new DocumentReference();
+		dr.addContent().getAttachment().setContentType("application/vnd.mfer");
+		String drId = ourClient.create().resource(dr).execute().getId().toUnqualifiedVersionless().getValue();
+
+		for (int i = 0; i < 60; i++) {
+			Observation obs = new Observation();
+			obs.addPartOf().setReference(procedureId);
+			obs.addDerivedFrom().setReference(drId);
+			ourClient.create().resource(obs).execute();
+		}
+
+		ourLog.info("Starting search");
+
+		Bundle response = ourClient
+			.search()
+			.byUrl("Observation?part-of=" + procedureId + "&derived-from:DocumentReference.contenttype=application/vnd.mfer&_total=accurate&_count=2")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		int obsCount = 0;
+		int pageCount = 0;
+		while (response != null) {
+			obsCount += response.getEntry().size();
+			pageCount++;
+			if (response.getLink("next") != null) {
+				response = ourClient.loadPage().next(response).execute();
+			} else {
+				response = null;
+			}
+
+
+			ourLog.info("Have loaded {} pages and {} reources", pageCount, obsCount);
+		}
+
+		assertEquals(60, obsCount);
+		assertEquals(30, pageCount);
+
+	}
+
 
 	@Test
 	public void testManualPagingLinkOffsetDoesntReturnBeyondEnd() {
@@ -683,7 +732,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.create()
 			.resource(p)
 			.conditionalByUrl("Patient?identifier=foo|bar")
-			.prefer(PreferHeader.PreferReturnEnum.REPRESENTATION)
+			.prefer(PreferReturnEnum.REPRESENTATION)
 			.execute();
 
 		assertEquals(id.getIdPart(), outcome.getId().getIdPart());
@@ -798,7 +847,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stu
+			public void interceptResponse(IHttpResponse theResponse) {               // TODO Auto-generated method stub
 			}
 
 		});
@@ -3852,10 +3901,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withResources(resources).prettyPrint().encodedXml().execute();
 
-		/*
-		 * First, make sure that we don't reuse a search if
-		 * it's not marked with an expiry
-		 */
+
 		{
 			myDaoConfig.setReuseCachedSearchResultsForMillis(10L);
 			Bundle result1 = ourClient
@@ -3864,7 +3910,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
-			sleepOneClick();
+			sleepAtLeast(11L);
 			Bundle result2 = ourClient
 				.search()
 				.forResource("Organization")
@@ -3874,10 +3920,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertNotEquals(uuid1, uuid2);
 		}
 
-		/*
-		 * Now try one but mark it with an expiry time
-		 * in the future
-		 */
 		{
 			myDaoConfig.setReuseCachedSearchResultsForMillis(1000L);
 			Bundle result1 = ourClient
@@ -3898,7 +3940,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			// Expiry doesn't affect reusablility
 			final String uuid2 = toSearchUuidFromLinkNext(result2);
 			assertEquals(uuid1, uuid2);
 
@@ -5079,6 +5120,31 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1, actual.getEntry().size());
 		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 
+	}
+
+	@Test
+	public void testUpdateWithSource() {
+		Patient patient = new Patient();
+		patient.setActive(false);
+		IIdType patientid = ourClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+		}
+
+		patient.setId(patientid);
+		patient.setActive(true);
+		ourClient.update().resource(patient).execute();
+		{
+			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+
+			readPatient.addName().setFamily("testUpdateWithSource");
+			ourClient.update().resource(readPatient).execute();
+			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+		}
 	}
 
 	@Test

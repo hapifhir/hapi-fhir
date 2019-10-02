@@ -66,13 +66,17 @@ public abstract class BaseRuntimeChildDefinition {
 	}
 
 	public interface IAccessor {
-		List<IBase> getValues(Object theTarget);
+		List<IBase> getValues(IBase theTarget);
+
+		default IBase getFirstValueOrNull(IBase theTarget) {
+			return getValues(theTarget).stream().findFirst().orElse(null);
+		}
 	}
 
 	public interface IMutator {
-		void addValue(Object theTarget, IBase theValue);
+		void addValue(IBase theTarget, IBase theValue);
 
-		void setValue(Object theTarget, IBase theValue);
+		void setValue(IBase theTarget, IBase theValue);
 	}
 
 	BaseRuntimeElementDefinition<?> findResourceReferenceDefinition(Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {

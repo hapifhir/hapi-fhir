@@ -52,15 +52,6 @@ public class GsonStructure implements JsonLikeStructure {
 		super();
 	}
 	
-	public GsonStructure (JsonObject json) {
-		super();
-		setNativeObject(json);
-	}
-	public GsonStructure (JsonArray json) {
-		super();
-		setNativeArray(json);
-	}
-	
 	public void setNativeObject (JsonObject json) {
 		this.rootType = ROOT_TYPE.OBJECT;
 		this.nativeRoot = json;
@@ -111,8 +102,7 @@ public class GsonStructure implements JsonLikeStructure {
 			if (nextInt == '{') {
 				JsonObject root = gson.fromJson(pbr, JsonObject.class);
 				setNativeObject(root);
-			} else
-			if (nextInt == '[') {
+			} else if (nextInt == '[') {
 				JsonArray root = gson.fromJson(pbr, JsonArray.class);
 				setNativeArray(root);
 			}

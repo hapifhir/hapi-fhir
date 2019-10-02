@@ -46,12 +46,14 @@ public class BundleUtil {
 		private final RequestTypeEnum myRequestType;
 		private final IBaseResource myResource;
 		private final String myUrl;
+		private final String myConditionalUrl;
 
-		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource) {
+		BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
 			super();
 			myRequestType = theRequestType;
 			myUrl = theUrl;
 			myResource = theResource;
+			myConditionalUrl = theConditionalUrl;
 		}
 
 		public RequestTypeEnum getRequestType() {
@@ -60,6 +62,10 @@ public class BundleUtil {
 
 		public IBaseResource getResource() {
 			return myResource;
+		}
+
+		public String getConditionalUrl() {
+			return myConditionalUrl;
 		}
 
 		public String getUrl() {
@@ -190,19 +196,21 @@ public class BundleUtil {
 		BaseRuntimeChildDefinition resourceChild = entryChildElem.getChildByName("resource");
 		BaseRuntimeChildDefinition requestChild = entryChildElem.getChildByName("request");
 		BaseRuntimeElementCompositeDefinition<?> requestElem = (BaseRuntimeElementCompositeDefinition<?>) requestChild.getChildByName("request");
-		BaseRuntimeChildDefinition urlChild = requestElem.getChildByName("url");
+		BaseRuntimeChildDefinition requestUrlChild = requestElem.getChildByName("url");
+		BaseRuntimeChildDefinition requestIfNoneExistChild = requestElem.getChildByName("ifNoneExist");
 		BaseRuntimeChildDefinition methodChild = requestElem.getChildByName("method");
 
 		for (IBase nextEntry : entries) {
 			IBaseResource resource = null;
 			String url = null;
 			RequestTypeEnum requestType = null;
+			String conditionalUrl = null;
 
 			for (IBase next : resourceChild.getAccessor().getValues(nextEntry)) {
 				resource = (IBaseResource) next;
 			}
 			for (IBase nextRequest : requestChild.getAccessor().getValues(nextEntry)) {
-				for (IBase nextUrl : urlChild.getAccessor().getValues(nextRequest)) {
+				for (IBase nextUrl : requestUrlChild.getAccessor().getValues(nextRequest)) {
 					url = ((IPrimitiveType<?>) nextUrl).getValueAsString();
 				}
 				for (IBase nextUrl : methodChild.getAccessor().getValues(nextRequest)) {
@@ -211,13 +219,29 @@ public class BundleUtil {
 						requestType = RequestTypeEnum.valueOf(methodString);
 					}
 				}
+
+				if (requestType != null) {
+					//noinspection EnumSwitchStatementWhichMissesCases
+					switch (requestType) {
+						case PUT:
+							conditionalUrl = url != null && url.contains("?") ? url : null;
+							break;
+						case POST:
+							List<IBase> ifNoneExistReps = requestIfNoneExistChild.getAccessor().getValues(nextRequest);
+							if (ifNoneExistReps.size() > 0) {
+								IPrimitiveType<?> ifNoneExist = (IPrimitiveType<?>) ifNoneExistReps.get(0);
+								conditionalUrl = ifNoneExist.getValueAsString();
+							}
+							break;
+					}
+				}
 			}
 
 			/*
 			 * All 3 might be null - That's ok because we still want to know the
 			 * order in the original bundle.
 			 */
-			retVal.add(new BundleEntryParts(requestType, url, resource));
+			retVal.add(new BundleEntryParts(requestType, url, resource, conditionalUrl));
 		}
 
 

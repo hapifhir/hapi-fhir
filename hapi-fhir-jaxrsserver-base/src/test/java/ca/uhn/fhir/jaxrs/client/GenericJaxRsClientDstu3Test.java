@@ -321,12 +321,12 @@ public class GenericJaxRsClientDstu3Test {
 		Patient p = new Patient();
 		p.addName().setFamily("FOOFAMILY");
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
 
-		client.create().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
@@ -1758,7 +1758,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		Patient p2 = new Patient(); // Yes ID
 		p2.addName().setFamily("PATIENT2");
-		p2.setId("Patient/2");
+		p2.setId("http://example.com/Patient/2");
 		input.add(p2);
 
 		//@formatter:off
@@ -1776,7 +1776,7 @@ public class GenericJaxRsClientDstu3Test {
 		assertEquals(2, requestBundle.getEntry().size());
 		assertEquals(HTTPVerb.POST, requestBundle.getEntry().get(0).getRequest().getMethod());
 		assertEquals(HTTPVerb.PUT, requestBundle.getEntry().get(1).getRequest().getMethod());
-		assertEquals("Patient/2", requestBundle.getEntry().get(1).getRequest().getUrl());
+		assertEquals("http://example.com/Patient/2", requestBundle.getEntry().get(1).getFullUrl());
 
 		p1 = (Patient) response.get(0);
 		assertEquals(new IdType("Patient/1/_history/1"), p1.getIdElement());
@@ -1990,12 +1990,12 @@ public class GenericJaxRsClientDstu3Test {
 		p.setId(new IdType("1"));
 		p.addName().setFamily("FOOFAMILY");
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.MINIMAL).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		
 
-		client.update().resource(p).prefer(PreferHeader.PreferReturnEnum.REPRESENTATION).execute();
+		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertEquals(1, ourRequestHeaders.get(Constants.HEADER_PREFER).size());
 		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 		

@@ -98,11 +98,9 @@ public class ValidationSupportChain implements IValidationSupport {
 	@Override
 	public CodeSystem fetchCodeSystem(FhirContext theCtx, String theSystem) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theSystem)) {
-				CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
-				if (retVal != null) {
-					return retVal;
-				}
+			CodeSystem retVal = next.fetchCodeSystem(theCtx, theSystem);
+			if (retVal != null) {
+				return retVal;
 			}
 		}
 		return null;

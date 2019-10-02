@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
-import ca.uhn.fhir.jpa.graphql.JpaStorageServices;
+import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
@@ -20,14 +20,12 @@ import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import org.hl7.fhir.r4.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.utils.GraphQLEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
-import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -100,6 +98,11 @@ public class BaseR4Config extends BaseConfig {
 		val.setBestPracticeWarningLevel(level);
 		val.setValidationSupport(validationSupportChainR4());
 		return val;
+	}
+
+	@Bean
+	public DefaultProfileValidationSupport defaultProfileValidationSupport() {
+		return new DefaultProfileValidationSupport();
 	}
 
 	@Bean

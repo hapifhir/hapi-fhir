@@ -78,6 +78,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	private static IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> ourValueSetDao;
 
 	@Autowired
+	protected ISearchDao mySearchEntityDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
+	@Autowired
 	@Qualifier("myResourceCountsCache")
 	protected ResourceCountCache myResourceCountsCache;
 	@Autowired
@@ -361,6 +365,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 
 		myPerformanceTracingLoggingInterceptor = new PerformanceTracingLoggingInterceptor();
 		myInterceptorRegistry.registerInterceptor(myPerformanceTracingLoggingInterceptor);
+	}
+
+	@Before
+	public void beforeUnregisterAllSubscriptions() {
+		mySubscriptionRegistry.unregisterAllSubscriptions();
 	}
 
 	@Before

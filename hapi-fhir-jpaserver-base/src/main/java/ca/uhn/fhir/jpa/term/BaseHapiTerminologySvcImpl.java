@@ -30,7 +30,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -64,9 +63,9 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -75,7 +74,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
@@ -206,22 +204,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
-	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
-	}
-
-	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
-		Query textQuery = qb
-			.phrase()
-			.withSlop(2)
-			.onField("myDisplay").boostedTo(4.0f)
-			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
-			// .andField("myDisplayNGram").boostedTo(1.0f)
-			// .andField("myDisplayPhonetic").boostedTo(0.5f)
-			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
-		bool.must(textQuery);
-	}
-
 	private boolean addToSet(Set<TermConcept> theSetToPopulate, TermConcept theConcept) {
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
@@ -297,7 +279,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		myCodeSystemDao.flush();
 
 		int i = 0;
-		for (TermCodeSystemVersion next : myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystem.getPid())) {
+		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+		for (TermCodeSystemVersion next : codeSystemVersions) {
 			deleteCodeSystemVersion(next.getPid());
 		}
 		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
@@ -889,23 +872,32 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				break;
 			case "parent":
 			case "child":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincParentChild(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincParentChild(theQb, theBool, theFilter);
+				break;
+			case "ancestor":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincAncestor(theSystem, theQb, theBool, theFilter);
+				break;
+			case "descendant":
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincDescendant(theSystem, theQb, theBool, theFilter);
 				break;
 			case "copyright":
-				if (isCodeSystemLoinc(theSystem)) {
-					handleFilterLoincCopyright(theQb, theBool, theFilter);
-				} else {
-					throw new InvalidRequestException("Invalid filter, property " + theFilter.getProperty() + " is LOINC-specific and cannot be used with system: " + theSystem);
-				}
+				isCodeSystemLoingOrThrowInvalidRequestException(theSystem, theFilter.getProperty());
+				handleFilterLoincCopyright(theQb, theBool, theFilter);
 				break;
 			default:
 				handleFilterRegex(theBool, theFilter);
 				break;
 		}
+	}
+
+	private boolean isCodeSystemLoingOrThrowInvalidRequestException(String theSystem, String theProperty) {
+		if (!isCodeSystemLoinc(theSystem)) {
+			throw new InvalidRequestException("Invalid filter, property " + theProperty + " is LOINC-specific and cannot be used with system: " + theSystem);
+		}
+		return true;
 	}
 
 	private boolean isCodeSystemLoinc(String theSystem) {
@@ -924,6 +916,22 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	private void addDisplayFilterExact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		bool.must(qb.phrase().onField("myDisplay").sentence(nextFilter.getValue()).createQuery());
+	}
+
+	private void addDisplayFilterInexact(QueryBuilder qb, BooleanJunction<?> bool, ValueSet.ConceptSetFilterComponent nextFilter) {
+		Query textQuery = qb
+			.phrase()
+			.withSlop(2)
+			.onField("myDisplay").boostedTo(4.0f)
+			.andField("myDisplayEdgeNGram").boostedTo(2.0f)
+			// .andField("myDisplayNGram").boostedTo(1.0f)
+			// .andField("myDisplayPhonetic").boostedTo(0.5f)
+			.sentence(nextFilter.getValue().toLowerCase()).createQuery();
+		bool.must(textQuery);
+	}
+
 	private void handleFilterConceptAndCode(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		TermConcept code = findCode(theSystem, theFilter.getValue())
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
@@ -937,12 +945,15 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	}
 
 	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
-		if (theFilter.getOp() == ValueSet.FilterOperator.EQUAL) {
-			addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
-		} else if (theFilter.getOp() == ValueSet.FilterOperator.IN) {
-			addLoincFilterParentChildIn(theBool, theFilter);
-		} else {
-			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterParentChildEqual(theBool, theFilter.getProperty(), theFilter.getValue());
+				break;
+			case IN:
+				addLoincFilterParentChildIn(theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
 		}
 	}
 
@@ -963,6 +974,95 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	private Term getPropertyTerm(String theProperty, String theValue) {
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
+	}
+
+	private void handleFilterLoincAncestor(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterAncestorIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterAncestorEqual(theSystem, theQb, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterAncestorEqual(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getAncestorTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void addLoincFilterAncestorIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getAncestorTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getAncestorTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		retVal.add(new Term("myParentPids", "" + code.getId()));
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
+	}
+
+	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		switch (theFilter.getOp()) {
+			case EQUAL:
+				addLoincFilterDescendantEqual(theSystem, theBool, theFilter);
+				break;
+			case IN:
+				addLoincFilterDescendantIn(theSystem, theQb, theBool, theFilter);
+				break;
+			default:
+				throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
+		}
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		addLoincFilterDescendantEqual(theSystem, theBool, theFilter.getProperty(), theFilter.getValue());
+	}
+
+	private void addLoincFilterDescendantEqual(String theSystem, BooleanJunction<?> theBool, String theProperty, String theValue) {
+		List<Term> terms = getDescendantTerms(theSystem, theProperty, theValue);
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private void addLoincFilterDescendantIn(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
+		String[] values = theFilter.getValue().split(",");
+		List<Term> terms = new ArrayList<>();
+		for (String value : values) {
+			terms.addAll(getDescendantTerms(theSystem, theFilter.getProperty(), value));
+		}
+		theBool.must(new TermsQuery(terms));
+	}
+
+	private List<Term> getDescendantTerms(String theSystem, String theProperty, String theValue) {
+		List<Term> retVal = new ArrayList<>();
+
+		TermConcept code = findCode(theSystem, theValue)
+			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theValue));
+
+		String[] parentPids = code.getParentPidsAsString().split(" ");
+		for (String parentPid : parentPids) {
+			retVal.add(new Term("myId", parentPid));
+		}
+		logFilteringValueOnProperty(theValue, theProperty);
+
+		return retVal;
 	}
 
 	private void handleFilterLoincCopyright(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
@@ -1631,7 +1731,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		jobDefinition.setJobClass(SaveDeferredJob.class);
 		mySchedulerService.scheduleFixedDelay(5000, false, jobDefinition);
 
-		// Register scheduled job to save deferred concepts
+		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
 		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
@@ -1642,14 +1742,14 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion) {
+	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
 		ourLog.info("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
 
 		// Grab the existing versions so we can delete them later
-		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResource(theCodeSystemResourcePid);
+		List<TermCodeSystemVersion> existing = myCodeSystemVersionDao.findByCodeSystemResourcePid(theCodeSystemResourcePid);
 
 		/*
 		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
@@ -1669,24 +1769,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		 * Do the upload
 		 */
 
-		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
-		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
-			if (codeSystem == null) {
-				codeSystem = new TermCodeSystem();
-			}
-			codeSystem.setResource(theCodeSystemVersion.getResource());
-		} else {
-			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemVersion.getResource().getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
-					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
-			}
-		}
-
-		codeSystem.setCodeSystemUri(theSystemUri);
-		codeSystem.setName(theSystemName);
-		codeSystem = myCodeSystemDao.save(codeSystem);
+		TermCodeSystem codeSystem = getOrCreateTermCodeSystem(theCodeSystemResourcePid, theSystemUri, theSystemName, theCodeSystemResourceTable);
 
 		theCodeSystemVersion.setCodeSystem(codeSystem);
 
@@ -1737,6 +1820,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	@Nonnull
+	private TermCodeSystem getOrCreateTermCodeSystem(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+		TermCodeSystem codeSystem = getCodeSystem(theSystemUri);
+		if (codeSystem == null) {
+			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
+			if (codeSystem == null) {
+				codeSystem = new TermCodeSystem();
+			}
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemResourceTable.getId())) {
+				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
+					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
+		}
+
+		codeSystem.setCodeSystemUri(theSystemUri);
+		codeSystem.setName(theSystemName);
+		codeSystem = myCodeSystemDao.save(codeSystem);
+		return codeSystem;
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -1751,7 +1857,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 		populateCodeSystemVersionProperties(theCodeSystemVersion, theCodeSystemResource, resource);
 
-		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion);
+		storeNewCodeSystemVersion(codeSystemResourcePid, theCodeSystemResource.getUrl(), theCodeSystemResource.getName(), theCodeSystemResource.getVersion(), theCodeSystemVersion, resource);
 
 		myDeferredConceptMaps.addAll(theConceptMaps);
 		myDeferredValueSets.addAll(theValueSets);
@@ -1773,23 +1879,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.COMPLETE || theCodeSystem.getContent() == null || theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 				ourLog.info("CodeSystem {} has a status of {}, going to store concepts in terminology tables", theResourceEntity.getIdDt().getValue(), theCodeSystem.getContentElement().getValueAsString());
 
-				// If this is a not-present codesystem, we don't want to store a new version if one
-				// already exists, since that will wipe out the existing concepts
+				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
+
+				/*
+				 * If this is a not-present codesystem, we don't want to store a new version if one
+				 * already exists, since that will wipe out the existing concepts. We do create or update
+				 * the TermCodeSystem table though, since that allows the DB to reject changes
+				 * that would result in duplicate CodeSysten.url values.
+				 */
 				if (theCodeSystem.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT) {
 					TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystem.getUrl());
 					if (codeSystem != null) {
+						getOrCreateTermCodeSystem(codeSystemResourcePid, theCodeSystem.getUrl(), theCodeSystem.getUrl(), theResourceEntity);
 						return;
 					}
 				}
 
-				Long codeSystemResourcePid = getCodeSystemResourcePid(theCodeSystem.getIdElement());
 				TermCodeSystemVersion persCs = new TermCodeSystemVersion();
 
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
 				persCs.getConcepts().addAll(toPersistedConcepts(theCodeSystem.getConcept(), persCs));
 				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
-				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs);
+				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs, theResourceEntity);
 			}
 
 		}
@@ -1859,7 +1971,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap {}", theConceptMap.getIdElement().getValue());
+		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");
@@ -1970,7 +2082,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermConceptMap[{}]", termConceptMap.getId());
+		ourLog.info("Done storing TermConceptMap[{}] for {}", termConceptMap.getId(), theConceptMap.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override
@@ -2066,7 +2178,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	@Override
 	@Transactional
 	public void storeTermValueSet(ResourceTable theResourceTable, ValueSet theValueSet) {
-		ourLog.info("Storing TermValueSet {}", theValueSet.getIdElement().getValue());
+		ourLog.info("Storing TermValueSet for {}", theValueSet.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theValueSet.getUrl(), "ValueSet has no value for ValueSet.url");
@@ -2100,7 +2212,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			throw new UnprocessableEntityException(msg);
 		}
 
-		ourLog.info("Done storing TermValueSet[{}]", termValueSet.getId());
+		ourLog.info("Done storing TermValueSet[{}] for {}", termValueSet.getId(), theValueSet.getIdElement().toVersionless().getValueAsString());
 	}
 
 	@Override

@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
@@ -36,6 +35,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_CODE_SYSTEM;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TerminologyTest.URL_MY_VALUE_SET;
@@ -57,8 +57,24 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		loadAndPersistValueSet(theVerb);
 	}
 
+	private void loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb theVerb) throws IOException {
+		loadAndPersistCodeSystemWithDesignations(theVerb);
+		loadAndPersistValueSet(theVerb);
+	}
+
+	private void loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb theVerb) throws IOException {
+		loadAndPersistCodeSystemWithDesignations(theVerb);
+		loadAndPersistValueSetWithExclude(theVerb);
+	}
+
 	private void loadAndPersistCodeSystem(HttpVerb theVerb) throws IOException {
 		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
+		codeSystem.setId("CodeSystem/cs");
+		persistCodeSystem(codeSystem, theVerb);
+	}
+
+	private void loadAndPersistCodeSystemWithDesignations(HttpVerb theVerb) throws IOException {
+		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs-with-designations.xml");
 		codeSystem.setId("CodeSystem/cs");
 		persistCodeSystem(codeSystem, theVerb);
 	}
@@ -89,6 +105,12 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	private void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
+		valueSet.setId("ValueSet/vs");
+		persistValueSet(valueSet, theVerb);
+	}
+
+	private void loadAndPersistValueSetWithExclude(HttpVerb theVerb) throws IOException {
+		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs-with-exclude.xml");
 		valueSet.setId("ValueSet/vs");
 		persistValueSet(valueSet, theVerb);
 	}
@@ -222,7 +244,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -274,7 +296,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByIdWithFilterWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -333,7 +355,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -356,7 +378,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -398,7 +420,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testExpandByValueSetWithPreExpansion() throws IOException {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystem(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -688,6 +710,168 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testUpdateValueSetTriggersAnotherPreExpansion() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		String initialValueSetName = valueSet.getName();
+		validateTermValueSetNotExpanded(initialValueSetName);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
+
+		ValueSet updatedValueSet = valueSet;
+		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
+		persistValueSet(updatedValueSet, HttpVerb.PUT);
+		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+
+		String updatedValueSetName = valueSet.getName();
+		validateTermValueSetNotExpanded(updatedValueSetName);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
+	}
+
+	@Test
+	public void testUpdateValueSetTriggersAnotherPreExpansionUsingTransactionBundle() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
+
+		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
+		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
+
+		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
+
+		String initialValueSetName = valueSet.getName();
+		validateTermValueSetNotExpanded(initialValueSetName);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		validateTermValueSetExpandedAndChildren(initialValueSetName, codeSystem);
+
+		ValueSet updatedValueSet = valueSet;
+		updatedValueSet.setName(valueSet.getName().concat(" - MODIFIED"));
+
+		String url = ourClient.getServerBase().concat("/").concat(myExtensionalVsId.getValueAsString());
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle
+			.addEntry()
+			.setFullUrl(url)
+			.setResource(updatedValueSet)
+			.getRequest()
+			.setMethod(Bundle.HTTPVerb.PUT)
+			.setUrl(url);
+		ourLog.info("Transaction Bundle:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+		ourClient.transaction().withBundle(bundle).execute();
+
+		updatedValueSet = myValueSetDao.read(myExtensionalVsId);
+		ourLog.info("Updated ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(updatedValueSet));
+
+		String updatedValueSetName = valueSet.getName();
+		validateTermValueSetNotExpanded(updatedValueSetName);
+		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
+		validateTermValueSetExpandedAndChildren(updatedValueSetName, codeSystem);
+	}
+
+	private void validateTermValueSetNotExpanded(String theValueSetName) {
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals(theValueSetName, termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		});
+	}
+
+	private void validateTermValueSetExpandedAndChildren(String theValueSetName, CodeSystem theCodeSystem) {
+		runInTransaction(()->{
+			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
+			assertTrue(optionalValueSetByResourcePid.isPresent());
+
+			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findByUrl("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+			assertTrue(optionalValueSetByUrl.isPresent());
+
+			TermValueSet termValueSet = optionalValueSetByUrl.get();
+			assertSame(optionalValueSetByResourcePid.get(), termValueSet);
+			ourLog.info("ValueSet:\n" + termValueSet.toString());
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals(theValueSetName, termValueSet.getName());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+
+			TermValueSetConcept concept = termValueSet.getConcepts().get(0);
+			ourLog.info("Concept:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
+			assertEquals(0, concept.getOrder());
+
+			TermValueSetConceptDesignation designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+
+			designation = concept.getDesignations().get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(1);
+			ourLog.info("Concept:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+			assertEquals(1, concept.getOrder());
+
+			// ...
+
+			concept = termValueSet.getConcepts().get(22);
+			ourLog.info("Concept:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
+			assertEquals(22, concept.getOrder());
+
+			designation = concept.getDesignations().get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+
+			concept = termValueSet.getConcepts().get(23);
+			ourLog.info("Concept:\n" + concept.toString());
+			assertEquals("http://acme.org", concept.getSystem());
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
+			assertEquals(23, concept.getOrder());
+		});
+	}
+
+	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
@@ -767,7 +951,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testValiedateCodeAgainstBuiltInSystem() {
+	public void testValidateCodeAgainstBuiltInSystem() {
 		Parameters respParam = ourClient
 			.operation()
 			.onType(ValueSet.class)
@@ -839,7 +1023,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 
 	@After
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@AfterClass
@@ -876,7 +1060,7 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs);
+		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 		return codeSystem;
 	}
 
