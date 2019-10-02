@@ -787,6 +787,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return Utilities.appendSlash(base) + type + "/" + id;
   }
 
+  @Override
   public BestPracticeWarningLevel getBasePracticeWarningLevel() {
     return bpWarnings;
   }
@@ -941,10 +942,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
     return context.fetchResource(StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + type);
   }
 
+	@Override
 	public IdStatus getResourceIdRule() {
 		return resourceIdRule;
 	}
 
+	@Override
 	public void setResourceIdRule(IdStatus resourceIdRule) {
 		this.resourceIdRule = resourceIdRule;
 	}
@@ -1209,6 +1212,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
       return sd.getSnapshot().getElement().get(0);
   }
 
+  @Override
   public void setBestPracticeWarningLevel(BestPracticeWarningLevel value) {
     bpWarnings = value;
   }
@@ -2071,6 +2075,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			this.typeProfile = typeProfile;
 		}
 
+		@Override
 		public boolean equalsDeep(Base other) {
 			if (!super.equalsDeep(other) || !fhirType().equals(other.fhirType()))
 			  return false;
@@ -2153,6 +2158,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 	  	return true;
 		}
 
+		@Override
 		public boolean isPrimitive() {
 			String t = fhirType();
 			return t.equalsIgnoreCase("boolean") || t.equalsIgnoreCase("integer") || t.equalsIgnoreCase("string") || t.equalsIgnoreCase("decimal") || t.equalsIgnoreCase("uri") || t.equalsIgnoreCase("base64Binary") ||
@@ -2188,6 +2194,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			return list;
 		}
 
+		@Override
 		public String primitiveValue() {
 			return wrapper.getAttribute("value");
 		}

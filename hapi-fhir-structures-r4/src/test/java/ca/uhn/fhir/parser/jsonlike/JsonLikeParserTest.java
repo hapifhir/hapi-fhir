@@ -699,21 +699,25 @@ public class JsonLikeParserTest {
 				return super.getAsBoolean();
 			}
 
+			@Override
 			public boolean isObject () {
 				return (nativeValue != null)
 					&& ( (nativeValue instanceof Map) || Map.class.isAssignableFrom(nativeValue.getClass()) );
 			}
 
+			@Override
 			public boolean isArray () {
 				return (nativeValue != null)
 					&& ( (nativeValue instanceof List) || List.class.isAssignableFrom(nativeValue.getClass()));
 			}
 
+			@Override
 			public boolean isString () {
 				return (nativeValue != null)
 					&& ( (nativeValue instanceof String) || String.class.isAssignableFrom(nativeValue.getClass()));
 			}
 
+			@Override
 			public boolean isNumber () {
 				return (nativeValue != null)
 					&& ( (nativeValue instanceof Number) || Number.class.isAssignableFrom(nativeValue.getClass()) );
@@ -724,6 +728,7 @@ public class JsonLikeParserTest {
 					&& ( (nativeValue instanceof Boolean) || Boolean.class.isAssignableFrom(nativeValue.getClass()) );
 			}
 			
+			@Override
 			public boolean isNull () {
 				return (null == nativeValue);
 			}

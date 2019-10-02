@@ -59,6 +59,7 @@ public class ResourceBlock extends Child {
 		return getClassName();
 	}
 
+	@Override
 	public boolean isBlock() {
 		return true;
 	}
