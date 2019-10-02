@@ -300,6 +300,10 @@
 				A docker compose script for the hapi-fhir-jpaserver-starter project was added. Thanks to
 				Long Nguyen for the pull request!
 			</action>
+			<action type="add" issue="1476">
+				A number of overridden methods in the HAPI FHIR codebase did not have the
+				@Override annotation. Thanks to Clayton Bodendein for cleaning this up!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
