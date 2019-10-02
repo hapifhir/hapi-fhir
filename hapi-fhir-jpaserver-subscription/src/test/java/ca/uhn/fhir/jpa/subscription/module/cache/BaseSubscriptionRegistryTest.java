@@ -6,6 +6,7 @@ import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
 public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3Test {
@@ -21,7 +22,11 @@ public abstract class BaseSubscriptionRegistryTest extends BaseSubscriptionDstu3
 	@After
 	public void clearRegistryAfter() {
 		mySubscriptionRegistry.unregisterAllSubscriptions();
-		assertRegistrySize(0);
+		await().until(this::registryEmpty);
+	}
+
+	public boolean registryEmpty() {
+		return mySubscriptionChannelRegistry.size() == 0;
 	}
 
 	protected Subscription createSubscription() {
