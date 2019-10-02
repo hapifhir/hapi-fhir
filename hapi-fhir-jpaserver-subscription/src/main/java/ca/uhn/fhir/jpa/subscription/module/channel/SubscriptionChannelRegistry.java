@@ -61,19 +61,19 @@ public class SubscriptionChannelRegistry {
 			return;
 		}
 		String channelName = theActiveSubscription.getChannelName();
-		ourLog.info("Removing subscription {} from channel {}: {}", theActiveSubscription.getId() ,channelName, myActiveSubscriptionByChannelName);
+		ourLog.info("Removing subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
 		boolean removed = myActiveSubscriptionByChannelName.remove(channelName, theActiveSubscription.getId());
 		if (!removed) {
 			ourLog.warn("Failed to remove subscription {} from channel {}", theActiveSubscription.getId() ,channelName);
 		}
 
-		// This was the last one.  Shut down the channel
+		// This was the last one.  Close and remove the channel
 		if (!myActiveSubscriptionByChannelName.containsKey(channelName)) {
 			SubscriptionChannelWithHandlers channel = mySubscriptionChannelCache.get(channelName);
 			if (channel != null) {
 				channel.close();
 			}
-			mySubscriptionChannelCache.remove(channelName);
+			mySubscriptionChannelCache.closeAndRemove(channelName);
 		}
 	}
 

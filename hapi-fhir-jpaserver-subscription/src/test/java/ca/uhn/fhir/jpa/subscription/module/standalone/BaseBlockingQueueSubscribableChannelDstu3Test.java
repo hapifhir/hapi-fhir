@@ -10,10 +10,10 @@ import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionMatchingSubscriberTest;
@@ -210,8 +210,6 @@ public abstract class BaseBlockingQueueSubscribableChannelDstu3Test extends Base
 		}
 
 		@Override
-		public void clear() {
-			updateLatch.clear();
-		}
+		public void clear() { updateLatch.clear();}
 	}
 }

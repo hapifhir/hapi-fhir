@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  */
 
 import ca.uhn.fhir.jpa.subscription.module.LinkedBlockingQueueSubscribableChannel;
-import org.springframework.messaging.SubscribableChannel;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
+import org.springframework.messaging.SubscribableChannel;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

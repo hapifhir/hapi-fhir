@@ -63,8 +63,4 @@ public class SubscriptionChannelWithHandlers implements Closeable {
 	public MessageChannel getChannel() {
 		return mySubscribableChannel;
 	}
-
-	public String getChannelName() {
-		return myChannelName;
-	}
 }

@@ -2,16 +2,12 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionDeliveryChannelNamer;
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.After;
 import org.junit.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.junit.Assert.*;
 
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class SubscriptionRegistrySharedTest extends BaseSubscriptionRegistryTest {

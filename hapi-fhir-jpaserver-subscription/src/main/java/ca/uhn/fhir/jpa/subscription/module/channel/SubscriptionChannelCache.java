@@ -1,15 +1,10 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
-import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,10 +17,6 @@ class SubscriptionChannelCache {
 		return myCache.get(theChannelName);
 	}
 
-	public Collection<SubscriptionChannelWithHandlers> getAll() {
-		return Collections.unmodifiableCollection(myCache.values());
-	}
-
 	public int size() {
 		return myCache.size();
 	}
@@ -34,7 +25,7 @@ class SubscriptionChannelCache {
 		myCache.put(theChannelName, theValue);
 	}
 
-	public synchronized void remove(String theChannelName) {
+	synchronized void closeAndRemove(String theChannelName) {
 		Validate.notBlank(theChannelName);
 
 		SubscriptionChannelWithHandlers subscriptionChannelWithHandlers = myCache.get(theChannelName);

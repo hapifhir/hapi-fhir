@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
 import org.hl7.fhir.dstu3.model.Subscription;
-import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

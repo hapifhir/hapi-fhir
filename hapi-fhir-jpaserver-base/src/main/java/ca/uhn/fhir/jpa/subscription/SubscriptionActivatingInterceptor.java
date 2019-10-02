@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;

@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
 import org.junit.Before;

@@ -4,7 +4,6 @@ import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.*;

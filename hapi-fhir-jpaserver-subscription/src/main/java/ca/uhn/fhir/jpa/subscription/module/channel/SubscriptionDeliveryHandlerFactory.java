@@ -20,16 +20,13 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.email.SubscriptionDeliveringEmailSubscriber;
-import org.hl7.fhir.r4.model.Subscription;
 import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.util.Validate;
 
 import java.util.Optional;
 

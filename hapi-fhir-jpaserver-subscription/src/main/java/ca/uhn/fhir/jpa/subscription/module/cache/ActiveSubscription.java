@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

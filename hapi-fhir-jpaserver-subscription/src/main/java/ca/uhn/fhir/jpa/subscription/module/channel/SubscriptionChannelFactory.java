@@ -20,11 +20,8 @@ package ca.uhn.fhir.jpa.subscription.module.channel;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import org.springframework.messaging.SubscribableChannel;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscribableChannelFactory;
-import ca.uhn.fhir.jpa.subscription.module.channel.ISubscriptionDeliveryChannelNamer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.stereotype.Component;
 
 @Component
