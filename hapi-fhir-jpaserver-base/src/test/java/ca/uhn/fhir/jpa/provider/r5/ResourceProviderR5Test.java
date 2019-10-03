@@ -1,10 +1,14 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.jpa.entity.Search;
+import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -19,7 +23,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.*;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
@@ -85,6 +90,87 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			.execute();
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		assertThat(ids, containsInAnyOrder(pt1id));
+
+	}
+
+	@Test
+	public void testErroredSearchIsNotReused() {
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Hello");
+		myPatientDao.create(pt1);
+
+		// Perform the search
+		Bundle response0 = ourClient.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("Hello"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(1, response0.getEntry().size());
+
+		// Perform the search again (should return the same)
+		Bundle response1 = ourClient.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("Hello"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(1, response1.getEntry().size());
+		assertEquals(response0.getId(), response1.getId());
+
+		// Pretend the search was errored out
+		runInTransaction(()->{
+			assertEquals(1L, mySearchEntityDao.count());
+			Search search = mySearchEntityDao.findAll().iterator().next();
+			search.setStatus(SearchStatusEnum.FAILED);
+			search.setFailureMessage("Some Failure Message");
+			search.setFailureCode(501);
+		});
+
+		// Perform the search again (shouldn't return the errored out search)
+		Bundle response3 = ourClient.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("Hello"))
+			.returnBundle(Bundle.class)
+			.execute();
+		assertEquals(1, response3.getEntry().size());
+		assertNotEquals(response0.getId(), response3.getId());
+
+	}
+
+	@Test
+	public void testErroredSearchReturnsAppropriateResponse() {
+		Patient pt1 = new Patient();
+		pt1.addName().setFamily("Hello");
+		myPatientDao.create(pt1);
+
+		Patient pt2 = new Patient();
+		pt2.addName().setFamily("Hello");
+		myPatientDao.create(pt2);
+
+		// Perform a search for the first page
+		Bundle response0 = ourClient.search()
+			.forResource("Patient")
+			.where(Patient.NAME.matches().value("Hello"))
+			.returnBundle(Bundle.class)
+			.count(1)
+			.execute();
+		assertEquals(1, response0.getEntry().size());
+
+		// Pretend the search was errored out
+		runInTransaction(()->{
+			assertEquals(1L, mySearchEntityDao.count());
+			Search search = mySearchEntityDao.findAll().iterator().next();
+			search.setStatus(SearchStatusEnum.FAILED);
+			search.setFailureMessage("Some Failure Message");
+			search.setFailureCode(501);
+		});
+
+		// Request the second page
+		try {
+			ourClient.loadPage().next(response0).execute();
+		} catch (NotImplementedOperationException e) {
+			assertEquals(501, e.getStatusCode());
+			assertThat(e.getMessage(), containsString("Some Failure Message"));
+		}
 
 	}
 

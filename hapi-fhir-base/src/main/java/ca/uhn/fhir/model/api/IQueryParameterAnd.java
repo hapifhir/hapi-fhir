@@ -40,7 +40,7 @@ public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> extends Seri
 	 * @param theContext TODO
 	 * @param theParamName TODO
 	 */
-	public void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters) throws InvalidRequestException;
+	void setValuesAsQueryTokens(FhirContext theContext, String theParamName, List<QualifiedParamList> theParameters) throws InvalidRequestException;
 
 	/**
 	 * 
@@ -50,7 +50,7 @@ public interface IQueryParameterAnd<T extends IQueryParameterOr<?>> extends Seri
 	 *    for information on the <b>token</b> format
 	 * </p>
 	 */
-	public List<T> getValuesAsQueryTokens();
+	List<T> getValuesAsQueryTokens();
 
 	
 }
