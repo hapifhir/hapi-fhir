@@ -28,11 +28,11 @@ jobs:
           mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
       - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
         displayName: 'codecov'
-  - task: PublishCodeCoverageResults@1
-    inputs:
-       codeCoverageTool: 'JaCoCo'
-       summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
-       failIfCoverageEmpty: false
+      - task: PublishCodeCoverageResults@1
+        inputs:
+          codeCoverageTool: 'JaCoCo'
+          summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
+          failIfCoverageEmpty: false
 
 # Potential Additional Maven3 Options:
 #publishJUnitResults: true
