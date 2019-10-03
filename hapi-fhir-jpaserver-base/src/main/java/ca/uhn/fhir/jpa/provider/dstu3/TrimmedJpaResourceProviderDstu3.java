@@ -1,7 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.provider.TrimmedBaseJpaResourceProvider;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
