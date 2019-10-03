@@ -81,7 +81,7 @@ public class SubscriptionChannelRegistry {
 		return mySubscriptionChannelCache.get(theChannelName);
 	}
 
-	public int size() {
+	public synchronized int size() {
 		return mySubscriptionChannelCache.size();
 	}
 
