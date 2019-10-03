@@ -1,4 +1,4 @@
-package ca.uhn.fhir.ext;
+package ca.uhn.fhir.jpa.provider;
 
 /*
  * #%L
@@ -21,7 +21,6 @@ package ca.uhn.fhir.ext;
  */
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.provider.BaseJpaProvider;
 import ca.uhn.fhir.jpa.util.ExpungeOptions;
 import ca.uhn.fhir.jpa.util.ExpungeOutcome;
 import ca.uhn.fhir.rest.annotation.IdParam;

@@ -10,7 +10,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface IDelete<T extends IAnyResource> extends IResourceProvider<T> {
+public interface IDelete<T extends IAnyResource> extends IExtendedResourceProvider<T> {
 
 	@Delete
 	default MethodOutcome delete(HttpServletRequest theRequest, @IdParam IdType theResource, @ConditionalUrlParam(supportsMultiple = true) String theConditional, RequestDetails theRequestDetails) {

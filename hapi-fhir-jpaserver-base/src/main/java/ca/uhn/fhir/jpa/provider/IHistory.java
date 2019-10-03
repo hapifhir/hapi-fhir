@@ -13,7 +13,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
-public interface IHistory<T extends IAnyResource> extends IResourceProvider<T> {
+public interface IHistory<T extends IAnyResource> extends IExtendedResourceProvider<T> {
 
 	@History
 	default IBundleProvider getHistoryForResourceInstance(
@@ -27,21 +27,6 @@ public interface IHistory<T extends IAnyResource> extends IResourceProvider<T> {
 		try {
 			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
 			return getDao().history(theId, sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
-		} finally {
-			endRequest(theRequest);
-		}
-	}
-
-	@History
-	default IBundleProvider getHistoryForResourceType(
-		HttpServletRequest theRequest,
-		@Since Date theSince,
-		@At DateRangeParam theAt,
-		RequestDetails theRequestDetails) {
-		startRequest(theRequest);
-		try {
-			DateRangeParam sinceOrAt = processSinceOrAt(theSince, theAt);
-			return getDao().history(sinceOrAt.getLowerBoundAsInstant(), sinceOrAt.getUpperBoundAsInstant(), theRequestDetails);
 		} finally {
 			endRequest(theRequest);
 		}

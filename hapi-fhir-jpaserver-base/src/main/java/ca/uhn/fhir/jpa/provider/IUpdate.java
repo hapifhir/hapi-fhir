@@ -11,7 +11,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 
 import javax.servlet.http.HttpServletRequest;
 
-public interface IUpdate<T extends IAnyResource> extends IResourceProvider<T> {
+public interface IUpdate<T extends IAnyResource> extends IExtendedResourceProvider<T> {
 
 	@Update
 	default MethodOutcome update(HttpServletRequest theRequest, @ResourceParam T theResource, @IdParam IdType theId, @ConditionalUrlParam String theConditional, RequestDetails theRequestDetails) {

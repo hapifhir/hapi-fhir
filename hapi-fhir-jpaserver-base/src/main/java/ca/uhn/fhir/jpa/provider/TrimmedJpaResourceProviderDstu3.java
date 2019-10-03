@@ -1,4 +1,4 @@
-package ca.uhn.fhir.ext;
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
