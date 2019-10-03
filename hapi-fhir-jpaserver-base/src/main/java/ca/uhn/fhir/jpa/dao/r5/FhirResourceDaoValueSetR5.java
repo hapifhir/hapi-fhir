@@ -151,14 +151,6 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 		return retVal;
 	}
 
-	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
-		for (ConceptSetComponent nextExclude : listToValidate) {
-			if (isBlank(nextExclude.getSystem()) && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
-				throw new InvalidRequestException("ValueSet contains " + name + " criteria with no system defined");
-			}
-		}
-	}
-
 	@Override
 	public ValueSet expandByIdentifier(String theUri, String theFilter) {
 		if (isBlank(theUri)) {
