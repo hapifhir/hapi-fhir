@@ -399,7 +399,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			subscription.setCriteriaString(criteria);
 			subscription.setIdElement(new IdType("Subscription", 123L));
 			ResourceModifiedMessage msg = new ResourceModifiedMessage(myContext, patient, ResourceModifiedMessage.OperationTypeEnum.CREATE);
-			msg.setSubscriptionId("Subscription/123");
+			msg.setSubscriptionId("123");
 			msg.setId(new IdType("Patient/ABC"));
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail();

@@ -143,7 +143,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t->t.getValue()).collect(Collectors.toList()));
 		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t->t.getValue()).collect(Collectors.toList()));
 		if (theSubscriptionId != null) {
-			jobDetails.setSubscriptionId(theSubscriptionId.toUnqualifiedVersionless().getValue());
+			jobDetails.setSubscriptionId(theSubscriptionId.getIdPart());
 		}
 
 		// Submit job for processing
@@ -315,7 +315,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ourLog.info("Submitting resource {} to subscription {}", theResourceToTrigger.getIdElement().toUnqualifiedVersionless().getValue(), theSubscriptionId);
 
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
-		msg.setSubscriptionId(new IdType(theSubscriptionId).toUnqualifiedVersionless().getValue());
+		msg.setSubscriptionId(theSubscriptionId);
 
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.subscription.module.cache;
+package ca.uhn.fhir.jpa.subscription.module.channel;
 
 /*-
  * #%L
@@ -34,12 +34,8 @@ public class SubscriptionChannelFactory {
 		mySubscribableChannelFactory = theSubscribableChannelFactory;
 	}
 
-	public SubscribableChannel newDeliveryChannel(String theSubscriptionId, String theChannelType) {
-		String channelName = "subscription-delivery-" +
-			theChannelType +
-			"-" +
-			theSubscriptionId;
-		return mySubscribableChannelFactory.createSubscribableChannel(channelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
+	public SubscribableChannel newDeliveryChannel(String theChannelName) {
+		return mySubscribableChannelFactory.createSubscribableChannel(theChannelName, mySubscribableChannelFactory.getDeliveryChannelConcurrentConsumers());
 	}
 
 	public SubscribableChannel newMatchingChannel(String theChannelName) {

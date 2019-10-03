@@ -1,9 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.standalone;
 
-import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
 import org.junit.Before;
@@ -16,7 +13,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private static final int MOCK_FHIR_CLIENT_FAILURES = 5;
+	private static final int MOCK_FHIR_CLIENT_FAILURES = 3;
 	@Autowired
 	private MockFhirClientSubscriptionProvider myMockFhirClientSubscriptionProvider;
 
@@ -41,9 +38,9 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
-        mySubscriptionActivatedPost.setExpectedCount(2);
+		mySubscriptionActivatedPost.setExpectedCount(2);
 		initSubscriptionLoader(subs, "uuid");
-        mySubscriptionActivatedPost.awaitExpected();
+		mySubscriptionActivatedPost.awaitExpected();
 		assertEquals(0, myMockFhirClientSubscriptionProvider.getFailCount());
 	}
 }
