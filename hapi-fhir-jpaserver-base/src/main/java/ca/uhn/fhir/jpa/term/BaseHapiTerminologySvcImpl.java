@@ -821,12 +821,16 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				for (VersionIndependentConcept nextConcept : expanded) {
 					if (theAdd) {
 						TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
-						myConceptDao
-							.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
-							.ifPresent(concept ->
-								addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
-							);
-
+						if (codeSystem != null) {
+							myConceptDao
+								.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
+								.ifPresent(concept ->
+									addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
+								);
+						} else {
+							Collection<TermConceptDesignation> emptyCollection = Collections.emptyList();
+							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), null);
+						}
 					}
 					if (isNoneBlank(nextConcept.getSystem(), nextConcept.getCode()) && !theAdd && theAddedCodes.remove(nextConcept.getSystem() + "|" + nextConcept.getCode())) {
 						theValueSetCodeAccumulator.excludeConcept(nextConcept.getSystem(), nextConcept.getCode());

@@ -596,6 +596,24 @@ public class ResourceProviderR4ValueSetTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
+	public void testExpandValueSetByBuiltInUrl() {
+
+		Parameters respParam = ourClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameter(Parameters.class, "url", new UriType("http://hl7.org/fhir/ValueSet/medication-status"))
+			.execute();
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+
+		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		ourLog.info(resp);
+
+		assertThat(resp, containsStringIgnoringCase("<system value=\"http://hl7.org/fhir/CodeSystem/medication-status\"/>"));
+		assertThat(resp, containsStringIgnoringCase("<code value=\"active\"/>"));
+	}
+
+	@Test
 	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
 		assertNotNull(myLocalValueSetId);

@@ -780,7 +780,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		Predicate nextPredicate = createPredicateResourceId(myResourceTableRoot, theResourceName, theValues, theOperation, theRequest);
 
-		if (theOperation != null) {
+		if (nextPredicate != null) {
 			myPredicates.add(nextPredicate);
 			return nextPredicate;
 		}
@@ -825,7 +825,7 @@ public class SearchBuilder implements ISearchBuilder {
 				nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
 			}
 
-			if (theOperation != null) {
+			if (nextPredicate != null) {
 				break;
 			}
 
