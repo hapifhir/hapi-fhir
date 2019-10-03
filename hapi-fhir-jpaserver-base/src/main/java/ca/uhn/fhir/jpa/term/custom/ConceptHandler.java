@@ -37,6 +37,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class ConceptHandler implements IRecordHandler {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ConceptHandler.class);
+	public static final String CODE = "CODE";
+	public static final String DISPLAY = "DISPLAY";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final TermCodeSystemVersion myCodeSystemVersion;
 
@@ -47,9 +49,9 @@ public class ConceptHandler implements IRecordHandler {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		String code = trim(theRecord.get("CODE"));
+		String code = trim(theRecord.get(CODE));
 		if (isNotBlank(code)) {
-			String display = trim(theRecord.get("DISPLAY"));
+			String display = trim(theRecord.get(DISPLAY));
 
 			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 
