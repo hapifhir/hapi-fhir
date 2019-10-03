@@ -156,7 +156,6 @@ public class BundleUtil {
 	 * Extract all of the resources from a given bundle
 	 */
 	public static List<BundleEntryParts> toListOfEntries(FhirContext theContext, IBaseBundle theBundle) {
-
 		EntryListAccumulator entryListAccumulator = new EntryListAccumulator();
 		processEntries(theContext, theBundle, entryListAccumulator);
 		return entryListAccumulator.getList();
@@ -254,6 +253,4 @@ public class BundleUtil {
 		}
 		return retVal;
 	}
-
-
 }

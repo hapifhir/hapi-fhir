@@ -195,7 +195,6 @@ public class SearchNarrowingInterceptor {
 		BundleUtil.processEntries(ctx, bundle, processor);
 	}
 
-
 	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
 		private final FhirContext myFhirContext;
 		private final ServletRequestDetails myRequestDetails;
@@ -275,4 +274,5 @@ public class SearchNarrowingInterceptor {
 			}
 		}
 	}
+
 }

@@ -440,7 +440,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			} catch (NotModifiedException e) {
 				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(Constants.STATUS_HTTP_304_NOT_MODIFIED));
 			} catch (BaseServerResponseException e) {
-				ourLog.info("Failure processing transaction GET {}: {}", requestDetails.getRequestPath(), e.toString());
+				ourLog.info("Failure processing transaction GET {}: {}", url, e.toString());
 				myVersionAdapter.setResponseStatus(nextRespEntry, toStatusString(e.getStatusCode()));
 				populateEntryWithOperationOutcome(e, nextRespEntry);
 			}
@@ -462,8 +462,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 
 		return response;
 	}
-
-
 
 	private boolean isValidVerb(String theVerb) {
 		try {

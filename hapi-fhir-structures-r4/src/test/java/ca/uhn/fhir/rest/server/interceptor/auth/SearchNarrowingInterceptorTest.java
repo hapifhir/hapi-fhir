@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -307,7 +306,6 @@ public class SearchNarrowingInterceptorTest {
 			ourLastBundleRequest = theInput.getEntry().get(0).getRequest();
 			return theInput;
 		}
-
 	}
 
 	private static class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {

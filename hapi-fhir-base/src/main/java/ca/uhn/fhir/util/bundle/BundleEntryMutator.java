@@ -12,7 +12,7 @@ public class BundleEntryMutator {
 	private final BaseRuntimeChildDefinition myRequestChildDef;
 	private final BaseRuntimeElementCompositeDefinition<?> myRequestChildContentsDef;
 
-	BundleEntryMutator(IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theRequestChildContentsDef) {
+	public BundleEntryMutator(IBase theEntry, BaseRuntimeChildDefinition theRequestChildDef, BaseRuntimeElementCompositeDefinition<?> theRequestChildContentsDef) {
 		myEntry = theEntry;
 		myRequestChildDef = theRequestChildDef;
 		myRequestChildContentsDef = theRequestChildContentsDef;

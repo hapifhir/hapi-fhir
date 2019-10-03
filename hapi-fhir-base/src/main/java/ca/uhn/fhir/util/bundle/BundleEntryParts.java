@@ -9,7 +9,7 @@ public class BundleEntryParts {
 	private final String myUrl;
 	private final String myConditionalUrl;
 
-	BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
+	public BundleEntryParts(RequestTypeEnum theRequestType, String theUrl, IBaseResource theResource, String theConditionalUrl) {
 		super();
 		myRequestType = theRequestType;
 		myUrl = theUrl;

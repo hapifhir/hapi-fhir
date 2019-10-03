@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-
 public class ServletSubRequestDetails extends ServletRequestDetails {
 
 	private Map<String, List<String>> myHeaders = new HashMap<>();
