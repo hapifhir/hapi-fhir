@@ -31,6 +31,19 @@
 			<artifactId>javax.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- FIXME KHS for NameValuePair grab apache httpcore instead-->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<optional>true</optional>
+			<type>pom</type>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.jsonld-java</groupId>
+					<artifactId>jsonld-java</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 
 		<!-- 
 		Spring is added as an optional dependency just so that it

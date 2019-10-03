@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.util.TestUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -30,6 +31,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,6 +59,8 @@ public class SearchNarrowingInterceptorTest {
 	private static Server ourServer;
 	private static IGenericClient ourClient;
 	private static AuthorizedList ourNextCompartmentList;
+	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
+
 
 	@Before
 	public void before() {
@@ -114,7 +118,7 @@ public class SearchNarrowingInterceptorTest {
 
 		Bundle bundle = new Bundle();
 		bundle.setType(Bundle.BundleType.TRANSACTION);
-		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Observation");
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient");
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		ourClient
@@ -122,15 +126,9 @@ public class SearchNarrowingInterceptorTest {
 			.withBundle(bundle)
 			.execute();
 
-		assertEquals("Observation.search", ourLastHitMethod);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastCodeParam);
-		assertNull(ourLastSubjectParam);
-		assertNull(ourLastPerformerParam);
-		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/123,Patient/456"));
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
 	}
-
-
 
 	/**
 	 * Should not make any changes
@@ -305,6 +303,8 @@ public class SearchNarrowingInterceptorTest {
 	public static class DummySystemProvider {
 		@Transaction
 		public Bundle transaction(@TransactionParam Bundle theInput) {
+			ourLastHitMethod = "transaction";
+			ourLastBundleRequest = theInput.getEntry().get(0).getRequest();
 			return theInput;
 		}
 

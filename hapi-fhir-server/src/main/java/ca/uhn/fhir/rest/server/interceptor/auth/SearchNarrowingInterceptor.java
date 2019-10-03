@@ -30,8 +30,14 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.bundle.BundleUtil;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -42,6 +48,7 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * This interceptor can be used to automatically narrow the scope of searches in order to
@@ -68,6 +75,7 @@ import java.util.*;
  */
 public class SearchNarrowingInterceptor {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptor.class);
+
 
 	/**
 	 * Subclasses should override this method to supply the set of compartments that
@@ -177,21 +185,46 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
-	public void incomingRequestPreHandled(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+	public void incomingRequestPreHandled(ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
 		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
 			return;
 		}
-		incomingRequestPostProcessedBundle(theRequestDetails, theRequest, theResponse);
-	}
 
-	private void incomingRequestPostProcessedBundle(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
 		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
 		FhirContext ctx = theRequestDetails.getFhirContext();
-		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ctx, bundle);
-		for (BundleEntryParts entry : entries) {
-			bundle.setUserData("test", "bark");
+		BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
+		BundleUtil.processEntries(ctx, bundle, processor);
+	}
+
+
+	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
+		private final FhirContext myFhirContext;
+		private final ServletRequestDetails myRequestDetails;
+		private final HttpServletRequest myRequest;
+		private final HttpServletResponse myResponse;
+
+		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+			myFhirContext = theFhirContext;
+			myRequestDetails = theRequestDetails;
+			myRequest = theRequest;
+			myResponse = theResponse;
 		}
-		theRequestDetails.setResource(bundle);
+
+		@Override
+		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
+			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+
+			String url = theModifiableBundleEntry.getRequestUrl();
+
+			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
+			BaseMethodBinding<?> method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
+			RestOperationTypeEnum restOperationType = method.getRestOperationType();
+			subServletRequestDetails.setRestOperationType(restOperationType);
+
+			incomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
+
+			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
+		}
 	}
 
 	private void processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, HashMap<String, List<String>> theParameterToOrValues, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
@@ -243,5 +276,4 @@ public class SearchNarrowingInterceptor {
 			}
 		}
 	}
-
 }

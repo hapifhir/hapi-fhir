@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.rest.server.servlet;
 
 /*
  * #%L

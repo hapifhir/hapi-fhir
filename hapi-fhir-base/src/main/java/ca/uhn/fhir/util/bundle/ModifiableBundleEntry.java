@@ -20,13 +20,11 @@ public class ModifiableBundleEntry {
 		return myBundleEntryParts;
 	}
 
-	void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
+	public void setRequestUrl(FhirContext theFhirContext, String theRequestUrl) {
 		myBundleEntryMutator.setRequestUrl(theFhirContext, theRequestUrl);
 	}
 
-	String getRequestUrl() {
+	public String getRequestUrl() {
 		return myBundleEntryParts.getUrl();
 	}
-
-
 }
