@@ -304,7 +304,7 @@
 				A number of overridden methods in the HAPI FHIR codebase did not have the
 				@Override annotation. Thanks to Clayton Bodendein for cleaning this up!
 			</action>
-			<action type"add" issue="1373">
+			<action type="add" issue="1373">
 				Plain server resource providers were not correctly matching methods that 
 				had the _id search parameter if a client performed a request using a modifier
 				such as :not or :exact. Thanks to Petro Mykhailyshyn
@@ -314,6 +314,13 @@
 				The JPA server contained a restriction on the columns used to hold a resource's type name
 				that was too short to hold the longest name from the final R4 definitions. This has been
 				corrected to account for names up to 40 characters long.
+			</action>
+			<action type="fix">
+                A new command has been added to the HAPI FHIR CLI that allows external (not-present) codesystem deltas to be manually uploaded
+			</action>
+			<action type="fix">
+				The subscription triggering operation was not able to handle commas within search URLs being
+				used to trigger resources for subscription checking. This has been corrected.
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

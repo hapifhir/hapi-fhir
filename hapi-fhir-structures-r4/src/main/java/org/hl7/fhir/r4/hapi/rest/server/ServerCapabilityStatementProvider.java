@@ -573,15 +573,6 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     // ignore
   }
 
-  private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
-    Collections.sort(searchParameters, new Comparator<RuntimeSearchParam>() {
-      @Override
-      public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
-        return theO1.getName().compareTo(theO2.getName());
-      }
-    });
-  }
-
   private void sortSearchParameters(List<SearchParameter> searchParameters) {
     Collections.sort(searchParameters, new Comparator<SearchParameter>() {
       @Override

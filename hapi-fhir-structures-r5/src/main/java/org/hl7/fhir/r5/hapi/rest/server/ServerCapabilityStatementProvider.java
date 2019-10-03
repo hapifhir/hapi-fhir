@@ -15,8 +15,8 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.*;
-import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
+import ca.uhn.fhir.rest.server.method.OperationMethodBinding.ReturnType;
 import ca.uhn.fhir.rest.server.util.BaseServerCapabilityStatementProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -75,16 +75,6 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
    */
   public ServerCapabilityStatementProvider() {
     super();
-  }
-
-  /**
-   * Constructor
-   *
-   * @deprecated Use no-args constructor instead. Deprecated in 4.0.0
-   */
-  @Deprecated
-  public ServerCapabilityStatementProvider(RestfulServer theRestfulServer) {
-    this();
   }
 
   /**
@@ -558,34 +548,12 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     return op;
   }
 
-  /**
-   * Sets the cache property (default is true). If set to true, the same response will be returned for each invocation.
-   * <p>
-   * See the class documentation for an important note if you are extending this class
-   * </p>
-   *
-   * @deprecated Since 4.0.0 - This method no longer does anything
-   */
-  @Deprecated
-  public ServerCapabilityStatementProvider setCache(boolean theCache) {
-    return this;
-  }
-
   @Override
   public void setRestfulServer(RestfulServer theRestfulServer) {
     // ignore
   }
 
-  private void sortRuntimeSearchParameters(List<RuntimeSearchParam> searchParameters) {
-    Collections.sort(searchParameters, new Comparator<RuntimeSearchParam>() {
-      @Override
-      public int compare(RuntimeSearchParam theO1, RuntimeSearchParam theO2) {
-        return theO1.getName().compareTo(theO2.getName());
-      }
-    });
-  }
-
-  private void sortSearchParameters(List<SearchParameter> searchParameters) {
+	private void sortSearchParameters(List<SearchParameter> searchParameters) {
     Collections.sort(searchParameters, new Comparator<SearchParameter>() {
       @Override
       public int compare(SearchParameter theO1, SearchParameter theO2) {
