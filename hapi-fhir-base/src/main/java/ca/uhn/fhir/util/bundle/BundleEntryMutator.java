@@ -7,7 +7,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-class BundleEntryMutator {
+public class BundleEntryMutator {
 	private final IBase myEntry;
 	private final BaseRuntimeChildDefinition myRequestChildDef;
 	private final BaseRuntimeElementCompositeDefinition<?> myRequestChildContentsDef;

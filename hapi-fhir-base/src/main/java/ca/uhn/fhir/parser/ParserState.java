@@ -32,7 +32,7 @@ import ca.uhn.fhir.model.primitive.XhtmlDt;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.JsonLikeValue.ValueType;
 import ca.uhn.fhir.util.*;
-import ca.uhn.fhir.util.bundle.BundleUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.tuple.Pair;

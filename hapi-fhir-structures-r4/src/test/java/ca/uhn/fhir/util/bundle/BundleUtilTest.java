@@ -2,8 +2,7 @@ package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.bundle.BundleUtil;
-import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.AfterClass;

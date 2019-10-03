@@ -1,7 +1,11 @@
-package ca.uhn.fhir.util.bundle;
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.util.bundle.BundleEntryMutator;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import ca.uhn.fhir.util.bundle.EntryListAccumulator;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;

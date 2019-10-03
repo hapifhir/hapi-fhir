@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-class EntryListAccumulator implements Consumer<ModifiableBundleEntry> {
+public class EntryListAccumulator implements Consumer<ModifiableBundleEntry> {
 	private final List<BundleEntryParts> myList = new ArrayList<>();
 
 	@Override

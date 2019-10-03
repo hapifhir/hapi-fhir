@@ -23,7 +23,7 @@ package ca.uhn.fhir.validation.schematron;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.bundle.BundleUtil;
+import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.validation.*;
 import com.helger.commons.error.IError;
 import com.helger.commons.error.list.IErrorList;
