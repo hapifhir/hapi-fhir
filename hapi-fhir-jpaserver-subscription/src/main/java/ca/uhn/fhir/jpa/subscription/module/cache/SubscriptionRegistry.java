@@ -53,11 +53,11 @@ public class SubscriptionRegistry {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionRegistry.class);
 	private final ActiveSubscriptionCache myActiveSubscriptionCache = new ActiveSubscriptionCache();
 	@Autowired
-	SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
+	private SubscriptionCanonicalizer<IBaseResource> mySubscriptionCanonicalizer;
 	@Autowired
-	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
+	private ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer;
 	@Autowired
-	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 

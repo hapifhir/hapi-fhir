@@ -26,11 +26,11 @@ public class SubscriptionChannelRegistry {
 	private final Multimap<String, String> myActiveSubscriptionByChannelName = MultimapBuilder.hashKeys().arrayListValues().build();
 
 	@Autowired
-	SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
+	private SubscriptionDeliveryHandlerFactory mySubscriptionDeliveryHandlerFactory;
 	@Autowired
-	SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
+	private SubscriptionChannelFactory mySubscriptionDeliveryChannelFactory;
 	@Autowired
-	ModelConfig myModelConfig;
+	private ModelConfig myModelConfig;
 
 	public void add(ActiveSubscription theActiveSubscription) {
 		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
