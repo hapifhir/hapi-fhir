@@ -9,7 +9,7 @@ import org.hl7.fhir.r5.hapi.rest.server.ServerProfileProvider;
 public class FhirServerR5 implements IFhirVersionServer {
   @Override
   public ServerCapabilityStatementProvider createServerConformanceProvider(RestfulServer theServer) {
-    return new ServerCapabilityStatementProvider(theServer);
+    return new ServerCapabilityStatementProvider();
   }
 
   @Override

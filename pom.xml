@@ -1672,6 +1672,10 @@
 					<configuration>
 						<excludes>
 							<exclude>ca/uhn/fhir/model/dstu2/**/*.class</exclude>
+							<exclude>ca/uhn/fhir/jpa/rp/r5/*.class</exclude>
+							<exclude>ca/uhn/fhir/jpa/rp/r4/*.class</exclude>
+							<exclude>ca/uhn/fhir/jpa/rp/dstu3/*.class</exclude>
+							<exclude>ca/uhn/fhir/jpa/rp/dstu2/*.class</exclude>
 						</excludes>
 					</configuration>
 				</plugin>

@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -1478,6 +1479,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("8450-9", concept.getCode());
 				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 				assertEquals(2, concept.getDesignations().size());
+				assertThat(concept.toString(), containsString("8450"));
 
 				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
 

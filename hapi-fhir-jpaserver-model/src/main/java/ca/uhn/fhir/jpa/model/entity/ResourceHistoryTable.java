@@ -38,10 +38,14 @@ import java.util.Collection;
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
+
 	/**
 	 * @see ResourceEncodingEnum
 	 */
+	// Don't reduce the visibility here, we reference this from Smile
+	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
+
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -52,7 +56,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE", length = 30, nullable = false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	@Column(name = "RES_VER", nullable = false)
@@ -80,19 +84,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public ResourceHistoryProvenanceEntity getProvenance() {
 		return myProvenance;
-	}
-
-	public void setProvenance(ResourceHistoryProvenanceEntity theProvenance) {
-		myProvenance = theProvenance;
-	}
-
-	public void addTag(ResourceHistoryTag theTag) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.equals(theTag)) {
-				return;
-			}
-		}
-		getTags().add(theTag);
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -126,10 +117,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myId;
 	}
 
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
 	public byte[] getResource() {
 		return myResource;
 	}
@@ -159,7 +146,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Collection<ResourceHistoryTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<ResourceHistoryTag>();
+			myTags = new ArrayList<>();
 		}
 		return myTags;
 	}
@@ -171,15 +158,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
-	}
-
-	public boolean hasTag(String theTerm, String theScheme) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
