@@ -34,7 +34,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleUtil;
 import ca.uhn.fhir.util.IModelVisitor2;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;

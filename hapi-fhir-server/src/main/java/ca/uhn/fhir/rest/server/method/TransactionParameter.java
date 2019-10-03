@@ -28,7 +28,7 @@ import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleUtil;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 

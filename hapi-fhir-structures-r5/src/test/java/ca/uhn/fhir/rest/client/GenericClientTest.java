@@ -10,7 +10,7 @@ import ca.uhn.fhir.rest.client.impl.BaseClient;
 import ca.uhn.fhir.rest.client.impl.GenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
@@ -43,7 +43,6 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 

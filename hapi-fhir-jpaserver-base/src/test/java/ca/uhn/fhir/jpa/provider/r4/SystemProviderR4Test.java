@@ -19,7 +19,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
-import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import com.google.common.base.Charsets;

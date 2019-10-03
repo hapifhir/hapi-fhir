@@ -23,15 +23,21 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
+import ca.uhn.fhir.util.bundle.BundleUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +66,8 @@ import java.util.*;
  *
  * @see AuthorizationInterceptor
  */
-public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
+public class SearchNarrowingInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptor.class);
 
 	/**
 	 * Subclasses should override this method to supply the set of compartments that
@@ -79,10 +86,8 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 		return null;
 	}
 
-
-	@Override
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
@@ -169,6 +174,24 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 		}
 
 		return true;
+	}
+
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+	public void incomingRequestPreHandled(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
+			return;
+		}
+		incomingRequestPostProcessedBundle(theRequestDetails, theRequest, theResponse);
+	}
+
+	private void incomingRequestPostProcessedBundle(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
+		FhirContext ctx = theRequestDetails.getFhirContext();
+		List<BundleEntryParts> entries = BundleUtil.toListOfEntries(ctx, bundle);
+		for (BundleEntryParts entry : entries) {
+			bundle.setUserData("test", "bark");
+		}
+		theRequestDetails.setResource(bundle);
 	}
 
 	private void processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, HashMap<String, List<String>> theParameterToOrValues, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {
