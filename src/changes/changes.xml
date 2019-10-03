@@ -322,6 +322,10 @@
 				The subscription triggering operation was not able to handle commas within search URLs being
 				used to trigger resources for subscription checking. This has been corrected.
 			</action>
+			<action type="fix">
+				In some cases where resources were recently expunged, null entries could be passed to JPA interceptors registered
+				against the STORAGE_PRESHOW_RESOURCES hook.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
