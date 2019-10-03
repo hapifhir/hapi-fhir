@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.provider;
+package ca.uhn.fhir.rest.server.servlet;
 
 /*
  * #%L
@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 
 public class ServletSubRequestDetails extends ServletRequestDetails {
 

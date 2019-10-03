@@ -5,6 +5,8 @@ import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.annotation.Transaction;
+import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -22,14 +24,13 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,8 +40,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SearchNarrowingInterceptorTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptorTest.class);
 
 	private static String ourLastHitMethod;
 	private static FhirContext ourCtx;
@@ -54,6 +58,8 @@ public class SearchNarrowingInterceptorTest {
 	private static Server ourServer;
 	private static IGenericClient ourClient;
 	private static AuthorizedList ourNextCompartmentList;
+	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
+
 
 	@Before
 	public void before() {
@@ -102,6 +108,25 @@ public class SearchNarrowingInterceptorTest {
 		assertNull(ourLastSubjectParam);
 		assertNull(ourLastPerformerParam);
 		assertThat(toStrings(ourLastPatientParam), Matchers.contains("Patient/123,Patient/456"));
+	}
+
+	@Test
+	public void testNarrowObservationsByPatientContext_ClientRequestedBundleNoParams() {
+
+		ourNextCompartmentList = new AuthorizedList().addCompartments("Patient/123", "Patient/456");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl("Patient");
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
+
+		ourClient
+			.transaction()
+			.withBundle(bundle)
+			.execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals("Patient?_id=" + URLEncoder.encode("Patient/123,Patient/456"), ourLastBundleRequest.getUrl());
 	}
 
 	/**
@@ -274,6 +299,15 @@ public class SearchNarrowingInterceptorTest {
 
 	}
 
+	public static class DummySystemProvider {
+		@Transaction
+		public Bundle transaction(@TransactionParam Bundle theInput) {
+			ourLastHitMethod = "transaction";
+			ourLastBundleRequest = theInput.getEntry().get(0).getRequest();
+			return theInput;
+		}
+	}
+
 	private static class MySearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 		@Override
 		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
@@ -298,10 +332,12 @@ public class SearchNarrowingInterceptorTest {
 
 		DummyPatientResourceProvider patProvider = new DummyPatientResourceProvider();
 		DummyObservationResourceProvider obsProv = new DummyObservationResourceProvider();
+		DummySystemProvider systemProv = new DummySystemProvider();
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer ourServlet = new RestfulServer(ourCtx);
 		ourServlet.setFhirContext(ourCtx);
+		ourServlet.registerProviders(systemProv);
 		ourServlet.setResourceProviders(patProvider, obsProv);
 		ourServlet.setPagingProvider(new FifoMemoryPagingProvider(100));
 		ourServlet.registerInterceptor(new MySearchNarrowingInterceptor());
