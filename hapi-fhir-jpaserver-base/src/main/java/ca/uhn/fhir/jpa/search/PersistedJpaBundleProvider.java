@@ -319,6 +319,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		// Execute the query and make sure we return distinct results
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
+//		resources.removeIf(t->t == null); aaaaaaaaabbbbbbbb
 
 		// Interceptor call: STORAGE_PRESHOW_RESOURCE
 		// This can be used to remove results from the search result details before

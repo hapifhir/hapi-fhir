@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.model.concurrency;
+package ca.uhn.test.concurrency;
 
 /*-
  * #%L

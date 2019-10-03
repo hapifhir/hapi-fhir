@@ -47,9 +47,6 @@ public class BinaryStorageEntity {
 	private String myHash;
 
 	public Date getPublished() {
-		if (myPublished == null) {
-			return null;
-		}
 		return new Date(myPublished.getTime());
 	}
 
@@ -61,20 +58,8 @@ public class BinaryStorageEntity {
 		return myHash;
 	}
 
-	public void setHash(String theHash) {
-		myHash = theHash;
-	}
-
-	public String getBlobId() {
-		return myBlobId;
-	}
-
 	public void setBlobId(String theBlobId) {
 		myBlobId = theBlobId;
-	}
-
-	public String getResourceId() {
-		return myResourceId;
 	}
 
 	public void setResourceId(String theResourceId) {
@@ -83,10 +68,6 @@ public class BinaryStorageEntity {
 
 	public int getSize() {
 		return mySize;
-	}
-
-	public void setSize(int theSize) {
-		mySize = theSize;
 	}
 
 	public String getBlobContentType() {
