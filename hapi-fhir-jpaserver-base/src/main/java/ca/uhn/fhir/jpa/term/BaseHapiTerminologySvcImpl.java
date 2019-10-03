@@ -828,6 +828,8 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 									addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
 								);
 						} else {
+							// This will happen if we're expanding against a built-in (part of FHIR) ValueSet that
+							// isn't actually in the database anywhere
 							Collection<TermConceptDesignation> emptyCollection = Collections.emptyList();
 							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), null);
 						}
