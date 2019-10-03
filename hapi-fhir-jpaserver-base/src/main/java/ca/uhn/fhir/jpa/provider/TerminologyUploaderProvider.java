@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -36,7 +35,10 @@ import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -149,8 +151,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				value = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theValue);
 			} else if (theValue instanceof org.hl7.fhir.r5.model.CodeSystem) {
 				value = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theValue);
-			} else if (theValue instanceof IBaseBinary) {
-				value = convertBinary((IBaseBinary) theValue);
 			} else {
 				throw new InvalidRequestException("Value must be present and be a CodeSystem");
 			}
@@ -169,15 +169,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		}
 
 	}
-
-	private CodeSystem convertBinary(IBaseBinary theValue) {
-		ValidateUtil.isTrueOrThrowInvalidRequest(Constants.CT_TEXT_CSV.equals(theValue.getContentType()), "Binary has non-CSV contents");
-
-		String contents = null;
-
-		return null;
-	}
-
 
 	/**
 	 * <code>

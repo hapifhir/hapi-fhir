@@ -302,12 +302,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
 
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
-
 					LineNumberReader lnr = new LineNumberReader(reader);
 					while (lnr.readLine() != null) {
 					}
@@ -332,12 +326,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				Reader reader = null;
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
 
 					LineNumberReader lnr = new LineNumberReader(reader);
 					while (lnr.readLine() != null) {
@@ -726,12 +714,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				CSVParser parsed;
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
 
 					parsed = newCsvRecords(theDelimiter, theQuoteMode, reader);
 					Iterator<CSVRecord> iter = parsed.iterator();

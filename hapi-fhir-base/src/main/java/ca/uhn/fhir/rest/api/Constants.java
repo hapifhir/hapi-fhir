@@ -26,6 +26,9 @@ import java.util.*;
 
 public class Constants {
 
+	/** Non instantiable */
+	private Constants() {}
+
 	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
