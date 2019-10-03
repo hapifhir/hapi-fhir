@@ -32,6 +32,7 @@ jobs:
         inputs:
           codeCoverageTool: 'JaCoCo'
           summaryFileLocation: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/jacoco.xml
+          reportDirectory: $(System.DefaultWorkingDirectory)/hapi-fhir-jacoco/target/site/jacoco-report/
           failIfCoverageEmpty: false
 
 # Potential Additional Maven3 Options:
