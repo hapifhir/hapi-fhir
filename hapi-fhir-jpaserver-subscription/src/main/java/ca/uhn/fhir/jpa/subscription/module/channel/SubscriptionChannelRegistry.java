@@ -32,7 +32,7 @@ public class SubscriptionChannelRegistry {
 	@Autowired
 	private ModelConfig myModelConfig;
 
-	public void add(ActiveSubscription theActiveSubscription) {
+	public synchronized void add(ActiveSubscription theActiveSubscription) {
 		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
 			return;
 		}
@@ -56,7 +56,7 @@ public class SubscriptionChannelRegistry {
 		mySubscriptionChannelCache.put(channelName, subscriptionChannelWithHandlers);
 	}
 
-	public void remove(ActiveSubscription theActiveSubscription) {
+	public synchronized void remove(ActiveSubscription theActiveSubscription) {
 		if (!myModelConfig.isSubscriptionMatchingEnabled()) {
 			return;
 		}
@@ -77,7 +77,7 @@ public class SubscriptionChannelRegistry {
 		}
 	}
 
-	public SubscriptionChannelWithHandlers get(String theChannelName) {
+	public synchronized SubscriptionChannelWithHandlers get(String theChannelName) {
 		return mySubscriptionChannelCache.get(theChannelName);
 	}
 
