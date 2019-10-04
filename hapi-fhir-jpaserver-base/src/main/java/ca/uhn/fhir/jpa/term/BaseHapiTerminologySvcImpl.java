@@ -818,9 +818,17 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				ourLog.info("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
 				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
+				Map<String, TermCodeSystem> uriToCodeSystem = new HashMap<>();
+
 				for (VersionIndependentConcept nextConcept : expanded) {
 					if (theAdd) {
-						TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
+
+						if (!uriToCodeSystem.containsKey(nextConcept.getSystem())) {
+							TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
+							uriToCodeSystem.put(nextConcept.getSystem(), codeSystem);
+						}
+
+						TermCodeSystem codeSystem = uriToCodeSystem.get(nextConcept.getSystem());
 						if (codeSystem != null) {
 							myConceptDao
 								.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
@@ -1288,11 +1296,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
 			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 		});
-	}
-
-	@Override
-	public List<TermConcept> findCodes(String theSystem) {
-		return myConceptDao.findByCodeSystemVersion(findCurrentCodeSystemVersionForSystem(theSystem));
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)

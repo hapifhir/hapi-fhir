@@ -95,6 +95,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
@@ -364,7 +365,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 
 				final Expression<BigDecimal> fromObj = join.get("myValue");
-				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
+				ParamPrefixEnum prefix = defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
 				if (operation == SearchFilterParser.CompareOperation.ne) {
 					prefix = ParamPrefixEnum.NOT_EQUAL;
 				} else if (operation == SearchFilterParser.CompareOperation.lt) {
@@ -791,8 +792,12 @@ public class SearchBuilder implements ISearchBuilder {
 	@org.jetbrains.annotations.Nullable
 	private Predicate createPredicateResourceId(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
 		Predicate nextPredicate = null;
+
+		Set<Long> allOrPids = null;
+
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<>();
+			boolean haveValue = false;
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(myContext);
 				if (value != null && value.startsWith("|")) {
@@ -801,6 +806,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
+					haveValue = true;
 					try {
 						Long pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
 						orPids.add(pid);
@@ -810,26 +816,37 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 			}
-
-			if (orPids.size() > 0) {
-
-				assert theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq || theOperation == SearchFilterParser.CompareOperation.ne;
-				if ((theOperation == null) || (theOperation == SearchFilterParser.CompareOperation.eq)) {
-					nextPredicate = theRoot.get("myId").as(Long.class).in(orPids);
-				} else if (theOperation == SearchFilterParser.CompareOperation.ne) {
-					nextPredicate = theRoot.get("myId").as(Long.class).in(orPids).not();
+			if (haveValue) {
+				if (allOrPids == null) {
+					allOrPids = orPids;
+				} else {
+					allOrPids.retainAll(orPids);
 				}
 
-			} else {
-				// This will never match
-				nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
 			}
+		}
 
-			if (nextPredicate != null) {
-				break;
+		if (allOrPids != null && allOrPids.isEmpty()) {
+
+			// This will never match
+			nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
+
+		} else if (allOrPids != null) {
+
+			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
+			assert operation == null || operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			switch (operation) {
+				default:
+				case eq:
+					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids);
+					break;
+				case ne:
+					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids).not();
+					break;
 			}
 
 		}
+
 		return nextPredicate;
 	}
 
@@ -1592,7 +1609,7 @@ public class SearchBuilder implements ISearchBuilder {
 				code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
 			}
 
-			cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+			cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 			final Expression<BigDecimal> path = theFrom.get("myValue");
 			String invalidMessageName = "invalidQuantityPrefix";
 
@@ -1624,7 +1641,7 @@ public class SearchBuilder implements ISearchBuilder {
 			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
-		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+		cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
