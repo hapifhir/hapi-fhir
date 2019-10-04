@@ -2,7 +2,7 @@ package ca.uhn.test.concurrency;
 
 /*-
  * #%L
- * HAPI FHIR Model
+ * HAPI FHIR Test Utilities
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
