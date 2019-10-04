@@ -818,15 +818,29 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 				ourLog.info("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
 				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
+				Map<String, TermCodeSystem> uriToCodeSystem = new HashMap<>();
+
 				for (VersionIndependentConcept nextConcept : expanded) {
 					if (theAdd) {
-						TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
-						myConceptDao
-							.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
-							.ifPresent(concept ->
-								addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
-							);
 
+						if (!uriToCodeSystem.containsKey(nextConcept.getSystem())) {
+							TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(nextConcept.getSystem());
+							uriToCodeSystem.put(nextConcept.getSystem(), codeSystem);
+						}
+
+						TermCodeSystem codeSystem = uriToCodeSystem.get(nextConcept.getSystem());
+						if (codeSystem != null) {
+							myConceptDao
+								.findByCodeSystemAndCode(codeSystem.getCurrentVersion(), nextConcept.getCode())
+								.ifPresent(concept ->
+									addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter)
+								);
+						} else {
+							// This will happen if we're expanding against a built-in (part of FHIR) ValueSet that
+							// isn't actually in the database anywhere
+							Collection<TermConceptDesignation> emptyCollection = Collections.emptyList();
+							addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, emptyCollection, theAdd, theCodeCounter, nextConcept.getSystem(), nextConcept.getCode(), null);
+						}
 					}
 					if (isNoneBlank(nextConcept.getSystem(), nextConcept.getCode()) && !theAdd && theAddedCodes.remove(nextConcept.getSystem() + "|" + nextConcept.getCode())) {
 						theValueSetCodeAccumulator.excludeConcept(nextConcept.getSystem(), nextConcept.getCode());
@@ -1282,11 +1296,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TermCodeSystemVersion csv = findCurrentCodeSystemVersionForSystem(theCodeSystem);
 			return myConceptDao.findByCodeSystemAndCode(csv, theCode);
 		});
-	}
-
-	@Override
-	public List<TermConcept> findCodes(String theSystem) {
-		return myConceptDao.findByCodeSystemVersion(findCurrentCodeSystemVersionForSystem(theSystem));
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
