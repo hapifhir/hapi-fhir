@@ -78,9 +78,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 	private int getOperationStatus(MethodOutcome response) {
 		switch (getRestOperationType()) {
 			case CREATE:
-				if (response == null) {
-					throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null, which is not allowed for create operation");
-				}
+				validateResponseNotNullIfItShouldntBe(response);
 				if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_201_CREATED;
 				}
@@ -95,16 +93,20 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 			case VALIDATE:
 			case DELETE:
 			default:
+				validateResponseNotNullIfItShouldntBe(response);
 				if (response == null) {
-					if (isReturnVoid() == false) {
-						throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
-					}
 					return Constants.STATUS_HTTP_204_NO_CONTENT;
 				}
 				if (response.getOperationOutcome() == null) {
 					return Constants.STATUS_HTTP_204_NO_CONTENT;
 				}
 				return Constants.STATUS_HTTP_200_OK;
+		}
+	}
+
+	private void validateResponseNotNullIfItShouldntBe(MethodOutcome response) {
+		if (response == null && !isReturnVoid()) {
+			throw new InternalErrorException("Method " + getMethod().getName() + " in type " + getMethod().getDeclaringClass().getCanonicalName() + " returned null");
 		}
 	}
 
@@ -237,16 +239,6 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		Set<SummaryEnum> summaryMode = Collections.emptySet();
 
 		return restfulResponse.streamResponseAsResource(responseDetails.getResponseResource(), prettyPrint, summaryMode, responseDetails.getResponseCode(), null, theRequest.isRespondGzip(), true);
-	}
-
-	protected static void parseContentLocation(FhirContext theContext, MethodOutcome theOutcomeToPopulate, String theLocationHeader) {
-		if (StringUtils.isBlank(theLocationHeader)) {
-			return;
-		}
-
-		IIdType id = theContext.getVersion().newIdType();
-		id.setValue(theLocationHeader);
-		theOutcomeToPopulate.setId(id);
 	}
 
 }

@@ -334,6 +334,12 @@
 				The JPA server did not correctly process _has queries where the linked search parameter was
 				the _id parameter.
 			</action>
+			<action type="remove">
+				HTTP PUT (resource update) operations will no longer allow the version to be specified in a
+				Content-Location header. This behaviour was allowed in DSTU1 and was never removed from HAPI even though
+				it hasn't been permitted in the spec for a very long time. Hopefully this change will not
+				impact anyone!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
