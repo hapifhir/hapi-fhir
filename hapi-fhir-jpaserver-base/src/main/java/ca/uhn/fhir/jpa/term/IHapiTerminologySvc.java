@@ -4,17 +4,16 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * #%L
@@ -107,9 +106,9 @@ public interface IHapiTerminologySvc {
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
-	AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue);
+	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
-	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
+	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
 	void preExpandDeferredValueSetsToTerminologyTables();
 
@@ -124,4 +123,6 @@ public interface IHapiTerminologySvc {
 	 * Version independent
 	 */
 	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
+
+
 }

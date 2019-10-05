@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
@@ -39,8 +40,14 @@ public interface IHapiTerminologyLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.0.0
+	// FIXME: remove the default implementation before 4.1.0
 	default UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+
+	// FIXME: remove the default implementation before 4.1.0
+	default UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+
+	// FIXME: remove the default implementation before 4.1.0
+	default UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
 
 	interface FileDescriptor {
 
@@ -48,6 +55,27 @@ public interface IHapiTerminologyLoaderSvc {
 
 		InputStream getInputStream();
 
+	}
+
+	class ByteArrayFileDescriptor implements FileDescriptor {
+
+		private final String myNextUrl;
+		private final byte[] myNextData;
+
+		public ByteArrayFileDescriptor(String theNextUrl, byte[] theNextData) {
+			myNextUrl = theNextUrl;
+			myNextData = theNextData;
+		}
+
+		@Override
+		public String getFilename() {
+			return myNextUrl;
+		}
+
+		@Override
+		public InputStream getInputStream() {
+			return new ByteArrayInputStream(myNextData);
+		}
 	}
 
 	class UploadStatistics {

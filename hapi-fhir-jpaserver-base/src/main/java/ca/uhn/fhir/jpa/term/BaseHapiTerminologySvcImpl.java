@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -958,6 +959,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincParentChild(QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -990,6 +992,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return new Term(TermConceptPropertyFieldBridge.CONCEPT_FIELD_PROPERTY_PREFIX + theProperty, theValue);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincAncestor(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -1033,6 +1036,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return retVal;
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void handleFilterLoincDescendant(String theSystem, QueryBuilder theQb, BooleanJunction<?> theBool, ValueSet.ConceptSetFilterComponent theFilter) {
 		switch (theFilter.getOp()) {
 			case EQUAL:
@@ -2256,75 +2260,76 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Transactional
 	@Override
-	public AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue) {
-		TermCodeSystem cs = getCodeSystem(theSystem);
-		if (cs == null) {
-			List<CodeSystem.ConceptDefinitionComponent> codes = theValue.getConcept();
-			theValue.setConcept(null);
-			createOrUpdateCodeSystem(theValue);
-			cs = getCodeSystem(theSystem);
-			theValue.setConcept(codes);
-		}
+	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsAdd(String theSystem, CustomTerminologySet theAdditions) {
 
-		TermCodeSystemVersion csv = cs.getCurrentVersion();
+//		TermCodeSystem cs = getCodeSystem(theSystem);
+//		if (cs == null) {
+//			List<CodeSystem.ConceptDefinitionComponent> codes = theValue.getConcept();
+//			theValue.setConcept(null);
+//			createOrUpdateCodeSystem(theValue);
+//			cs = getCodeSystem(theSystem);
+//			theValue.setConcept(codes);
+//		}
+//
+//		TermCodeSystemVersion csv = cs.getCurrentVersion();
+//
+//		AtomicInteger addedCodeCounter = new AtomicInteger(0);
+//
+//		TermConcept parentCode = null;
+//		if (isNotBlank(theParent)) {
+//			parentCode = myConceptDao
+//				.findByCodeSystemAndCode(csv, theParent)
+//				.orElseThrow(() -> new InvalidRequestException("Unknown code [" + theSystem + "|" + theParent + "]"));
+//		}
+//
+//		List<TermConcept> concepts = new ArrayList<>();
+//		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
+//			TermConcept concept = toTermConcept(next, csv);
+//			if (parentCode != null) {
+//				parentCode.addChild(concept, RelationshipTypeEnum.ISA);
+//			}
+//			concepts.add(concept);
+//		}
+//
+//		// The first pass just saves any concepts that were added to the
+//		// root of the CodeSystem
+//		List<TermConceptParentChildLink> links = new ArrayList<>();
+//		for (TermConcept next : concepts) {
+//			int addedCount = saveOrUpdateConcept(next);
+//			addedCodeCounter.addAndGet(addedCount);
+//			extractLinksFromConceptAndChildren(next, links);
+//		}
+//
+//		// This second pass saves any child concepts
+//		for (TermConceptParentChildLink next : links) {
+//			next.setCodeSystem(csv);
+//			int addedCount = saveOrUpdateConcept(next.getChild());
+//			addedCodeCounter.addAndGet(addedCount);
+//			myConceptParentChildLinkDao.save(next);
+//		}
 
-		AtomicInteger addedCodeCounter = new AtomicInteger(0);
-
-		TermConcept parentCode = null;
-		if (isNotBlank(theParent)) {
-			parentCode = myConceptDao
-				.findByCodeSystemAndCode(csv, theParent)
-				.orElseThrow(() -> new InvalidRequestException("Unknown code [" + theSystem + "|" + theParent + "]"));
-		}
-
-		List<TermConcept> concepts = new ArrayList<>();
-		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
-			TermConcept concept = toTermConcept(next, csv);
-			if (parentCode != null) {
-				parentCode.addChild(concept, RelationshipTypeEnum.ISA);
-			}
-			concepts.add(concept);
-		}
-
-		// The first pass just saves any concepts that were added to the
-		// root of the CodeSystem
-		List<TermConceptParentChildLink> links = new ArrayList<>();
-		for (TermConcept next : concepts) {
-			int addedCount = saveOrUpdateConcept(next);
-			addedCodeCounter.addAndGet(addedCount);
-			extractLinksFromConceptAndChildren(next, links);
-		}
-
-		// This second pass saves any child concepts
-		for (TermConceptParentChildLink next : links) {
-			next.setCodeSystem(csv);
-			int addedCount = saveOrUpdateConcept(next.getChild());
-			addedCodeCounter.addAndGet(addedCount);
-			myConceptParentChildLinkDao.save(next);
-		}
-
-		return addedCodeCounter;
+		return null;
 	}
 
 	@Transactional
 	@Override
-	public AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theValue) {
-		TermCodeSystem cs = getCodeSystem(theSystem);
-		if (cs == null) {
-			throw new InvalidRequestException("Unknown code system: " + theSystem);
-		}
+	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsRemove(String theSystem, CustomTerminologySet theValue) {
+//		TermCodeSystem cs = getCodeSystem(theSystem);
+//		if (cs == null) {
+//			throw new InvalidRequestException("Unknown code system: " + theSystem);
+//		}
+//
+//		AtomicInteger removeCounter = new AtomicInteger(0);
+//
+//		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
+//			Optional<TermConcept> conceptOpt = findCode(theSystem, next.getCode());
+//			if (conceptOpt.isPresent()) {
+//				TermConcept concept = conceptOpt.get();
+//				deleteConceptChildrenAndConcept(concept, removeCounter);
+//			}
+//		}
 
-		AtomicInteger removeCounter = new AtomicInteger(0);
-
-		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
-			Optional<TermConcept> conceptOpt = findCode(theSystem, next.getCode());
-			if (conceptOpt.isPresent()) {
-				TermConcept concept = conceptOpt.get();
-				deleteConceptChildrenAndConcept(concept, removeCounter);
-			}
-		}
-
-		return removeCounter;
+		return null;
 	}
 
 	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {

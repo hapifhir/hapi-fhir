@@ -56,9 +56,10 @@ public final class SctHandlerDescription implements IRecordHandler {
 
       String term = theRecord.get("term");
 
-      TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCodeSystemVersion, myId2concept, id);
+      TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myId2concept, id);
       concept.setCode(conceptId);
       concept.setDisplay(term);
+      concept.setCodeSystemVersion(myCodeSystemVersion);
       myCode2concept.put(conceptId, concept);
    }
 }

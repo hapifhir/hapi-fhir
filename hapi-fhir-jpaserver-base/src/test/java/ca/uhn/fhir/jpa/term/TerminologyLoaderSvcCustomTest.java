@@ -1,22 +1,31 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
+import org.intellij.lang.annotations.Language;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
@@ -26,7 +35,8 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 	private IHapiTerminologySvc myTermSvc;
 
 	private ZipCollectionBuilder myFiles;
-
+	@Captor
+	private ArgumentCaptor<CustomTerminologySet> myCustomTerminologySetCaptor;
 
 	@Before
 	public void before() {
@@ -104,6 +114,67 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		code = concepts.get("CHEM");
 		assertEquals("CHEM", code.getCode());
 		assertEquals("Chemistry", code.getDisplay());
+
+	}
+
+	@Test
+	public void testDeltaAdd() throws IOException {
+
+		myFiles.addFileText(loadResource("/custom_term/concepts.csv"), "concepts.csv");
+		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
+
+		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
+		when(myTermSvc.applyDeltaCodesystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
+
+		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
+		assertSame(stats, outcome);
+
+		verify(myTermSvc, times(1)).applyDeltaCodesystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
+
+		// Root concepts
+		assertEquals(2, set.getRootConcepts().size());
+		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
+		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
+		assertEquals("MICRO", set.getRootConcepts().get(1).getCode());
+		assertEquals("Microbiology", set.getRootConcepts().get(1).getDisplay());
+
+		// Child concepts
+		assertEquals(2, set.getRootConcepts().get(0).getChildren().size());
+		assertEquals("HB", set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode());
+		assertEquals("Hemoglobin", set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay());
+		assertEquals(null, set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
+		assertEquals("NEUT", set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
+		assertEquals("Neutrophils", set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
+
+	}
+
+	@Test
+	public void testDeltaRemove() throws IOException {
+
+		myFiles.addFileText(loadResource("/custom_term/concepts.csv"), "concepts.csv");
+
+		// Hierarchy should be ignored for remove, but we'll add one just
+		// to make sure it's ignored..
+		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
+
+		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
+		when(myTermSvc.applyDeltaCodesystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
+
+		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
+		assertSame(stats, outcome);
+
+		verify(myTermSvc, times(1)).applyDeltaCodesystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
+
+		// Root concepts
+		assertEquals(5, set.getRootConcepts().size());
+		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
+		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
+		assertEquals("HB", set.getRootConcepts().get(1).getCode());
+		assertEquals("Hemoglobin", set.getRootConcepts().get(1).getDisplay());
+		assertEquals("NEUT", set.getRootConcepts().get(2).getCode());
+		assertEquals("Neutrophils", set.getRootConcepts().get(2).getDisplay());
 
 	}
 

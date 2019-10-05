@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
@@ -290,6 +291,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 	@Autowired
 	protected IHapiTerminologySvcR4 myTermSvc;
 	@Autowired
+	protected IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
+	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
 	protected PlatformTransactionManager myTxManager;
@@ -437,10 +440,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		IBaseResource resourceParsed = parser.parseResource(resource);
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(resourceParsed.getIdElement().getResourceType());
 		dao.update(resourceParsed);
-	}
-
-	protected String loadResource(String theClasspath) throws IOException {
-		return IOUtils.toString(FhirResourceDaoR4ValidateTest.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
 	}
 
 

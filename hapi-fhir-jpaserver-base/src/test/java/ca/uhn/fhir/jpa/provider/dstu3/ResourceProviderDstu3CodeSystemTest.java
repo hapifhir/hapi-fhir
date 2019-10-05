@@ -6,8 +6,6 @@ import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -18,7 +16,6 @@ import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -333,14 +330,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info("Encoded:\n{}", encoded);
-	}
-
-	private String loadResource(String theFileName) throws IOException {
-		InputStream resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName);
-		if (resourceAsStream == null) {
-			resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName.substring(1));
-		}
-		return IOUtils.toString(resourceAsStream, Charsets.UTF_8);
 	}
 
 	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {

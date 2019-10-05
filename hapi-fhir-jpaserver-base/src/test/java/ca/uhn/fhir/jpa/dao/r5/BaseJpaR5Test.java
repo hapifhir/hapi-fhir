@@ -434,11 +434,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 		dao.update(resourceParsed);
 	}
 
-	protected String loadResource(String theClasspath) throws IOException {
-		return IOUtils.toString(BaseJpaR5Test.class.getResourceAsStream(theClasspath), Charsets.UTF_8);
-	}
-
-
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR5Test() {
 		ourValueSetDao.purgeCaches();

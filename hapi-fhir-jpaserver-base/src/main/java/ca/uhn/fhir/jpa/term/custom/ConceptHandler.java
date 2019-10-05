@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.term.custom;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
@@ -40,11 +39,9 @@ public class ConceptHandler implements IRecordHandler {
 	public static final String CODE = "CODE";
 	public static final String DISPLAY = "DISPLAY";
 	private final Map<String, TermConcept> myCode2Concept;
-	private final TermCodeSystemVersion myCodeSystemVersion;
 
-	public ConceptHandler(Map<String, TermConcept> theCode2concept, TermCodeSystemVersion theCodeSystemVersion) {
+	public ConceptHandler(Map<String, TermConcept> theCode2concept) {
 		myCode2Concept = theCode2concept;
-		myCodeSystemVersion = theCodeSystemVersion;
 	}
 
 	@Override
@@ -55,7 +52,7 @@ public class ConceptHandler implements IRecordHandler {
 
 			Validate.isTrue(!myCode2Concept.containsKey(code), "The code %s has appeared more than once", code);
 
-			TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCodeSystemVersion, myCode2Concept, code);
+			TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myCode2Concept, code);
 			concept.setCode(code);
 			concept.setDisplay(display);
 

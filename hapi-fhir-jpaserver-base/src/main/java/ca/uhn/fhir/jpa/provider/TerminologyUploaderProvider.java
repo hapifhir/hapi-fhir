@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -34,52 +33,46 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.CodeSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
-	public static final String CONCEPT_COUNT = "conceptCount";
-	public static final String TARGET = "target";
-	public static final String PARENT_CODE = "parentCode";
-	public static final String VALUE = "value";
+	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
+	private static final String RESP_PARAM_TARGET = "target";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
 	private static final String PACKAGE = "package";
+	public static final String PARAM_FILE = "file";
+	public static final String PARAM_SYSTEM = "system";
 
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
 	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
-	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
 
 	/**
 	 * Constructor
 	 */
 	public TerminologyUploaderProvider() {
-		this(null, null, null);
+		this(null, null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public TerminologyUploaderProvider(FhirContext theContext, IHapiTerminologyLoaderSvc theTerminologyLoaderSvc, IHapiTerminologySvc theTerminologySvc) {
+	public TerminologyUploaderProvider(FhirContext theContext, IHapiTerminologyLoaderSvc theTerminologyLoaderSvc) {
 		myCtx = theContext;
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
-		myTerminologySvc = theTerminologySvc;
 	}
 
 
@@ -92,35 +85,16 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters applyCodeSystemDeltaAdd(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARENT_CODE, min = 0, max = 1) IPrimitiveType<String> theParentCode,
-		@OperationParam(name = VALUE, min = 0, max = 1) IBaseResource theValue,
+		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
-
-			CodeSystem value;
-			if (theValue instanceof CodeSystem) {
-				value = (CodeSystem) theValue;
-			} else if (theValue instanceof org.hl7.fhir.dstu3.model.CodeSystem) {
-				value = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theValue);
-			} else if (theValue instanceof org.hl7.fhir.r5.model.CodeSystem) {
-				value = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theValue);
-			} else {
-				throw new InvalidRequestException("Value must be present and be a CodeSystem");
-			}
-
-			String system = value.getUrl();
-			String parentCode = theParentCode != null ? theParentCode.getValue() : null;
-
-			AtomicInteger counter = myTerminologySvc.applyDeltaCodesystemsAdd(system, parentCode, value);
-
-			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, "success", true);
-			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, "addedConcepts", counter.get());
-			return retVal;
-
+			List<IHapiTerminologyLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
+			return toDeltaResponse(outcome);
 		} finally {
 			endRequest(theServletRequest);
 		}
@@ -137,37 +111,41 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters applyCodeSystemDeltaRemove(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = VALUE, min = 1, max = 1) IBaseResource theValue,
+		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
-
-			CodeSystem value;
-			if (theValue instanceof CodeSystem) {
-				value = (CodeSystem) theValue;
-			} else if (theValue instanceof org.hl7.fhir.dstu3.model.CodeSystem) {
-				value = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theValue);
-			} else if (theValue instanceof org.hl7.fhir.r5.model.CodeSystem) {
-				value = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theValue);
-			} else {
-				throw new InvalidRequestException("Value must be present and be a CodeSystem");
-			}
-
-			String system = value.getUrl();
-
-			AtomicInteger counter = myTerminologySvc.applyDeltaCodesystemsRemove(system, value);
-
-			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, "success", true);
-			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, "removedConcepts", counter.get());
-			return retVal;
-
+			List<IHapiTerminologyLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
+			return toDeltaResponse(outcome);
 		} finally {
 			endRequest(theServletRequest);
 		}
 
+	}
+
+	@Nonnull
+	private List<IHapiTerminologyLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
+		List<IHapiTerminologyLoaderSvc.FileDescriptor> files = new ArrayList<>();
+		for (ICompositeType next : theFiles) {
+			byte[] nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
+			ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
+			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
+
+			files.add(new IHapiTerminologyLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
+		}
+		return files;
+	}
+
+	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
+		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
+		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getConceptCount());
+		ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
+		return retVal;
 	}
 
 	/**
@@ -275,8 +253,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
 			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, "success", true);
-			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, CONCEPT_COUNT, stats.getConceptCount());
-			ParametersUtil.addParameterToParametersReference(myCtx, retVal, TARGET, stats.getTarget().getValue());
+			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, stats.getConceptCount());
+			ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
 
 			return retVal;
 		} finally {

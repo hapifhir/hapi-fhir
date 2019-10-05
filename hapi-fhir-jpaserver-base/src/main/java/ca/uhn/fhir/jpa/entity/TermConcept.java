@@ -37,6 +37,7 @@ import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -106,6 +107,13 @@ public class TermConcept implements Serializable {
 	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
 		setCodeSystemVersion(theCs);
 		setCode(theCode);
+	}
+
+	public TermConcept addChild(RelationshipTypeEnum theRelationshipType) {
+		TermConcept child = new TermConcept();
+		child.setCodeSystemVersion(myCodeSystem);
+		addChild(child, theRelationshipType);
+		return child;
 	}
 
 	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
@@ -387,4 +395,13 @@ public class TermConcept implements Serializable {
 		}
 		return retVal;
 	}
+
+	/**
+	 * Returns a view of {@link #getChildren()} but containing the actual child codes
+	 */
+	public List<TermConcept> getChildCodes() {
+		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
+	}
+
+
 }

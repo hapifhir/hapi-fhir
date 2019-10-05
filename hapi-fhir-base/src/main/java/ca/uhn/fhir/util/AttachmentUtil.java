@@ -35,12 +35,10 @@ public class AttachmentUtil {
 	 * Fetches the base64Binary value of Attachment.data, creating it if it does not
 	 * already exist.
 	 */
-	@SuppressWarnings("unchecked")
 	public static IPrimitiveType<byte[]> getOrCreateData(FhirContext theContext, ICompositeType theAttachment) {
 		return getOrCreateChild(theContext, theAttachment, "data", "base64Binary");
 	}
 
-	@SuppressWarnings("unchecked")
 	public static IPrimitiveType<String> getOrCreateContentType(FhirContext theContext, ICompositeType theAttachment) {
 		return getOrCreateChild(theContext, theAttachment, "contentType", "string");
 	}
@@ -62,6 +60,11 @@ public class AttachmentUtil {
 				entryChild.getMutator().setValue(theAttachment, string);
 				return (IPrimitiveType<T>) string;
 			});
+	}
+
+	public static void setUrl(FhirContext theContext, ICompositeType theAttachment, String theUrl) {
+		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "url");
+		entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "url", theUrl));
 	}
 
 	public static void setContentType(FhirContext theContext, ICompositeType theAttachment, String theContentType) {
@@ -99,5 +102,9 @@ public class AttachmentUtil {
 	static BaseRuntimeChildDefinition getChild(FhirContext theContext, IBase theElement, String theName) {
 		BaseRuntimeElementCompositeDefinition<?> def = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theElement.getClass());
 		return def.getChildByName(theName);
+	}
+
+	public static ICompositeType newInstance(FhirContext theFhirCtx) {
+		return (ICompositeType) theFhirCtx.getElementDefinition("Attachment").newInstance();
 	}
 }

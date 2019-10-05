@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -87,4 +88,17 @@ public class ZipCollectionBuilder {
 		return myFiles;
 	}
 
+	public void addFileText(String theText, String theFilename) {
+		myFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+			@Override
+			public String getFilename() {
+				return theFilename;
+			}
+
+			@Override
+			public InputStream getInputStream() {
+				return new ByteArrayInputStream(theText.getBytes(Charsets.UTF_8));
+			}
+		});
+	}
 }

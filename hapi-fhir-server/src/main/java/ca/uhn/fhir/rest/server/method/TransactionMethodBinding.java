@@ -142,17 +142,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 		List<IBaseResource> retResources = retVal.getResources(0, retVal.size());
 		for (int i = 0; i < retResources.size(); i++) {
-			IdDt oldId = oldIds.get(retResources.get(i));
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
-				}
-			}
-
-			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.equals(newRes.getIdElement()) && newRes instanceof IResource) {
-					((IResource) newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}

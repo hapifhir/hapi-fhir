@@ -24,9 +24,8 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -36,9 +35,11 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class HierarchyHandler implements IRecordHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
+	private final ArrayListMultimap<String, TermConcept> myParentCodeToChildrenWithMissingParent;
 
-	public HierarchyHandler(Map<String, TermConcept> theCode2concept) {
+	public HierarchyHandler(Map<String, TermConcept> theCode2concept, ArrayListMultimap<String, TermConcept> theParentCodeToChildrenWithMissingParent) {
 		myCode2Concept = theCode2concept;
+		myParentCodeToChildrenWithMissingParent = theParentCodeToChildrenWithMissingParent;
 	}
 
 	@Override
@@ -47,12 +48,15 @@ public class HierarchyHandler implements IRecordHandler {
 		String child = trim(theRecord.get("CHILD"));
 		if (isNotBlank(parent) && isNotBlank(child)) {
 
-			TermConcept parentConcept = myCode2Concept.get(parent);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(parentConcept, "Parent code %s not found", parent);
 			TermConcept childConcept = myCode2Concept.get(child);
 			ValidateUtil.isNotNullOrThrowUnprocessableEntity(childConcept, "Child code %s not found", child);
 
-			parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			TermConcept parentConcept = myCode2Concept.get(parent);
+			if (parentConcept == null) {
+				myParentCodeToChildrenWithMissingParent.put(parent, childConcept);
+			} else {
+				parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			}
 		}
 	}
 }

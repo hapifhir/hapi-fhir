@@ -151,6 +151,10 @@ public class SearchMethodBinding extends BaseResourceReturningMethodBinding {
 			ourLog.trace("Method {} doesn't match because it is for compartment {} but request is compartment {}", getMethod(), myCompartmentName, theRequest.getCompartmentName());
 			return false;
 		}
+		if (theRequest.getParameters().get(Constants.PARAM_PAGINGACTION) != null) {
+			return false;
+		}
+
 		// This is used to track all the parameters so we can reject queries that
 		// have additional params we don't understand
 		Set<String> methodParamsTemp = new HashSet<>();

@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
@@ -41,8 +42,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			zos.write(IOUtils.toByteArray(getClass().getResourceAsStream("/sct/" + nextName)));
 		}
 		zos.close();
-		byte[] packageBytes = bos.toByteArray();
-		return packageBytes;
+		return bos.toByteArray();
 	}
 
 	@Test
@@ -175,34 +175,17 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testApplyDeltaAdd() {
-
-		CodeSystem delta = new CodeSystem();
-		delta.setUrl("http://example.com/labCodes");
-		delta.setName("Example Hospital Lab Codes");
-		delta.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		delta.setUrl("http://foo");
-		CodeSystem.ConceptDefinitionComponent chem = delta
-			.addConcept()
-			.setCode("CHEM")
-			.setDisplay("Chemistry Tests");
-		chem
-			.addConcept()
-			.setCode("HB")
-			.setDisplay("Hemoglobin");
-		chem
-			.addConcept()
-			.setCode("NEUT")
-			.setDisplay("Neutrophil");
-		CodeSystem.ConceptDefinitionComponent micro = delta
-			.addConcept()
-			.setCode("MICRO")
-			.setDisplay("Microbiology Tests");
-		micro
-			.addConcept()
-			.setCode("C&S")
-			.setDisplay("Culture & Sensitivity");
+	public void testApplyDeltaAdd() throws IOException {
+		String conceptsCsv = loadResource("/custom_term/concepts.csv");
+		Attachment conceptsAttachment = new Attachment()
+			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl("file:/foo/concepts.csv");
+		String hierarchyCsv = loadResource("/custom_term/hierarchy.csv");
+		Attachment hierarchyAttachment = new Attachment()
+			.setData(hierarchyCsv.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl("file:/foo/hierarchy.csv");
 
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		ourClient.registerInterceptor(interceptor);
@@ -210,7 +193,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);
@@ -218,47 +202,38 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
 		assertThat(encoded, containsString("\"valueInteger\": 5"));
+		assertThat(encoded, containsString("AAAAA"));
 	}
 
 	@Test
-	public void testApplyDeltaRemove() {
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		ourClient.create().resource(cs).execute();
+	public void testApplyDeltaRemove() throws IOException {
+		String conceptsCsv = loadResource("/custom_term/concepts.csv");
+		Attachment conceptsAttachment = new Attachment()
+			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl("file:/foo/concepts.csv");
+		String hierarchyCsv = loadResource("/custom_term/hierarchy.csv");
+		Attachment hierarchyAttachment = new Attachment()
+			.setData(hierarchyCsv.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl("file:/foo/hierarchy.csv");
 
-		CodeSystem delta = new CodeSystem();
-		delta.setUrl("http://foo");
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-
-		// Add
-		ourClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
-			.prettyPrint()
-			.execute();
-
-		// Remove
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		ourClient.registerInterceptor(interceptor);
 		Parameters outcome = ourClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.VALUE, delta)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 1"));
+		assertThat(encoded, containsString("\"valueInteger\": 5"));
+		assertThat(encoded, containsString("AAAAA"));
 	}
 
 	@AfterClass

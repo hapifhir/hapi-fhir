@@ -340,6 +340,15 @@
 				it hasn't been permitted in the spec for a very long time. Hopefully this change will not
 				impact anyone!
 			</action>
+			<action type="add">
+				Auto generated transaction IDs will now use both upper- and lowercase letters for more uniqueness in
+				the same amount of space
+			</action>
+			<action type="fix">
+				Paging requests that are incorrectly executed at the type level were interpreted by the plain server
+				as search requests with no search parameters, leading to confusing search results. These will now
+				result in an HTTP 400 error with a meaningful error message.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
