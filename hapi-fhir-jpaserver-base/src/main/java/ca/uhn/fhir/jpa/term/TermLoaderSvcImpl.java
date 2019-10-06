@@ -4,6 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
@@ -62,32 +65,31 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
-	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
-	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
+public class TermLoaderSvcImpl implements ITermLoaderSvc {
+	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
+	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
 
-	public static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
-	public static final String IMGTHLA_HLA_XML = "hla.xml";
+	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
+	static final String IMGTHLA_HLA_XML = "hla.xml";
 
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
-	public static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
-	public static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
+	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
+	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
 	private static final int LOG_INCREMENT = 1000;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermLoaderSvcImpl.class);
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
 	private final FhirContext myCtx = FhirContext.forR4();
 	@Autowired
-	private IHapiTerminologySvc myTermSvc;
+	private ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	@Autowired
+	private ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
+	@Autowired
+	private TermCodeSystemStorageSvcImpl myConceptStorageSvc;
 
-	@VisibleForTesting
-	public void setTermSvcForUnitTest(IHapiTerminologySvc theTermSvc) {
-		myTermSvc = theTermSvc;
-	}
-
-	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept, Counter theCircularCounter) {
+	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
 
 		theChain.add(theConcept.getCode());
 		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
@@ -113,7 +115,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				nextChild.getParents().remove(next);
 
 			} else {
-				dropCircularRefs(nextChild, theChain, theCode2concept, theCircularCounter);
+				dropCircularRefs(nextChild, theChain, theCode2concept);
 			}
 		}
 		theChain.remove(theChain.size() - 1);
@@ -122,9 +124,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		LoadedFileDescriptors descriptors = null;
-		try {
-			descriptors = new LoadedFileDescriptors(theFiles);
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				IMGTHLA_HLA_NOM_TXT,
 				IMGTHLA_HLA_XML
@@ -134,8 +134,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			ourLog.info("Beginning IMGTHLA processing");
 
 			return processImgthlaFiles(descriptors, theRequestDetails);
-		} finally {
-			IOUtils.closeQuietly(descriptors);
 		}
 	}
 
@@ -216,8 +214,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	@Override
 	public UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			IRecordHandler handler;
-
 			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
 			CodeSystem codeSystem;
 			if (codeSystemContent.isPresent()) {
@@ -247,7 +243,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
-			return myTermSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
+			return myConceptStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
 		}
 	}
 
@@ -256,7 +252,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
-			return myTermSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
+			return myConceptStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
 		}
 	}
 
@@ -520,7 +516,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
-		retVal.getCompose().addInclude().setSystem(IHapiTerminologyLoaderSvc.LOINC_URI);
+		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI);
 
 		return retVal;
 	}
@@ -559,7 +555,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			long count = circularCounter.getThenAdd();
 			float pct = ((float) count / rootConcepts.size()) * 100.0f;
 			ourLog.info(" * Scanning for circular refs - have scanned {} / {} codes ({}%)", count, rootConcepts.size(), pct);
-			dropCircularRefs(next, new ArrayList<>(), code2concept, circularCounter);
+			dropCircularRefs(next, new ArrayList<>(), code2concept);
 		}
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
@@ -574,8 +570,8 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	}
 
 	@VisibleForTesting
-	void setTermSvcForUnitTests(IHapiTerminologySvc theTermSvc) {
-		myTermSvc = theTermSvc;
+	void setTermCodeSystemStorageSvcForUnitTests(ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
+		myTerminologyCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 	}
 
 	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -585,9 +581,9 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.emptyList());
 
 		IIdType retVal;
-		myTermSvc.setProcessDeferred(false);
-		retVal = myTermSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
-		myTermSvc.setProcessDeferred(true);
+		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		retVal = myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 
 		return retVal;
 	}
@@ -646,7 +642,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	}
 
 	@Nonnull
-	public static CSVParser newCsvRecords(char theDelimiter, QuoteMode theQuoteMode, Reader theReader) throws IOException {
+	private static CSVParser newCsvRecords(char theDelimiter, QuoteMode theQuoteMode, Reader theReader) throws IOException {
 		CSVParser parsed;
 		CSVFormat format = CSVFormat
 			.newFormat(theDelimiter)

@@ -2,13 +2,13 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcDstu3;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
@@ -19,7 +19,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -60,11 +58,6 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	@Autowired
 	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoDstu3")
-	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
-	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
@@ -102,55 +95,6 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 		return false;
 	}
 
-	@Override
-	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
-		CodeSystem resourceToStore;
-		try {
-			resourceToStore = VersionConvertor_30_40.convertCodeSystem(theCodeSystemResource);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
-		}
-		validateCodeSystemForStorage(theCodeSystemResource);
-		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
-			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(resourceToStore, matchUrl).getId();
-		} else {
-			return myCodeSystemResourceDao.update(resourceToStore).getId();
-		}
-	}
-
-	@Override
-	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
-		ConceptMap resourceToStore;
-		try {
-			resourceToStore = VersionConvertor_30_40.convertConceptMap(theConceptMap);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
-		}
-		if (isBlank(resourceToStore.getIdElement().getIdPart())) {
-			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-			myConceptMapResourceDao.update(resourceToStore, matchUrl);
-		} else {
-			myConceptMapResourceDao.update(resourceToStore);
-		}
-	}
-
-	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
-		ValueSet valueSetDstu3;
-		try {
-			valueSetDstu3 = VersionConvertor_30_40.convertValueSet(theValueSet);
-		} catch (FHIRException e) {
-			throw new InternalErrorException(e);
-		}
-
-		if (isBlank(valueSetDstu3.getIdElement().getIdPart())) {
-			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(valueSetDstu3, matchUrl);
-		} else {
-			myValueSetResourceDao.update(valueSetDstu3);
-		}
-	}
 
 	@Override
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
@@ -303,7 +247,7 @@ public class HapiTerminologySvcDstu3 extends BaseHapiTerminologySvcImpl implemen
 	}
 
 	@Override
-	protected org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
+	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
 		CodeSystem codeSystem = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		try {
 			return VersionConvertor_30_40.convertCodeSystem(codeSystem);

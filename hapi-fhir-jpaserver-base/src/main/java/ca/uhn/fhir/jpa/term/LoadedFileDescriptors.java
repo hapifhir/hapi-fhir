@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.apache.commons.io.FileUtils;
@@ -20,11 +21,11 @@ public class LoadedFileDescriptors implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(LoadedFileDescriptors.class);
 
 	private List<File> myTemporaryFiles = new ArrayList<>();
-	private List<IHapiTerminologyLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
+	private List<ITermLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
 
-	public LoadedFileDescriptors(List<IHapiTerminologyLoaderSvc.FileDescriptor> theFileDescriptors) {
+	public LoadedFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFileDescriptors) {
 		try {
-			for (IHapiTerminologyLoaderSvc.FileDescriptor next : theFileDescriptors) {
+			for (ITermLoaderSvc.FileDescriptor next : theFileDescriptors) {
 				if (next.getFilename().toLowerCase().endsWith(".zip")) {
 					ourLog.info("Uncompressing {} into temporary files", next.getFilename());
 					try (InputStream inputStream = next.getInputStream()) {
@@ -37,7 +38,7 @@ public class LoadedFileDescriptors implements Closeable {
 							FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
 							IOUtils.copy(fis, fos);
 							String nextEntryFileName = nextEntry.getName();
-							myUncompressedFileDescriptors.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+							myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
 								@Override
 								public String getFilename() {
 									return nextEntryFileName;
@@ -81,14 +82,14 @@ public class LoadedFileDescriptors implements Closeable {
 		}
 	}
 
-	List<IHapiTerminologyLoaderSvc.FileDescriptor> getUncompressedFileDescriptors() {
+	List<ITermLoaderSvc.FileDescriptor> getUncompressedFileDescriptors() {
 		return myUncompressedFileDescriptors;
 	}
 
 	private List<String> notFound(List<String> theExpectedFilenameFragments) {
 		Set<String> foundFragments = new HashSet<>();
 		for (String nextExpected : theExpectedFilenameFragments) {
-			for (IHapiTerminologyLoaderSvc.FileDescriptor next : myUncompressedFileDescriptors) {
+			for (ITermLoaderSvc.FileDescriptor next : myUncompressedFileDescriptors) {
 				if (next.getFilename().contains(nextExpected)) {
 					foundFragments.add(nextExpected);
 					break;

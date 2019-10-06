@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR5;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR5;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.SnapshotGeneratingValidationSupport;

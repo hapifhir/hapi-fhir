@@ -4,7 +4,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
@@ -98,7 +98,7 @@ public class CustomTerminologySet {
 
 		// Concepts
 		IRecordHandler conceptHandler = new ConceptHandler(code2concept);
-		TerminologyLoaderSvcImpl.iterateOverZipFile(theDescriptors, TerminologyLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
+		TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE, conceptHandler, ',', QuoteMode.NON_NUMERIC, false);
 		if (theFlat) {
 
 			return new CustomTerminologySet(code2concept.size(), ArrayListMultimap.create(), code2concept.values());
@@ -106,9 +106,9 @@ public class CustomTerminologySet {
 		} else {
 
 			// Hierarchy
-			if (theDescriptors.hasFile(TerminologyLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
+			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
 				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept, parentCodeToChildrenWithMissingParent);
-				TerminologyLoaderSvcImpl.iterateOverZipFile(theDescriptors, TerminologyLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
+				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
 			// Find root concepts

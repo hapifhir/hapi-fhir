@@ -117,7 +117,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		return id;
 	}
@@ -263,7 +263,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setCode("codeA")
 			.setDisplay("displayA");
 		try {
-			myTermSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("", e.getMessage());
@@ -277,7 +277,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("CBC", "Complete Blood Count");
 		delta.addRootConcept("URNL", "Routine Urinalysis");
-		myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -302,7 +302,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codea", "CODEA0");
 		delta.addRootConcept("codeb", "CODEB0");
 
-		IHapiTerminologyLoaderSvc.UploadStatistics outcome = myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getConceptCount());
 		assertEquals("CODEA0", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
@@ -310,12 +310,12 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codea", "CODEA1");
 		delta.addRootConcept("codeb", "CODEB1");
-		outcome = myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getConceptCount());
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with no changes
-		outcome = myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(0, outcome.getConceptCount());
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 	}
@@ -413,7 +413,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			.setCode("codeAAA")
 			.setDisplay("displayAAA");
 		delta.addRootConcept("codeB", "displayB");
-		myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 
 		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
 		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
@@ -423,7 +423,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		// Remove CodeB
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeB", "displayB");
-		myTermSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
 
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
 		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
@@ -433,7 +433,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		// Remove CodeA
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA");
-		myTermSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
 
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
@@ -449,7 +449,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA", "displayA");
 		try {
-			myTermSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
 		}
@@ -656,6 +656,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		loadAndPersistValueSet(HttpVerb.POST);
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);

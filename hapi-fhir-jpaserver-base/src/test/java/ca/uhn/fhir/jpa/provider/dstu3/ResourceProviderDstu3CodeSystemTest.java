@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
@@ -86,7 +86,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testDeleteCodeSystemComplete2() {
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 
 		String input = "{\n" +
 			"    \"resourceType\": \"CodeSystem\",\n" +

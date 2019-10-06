@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
@@ -26,10 +27,10 @@ import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
-	private TerminologyLoaderSvcImpl mySvc;
+	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 
 	private ZipCollectionBuilder myFiles;
 	@Captor
@@ -37,22 +38,22 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvcImpl();
-		mySvc.setTermSvcForUnitTests(myTermSvc);
+		mySvc = new TermLoaderSvcImpl();
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
 
 	@Test
 	public void testLoadComplete() throws Exception {
-		myFiles.addFileZip("/custom_term/", TerminologyLoaderSvcImpl.CUSTOM_CODESYSTEM_JSON);
-		myFiles.addFileZip("/custom_term/", TerminologyLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
-		myFiles.addFileZip("/custom_term/", TerminologyLoaderSvcImpl.CUSTOM_HIERARCHY_FILE);
+		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CODESYSTEM_JSON);
+		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
+		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE);
 
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
@@ -77,12 +78,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	@Test
 	public void testLoadWithNoCodeSystem() throws Exception {
-		myFiles.addFileZip("/custom_term/", TerminologyLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
+		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
 
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
@@ -96,12 +97,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 	 */
 	@Test
 	public void testLoadCodesOnly() throws Exception {
-		myFiles.addFileZip("/custom_term/", TerminologyLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
+		myFiles.addFileZip("/custom_term/", TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE);
 
 		// Actually do the load
 		mySvc.loadCustom("http://example.com/labCodes", myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		TermConcept code;
@@ -120,13 +121,13 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		myFiles.addFileText(loadResource("/custom_term/concepts.csv"), "concepts.csv");
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
-		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
+		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
+		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
 
-		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
+		UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
@@ -155,13 +156,13 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// to make sure it's ignored..
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
-		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
+		UploadStatistics stats = new UploadStatistics(100, new IdType("CodeSystem/100"));
+		when(myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
 
-		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
+		UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts

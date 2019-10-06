@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.term.api;
 
 /*-
  * #%L

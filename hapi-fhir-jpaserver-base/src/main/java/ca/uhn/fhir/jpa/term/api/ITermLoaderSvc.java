@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.term.api;
 
 /*
  * #%L
@@ -20,14 +20,17 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-public interface IHapiTerminologyLoaderSvc {
+/**
+ * This service handles bulk loading concepts into the terminology service concept tables
+ */
+public interface ITermLoaderSvc {
 
 	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
 	String LOINC_URI = "http://loinc.org";
@@ -76,25 +79,6 @@ public interface IHapiTerminologyLoaderSvc {
 		public InputStream getInputStream() {
 			return new ByteArrayInputStream(myNextData);
 		}
-	}
-
-	class UploadStatistics {
-		private final int myConceptCount;
-		private final IIdType myTarget;
-
-		public UploadStatistics(int theConceptCount, IIdType theTarget) {
-			myConceptCount = theConceptCount;
-			myTarget = theTarget;
-		}
-
-		public int getConceptCount() {
-			return myConceptCount;
-		}
-
-		public IIdType getTarget() {
-			return myTarget;
-		}
-
 	}
 
 }

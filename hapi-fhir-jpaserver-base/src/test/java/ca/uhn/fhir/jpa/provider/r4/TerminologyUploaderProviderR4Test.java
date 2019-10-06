@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3Test;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.TestUtil;
@@ -54,7 +54,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI + "FOO"))
+				.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
 				.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
 			fail();
@@ -71,7 +71,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
+			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
@@ -89,7 +89,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.LOINC_URI))
+			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.LOINC_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
@@ -106,7 +106,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
+				.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -140,7 +140,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
+			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
 			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
@@ -164,7 +164,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(IHapiTerminologyLoaderSvc.SCT_URI))
+			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
 			.execute();
 

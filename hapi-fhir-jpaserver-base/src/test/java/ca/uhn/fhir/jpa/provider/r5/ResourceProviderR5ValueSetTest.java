@@ -6,8 +6,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.provider.r5.BaseResourceProviderR5Test;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -80,6 +80,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		persistCodeSystem(codeSystem, theVerb);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistCodeSystem(CodeSystem theCodeSystem, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
@@ -116,6 +117,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		persistValueSet(valueSet, theVerb);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistValueSet(ValueSet theValueSet, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
@@ -145,7 +147,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		IResourceTableDao resourceTableDao = myResourceTableDao;
 		IHapiTerminologySvc termSvc = myTermSvc;
 
-		return createExternalCs(codeSystemDao, resourceTableDao, termSvc, mySrd);
+		return createExternalCs(codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -1032,7 +1034,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, IHapiTerminologySvc theTermSvc, ServletRequestDetails theRequestDetails) {
+	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -1061,7 +1063,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
 		return codeSystem;
 	}
 

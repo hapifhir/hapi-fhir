@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term.snomedct;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.Map;
@@ -56,7 +56,7 @@ public final class SctHandlerDescription implements IRecordHandler {
 
       String term = theRecord.get("term");
 
-      TermConcept concept = TerminologyLoaderSvcImpl.getOrCreateConcept(myId2concept, id);
+      TermConcept concept = TermLoaderSvcImpl.getOrCreateConcept(myId2concept, id);
       concept.setCode(conceptId);
       concept.setDisplay(term);
       concept.setCodeSystemVersion(myCodeSystemVersion);

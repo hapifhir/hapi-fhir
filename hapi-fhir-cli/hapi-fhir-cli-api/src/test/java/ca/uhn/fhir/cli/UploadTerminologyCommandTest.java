@@ -4,9 +4,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.BaseTest;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
@@ -62,7 +62,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsAdd(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsAdd(eq("http://foo"), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -91,7 +91,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	public void testTerminologyUpload_RemoveDelta() throws IOException {
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsRemove(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsRemove(eq("http://foo"), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -189,7 +189,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	public void before() throws Exception {
 		myServer = new Server(0);
 
-		TerminologyLoaderSvcImpl terminologyLoaderSvc = new TerminologyLoaderSvcImpl();
+		TermLoaderSvcImpl terminologyLoaderSvc = new TermLoaderSvcImpl();
 		terminologyLoaderSvc.setTermSvcForUnitTest(myTerminologyLoaderSvc);
 
 		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, terminologyLoaderSvc);

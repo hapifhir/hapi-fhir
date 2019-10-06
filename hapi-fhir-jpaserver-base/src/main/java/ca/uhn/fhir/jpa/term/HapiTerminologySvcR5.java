@@ -5,12 +5,11 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR5;
 import ca.uhn.fhir.util.CoverageIgnore;
-import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
@@ -28,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
@@ -53,12 +51,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements IValidationSupport, IHapiTerminologySvcR5 {
 
-	@Autowired
-	@Qualifier("myConceptMapDaoR5")
-	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
-	@Autowired
-	@Qualifier("myCodeSystemDaoR5")
-	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
 	@Autowired
 	@Qualifier("myValueSetDaoR5")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
@@ -90,44 +82,6 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 		return false;
 	}
 
-	@Override
-	protected IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
-		validateCodeSystemForStorage(theCodeSystemResource);
-
-		CodeSystem codeSystemR4 = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(theCodeSystemResource);
-		if (isBlank(theCodeSystemResource.getIdElement().getIdPart())) {
-			String matchUrl = "CodeSystem?url=" + UrlUtil.escapeUrlParam(theCodeSystemResource.getUrl());
-			return myCodeSystemResourceDao.update(codeSystemR4, matchUrl).getId();
-		} else {
-			return myCodeSystemResourceDao.update(codeSystemR4).getId();
-		}
-	}
-
-	@Override
-	protected void createOrUpdateConceptMap(org.hl7.fhir.r4.model.ConceptMap theConceptMap) {
-
-		ConceptMap conceptMapR4 = org.hl7.fhir.convertors.conv40_50.ConceptMap.convertConceptMap(theConceptMap);
-
-		if (isBlank(theConceptMap.getIdElement().getIdPart())) {
-			String matchUrl = "ConceptMap?url=" + UrlUtil.escapeUrlParam(theConceptMap.getUrl());
-			myConceptMapResourceDao.update(conceptMapR4, matchUrl);
-		} else {
-			myConceptMapResourceDao.update(conceptMapR4);
-		}
-	}
-
-	@Override
-	protected void createOrUpdateValueSet(org.hl7.fhir.r4.model.ValueSet theValueSet) {
-
-		ValueSet valueSetR4 = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(theValueSet);
-
-		if (isBlank(theValueSet.getIdElement().getIdPart())) {
-			String matchUrl = "ValueSet?url=" + UrlUtil.escapeUrlParam(theValueSet.getUrl());
-			myValueSetResourceDao.update(valueSetR4, matchUrl);
-		} else {
-			myValueSetResourceDao.update(valueSetR4);
-		}
-	}
 
 	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
@@ -244,7 +198,7 @@ public class HapiTerminologySvcR5 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
-	protected org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
+	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
 		CodeSystem codeSystemR5 = myValidationSupport.fetchCodeSystem(myContext, theSystem);
 		return org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem(codeSystemR5);
 	}

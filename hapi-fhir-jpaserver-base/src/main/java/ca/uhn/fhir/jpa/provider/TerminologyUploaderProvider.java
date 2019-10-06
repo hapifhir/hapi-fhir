@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc.UploadStatistics;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -58,7 +58,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	@Autowired
 	private FhirContext myCtx;
 	@Autowired
-	private IHapiTerminologyLoaderSvc myTerminologyLoaderSvc;
+	private ITermLoaderSvc myTerminologyLoaderSvc;
 
 	/**
 	 * Constructor
@@ -70,7 +70,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	/**
 	 * Constructor
 	 */
-	public TerminologyUploaderProvider(FhirContext theContext, IHapiTerminologyLoaderSvc theTerminologyLoaderSvc) {
+	public TerminologyUploaderProvider(FhirContext theContext, ITermLoaderSvc theTerminologyLoaderSvc) {
 		myCtx = theContext;
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 	}
@@ -92,7 +92,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		startRequest(theServletRequest);
 		try {
-			List<IHapiTerminologyLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
 			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
@@ -118,7 +118,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 		startRequest(theServletRequest);
 		try {
-			List<IHapiTerminologyLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
 			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
@@ -128,15 +128,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	@Nonnull
-	private List<IHapiTerminologyLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
-		List<IHapiTerminologyLoaderSvc.FileDescriptor> files = new ArrayList<>();
+	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
+		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
 		for (ICompositeType next : theFiles) {
 			byte[] nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
 			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
 			ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
 			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
 
-			files.add(new IHapiTerminologyLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
+			files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
 		}
 		return files;
 	}
@@ -177,7 +177,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		}
 
 		try {
-			List<IHapiTerminologyLoaderSvc.FileDescriptor> localFiles = new ArrayList<>();
+			List<ITermLoaderSvc.FileDescriptor> localFiles = new ArrayList<>();
 			if (theLocalFile != null && theLocalFile.size() > 0) {
 				for (IPrimitiveType<String> nextLocalFile : theLocalFile) {
 					if (isNotBlank(nextLocalFile.getValue())) {
@@ -186,7 +186,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						if (!nextFile.exists() || !nextFile.isFile()) {
 							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
 						}
-						localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+						localFiles.add(new ITermLoaderSvc.FileDescriptor() {
 							@Override
 							public String getFilename() {
 								return nextFile.getAbsolutePath();
@@ -213,7 +213,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 						throw new UnprocessableEntityException("Package is missing mandatory url element");
 					}
 
-					localFiles.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+					localFiles.add(new ITermLoaderSvc.FileDescriptor() {
 						@Override
 						public String getFilename() {
 							return url;
@@ -237,13 +237,13 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
 			} else {
 				switch (codeSystemUrl) {
-					case IHapiTerminologyLoaderSvc.SCT_URI:
+					case ITermLoaderSvc.SCT_URI:
 						stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
 						break;
-					case IHapiTerminologyLoaderSvc.LOINC_URI:
+					case ITermLoaderSvc.LOINC_URI:
 						stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
 						break;
-					case IHapiTerminologyLoaderSvc.IMGTHLA_URI:
+					case ITermLoaderSvc.IMGTHLA_URI:
 						stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
 						break;
 					default:

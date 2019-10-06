@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -121,7 +121,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		TermCodeSystemVersion csv = new TermCodeSystemVersion();
 		csv.addConcept().setCode("bar").setDisplay("Bar Code");
-		myTerminologySvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
 
 		// Validate a resource containing this codesystem in a field with an extendable binding
 		Patient patient = new Patient();

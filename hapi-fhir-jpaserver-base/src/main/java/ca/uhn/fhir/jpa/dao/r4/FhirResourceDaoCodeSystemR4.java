@@ -122,7 +122,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		if (isNotBlank(codeSystemUrl)) {
 			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
 			if (persCs != null) {
-				myTerminologySvc.deleteCodeSystem(persCs);
+				myTerminologyCodeSystemStorageSvc.deleteCodeSystem(persCs);
 			}
 		}
 	}
@@ -135,7 +135,7 @@ public class FhirResourceDaoCodeSystemR4 extends FhirResourceDaoR4<CodeSystem> i
 		CodeSystem cs = (CodeSystem) theResource;
 		addPidToResource(theEntity, theResource);
 
-		myTerminologySvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
 
 		return retVal;
 	}

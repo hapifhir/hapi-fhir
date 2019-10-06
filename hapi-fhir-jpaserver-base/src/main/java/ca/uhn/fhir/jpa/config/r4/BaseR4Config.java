@@ -12,10 +12,10 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.*;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -60,6 +60,12 @@ public class BaseR4Config extends BaseConfig {
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextR4();
+	}
+
+	@Bean
+	@Override
+	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
+		return new TermVersionAdapterSvcR4();
 	}
 
 	@Bean
@@ -154,8 +160,8 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvcImpl();
+	public ITermLoaderSvc termLoaderService() {
+		return new TermLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
