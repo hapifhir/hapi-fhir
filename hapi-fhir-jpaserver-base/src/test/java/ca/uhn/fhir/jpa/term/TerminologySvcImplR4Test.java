@@ -415,6 +415,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeB", "displayB");
 		myTermSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+
 		// Remove CodeB
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeB", "displayB");
@@ -434,6 +439,20 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
 		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+
+	}
+
+
+	@Test
+	public void testApplyCodeSystemDeltaRemove_UnknownSystem() {
+
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("codeA", "displayA");
+		try {
+			myTermSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
+		}
 
 	}
 

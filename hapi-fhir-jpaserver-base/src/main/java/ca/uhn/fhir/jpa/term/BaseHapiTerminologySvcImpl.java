@@ -2340,9 +2340,21 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		}
 
 		AtomicInteger conceptUpdateCounter = new AtomicInteger();
+
+		TermConcept parentCode = null;
+
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
-			ourLog.info("Saving root concept {}", conceptUpdateCounter.get());
-			setCodeSystemVersionRecursively(nextRootConcept, csv);
+
+			String parentDescription = parentCode != null ? parentCode.getCode() : "(root concept)";
+			ourLog.info("Saving concept {} with parent {}", conceptUpdateCounter.get(), parentDescription);
+
+			if (codeToConceptPid.containsKey(nextRootConcept.getCode())) {
+				TermConcept existingCode = myConceptDao.getOne(codeToConceptPid.get(nextRootConcept.getCode()));
+				existingCode.setIndexStatus(null);
+				existingCode.setDisplay(nextRootConcept.getDisplay());
+			}
+
+			saveConceptsRecursively(nextRootConcept, csv);
 			myConceptDao.save(nextRootConcept);
 
 			conceptUpdateCounter.incrementAndGet();
@@ -2351,32 +2363,41 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		return new IHapiTerminologyLoaderSvc.UploadStatistics(conceptUpdateCounter.get(), codeSystemId);
 	}
 
-	private void setCodeSystemVersionRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv) {
+	private void saveConceptsRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv) {
 		theConcept.setCodeSystemVersion(theCsv);
-		for (TermConcept next : theConcept.getChildCodes()) {
-			setCodeSystemVersionRecursively(next, theCsv);
+		saveConcept(theConcept);
+
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			TermConcept nextChild = nextChildLink.getChild();
+			nextChildLink.setCodeSystem(theCsv);
+			saveConceptsRecursively(nextChild, theCsv);
+
+			if (nextChildLink.getId() == null) {
+				myConceptParentChildLinkDao.save(nextChildLink);
+			}
 		}
 	}
 
 	@Transactional
 	@Override
 	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
-//		TermCodeSystem cs = getCodeSystem(theSystem);
-//		if (cs == null) {
-//			throw new InvalidRequestException("Unknown code system: " + theSystem);
-//		}
-//
-//		AtomicInteger removeCounter = new AtomicInteger(0);
-//
-//		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
-//			Optional<TermConcept> conceptOpt = findCode(theSystem, next.getCode());
-//			if (conceptOpt.isPresent()) {
-//				TermConcept concept = conceptOpt.get();
-//				deleteConceptChildrenAndConcept(concept, removeCounter);
-//			}
-//		}
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			throw new InvalidRequestException("Unknown code system: " + theSystem);
+		}
 
-		return null;
+		AtomicInteger removeCounter = new AtomicInteger(0);
+
+		for (TermConcept nextSuppliedConcept : theValue.getRootConcepts()) {
+			Optional<TermConcept> conceptOpt = findCode(theSystem, nextSuppliedConcept.getCode());
+			if (conceptOpt.isPresent()) {
+				TermConcept concept = conceptOpt.get();
+				deleteConceptChildrenAndConcept(concept, removeCounter);
+			}
+		}
+
+		IIdType target = cs.getResource().getIdDt();
+		return new IHapiTerminologyLoaderSvc.UploadStatistics(removeCounter.get(), target);
 	}
 
 	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {

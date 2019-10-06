@@ -208,7 +208,7 @@ public class TermConcept implements Serializable {
 
 	public TermConcept setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystem = theCodeSystemVersion;
-		if (theCodeSystemVersion.getPid() != null) {
+		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
 		return this;
