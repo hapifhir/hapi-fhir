@@ -247,7 +247,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
-			return myTermSvc.applyDeltaCodesystemsAdd(theSystem, terminologySet);
+			return myTermSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
 		}
 	}
 
@@ -256,7 +256,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
-			return myTermSvc.applyDeltaCodesystemsRemove(theSystem, terminologySet);
+			return myTermSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
 		}
 	}
 

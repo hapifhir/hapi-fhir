@@ -20,11 +20,16 @@ package ca.uhn.fhir.jpa.entity;
  * #L%
  */
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Fields;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "TRM_CONCEPT_PC_LINK")
+@Table(name = "TRM_CONCEPT_PC_LINK", indexes = {
+	@Index(name = "IDX_TRMCONCPCLNK_CSV", columnList = "CODESYSTEM_PID")
+})
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -38,6 +43,10 @@ public class TermConceptParentChildLink implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "CODESYSTEM_PID", nullable = false, foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_CS"))
 	private TermCodeSystemVersion myCodeSystem;
+
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false, nullable = false)
+	@Fields({@Field(name = "myCodeSystemVersionPid")})
+	private long myCodeSystemVersionPid;
 
 	@ManyToOne(cascade = {})
 	@JoinColumn(name = "PARENT_PID", nullable = false, referencedColumnName = "PID", foreignKey = @ForeignKey(name = "FK_TERM_CONCEPTPC_PARENT"))

@@ -46,6 +46,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -2260,60 +2261,106 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 
 	@Transactional
 	@Override
-	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsAdd(String theSystem, CustomTerminologySet theAdditions) {
+	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "No system provided");
 
-//		TermCodeSystem cs = getCodeSystem(theSystem);
-//		if (cs == null) {
-//			List<CodeSystem.ConceptDefinitionComponent> codes = theValue.getConcept();
-//			theValue.setConcept(null);
-//			createOrUpdateCodeSystem(theValue);
-//			cs = getCodeSystem(theSystem);
-//			theValue.setConcept(codes);
-//		}
-//
-//		TermCodeSystemVersion csv = cs.getCurrentVersion();
-//
-//		AtomicInteger addedCodeCounter = new AtomicInteger(0);
-//
-//		TermConcept parentCode = null;
-//		if (isNotBlank(theParent)) {
-//			parentCode = myConceptDao
-//				.findByCodeSystemAndCode(csv, theParent)
-//				.orElseThrow(() -> new InvalidRequestException("Unknown code [" + theSystem + "|" + theParent + "]"));
-//		}
-//
-//		List<TermConcept> concepts = new ArrayList<>();
-//		for (CodeSystem.ConceptDefinitionComponent next : theValue.getConcept()) {
-//			TermConcept concept = toTermConcept(next, csv);
-//			if (parentCode != null) {
-//				parentCode.addChild(concept, RelationshipTypeEnum.ISA);
-//			}
-//			concepts.add(concept);
-//		}
-//
-//		// The first pass just saves any concepts that were added to the
-//		// root of the CodeSystem
-//		List<TermConceptParentChildLink> links = new ArrayList<>();
-//		for (TermConcept next : concepts) {
-//			int addedCount = saveOrUpdateConcept(next);
-//			addedCodeCounter.addAndGet(addedCount);
-//			extractLinksFromConceptAndChildren(next, links);
-//		}
-//
-//		// This second pass saves any child concepts
-//		for (TermConceptParentChildLink next : links) {
-//			next.setCodeSystem(csv);
-//			int addedCount = saveOrUpdateConcept(next.getChild());
-//			addedCodeCounter.addAndGet(addedCount);
-//			myConceptParentChildLinkDao.save(next);
-//		}
+		TermCodeSystem cs = getCodeSystem(theSystem);
+		if (cs == null) {
+			CodeSystem codeSystemResource = new CodeSystem();
+			codeSystemResource.setUrl(theSystem);
+			codeSystemResource.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			this.createOrUpdateCodeSystem(codeSystemResource);
 
-		return null;
+			cs = getCodeSystem(theSystem);
+		}
+
+		TermCodeSystemVersion csv = cs.getCurrentVersion();
+		Validate.notNull(csv);
+
+		CodeSystem codeSystem = getCodeSystemFromContext(theSystem);
+		if (codeSystem.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			throw new InvalidRequestException("CodeSystem with url[" + theSystem + "] can not apply a delta - wrong content mode: " + codeSystem.getContent());
+		}
+
+		Validate.notNull(cs);
+		Validate.notNull(cs.getPid());
+
+		IIdType codeSystemId = cs.getResource().getIdDt();
+
+		// Load all concepts for the code system
+		Map<String, Long> codeToConceptPid = new HashMap<>();
+		{
+			ourLog.info("Loading all concepts in CodeSystem url[" + theSystem + "]");
+			StopWatch sw = new StopWatch();
+			CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
+			Root<TermConcept> root = query.from(TermConcept.class);
+			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), cs.getPid());
+			query.where(predicate);
+			TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
+			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			try (ScrollableResultsIterator<TermConcept> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
+				while (scrollableResultsIterator.hasNext()) {
+					TermConcept next = scrollableResultsIterator.next();
+					codeToConceptPid.put(next.getCode(), next.getId());
+				}
+			}
+			ourLog.info("Loaded {} concepts in {}", codeToConceptPid.size(), sw.toString());
+		}
+
+		// Load all parent/child links
+		ListMultimap<String, String> parentCodeToChildCodes = ArrayListMultimap.create();
+		ListMultimap<String, String> childCodeToParentCodes = ArrayListMultimap.create();
+		{
+			ourLog.info("Loading all parent/child relationships in CodeSystem url[" + theSystem + "]");
+			int count = 0;
+			StopWatch sw = new StopWatch();
+			CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
+			CriteriaQuery<TermConceptParentChildLink> query = criteriaBuilder.createQuery(TermConceptParentChildLink.class);
+			Root<TermConceptParentChildLink> root = query.from(TermConceptParentChildLink.class);
+			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), cs.getPid());
+			root.fetch("myChild");
+			root.fetch("myParent");
+			query.where(predicate);
+			TypedQuery<TermConceptParentChildLink> typedQuery = myEntityManager.createQuery(query.select(root));
+			org.hibernate.query.Query<TermConceptParentChildLink> hibernateQuery = (org.hibernate.query.Query<TermConceptParentChildLink>) typedQuery;
+			ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
+			try (ScrollableResultsIterator<TermConceptParentChildLink> scrollableResultsIterator = new ScrollableResultsIterator<>(scrollableResults)) {
+				while (scrollableResultsIterator.hasNext()) {
+					TermConceptParentChildLink next = scrollableResultsIterator.next();
+					String parentCode = next.getParent().getCode();
+					String childCode = next.getChild().getCode();
+					parentCodeToChildCodes.put(parentCode, childCode);
+					childCodeToParentCodes.put(childCode, parentCode);
+					count++;
+				}
+			}
+			ourLog.info("Loaded {} parent/child relationships in {}", count, sw.toString());
+		}
+
+		AtomicInteger conceptUpdateCounter = new AtomicInteger();
+		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
+			ourLog.info("Saving root concept {}", conceptUpdateCounter.get());
+			setCodeSystemVersionRecursively(nextRootConcept, csv);
+			myConceptDao.save(nextRootConcept);
+
+			conceptUpdateCounter.incrementAndGet();
+		}
+
+		return new IHapiTerminologyLoaderSvc.UploadStatistics(conceptUpdateCounter.get(), codeSystemId);
+	}
+
+	private void setCodeSystemVersionRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv) {
+		theConcept.setCodeSystemVersion(theCsv);
+		for (TermConcept next : theConcept.getChildCodes()) {
+			setCodeSystemVersionRecursively(next, theCsv);
+		}
 	}
 
 	@Transactional
 	@Override
-	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsRemove(String theSystem, CustomTerminologySet theValue) {
+	public IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
 //		TermCodeSystem cs = getCodeSystem(theSystem);
 //		if (cs == null) {
 //			throw new InvalidRequestException("Unknown code system: " + theSystem);

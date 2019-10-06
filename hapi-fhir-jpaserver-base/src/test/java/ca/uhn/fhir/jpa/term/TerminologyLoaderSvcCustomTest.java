@@ -4,11 +4,8 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.IdType;
-import org.intellij.lang.annotations.Language;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -124,12 +121,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
 		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermSvc.applyDeltaCodesystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
+		when(myTermSvc.applyDeltaCodeSystemsAdd(eq("http://foo/system"), any())).thenReturn(stats);
 
 		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaAdd("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermSvc, times(1)).applyDeltaCodesystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
@@ -159,12 +156,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		myFiles.addFileText(loadResource("/custom_term/hierarchy.csv"), "hierarchy.csv");
 
 		IHapiTerminologyLoaderSvc.UploadStatistics stats = new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/100"));
-		when(myTermSvc.applyDeltaCodesystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
+		when(myTermSvc.applyDeltaCodeSystemsRemove(eq("http://foo/system"), any())).thenReturn(stats);
 
 		IHapiTerminologyLoaderSvc.UploadStatistics outcome = mySvc.loadDeltaRemove("http://foo/system", myFiles.getFiles(), mySrd);
 		assertSame(stats, outcome);
 
-		verify(myTermSvc, times(1)).applyDeltaCodesystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
+		verify(myTermSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo/system"), myCustomTerminologySetCaptor.capture());
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts

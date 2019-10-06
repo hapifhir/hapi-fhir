@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
@@ -63,7 +62,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodesystemsAdd(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsAdd(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -75,7 +74,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 			"-d", myHierarchyFileName
 		});
 
-		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodesystemsAdd(eq("http://foo"), myCodeSystemCaptor.capture());
+		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo"), myCodeSystemCaptor.capture());
 
 		CustomTerminologySet codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals(1, codeSystem.getRootConcepts().size());
@@ -92,7 +91,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	public void testTerminologyUpload_RemoveDelta() throws IOException {
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodesystemsRemove(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsRemove(eq("http://foo"), any())).thenReturn(new IHapiTerminologyLoaderSvc.UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -104,7 +103,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 			"-d", myHierarchyFileName
 		});
 
-		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodesystemsRemove(eq("http://foo"), myCodeSystemCaptor.capture());
+		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo"), myCodeSystemCaptor.capture());
 
 		CustomTerminologySet codeSystem = myCodeSystemCaptor.getValue();
 		assertEquals(3, codeSystem.getRootConcepts().size());

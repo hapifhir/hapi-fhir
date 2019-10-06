@@ -106,9 +106,9 @@ public interface IHapiTerminologySvc {
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
-	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsAdd(String theSystem, CustomTerminologySet theAdditions);
+	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions);
 
-	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodesystemsRemove(String theSystem, CustomTerminologySet theRemovals);
+	IHapiTerminologyLoaderSvc.UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theRemovals);
 
 	void preExpandDeferredValueSetsToTerminologyTables();
 
