@@ -1415,6 +1415,11 @@
 				<artifactId>xpp3_xpath</artifactId>
 				<version>1.1.4c</version>
 			</dependency>
+			<dependency>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-core</artifactId>
+				<version>6.0.4</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

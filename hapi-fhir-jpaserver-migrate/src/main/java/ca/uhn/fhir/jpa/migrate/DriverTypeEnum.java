@@ -99,7 +99,7 @@ public enum DriverTypeEnum {
 		return new ConnectionProperties(dataSource, txTemplate, this);
 	}
 
-	public static class ConnectionProperties {
+	public static class ConnectionProperties implements AutoCloseable {
 
 		private final DriverTypeEnum myDriverType;
 		private final DataSource myDataSource;
@@ -139,6 +139,7 @@ public enum DriverTypeEnum {
 			return myTxTemplate;
 		}
 
+		@Override
 		public void close() {
 			if (myDataSource instanceof DisposableBean) {
 				try {

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import ca.uhn.fhir.jpa.migrate.Migrator;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
@@ -14,7 +15,7 @@ public class BaseTest {
 
 	private static int ourDatabaseUrl = 0;
 	private String myUrl;
-	private Migrator myMigrator;
+	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 
 	public String getUrl() {
@@ -25,6 +26,10 @@ public class BaseTest {
 		return myConnectionProperties;
 	}
 
+	@After
+	public void resetMigrationVersion() {
+			executeSql("DELETE from \"flyway_schema_history\" where \"installed_rank\" > 0");
+	}
 
 	protected void executeSql(@Language("SQL") String theSql, Object... theArgs) {
 		myConnectionProperties.getTxTemplate().execute(t -> {
@@ -39,7 +44,7 @@ public class BaseTest {
 		});
 	}
 
-	public Migrator getMigrator() {
+	public FlywayMigrator getMigrator() {
 		return myMigrator;
 	}
 
@@ -56,7 +61,7 @@ public class BaseTest {
 
 		myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
 
-		myMigrator = new Migrator();
+		myMigrator = new FlywayMigrator();
 		myMigrator.setConnectionUrl(myUrl);
 		myMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 		myMigrator.setUsername("SA");

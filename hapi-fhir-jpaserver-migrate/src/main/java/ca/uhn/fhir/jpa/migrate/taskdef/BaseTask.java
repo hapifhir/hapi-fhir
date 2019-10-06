@@ -43,6 +43,8 @@ public abstract class BaseTask<T extends BaseTask> {
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
+	// FIXME KHS final
+	private String version;
 
 	public boolean isNoColumnShrink() {
 		return myNoColumnShrink;
@@ -129,6 +131,15 @@ public abstract class BaseTask<T extends BaseTask> {
 	}
 
 	public abstract void execute() throws SQLException;
+
+	public String getVersion() {
+		return version;
+	}
+
+	public BaseTask<T> setVersion(String theVersion) {
+		version = theVersion;
+		return this;
+	}
 
 	public static class ExecutedStatement {
 		private final String mySql;
