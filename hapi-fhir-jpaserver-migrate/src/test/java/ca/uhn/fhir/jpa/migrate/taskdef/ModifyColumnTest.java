@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class ModifyColumnTest extends BaseTest {
 	@Test
 	public void testColumnWithJdbcTypeClob() throws SQLException {
-		executeSql("create table SOMETABLE (TEXTCOL varchar2(255 char), TEXTCOL2 clob)");
+		executeSql("create table SOMETABLE (TEXTCOL clob)");
 
 		ModifyColumnTask task = new ModifyColumnTask();
 		task.setTableName("SOMETABLE");
