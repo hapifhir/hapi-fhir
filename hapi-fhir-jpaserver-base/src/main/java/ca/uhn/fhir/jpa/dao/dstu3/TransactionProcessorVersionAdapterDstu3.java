@@ -21,16 +21,13 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  */
 
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
-import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
 import org.hl7.fhir.dstu3.model.Resource;
-import org.hl7.fhir.dstu3.model.codesystems.IssueType;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -117,14 +114,11 @@ public class TransactionProcessorVersionAdapterDstu3 implements TransactionProce
 		 * DSTU3 Bundle.entry.request.method (it was added in R4)
 		 */
 		if (isBlank(retVal)) {
-			if (theEntry.getResource() instanceof IBaseBinary) {
-				String contentType = ((IBaseBinary) theEntry.getResource()).getContentType();
-				 try {
-					 PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
-					 retVal = "PATCH";
-				 } catch (InvalidRequestException e) {
-				 	// ignore
-				 }
+			Resource resource = theEntry.getResource();
+			boolean isPatch = BundleUtil.isDstu3TransactionPatch(resource);
+
+			if (isPatch) {
+				retVal = "PATCH";
 			}
 		}
 		return retVal;
