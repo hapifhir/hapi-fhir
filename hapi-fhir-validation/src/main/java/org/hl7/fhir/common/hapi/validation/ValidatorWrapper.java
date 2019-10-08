@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import com.google.gson.*;
 import org.hl7.fhir.r5.context.IWorkerContext;
@@ -38,8 +39,7 @@ public class ValidatorWrapper {
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
-		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
-		myDocBuilderFactory.setNamespaceAware(true);
+		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
