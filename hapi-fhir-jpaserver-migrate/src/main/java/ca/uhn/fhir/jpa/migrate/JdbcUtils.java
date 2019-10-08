@@ -235,6 +235,8 @@ public class JdbcUtils {
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, length);
 							case Types.BLOB:
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB, length);
+							case Types.CLOB:
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.CLOB, length);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}
