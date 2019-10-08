@@ -1509,6 +1509,9 @@ public class XmlUtil {
 		VALID_ENTITY_NAMES = Collections.unmodifiableMap(validEntityNames);
 	}
 
+	/** Non-instantiable */
+	private XmlUtil() {}
+
 	private static final class ExtendedEntityReplacingXmlResolver implements XMLResolver {
 		@Override
 		public Object resolveEntity(String thePublicID, String theSystemID, String theBaseURI, String theNamespace) {

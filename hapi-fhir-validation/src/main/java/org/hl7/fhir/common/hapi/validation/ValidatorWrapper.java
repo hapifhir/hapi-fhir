@@ -39,8 +39,7 @@ public class ValidatorWrapper {
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
-		DocumentBuilderFactory docBuilderFactory = XmlUtil.newDocumentBuilderFactory();
-		myDocBuilderFactory = docBuilderFactory;
+		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
