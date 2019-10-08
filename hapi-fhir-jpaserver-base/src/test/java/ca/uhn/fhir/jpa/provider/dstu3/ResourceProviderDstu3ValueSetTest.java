@@ -140,7 +140,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalVsWithUnknownCode(codeSystem);
 	}
 
-	private void createLocalCsAndVs() {
+	private void createLocalCs() {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
@@ -155,8 +155,6 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			.addConcept(new ConceptDefinitionComponent().setCode("BA").setDisplay("Code BA"))
 			.addConcept(new ConceptDefinitionComponent().setCode("BB").setDisplay("Code BB"));
 		myCodeSystemDao.create(codeSystem, mySrd);
-
-		createLocalVs(codeSystem);
 	}
 
 
@@ -242,6 +240,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		// Include
 		vs = new ValueSet();
+		vs.setUrl("http://www.example.org/vs");
 		vs.getCompose()
 			.addInclude()
 			.setSystem(CS_URL);
@@ -282,6 +281,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		// Include
 		vs = new ValueSet();
+		vs.setUrl("http://www.example.org/vs");
 		vs.getCompose()
 			.addInclude()
 			.setSystem(CS_URL);
@@ -329,7 +329,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByIdWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -445,7 +445,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlWithPreExpansion() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -468,7 +468,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -746,7 +746,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
-		createLocalCsAndVs();
+		createLocalCs();
 		createLocalVsWithIncludeConcept();
 
 		String url = ourServerBase +
@@ -789,7 +789,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 * Technically this is the wrong param name
 	 */
 	@Test
-	public void testValiedateCodeAgainstBuiltInSystem() throws Exception {
+	public void testValidateCodeAgainstBuiltInSystem() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
 		Parameters respParam = ourClient
@@ -819,7 +819,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 * Technically this is the right param name
 	 */
 	@Test
-	public void testValiedateCodeAgainstBuiltInSystemByUrl() throws Exception {
+	public void testValidateCodeAgainstBuiltInSystemByUrl() throws Exception {
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
 
 		Parameters respParam = ourClient
@@ -847,7 +847,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@After
 	public void afterResetPreExpansionDefault() {
-		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@AfterClass

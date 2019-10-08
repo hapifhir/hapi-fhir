@@ -16,7 +16,7 @@ import java.util.Collections;
 import static org.junit.Assert.assertEquals;
 
 public class SearchParamLoaderTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-	private static final int MOCK_FHIR_CLIENT_FAILURES = 5;
+	private static final int MOCK_FHIR_CLIENT_FAILURES = 3;
 	@Autowired
 	private MockFhirClientSearchParamProvider myMockFhirClientSearchParamProvider;
 	@Autowired

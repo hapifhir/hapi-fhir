@@ -84,7 +84,12 @@ public class SubscriptionDebugLogInterceptor {
 	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
 		String value = Long.toString(System.currentTimeMillis());
 		theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
-		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", theMessage.getResourceId(), theMessage.getOperationType());
+		String resourceId = theMessage.getPayloadId();
+		if (resourceId == null) {
+			// Delete operations have no payload
+			resourceId = theMessage.getId();
+		}
+		log(EventCodeEnum.SUBS1, "Resource {} was submitted to the processing pipeline (op={})", resourceId, theMessage.getOperationType());
 	}
 
 	/*

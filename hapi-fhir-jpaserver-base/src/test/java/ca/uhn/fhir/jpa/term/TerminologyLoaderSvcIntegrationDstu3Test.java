@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.dao.dstu3.BaseJpaDstu3Test;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.junit.After;
@@ -17,13 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
@@ -104,6 +104,19 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		codes = toExpandedCodes(expanded);
 		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded));
 		assertThat(codes, empty());
+	}
+
+	@Test
+	public void testStoreAndProcessDeferred() throws IOException {
+		ZipCollectionBuilder files = new ZipCollectionBuilder();
+		TerminologyLoaderSvcLoincTest.addLoincMandatoryFilesToZip(files);
+		myLoader.loadLoinc(files.getFiles(), mySrd);
+
+		myTermSvc.saveDeferred();
+
+		runInTransaction(() -> {
+			await().until(() -> myTermConceptMapDao.count(), greaterThan(0L));
+		});
 	}
 
 	@Test

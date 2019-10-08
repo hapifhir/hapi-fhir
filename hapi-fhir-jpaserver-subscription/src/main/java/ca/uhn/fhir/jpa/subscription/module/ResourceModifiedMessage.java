@@ -87,6 +87,10 @@ public class ResourceModifiedMessage extends BaseResourceMessage implements IRes
 		mySubscriptionId = theSubscriptionId;
 	}
 
+	public String getId() {
+		return myId;
+	}
+
 	public IIdType getId(FhirContext theCtx) {
 		IIdType retVal = null;
 		if (myId != null) {

@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public interface IHapiTerminologySvc {
 
-	void deleteCodeSystem(TermCodeSystem thePersCs);
+	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
@@ -61,8 +61,6 @@ public interface IHapiTerminologySvc {
 	List<VersionIndependentConcept> expandValueSet(String theValueSet);
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
-
-	List<TermConcept> findCodes(String theSystem);
 
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 

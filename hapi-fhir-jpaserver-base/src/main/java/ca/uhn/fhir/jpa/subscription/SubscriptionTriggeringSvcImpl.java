@@ -100,7 +100,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private ISchedulerService mySchedulerService;
 
 	@Override
-	public IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId) {
+	public IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId) {
+
 		if (myDaoConfig.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException("Subscription processing not active on this server");
 		}
@@ -115,8 +116,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			subscriptionDao.read(subscriptionId);
 		}
 
-		List<UriParam> resourceIds = ObjectUtils.defaultIfNull(theResourceIds, Collections.emptyList());
-		List<StringParam> searchUrls = ObjectUtils.defaultIfNull(theSearchUrls, Collections.emptyList());
+		List<IPrimitiveType<String>> resourceIds = ObjectUtils.defaultIfNull(theResourceIds, Collections.emptyList());
+		List<IPrimitiveType<String>> searchUrls = ObjectUtils.defaultIfNull(theSearchUrls, Collections.emptyList());
 
 		// Make sure we have at least one resource ID or search URL
 		if (resourceIds.size() == 0 && searchUrls.size() == 0) {
@@ -124,14 +125,14 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		}
 
 		// Resource URLs must be compete
-		for (UriParam next : resourceIds) {
+		for (IPrimitiveType<String> next : resourceIds) {
 			IdType resourceId = new IdType(next.getValue());
 			ValidateUtil.isTrueOrThrowInvalidRequest(resourceId.hasResourceType(), RESOURCE_ID + " parameter must have resource type");
 			ValidateUtil.isTrueOrThrowInvalidRequest(resourceId.hasIdPart(), RESOURCE_ID + " parameter must have resource ID part");
 		}
 
 		// Search URLs must be valid
-		for (StringParam next : searchUrls) {
+		for (IPrimitiveType<String> next : searchUrls) {
 			if (!next.getValue().contains("?")) {
 				throw new InvalidRequestException("Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
 			}
@@ -139,10 +140,10 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 
 		SubscriptionTriggeringJobDetails jobDetails = new SubscriptionTriggeringJobDetails();
 		jobDetails.setJobId(UUID.randomUUID().toString());
-		jobDetails.setRemainingResourceIds(resourceIds.stream().map(UriParam::getValue).collect(Collectors.toList()));
-		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(StringParam::getValue).collect(Collectors.toList()));
+		jobDetails.setRemainingResourceIds(resourceIds.stream().map(t->t.getValue()).collect(Collectors.toList()));
+		jobDetails.setRemainingSearchUrls(searchUrls.stream().map(t->t.getValue()).collect(Collectors.toList()));
 		if (theSubscriptionId != null) {
-			jobDetails.setSubscriptionId(theSubscriptionId.toUnqualifiedVersionless().getValue());
+			jobDetails.setSubscriptionId(theSubscriptionId.getIdPart());
 		}
 
 		// Submit job for processing
@@ -314,7 +315,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		ourLog.info("Submitting resource {} to subscription {}", theResourceToTrigger.getIdElement().toUnqualifiedVersionless().getValue(), theSubscriptionId);
 
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, theResourceToTrigger, ResourceModifiedMessage.OperationTypeEnum.UPDATE);
-		msg.setSubscriptionId(new IdType(theSubscriptionId).toUnqualifiedVersionless().getValue());
+		msg.setSubscriptionId(theSubscriptionId);
 
 		return myExecutorService.submit(() -> {
 			for (int i = 0; ; i++) {

@@ -38,7 +38,8 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	@Autowired
 	@Qualifier("myJpaValidationSupportDstu3")
 	public ca.uhn.fhir.jpa.dao.dstu3.IJpaValidationSupportDstu3 myJpaValidationSupportDstu3;
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	@Autowired
 	private IHapiTerminologySvcDstu3 myTerminologyService;
 	@Autowired

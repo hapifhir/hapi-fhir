@@ -26,6 +26,7 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
@@ -237,6 +238,10 @@ public class Constants {
 	public static final int STATUS_HTTP_202_ACCEPTED = 202;
 	public static final String HEADER_X_PROGRESS = "X-Progress";
 	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	/**
+	 * Operation name for the $lastn operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;

@@ -35,6 +35,7 @@ public class ContainedDt extends BaseContainedDt {
 	@Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IResource> myContainedResources;
 
+	@Override
 	public List<IResource> getContainedResources() {
 		if (myContainedResources == null) {
 			myContainedResources = new ArrayList<IResource>();

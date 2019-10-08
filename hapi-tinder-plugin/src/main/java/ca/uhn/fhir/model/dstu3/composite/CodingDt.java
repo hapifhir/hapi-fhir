@@ -126,7 +126,8 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public UriDt getSystemElement() {  
+	@Override
+	public UriDt getSystemElement() {
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
@@ -144,7 +145,8 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public String getSystem() {  
+	@Override
+	public String getSystem() {
 		return getSystemElement().getValue();
 	}
 
@@ -171,7 +173,8 @@ public class CodingDt
      * The identification of the code system that defines the meaning of the symbol in the code.
      * </p> 
 	 */
-	public CodingDt setSystem( String theUri) {
+	@Override
+	public CodingDt setSystem(String theUri) {
 		mySystem = new UriDt(theUri); 
 		return this; 
 	}
@@ -248,7 +251,8 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
-	public CodeDt getCodeElement() {  
+	@Override
+	public CodeDt getCodeElement() {
 		if (myCode == null) {
 			myCode = new CodeDt();
 		}
@@ -266,7 +270,8 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
-	public String getCode() {  
+	@Override
+	public String getCode() {
 		return getCodeElement().getValue();
 	}
 
@@ -293,7 +298,8 @@ public class CodingDt
      * A symbol in syntax defined by the system. The symbol may be a predefined code or an expression in a syntax defined by the coding system (e.g. post-coordination)
      * </p> 
 	 */
-	public CodingDt setCode( String theCode) {
+	@Override
+	public CodingDt setCode(String theCode) {
 		myCode = new CodeDt(theCode); 
 		return this; 
 	}
@@ -309,7 +315,8 @@ public class CodingDt
      * A representation of the meaning of the code in the system, following the rules of the system
      * </p> 
 	 */
-	public StringDt getDisplayElement() {  
+	@Override
+	public StringDt getDisplayElement() {
 		if (myDisplay == null) {
 			myDisplay = new StringDt();
 		}
@@ -327,7 +334,8 @@ public class CodingDt
      * A representation of the meaning of the code in the system, following the rules of the system
      * </p> 
 	 */
-	public String getDisplay() {  
+	@Override
+	public String getDisplay() {
 		return getDisplayElement().getValue();
 	}
 
@@ -354,7 +362,8 @@ public class CodingDt
      * A representation of the meaning of the code in the system, following the rules of the system
      * </p> 
 	 */
-	public CodingDt setDisplay( String theString) {
+	@Override
+	public CodingDt setDisplay(String theString) {
 		myDisplay = new StringDt(theString); 
 		return this; 
 	}

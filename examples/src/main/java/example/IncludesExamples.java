@@ -25,8 +25,9 @@ public class IncludesExamples {
       FhirContext ctx = FhirContext.forDstu2();
 
       Dstu2BundleFactory bf = new Dstu2BundleFactory(ctx);
-      bf.initializeBundleFromResourceList(null, resources, "http://example.com/base", "http://example.com/base/Patient", 1, BundleTypeEnum.SEARCHSET);
-      IBaseResource b = bf.getResourceBundle();
+		bf.addRootPropertiesToBundle(null, null, null, null, null, resources.size(), BundleTypeEnum.SEARCHSET, null);
+		bf.addResourcesToBundle(new ArrayList<>(resources), BundleTypeEnum.SEARCHSET, null, null, null);
+		IBaseResource b = bf.getResourceBundle();
 
       // Encode the bundle
       String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);

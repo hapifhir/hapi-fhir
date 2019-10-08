@@ -44,8 +44,9 @@ public class IncludesExamples {
       FhirContext ctx = FhirContext.forDstu2();
 
       R4BundleFactory bf = new R4BundleFactory(ctx);
-      bf.initializeBundleFromResourceList(null, resources, "http://example.com/base", "http://example.com/base/Patient", 1, BundleTypeEnum.SEARCHSET);
-      IBaseResource b = bf.getResourceBundle();
+		bf.addRootPropertiesToBundle(null, null, null, null, null, resources.size(), BundleTypeEnum.SEARCHSET, null);
+		bf.addResourcesToBundle(new ArrayList<>(resources), BundleTypeEnum.SEARCHSET, null, null, null);
+		IBaseResource b = bf.getResourceBundle();
 
       // Encode the bundle
       String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);

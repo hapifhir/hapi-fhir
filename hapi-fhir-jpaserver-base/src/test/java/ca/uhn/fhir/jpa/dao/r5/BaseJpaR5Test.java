@@ -231,6 +231,9 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Qualifier("myPractitionerDaoR5")
 	protected IFhirResourceDao<Practitioner> myPractitionerDao;
 	@Autowired
+	@Qualifier("myPractitionerRoleDaoR5")
+	protected IFhirResourceDao<PractitionerRole> myPractitionerRoleDao;
+	@Autowired
 	@Qualifier("myServiceRequestDaoR5")
 	protected IFhirResourceDao<ServiceRequest> myServiceRequestDao;
 	@Autowired
@@ -248,6 +251,8 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	protected ISearchCoordinatorSvc mySearchCoordinatorSvc;
 	@Autowired(required = false)
 	protected IFulltextSearchSvc mySearchDao;
+	@Autowired(required = false)
+	protected ISearchDao mySearchEntityDao;
 	@Autowired
 	protected IResourceReindexJobDao myResourceReindexJobDao;
 	@Autowired

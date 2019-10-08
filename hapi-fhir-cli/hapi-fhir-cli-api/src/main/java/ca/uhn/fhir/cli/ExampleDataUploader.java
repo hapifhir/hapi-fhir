@@ -715,7 +715,8 @@ public class ExampleDataUploader extends BaseCommand {
 			ourLog.info("About to upload {} examples in a transaction, {} remaining", subResourceList.size(), resources.size());
 
 			IVersionSpecificBundleFactory bundleFactory = ctx.newBundleFactory();
-			bundleFactory.initializeBundleFromResourceList(null, subResourceList, null, null, 0, BundleTypeEnum.TRANSACTION);
+			bundleFactory.addRootPropertiesToBundle(null, null, null, null, null, subResourceList.size(), BundleTypeEnum.TRANSACTION, null);
+			bundleFactory.addResourcesToBundle(new ArrayList<>(subResourceList), BundleTypeEnum.TRANSACTION, null, null, null);
 			IBaseResource subBundle = bundleFactory.getResourceBundle();
 
 			String encoded = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(subBundle);

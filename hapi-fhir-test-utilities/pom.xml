@@ -15,6 +15,13 @@
 	<url>http://jamesagnew.github.io/hapi-fhir/</url>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-base</artifactId>
+			<version>4.1.0-SNAPSHOT</version>
+		</dependency>
+
 		<!-- General -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>

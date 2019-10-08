@@ -59,7 +59,6 @@ public class SearchParameterMap implements Serializable {
 	private SortSpec mySort;
 	private SummaryEnum mySummaryMode;
 	private SearchTotalModeEnum mySearchTotalMode;
-	private Long myQueryCacheExpiryTime;
 
 	/**
 	 * Constructor
@@ -75,14 +74,6 @@ public class SearchParameterMap implements Serializable {
 		add(theName, theParam);
 	}
 
-    public Long getQueryCacheExpiryTime() {
-        return myQueryCacheExpiryTime;
-    }
-    
-    public void setQueryCacheExpiryTime(Long theQueryCacheExpiryTime) {
-        myQueryCacheExpiryTime = theQueryCacheExpiryTime;
-    }
-    
 	public SummaryEnum getSummaryMode() {
 		return mySummaryMode;
 	}
