@@ -93,11 +93,9 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 				String[] propertiesSplit = contentTypeSplit[1].split(",");
 
 				for (String property : propertiesSplit) {
-					String[] propertySplit = property.split("=");
-
-					if (propertySplit.length == 2) {
-						String propertyName = propertySplit[0];
-						String propertyValue = propertySplit[1];
+					if (property.indexOf("=") > 0) {
+						String propertyName = property.substring(0, property.indexOf("="));
+						String propertyValue = property.substring(property.indexOf("=") + 1);
 
 						switch (propertyName.toLowerCase()) {
 							case "bodynarrative":
@@ -126,7 +124,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			// been set elsewhere (ex: by the subscriber asking for the narrative to be put in the body, assuming there *is* narrative)
 			if (bodyText != null && !bodyText.isEmpty() && (details.getBodyTemplate() == null || details.getBodyTemplate().isEmpty())) {
 				byte[] bodyBytes = Base64.decodeBase64(bodyText);
-				details.setBodyTemplate(Arrays.toString(bodyBytes));
+				details.setBodyTemplate(new String(bodyBytes));
 				details.setBodyContentType("text/plain");
 				attachResource = true;
 			}

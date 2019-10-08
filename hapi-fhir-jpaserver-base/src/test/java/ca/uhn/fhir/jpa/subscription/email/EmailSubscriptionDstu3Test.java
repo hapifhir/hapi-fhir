@@ -14,8 +14,10 @@ import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.util.SharedByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(EmailSubscriptionDstu3Test.class);
+	public static final String TEST_NARRATIVE_DIV_CONTENT = "This is a test observation for email subscription";
 
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
@@ -97,6 +100,11 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private Observation sendObservation(String code, String system) {
 		Observation observation = new Observation();
+
+		Narrative narrative = new Narrative();
+		narrative.setDivAsString(TEST_NARRATIVE_DIV_CONTENT);
+		observation.setText(narrative);
+
 		CodeableConcept codeableConcept = new CodeableConcept();
 		observation.setCode(codeableConcept);
 		Coding coding = codeableConcept.addCoding();
@@ -113,23 +121,154 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		return observation;
 	}
 
+	/**
+	 * Tests that an email subscription with no payload sends an email message that has no body.
+	 * @throws Exception
+	 */
 	@Test
-	public void testEmailSubscriptionNoPayload() {
+	public void testEmailSubscriptionNoPayload() throws Exception {
+		String payload = "";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		Subscription subscription = createSubscription(criteria1, payload);
+		waitForQueueToDrain();
+		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
 
+		sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		waitForSize(1, 60000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
+
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+
+		// Expect the body of the email subscription to be an Observation formatted as XML
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(1, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		String content = (String) multipart.getBodyPart(0).getContent();
+		assertEquals("", content);
 	}
 
+	/**
+	 * Tests that an email subscription with a mime-type of application/fhir+json and mime-type options of "bodynarrative=true"
+	 * results in sending an email message where the body of the email is the narrative content of the resource that triggered
+	 * the subscription, and the email has an attachment that represents the JSON of the resource.
+	 * @throws Exception
+	 */
 	@Test
-	public void testEmailSubscriptionXmlAttach() {
+	public void testEmailSubscriptionNarrativeBodyJsonAttach() throws Exception {
+		String payload = "application/fhir+json;bodynarrative=true";
 
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		Subscription subscription = createSubscription(criteria1, payload);
+		waitForQueueToDrain();
+		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
+
+		sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		waitForSize(1, 60000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
+
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+
+		// Expect the body of the email subscription to be an Observation formatted as XML
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(2, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		String content = (String) multipart.getBodyPart(0).getContent();
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">" + TEST_NARRATIVE_DIV_CONTENT + "</div>", content);
+
+		MimeBodyPart attachmentBodyPart = (MimeBodyPart) multipart.getBodyPart(1);
+		String[] attachmentContentType = attachmentBodyPart.getHeader("Content-Type");
+		String[] attachmentDisposition = attachmentBodyPart.getHeader("Content-Disposition");
+
+		// Validate headers on the attachment body part
+		assertEquals(1, attachmentContentType.length);
+		assertEquals("application/json; name=resource.json", attachmentContentType[0]);
+		assertEquals(1, attachmentDisposition.length);
+		assertEquals("attachment; filename=resource.json", attachmentDisposition[0]);
+
+		// Validate the content of the attachment body part
+		SharedByteArrayInputStream is = (SharedByteArrayInputStream) attachmentBodyPart.getContent();
+		String attachmentContent = (String) org.apache.commons.io.IOUtils.toString(is);
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newJsonParser().parseResource(attachmentContent);
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
+	/**
+	 * Tests that an email subscription with a mime-type of application/fhir+xml and mime-type options of "bodytext=BASE64ENCODEDTEXT"
+	 * results in sending an email message where the body of the email is the text specified in the mime-type "bodytext" option, and
+	 * the XML representing the resource is an attachment on the email.
+	 * @throws Exception
+	 */
 	@Test
-	public void testEmailSubscriptionXmlAttachAndBodyText() {
+	public void testEmailSubscriptionTextBodyXmlAttach() throws Exception {
+		String payload = "application/fhir+xml;bodytext=dGhpcyBpcyBzb21lIHRlc3QgdGV4dA==";
 
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		Subscription subscription = createSubscription(criteria1, payload);
+		waitForQueueToDrain();
+		mySubscriptionTestUtil.setEmailSender(subscription.getIdElement());
+
+		sendObservation(code, "SNOMED-CT");
+		waitForQueueToDrain();
+
+		waitForSize(1, 60000, new Callable<Number>() {
+			@Override
+			public Number call() throws Exception {
+				return ourTestSmtp.getReceivedMessages().length;
+			}
+		});
+
+		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
+
+		// Expect the body of the email subscription to be an Observation formatted as XML
+		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
+		assertEquals(2, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		String content = (String) multipart.getBodyPart(0).getContent();
+		assertEquals("this is some test text", content);
+
+		MimeBodyPart attachmentBodyPart = (MimeBodyPart) multipart.getBodyPart(1);
+		String[] attachmentContentType = attachmentBodyPart.getHeader("Content-Type");
+		String[] attachmentDisposition = attachmentBodyPart.getHeader("Content-Disposition");
+
+		// Validate headers on the attachment body part
+		assertEquals(1, attachmentContentType.length);
+		assertEquals("application/xml; name=resource.xml", attachmentContentType[0]);
+		assertEquals(1, attachmentDisposition.length);
+		assertEquals("attachment; filename=resource.xml", attachmentDisposition[0]);
+
+		// Validate the content of the attachment body part
+		SharedByteArrayInputStream is = (SharedByteArrayInputStream) attachmentBodyPart.getContent();
+		String attachmentContent = (String) org.apache.commons.io.IOUtils.toString(is);
+		Observation parsedObservation = (Observation) ourClient.getFhirContext().newXmlParser().parseResource(attachmentContent);
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
 	/**
 	 * Tests an email subscription with payload set to XML. The email sent must include content in the body of the email that is formatted as XML.
+	 * This test ensures backwards compatibility with previous versions of HAPI-FHIR.
 	 * @throws Exception
 	 */
 	@Test
@@ -173,6 +312,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 	/**
 	 * Tests an email subscription with payload set to JSON. The email sent must include content in the body of the email that is formatted as JSON.
+	 * This test ensures backwards compatibility with previous versions of HAPI-FHIR.
 	 * @throws Exception
 	 */
 	@Test
