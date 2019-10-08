@@ -208,32 +208,26 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return new UploadStatistics(conceptUpdateCounter.get(), codeSystemId);
 	}
 
-	/**
-	 * Returns the number of saved concepts
-	 */
-	private int saveOrUpdateConcept(TermConcept theConcept) {
-
-		TermCodeSystemVersion csv = theConcept.getCodeSystemVersion();
-		Optional<TermConcept> existing = myConceptDao.findByCodeSystemAndCode(csv, theConcept.getCode());
-		if (existing.isPresent()) {
-			TermConcept existingConcept = existing.get();
-			boolean haveChanges = false;
-			if (!StringUtils.equals(existingConcept.getDisplay(), theConcept.getDisplay())) {
-				existingConcept.setDisplay(theConcept.getDisplay());
-				haveChanges = true;
-			}
-
-			if (!haveChanges) {
-				return 0;
-			}
-
-			myConceptDao.save(existingConcept);
-			return 1;
-
-		} else {
-			return saveConcept(theConcept);
+	@Transactional
+	@Override
+	public UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
+		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
+		if (cs == null) {
+			throw new InvalidRequestException("Unknown code system: " + theSystem);
 		}
 
+		AtomicInteger removeCounter = new AtomicInteger(0);
+
+		for (TermConcept nextSuppliedConcept : theValue.getRootConcepts()) {
+			Optional<TermConcept> conceptOpt = myTerminologySvc.findCode(theSystem, nextSuppliedConcept.getCode());
+			if (conceptOpt.isPresent()) {
+				TermConcept concept = conceptOpt.get();
+				deleteConceptChildrenAndConcept(concept, removeCounter);
+			}
+		}
+
+		IIdType target = cs.getResource().getIdDt();
+		return new UploadStatistics(removeCounter.get(), target);
 	}
 
 	private Long getCodeSystemResourcePid(IIdType theIdType) {
@@ -452,28 +446,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theCodeSystemVersion.setResource(theResourceTable);
 		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
 		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
-	}
-
-	@Transactional
-	@Override
-	public UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
-		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
-		if (cs == null) {
-			throw new InvalidRequestException("Unknown code system: " + theSystem);
-		}
-
-		AtomicInteger removeCounter = new AtomicInteger(0);
-
-		for (TermConcept nextSuppliedConcept : theValue.getRootConcepts()) {
-			Optional<TermConcept> conceptOpt = myTerminologySvc.findCode(theSystem, nextSuppliedConcept.getCode());
-			if (conceptOpt.isPresent()) {
-				TermConcept concept = conceptOpt.get();
-				deleteConceptChildrenAndConcept(concept, removeCounter);
-			}
-		}
-
-		IIdType target = cs.getResource().getIdDt();
-		return new UploadStatistics(removeCounter.get(), target);
 	}
 
 	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
