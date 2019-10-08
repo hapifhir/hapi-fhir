@@ -3,6 +3,7 @@ package org.hl7.fhir.instance.hapi.validation;
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.CacheLoader;
@@ -84,8 +85,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
-		myDocBuilderFactory.setNamespaceAware(true);
+		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 		myValidationSupport = theValidationSupport;
 	}
 
