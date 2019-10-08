@@ -6,6 +6,7 @@ import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import ca.uhn.fhir.util.XmlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.model.OperationOutcome.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
@@ -48,8 +49,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 *           The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myDocBuilderFactory = DocumentBuilderFactory.newInstance();
-		myDocBuilderFactory.setNamespaceAware(true);
+		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 		myValidationSupport = theValidationSupport;
 	}
 

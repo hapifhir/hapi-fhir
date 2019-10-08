@@ -346,6 +346,10 @@
 				field does not include the PATCH verb. The AuthorizationInterceptor however did not understand
 				this and would reject these requests. This is now corrected.
 			</action>
+			<action type="fix" issue="1530">
+				A potential XXE vulnerability in the validator was corrected. The XML parser used for validating
+				XML payloads (i.e. FHIR resources) will no longer read from DTD declarations.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
