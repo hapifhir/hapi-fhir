@@ -340,6 +340,12 @@
 				it hasn't been permitted in the spec for a very long time. Hopefully this change will not
 				impact anyone!
 			</action>
+			<action type="fix" issue="1529">
+				HAPI FHIR allows transactions in DSTU3 to contain a JSON/XML Patch in a Binary resource without
+				specifying a verb in Bundle.entry.request.method, since the valueset defined in DSTU3 for that
+				field does not include the PATCH verb. The AuthorizationInterceptor however did not understand
+				this and would reject these requests. This is now corrected.
+			</action>
 			<action type="fix" issue="1530">
 				A potential XXE vulnerability in the validator was corrected. The XML parser used for validating
 				XML payloads (i.e. FHIR resources) will no longer read from DTD declarations.
