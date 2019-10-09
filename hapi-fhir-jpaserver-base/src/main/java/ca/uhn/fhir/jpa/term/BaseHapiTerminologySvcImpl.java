@@ -30,7 +30,10 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.*;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -146,8 +149,6 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	private ISchedulerService mySchedulerService;
 	@Autowired
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
-	private ITermVersionAdapterSvc myTerminologyVersionAdapterSvc;
 	@Autowired
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 

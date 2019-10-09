@@ -9,7 +9,6 @@ import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,9 +21,8 @@ import static org.junit.Assert.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	public static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
-	private IIdType myExtensionalVsId;
+	public static FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Before
 	@Transactional
@@ -33,12 +31,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		myCodeSystemDao.create(cs, mySrd);
 
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
+		myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -116,19 +114,13 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		// Create the code system
 		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
 		ourClient.update().resource(cs).execute();
-		runInTransaction(()->{
-			assertEquals(26, myConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(26, myConceptDao.count()));
 
 		// Delete the code system
 		ourClient.delete().resource(cs).execute();
-		runInTransaction(()->{
-			assertEquals(24L, myConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
 
 	}
-
-
 
 
 	@Test
@@ -190,7 +182,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -228,7 +220,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test

@@ -1,16 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -32,9 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -240,222 +232,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		}
 		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
 	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAdd() {
-
-		// FIXME: JA add
-
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAddNotPermittedForNonExternalCodeSystem() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		try {
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", new CustomTerminologySet());
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
-		}
-
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAddWithoutPreExistingCodeSystem() {
-
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("CBC", "Complete Blood Count");
-		delta.addRootConcept("URNL", "Routine Urinalysis");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(CodeSystem.SP_URL, new UriParam("http://foo"));
-		IBundleProvider searchResult = myCodeSystemDao.search(params, mySrd);
-		assertEquals(1, Objects.requireNonNull(searchResult.size()).intValue());
-		CodeSystem outcome = (CodeSystem) searchResult.getResources(0, 1).get(0);
-
-		assertEquals("http://foo", outcome.getUrl());
-		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
-
-		IContextValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(myFhirCtx, "http://foo", "CBC");
-		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
-	}
-
-
-	@Test
-	public void testApplyCodeSystemDeltaAddModifiesExistingCodesInPlace() {
-
-		// Add codes
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("codea", "CODEA0");
-		delta.addRootConcept("codeb", "CODEB0");
-
-		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
-
-		// Add codes again with different display
-		delta = new CustomTerminologySet();
-		delta.addRootConcept("codea", "CODEA1");
-		delta.addRootConcept("codeb", "CODEB1");
-		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
-
-		// Add codes again with no changes
-		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(0, outcome.getConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
-	}
-
-
-	@Test
-	@Ignore
-	public void testApplyCodeSystemDeltaAddWithPropertiesAndDesignations() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setName("Description of my life");
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		cs.setVersion("1.2.3");
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent concept = delta
-			.addConcept()
-			.setCode("lunch")
-			.setDisplay("I'm having dog food");
-		concept
-			.addDesignation()
-			.setLanguage("fr")
-			.setUse(new Coding("http://sys", "code", "display"))
-			.setValue("Je mange une pomme");
-		concept
-			.addDesignation()
-			.setLanguage("es")
-			.setUse(new Coding("http://sys", "code", "display"))
-			.setValue("Como una pera");
-		concept.addProperty()
-			.setCode("flavour")
-			.setValue(new StringType("Hints of lime"));
-		concept.addProperty()
-			.setCode("useless_sct_code")
-			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
-//		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo", "lunch");
-		assertEquals(true, result.isFound());
-		assertEquals("lunch", result.getSearchedForCode());
-		assertEquals("http://foo", result.getSearchedForSystem());
-
-		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-
-		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
-		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
-		assertEquals(false, output.getParameterBool("abstract"));
-
-		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
-		assertEquals("language", designations.get(0).getPart().get(0).getName());
-		assertEquals("fr", ((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("use", designations.get(0).getPart().get(1).getName());
-		assertEquals("http://sys", ((Coding) designations.get(0).getPart().get(1).getValue()).getSystem());
-		assertEquals("code", ((Coding) designations.get(0).getPart().get(1).getValue()).getCode());
-		assertEquals("display", ((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay());
-		assertEquals("value", designations.get(0).getPart().get(2).getName());
-		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
-
-		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
-		assertEquals("code", properties.get(0).getPart().get(0).getName());
-		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("value", properties.get(0).getPart().get(1).getName());
-		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
-
-		assertEquals("code", properties.get(1).getPart().get(0).getName());
-		assertEquals("useless_sct_code", ((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("value", properties.get(1).getPart().get(1).getName());
-		assertEquals("http://snomed.info", ((Coding) properties.get(1).getPart().get(1).getValue()).getSystem());
-		assertEquals("1234567", ((Coding) properties.get(1).getPart().get(1).getValue()).getCode());
-		assertEquals("Choked on large meal (finding)", ((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay());
-
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaRemove() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		myCodeSystemDao.create(cs);
-
-		CustomTerminologySet delta = new CustomTerminologySet();
-		TermConcept codeA = delta.addRootConcept("codeA", "displayA");
-		TermConcept codeAA = codeA
-			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA)
-			.setCode("codeAA")
-			.setDisplay("displayAA");
-		codeAA
-			.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA)
-			.setCode("codeAAA")
-			.setDisplay("displayAAA");
-		delta.addRootConcept("codeB", "displayB");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
-
-		// Remove CodeB
-		delta = new CustomTerminologySet();
-		delta.addRootConcept("codeB", "displayB");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
-
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
-
-		// Remove CodeA
-		delta = new CustomTerminologySet();
-		delta.addRootConcept("codeA");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
-
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
-
-	}
-
-
-	@Test
-	public void testApplyCodeSystemDeltaRemove_UnknownSystem() {
-
-		CustomTerminologySet delta = new CustomTerminologySet();
-		delta.addRootConcept("codeA", "displayA");
-		try {
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
-		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
-		}
-
-	}
-
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {

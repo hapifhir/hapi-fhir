@@ -83,11 +83,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
 	private final FhirContext myCtx = FhirContext.forR4();
 	@Autowired
-	private ITermDeferredStorageSvc myTerminologyDeferredStorageSvc;
+	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Autowired
-	private ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
-	@Autowired
-	private TermCodeSystemStorageSvcImpl myConceptStorageSvc;
+	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
 
 	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
 
@@ -140,7 +138,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			List<String> loincUploadPropertiesFragment = Arrays.asList(
+			List<String> loincUploadPropertiesFragment = Collections.singletonList(
 				LOINC_UPLOAD_PROPERTIES_FILE.getCode()
 			);
 			descriptors.verifyMandatoryFilesExist(loincUploadPropertiesFragment);
@@ -243,7 +241,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
-			return myConceptStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
+			return myCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
 		}
 	}
 
@@ -252,7 +250,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
-			return myConceptStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
+			return myCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
 		}
 	}
 
@@ -272,9 +270,8 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		return Optional.empty();
 	}
 
-	UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
+	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
 		final List<ConceptMap> conceptMaps = new ArrayList<>();
 
@@ -571,7 +568,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 	@VisibleForTesting
 	void setTermCodeSystemStorageSvcForUnitTests(ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
-		myTerminologyCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		myCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 	}
 
 	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -581,9 +578,9 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.emptyList());
 
 		IIdType retVal;
-		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
-		retVal = myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
-		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+		myDeferredStorageSvc.setProcessDeferred(false);
+		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+		myDeferredStorageSvc.setProcessDeferred(true);
 
 		return retVal;
 	}

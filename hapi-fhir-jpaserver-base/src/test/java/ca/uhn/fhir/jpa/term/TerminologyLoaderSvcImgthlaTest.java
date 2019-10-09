@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -20,7 +20,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermStorageSvc;
 
 	private ZipCollectionBuilder myFiles;
 
@@ -28,7 +28,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	@Before
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
-		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermSvc);
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
