@@ -365,7 +365,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		int valueSetCount = valueSets.size();
 		int rootConceptCount = codeSystemVersion.getConcepts().size();
-		int conceptCount = code2concept.size();
+		int conceptCount = rootConceptCount;
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
 		// remove this when fully implemented ...

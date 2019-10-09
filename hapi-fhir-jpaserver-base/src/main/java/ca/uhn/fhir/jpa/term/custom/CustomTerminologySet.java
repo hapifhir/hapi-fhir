@@ -89,6 +89,16 @@ public class CustomTerminologySet {
 		return Collections.unmodifiableList(myRootConcepts);
 	}
 
+	public void addUnanchoredChildConcept(String theParentCode, String theCode, String theDisplay) {
+		Validate.notBlank(theParentCode);
+		Validate.notBlank(theCode);
+
+		TermConcept code = new TermConcept()
+			.setCode(theCode)
+			.setDisplay(theDisplay);
+		myParentCodeToChildrenWithMissingParent.put(theParentCode, code);
+	}
+
 
 	@Nonnull
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {

@@ -5,7 +5,10 @@ import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.api.*;
+import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -16,6 +19,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
@@ -184,28 +188,101 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info("Loaded {} parent/child relationships in {}", count, sw.toString());
 		}
 
+		// Account for root codes in the parent->child map
+		for (String nextCode : codeToConceptPid.keySet()) {
+			if (childCodeToParentCodes.get(nextCode).isEmpty()) {
+				parentCodeToChildCodes.put("", nextCode);
+			}
+		}
+
 		AtomicInteger conceptUpdateCounter = new AtomicInteger();
 
-		TermConcept parentCode = null;
+		// Add root concepts
+		String parentCode = null;
+		List<TermConcept> conceptsToAdd = theAdditions.getRootConcepts();
+		Multimap<String, String> parentCodeToChildCodesToPreserve = ArrayListMultimap.create();
+		addConcepts(csv, codeToConceptPid, conceptUpdateCounter, parentCode, conceptsToAdd, parentCodeToChildCodes, parentCodeToChildCodesToPreserve);
 
-		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
-
-			String parentDescription = parentCode != null ? parentCode.getCode() : "(root concept)";
-			ourLog.info("Saving concept {} with parent {}", conceptUpdateCounter.get(), parentDescription);
-
-			if (codeToConceptPid.containsKey(nextRootConcept.getCode())) {
-				TermConcept existingCode = myConceptDao.getOne(codeToConceptPid.get(nextRootConcept.getCode()));
-				existingCode.setIndexStatus(null);
-				existingCode.setDisplay(nextRootConcept.getDisplay());
-			}
-
-			saveConceptsRecursively(nextRootConcept, csv);
-			myConceptDao.save(nextRootConcept);
-
-			conceptUpdateCounter.incrementAndGet();
+		// Add unanchored child concepts
+		for (String nextParent : theAdditions.getParentCodeToChildrenWithMissingParent().keySet()) {
+			List<TermConcept> nextChildren = theAdditions.getParentCodeToChildrenWithMissingParent().get(nextParent);
+			addConcepts(csv, codeToConceptPid, conceptUpdateCounter, nextParent, nextChildren, parentCodeToChildCodes, parentCodeToChildCodesToPreserve);
 		}
 
 		return new UploadStatistics(conceptUpdateCounter.get(), codeSystemId);
+	}
+
+	private void addConcepts(TermCodeSystemVersion theCsv, Map<String, Long> theCodeToConceptPid, AtomicInteger theConceptUpdateCounter, String theParentCode, List<TermConcept> theConceptsToAdd, ListMultimap<String, String> theParentCodeToChildCodes, Multimap<String, String> theParentCodeToChildCodesToPreserve) {
+		for (TermConcept nextConceptToAdd : theConceptsToAdd) {
+
+			String nextCodeToAdd = nextConceptToAdd.getCode();
+			String parentDescription = "(root concept)";
+			TermConcept parentConcept = null;
+			String parentCodeOrEmpty = "";
+			Long parentCodePid;
+			if (isNotBlank(theParentCode)) {
+				parentDescription = theParentCode;
+				parentCodePid = theCodeToConceptPid.get(theParentCode);
+				if (parentCodePid == null) {
+					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + theParentCode);
+				}
+				parentConcept = myConceptDao.getOne(parentCodePid);
+				parentCodeOrEmpty = parentConcept.getCode();
+			}
+
+			theParentCodeToChildCodesToPreserve.put(parentCodeOrEmpty, nextCodeToAdd);
+			ourLog.info("Saving concept {} with parent {}", theConceptUpdateCounter.get(), parentDescription);
+
+			if (theCodeToConceptPid.containsKey(nextCodeToAdd)) {
+				TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
+
+//				if (StringUtils.equals(existingCode.getDisplay(), nextConceptToAdd.getDisplay())) {
+//					ourLog.trace("No change to code: {}", nextCodeToAdd);
+//					continue;
+//				}
+
+				existingCode.setIndexStatus(null);
+				existingCode.setDisplay(nextConceptToAdd.getDisplay());
+				nextConceptToAdd = existingCode;
+			} else {
+
+				// If this is a new code, give it a sequence number based on how many concepts the
+				// parent already has
+				int sequence = theParentCodeToChildCodes.get(parentCodeOrEmpty).size() + 1;
+				nextConceptToAdd.setSequence(sequence);
+				theParentCodeToChildCodes.put(parentCodeOrEmpty, nextCodeToAdd);
+
+			}
+
+			// Drop any old parent-child links if they aren't explicitly specified in the
+			// hierarchy being added
+			nextConceptToAdd.getParents().removeIf(t->{
+				String parentCode = t.getParent().getCode();
+				boolean shouldRemove = !theParentCodeToChildCodesToPreserve.get(parentCode).contains(nextCodeToAdd);
+				if (shouldRemove) {
+					ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
+					myConceptParentChildLinkDao.delete(t);
+				}
+				return shouldRemove;
+			});
+
+			nextConceptToAdd.setParentPids(null);
+			saveConceptsRecursively(nextConceptToAdd, theCsv);
+			myConceptDao.save(nextConceptToAdd);
+
+			if (theParentCode != null) {
+				TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
+				parentLink.setParent(parentConcept);
+				parentLink.setChild(nextConceptToAdd);
+				parentLink.setCodeSystem(theCsv);
+				parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+				parentConcept.getChildren().add(parentLink);
+				nextConceptToAdd.getParents().add(parentLink);
+				myConceptParentChildLinkDao.save(parentLink);
+			}
+
+			theConceptUpdateCounter.incrementAndGet();
+		}
 	}
 
 	@Transactional
