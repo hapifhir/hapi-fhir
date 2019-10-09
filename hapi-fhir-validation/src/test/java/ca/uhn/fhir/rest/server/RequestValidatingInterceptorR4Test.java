@@ -208,7 +208,7 @@ public class RequestValidatingInterceptorR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertEquals(422, status.getStatusLine().getStatusCode());
-			assertThat(responseContent, containsString("DOCTYPE is disallowed"));
+			assertThat(responseContent, containsString("DOCTYPE"));
 		}
 
 	}
