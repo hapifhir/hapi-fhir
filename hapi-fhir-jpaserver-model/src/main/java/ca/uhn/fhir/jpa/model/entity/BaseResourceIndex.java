@@ -28,7 +28,7 @@ public abstract class BaseResourceIndex implements Serializable {
 
 	public abstract void setId(Long theId);
 
-	public abstract void calculateHashes();
+	public abstract BaseResourceIndexedSearchParam calculateHashes();
 
 	/**
 	 * Subclasses must implement

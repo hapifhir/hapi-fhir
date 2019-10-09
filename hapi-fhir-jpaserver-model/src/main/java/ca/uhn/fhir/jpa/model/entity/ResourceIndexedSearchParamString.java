@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -165,7 +164,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	@PrePersist
 	@PreUpdate
-	public void calculateHashes() {
+	public ResourceIndexedSearchParamString calculateHashes() {
 		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && myModelConfig != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
@@ -175,6 +174,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			setHashExact(calculateHashExact(resourceType, paramName, valueExact));
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
+		return this;
 	}
 
 	@Override
@@ -243,22 +243,24 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myValueExact;
 	}
 
-	public void setValueExact(String theValueExact) {
+	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
+		return this;
 	}
 
 	public String getValueNormalized() {
 		return myValueNormalized;
 	}
 
-	public void setValueNormalized(String theValueNormalized) {
+	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
+		return this;
 	}
 
 	@Override

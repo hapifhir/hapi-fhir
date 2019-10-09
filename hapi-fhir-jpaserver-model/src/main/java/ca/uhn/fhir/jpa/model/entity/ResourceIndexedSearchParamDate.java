@@ -86,12 +86,13 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 	@Override
 	@PrePersist
-	public void calculateHashes() {
+	public ResourceIndexedSearchParamDate calculateHashes() {
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
+		return this;
 	}
 
 	@Override
@@ -151,16 +152,18 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return myValueHigh;
 	}
 
-	public void setValueHigh(Date theValueHigh) {
+	public ResourceIndexedSearchParamDate setValueHigh(Date theValueHigh) {
 		myValueHigh = theValueHigh;
+		return this;
 	}
 
 	public Date getValueLow() {
 		return myValueLow;
 	}
 
-	public void setValueLow(Date theValueLow) {
+	public ResourceIndexedSearchParamDate setValueLow(Date theValueLow) {
 		myValueLow = theValueLow;
+		return this;
 	}
 
 	@Override

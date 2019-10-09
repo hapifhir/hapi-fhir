@@ -69,12 +69,13 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 
 	@Override
 	@PrePersist
-	public void calculateHashes() {
+	public ResourceIndexedSearchParamCoords calculateHashes() {
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
+		return this;
 	}
 
 	@Override
@@ -127,16 +128,18 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return myLatitude;
 	}
 
-	public void setLatitude(double theLatitude) {
+	public ResourceIndexedSearchParamCoords setLatitude(double theLatitude) {
 		myLatitude = theLatitude;
+		return this;
 	}
 
 	public double getLongitude() {
 		return myLongitude;
 	}
 
-	public void setLongitude(double theLongitude) {
+	public ResourceIndexedSearchParamCoords setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
+		return this;
 	}
 
 	@Override

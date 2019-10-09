@@ -114,4 +114,21 @@ public class ResourceIndexedSearchParamDateTest {
 		assertFalse(param2.equals(param));
 		assertNotEquals(param.hashCode(), param2.hashCode());
 	}
+
+
+	@Test
+	public void testEquals() {
+		ResourceIndexedSearchParamDate val1 = new ResourceIndexedSearchParamDate()
+			.setValueHigh(new Date(100000000L))
+			.setValueLow(new Date(111111111L))
+			.calculateHashes();
+		ResourceIndexedSearchParamDate val2 = new ResourceIndexedSearchParamDate()
+			.setValueHigh(new Date(100000000L))
+			.setValueLow(new Date(111111111L))
+			.calculateHashes();
+		assertEquals(val1, val1);
+		assertEquals(val1, val2);
+		assertNotEquals(val1, null);
+		assertNotEquals(val1, "");
+	}
 }
