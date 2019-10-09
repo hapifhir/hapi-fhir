@@ -84,7 +84,7 @@ public class SubscriptionDebugLogInterceptor {
 	public void step10_resourceModified(ResourceModifiedMessage theMessage) {
 		String value = Long.toString(System.currentTimeMillis());
 		theMessage.setAttribute(SUBSCRIPTION_DEBUG_LOG_INTERCEPTOR_PRECHECK, value);
-		String resourceId = theMessage.getPayloadId();
+		String resourceId = theMessage.getResourceId();
 		if (resourceId == null) {
 			// Delete operations have no payload
 			resourceId = theMessage.getId();
