@@ -821,7 +821,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		byte[] resourceBytes;
 		ResourceEncodingEnum resourceEncoding;
 		Collection<? extends BaseTag> myTagList;
-		Long version;
+		long version;
 		String provenanceSourceUri = null;
 		String provenanceRequestId = null;
 
