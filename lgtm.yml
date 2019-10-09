@@ -6,3 +6,4 @@ extraction:
         - exclude: "**/bootstrap*.js"
         - exclude: "**/webapp/fa/*.js"
 
+
