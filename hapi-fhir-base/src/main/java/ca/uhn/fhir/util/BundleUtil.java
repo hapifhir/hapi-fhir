@@ -1,16 +1,15 @@
 package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.*;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.bundle.BundleEntryMutator;
 import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.bundle.EntryListAccumulator;
 import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
 import org.apache.commons.lang3.tuple.Pair;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -252,5 +251,26 @@ public class BundleUtil {
 			}
 		}
 		return retVal;
+	}
+
+	/**
+	 * DSTU3 did not allow the PATCH verb for transaction bundles- so instead we infer that a bundle
+	 * is a patch if the payload is a binary resource containing a patch. This method
+	 * tests whether a resource (which should have come from
+	 * <code>Bundle.entry.resource</code> is a Binary resource with a patch
+	 * payload type.
+	 */
+	public static boolean isDstu3TransactionPatch(IBaseResource thePayloadResource) {
+		boolean isPatch = false;
+		if (thePayloadResource instanceof IBaseBinary) {
+			String contentType = ((IBaseBinary) thePayloadResource).getContentType();
+			 try {
+				 PatchTypeEnum.forContentTypeOrThrowInvalidRequestException(contentType);
+				 isPatch = true;
+			 } catch (InvalidRequestException e) {
+				 // ignore
+			 }
+		}
+		return isPatch;
 	}
 }
