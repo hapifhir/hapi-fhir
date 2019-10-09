@@ -191,9 +191,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
-		if (theId == null || !theId.hasIdPart()) {
-			throw new InvalidRequestException("Can not perform delete, no ID provided");
-		}
+		validateIdPresentForDelete(theId);
+
 		final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
@@ -269,7 +268,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
-		Validate.notNull(theId);
+		validateIdPresentForDelete(theId);
 
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
 		if (isNotBlank(theId.getValue())) {
@@ -374,6 +373,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		return outcome;
+	}
+
+	private void validateIdPresentForDelete(IIdType theId) {
+		if (theId == null || !theId.hasIdPart()) {
+			throw new InvalidRequestException("Can not perform delete, no ID provided");
+		}
 	}
 
 	@PostConstruct
@@ -559,7 +564,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
             throw new MethodNotAllowedException("$expunge is not enabled on this server");
         }
     }
-    
+
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
