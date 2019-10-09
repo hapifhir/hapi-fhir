@@ -197,9 +197,8 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	@Override
-	public BaseResourceIndexedSearchParam calculateHashes() {
+	public void calculateHashes() {
 		// nothing right now
-		return null;
 	}
 
 	@Override

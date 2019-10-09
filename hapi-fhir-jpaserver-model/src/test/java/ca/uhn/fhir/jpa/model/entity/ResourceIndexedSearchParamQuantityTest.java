@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.junit.Test;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -29,17 +28,16 @@ public class ResourceIndexedSearchParamQuantityTest {
 	@Test
 	public void testEquals() {
 		ResourceIndexedSearchParamQuantity val1 = new ResourceIndexedSearchParamQuantity()
-			.setValue(new BigDecimal(123))
-			.calculateHashes();
+			.setValue(new BigDecimal(123));
+		val1.calculateHashes();
 		ResourceIndexedSearchParamQuantity val2 = new ResourceIndexedSearchParamQuantity()
-			.setValue(new BigDecimal(123))
-			.calculateHashes();
+			.setValue(new BigDecimal(123));
+		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
 	}
-
 
 
 }

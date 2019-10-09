@@ -120,12 +120,12 @@ public class ResourceIndexedSearchParamDateTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamDate val1 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
-			.setValueLow(new Date(111111111L))
-			.calculateHashes();
+			.setValueLow(new Date(111111111L));
+		val1.calculateHashes();
 		ResourceIndexedSearchParamDate val2 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
-			.setValueLow(new Date(111111111L))
-			.calculateHashes();
+			.setValueLow(new Date(111111111L));
+		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);

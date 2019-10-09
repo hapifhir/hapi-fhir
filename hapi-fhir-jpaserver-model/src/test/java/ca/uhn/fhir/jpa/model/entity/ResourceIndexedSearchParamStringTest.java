@@ -35,12 +35,12 @@ public class ResourceIndexedSearchParamStringTest {
 	public void testEquals() {
 		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
-			.setValueNormalized("AAA")
-			.calculateHashes();
+			.setValueNormalized("AAA");
+		val1.calculateHashes();
 		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
-			.setValueNormalized("AAA")
-			.calculateHashes();
+			.setValueNormalized("AAA");
+		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);

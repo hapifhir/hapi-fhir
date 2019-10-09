@@ -110,7 +110,7 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 
 	@Override
 	@PrePersist
-	public ResourceIndexedSearchParamToken calculateHashes() {
+	public void calculateHashes() {
 		if (myHashSystem == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
@@ -121,7 +121,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			setHashSystemAndValue(calculateHashSystemAndValue(resourceType, paramName, system, value));
 			setHashValue(calculateHashValue(resourceType, paramName, value));
 		}
-		return this;
 	}
 
 	@Override

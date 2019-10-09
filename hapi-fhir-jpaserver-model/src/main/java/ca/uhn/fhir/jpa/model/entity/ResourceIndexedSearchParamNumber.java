@@ -72,13 +72,12 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	@Override
 	@PrePersist
-	public BaseResourceIndexedSearchParam calculateHashes() {
+	public void calculateHashes() {
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
-		return null;
 	}
 
 	@Override

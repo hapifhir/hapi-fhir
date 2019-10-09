@@ -164,7 +164,7 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	@PrePersist
 	@PreUpdate
-	public ResourceIndexedSearchParamString calculateHashes() {
+	public void calculateHashes() {
 		if ((myHashIdentity == null || myHashNormalizedPrefix == null || myHashExact == null) && myModelConfig != null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
@@ -174,7 +174,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 			setHashExact(calculateHashExact(resourceType, paramName, valueExact));
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 		}
-		return this;
 	}
 
 	@Override

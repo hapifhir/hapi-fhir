@@ -87,7 +87,7 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 
 	@Override
 	@PrePersist
-	public ResourceIndexedSearchParamUri calculateHashes() {
+	public void calculateHashes() {
 		if (myHashUri == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
@@ -95,7 +95,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 			setHashIdentity(calculateHashIdentity(resourceType, paramName));
 			setHashUri(calculateHashUri(resourceType, paramName, uri));
 		}
-		return this;
 	}
 
 	@Override

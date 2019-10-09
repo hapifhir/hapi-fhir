@@ -101,7 +101,7 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 
 	@Override
 	@PrePersist
-	public ResourceIndexedSearchParamQuantity calculateHashes() {
+	public void calculateHashes() {
 		if (myHashIdentity == null) {
 			String resourceType = getResourceType();
 			String paramName = getParamName();
@@ -111,7 +111,6 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 			setHashIdentityAndUnits(calculateHashUnits(resourceType, paramName, units));
 			setHashIdentitySystemAndUnits(calculateHashSystemAndUnits(resourceType, paramName, system, units));
 		}
-		return this;
 	}
 
 	@Override

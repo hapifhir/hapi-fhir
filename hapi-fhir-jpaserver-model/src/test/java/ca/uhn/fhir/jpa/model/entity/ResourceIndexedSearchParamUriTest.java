@@ -19,11 +19,11 @@ public class ResourceIndexedSearchParamUriTest {
 	@Test
 	public void testEquals() {
 		ResourceIndexedSearchParamUri val1 = new ResourceIndexedSearchParamUri()
-			.setUri("http://foo")
-			.calculateHashes();
+			.setUri("http://foo");
+		val1.calculateHashes();
 		ResourceIndexedSearchParamUri val2 = new ResourceIndexedSearchParamUri()
-			.setUri("http://foo")
-			.calculateHashes();
+			.setUri("http://foo");
+		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);

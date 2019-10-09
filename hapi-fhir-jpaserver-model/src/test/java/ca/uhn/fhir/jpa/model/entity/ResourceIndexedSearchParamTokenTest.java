@@ -2,8 +2,6 @@ package ca.uhn.fhir.jpa.model.entity;
 
 import org.junit.Test;
 
-import java.math.BigDecimal;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
@@ -34,11 +32,11 @@ public class ResourceIndexedSearchParamTokenTest {
 	@Test
 	public void testEquals() {
 		ResourceIndexedSearchParamToken val1 = new ResourceIndexedSearchParamToken()
-			.setValue("AAA")
-			.calculateHashes();
+			.setValue("AAA");
+		val1.calculateHashes();
 		ResourceIndexedSearchParamToken val2 = new ResourceIndexedSearchParamToken()
-			.setValue("AAA")
-			.calculateHashes();
+			.setValue("AAA");
+		val2.calculateHashes();
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
