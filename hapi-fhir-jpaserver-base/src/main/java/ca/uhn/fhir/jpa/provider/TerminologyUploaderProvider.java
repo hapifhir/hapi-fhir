@@ -143,7 +143,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
 		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getConceptCount());
+		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
 		ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
 		return retVal;
 	}
@@ -253,7 +253,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
 			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, "success", true);
-			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, stats.getConceptCount());
+			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
 			ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
 
 			return retVal;

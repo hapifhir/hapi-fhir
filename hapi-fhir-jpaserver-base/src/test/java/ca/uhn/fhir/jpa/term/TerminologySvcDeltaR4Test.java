@@ -110,17 +110,17 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			" ChildAA",
 			"RootB"
 		);
-//		assertEquals(2, outcome.getConceptCount());
+		assertEquals(3, outcome.getUpdatedConceptCount());
 
 		delta = new CustomTerminologySet();
 		delta.addUnanchoredChildConcept("RootB", "ChildAA", "Child AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		assertEquals(1, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
 			"RootA",
 			"RootB",
 			" ChildAA"
 			);
-//		assertEquals(3, outcome.getConceptCount());
 
 	}
 
@@ -223,7 +223,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB0");
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getConceptCount());
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertEquals("CODEA0", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with different display
@@ -231,12 +231,12 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codea", "CODEA1");
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(2, outcome.getConceptCount());
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertEquals(0, outcome.getConceptCount());
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 	}
 

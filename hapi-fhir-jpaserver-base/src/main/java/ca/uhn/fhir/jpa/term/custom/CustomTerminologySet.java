@@ -17,7 +17,7 @@ import java.util.*;
 public class CustomTerminologySet {
 
 	private final int mySize;
-	private final ListMultimap<String, TermConcept> myParentCodeToChildrenWithMissingParent;
+	private final ListMultimap<TermConcept, String> myUnanchoredChildConceptsToParentCodes;
 	private final List<TermConcept> myRootConcepts;
 
 	/**
@@ -30,26 +30,26 @@ public class CustomTerminologySet {
 	/**
 	 * Constructor
 	 */
-	public CustomTerminologySet(int theSize, ListMultimap<String, TermConcept> theParentCodeToChildrenWithMissingParent, Collection<TermConcept> theRootConcepts) {
+	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theParentCodeToChildrenWithMissingParent, Collection<TermConcept> theRootConcepts) {
 		this(theSize, theParentCodeToChildrenWithMissingParent, new ArrayList<>(theRootConcepts));
 	}
 
 	/**
 	 * Constructor
 	 */
-	public CustomTerminologySet(int theSize, ListMultimap<String, TermConcept> theParentCodeToChildrenWithMissingParent, List<TermConcept> theRootConcepts) {
+	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theUnanchoredChildConceptsToParentCodes, List<TermConcept> theRootConcepts) {
 		mySize = theSize;
-		myParentCodeToChildrenWithMissingParent = theParentCodeToChildrenWithMissingParent;
+		myUnanchoredChildConceptsToParentCodes = theUnanchoredChildConceptsToParentCodes;
 		myRootConcepts = theRootConcepts;
 	}
 
-	public TermConcept addRootConcept(String theCode) {
-		return addRootConcept(theCode, null);
+	public void addRootConcept(String theCode) {
+		addRootConcept(theCode, null);
 	}
 
 	public TermConcept addRootConcept(String theCode, String theDisplay) {
 		Validate.notBlank(theCode, "theCode must not be blank");
-		Validate.isTrue(!myRootConcepts.stream().anyMatch(t -> t.getCode().equals(theCode)), "Already have code %s", theCode);
+		Validate.isTrue(myRootConcepts.stream().noneMatch(t -> t.getCode().equals(theCode)), "Already have code %s", theCode);
 		TermConcept retVal = new TermConcept();
 		retVal.setCode(theCode);
 		retVal.setDisplay(theDisplay);
@@ -58,8 +58,8 @@ public class CustomTerminologySet {
 	}
 
 
-	public ListMultimap<String, TermConcept> getParentCodeToChildrenWithMissingParent() {
-		return Multimaps.unmodifiableListMultimap(myParentCodeToChildrenWithMissingParent);
+	public ListMultimap<TermConcept, String> getUnanchoredChildConceptsToParentCodes() {
+		return Multimaps.unmodifiableListMultimap(myUnanchoredChildConceptsToParentCodes);
 	}
 
 	public int getSize() {
@@ -96,7 +96,7 @@ public class CustomTerminologySet {
 		TermConcept code = new TermConcept()
 			.setCode(theCode)
 			.setDisplay(theDisplay);
-		myParentCodeToChildrenWithMissingParent.put(theParentCode, code);
+		myUnanchoredChildConceptsToParentCodes.put(code, theParentCode);
 	}
 
 
@@ -104,7 +104,7 @@ public class CustomTerminologySet {
 	public static CustomTerminologySet load(LoadedFileDescriptors theDescriptors, boolean theFlat) {
 
 		final Map<String, TermConcept> code2concept = new LinkedHashMap<>();
-		ArrayListMultimap<String, TermConcept> parentCodeToChildrenWithMissingParent = ArrayListMultimap.create();
+		ArrayListMultimap<TermConcept, String> unanchoredChildConceptsToParentCodes = ArrayListMultimap.create();
 
 		// Concepts
 		IRecordHandler conceptHandler = new ConceptHandler(code2concept);
@@ -117,7 +117,7 @@ public class CustomTerminologySet {
 
 			// Hierarchy
 			if (theDescriptors.hasFile(TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE)) {
-				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept, parentCodeToChildrenWithMissingParent);
+				IRecordHandler hierarchyHandler = new HierarchyHandler(code2concept, unanchoredChildConceptsToParentCodes);
 				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
@@ -129,7 +129,7 @@ public class CustomTerminologySet {
 				}
 			}
 
-			return new CustomTerminologySet(code2concept.size(), parentCodeToChildrenWithMissingParent, rootConcepts);
+			return new CustomTerminologySet(code2concept.size(), unanchoredChildConceptsToParentCodes, rootConcepts);
 		}
 	}
 

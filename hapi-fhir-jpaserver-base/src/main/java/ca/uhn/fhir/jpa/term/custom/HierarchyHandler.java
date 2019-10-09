@@ -35,11 +35,11 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class HierarchyHandler implements IRecordHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
-	private final ArrayListMultimap<String, TermConcept> myParentCodeToChildrenWithMissingParent;
+	private final ArrayListMultimap<TermConcept, String> myUnanchoredChildConceptsToParentCodes;
 
-	public HierarchyHandler(Map<String, TermConcept> theCode2concept, ArrayListMultimap<String, TermConcept> theParentCodeToChildrenWithMissingParent) {
+	public HierarchyHandler(Map<String, TermConcept> theCode2concept, ArrayListMultimap<TermConcept, String> theunanchoredChildConceptsToParentCodes) {
 		myCode2Concept = theCode2concept;
-		myParentCodeToChildrenWithMissingParent = theParentCodeToChildrenWithMissingParent;
+		myUnanchoredChildConceptsToParentCodes = theunanchoredChildConceptsToParentCodes;
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class HierarchyHandler implements IRecordHandler {
 
 			TermConcept parentConcept = myCode2Concept.get(parent);
 			if (parentConcept == null) {
-				myParentCodeToChildrenWithMissingParent.put(parent, childConcept);
+				myUnanchoredChildConceptsToParentCodes.put(childConcept, parent);
 			} else {
 				parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
 			}
