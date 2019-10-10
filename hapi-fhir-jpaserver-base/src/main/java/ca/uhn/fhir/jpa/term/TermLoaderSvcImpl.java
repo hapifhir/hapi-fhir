@@ -66,16 +66,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 
 public class TermLoaderSvcImpl implements ITermLoaderSvc {
+	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
+	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
+	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
+	static final String IMGTHLA_HLA_XML = "hla.xml";
+	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
 	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
 	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
 	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-
-	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
-	static final String IMGTHLA_HLA_XML = "hla.xml";
-
-	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
-	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
-	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
 	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
 	private static final int LOG_INCREMENT = 1000;
@@ -564,6 +562,11 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		IIdType target = storeCodeSystem(theRequestDetails, codeSystemVersion, cs, null, null);
 
 		return new UploadStatistics(code2concept.size(), target);
+	}
+
+	@VisibleForTesting
+	void setTermDeferredStorageSvc(ITermDeferredStorageSvc theDeferredStorageSvc) {
+		myDeferredStorageSvc = theDeferredStorageSvc;
 	}
 
 	@VisibleForTesting

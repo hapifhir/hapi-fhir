@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.TestUtil;
@@ -31,15 +32,17 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 	@Mock
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
-
 	private ZipCollectionBuilder myFiles;
 	@Captor
 	private ArgumentCaptor<CustomTerminologySet> myCustomTerminologySetCaptor;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Before
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}

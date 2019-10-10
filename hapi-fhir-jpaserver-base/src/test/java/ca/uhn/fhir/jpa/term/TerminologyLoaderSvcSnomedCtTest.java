@@ -4,6 +4,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -44,11 +45,14 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	private ZipCollectionBuilder myFiles;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Before
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}

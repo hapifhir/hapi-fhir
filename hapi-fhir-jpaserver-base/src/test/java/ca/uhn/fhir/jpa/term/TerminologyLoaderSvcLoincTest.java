@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -41,14 +42,16 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
-
 	private ZipCollectionBuilder myFiles;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 
 	@Before
 	public void before() {
 		mySvc = new TermLoaderSvcImpl();
 		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}

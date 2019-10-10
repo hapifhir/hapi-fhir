@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
-import ca.uhn.fhir.jpa.provider.dstu3.TerminologyUploaderProviderDstu3Test;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -53,25 +53,25 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
-				.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
+				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unknown URL: http://snomed.info/sctFOO", e.getMessage());
+			assertThat(e.getMessage(), containsString("Did not find file matching concepts.csv"));
 		}
 	}
 
 	@Test
 	public void testUploadLoinc() throws Exception {
-		byte[] packageBytes = TerminologyUploaderProviderDstu3Test.createLoincZip();
+		byte[] packageBytes = createLoincZip();
 
 		Parameters respParam = ourClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.LOINC_URI))
-			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -88,8 +88,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.LOINC_URI))
-			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.LOINC_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
 		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -104,7 +104,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
@@ -121,11 +121,11 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.operation()
 				.onType(CodeSystem.class)
 				.named("upload-external-code-system")
-				.withParameter(Parameters.class, "package", new Attachment().setUrl("file.zip").setData(packageBytes))
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: Unknown URL: ", e.getMessage());
+			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
 		}
 
 	}
@@ -138,8 +138,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
-			.andParameter("package", new Attachment().setUrl("file.zip").setData(packageBytes))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
@@ -162,7 +162,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
-			.withParameter(Parameters.class, "url", new UriType(ITermLoaderSvc.SCT_URI))
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
 			.execute();
 
@@ -229,7 +229,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("AAAA"));
+			assertThat(e.getMessage(), containsString("Missing mandatory parameter: system"));
 		}
 		ourClient.unregisterInterceptor(interceptor);
 
@@ -250,7 +250,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("AAAA"));
+			assertThat(e.getMessage(), containsString("Missing mandatory parameter: file"));
 		}
 		ourClient.unregisterInterceptor(interceptor);
 	}
@@ -268,13 +268,26 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.setContentType("text/csv")
 			.setUrl("file:/foo/hierarchy.csv");
 
+		// Add the codes
+		ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
+			.prettyPrint()
+			.execute();
+
+		// And remove them
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		ourClient.registerInterceptor(interceptor);
 		Parameters outcome = ourClient
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
@@ -282,8 +295,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 100"));
-		assertThat(encoded, containsString("AAAAA"));
+		assertThat(encoded, containsString("\"valueInteger\": 5"));
 	}
 
 	@AfterClass
@@ -291,4 +303,37 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
+	private static void addFile(ZipOutputStream theZos, String theFileName) throws IOException {
+		theZos.putNextEntry(new ZipEntry(theFileName));
+		theZos.write(IOUtils.toByteArray(TerminologyUploaderProviderR4Test.class.getResourceAsStream("/loinc/" + theFileName)));
+	}
+
+	public static byte[] createLoincZip() throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(bos);
+
+		addFile(zos, LOINC_UPLOAD_PROPERTIES_FILE.getCode());
+		addFile(zos, LOINC_PART_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_HIERARCHY_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_ANSWERLIST_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_GROUP_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_GROUP_TERMS_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PARENT_GROUP_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_LINK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_PART_RELATED_CODE_MAPPING_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_DOCUMENT_ONTOLOGY_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_RSNA_PLAYBOOK_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_IEEE_MEDICAL_DEVICE_CODE_MAPPING_TABLE_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_IMAGING_DOCUMENT_CODES_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_SI_FILE_DEFAULT.getCode());
+		addFile(zos, LOINC_TOP2000_COMMON_LAB_RESULTS_US_FILE_DEFAULT.getCode());
+
+		zos.close();
+
+
+		return bos.toByteArray();
+	}
 }

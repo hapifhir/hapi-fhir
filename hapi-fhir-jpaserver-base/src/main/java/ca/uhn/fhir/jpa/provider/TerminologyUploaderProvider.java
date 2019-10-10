@@ -85,13 +85,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	})
 	public IBaseParameters uploadSnapshot(
 		HttpServletRequest theServletRequest,
-		@OperationParam(name = "url", min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
+		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
 		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
 		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
+
+		if (theCodeSystemUrl == null || isBlank(theCodeSystemUrl.getValueAsString())) {
+			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+		}
 
 		if (theLocalFile == null || theLocalFile.size() == 0) {
 			if (theFiles == null || theFiles.size() == 0) {
@@ -154,8 +158,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				}
 			}
 
-			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
-			codeSystemUrl = defaultString(codeSystemUrl);
+			String codeSystemUrl = theCodeSystemUrl.getValue();
+			codeSystemUrl = trim(codeSystemUrl);
 
 			UploadStatistics stats;
 			switch (codeSystemUrl) {
