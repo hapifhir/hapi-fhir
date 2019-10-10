@@ -29,6 +29,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,11 +76,9 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(2, listOfDescriptors.size());
-		assertEquals("", listOfDescriptors.get(0).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
-		assertEquals("", listOfDescriptors.get(1).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
+		assertEquals(1, listOfDescriptors.size());
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
 	@Test
@@ -101,11 +100,9 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(2, listOfDescriptors.size());
-		assertEquals("", listOfDescriptors.get(0).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
-		assertEquals("", listOfDescriptors.get(1).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
+		assertEquals(1, listOfDescriptors.size());
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 
 	}
 
@@ -129,11 +126,9 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(2, listOfDescriptors.size());
-		assertEquals("", listOfDescriptors.get(0).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
-		assertEquals("", listOfDescriptors.get(1).getFilename());
-		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
+		assertEquals(1, listOfDescriptors.size());
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
 
