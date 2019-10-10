@@ -326,8 +326,32 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 		myValue = theValue;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ResourceMetadataKeyEnum<?> other = (ResourceMetadataKeyEnum<?>) obj;
+		if (myValue == null) {
+			if (other.myValue != null)
+				return false;
+		} else if (!myValue.equals(other.myValue))
+			return false;
+		return true;
+	}
+
 	public abstract T get(IResource theResource);
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((myValue == null) ? 0 : myValue.hashCode());
+		return result;
+	}
 
 	public String name() {
 		return myValue;
@@ -350,8 +374,8 @@ public abstract class ResourceMetadataKeyEnum<T> implements Serializable {
 	}
 
 	public static final class ExtensionResourceMetadataKey extends ResourceMetadataKeyEnum<ExtensionDt> {
-		public ExtensionResourceMetadataKey(String url) {
-			super(url);
+		public ExtensionResourceMetadataKey(String theUrl) {
+			super(theUrl);
 		}
 
 		@Override
