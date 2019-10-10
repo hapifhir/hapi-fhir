@@ -22,6 +22,6 @@ package ca.uhn.fhir.jpa.term.api;
 
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 
-public interface IHapiTerminologySvcR5 extends IHapiTerminologySvc, IValidationSupport {
+public interface ITermReadSvcR5 extends ITermReadSvc, IValidationSupport {
 	// nothing
 }

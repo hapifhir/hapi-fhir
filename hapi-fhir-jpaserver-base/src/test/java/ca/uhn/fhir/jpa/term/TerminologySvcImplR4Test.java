@@ -2171,7 +2171,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2201,7 +2201,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2225,7 +2225,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2275,7 +2275,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2354,7 +2354,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2396,7 +2396,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2426,7 +2426,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2444,7 +2444,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2474,7 +2474,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2504,7 +2504,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2532,7 +2532,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2574,7 +2574,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2604,7 +2604,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2622,7 +2622,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2652,7 +2652,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2682,7 +2682,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2710,7 +2710,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2752,7 +2752,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2780,7 +2780,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2822,7 +2822,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
@@ -2854,7 +2854,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -2871,7 +2871,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -2922,7 +2922,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -2950,7 +2950,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -2982,7 +2982,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -2999,7 +2999,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -3031,7 +3031,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3048,7 +3048,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -3078,7 +3078,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3106,7 +3106,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -3138,7 +3138,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3166,7 +3166,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -3196,7 +3196,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3224,7 +3224,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
@@ -3254,7 +3254,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3282,7 +3282,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}

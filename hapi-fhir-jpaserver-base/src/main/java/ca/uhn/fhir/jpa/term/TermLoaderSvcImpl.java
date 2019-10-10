@@ -87,39 +87,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	@Autowired
 	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
 
-	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
-
-		theChain.add(theConcept.getCode());
-		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
-			TermConceptParentChildLink next = childIter.next();
-			TermConcept nextChild = next.getChild();
-			if (theChain.contains(nextChild.getCode())) {
-
-				StringBuilder b = new StringBuilder();
-				b.append("Removing circular reference code ");
-				b.append(nextChild.getCode());
-				b.append(" from parent ");
-				b.append(next.getParent().getCode());
-				b.append(". Chain was: ");
-				for (String nextInChain : theChain) {
-					TermConcept nextCode = theCode2concept.get(nextInChain);
-					b.append(nextCode.getCode());
-					b.append('[');
-					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20).replace("[", "").replace("]", "").trim());
-					b.append("] ");
-				}
-				ourLog.info(b.toString(), theConcept.getCode());
-				childIter.remove();
-				nextChild.getParents().remove(next);
-
-			} else {
-				dropCircularRefs(nextChild, theChain, theCode2concept);
-			}
-		}
-		theChain.remove(theChain.size() - 1);
-
-	}
-
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
@@ -174,23 +141,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 			return processLoincFiles(descriptors, theRequestDetails, uploadProperties);
 		}
-	}
-
-	@NotNull
-	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
-		Properties retVal = new Properties();
-		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
-			if (next.getFilename().endsWith(thePropertiesFile)) {
-				try {
-					try (InputStream inputStream = next.getInputStream()) {
-						retVal.load(inputStream);
-					}
-				} catch (IOException e) {
-					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
-				}
-			}
-		}
-		return retVal;
 	}
 
 	@Override
@@ -254,6 +204,56 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		}
 	}
 
+	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
+
+		theChain.add(theConcept.getCode());
+		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
+			TermConceptParentChildLink next = childIter.next();
+			TermConcept nextChild = next.getChild();
+			if (theChain.contains(nextChild.getCode())) {
+
+				StringBuilder b = new StringBuilder();
+				b.append("Removing circular reference code ");
+				b.append(nextChild.getCode());
+				b.append(" from parent ");
+				b.append(next.getParent().getCode());
+				b.append(". Chain was: ");
+				for (String nextInChain : theChain) {
+					TermConcept nextCode = theCode2concept.get(nextInChain);
+					b.append(nextCode.getCode());
+					b.append('[');
+					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20).replace("[", "").replace("]", "").trim());
+					b.append("] ");
+				}
+				ourLog.info(b.toString(), theConcept.getCode());
+				childIter.remove();
+				nextChild.getParents().remove(next);
+
+			} else {
+				dropCircularRefs(nextChild, theChain, theCode2concept);
+			}
+		}
+		theChain.remove(theChain.size() - 1);
+
+	}
+
+	@NotNull
+	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
+		Properties retVal = new Properties();
+		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
+			if (next.getFilename().endsWith(thePropertiesFile)) {
+				try {
+					try (InputStream inputStream = next.getInputStream()) {
+						retVal.load(inputStream);
+					}
+				} catch (IOException e) {
+					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
+				}
+			}
+		}
+		return retVal;
+	}
+
 	private Optional<String> loadFile(LoadedFileDescriptors theDescriptors, String... theFilenames) {
 		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
 			for (String nextFilename : theFilenames) {
@@ -277,7 +277,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		CodeSystem imgthlaCs;
 		try {
-			String imgthlaCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
+			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load imgthla.xml", e);
@@ -384,7 +384,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 
 		CodeSystem loincCs;
 		try {
-			String loincCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
+			String loincCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);

@@ -39,7 +39,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.model.api.*;
@@ -134,7 +134,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	private List<Long> myAlsoIncludePids;

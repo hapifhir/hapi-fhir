@@ -5,15 +5,20 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.ValidateUtil;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
+import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
+import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
-import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,15 +53,24 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements IHapiTerminologySvcR4 {
+public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidationSupport, ITermReadSvcDstu3 {
 
 	@Autowired
-	@Qualifier("myValueSetDaoR4")
+	@Qualifier("myValueSetDaoDstu3")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
 	@Autowired
 	private IValidationSupport myValidationSupport;
 	@Autowired
+	private ITermReadSvc myTerminologySvc;
+	@Autowired
 	private PlatformTransactionManager myTransactionManager;
+
+	/**
+	 * Constructor
+	 */
+	public TermReadSvcDstu3() {
+		super();
+	}
 
 	private void addAllChildren(String theSystemString, ConceptDefinitionComponent theCode, List<VersionIndependentConcept> theListToPopulate) {
 		if (isNotBlank(theCode.getCode())) {
@@ -83,6 +97,62 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 
 
 	@Override
+	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
+		ValueSet valueSetToExpand = new ValueSet();
+		valueSetToExpand.getCompose().addInclude(theInclude);
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSet(valueSetToExpandR4).getExpansion();
+			return VersionConvertor_30_40.convertValueSetExpansionComponent(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput) {
+		ValueSet valueSetToExpand = (ValueSet) theInput;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4);
+			return VersionConvertor_30_40.convertValueSet(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
+	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
+		ValueSet valueSetToExpand = (ValueSet) theInput;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4, theOffset, theCount);
+			return VersionConvertor_30_40.convertValueSet(expandedR4);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
+	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
+
+		try {
+			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			super.expandValueSet(valueSetToExpandR4, theValueSetCodeAccumulator);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+	}
+
+	@Override
 	public List<VersionIndependentConcept> expandValueSet(String theValueSet) {
 		// TODO: DM 2019-09-10 - This is problematic because an incorrect URL that matches ValueSet.id will not be found in the terminology tables but will yield a ValueSet here. Depending on the ValueSet, the expansion may time-out.
 		ValueSet vs = myValidationSupport.fetchResource(myContext, ValueSet.class, theValueSet);
@@ -90,33 +160,15 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 			super.throwInvalidValueSet(theValueSet);
 		}
 
-		return expandValueSetAndReturnVersionIndependentConcepts(vs);
-	}
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+		try {
+			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(vs);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
 
-	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput) {
-		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSet(valueSetToExpand);
-	}
 
-	@Override
-	public IBaseResource expandValueSet(IBaseResource theInput, int theOffset, int theCount) {
-		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSet(valueSetToExpand, theOffset, theCount);
-	}
-
-	@Override
-	public void expandValueSet(IBaseResource theValueSetToExpand, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
-		ValueSet valueSetToExpand = (ValueSet) theValueSetToExpand;
-		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
-	}
-
-	@Override
-	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
-		ValueSet valueSetToExpand = new ValueSet();
-		valueSetToExpand.getCompose().addInclude(theInclude);
-		ValueSet expanded = super.expandValueSet(valueSetToExpand);
-		return new ValueSetExpander.ValueSetExpansionOutcome(expanded);
+		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4);
 	}
 
 	@Override
@@ -135,14 +187,14 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 		return null;
 	}
 
-	@CoverageIgnore
 	@Override
-	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
+	public IBaseResource fetchResource(FhirContext theContext, Class theClass, String theUri) {
 		return null;
 	}
 
+	@CoverageIgnore
 	@Override
-	public <T extends IBaseResource> T fetchResource(FhirContext theContext, Class<T> theClass, String theUri) {
+	public ValueSet fetchValueSet(FhirContext theContext, String theSystem) {
 		return null;
 	}
 
@@ -195,23 +247,32 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
-	public CodeSystem getCodeSystemFromContext(String theSystem) {
-		return myValidationSupport.fetchCodeSystem(myContext, theSystem);
+	public org.hl7.fhir.r4.model.CodeSystem getCodeSystemFromContext(String theSystem) {
+		CodeSystem codeSystem = myValidationSupport.fetchCodeSystem(myContext, theSystem);
+		try {
+			return VersionConvertor_30_40.convertCodeSystem(codeSystem);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
 	}
 
 	@Override
-	protected ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
-		return myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+	protected org.hl7.fhir.r4.model.ValueSet getValueSetFromResourceTable(ResourceTable theResourceTable) {
+		ValueSet valueSet = myValueSetResourceDao.toResource(ValueSet.class, theResourceTable, null, false);
+
+		org.hl7.fhir.r4.model.ValueSet valueSetR4;
+		try {
+			valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		} catch (FHIRException e) {
+			throw new InternalErrorException(e);
+		}
+
+		return valueSetR4;
 	}
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
-		return supportsSystem(theSystem);
-	}
-
-	@Override
-	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theWebUrl, String theProfileName) {
-		return null;
+		return myTerminologySvc.supportsSystem(theSystem);
 	}
 
 	@CoverageIgnore
@@ -219,20 +280,22 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return txTemplate.execute(t-> {
-			Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
+		return txTemplate.execute(t->{
+			Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
 			if (codeOpt.isPresent()) {
-				TermConcept code = codeOpt.get();
 				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+				TermConcept code = codeOpt.get();
 				def.setCode(code.getCode());
 				def.setDisplay(code.getDisplay());
 				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
 				retVal.setProperties(code.toValidationProperties());
+				retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
 				return retVal;
 			}
 
 			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 		});
+
 	}
 
 	@Override
@@ -241,16 +304,39 @@ public class HapiTerminologySvcR4 extends BaseHapiTerminologySvcImpl implements 
 	}
 
 	@Override
+	public StructureDefinition generateSnapshot(StructureDefinition theInput, String theUrl, String theName) {
+		return null;
+	}
+
+	@Override
 	public ValidateCodeResult validateCodeIsInPreExpandedValueSet(IBaseResource theValueSet, String theSystem, String theCode, String theDisplay, IBaseDatatype theCoding, IBaseDatatype theCodeableConcept) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+
 		Coding coding = (Coding) theCoding;
+		org.hl7.fhir.r4.model.Coding codingR4 = null;
+		if (coding != null) {
+			codingR4 = new org.hl7.fhir.r4.model.Coding(coding.getSystem(), coding.getCode(), coding.getDisplay());
+		}
+
 		CodeableConcept codeableConcept = (CodeableConcept) theCodeableConcept;
-		return super.validateCodeIsInPreExpandedValueSet(valueSet, theSystem, theCode, theDisplay, coding, codeableConcept);
+		org.hl7.fhir.r4.model.CodeableConcept codeableConceptR4 = null;
+		if (codeableConcept != null) {
+			codeableConceptR4 = new org.hl7.fhir.r4.model.CodeableConcept();
+			for (Coding nestedCoding : codeableConcept.getCoding()) {
+				codeableConceptR4.addCoding(new org.hl7.fhir.r4.model.Coding(nestedCoding.getSystem(), nestedCoding.getCode(), nestedCoding.getDisplay()));
+			}
+		}
+
+		return super.validateCodeIsInPreExpandedValueSet(valueSetR4, theSystem, theCode, theDisplay, codingR4, codeableConceptR4);
 	}
 
 	@Override
 	public boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet) {
+		ValidateUtil.isNotNullOrThrowUnprocessableEntity(theValueSet, "ValueSet must not be null");
 		ValueSet valueSet = (ValueSet) theValueSet;
-		return super.isValueSetPreExpandedForCodeValidation(valueSet);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+		return super.isValueSetPreExpandedForCodeValidation(valueSetR4);
 	}
 }

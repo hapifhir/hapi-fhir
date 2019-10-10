@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.validation.ValidationSupportChain;
 import org.hl7.fhir.dstu3.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -41,7 +41,7 @@ public class JpaValidationSupportChainDstu3 extends ValidationSupportChain {
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 	@Autowired
-	private IHapiTerminologySvcDstu3 myTerminologyService;
+	private ITermReadSvcDstu3 myTerminologyService;
 	@Autowired
 	private FhirContext myFhirContext;
 

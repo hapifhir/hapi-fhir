@@ -34,7 +34,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
+public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;

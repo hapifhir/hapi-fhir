@@ -30,7 +30,7 @@ import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -93,10 +93,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc, ApplicationContextAware {
+public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationContextAware {
 	public static final int DEFAULT_FETCH_SIZE = 250;
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiTerminologySvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
@@ -192,7 +192,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		boolean retVal = theSetToPopulate.add(theConcept);
 		if (retVal) {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
-				String msg = myContext.getLocalizer().getMessage(BaseHapiTerminologySvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
 				throw new InvalidRequestException(msg);
 			}
 		}
@@ -1234,7 +1234,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 		// Register scheduled job to pre-expand ValueSets
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition vsJobDefinition = new ScheduledJobDefinition();
-		vsJobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_preExpandValueSets");
+		vsJobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_preExpandValueSets");
 		vsJobDefinition.setJobClass(PreExpandValueSetsJob.class);
 		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_MINUTE, true, vsJobDefinition);
 	}
@@ -1345,7 +1345,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TermConceptMap existingTermConceptMap = optionalExistingTermConceptMapByUrl.get();
 
 			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
+				BaseTermReadSvcImpl.class,
 				"cannotCreateDuplicateConceptMapUrl",
 				conceptMapUrl,
 				existingTermConceptMap.getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -1451,7 +1451,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 			TermValueSet existingTermValueSet = optionalExistingTermValueSetByUrl.get();
 
 			String msg = myContext.getLocalizer().getMessage(
-				BaseHapiTerminologySvcImpl.class,
+				BaseTermReadSvcImpl.class,
 				"cannotCreateDuplicateValueSetUrl",
 				url,
 				existingTermValueSet.getResource().getIdDt().toUnqualifiedVersionless().getValue());
@@ -1761,7 +1761,7 @@ public abstract class BaseHapiTerminologySvcImpl implements IHapiTerminologySvc,
 	public static class PreExpandValueSetsJob implements Job {
 
 		@Autowired
-		private IHapiTerminologySvc myTerminologySvc;
+		private ITermReadSvc myTerminologySvc;
 
 		@Override
 		public void execute(JobExecutionContext theContext) {

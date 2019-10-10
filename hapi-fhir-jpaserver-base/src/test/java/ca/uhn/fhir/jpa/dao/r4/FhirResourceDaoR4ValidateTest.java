@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -43,7 +43,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private IValidatorModule myValidatorModule;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private ITermReadSvc myTerminologySvc;
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {

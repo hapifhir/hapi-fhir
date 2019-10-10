@@ -21,11 +21,11 @@ import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.warm.ICacheWarmingSvc;
 import ca.uhn.fhir.jpa.searchparam.registry.BaseSearchParamRegistry;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.util.ResourceProviderFactory;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
@@ -293,7 +293,7 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 	@Qualifier("myTaskDaoR5")
 	protected IFhirResourceDao<Task> myTaskDao;
 	@Autowired
-	protected IHapiTerminologySvcR5 myTermSvc;
+	protected ITermReadSvcR5 myTermSvc;
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
 	@Autowired
@@ -350,11 +350,11 @@ public abstract class BaseJpaR5Test extends BaseJpaTest {
 
 	@After
 	public void afterClearTerminologyCaches() {
-		BaseHapiTerminologySvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
+		BaseTermReadSvcImpl baseHapiTerminologySvc = AopTestUtils.getTargetObject(myTermSvc);
 		baseHapiTerminologySvc.clearTranslationCache();
 		baseHapiTerminologySvc.clearTranslationWithReverseCache();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationCache();
-		BaseHapiTerminologySvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationCache();
+		BaseTermReadSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl deferredStorageSvc = AopTestUtils.getTargetObject(myTermDeferredStorageSvc);
 		deferredStorageSvc.clearDeferred();
 	}

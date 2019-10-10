@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.term.api;
 
-/*-
+/*
  * #%L
  * HAPI FHIR JPA Server
  * %%
@@ -20,8 +20,8 @@ package ca.uhn.fhir.jpa.term.api;
  * #L%
  */
 
-import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
+import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 
-public interface IHapiTerminologySvcR4 extends IHapiTerminologySvc, IValidationSupport {
+public interface ITermReadSvcDstu3 extends ITermReadSvc, IValidationSupport {
 	// nothing
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 /**
  * This service handles processing "deferred" concept writes, meaning concepts that have neen
- * queued for storage because there are too many of them.
+ * queued for storage because there are too many of them to handle in a single transaction.
  */
 public interface ITermDeferredStorageSvc {
 

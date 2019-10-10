@@ -29,6 +29,7 @@ import java.util.List;
 
 /**
  * This service handles bulk loading concepts into the terminology service concept tables
+ * using any of several predefined input formats
  */
 public interface ITermLoaderSvc {
 

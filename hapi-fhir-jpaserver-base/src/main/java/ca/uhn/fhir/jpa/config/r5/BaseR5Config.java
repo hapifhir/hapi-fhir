@@ -14,7 +14,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR5;
 import ca.uhn.fhir.jpa.term.*;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
@@ -165,8 +165,8 @@ public class BaseR5Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcR5 terminologyService() {
-		return new HapiTerminologySvcR5();
+	public ITermReadSvcR5 terminologyService() {
+		return new TermReadSvcR5();
 	}
 
 	@Primary

@@ -12,10 +12,10 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu3;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.TermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu3;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvcDstu3;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
@@ -162,8 +162,8 @@ public class BaseDstu3Config extends BaseConfig {
 	}
 
 	@Bean
-	public IHapiTerminologySvcDstu3 terminologyService() {
-		return new HapiTerminologySvcDstu3();
+	public ITermReadSvcDstu3 terminologyService() {
+		return new TermReadSvcDstu3();
 	}
 
 	@Primary

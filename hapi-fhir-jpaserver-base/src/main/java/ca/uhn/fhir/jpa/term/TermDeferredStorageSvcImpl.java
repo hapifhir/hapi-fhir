@@ -234,7 +234,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 		// Register scheduled job to save deferred concepts
 		// In the future it would be great to make this a cluster-aware task somehow
 		ScheduledJobDefinition jobDefinition = new ScheduledJobDefinition();
-		jobDefinition.setId(BaseHapiTerminologySvcImpl.class.getName() + "_saveDeferred");
+		jobDefinition.setId(BaseTermReadSvcImpl.class.getName() + "_saveDeferred");
 		jobDefinition.setJobClass(SaveDeferredJob.class);
 		mySchedulerService.scheduleFixedDelay(SCHEDULE_INTERVAL_MILLIS, false, jobDefinition);
 	}

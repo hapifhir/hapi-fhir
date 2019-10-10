@@ -47,10 +47,11 @@ import java.util.Set;
  * <p>
  * It is intended to only handle read operations, leaving various write operations to
  * other services within the terminology service APIs.
- * (Note that at present, a few write operations remain here- they should be moved)
+ * (Note that at present, a few write operations remain here- they should be moved but haven't
+ * been moved yet)
  * </p>
  */
-public interface IHapiTerminologySvc {
+public interface ITermReadSvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
