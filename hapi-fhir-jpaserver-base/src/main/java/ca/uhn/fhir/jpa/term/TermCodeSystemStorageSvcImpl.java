@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.jpa.dao.*;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.*;
+import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -23,7 +25,6 @@ import com.google.common.collect.ListMultimap;
 import org.apache.commons.lang3.Validate;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -31,7 +32,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,7 +42,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceContextType;
@@ -74,6 +73,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 	@Autowired
+	protected IdHelperService myIdHelperService;
+	@Autowired
 	private PlatformTransactionManager myTransactionManager;
 	@Autowired
 	private ITermConceptParentChildLinkDao myConceptParentChildLinkDao;
@@ -85,12 +86,10 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private FhirContext myContext;
 	@Autowired
 	private ITermReadSvc myTerminologySvc;
-	private IFhirResourceDaoCodeSystem<?, ?, ?> myCodeSystemResourceDao;
-	@Autowired
-	private ApplicationContext myApplicationContext;
-	private IFhirResourceDaoValueSet<?, ?, ?> myValueSetResourceDao;
 	@Autowired
 	private DaoConfig myDaoConfig;
+	@Autowired
+	private IResourceTableDao myResourceTableDao;
 
 	@Override
 	public Long getValueSetResourcePid(IIdType theIdType) {
@@ -98,15 +97,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private Long getValueSetResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
-		return getResourcePid(myValueSetResourceDao, theIdType, theRequestDetails);
-	}
-
-	@PostConstruct
-	public void start() {
-		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
-		}
-		myValueSetResourceDao = myApplicationContext.getBean(IFhirResourceDaoValueSet.class);
+		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
 	}
 
 	@Transactional
@@ -335,9 +326,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemResource.getUrl(), "theCodeSystemResource must have a URL");
 
 		IIdType csId = myTerminologyVersionAdapterSvc.createOrUpdateCodeSystem(theCodeSystemResource);
-
-		ResourceTable resource = (ResourceTable) myCodeSystemResourceDao.readEntity(csId, theRequest);
-		Long codeSystemResourcePid = resource.getId();
+		Long codeSystemResourcePid = myIdHelperService.translateForcedIdToPid(csId, theRequest);
+		ResourceTable resource = myResourceTableDao.getOne(codeSystemResourcePid);
 
 		ourLog.info("CodeSystem resource has ID: {}", csId.getValue());
 
@@ -565,12 +555,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
-		return getResourcePid(myCodeSystemResourceDao, theIdType, theRequestDetails);
-	}
-
-	private Long getResourcePid(IFhirResourceDao<? extends IBaseResource> theResourceDao, IIdType theIdType, RequestDetails theRequestDetails) {
-		ResourceTable resourceTable = (ResourceTable) theResourceDao.readEntity(theIdType, theRequestDetails);
-		return resourceTable.getId();
+		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
 	}
 
 	private void saveConceptsRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv, UploadStatistics theStatisticsTracker) {

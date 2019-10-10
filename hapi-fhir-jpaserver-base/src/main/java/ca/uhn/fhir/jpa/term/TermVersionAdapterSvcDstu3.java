@@ -1,29 +1,38 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
 
-	@Autowired
-	@Qualifier("myValueSetDaoDstu3")
-	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
-	@Autowired
-	@Qualifier("myConceptMapDaoDstu3")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
+	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
+	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
+
 	@Autowired
-	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemResourceDao;
+	private ApplicationContext myAppCtx;
+
+	@SuppressWarnings("unchecked")
+	@PostConstruct
+	public void start() {
+		myCodeSystemResourceDao = (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoDstu3");
+		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoDstu3");
+		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoDstu3");
+	}
 
 	@Override
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {

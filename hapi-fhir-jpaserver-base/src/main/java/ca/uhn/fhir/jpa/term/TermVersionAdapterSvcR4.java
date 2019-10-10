@@ -9,19 +9,27 @@ import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+
+import javax.annotation.PostConstruct;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl implements ITermVersionAdapterSvc {
-	@Autowired
-	@Qualifier("myConceptMapDaoR4")
 	private IFhirResourceDao<ConceptMap> myConceptMapResourceDao;
-	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
 	private IFhirResourceDao<CodeSystem> myCodeSystemResourceDao;
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
 	private IFhirResourceDao<ValueSet> myValueSetResourceDao;
+
+	@Autowired
+	private ApplicationContext myAppCtx;
+
+	@SuppressWarnings("unchecked")
+	@PostConstruct
+	public void start() {
+		myCodeSystemResourceDao = (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoR4");
+		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoR4");
+		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoR4");
+	}
 
 	@Override
 	public IIdType createOrUpdateCodeSystem(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource) {
