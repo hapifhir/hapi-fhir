@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -140,9 +141,18 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals("to1@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[0]).getAddress());
 		assertEquals("to2@example.com", ((InternetAddress) messages[msgIdx].getAllRecipients()[1]).getAddress());
 		assertEquals(1, messages[msgIdx].getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=us-ascii", messages[msgIdx].getHeader("Content-Type")[0]);
-		String foundBody = GreenMailUtil.getBody(messages[msgIdx]);
-		assertEquals("", foundBody);
+		assertEquals(true, messages[msgIdx].getHeader("Content-Type")[0].startsWith("multipart/mixed; \r\n\tboundary="));
+
+		// Expect the body of the email subscription to be a multipart mime message, with one part, that is empty
+		assertEquals(MimeMultipart.class, messages[msgIdx].getContent().getClass());
+		MimeMultipart multipart = (MimeMultipart) messages[msgIdx].getContent();
+		assertEquals(1, multipart.getCount());
+		assertEquals(String.class, multipart.getBodyPart(0).getContent().getClass());
+
+		String content = (String) multipart.getBodyPart(0).getContent();
+		assertEquals(true, multipart.getBodyPart(0).getHeader("Content-Type") != null);
+		assertEquals("text/plain; charset=us-ascii", multipart.getBodyPart(0).getHeader("Content-Type")[0]);
+		assertEquals("", content);
 
 	}
 

@@ -85,8 +85,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		if (isNotBlank(subscription.getPayloadString())) {
 			String[] contentTypeSplit = subscription.getPayloadString().split(";");
 			String bodyText = null;
-			Boolean bodyNarrative = false;
-			Boolean attachResource = false;
+			boolean bodyNarrative = false;
+			boolean attachResource = false;
 
 			if (contentTypeSplit.length == 2) {
 				// Custom mime-type parameters have been specified. Read them.

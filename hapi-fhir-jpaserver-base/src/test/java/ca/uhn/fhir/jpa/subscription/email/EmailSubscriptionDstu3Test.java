@@ -146,7 +146,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<MimeMessage> received = Arrays.asList(ourTestSmtp.getReceivedMessages());
 
-		// Expect the body of the email subscription to be an Observation formatted as XML
+		// Expect the body of the email subscription to be a multipart mime message, with one part, that is empty
 		assertEquals(MimeMultipart.class, received.get(0).getContent().getClass());
 		MimeMultipart multipart = (MimeMultipart) received.get(0).getContent();
 		assertEquals(1, multipart.getCount());
