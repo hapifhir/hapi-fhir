@@ -1761,7 +1761,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 		theResponse.setContentType("text/plain");
 		theResponse.setCharacterEncoding("UTF-8");
-		theResponse.getWriter().write(theException.getMessage());
+		String message = UrlUtil.sanitizeUrlPart(theException.getMessage());
+		theResponse.getWriter().write(message);
 	}
 
 	/**

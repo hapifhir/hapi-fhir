@@ -137,13 +137,15 @@ public class Dstu2Hl7OrgBundleFactory implements IVersionSpecificBundleFactory {
         switch (theBundleType) {
           case BATCH_RESPONSE:
           case TRANSACTION_RESPONSE:
-            if ("1".equals(id.getVersionIdPart())) {
-              entry.getResponse().setStatus("201 Created");
-            } else if (isNotBlank(id.getVersionIdPart())) {
-              entry.getResponse().setStatus("200 OK");
-            }
-            if (isNotBlank(id.getVersionIdPart())) {
-              entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+            if (id != null) {
+              if ("1".equals(id.getVersionIdPart())) {
+                entry.getResponse().setStatus("201 Created");
+              } else if (isNotBlank(id.getVersionIdPart())) {
+                entry.getResponse().setStatus("200 OK");
+              }
+              if (isNotBlank(id.getVersionIdPart())) {
+                entry.getResponse().setEtag(RestfulServerUtils.createEtag(id.getVersionIdPart()));
+              }
             }
             break;
         }

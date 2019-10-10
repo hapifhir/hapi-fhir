@@ -202,9 +202,10 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return myValue;
 	}
 
-	public void setValue(BigDecimal theValue) {
+	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
 		clearHashes();
 		myValue = theValue;
+		return this;
 	}
 
 	@Override

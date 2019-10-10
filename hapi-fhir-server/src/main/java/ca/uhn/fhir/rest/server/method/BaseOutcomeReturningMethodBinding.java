@@ -79,7 +79,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		switch (getRestOperationType()) {
 			case CREATE:
 				validateResponseNotNullIfItShouldntBe(response);
-				if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
+				if (response == null || response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_201_CREATED;
 				}
 				return Constants.STATUS_HTTP_200_OK;

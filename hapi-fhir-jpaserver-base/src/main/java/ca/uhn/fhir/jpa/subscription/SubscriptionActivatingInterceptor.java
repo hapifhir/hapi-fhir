@@ -102,6 +102,7 @@ public class SubscriptionActivatingInterceptor {
 			.getValueAsString();
 
 		Subscription.SubscriptionChannelType subscriptionChannelType = Subscription.SubscriptionChannelType.fromCode(subscriptionChannelTypeCode);
+
 		// Only activate supported subscriptions
 		if (!myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType)) {
 			return false;
