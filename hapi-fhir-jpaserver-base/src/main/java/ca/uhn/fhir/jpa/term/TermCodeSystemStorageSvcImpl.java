@@ -105,6 +105,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	public UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "No system provided");
 		validateDstu3OrNewer();
+		theAdditions.validateNoCycleOrThrowInvalidRequest();
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		if (cs == null) {
@@ -497,16 +498,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
 
 		if (theCodeToConceptPid.containsKey(nextCodeToAdd)) {
-			TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
 
-//				if (StringUtils.equals(existingCode.getDisplay(), nextConceptToAdd.getDisplay())) {
-//					ourLog.trace("No change to code: {}", nextCodeToAdd);
-//					continue;
-//				}
+			TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
 
 			existingCode.setIndexStatus(null);
 			existingCode.setDisplay(nextConceptToAdd.getDisplay());
 			nextConceptToAdd = existingCode;
+
 		} else {
 
 			// If this is a new code, give it a sequence number based on how many concepts the
@@ -516,21 +514,29 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				theParentCodeToChildCodes.put(nextParentCode, nextCodeToAdd);
 				sequence = Math.max(sequence, theParentCodeToChildCodes.get(nextParentCode).size());
 			}
+			if (theParentCodes.isEmpty()) {
+				theParentCodeToChildCodes.put("", nextCodeToAdd);
+				sequence = Math.max(sequence, theParentCodeToChildCodes.get("").size());
+			}
 			nextConceptToAdd.setSequence(sequence);
 
 		}
 
 		// Drop any old parent-child links if they aren't explicitly specified in the
 		// hierarchy being added
-		nextConceptToAdd.getParents().removeIf(t -> {
-			String parentCode = t.getParent().getCode();
-			boolean shouldRemove = !theParentCodeToChildCodes.get(parentCode).contains(nextCodeToAdd);
+		for (Iterator<TermConceptParentChildLink> iter = nextConceptToAdd.getParents().iterator(); iter.hasNext(); ) {
+			TermConceptParentChildLink nextLink = iter.next();
+			String parentCode = nextLink.getParent().getCode();
+			boolean shouldRemove = !theParentCodes.contains(nextCodeToAdd);
 			if (shouldRemove) {
 				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
-				myConceptParentChildLinkDao.delete(t);
+				myConceptParentChildLinkDao.delete(nextLink);
+				iter.remove();
+
+				List<TermConceptParentChildLink> parentChildrenList = nextLink.getParent().getChildren();
+				parentChildrenList.remove(nextLink);
 			}
-			return shouldRemove;
-		});
+		}
 
 		nextConceptToAdd.setParentPids(null);
 		saveConceptsRecursively(nextConceptToAdd, theCsv, theStatisticsTracker);

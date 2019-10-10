@@ -67,6 +67,27 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testAddRootConceptsWithCycle() {
+		createNotPresentCodeSystem();
+		ValueSet vs;
+		vs = expandNotPresentCodeSystem();
+		assertEquals(0, vs.getExpansion().getContains().size());
+
+		CustomTerminologySet delta = new CustomTerminologySet();
+
+		TermConcept root = delta.addRootConcept("Root", "Root");
+		TermConcept child = root.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("Child").setDisplay("Child");
+		child.addChild(root, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+
+		try {
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Cycle detected around code Root", e.getMessage());
+		}
+	}
+
+	@Test
 	public void testAddHierarchyConcepts() {
 		createNotPresentCodeSystem();
 		assertHierarchyContains();
@@ -213,7 +234,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("AAAAA"));
+			assertThat(e.getMessage(), containsString("Unable to add code \"CodeBB\" to unknown parent: CodeB"));
 		}
 	}
 
@@ -231,17 +252,17 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		TermConcept codeBA = codeB.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBA").setDisplay("Code BA");
 		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAA").setDisplay("Code BAA");
 		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAB").setDisplay("Code BAB");
-		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(8, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA seq=1",
-			" CodeAA seq=1",
-			"  CodeAAA seq=1",
-			"  CodeAAB seq=2",
-			"CodeB seq=1",
-			" CodeBA seq=1",
-			"  CodeBAA seq=1",
-			"  CodeBAB seq=2"
+			"CodeA",
+			" CodeAA",
+			"  CodeAAA",
+			"  CodeAAB",
+			"CodeB",
+			" CodeBA",
+			"  CodeBAA",
+			"  CodeBAB"
 		);
 
 		// Move a single child code to a new spot and make sure the hierarchy comes along
@@ -249,16 +270,16 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta = new CustomTerminologySet();
 		delta.addUnanchoredChildConcept("CodeB", "CodeAA", "Code AA");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
-		assertEquals(1, outcome.getUpdatedConceptCount());
+		assertEquals(3, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA seq=1",
-			"CodeB seq=1",
-			" CodeBA seq=1",
-			"  CodeBAA seq=1",
-			"  CodeBAB seq=2",
-			" CodeAA seq=2",
-			"  CodeAAA seq=1",
-			"  CodeAAB seq=2"
+			"CodeA",
+			"CodeB",
+			" CodeBA",
+			"  CodeBAA",
+			"  CodeBAB",
+			" CodeAA",
+			"  CodeAAA",
+			"  CodeAAB"
 		);
 
 	}
@@ -416,9 +437,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	private void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
-		theCodes.sort(Comparator.comparingInt(TermConcept::getSequence));
+		theCodes.sort((o1,o2)->{
+			int s1 = o1.getSequence() != null ? o1.getSequence() : 0;
+			int s2 = o2.getSequence() != null ? o2.getSequence() : 0;
+			return s1-s2;
+		});
+
 		for (TermConcept nextCode : theCodes) {
-			String hierarchyEntry = thePrefix + nextCode.getCode() + " seq=" + nextCode.getSequence();
+			String hierarchyEntry = thePrefix + nextCode.getCode();
 			theFlattenedHierarchy.add(hierarchyEntry);
 
 			List<TermConcept> children = nextCode.getChildCodes();

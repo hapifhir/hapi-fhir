@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.jpa.term.LoadedFileDescriptors;
 import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
@@ -97,6 +98,27 @@ public class CustomTerminologySet {
 			.setCode(theCode)
 			.setDisplay(theDisplay);
 		myUnanchoredChildConceptsToParentCodes.put(code, theParentCode);
+	}
+
+	public void validateNoCycleOrThrowInvalidRequest() {
+		Set<String> codes = new HashSet<>();
+		validateNoCycleOrThrowInvalidRequest(codes, getRootConcepts());
+		for (TermConcept next : myUnanchoredChildConceptsToParentCodes.keySet()) {
+			validateNoCycleOrThrowInvalidRequest(codes, next);
+		}
+	}
+
+	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, List<TermConcept> theRootConcepts) {
+		for (TermConcept next : theRootConcepts) {
+			validateNoCycleOrThrowInvalidRequest(theCodes, next);
+		}
+	}
+
+	private void validateNoCycleOrThrowInvalidRequest(Set<String> theCodes, TermConcept next) {
+		if (!theCodes.add(next.getCode())) {
+			throw new InvalidRequestException("Cycle detected around code " + next.getCode());
+		}
+		validateNoCycleOrThrowInvalidRequest(theCodes, next.getChildCodes());
 	}
 
 
