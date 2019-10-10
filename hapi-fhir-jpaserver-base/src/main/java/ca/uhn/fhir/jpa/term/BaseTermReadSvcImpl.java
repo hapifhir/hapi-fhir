@@ -147,9 +147,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	private ITermValueSetConceptViewDao myTermValueSetConceptViewDao;
 	@Autowired
 	private ISchedulerService mySchedulerService;
-	@Autowired
+	@Autowired(required = false)
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
-	@Autowired
+	@Autowired(required = false)
 	private ITermCodeSystemStorageSvc myConceptStorageSvc;
 
 	private void addCodeIfNotAlreadyAdded(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, TermConcept theConcept, boolean theAdd, AtomicInteger theCodeCounter) {

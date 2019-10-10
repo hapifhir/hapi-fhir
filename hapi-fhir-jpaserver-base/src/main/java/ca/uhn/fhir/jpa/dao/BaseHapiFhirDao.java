@@ -137,8 +137,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	protected ITermReadSvc myTerminologySvc;
 	@Autowired
-	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
-	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
 	protected IResourceTableDao myResourceTableDao;

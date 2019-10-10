@@ -1,13 +1,14 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
@@ -102,7 +103,9 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@PostConstruct
 	public void start() {
-		myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			myCodeSystemResourceDao = myApplicationContext.getBean(IFhirResourceDaoCodeSystem.class);
+		}
 		myValueSetResourceDao = myApplicationContext.getBean(IFhirResourceDaoValueSet.class);
 	}
 
@@ -110,6 +113,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	public UploadStatistics applyDeltaCodeSystemsAdd(String theSystem, CustomTerminologySet theAdditions) {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "No system provided");
+		validateDstu3OrNewer();
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		if (cs == null) {
@@ -210,82 +214,11 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return retVal;
 	}
 
-	private void addConcepts(TermCodeSystemVersion theCsv, Map<String, Long> theCodeToConceptPid, Collection<String> theParentCodes, TermConcept theConceptToAdd, ListMultimap<String, String> theParentCodeToChildCodes, UploadStatistics theStatisticsTracker) {
-		TermConcept nextConceptToAdd = theConceptToAdd;
-
-		String nextCodeToAdd = nextConceptToAdd.getCode();
-		String parentDescription = "(root concept)";
-		Set<TermConcept> parentConcepts = new HashSet<>();
-		if (!theParentCodes.isEmpty()) {
-			parentDescription = "[" + String.join(", ", theParentCodes) + "]";
-			for (String nextParentCode : theParentCodes) {
-				Long nextParentCodePid = theCodeToConceptPid.get(nextParentCode);
-				if (nextParentCodePid == null) {
-					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
-				}
-				parentConcepts.add(myConceptDao.getOne(nextParentCodePid));
-			}
-		}
-
-		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
-
-		if (theCodeToConceptPid.containsKey(nextCodeToAdd)) {
-			TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
-
-//				if (StringUtils.equals(existingCode.getDisplay(), nextConceptToAdd.getDisplay())) {
-//					ourLog.trace("No change to code: {}", nextCodeToAdd);
-//					continue;
-//				}
-
-			existingCode.setIndexStatus(null);
-			existingCode.setDisplay(nextConceptToAdd.getDisplay());
-			nextConceptToAdd = existingCode;
-		} else {
-
-			// If this is a new code, give it a sequence number based on how many concepts the
-			// parent already has (or the highest number, if the code has multiple parents)
-			int sequence = 0;
-			for (String nextParentCode : theParentCodes) {
-				theParentCodeToChildCodes.put(nextParentCode, nextCodeToAdd);
-				sequence = Math.max(sequence, theParentCodeToChildCodes.get(nextParentCode).size());
-			}
-			nextConceptToAdd.setSequence(sequence);
-
-		}
-
-		// Drop any old parent-child links if they aren't explicitly specified in the
-		// hierarchy being added
-		nextConceptToAdd.getParents().removeIf(t -> {
-			String parentCode = t.getParent().getCode();
-			boolean shouldRemove = !theParentCodeToChildCodes.get(parentCode).contains(nextCodeToAdd);
-			if (shouldRemove) {
-				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
-				myConceptParentChildLinkDao.delete(t);
-			}
-			return shouldRemove;
-		});
-
-		nextConceptToAdd.setParentPids(null);
-		saveConceptsRecursively(nextConceptToAdd, theCsv, theStatisticsTracker);
-		myConceptDao.save(nextConceptToAdd);
-
-		for (TermConcept nextParentConcept : parentConcepts) {
-			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
-			parentLink.setParent(nextParentConcept);
-			parentLink.setChild(nextConceptToAdd);
-			parentLink.setCodeSystem(theCsv);
-			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-			nextParentConcept.getChildren().add(parentLink);
-			nextConceptToAdd.getParents().add(parentLink);
-			myConceptParentChildLinkDao.save(parentLink);
-		}
-
-
-	}
-
 	@Transactional
 	@Override
 	public UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
+		validateDstu3OrNewer();
+
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);
 		if (cs == null) {
 			throw new InvalidRequestException("Unknown code system: " + theSystem);
@@ -305,17 +238,59 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return new UploadStatistics(removeCounter.get(), target);
 	}
 
-	private Long getCodeSystemResourcePid(IIdType theIdType) {
-		return getCodeSystemResourcePid(theIdType, null);
+	@Override
+	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
+		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
+
+		myEntityManager.flush();
+		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
+		cs.setCurrentVersion(null);
+		myCodeSystemDao.save(cs);
+		myCodeSystemDao.flush();
+
+		int i = 0;
+		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
+		for (TermCodeSystemVersion next : codeSystemVersions) {
+			deleteCodeSystemVersion(next.getPid());
+		}
+		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
+		myCodeSystemDao.delete(theCodeSystem);
+
+		myEntityManager.flush();
 	}
 
-	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
-		return getResourcePid(myCodeSystemResourceDao, theIdType, theRequestDetails);
-	}
+	/**
+	 * Returns the number of saved concepts
+	 */
+	@Override
+	public int saveConcept(TermConcept theConcept) {
+		int retVal = 0;
 
-	private Long getResourcePid(IFhirResourceDao<? extends IBaseResource> theResourceDao, IIdType theIdType, RequestDetails theRequestDetails) {
-		ResourceTable resourceTable = (ResourceTable) theResourceDao.readEntity(theIdType, theRequestDetails);
-		return resourceTable.getId();
+		/*
+		 * If the concept has an ID, we're reindexing, so there's no need to
+		 * save parent concepts first (it's way too slow to do that)
+		 */
+		if (theConcept.getId() == null) {
+			retVal += ensureParentsSaved(theConcept.getParents());
+		}
+
+		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
+			retVal++;
+			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+			theConcept.setUpdated(new Date());
+			myConceptDao.save(theConcept);
+
+			for (TermConceptProperty next : theConcept.getProperties()) {
+				myConceptPropertyDao.save(next);
+			}
+
+			for (TermConceptDesignation next : theConcept.getDesignations()) {
+				myConceptDesignationDao.save(next);
+			}
+		}
+
+		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
+		return retVal;
 	}
 
 	@Override
@@ -354,148 +329,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
-	private void saveConceptsRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv, UploadStatistics theStatisticsTracker) {
-		theConcept.setCodeSystemVersion(theCsv);
-		theStatisticsTracker.incrementUpdatedConceptCount();
-		saveConcept(theConcept);
-
-		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
-			TermConcept nextChild = nextChildLink.getChild();
-			nextChildLink.setCodeSystem(theCsv);
-			saveConceptsRecursively(nextChild, theCsv, theStatisticsTracker);
-
-			if (nextChildLink.getId() == null) {
-				myConceptParentChildLinkDao.save(nextChildLink);
-			}
-		}
-	}
-
-	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
-		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
-			return;
-		}
-
-		if (theConceptsStack.size() == 1 || theConceptsStack.size() % 10000 == 0) {
-			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
-			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int) (pct * 100.0f));
-		}
-
-		theConcept.setCodeSystemVersion(theCodeSystem);
-		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-
-		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(theConcept);
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(theConcept);
-		}
-
-		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			persistChildren(next.getChild(), theCodeSystem, theConceptsStack, theTotalConcepts);
-		}
-
-		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
-				saveConceptLink(next);
-			} else {
-				myDeferredStorageSvc.addConceptLinkToStorageQueue(next);
-			}
-		}
-
-	}
-
-	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
-		if (theNext.getCodeSystemVersion() != null) {
-			return;
-		}
-		theNext.setCodeSystemVersion(theCodeSystemVersion);
-		for (TermConceptParentChildLink next : theNext.getChildren()) {
-			populateVersion(next.getChild(), theCodeSystemVersion);
-		}
-	}
-
-	/**
-	 * Returns the number of saved concepts
-	 */
-	@Override
-	public int saveConcept(TermConcept theConcept) {
-		int retVal = 0;
-
-		/*
-		 * If the concept has an ID, we're reindexing, so there's no need to
-		 * save parent concepts first (it's way too slow to do that)
-		 */
-		if (theConcept.getId() == null) {
-			retVal += ensureParentsSaved(theConcept.getParents());
-		}
-
-		if (theConcept.getId() == null || theConcept.getIndexStatus() == null) {
-			retVal++;
-			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
-			theConcept.setUpdated(new Date());
-			myConceptDao.save(theConcept);
-
-			for (TermConceptProperty next : theConcept.getProperties()) {
-				myConceptPropertyDao.save(next);
-			}
-
-			for (TermConceptDesignation next : theConcept.getDesignations()) {
-				myConceptDesignationDao.save(next);
-			}
-		}
-
-		ourLog.trace("Saved {} and got PID {}", theConcept.getCode(), theConcept.getId());
-		return retVal;
-	}
-
-	private void saveConceptLink(TermConceptParentChildLink next) {
-		if (next.getId() == null) {
-			myConceptParentChildLinkDao.save(next);
-		}
-	}
-
-	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
-		ourLog.trace("Checking {} parents", theParents.size());
-		int retVal = 0;
-
-		for (TermConceptParentChildLink nextLink : theParents) {
-			if (nextLink.getRelationshipType() == TermConceptParentChildLink.RelationshipTypeEnum.ISA) {
-				TermConcept nextParent = nextLink.getParent();
-				retVal += ensureParentsSaved(nextParent.getParents());
-				if (nextParent.getId() == null) {
-					nextParent.setUpdated(new Date());
-					myConceptDao.saveAndFlush(nextParent);
-					retVal++;
-					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
-				}
-			}
-		}
-
-		return retVal;
-	}
-
-	@Nonnull
-	private TermCodeSystem getOrCreateTermCodeSystem(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
-		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
-		if (codeSystem == null) {
-			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
-			if (codeSystem == null) {
-				codeSystem = new TermCodeSystem();
-			}
-			codeSystem.setResource(theCodeSystemResourceTable);
-		} else {
-			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemResourceTable.getId())) {
-				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
-					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
-				throw new UnprocessableEntityException(msg);
-			}
-		}
-
-		codeSystem.setCodeSystemUri(theSystemUri);
-		codeSystem.setName(theSystemName);
-		codeSystem = myCodeSystemDao.save(codeSystem);
-		return codeSystem;
-	}
-
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public IIdType storeNewCodeSystemVersion(CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequest, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -516,24 +349,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myDeferredStorageSvc.addValueSetsToStorageQueue(theValueSets);
 
 		return csId;
-	}
-
-	private void populateCodeSystemVersionProperties(TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystemResource, ResourceTable theResourceTable) {
-		theCodeSystemVersion.setResource(theResourceTable);
-		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
-		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
-	}
-
-	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
-		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
-			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
-			myConceptParentChildLinkDao.delete(nextChildLink);
-		}
-
-		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
-		myConceptPropertyDao.deleteAll(theConcept.getProperties());
-		myConceptDao.delete(theConcept);
-		theRemoveCounter.incrementAndGet();
 	}
 
 	@Override
@@ -616,8 +431,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
-
-	public void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
+	private void deleteCodeSystemVersion(final Long theCodeSystemVersionPid) {
 		ourLog.info(" * Deleting code system version {}", theCodeSystemVersionPid);
 
 		PageRequest page1000 = PageRequest.of(0, 1000);
@@ -669,6 +483,223 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	}
 
+	private void validateDstu3OrNewer() {
+		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");
+	}
+
+	private void addConcepts(TermCodeSystemVersion theCsv, Map<String, Long> theCodeToConceptPid, Collection<String> theParentCodes, TermConcept theConceptToAdd, ListMultimap<String, String> theParentCodeToChildCodes, UploadStatistics theStatisticsTracker) {
+		TermConcept nextConceptToAdd = theConceptToAdd;
+
+		String nextCodeToAdd = nextConceptToAdd.getCode();
+		String parentDescription = "(root concept)";
+		Set<TermConcept> parentConcepts = new HashSet<>();
+		if (!theParentCodes.isEmpty()) {
+			parentDescription = "[" + String.join(", ", theParentCodes) + "]";
+			for (String nextParentCode : theParentCodes) {
+				Long nextParentCodePid = theCodeToConceptPid.get(nextParentCode);
+				if (nextParentCodePid == null) {
+					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+				}
+				parentConcepts.add(myConceptDao.getOne(nextParentCodePid));
+			}
+		}
+
+		ourLog.info("Saving concept {} with parent {}", theStatisticsTracker.getUpdatedConceptCount(), parentDescription);
+
+		if (theCodeToConceptPid.containsKey(nextCodeToAdd)) {
+			TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
+
+//				if (StringUtils.equals(existingCode.getDisplay(), nextConceptToAdd.getDisplay())) {
+//					ourLog.trace("No change to code: {}", nextCodeToAdd);
+//					continue;
+//				}
+
+			existingCode.setIndexStatus(null);
+			existingCode.setDisplay(nextConceptToAdd.getDisplay());
+			nextConceptToAdd = existingCode;
+		} else {
+
+			// If this is a new code, give it a sequence number based on how many concepts the
+			// parent already has (or the highest number, if the code has multiple parents)
+			int sequence = 0;
+			for (String nextParentCode : theParentCodes) {
+				theParentCodeToChildCodes.put(nextParentCode, nextCodeToAdd);
+				sequence = Math.max(sequence, theParentCodeToChildCodes.get(nextParentCode).size());
+			}
+			nextConceptToAdd.setSequence(sequence);
+
+		}
+
+		// Drop any old parent-child links if they aren't explicitly specified in the
+		// hierarchy being added
+		nextConceptToAdd.getParents().removeIf(t -> {
+			String parentCode = t.getParent().getCode();
+			boolean shouldRemove = !theParentCodeToChildCodes.get(parentCode).contains(nextCodeToAdd);
+			if (shouldRemove) {
+				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
+				myConceptParentChildLinkDao.delete(t);
+			}
+			return shouldRemove;
+		});
+
+		nextConceptToAdd.setParentPids(null);
+		saveConceptsRecursively(nextConceptToAdd, theCsv, theStatisticsTracker);
+		myConceptDao.save(nextConceptToAdd);
+
+		for (TermConcept nextParentConcept : parentConcepts) {
+			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
+			parentLink.setParent(nextParentConcept);
+			parentLink.setChild(nextConceptToAdd);
+			parentLink.setCodeSystem(theCsv);
+			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			nextParentConcept.getChildren().add(parentLink);
+			nextConceptToAdd.getParents().add(parentLink);
+			myConceptParentChildLinkDao.save(parentLink);
+		}
+
+
+	}
+
+	private Long getCodeSystemResourcePid(IIdType theIdType) {
+		return getCodeSystemResourcePid(theIdType, null);
+	}
+
+	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
+		return getResourcePid(myCodeSystemResourceDao, theIdType, theRequestDetails);
+	}
+
+	private Long getResourcePid(IFhirResourceDao<? extends IBaseResource> theResourceDao, IIdType theIdType, RequestDetails theRequestDetails) {
+		ResourceTable resourceTable = (ResourceTable) theResourceDao.readEntity(theIdType, theRequestDetails);
+		return resourceTable.getId();
+	}
+
+	private void saveConceptsRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv, UploadStatistics theStatisticsTracker) {
+		theConcept.setCodeSystemVersion(theCsv);
+		theStatisticsTracker.incrementUpdatedConceptCount();
+		saveConcept(theConcept);
+
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			TermConcept nextChild = nextChildLink.getChild();
+			nextChildLink.setCodeSystem(theCsv);
+			saveConceptsRecursively(nextChild, theCsv, theStatisticsTracker);
+
+			if (nextChildLink.getId() == null) {
+				myConceptParentChildLinkDao.save(nextChildLink);
+			}
+		}
+	}
+
+	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {
+		if (theConceptsStack.put(theConcept, PLACEHOLDER_OBJECT) != null) {
+			return;
+		}
+
+		if (theConceptsStack.size() == 1 || theConceptsStack.size() % 10000 == 0) {
+			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
+			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int) (pct * 100.0f));
+		}
+
+		theConcept.setCodeSystemVersion(theCodeSystem);
+		theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+
+		if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+			saveConcept(theConcept);
+		} else {
+			myDeferredStorageSvc.addConceptToStorageQueue(theConcept);
+		}
+
+		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			persistChildren(next.getChild(), theCodeSystem, theConceptsStack, theTotalConcepts);
+		}
+
+		for (TermConceptParentChildLink next : theConcept.getChildren()) {
+			if (theConceptsStack.size() <= myDaoConfig.getDeferIndexingForCodesystemsOfSize()) {
+				saveConceptLink(next);
+			} else {
+				myDeferredStorageSvc.addConceptLinkToStorageQueue(next);
+			}
+		}
+
+	}
+
+	private void populateVersion(TermConcept theNext, TermCodeSystemVersion theCodeSystemVersion) {
+		if (theNext.getCodeSystemVersion() != null) {
+			return;
+		}
+		theNext.setCodeSystemVersion(theCodeSystemVersion);
+		for (TermConceptParentChildLink next : theNext.getChildren()) {
+			populateVersion(next.getChild(), theCodeSystemVersion);
+		}
+	}
+
+	private void saveConceptLink(TermConceptParentChildLink next) {
+		if (next.getId() == null) {
+			myConceptParentChildLinkDao.save(next);
+		}
+	}
+
+	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
+		ourLog.trace("Checking {} parents", theParents.size());
+		int retVal = 0;
+
+		for (TermConceptParentChildLink nextLink : theParents) {
+			if (nextLink.getRelationshipType() == TermConceptParentChildLink.RelationshipTypeEnum.ISA) {
+				TermConcept nextParent = nextLink.getParent();
+				retVal += ensureParentsSaved(nextParent.getParents());
+				if (nextParent.getId() == null) {
+					nextParent.setUpdated(new Date());
+					myConceptDao.saveAndFlush(nextParent);
+					retVal++;
+					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
+				}
+			}
+		}
+
+		return retVal;
+	}
+
+	@Nonnull
+	private TermCodeSystem getOrCreateTermCodeSystem(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, ResourceTable theCodeSystemResourceTable) {
+		TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theSystemUri);
+		if (codeSystem == null) {
+			codeSystem = myCodeSystemDao.findByResourcePid(theCodeSystemResourcePid);
+			if (codeSystem == null) {
+				codeSystem = new TermCodeSystem();
+			}
+			codeSystem.setResource(theCodeSystemResourceTable);
+		} else {
+			if (!ObjectUtil.equals(codeSystem.getResource().getId(), theCodeSystemResourceTable.getId())) {
+				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "cannotCreateDuplicateCodeSystemUrl", theSystemUri,
+					codeSystem.getResource().getIdDt().toUnqualifiedVersionless().getValue());
+				throw new UnprocessableEntityException(msg);
+			}
+		}
+
+		codeSystem.setCodeSystemUri(theSystemUri);
+		codeSystem.setName(theSystemName);
+		codeSystem = myCodeSystemDao.save(codeSystem);
+		return codeSystem;
+	}
+
+	private void populateCodeSystemVersionProperties(TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystemResource, ResourceTable theResourceTable) {
+		theCodeSystemVersion.setResource(theResourceTable);
+		theCodeSystemVersion.setCodeSystemDisplayName(theCodeSystemResource.getName());
+		theCodeSystemVersion.setCodeSystemVersionId(theCodeSystemResource.getVersion());
+	}
+
+	private void deleteConceptChildrenAndConcept(TermConcept theConcept, AtomicInteger theRemoveCounter) {
+		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
+			deleteConceptChildrenAndConcept(nextChildLink.getChild(), theRemoveCounter);
+			myConceptParentChildLinkDao.delete(nextChildLink);
+		}
+
+		myConceptDesignationDao.deleteAll(theConcept.getDesignations());
+		myConceptPropertyDao.deleteAll(theConcept.getProperties());
+		myConceptDao.delete(theConcept);
+		theRemoveCounter.incrementAndGet();
+	}
+
+
 	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
@@ -692,27 +723,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ourLog.info(" * {} {} deleted - {}/sec - ETA: {}", count, theDescriptor, sw.formatThroughput(count, TimeUnit.SECONDS), sw.getEstimatedTimeRemaining(count, totalCount));
 		}
 		theDao.flush();
-	}
-
-	@Override
-	public void deleteCodeSystem(TermCodeSystem theCodeSystem) {
-		ourLog.info(" * Deleting code system {}", theCodeSystem.getPid());
-
-		myEntityManager.flush();
-		TermCodeSystem cs = myCodeSystemDao.findById(theCodeSystem.getPid()).orElseThrow(IllegalStateException::new);
-		cs.setCurrentVersion(null);
-		myCodeSystemDao.save(cs);
-		myCodeSystemDao.flush();
-
-		int i = 0;
-		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
-		for (TermCodeSystemVersion next : codeSystemVersions) {
-			deleteCodeSystemVersion(next.getPid());
-		}
-		myCodeSystemVersionDao.deleteForCodeSystem(theCodeSystem);
-		myCodeSystemDao.delete(theCodeSystem);
-
-		myEntityManager.flush();
 	}
 
 

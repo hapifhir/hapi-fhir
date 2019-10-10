@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.config.r5;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -55,7 +56,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class BaseR5Config extends BaseConfig {
+public class BaseR5Config extends BaseConfigDstu3Plus {
 
 	@Override
 	public FhirContext fhirContext() {

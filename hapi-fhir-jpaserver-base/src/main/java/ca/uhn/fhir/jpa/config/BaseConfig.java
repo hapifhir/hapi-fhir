@@ -246,24 +246,6 @@ public abstract class BaseConfig {
 	}
 
 	@Bean
-	public ITermCodeSystemStorageSvc termCodeSystemStorageSvc() {
-		return new TermCodeSystemStorageSvcImpl();
-	}
-
-	@Bean
-	public ITermDeferredStorageSvc termDeferredStorageSvc() {
-		return new TermDeferredStorageSvcImpl();
-	}
-
-	@Bean
-	public ITermReindexingSvc termReindexingSvc() {
-		return new TermReindexingSvcImpl();
-	}
-
-	@Bean
-	public abstract ITermVersionAdapterSvc terminologyVersionAdapterSvc();
-
-	@Bean
 	public AutowiringSpringBeanJobFactory schedulerJobFactory() {
 		return new AutowiringSpringBeanJobFactory();
 	}
