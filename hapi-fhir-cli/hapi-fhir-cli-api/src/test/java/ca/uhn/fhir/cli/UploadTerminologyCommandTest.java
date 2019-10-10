@@ -2,15 +2,14 @@ package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.BaseTest;
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
-import ca.uhn.fhir.jpa.term.api.IHapiTerminologySvc;
-import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -28,6 +27,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -45,11 +45,9 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	private Server myServer;
 	private FhirContext myCtx = FhirContext.forR4();
 	@Mock
-	private IHapiTerminologySvc myTerminologyLoaderSvc;
+	private ITermLoaderSvc myTermLoaderSvc;
 	@Captor
-	private ArgumentCaptor<TermCodeSystemVersion> myDescriptorList;
-	@Captor
-	private ArgumentCaptor<CustomTerminologySet> myCodeSystemCaptor;
+	private ArgumentCaptor<List<ITermLoaderSvc.FileDescriptor>> myDescriptorListCaptor;
 
 	private int myPort;
 	private String myConceptsFileName = "target/concepts.csv";
@@ -58,11 +56,11 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	private File myHierarchyFile = new File(myHierarchyFileName);
 
 	@Test
-	public void testTerminologyUpload_AddDelta() throws IOException {
+	public void testAddDelta() throws IOException {
 
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsAdd(eq("http://foo"), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -74,24 +72,21 @@ public class UploadTerminologyCommandTest extends BaseTest {
 			"-d", myHierarchyFileName
 		});
 
-		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodeSystemsAdd(eq("http://foo"), myCodeSystemCaptor.capture());
+		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
-		CustomTerminologySet codeSystem = myCodeSystemCaptor.getValue();
-		assertEquals(1, codeSystem.getRootConcepts().size());
-		assertEquals("ANIMALS", codeSystem.getRootConcepts().get(0).getCode());
-		assertEquals("Animals", codeSystem.getRootConcepts().get(0).getDisplay());
-		assertEquals(2, codeSystem.getRootConcepts().get(0).getChildCodes().size());
-		assertEquals("CATS", codeSystem.getRootConcepts().get(0).getChildCodes().get(0).getCode());
-		assertEquals("Cats", codeSystem.getRootConcepts().get(0).getChildCodes().get(0).getDisplay());
-		assertEquals("DOGS", codeSystem.getRootConcepts().get(0).getChildCodes().get(1).getCode());
-		assertEquals("Dogs", codeSystem.getRootConcepts().get(0).getChildCodes().get(1).getDisplay());
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(2, listOfDescriptors.size());
+		assertEquals("", listOfDescriptors.get(0).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
+		assertEquals("", listOfDescriptors.get(1).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
 	}
 
 	@Test
-	public void testTerminologyUpload_RemoveDelta() throws IOException {
+	public void testRemoveDelta() throws IOException {
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.applyDeltaCodeSystemsRemove(eq("http://foo"), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+		when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
@@ -103,41 +98,42 @@ public class UploadTerminologyCommandTest extends BaseTest {
 			"-d", myHierarchyFileName
 		});
 
-		verify(myTerminologyLoaderSvc, times(1)).applyDeltaCodeSystemsRemove(eq("http://foo"), myCodeSystemCaptor.capture());
+		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
-		CustomTerminologySet codeSystem = myCodeSystemCaptor.getValue();
-		assertEquals(3, codeSystem.getRootConcepts().size());
-		assertEquals("ANIMALS", codeSystem.getRootConcepts().get(0).getCode());
-		assertEquals("Animals", codeSystem.getRootConcepts().get(0).getDisplay());
-		assertEquals("CATS", codeSystem.getRootConcepts().get(1).getCode());
-		assertEquals("Cats", codeSystem.getRootConcepts().get(1).getDisplay());
-		assertEquals("DOGS", codeSystem.getRootConcepts().get(2).getCode());
-		assertEquals("Dogs", codeSystem.getRootConcepts().get(2).getDisplay());
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(2, listOfDescriptors.size());
+		assertEquals("", listOfDescriptors.get(0).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
+		assertEquals("", listOfDescriptors.get(1).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
+
 	}
 
 	@Test
-	public void testTerminologyUpload_Snapshot() throws IOException {
+	public void testSnapshot() throws IOException {
 
 		writeConceptAndHierarchyFiles();
 
-		when(myTerminologyLoaderSvc.storeNewCodeSystemVersion(any(), any(), any(), anyList(), anyList())).thenReturn(new IdType("CodeSystem/123"));
+		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
 
 		App.main(new String[]{
 			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
 			"-v", "r4",
 			"-m", "SNAPSHOT",
-			"--custom",
 			"-t", "http://localhost:" + myPort,
 			"-u", "http://foo",
 			"-d", myConceptsFileName,
 			"-d", myHierarchyFileName
 		});
 
-		verify(myTerminologyLoaderSvc, times(1)).storeNewCodeSystemVersion(any(), myDescriptorList.capture(), any(), any(), any());
+		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
-		TermCodeSystemVersion listOfDescriptors = myDescriptorList.getValue();
-		assertEquals(1, listOfDescriptors.getConcepts().size());
-		assertEquals("ANIMALS", listOfDescriptors.getConcepts().iterator().next().getCode());
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(2, listOfDescriptors.size());
+		assertEquals("", listOfDescriptors.get(0).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length);
+		assertEquals("", listOfDescriptors.get(1).getFilename());
+		assertEquals(100, IOUtils.toByteArray(listOfDescriptors.get(1).getInputStream()).length);
 	}
 
 
@@ -157,7 +153,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	}
 
 	@Test
-	public void testTerminologyUpload_AddInvalidFileName() throws IOException {
+	public void testAddInvalidFileName() throws IOException {
 
 		writeConceptAndHierarchyFiles();
 
@@ -189,10 +185,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	public void before() throws Exception {
 		myServer = new Server(0);
 
-		TermLoaderSvcImpl terminologyLoaderSvc = new TermLoaderSvcImpl();
-		terminologyLoaderSvc.setTermSvcForUnitTest(myTerminologyLoaderSvc);
-
-		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, terminologyLoaderSvc);
+		TerminologyUploaderProvider provider = new TerminologyUploaderProvider(myCtx, myTermLoaderSvc);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		RestfulServer servlet = new RestfulServer(myCtx);

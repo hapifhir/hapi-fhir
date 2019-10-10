@@ -39,7 +39,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 
 	@Test
-	public void testApplyCodeSystemDeltaAdd_RootConcepts() {
+	public void testAddRootConcepts() {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
@@ -67,7 +67,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testApplyCodeSystemAdd_HierarchyConcepts() {
+	public void testAddHierarchyConcepts() {
 		createNotPresentCodeSystem();
 		assertHierarchyContains();
 
@@ -93,7 +93,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testApplyCodeSystemAdd_MoveConceptFromOneParentToAnother() {
+	public void testAddMoveConceptFromOneParentToAnother() {
 		createNotPresentCodeSystem();
 		assertHierarchyContains();
 
@@ -120,52 +120,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"RootA",
 			"RootB",
 			" ChildAA"
-			);
+		);
 
-	}
-
-	private void assertHierarchyContains(String... theStrings) {
-		List<String> hierarchy = runInTransaction(() -> {
-			List<String> hierarchyHolder = new ArrayList<>();
-			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
-			TermCodeSystemVersion csv = codeSystem.getCurrentVersion();
-			List<TermConcept> codes = myTermConceptDao.findByCodeSystemVersion(csv);
-			List<TermConcept> rootCodes = codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
-			flattenExpansionHierarchy(hierarchyHolder, rootCodes, "");
-			return hierarchyHolder;
-		});
-		if (theStrings.length == 0) {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
-		} else {
-			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
-		}
-	}
-
-	private void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
-		theCodes.sort(Comparator.comparingInt(TermConcept::getSequence));
-		for (TermConcept nextCode : theCodes) {
-			String hierarchyEntry = thePrefix + nextCode.getCode();
-			theFlattenedHierarchy.add(hierarchyEntry);
-
-			List<TermConcept> children = nextCode.getChildCodes();
-			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
-		}
-	}
-
-	private ValueSet expandNotPresentCodeSystem() {
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://foo/vs");
-		vs.getCompose().addInclude().setSystem("http://foo/cs");
-		vs = myValueSetDao.expand(vs, null);
-		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
-		return vs;
-	}
-
-	private void createNotPresentCodeSystem() {
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo/cs");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		myCodeSystemDao.create(cs);
 	}
 
 	@Test
@@ -240,6 +196,72 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("CODEA1", myTermSvc.lookupCode(myFhirCtx, "http://foo", "codea").getCodeDisplay());
 	}
 
+	@Test
+	public void testAddUnanchoredWithUnknownParent() {
+		createNotPresentCodeSystem();
+
+		// Add root code
+		CustomTerminologySet delta = new CustomTerminologySet();
+		delta.addRootConcept("CodeA", "Code A");
+		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		assertEquals(1, outcome.getUpdatedConceptCount());
+
+		// Try to add child to nonexistent root code
+		delta = new CustomTerminologySet();
+		delta.addUnanchoredChildConcept("CodeB", "CodeBB", "Code BB");
+		try {
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("AAAAA"));
+		}
+	}
+
+	@Test
+	public void testAddRelocateHierarchy() {
+		createNotPresentCodeSystem();
+
+		// Add code hierarchy
+		CustomTerminologySet delta = new CustomTerminologySet();
+		TermConcept codeA = delta.addRootConcept("CodeA", "Code A");
+		TermConcept codeAA = codeA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAA").setDisplay("Code AA");
+		codeAA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAAA").setDisplay("Code AAA");
+		codeAA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeAAB").setDisplay("Code AAB");
+		TermConcept codeB = delta.addRootConcept("CodeB", "Code B");
+		TermConcept codeBA = codeB.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBA").setDisplay("Code BA");
+		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAA").setDisplay("Code BAA");
+		codeBA.addChild(TermConceptParentChildLink.RelationshipTypeEnum.ISA).setCode("CodeBAB").setDisplay("Code BAB");
+		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		assertEquals(8, outcome.getUpdatedConceptCount());
+		assertHierarchyContains(
+			"CodeA seq=1",
+			" CodeAA seq=1",
+			"  CodeAAA seq=1",
+			"  CodeAAB seq=2",
+			"CodeB seq=1",
+			" CodeBA seq=1",
+			"  CodeBAA seq=1",
+			"  CodeBAB seq=2"
+		);
+
+		// Move a single child code to a new spot and make sure the hierarchy comes along
+		// for the ride..
+		delta = new CustomTerminologySet();
+		delta.addUnanchoredChildConcept("CodeB", "CodeAA", "Code AA");
+		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
+		assertEquals(1, outcome.getUpdatedConceptCount());
+		assertHierarchyContains(
+			"CodeA seq=1",
+			"CodeB seq=1",
+			" CodeBA seq=1",
+			"  CodeBAA seq=1",
+			"  CodeBAB seq=2",
+			" CodeAA seq=2",
+			"  CodeAAA seq=1",
+			"  CodeAAB seq=2"
+		);
+
+	}
 
 	@Test
 	@Ignore
@@ -248,7 +270,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		// Create not-present
 		CodeSystem cs = new CodeSystem();
 		cs.setName("Description of my life");
-		cs.setUrl("http://foo");
+		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setVersion("1.2.3");
 		myCodeSystemDao.create(cs);
@@ -274,12 +296,11 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		concept.addProperty()
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
-//		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
 
-		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo", "lunch");
+		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo/cs", "lunch");
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
-		assertEquals("http://foo", result.getSearchedForSystem());
+		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
 		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
@@ -318,7 +339,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		// Create not-present
 		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
+		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemDao.create(cs);
 
@@ -333,32 +354,32 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			.setCode("codeAAA")
 			.setDisplay("displayAAA");
 		delta.addRootConcept("codeB", "displayB");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeB
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeB", "displayB");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeA
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA");
-		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 	}
 
@@ -369,13 +390,57 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("codeA", "displayA");
 		try {
-			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo", delta);
+			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), containsString("Unknown code system: http://foo"));
 		}
 
 	}
 
+
+	private void assertHierarchyContains(String... theStrings) {
+		List<String> hierarchy = runInTransaction(() -> {
+			List<String> hierarchyHolder = new ArrayList<>();
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
+			TermCodeSystemVersion csv = codeSystem.getCurrentVersion();
+			List<TermConcept> codes = myTermConceptDao.findByCodeSystemVersion(csv);
+			List<TermConcept> rootCodes = codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
+			flattenExpansionHierarchy(hierarchyHolder, rootCodes, "");
+			return hierarchyHolder;
+		});
+		if (theStrings.length == 0) {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+		} else {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+		}
+	}
+
+	private void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
+		theCodes.sort(Comparator.comparingInt(TermConcept::getSequence));
+		for (TermConcept nextCode : theCodes) {
+			String hierarchyEntry = thePrefix + nextCode.getCode() + " seq=" + nextCode.getSequence();
+			theFlattenedHierarchy.add(hierarchyEntry);
+
+			List<TermConcept> children = nextCode.getChildCodes();
+			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
+		}
+	}
+
+	private ValueSet expandNotPresentCodeSystem() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://foo/vs");
+		vs.getCompose().addInclude().setSystem("http://foo/cs");
+		vs = myValueSetDao.expand(vs, null);
+		ourLog.info(myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(vs));
+		return vs;
+	}
+
+	private void createNotPresentCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://foo/cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(cs);
+	}
 
 	@AfterClass
 	public static void afterClassClearContext() {

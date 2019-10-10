@@ -22,8 +22,8 @@ package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -48,12 +48,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
+	public static final String PARAM_FILE = "file";
+	public static final String PARAM_SYSTEM = "system";
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProvider.class);
-	private static final String PACKAGE = "package";
-	public static final String PARAM_FILE = "file";
-	public static final String PARAM_SYSTEM = "system";
+	private static final String RESP_PARAM_SUCCESS = "success";
 
 	@Autowired
 	private FhirContext myCtx;
@@ -75,79 +75,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 	}
 
-
-	/**
-	 * <code>
-	 * $apply-codesystem-delta-add
-	 * </code>
-	 */
-	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
-	})
-	public IBaseParameters applyCodeSystemDeltaAdd(
-		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
-		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
-		RequestDetails theRequestDetails
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
-			return toDeltaResponse(outcome);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
-
-	/**
-	 * <code>
-	 * $apply-codesystem-delta-remove
-	 * </code>
-	 */
-	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
-	})
-	public IBaseParameters applyCodeSystemDeltaRemove(
-		HttpServletRequest theServletRequest,
-		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
-		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
-		RequestDetails theRequestDetails
-	) {
-
-		startRequest(theServletRequest);
-		try {
-			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
-			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
-			return toDeltaResponse(outcome);
-		} finally {
-			endRequest(theServletRequest);
-		}
-
-	}
-
-	@Nonnull
-	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
-		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
-		for (ICompositeType next : theFiles) {
-			byte[] nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
-			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
-			ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
-			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
-
-			files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
-		}
-		return files;
-	}
-
-	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
-		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
-		ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
-		return retVal;
-	}
-
 	/**
 	 * <code>
 	 * $upload-external-codesystem
@@ -156,22 +83,21 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM, idempotent = false, returnParameters = {
 //		@OperationParam(name = "conceptCount", type = IntegerType.class, min = 1)
 	})
-	public IBaseParameters uploadExternalCodeSystem(
+	public IBaseParameters uploadSnapshot(
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = "url", min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
-		@OperationParam(name = "contentMode", min = 0, typeName = "code") IPrimitiveType<String> theContentMode,
 		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
-		@OperationParam(name = PACKAGE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> thePackage,
+		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 
 		if (theLocalFile == null || theLocalFile.size() == 0) {
-			if (thePackage == null || thePackage.size() == 0) {
+			if (theFiles == null || theFiles.size() == 0) {
 				throw new InvalidRequestException("No 'localfile' or 'package' parameter, or package had no data");
 			}
-			for (ICompositeType next : thePackage) {
+			for (ICompositeType next : theFiles) {
 				ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
 			}
 		}
@@ -205,8 +131,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 				}
 			}
 
-			if (thePackage != null) {
-				for (ICompositeType nextPackage : thePackage) {
+			if (theFiles != null) {
+				for (ICompositeType nextPackage : theFiles) {
 					final String url = AttachmentUtil.getOrCreateUrl(myCtx, nextPackage).getValueAsString();
 
 					if (isBlank(url)) {
@@ -231,28 +157,24 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			String codeSystemUrl = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			codeSystemUrl = defaultString(codeSystemUrl);
 
-			String contentMode = theContentMode != null ? theContentMode.getValue() : null;
 			UploadStatistics stats;
-			if ("custom".equals(contentMode)) {
-				stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
-			} else {
-				switch (codeSystemUrl) {
-					case ITermLoaderSvc.SCT_URI:
-						stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
-						break;
-					case ITermLoaderSvc.LOINC_URI:
-						stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
-						break;
-					case ITermLoaderSvc.IMGTHLA_URI:
-						stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
-						break;
-					default:
-						throw new InvalidRequestException("Unknown URL: " + codeSystemUrl);
-				}
+			switch (codeSystemUrl) {
+				case ITermLoaderSvc.SCT_URI:
+					stats = myTerminologyLoaderSvc.loadSnomedCt(localFiles, theRequestDetails);
+					break;
+				case ITermLoaderSvc.LOINC_URI:
+					stats = myTerminologyLoaderSvc.loadLoinc(localFiles, theRequestDetails);
+					break;
+				case ITermLoaderSvc.IMGTHLA_URI:
+					stats = myTerminologyLoaderSvc.loadImgthla(localFiles, theRequestDetails);
+					break;
+				default:
+					stats = myTerminologyLoaderSvc.loadCustom(codeSystemUrl, localFiles, theRequestDetails);
+					break;
 			}
 
 			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, "success", true);
+			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, RESP_PARAM_SUCCESS, true);
 			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
 			ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
 
@@ -260,6 +182,101 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		} finally {
 			endRequest(theServletRequest);
 		}
+	}
+
+	/**
+	 * <code>
+	 * $apply-codesystem-delta-add
+	 * </code>
+	 */
+	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD, idempotent = false, returnParameters = {
+	})
+	public IBaseParameters uploadDeltaAdd(
+		HttpServletRequest theServletRequest,
+		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
+		RequestDetails theRequestDetails
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			validateHaveSystem(theSystem);
+			validateHaveFiles(theFiles);
+
+			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
+			return toDeltaResponse(outcome);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
+	}
+
+
+	/**
+	 * <code>
+	 * $apply-codesystem-delta-remove
+	 * </code>
+	 */
+	@Operation(typeName = "CodeSystem", name = JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE, idempotent = false, returnParameters = {
+	})
+	public IBaseParameters uploadDeltaRemove(
+		HttpServletRequest theServletRequest,
+		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
+		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
+		RequestDetails theRequestDetails
+	) {
+
+		startRequest(theServletRequest);
+		try {
+			validateHaveSystem(theSystem);
+			validateHaveFiles(theFiles);
+
+			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
+			return toDeltaResponse(outcome);
+		} finally {
+			endRequest(theServletRequest);
+		}
+
+	}
+
+	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
+		if (theSystem == null || isBlank(theSystem.getValueAsString())) {
+			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
+		}
+	}
+
+	private void validateHaveFiles(List<ICompositeType> theFiles) {
+		if (theFiles != null) {
+			for (ICompositeType nextFile : theFiles) {
+				if (!nextFile.isEmpty()) {
+					return;
+				}
+			}
+		}
+		throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_FILE);
+	}
+
+	@Nonnull
+	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
+		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
+		for (ICompositeType next : theFiles) {
+			byte[] nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
+			ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
+			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
+
+			files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
+		}
+		return files;
+	}
+
+	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
+		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
+		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
+		ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
+		return retVal;
 	}
 
 

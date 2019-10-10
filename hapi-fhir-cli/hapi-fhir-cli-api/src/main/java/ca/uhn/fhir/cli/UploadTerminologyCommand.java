@@ -66,7 +66,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 		addBaseUrlOption(options);
 		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
 		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
-		addOptionalOption(options, null, "custom", false, "Indicates that this upload uses the HAPI FHIR custom external terminology format");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
 		addBasicAuthOption(options);
 		addVerboseLoggingOption(options);
@@ -105,19 +104,19 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		switch (mode) {
 			case SNAPSHOT:
-				uploadSnapshot(inputParameters, termUrl, datafile, theCommandLine, client);
+				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
 				break;
 			case ADD:
-				uploadDelta(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
 				break;
 			case REMOVE:
-				uploadDelta(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 				break;
 		}
 
 	}
 
-	private void uploadDelta(CommandLine theCommandLine, String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
+	private void invokeOperation(CommandLine theCommandLine, String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ourLog.info("Compressing data files...");
@@ -165,28 +164,6 @@ public class UploadTerminologyCommand extends BaseCommand {
 			retVal = retVal.substring(retVal.lastIndexOf("/"));
 		}
 		return retVal;
-	}
-
-	private void uploadSnapshot(IBaseParameters theInputParameters, String theTermUrl, String[] theDatafile, CommandLine theCommandLine, IGenericClient theClient) {
-		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, "url", theTermUrl);
-		for (String next : theDatafile) {
-			ParametersUtil.addParameterToParametersString(myFhirCtx, theInputParameters, "localfile", next);
-		}
-		if (theCommandLine.hasOption("custom")) {
-			ParametersUtil.addParameterToParametersCode(myFhirCtx, theInputParameters, "contentMode", "custom");
-		}
-
-		ourLog.info("Beginning upload - This may take a while...");
-
-		IBaseParameters response = theClient
-			.operation()
-			.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
-			.named(JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM)
-			.withParameters(theInputParameters)
-			.execute();
-
-		ourLog.info("Upload complete!");
-		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 	private enum ModeEnum {

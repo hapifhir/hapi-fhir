@@ -23,8 +23,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
@@ -100,7 +99,6 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testUploadMissingPackage() {
-		//@formatter:off
 		try {
 			ourClient
 				.operation()
@@ -193,7 +191,8 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.operation()
 			.onType(CodeSystem.class)
 			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
-			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
 			.prettyPrint()
 			.execute();
@@ -201,8 +200,59 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 5"));
-		assertThat(encoded, containsString("AAAAA"));
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 5",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+	}
+
+	@Test
+	public void testApplyDeltaAdd_MissingSystem() throws IOException {
+		String conceptsCsv = loadResource("/custom_term/concepts.csv");
+		Attachment conceptsAttachment = new Attachment()
+			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
+			.setContentType("text/csv")
+			.setUrl("file:/foo/concepts.csv");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+
+		try {
+			ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
+				.prettyPrint()
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("AAAA"));
+		}
+		ourClient.unregisterInterceptor(interceptor);
+
+	}
+
+	@Test
+	public void testApplyDeltaAdd_MissingFile() {
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+
+		try {
+			ourClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+				.prettyPrint()
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("AAAA"));
+		}
+		ourClient.unregisterInterceptor(interceptor);
 	}
 
 	@Test
@@ -232,7 +282,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, containsString("\"valueInteger\": 5"));
+		assertThat(encoded, containsString("\"valueInteger\": 100"));
 		assertThat(encoded, containsString("AAAAA"));
 	}
 
