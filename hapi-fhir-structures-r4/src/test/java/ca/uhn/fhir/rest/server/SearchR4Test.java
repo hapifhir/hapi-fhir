@@ -384,7 +384,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
 		}
 	}
 
@@ -406,7 +406,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
 		}
 	}
 
