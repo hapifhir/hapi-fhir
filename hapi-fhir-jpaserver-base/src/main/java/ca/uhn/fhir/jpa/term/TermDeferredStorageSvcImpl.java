@@ -150,7 +150,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 	 * This method is present only for unit tests, do not call from client code
 	 */
 	@VisibleForTesting
-	public void clearDeferred() {
+	public synchronized void clearDeferred() {
 		myDeferredValueSets.clear();
 		myDeferredConceptMaps.clear();
 		myDeferredConcepts.clear();

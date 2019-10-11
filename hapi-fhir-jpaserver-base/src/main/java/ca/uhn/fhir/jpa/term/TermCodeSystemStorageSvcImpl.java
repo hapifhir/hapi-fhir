@@ -210,6 +210,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Transactional
 	@Override
 	public UploadStatistics applyDeltaCodeSystemsRemove(String theSystem, CustomTerminologySet theValue) {
+		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystem, "No system provided");
 		validateDstu3OrNewer();
 
 		TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(theSystem);

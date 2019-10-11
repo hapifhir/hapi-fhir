@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.base.Charsets;
@@ -119,16 +120,36 @@ public class UploadTerminologyCommand extends BaseCommand {
 	private void invokeOperation(CommandLine theCommandLine, String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
-		ourLog.info("Compressing data files...");
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
+		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
-				ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
-				zipOutputStream.putNextEntry(nextEntry);
 
-				FileInputStream fileInputStream = new FileInputStream(nextDataFile);
-				IOUtils.copy(fileInputStream, zipOutputStream);
+				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
+					if (!nextDataFile.endsWith(".zip")) {
+
+						ourLog.info("Compressing and adding file: {}", nextDataFile);
+						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
+						zipOutputStream.putNextEntry(nextEntry);
+
+						IOUtils.copy(fileInputStream, zipOutputStream);
+						haveCompressedContents = true;
+
+						zipOutputStream.flush();
+						ourLog.info("Finished compressing {} into {}", nextEntry.getSize(), nextEntry.getCompressedSize());
+
+					} else {
+
+						ourLog.info("Adding file: {}", nextDataFile);
+						ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
+						AttachmentUtil.setUrl(myFhirCtx, attachment, "file:" + nextDataFile);
+						AttachmentUtil.setData(myFhirCtx, attachment, IOUtils.toByteArray(fileInputStream));
+						ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+
+					}
+				}
+
 			}
 			zipOutputStream.flush();
 			zipOutputStream.close();
@@ -136,38 +157,49 @@ public class UploadTerminologyCommand extends BaseCommand {
 			throw new ParseException(e.toString());
 		}
 
-		ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
-		AttachmentUtil.setUrl(myFhirCtx, attachment, "file:/files.zip");
-		AttachmentUtil.setData(myFhirCtx, attachment, byteArrayOutputStream.toByteArray());
-		ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
-
-		if (theCommandLine.hasOption("custom")) {
-			ParametersUtil.addParameterToParametersCode(myFhirCtx, theInputParameters, "contentMode", "custom");
+		if (haveCompressedContents) {
+			ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
+			AttachmentUtil.setUrl(myFhirCtx, attachment, "file:/files.zip");
+			AttachmentUtil.setData(myFhirCtx, attachment, byteArrayOutputStream.toByteArray());
+			ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
 
-		IBaseParameters response = theClient
-			.operation()
-			.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
-			.named(theOperationName)
-			.withParameters(theInputParameters)
-			.execute();
+		if (ourLog.isDebugEnabled() || "true".equals(System.getProperty("test"))) {
+		ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theInputParameters));
+		}
+
+		IBaseParameters response;
+		try {
+			response = theClient
+				.operation()
+				.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
+				.named(theOperationName)
+				.withParameters(theInputParameters)
+				.execute();
+		} catch (BaseServerResponseException e) {
+			if (e.getOperationOutcome() != null) {
+				ourLog.error("Received the following response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			}
+			throw e;
+		}
+
 
 		ourLog.info("Upload complete!");
 		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
-	private String stripPath(String thePath) {
+	private enum ModeEnum {
+		SNAPSHOT, ADD, REMOVE
+	}
+
+	public static String stripPath(String thePath) {
 		String retVal = thePath;
 		if (retVal.contains("/")) {
 			retVal = retVal.substring(retVal.lastIndexOf("/"));
 		}
 		return retVal;
-	}
-
-	private enum ModeEnum {
-		SNAPSHOT, ADD, REMOVE
 	}
 
 }

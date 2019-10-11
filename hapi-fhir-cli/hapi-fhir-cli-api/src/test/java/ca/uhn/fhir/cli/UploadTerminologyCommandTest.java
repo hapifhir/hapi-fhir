@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Server;
@@ -24,12 +25,13 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -55,6 +57,8 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	private String myHierarchyFileName = "target/hierarchy.csv";
 	private File myConceptsFile = new File(myConceptsFileName);
 	private File myHierarchyFile = new File(myHierarchyFileName);
+	private File myArchiveFile;
+	private String myArchiveFileName;
 
 	@Test
 	public void testAddDelta() throws IOException {
@@ -79,6 +83,56 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertEquals(1, listOfDescriptors.size());
 		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	@Test
+	public void testAddDeltaUsingCompressedFile() throws IOException {
+
+		writeConceptAndHierarchyFiles();
+		writeArchiveFile(myConceptsFile, myHierarchyFile);
+
+		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+		App.main(new String[]{
+			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+			"-v", "r4",
+			"-m", "ADD",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", myArchiveFileName
+		});
+
+		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
+
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern("^file:.*temp.*\\.zip$"));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	private void writeArchiveFile(File... theFiles) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
+
+		for (File next : theFiles) {
+			ZipEntry nextEntry = new ZipEntry(UploadTerminologyCommand.stripPath(next.getAbsolutePath()));
+			zipOutputStream.putNextEntry(nextEntry);
+
+			try (FileInputStream fileInputStream = new FileInputStream(next)) {
+				IOUtils.copy(fileInputStream, zipOutputStream);
+			}
+
+		}
+
+		zipOutputStream.flush();
+		zipOutputStream.close();
+
+		myArchiveFile = File.createTempFile("temp", ".zip");
+		myArchiveFile.deleteOnExit();
+		myArchiveFileName = myArchiveFile.getAbsolutePath();
+		try (FileOutputStream fos = new FileOutputStream(myArchiveFile, false)) {
+			fos.write(byteArrayOutputStream.toByteArray());
+		}
 	}
 
 	@Test
@@ -174,6 +228,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 
 		FileUtils.deleteQuietly(myConceptsFile);
 		FileUtils.deleteQuietly(myHierarchyFile);
+		FileUtils.deleteQuietly(myArchiveFile);
 	}
 
 	@Before

@@ -50,7 +50,7 @@ import java.util.Optional;
 public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 	/*
 	 * Be careful increasing this number! We use the number of params here in a
-	 * DELETE FROM foo WHERE params IN (aaaa)
+	 * DELETE FROM foo WHERE params IN (term,term,term...)
 	 * type query and this can fail if we have 1000s of params
 	 */
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;

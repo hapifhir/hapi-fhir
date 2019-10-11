@@ -20,9 +20,8 @@ package ca.uhn.fhir.util;
  * #L%
  */
 
-import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
-import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
-import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.*;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -64,7 +63,11 @@ public class AttachmentUtil {
 
 	public static void setUrl(FhirContext theContext, ICompositeType theAttachment, String theUrl) {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "url");
-		entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, "url", theUrl));
+		String typeName = "uri";
+		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			typeName = "url";
+		}
+		entryChild.getMutator().setValue(theAttachment, newPrimitive(theContext, typeName, theUrl));
 	}
 
 	public static void setContentType(FhirContext theContext, ICompositeType theAttachment, String theContentType) {
@@ -91,7 +94,9 @@ public class AttachmentUtil {
 	 */
 	@SuppressWarnings("unchecked")
 	static <T> IPrimitiveType<T> newPrimitive(FhirContext theContext, String theType, T theValue) {
-		IPrimitiveType<T> primitive = (IPrimitiveType<T>) theContext.getElementDefinition(theType).newInstance();
+		BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(theType);
+		Validate.notNull(elementDefinition, "Unknown type %s for %s", theType, theContext);
+		IPrimitiveType<T> primitive = (IPrimitiveType<T>) elementDefinition.newInstance();
 		primitive.setValue(theValue);
 		return primitive;
 	}
