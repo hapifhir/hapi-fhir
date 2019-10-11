@@ -23,9 +23,16 @@ jobs:
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES,JACOCO -nsu'
+          options: '-P ALLMODULES -nsu'
           # These are JVM options (and don't show up in the build logs)
-          mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto -Dtest=TerminologySvcDeltaR4Test'
+          mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto -Dmaven.test.skip'
+      - task: Maven@3
+        inputs:
+           goals: 'clean install'
+           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
+           options: '-P ALLMODULES,JACOCO -nsu -rf :hapi-fhir-jpaserver-base'
+           # These are JVM options (and don't show up in the build logs)
+           mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto -Dtest=TerminologySvcDeltaR4Test'
 #      - script: bash <(curl https://codecov.io/bash) -t $(CODECOV_TOKEN)
 #        displayName: 'codecov'
       - task: PublishCodeCoverageResults@1
