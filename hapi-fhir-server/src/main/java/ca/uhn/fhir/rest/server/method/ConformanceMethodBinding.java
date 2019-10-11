@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.rest.api.CacheControlDirective;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -77,14 +79,20 @@ public class ConformanceMethodBinding extends BaseResourceReturningMethodBinding
 	public IBundleProvider invokeServer(IRestfulServer<?> theServer, RequestDetails theRequest, Object[] theMethodParams) throws BaseServerResponseException {
 		IBaseResource conf;
 
-		conf = myCachedResponse.get();
-		if ("true".equals(System.getProperty("test"))) {
+		CacheControlDirective cacheControlDirective = new CacheControlDirective().parse(theRequest.getHeaders(Constants.HEADER_CACHE_CONTROL));
+
+		if (cacheControlDirective.isNoCache())
 			conf = null;
-		}
-		if (conf != null) {
-			long expires = myCachedResponseExpires.get();
-			if (expires < System.currentTimeMillis()) {
+		else {
+			conf = myCachedResponse.get();
+			if ("true".equals(System.getProperty("test"))) {
 				conf = null;
+			}
+			if (conf != null) {
+				long expires = myCachedResponseExpires.get();
+				if (expires < System.currentTimeMillis()) {
+					conf = null;
+				}
 			}
 		}
 		if (conf != null) {
