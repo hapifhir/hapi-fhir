@@ -36,8 +36,11 @@ public class ServerOperations {
 	public void manualInputAndOutput(HttpServletRequest theServletRequest, HttpServletResponse theServletResponse) throws IOException {
 		String contentType = theServletRequest.getContentType();
 		byte[] bytes = IOUtils.toByteArray(theServletRequest.getInputStream());
-
 		ourLog.info("Received call with content type {} and {} bytes", contentType, bytes.length);
+
+		// In a real example we might do something more interesting with the received bytes,
+		// here we'll just replace them with hardcoded ones
+		bytes = new byte[] { 0, 1, 2, 3 };
 
 		theServletResponse.setContentType(contentType);
 		theServletResponse.getOutputStream().write(bytes);

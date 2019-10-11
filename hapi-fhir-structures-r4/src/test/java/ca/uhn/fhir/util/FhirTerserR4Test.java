@@ -3,12 +3,10 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.hamcrest.Matchers;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.junit.AfterClass;
@@ -20,9 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -990,6 +986,44 @@ public class FhirTerserR4Test {
 	}
 
 	@Test
+	public void testVisitWithCustomSubclass() {
+
+		ValueSet.ValueSetExpansionComponent component = new MyValueSetExpansionComponent();
+		ValueSet vs = new ValueSet();
+		vs.setExpansion(component);
+		vs.getExpansion().setIdentifier("http://foo");
+
+		Set<String> strings = new HashSet<>();
+		ourCtx.newTerser().visit(vs, new IModelVisitor() {
+			@Override
+			public void acceptElement(IBaseResource theResource, IBase theElement, List<String> thePathToElement, BaseRuntimeChildDefinition theChildDefinition, BaseRuntimeElementDefinition<?> theDefinition) {
+				if (theElement instanceof IPrimitiveType) {
+					strings.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+			}
+		});
+		assertThat(strings, Matchers.contains("http://foo"));
+
+		strings.clear();
+		ourCtx.newTerser().visit(vs, new IModelVisitor2() {
+			@Override
+			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				if (theElement instanceof IPrimitiveType) {
+					strings.add(((IPrimitiveType) theElement).getValueAsString());
+				}
+				return true;
+			}
+
+			@Override
+			public boolean acceptUndeclaredExtension(IBaseExtension<?, ?> theNextExt, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
+				return true;
+			}
+		});
+		assertThat(strings, Matchers.contains("http://foo"));
+	}
+
+
+	@Test
 	public void testVisitWithModelVisitor2() {
 		IModelVisitor2 visitor = mock(IModelVisitor2.class);
 
@@ -1015,6 +1049,97 @@ public class FhirTerserR4Test {
 
 	}
 
+	@Test
+	public void testGetAllPopulatedChildElementsOfType() {
+
+		Patient p = new Patient();
+		p.setGender(Enumerations.AdministrativeGender.MALE);
+		p.addIdentifier().setSystem("urn:foo");
+		p.addAddress().addLine("Line1");
+		p.addAddress().addLine("Line2");
+		p.addName().setFamily("Line3");
+
+		FhirTerser t = ourCtx.newTerser();
+		List<StringType> strings = t.getAllPopulatedChildElementsOfType(p, StringType.class);
+
+		assertEquals(3, strings.size());
+
+		Set<String> allStrings = new HashSet<>();
+		for (StringType next : strings) {
+			allStrings.add(next.getValue());
+		}
+
+		assertThat(allStrings, containsInAnyOrder("Line1", "Line2", "Line3"));
+
+	}
+
+	@Test
+	public void testMultiValueTypes() {
+
+		Observation obs = new Observation();
+		obs.setValue(new Quantity(123L));
+
+		FhirTerser t = ourCtx.newTerser();
+
+		// As string
+		{
+			List<Object> values = t.getValues(obs, "Observation.valueString");
+			assertEquals(0, values.size());
+		}
+
+		// As quantity
+		{
+			List<Object> values = t.getValues(obs, "Observation.valueQuantity");
+			assertEquals(1, values.size());
+			Quantity actual = (Quantity) values.get(0);
+			assertEquals("123", actual.getValueElement().getValueAsString());
+		}
+	}
+
+	@Test
+	public void testTerser() {
+
+		//@formatter:off
+		String msg = "<Observation xmlns=\"http://hl7.org/fhir\">\n" +
+			"    <text>\n" +
+			"        <status value=\"empty\"/>\n" +
+			"        <div xmlns=\"http://www.w3.org/1999/xhtml\"/>\n" +
+			"    </text>\n" +
+			"    <!-- The test code  - may not be correct -->\n" +
+			"    <name>\n" +
+			"        <coding>\n" +
+			"            <system value=\"http://loinc.org\"/>\n" +
+			"            <code value=\"43151-0\"/>\n" +
+			"            <display value=\"Glucose Meter Device Panel\"/>\n" +
+			"        </coding>\n" +
+			"    </name>\n" +
+			"    <valueQuantity>\n" +
+			"        <value value=\"7.7\"/>\n" +
+			"        <units value=\"mmol/L\"/>\n" +
+			"        <system value=\"http://unitsofmeasure.org\"/>\n" +
+			"    </valueQuantity>\n" +
+			"    <appliesDateTime value=\"2014-05-28T22:12:21Z\"/>\n" +
+			"    <status value=\"final\"/>\n" +
+			"    <reliability value=\"ok\"/>\n" +
+			"    <subject>\n" +
+			"        <reference value=\"cid:patient@bundle\"/>\n" +
+			"    </subject>\n" +
+			"    <performer>\n" +
+			"        <reference value=\"cid:device@bundle\"></reference>\n" +
+			"    </performer>\n" +
+			"</Observation>";
+		//@formatter:on
+
+		Observation parsed = ourCtx.newXmlParser().parseResource(Observation.class, msg);
+		FhirTerser t = ourCtx.newTerser();
+
+		List<Reference> elems = t.getAllPopulatedChildElementsOfType(parsed, Reference.class);
+		assertEquals(2, elems.size());
+		assertEquals("cid:patient@bundle", elems.get(0).getReferenceElement().getValue());
+		assertEquals("cid:device@bundle", elems.get(1).getReferenceElement().getValue());
+	}
+
+
 	private List<String> toStrings(List<StringType> theStrings) {
 		ArrayList<String> retVal = new ArrayList<String>();
 		for (StringType next : theStrings) {
@@ -1036,6 +1161,11 @@ public class FhirTerserR4Test {
 			}
 			return (Class<T>) type;
 		}
+	}
+
+	@Block
+	public static class MyValueSetExpansionComponent extends ValueSet.ValueSetExpansionComponent {
+		private static final long serialVersionUID = 2624360513249904086L;
 	}
 
 	@AfterClass

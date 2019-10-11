@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public interface IHapiTerminologySvc {
 
-	void deleteCodeSystem(TermCodeSystem thePersCs);
+	void deleteCodeSystem(TermCodeSystem theCodeSystem);
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
@@ -62,8 +62,6 @@ public interface IHapiTerminologySvc {
 
 	Optional<TermConcept> findCode(String theCodeSystem, String theCode);
 
-	List<TermConcept> findCodes(String theSystem);
-
 	Set<TermConcept> findCodesAbove(Long theCodeSystemResourcePid, Long theCodeSystemResourceVersionPid, String theCode);
 
 	List<VersionIndependentConcept> findCodesAbove(String theSystem, String theCode);
@@ -84,7 +82,7 @@ public interface IHapiTerminologySvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion);
+	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
 
 	/**
 	 * @return Returns the ID of the created/updated code system

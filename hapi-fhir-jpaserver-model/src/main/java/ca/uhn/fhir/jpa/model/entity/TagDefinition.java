@@ -30,12 +30,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 
-//@formatter:on
 @Entity
 @Table(name = "HFJ_TAG_DEF", uniqueConstraints = {
 		@UniqueConstraint(name = "IDX_TAGDEF_TYPESYSCODE", columnNames = { "TAG_TYPE", "TAG_SYSTEM", "TAG_CODE" })
 })
-//@formatter:off
 public class TagDefinition implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -117,24 +115,18 @@ public class TagDefinition implements Serializable {
 		myHashCode = null;
 	}
 
-	public Tag toTag() {
-		return new Tag(getSystem(), getCode(), getDisplay());
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
 		if (!(obj instanceof TagDefinition)) {
 			return false;
 		}
 		TagDefinition other = (TagDefinition) obj;
+
 		EqualsBuilder b = new EqualsBuilder();
-		
+
 		if (myId != null && other.myId != null) {
 			b.append(myId, other.myId);
 		} else {
@@ -142,7 +134,7 @@ public class TagDefinition implements Serializable {
 			b.append(mySystem, other.mySystem);
 			b.append(myCode, other.myCode);
 		}
-		
+
 		return b.isEquals();
 	}
 	

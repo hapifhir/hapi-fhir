@@ -1021,6 +1021,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 			return Utilities.appendSlash(base) + type + "/" + id;
 	}  
 
+	@Override
 	public BestPracticeWarningLevel getBasePracticeWarningLevel() {
 		return bpWarnings;
 	}  
@@ -1416,6 +1417,7 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		this.anyExtensionsAllowed = anyExtensionsAllowed;
 	}
 
+	@Override
 	public void setBestPracticeWarningLevel(BestPracticeWarningLevel value) {
 		bpWarnings = value;
 	}
@@ -1429,10 +1431,12 @@ public class InstanceValidator extends BaseValidator implements IResourceValidat
 		this.suppressLoincSnomedMessages = suppressLoincSnomedMessages;
 	}
 
+	@Override
 	public IdStatus getResourceIdRule() {
 		return resourceIdRule;
 	}
 
+	@Override
 	public void setResourceIdRule(IdStatus resourceIdRule) {
 		this.resourceIdRule = resourceIdRule;
 	}

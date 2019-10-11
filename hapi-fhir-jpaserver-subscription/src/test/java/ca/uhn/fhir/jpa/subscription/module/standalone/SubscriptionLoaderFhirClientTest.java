@@ -10,7 +10,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscribableChannelDstu3Test {
-    
+
 	@Test
 	public void testSubscriptionLoaderFhirClient() throws InterruptedException {
 		String payload = "application/fhir+json";
@@ -22,13 +22,13 @@ public class SubscriptionLoaderFhirClientTest extends BaseBlockingQueueSubscriba
 		subs.add(makeActiveSubscription(criteria1, payload, ourListenerServerBase));
 		subs.add(makeActiveSubscription(criteria2, payload, ourListenerServerBase));
 
-        mySubscriptionActivatedPost.setExpectedCount(2);
+		mySubscriptionActivatedPost.setExpectedCount(2);
 		initSubscriptionLoader(subs, "uuid");
-        mySubscriptionActivatedPost.awaitExpected();
+		mySubscriptionActivatedPost.awaitExpected();
 
-        ourObservationListener.setExpectedCount(1);
+		ourObservationListener.setExpectedCount(1);
 		sendObservation(myCode, "SNOMED-CT");
-        ourObservationListener.awaitExpected();
+		ourObservationListener.awaitExpected();
 
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);

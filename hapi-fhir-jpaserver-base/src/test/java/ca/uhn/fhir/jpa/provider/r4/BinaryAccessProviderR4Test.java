@@ -3,10 +3,12 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -40,6 +42,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private MemoryBinaryStorageSvcImpl myStorageSvc;
+	@Autowired
+	private IBinaryStorageSvc myBinaryStorageSvc;
 
 	@Override
 	@Before
@@ -164,14 +168,38 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	public void testReadUnknownBlobId() throws IOException {
 		IIdType id = createDocumentReference(false);
 
-		DocumentReference dr = ourClient.read().resource(DocumentReference.class).withId(id).execute();
-		dr.getContentFirstRep()
-			.getAttachment()
-			.getDataElement()
-			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("AAAAA"));
-		ourClient.update().resource(dr).execute();
+		// Write a binary using the operation
 
 		String path = ourServerBase +
+			"/DocumentReference/" + id.getIdPart() + "/" +
+			JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
+			"?path=DocumentReference.content.attachment";
+		HttpPost post = new HttpPost(path);
+		post.setEntity(new ByteArrayEntity(SOME_BYTES, ContentType.IMAGE_JPEG));
+		post.addHeader("Accept", "application/fhir+json; _pretty=true");
+		String attachmentId;
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getEntity().getContentType().getValue(), containsString("application/fhir+json"));
+			String response = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
+			ourLog.info("Response: {}", response);
+
+			DocumentReference ref = myFhirCtx.newJsonParser().parseResource(DocumentReference.class, response);
+
+			Attachment attachment = ref.getContentFirstRep().getAttachment();
+			assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
+			assertEquals(15, attachment.getSize());
+			assertEquals(null, attachment.getData());
+			assertEquals("2", ref.getMeta().getVersionId());
+			attachmentId = attachment.getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			assertThat(attachmentId, matchesPattern("[a-zA-Z0-9]{100}"));
+		}
+
+
+		myBinaryStorageSvc.expungeBlob(id, attachmentId);
+
+		path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ +
 			"?path=DocumentReference.content.attachment";
@@ -198,7 +226,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, interceptor);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
 
-		// Read it back using the operation
+		// Write the binary using the operation
 
 		String path = ourServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
@@ -248,6 +276,26 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			assertArrayEquals(SOME_BYTES, actualBytes);
 		}
 
+	}
+
+	/**
+	 * Stores a binary large enough that it should live in binary storage
+	 */
+	@Test
+	public void testDontAllowUpdateWithAttachmentId() {
+
+		DocumentReference dr = new DocumentReference();
+		dr.addContent()
+			.getAttachment()
+			.getDataElement()
+			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("XUcR1qL9p4i8Ck6L2RzVbSpHv1ZPHYuBSd50LR39nzhDDR4N4efJ7Q0ywZLyzcLeLIPi60UvCCNmdZBlbyvT1KfNaDeHV1zBHbDp") );
+
+		try {
+			ourClient.create().resource(dr).execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			assertThat(e.getMessage(), containsString("Illegal extension found in request payload: http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id"));
+		}
 	}
 
 	/**
@@ -301,7 +349,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLargeBinary() throws IOException {
+	public void testWriteLargeBinaryUsingOperation() throws IOException {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 

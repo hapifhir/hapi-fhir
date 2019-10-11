@@ -53,8 +53,12 @@ public class TermCodeSystemVersion implements Serializable {
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, updatable = false, foreignKey = @ForeignKey(name = "FK_CODESYSVER_RES_ID"))
 	private ResourceTable myResource;
 
+	@Column(name = "RES_ID", nullable = false, insertable = false, updatable = false)
+	private Long myResourcePid;
+
 	@Column(name = "CS_VERSION_ID", nullable = true, updatable = false, length = MAX_VERSION_LENGTH)
 	private String myCodeSystemVersionId;
+
 	/**
 	 * This was added in HAPI FHIR 3.3.0 and is nullable just to avoid migration
 	 * issued. It should be made non-nullable at some point.
@@ -62,8 +66,11 @@ public class TermCodeSystemVersion implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "CODESYSTEM_PID", referencedColumnName = "PID", nullable = true, foreignKey = @ForeignKey(name = "FK_CODESYSVER_CS_ID"))
 	private TermCodeSystem myCodeSystem;
-	@SuppressWarnings("unused")
 
+	@Column(name = "CODESYSTEM_PID", insertable = false, updatable = false)
+	private Long myCodeSystemPid;
+
+	@SuppressWarnings("unused")
 	@OneToOne(mappedBy = "myCurrentVersion", optional = true)
 	private TermCodeSystem myCodeSystemHavingThisVersionAsCurrentVersionIfAny;
 
@@ -165,5 +172,12 @@ public class TermCodeSystemVersion implements Serializable {
 			theCodeSystemDisplayName, MAX_VERSION_LENGTH,
 			"Version ID exceeds maximum length (" + MAX_VERSION_LENGTH + "): " + length(theCodeSystemDisplayName));
 		myCodeSystemDisplayName = theCodeSystemDisplayName;
+	}
+
+	public TermConcept addConcept() {
+		TermConcept concept = new TermConcept();
+		concept.setCodeSystemVersion(this);
+		getConcepts().add(concept);
+		return concept;
 	}
 }

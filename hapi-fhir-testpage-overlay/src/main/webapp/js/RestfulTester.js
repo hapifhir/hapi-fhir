@@ -331,8 +331,8 @@ function addSearchControlDate(theSearchParamName, theContainerRowNum, theRowNum,
 		)
 	);
     input.datetimepicker({
-    	pickTime: false,
-    	showToday: true
+    	format: "YYYY-MM-DD",
+    	showTodayButton: true
     });
     // Set up the qualifier dropdown after we've initialized the datepicker, since it
     // overrides all addon buttons while it inits..
@@ -547,4 +547,4 @@ $( document ).ready(function() {
 	if (conformance) {
 		addSearchParamRow();
 	}
-});	
+});

@@ -143,6 +143,19 @@ public class FhirPathEngineR4Test {
 		assertEquals(true, ((BooleanType)result.get(0)).booleanValue());
 	}
 
+	@Test
+	public void testQuestionnaireResponseExpression() {
+
+		QuestionnaireResponse qr = new QuestionnaireResponse();
+		QuestionnaireResponse.QuestionnaireResponseItemComponent parent = qr.addItem().setLinkId("PARENT");
+		QuestionnaireResponse.QuestionnaireResponseItemComponent child = parent.addItem().setLinkId("CHILD");
+		child.addAnswer().setValue(new DateTimeType("2019-01-01"));
+
+		List<Base> answer = ourEngine.evaluate(qr, "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(DateTime)");
+		assertEquals("2019-01-01", ((DateTimeType)answer.get(0)).getValueAsString());
+
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() throws Exception {

@@ -78,23 +78,8 @@ public class ForcedId {
 		myForcedId = theForcedId;
 	}
 
-	public ResourceTable getResource() {
-		return myResource;
-	}
-
 	public void setResource(ResourceTable theResource) {
 		myResource = theResource;
-	}
-
-	public Long getResourcePid() {
-		if (myResourcePid == null) {
-			return myResource.getId();
-		}
-		return myResourcePid;
-	}
-
-	public void setResourcePid(ResourceTable theResourcePid) {
-		myResource = theResourcePid;
 	}
 
 	public String getResourceType() {
@@ -103,10 +88,6 @@ public class ForcedId {
 
 	public void setResourceType(String theResourceType) {
 		myResourceType = theResourceType;
-	}
-
-	public void setResourcePid(Long theResourcePid) {
-		myResourcePid = theResourcePid;
 	}
 
 }

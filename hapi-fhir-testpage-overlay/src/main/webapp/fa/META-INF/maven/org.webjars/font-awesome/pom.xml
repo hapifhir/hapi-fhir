@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
+
+    <packaging>jar</packaging>
+    <groupId>org.webjars</groupId>
+    <artifactId>font-awesome</artifactId>
+    <version>5.8.2</version>
+    <name>Font Awesome</name>
+    <description>WebJar for Font Awesome</description>
+    <url>http://webjars.org</url>
+
+    <licenses>
+        <license>
+            <name>CC BY 3.0</name>
+            <url>http://creativecommons.org/licenses/by/3.0/</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>http://github.com/webjars/font-awesome</url>
+        <connection>scm:git:https://github.com/webjars/font-awesome.git</connection>
+        <developerConnection>scm:git:https://github.com/webjars/font-awesome.git</developerConnection>
+        <tag>font-awesome-5.8.2</tag>
+    </scm>
+
+    <developers>
+        <developer>
+            <id>jamesward</id>
+            <name>James Ward</name>
+            <email>james@jamesward.org</email>
+        </developer>
+    </developers>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sourceUrl>https://use.fontawesome.com/releases/v${version.unrevise}</sourceUrl>
+        <archiveName>fontawesome-free-${version.unrevise}-web</archiveName>
+        <archiveFile>${archiveName}.zip</archiveFile>
+        <destDir>${project.build.outputDirectory}/META-INF/resources/webjars/${project.artifactId}/${project.version}</destDir>
+        <requirejs>
+            {
+                "paths": {
+                    "font-awesome-jsf": "css/font-awesome-jsf",
+                    "font-awesome-jsf-min": "css/font-awesome.min-jsf",
+                    "font-awesome": "css/font-awesome",
+                    "font-awesome-min": "css/font-awesome.min",
+                    "FontAwesome-otf": "fonts/FontAwesome",
+                    "fontawesome-webfont-eot": "fonts/fontawesome-webfont",
+                    "fontawesome-webfont-svg": "fonts/fontawesome-webfont",
+                    "fontawesome-webfont-ttf": "fonts/fontawesome-webfont",
+                    "fontawesome-webfont-woff": "fonts/fontawesome-webfont",
+                    "fontawesome-webfont-woff2": "fonts/fontawesome-webfont"
+                }
+            }
+        </requirejs>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.jamesward</groupId>
+                <artifactId>unsnapshot-maven-plugin</artifactId>
+                <version>0.2</version>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unsnapshot</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0-beta-4</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals><goal>download-single</goal></goals>
+                        <configuration>
+                            <url>${sourceUrl}</url>
+                            <fromFile>${archiveFile}</fromFile>
+                            <toDir>${project.build.directory}</toDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals><goal>run</goal></goals>
+                        <configuration>
+                            <target>
+                                <echo message="unzip archive" />
+                                <unzip src="${project.build.directory}/${archiveFile}" dest="${project.build.directory}" />
+                                <echo message="moving resources" />
+                                <move todir="${destDir}">
+                                    <fileset dir="${project.build.directory}/${archiveName}/" />
+                                </move>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includes>
+                        <include>
+                            ${project.build.directory}/classes/META-INF/resources/webjars/font-awesome/${project.version}/css/*.css
+                        </include>
+                    </includes>
+                    <inputFilePattern>(.*).css</inputFilePattern>
+                    <outputFilePattern>$1-jsf.css</outputFilePattern>
+                    <replacements>
+                        <replacement>
+                            <token>url\((["']?)\.\.\/webfonts\/([^"?#)]*)(?:\??#([^")]*))?\1\)</token>
+                            <value>url("#{resource['webjars:font-awesome/${project.version}/webfonts/$2']}&amp;#$3")</value>
+                        </replacement>
+                    </replacements>
+                    <regex>true</regex>
+                    <regexFlags>
+                        <regexFlag>CASE_INSENSITIVE</regexFlag>
+                    </regexFlags>
+                    <unescape>true</unescape>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.5</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>sonatype-nexus-staging</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

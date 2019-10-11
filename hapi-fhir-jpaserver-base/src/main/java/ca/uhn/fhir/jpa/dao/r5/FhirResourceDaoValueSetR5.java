@@ -33,6 +33,7 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
@@ -56,6 +57,9 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 
 	@Autowired
 	private IHapiTerminologySvc myHapiTerminologySvc;
+
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	@Qualifier("myJpaValidationSupportChainR5")
@@ -145,14 +149,6 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		return retVal;
-	}
-
-	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
-		for (ConceptSetComponent nextExclude : listToValidate) {
-			if (isBlank(nextExclude.getSystem()) && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
-				throw new InvalidRequestException("ValueSet contains " + name + " criteria with no system defined");
-			}
-		}
 	}
 
 	@Override
@@ -312,12 +308,18 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 
 		boolean haveIdentifierParam = theValueSetIdentifier != null && theValueSetIdentifier.isEmpty() == false;
 		ValueSet vs = null;
+		boolean isBuiltInValueSet = false;
 		if (theId != null) {
 			vs = read(theId, theRequestDetails);
 		} else if (haveIdentifierParam) {
-			vs = myValidationSupport.fetchResource(getContext(), ValueSet.class, theValueSetIdentifier.getValue());
+			vs = myDefaultProfileValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
 			if (vs == null) {
-				throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
+				vs = myValidationSupport.fetchValueSet(getContext(), theValueSetIdentifier.getValue());
+				if (vs == null) {
+					throw new InvalidRequestException("Unknown ValueSet identifier: " + theValueSetIdentifier.getValue());
+				}
+			} else {
+				isBuiltInValueSet = true;
 			}
 		} else {
 			if (theCode == null || theCode.isEmpty()) {
@@ -334,7 +336,7 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 
 		if (vs != null) {
 			ValidateCodeResult result;
-			if (myDaoConfig.isPreExpandValueSetsExperimental() && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
+			if (myDaoConfig.isPreExpandValueSets() && !isBuiltInValueSet && myTerminologySvc.isValueSetPreExpandedForCodeValidation(vs)) {
 				result = myTerminologySvc.validateCodeIsInPreExpandedValueSet(vs, toStringOrNull(theSystem), toStringOrNull(theCode), toStringOrNull(theDisplay), theCoding, theCodeableConcept);
 			} else {
 				ValueSet expansion = doExpand(vs);
@@ -397,11 +399,11 @@ public class FhirResourceDaoValueSetR5 extends FhirResourceDaoR5<ValueSet> imple
 	}
 
 	@Override
-	protected ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
+	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
+												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSetsExperimental()) {
+		if (myDaoConfig.isPreExpandValueSets()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
 				myHapiTerminologySvc.storeTermValueSet(retVal, org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSet));

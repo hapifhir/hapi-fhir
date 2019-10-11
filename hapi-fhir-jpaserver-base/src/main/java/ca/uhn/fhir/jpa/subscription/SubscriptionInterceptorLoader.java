@@ -20,10 +20,11 @@ package ca.uhn.fhir.jpa.subscription;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
+import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.module.channel.SubscriptionChannelRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
@@ -47,6 +48,8 @@ public class SubscriptionInterceptorLoader {
 	@Autowired
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Autowired
+	private SubscriptionChannelRegistry mySubscriptionChannelRegistry;
+	@Autowired
 	private ApplicationContext myApplicationContext;
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;
@@ -68,9 +71,11 @@ public class SubscriptionInterceptorLoader {
 
 	private void loadSubscriptions() {
 		ourLog.info("Loading subscriptions into the SubscriptionRegistry...");
-		// Activate scheduled subscription loads into the SubscriptionRegistry
-		myApplicationContext.getBean(SubscriptionLoader.class);
+		// Load active subscriptions into the SubscriptionRegistry and activate their channels
+		SubscriptionLoader loader = myApplicationContext.getBean(SubscriptionLoader.class);
+		loader.syncSubscriptions();
 		ourLog.info("...{} subscriptions loaded", mySubscriptionRegistry.size());
+		ourLog.info("...{} subscription channels started", mySubscriptionChannelRegistry.size());
 	}
 
 	@VisibleForTesting

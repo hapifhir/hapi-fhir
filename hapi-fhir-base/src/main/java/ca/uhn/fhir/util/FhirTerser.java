@@ -216,12 +216,12 @@ public class FhirTerser {
 	}
 
 	public Object getSingleValueOrNull(IBase theTarget, String thePath) {
-		Class<Object> wantedType = Object.class;
+		Class<IBase> wantedType = IBase.class;
 
 		return getSingleValueOrNull(theTarget, thePath, wantedType);
 	}
 
-	public <T> T getSingleValueOrNull(IBase theTarget, String thePath, Class<T> theWantedType) {
+	public <T extends IBase> T getSingleValueOrNull(IBase theTarget, String thePath, Class<T> theWantedType) {
 		Validate.notNull(theTarget, "theTarget must not be null");
 		Validate.notBlank(thePath, "thePath must not be empty");
 
@@ -241,12 +241,12 @@ public class FhirTerser {
 		return retVal.get(0);
 	}
 
-	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
+	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass) {
 		return getValues(theCurrentDef, theCurrentObj, theSubList, theWantedClass, false, false);
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, Object theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+	private <T extends IBase> List<T> getValues(BaseRuntimeElementCompositeDefinition<?> theCurrentDef, IBase theCurrentObj, List<String> theSubList, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
 		String name = theSubList.get(0);
 		List<T> retVal = new ArrayList<>();
 
@@ -325,7 +325,7 @@ public class FhirTerser {
 				List<T> values = retVal;
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
-					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 					retVal.addAll(foundValues);
 				}
@@ -410,7 +410,7 @@ public class FhirTerser {
 				List<T> values = retVal;
 				retVal = new ArrayList<>();
 				for (T nextElement : values) {
-					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition((Class<? extends IBase>) nextElement.getClass());
+					BaseRuntimeElementCompositeDefinition<?> nextChildDef = (BaseRuntimeElementCompositeDefinition<?>) myContext.getElementDefinition(nextElement.getClass());
 					List<T> foundValues = getValues(nextChildDef, nextElement, theSubList.subList(1, theSubList.size()), theWantedClass, theCreate, theAddExtension);
 					retVal.addAll(foundValues);
 				}
@@ -476,9 +476,10 @@ public class FhirTerser {
 	 * @return A list of values of type {@link Object}.
 	 */
 	public List<Object> getValues(IBaseResource theResource, String thePath) {
-		Class<Object> wantedClass = Object.class;
+		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theResource, thePath, wantedClass);
+		List values = getValues(theResource, thePath, wantedClass);
+		return values;
 	}
 
 	/**
@@ -491,9 +492,10 @@ public class FhirTerser {
 	 * @return A list of values of type {@link Object}.
 	 */
 	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate) {
-		Class<Object> wantedClass = Object.class;
+		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theResource, thePath, wantedClass, theCreate);
+		List retVal = getValues(theResource, thePath, wantedClass, theCreate);
+		return retVal;
 	}
 
 	/**
@@ -507,9 +509,10 @@ public class FhirTerser {
 	 * @return A list of values of type {@link Object}.
 	 */
 	public List<Object> getValues(IBaseResource theResource, String thePath, boolean theCreate, boolean theAddExtension) {
-		Class<Object> wantedClass = Object.class;
+		Class<IBase> wantedClass = IBase.class;
 
-		return getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
+		List retVal = getValues(theResource, thePath, wantedClass, theCreate, theAddExtension);
+		return retVal;
 	}
 
 	/**
@@ -522,7 +525,7 @@ public class FhirTerser {
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass);
@@ -539,7 +542,7 @@ public class FhirTerser {
 	 * @param <T>            Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass, theCreate, false);
@@ -557,7 +560,7 @@ public class FhirTerser {
 	 * @param <T>             Type declared by <code>theWantedClass</code>
 	 * @return A list of values of type <code>theWantedClass</code>.
 	 */
-	public <T> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
+	public <T extends IBase> List<T> getValues(IBaseResource theResource, String thePath, Class<T> theWantedClass, boolean theCreate, boolean theAddExtension) {
 		RuntimeResourceDefinition def = myContext.getResourceDefinition(theResource);
 		List<String> parts = parsePath(def, thePath);
 		return getValues(def, theResource, parts, theWantedClass, theCreate, theAddExtension);
@@ -728,26 +731,21 @@ public class FhirTerser {
 									continue;
 								}
 								BaseRuntimeElementDefinition<?> childElementDef;
-								childElementDef = nextChild.getChildElementDefinitionByDatatype(nextValue.getClass());
-
-								if (childElementDef == null) {
-									StringBuilder b = new StringBuilder();
-									b.append("Found value of type[");
-									b.append(nextValue.getClass().getSimpleName());
-									b.append("] which is not valid for field[");
-									b.append(nextChild.getElementName());
-									b.append("] in ");
-									b.append(childDef.getName());
-									b.append(" - Valid types: ");
-									for (Iterator<String> iter = new TreeSet<>(nextChild.getValidChildNames()).iterator(); iter.hasNext(); ) {
-										BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
-										b.append(childByName.getImplementingClass().getSimpleName());
-										if (iter.hasNext()) {
-											b.append(", ");
-										}
-									}
-									throw new DataFormatException(b.toString());
+								Class<? extends IBase> valueType = nextValue.getClass();
+								childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
+								while (childElementDef == null && IBase.class.isAssignableFrom(valueType)) {
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
+									valueType = (Class<? extends IBase>) valueType.getSuperclass();
 								}
+
+								Class<? extends IBase> typeClass = nextValue.getClass();
+								while (childElementDef == null && IBase.class.isAssignableFrom(typeClass)) {
+									//noinspection unchecked
+									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
+								}
+
+								Validate.notNull(childElementDef, "Found value of type[%s] which is not valid for field[%s] in %s", nextValue.getClass(), nextChild.getElementName(), childDef.getName());
 
 								visit(nextValue, nextChild, childElementDef, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
 							}

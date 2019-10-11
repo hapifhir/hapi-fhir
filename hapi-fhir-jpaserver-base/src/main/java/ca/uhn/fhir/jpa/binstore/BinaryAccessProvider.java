@@ -201,6 +201,7 @@ public class BinaryAccessProvider {
 
 			IBaseExtension<?, ?> ext = target.getTarget().addExtension();
 			ext.setUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+			ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
 			IPrimitiveType<String> blobIdString = (IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
 			blobIdString.setValueAsString(blobId);
 			ext.setValue(blobIdString);

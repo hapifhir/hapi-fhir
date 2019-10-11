@@ -24,6 +24,7 @@ package org.hl7.fhir.dstu2.model;
 
 public interface IIdType extends IBase {
 
+	@Override
 	boolean isEmpty();
 
 	/**

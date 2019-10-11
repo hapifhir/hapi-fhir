@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.entity.SearchTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import ca.uhn.fhir.jpa.util.InterceptorUtil;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.api.server.*;
@@ -52,7 +53,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class PersistedJpaBundleProvider implements IBundleProvider {
 
@@ -191,12 +191,12 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		if (mySearchEntity == null) {
 			ensureDependenciesInjected();
 
-			Optional<Search> search = mySearchCacheSvc.fetchByUuid(myUuid);
-			if (!search.isPresent()) {
+			Optional<Search> searchOpt = mySearchCacheSvc.fetchByUuid(myUuid);
+			if (!searchOpt.isPresent()) {
 				return false;
 			}
 
-			setSearchEntity(search.get());
+			setSearchEntity(searchOpt.get());
 
 			ourLog.trace("Retrieved search with version {} and total {}", mySearchEntity.getVersion(), mySearchEntity.getTotalCount());
 
@@ -292,10 +292,16 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearchEntity);
 
 		Integer size = mySearchEntity.getTotalCount();
-		if (size == null) {
-			return null;
+		if (size != null) {
+			return Math.max(0, size);
 		}
-		return Math.max(0, size);
+
+		if (mySearchEntity.getSearchType() == SearchTypeEnum.HISTORY) {
+			return null;
+		} else {
+			return mySearchCoordinatorSvc.getSearchTotal(myUuid).orElse(null);
+		}
+
 	}
 
 	// Note: Leave as protected, HSPC depends on this
@@ -314,22 +320,7 @@ public class PersistedJpaBundleProvider implements IBundleProvider {
 		List<IBaseResource> resources = new ArrayList<>();
 		theSearchBuilder.loadResourcesByPid(thePids, includedPidList, resources, false, myRequest);
 
-		// Interceptor call: STORAGE_PRESHOW_RESOURCE
-		// This can be used to remove results from the search result details before
-		// the user has a chance to know that they were in the results
-		if (resources.size() > 0) {
-			SimplePreResourceShowDetails accessDetails = new SimplePreResourceShowDetails(resources);
-			HookParams params = new HookParams()
-				.add(IPreResourceShowDetails.class, accessDetails)
-				.add(RequestDetails.class, myRequest)
-				.addIfMatchesType(ServletRequestDetails.class, myRequest);
-			JpaInterceptorBroadcaster.doCallHooks(myInterceptorBroadcaster, myRequest, Pointcut.STORAGE_PRESHOW_RESOURCES, params);
-
-			resources = resources
-				.stream()
-				.filter(t -> t != null)
-				.collect(Collectors.toList());
-		}
+		InterceptorUtil.fireStoragePreshowResource(resources, myRequest, myInterceptorBroadcaster);
 
 		return resources;
 	}

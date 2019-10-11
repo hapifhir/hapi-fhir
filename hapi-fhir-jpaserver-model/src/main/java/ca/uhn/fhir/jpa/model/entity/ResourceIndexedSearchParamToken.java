@@ -214,9 +214,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myValue;
 	}
 
-	public void setValue(String theValue) {
+	public ResourceIndexedSearchParamToken setValue(String theValue) {
 		clearHashes();
 		myValue = StringUtils.defaultIfBlank(theValue, null);
+		return this;
 	}
 
 	@Override

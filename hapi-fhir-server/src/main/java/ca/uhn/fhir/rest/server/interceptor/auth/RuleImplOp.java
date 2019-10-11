@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -12,7 +13,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import ca.uhn.fhir.util.BundleUtil;
-import ca.uhn.fhir.util.BundleUtil.BundleEntryParts;
+import ca.uhn.fhir.util.bundle.BundleEntryParts;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
@@ -203,8 +204,29 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							appliesToResourceId = Collections.singletonList(theInputResourceId);
 						}
 						break;
+					case PATCH:
+						appliesToResource = null;
+						if (theInputResourceId != null) {
+							appliesToResourceId = Collections.singletonList(theInputResourceId);
+						} else {
+							return null;
+						}
+						break;
 					default:
 						return null;
+				}
+				break;
+			case CREATE:
+				if (theInputResource == null && theInputResourceId == null) {
+					return null;
+				}
+				if (theOperation == RestOperationTypeEnum.CREATE) {
+					appliesToResource = theInputResource;
+					if (theInputResourceId != null) {
+						appliesToResourceId = Collections.singletonList(theInputResourceId);
+					}
+				} else {
+					return null;
 				}
 				break;
 			case DELETE:
@@ -272,7 +294,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							operation = RestOperationTypeEnum.UPDATE;
 						} else if (nextPart.getRequestType() == RequestTypeEnum.DELETE) {
 							operation = RestOperationTypeEnum.DELETE;
+						} else if (nextPart.getRequestType() == RequestTypeEnum.PATCH) {
+							operation = RestOperationTypeEnum.PATCH;
+						} else if (nextPart.getRequestType() == null && theRequestDetails.getServer().getFhirContext().getVersion().getVersion() == FhirVersionEnum.DSTU3 && BundleUtil.isDstu3TransactionPatch(nextPart.getResource())) {
+							// This is a workaround for the fact that there is no PATCH verb in DSTU3's bundle entry verb type ValueSet.
+							// See BundleUtil#isDstu3TransactionPatch
+							operation = RestOperationTypeEnum.PATCH;
 						} else {
+
 							throw new InvalidRequestException("Can not handle transaction with operation of type " + nextPart.getRequestType());
 						}
 
@@ -288,7 +317,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							}
 						}
 
+						String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
+						theRequestDetails.setFixedConditionalUrl(nextPart.getConditionalUrl());
+
 						Verdict newVerdict = theRuleApplier.applyRulesAndReturnDecision(operation, theRequestDetails, inputResource, inputResourceId, null, thePointcut);
+
+						theRequestDetails.setFixedConditionalUrl(previousFixedConditionalUrl);
+
 						if (newVerdict == null) {
 							continue;
 						} else if (verdict == null) {

@@ -26,6 +26,7 @@ import java.util.*;
 
 public class Constants {
 
+	public static final String CT_TEXT_CSV = "text/csv";
 	public static final String HEADER_REQUEST_ID = "X-Request-ID";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
@@ -151,6 +152,8 @@ public class Constants {
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
+	public static final String PARAM_INCLUDE_ITERATE = "_include" + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
@@ -163,6 +166,7 @@ public class Constants {
 	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_REVINCLUDE_ITERATE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
@@ -220,16 +224,34 @@ public class Constants {
 	public static final String CASCADE_DELETE = "delete";
 	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
 	public static final String CACHE_CONTROL_PRIVATE = "private";
+	public static final String CT_FHIR_NDJSON = "application/fhir+ndjson";
+	public static final String CT_APP_NDJSON = "application/ndjson";
+	public static final String CT_NDJSON = "ndjson";
+	public static final Set<String> CTS_NDJSON;
+	public static final String HEADER_PREFER_RESPOND_ASYNC = "respond-async";
 	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
 	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
 	/**
 	 * Note that this constant is used in a number of places including DB column lengths! Be careful if you decide to change it.
 	 */
 	public static final int REQUEST_ID_LENGTH = 16;
+	public static final int STATUS_HTTP_202_ACCEPTED = 202;
+	public static final String HEADER_X_PROGRESS = "X-Progress";
+	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	/**
+	 * Operation name for the $lastn operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
 
 	static {
 		CHARSET_UTF8 = StandardCharsets.UTF_8;
 		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
+
+		HashSet<String> ctsNdjson = new HashSet<>();
+		ctsNdjson.add(CT_FHIR_NDJSON);
+		ctsNdjson.add(CT_APP_NDJSON);
+		ctsNdjson.add(CT_NDJSON);
+		CTS_NDJSON = Collections.unmodifiableSet(ctsNdjson);
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");

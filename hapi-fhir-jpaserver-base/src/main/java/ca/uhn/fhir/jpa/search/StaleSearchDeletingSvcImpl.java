@@ -21,11 +21,16 @@ package ca.uhn.fhir.jpa.search;
  */
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
 
@@ -43,6 +48,8 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 	private DaoConfig myDaoConfig;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
+	@Autowired
+	private ISchedulerService mySchedulerService;
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -50,12 +57,29 @@ public class StaleSearchDeletingSvcImpl implements IStaleSearchDeletingSvc {
 		mySearchCacheSvc.pollForStaleSearchesAndDeleteThem();
 	}
 
-	@Scheduled(fixedDelay = DEFAULT_CUTOFF_SLACK)
+	@PostConstruct
+	public void registerScheduledJob() {
+		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
+		jobDetail.setId(StaleSearchDeletingSvcImpl.class.getName());
+		jobDetail.setJobClass(StaleSearchDeletingSvcImpl.SubmitJob.class);
+		mySchedulerService.scheduleFixedDelay(DEFAULT_CUTOFF_SLACK, true, jobDetail);
+	}
+
 	@Transactional(propagation = Propagation.NEVER)
 	@Override
 	public synchronized void schedulePollForStaleSearches() {
 		if (!myDaoConfig.isSchedulingDisabled()) {
 			pollForStaleSearchesAndDeleteThem();
+		}
+	}
+
+	public static class SubmitJob implements Job {
+		@Autowired
+		private IStaleSearchDeletingSvc myTarget;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTarget.schedulePollForStaleSearches();
 		}
 	}
 }

@@ -35,6 +35,7 @@ public class ContainedDt extends BaseContainedDt {
 	@Child(name = "resource", type = IResource.class, order = 0, min = 0, max = Child.MAX_UNLIMITED)
 	private List<IResource> myContainedResources;
 
+	@Override
 	public List<IResource> getContainedResources() {
 		if (myContainedResources == null) {
 			myContainedResources = new ArrayList<IResource>();
@@ -49,6 +50,16 @@ public class ContainedDt extends BaseContainedDt {
 	@Override
 	public boolean isEmpty() {
 		return myContainedResources == null || myContainedResources.size() == 0;
+	}
+
+	@Override
+	public Object getUserData(String theName) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void setUserData(String theName, Object theValue) {
+		throw new UnsupportedOperationException();
 	}
 
 }

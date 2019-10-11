@@ -116,6 +116,8 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 
 	ExpungeOutcome expunge(IIdType theIIdType, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
 
+	ExpungeOutcome forceExpungeInExistingTransaction(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest);
+
 	Class<T> getResourceType();
 
 	IBundleProvider history(Date theSince, Date theUntil, RequestDetails theRequestDetails);

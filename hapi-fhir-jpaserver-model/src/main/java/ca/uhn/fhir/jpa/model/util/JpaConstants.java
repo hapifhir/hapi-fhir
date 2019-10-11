@@ -175,6 +175,16 @@ public class JpaConstants {
 	public static final String OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM = "$upload-external-code-system";
 
 	/**
+	 * Operation name for the "$export" operation
+	 */
+	public static final String OPERATION_EXPORT = "$export";
+
+	/**
+	 * Operation name for the "$export-poll-status" operation
+	 */
+	public static final String OPERATION_EXPORT_POLL_STATUS = "$export-poll-status";
+
+	/**
 	 * <p>
 	 * This extension should be of type <code>string</code> and should be
 	 * placed on the <code>Subscription.channel</code> element
@@ -229,6 +239,11 @@ public class JpaConstants {
 	public static final String EXT_EXTERNALIZED_BINARY_ID = "http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id";
 
 	/**
+	 * Placed in system-generated extensions
+	 */
+	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+
+	/**
 	 * <p>
 	 * This extension represents the equivalent of the
 	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
@@ -238,5 +253,28 @@ public class JpaConstants {
 	 */
 	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";
 
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_OUTPUT_FORMAT = "_outputFormat";
+
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_TYPE = "_type";
+
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_SINCE = "_since";
+
+	/**
+	 * Parameter for the $export operation
+	 */
+	public static final String PARAM_EXPORT_TYPE_FILTER = "_typeFilter";
 }

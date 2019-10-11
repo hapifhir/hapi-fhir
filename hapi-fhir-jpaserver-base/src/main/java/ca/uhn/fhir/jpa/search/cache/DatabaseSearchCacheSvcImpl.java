@@ -136,7 +136,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 	@Override
 	public Collection<Search> findCandidatesForReuse(String theResourceType, String theQueryString, int theQueryStringHash, Date theCreatedAfter) {
 		int hashCode = theQueryString.hashCode();
-		return mySearchDao.find(theResourceType, hashCode, theCreatedAfter);
+		return mySearchDao.findWithCutoffOrExpiry(theResourceType, hashCode, theCreatedAfter);
 
 	}
 
@@ -166,8 +166,10 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 		TransactionTemplate tt = new TransactionTemplate(myTxManager);
 		final Slice<Long> toDelete = tt.execute(theStatus ->
-			mySearchDao.findWhereLastReturnedBefore(cutoff, PageRequest.of(0, 2000))
+			mySearchDao.findWhereLastReturnedBefore(cutoff, new Date(), PageRequest.of(0, 2000))
 		);
+		assert toDelete != null;
+
 		for (final Long nextSearchToDelete : toDelete) {
 			ourLog.debug("Deleting search with PID {}", nextSearchToDelete);
 			tt.execute(t -> {
@@ -184,22 +186,12 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 		int count = toDelete.getContent().size();
 		if (count > 0) {
 			if (ourLog.isDebugEnabled()) {
-				long total = tt.execute(t -> mySearchDao.count());
+				Long total = tt.execute(t -> mySearchDao.count());
 				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}
 		}
 	}
 
-
-	@VisibleForTesting
-	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
-		mySearchDao = theSearchDao;
-	}
-
-	@VisibleForTesting
-	void setSearchDaoIncludeForUnitTest(ISearchIncludeDao theSearchIncludeDao) {
-		mySearchIncludeDao = theSearchIncludeDao;
-	}
 
 	private void deleteSearch(final Long theSearchPid) {
 		mySearchDao.findById(theSearchPid).ifPresent(searchToDelete -> {

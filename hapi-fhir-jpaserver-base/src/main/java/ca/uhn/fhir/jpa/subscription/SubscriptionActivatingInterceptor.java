@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.subscription;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Interceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Interceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionConstants;
@@ -102,6 +102,7 @@ public class SubscriptionActivatingInterceptor {
 			.getValueAsString();
 
 		Subscription.SubscriptionChannelType subscriptionChannelType = Subscription.SubscriptionChannelType.fromCode(subscriptionChannelTypeCode);
+
 		// Only activate supported subscriptions
 		if (!myDaoConfig.getSupportedSubscriptionTypes().contains(subscriptionChannelType)) {
 			return false;
@@ -233,7 +234,7 @@ public class SubscriptionActivatingInterceptor {
 	private void submitResourceModified(final ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case DELETE:
-				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext));
+				mySubscriptionRegistry.unregisterSubscription(theMsg.getId(myFhirContext).getIdPart());
 				break;
 			case CREATE:
 			case UPDATE:

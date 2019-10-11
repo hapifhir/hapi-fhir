@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl.SearchTask;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -61,6 +62,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 	@Override
 	public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
 		SearchCoordinatorSvcImpl.verifySearchHasntFailedOrThrowInternalErrorException(mySearch);
+
+		mySearchTask.awaitInitialSync();
 
 		ourLog.trace("Fetching search resource PIDs from task: {}", mySearchTask.getClass());
 		final List<Long> pids = mySearchTask.getResourcePids(theFromIndex, theToIndex);
@@ -108,7 +111,8 @@ public class PersistedJpaSearchFirstPageBundleProvider extends PersistedJpaBundl
 		if (theResource instanceof IAnyResource) {
 			return "include".equals(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(((IAnyResource) theResource)));
 		}
-		return "include".equals(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(((IResource) theResource)));
+		BundleEntrySearchModeEnum searchMode = ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get(((IResource) theResource));
+		return BundleEntrySearchModeEnum.INCLUDE.equals(searchMode);
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -65,7 +66,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-		myDaoConfig.setPreExpandValueSetsExperimental(new DaoConfig().isPreExpandValueSetsExperimental());
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	private IIdType createCodeSystem() {
@@ -116,7 +117,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs);
+		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		return id;
 	}
@@ -629,7 +630,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -641,7 +642,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -666,7 +667,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDeleteValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -678,7 +679,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		TermValueSet termValueSet = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).get();
@@ -723,7 +724,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDuplicateValueSetUrls() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
 		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
@@ -736,7 +737,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -750,7 +751,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
@@ -760,7 +761,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread(), empty());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -821,7 +822,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 	public void testExpandExistingValueSetNotPreExpanded() throws Exception {
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId);
 		ourLog.info("CodeSystem:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
@@ -829,11 +830,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
@@ -885,11 +886,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		assertEquals("Systolic blood pressure 8 hour minimum", containsComponent.getDisplay());
 		assertFalse(containsComponent.hasDesignation());
 
-		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
@@ -944,7 +945,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -956,11 +957,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -1019,7 +1020,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCount() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -1031,11 +1032,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 23);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -1088,7 +1089,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1100,11 +1101,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 23);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 23);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -1157,7 +1158,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountOfZero() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -1169,11 +1170,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 0);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -1185,7 +1186,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithCountOfZeroWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1197,11 +1198,11 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), 0);
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, myDaoConfig.getPreExpandValueSetsDefaultOffset(), 0);
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffsetExperimental(), expandedValueSet.getExpansion().getOffset());
+		assertEquals(myDaoConfig.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
 		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
 		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
 		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
@@ -1213,7 +1214,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffset() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -1225,7 +1226,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -1274,7 +1275,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1286,7 +1287,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCountExperimental());
+		ValueSet expandedValueSet = myTermSvc.expandValueSet(valueSet, 1, myDaoConfig.getPreExpandValueSetsDefaultCount());
 		ourLog.info("Expanded ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
@@ -1335,7 +1336,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCount() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -1390,7 +1391,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -1478,6 +1479,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				assertEquals("8450-9", concept.getCode());
 				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
 				assertEquals(2, concept.getDesignations().size());
+				assertThat(concept.toString(), containsString("8450"));
 
 				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
 
@@ -2046,7 +2048,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildren() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -2148,7 +2150,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 
@@ -2250,7 +2252,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithExclude() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.POST);
 
@@ -2352,7 +2354,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermValueSetAndChildrenWithExcludeWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignationsAndExclude(HttpVerb.PUT);
 
@@ -3600,7 +3602,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSet() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.POST);
 
@@ -3650,7 +3652,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testValidateCodeIsInPreExpandedValueSetWithClientAssignedId() throws Exception {
-		myDaoConfig.setPreExpandValueSetsExperimental(true);
+		myDaoConfig.setPreExpandValueSets(true);
 
 		loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb.PUT);
 

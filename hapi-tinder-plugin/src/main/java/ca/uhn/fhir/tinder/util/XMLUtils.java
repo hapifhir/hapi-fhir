@@ -116,8 +116,9 @@ public class XMLUtils {
             impl = getDOMImpl();
         }
 
-        public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId,
-                String baseURI) {
+        @Override
+		  public LSInput resolveResource(String type, String namespaceURI, String publicId, String systemId,
+													String baseURI) {
             LSInput lsInput = impl.createLSInput();
             InputStream is = getClass().getResourceAsStream("/" + systemId);
             if (is == null)

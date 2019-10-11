@@ -142,12 +142,14 @@ public class FhirContextDstu2Test {
 			final CountDownLatch allDone = new CountDownLatch(numThreads);
 			for (final Runnable submittedTestRunnable : runnables) {
 				threadPool.submit(new Runnable() {
+					@Override
 					public void run() {
 						allExecutorThreadsReady.countDown();
 						try {
 							afterInitBlocker.await();
 							submittedTestRunnable.run();
 						} catch (final Throwable e) {
+							ourLog.error("Exception", e);
 							exceptions.add(e);
 						} finally {
 							allDone.countDown();

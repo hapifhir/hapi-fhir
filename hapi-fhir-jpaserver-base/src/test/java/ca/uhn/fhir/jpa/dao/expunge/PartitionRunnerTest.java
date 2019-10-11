@@ -3,7 +3,7 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.config.TestDstu3Config;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.concurrency.PointcutLatch;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.junit.After;
@@ -73,7 +73,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(1, partitionCall.size);
 	}
 
@@ -86,7 +86,7 @@ public class PartitionRunnerTest {
 		myLatch.setExpectedCount(1);
 		myPartitionRunner.runInPartitionedThreads(resourceIds, partitionConsumer);
 		PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(myLatch.awaitExpected());
-		assertEquals(EXPUNGE_THREADNAME_1, partitionCall.threadName);
+		assertEquals("main", partitionCall.threadName);
 		assertEquals(2, partitionCall.size);
 	}
 

@@ -1,11 +1,14 @@
 package ca.uhn.fhir.model.dstu2;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ca.uhn.fhir.model.primitive.InstantDt;
+import ca.uhn.fhir.parser.DataFormatException;
 import org.junit.AfterClass;
 import org.junit.Test;
 
@@ -71,7 +74,22 @@ public class ModelDstu2Test {
 			assertEquals("Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
-	
+
+
+	@Test
+	public void testInstantPrecision() {
+		new InstantDt("2019-01-01T00:00:00Z");
+		new InstantDt("2019-01-01T00:00:00.0Z");
+		new InstantDt("2019-01-01T00:00:00.000Z");
+		try {
+			new InstantDt("2019-01-01T00:00Z");
+			fail();
+		} catch (DataFormatException e) {
+			// good
+		}
+	}
+
+
 	/**
 	 * See #354
 	 */

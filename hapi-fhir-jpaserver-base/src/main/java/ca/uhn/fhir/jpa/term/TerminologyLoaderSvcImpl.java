@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.*;
@@ -81,12 +82,10 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 	private static final int LOG_INCREMENT = 1000;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
-
-	@Autowired
-	private IHapiTerminologySvc myTermSvc;
-
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
 	private final FhirContext myCtx = FhirContext.forR4();
+	@Autowired
+	private IHapiTerminologySvc myTermSvc;
 
 	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept, Counter theCircularCounter) {
 
@@ -118,69 +117,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			}
 		}
 		theChain.remove(theChain.size() - 1);
-
-	}
-
-	private void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
-
-		boolean foundMatch = false;
-		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
-			String nextFilename = nextZipBytes.getFilename();
-			boolean matches;
-			if (theIsPartialFilename) {
-				matches = nextFilename.contains(theFileNamePart);
-			} else {
-				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
-			}
-
-			if (matches) {
-				ourLog.info("Processing file {}", nextFilename);
-				foundMatch = true;
-
-				Reader reader;
-				CSVParser parsed;
-				try {
-					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
-
-					CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
-					if (theQuoteMode != null) {
-						format = format.withQuote('"').withQuoteMode(theQuoteMode);
-					}
-					parsed = new CSVParser(reader, format);
-					Iterator<CSVRecord> iter = parsed.iterator();
-					ourLog.debug("Header map: {}", parsed.getHeaderMap());
-
-					int count = 0;
-					int nextLoggedCount = 0;
-					while (iter.hasNext()) {
-						CSVRecord nextRecord = iter.next();
-						if (nextRecord.isConsistent() == false) {
-							continue;
-						}
-						theHandler.accept(nextRecord);
-						count++;
-						if (count >= nextLoggedCount) {
-							ourLog.info(" * Processed {} records in {}", count, nextFilename);
-							nextLoggedCount += LOG_INCREMENT;
-						}
-					}
-
-				} catch (IOException e) {
-					throw new InternalErrorException(e);
-				}
-			}
-
-		}
-
-		if (!foundMatch) {
-			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
-		}
 
 	}
 
@@ -280,7 +216,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	@Override
 	public UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			final Map<String, TermConcept> code2concept = new HashMap<>();
 			IRecordHandler handler;
 
 			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
@@ -299,23 +234,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			}
 
 			TermCodeSystemVersion csv = new TermCodeSystemVersion();
-
-			// Concept File
-			handler = new ConceptHandler(code2concept, csv);
-			iterateOverZipFile(descriptors, CUSTOM_CONCEPTS_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
-
-			// Hierarchy
-			if (descriptors.hasFile(CUSTOM_HIERARCHY_FILE)) {
-				handler = new HierarchyHandler(code2concept);
-				iterateOverZipFile(descriptors, CUSTOM_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
-			}
-
-			// Add root concepts to CodeSystemVersion
-			for (TermConcept nextConcept : code2concept.values()) {
-				if (nextConcept.getParents().isEmpty()) {
-					csv.getConcepts().add(nextConcept);
-				}
-			}
+			final Map<String, TermConcept> code2concept = processCustomTerminologyFiles(descriptors, csv);
 
 			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null);
 			return new UploadStatistics(code2concept.size(), target);
@@ -383,12 +302,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
 
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
-
 					LineNumberReader lnr = new LineNumberReader(reader);
 					while (lnr.readLine() != null) {
 					}
@@ -413,12 +326,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				Reader reader = null;
 				try {
 					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
-
-					if (ourLog.isTraceEnabled()) {
-						String contents = IOUtils.toString(reader);
-						ourLog.info("File contents for: {}\n{}", nextFilename, contents);
-						reader = new StringReader(contents);
-					}
 
 					LineNumberReader lnr = new LineNumberReader(reader);
 					while (lnr.readLine() != null) {
@@ -478,6 +385,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			if (isNotBlank(nextPropertyCode)) {
 				propertyNamesToTypes.put(nextPropertyCode, nextPropertyType);
 			}
+		}
+
+		// FIXME: DM 2019-09-13 - Manually add EXTERNAL_COPYRIGHT_NOTICE property until Regenstrief adds this to loinc.xml
+		if (!propertyNamesToTypes.containsKey("EXTERNAL_COPYRIGHT_NOTICE")) {
+			String externalCopyRightNoticeCode = "EXTERNAL_COPYRIGHT_NOTICE";
+			CodeSystem.PropertyType externalCopyRightNoticeType = CodeSystem.PropertyType.STRING;
+			propertyNamesToTypes.put(externalCopyRightNoticeCode, externalCopyRightNoticeType);
 		}
 
 		IRecordHandler handler;
@@ -659,12 +573,12 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		return retVal;
 	}
 
-	static class LoadedFileDescriptors implements Closeable {
+	public static class LoadedFileDescriptors implements Closeable {
 
 		private List<File> myTemporaryFiles = new ArrayList<>();
 		private List<IHapiTerminologyLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
 
-		LoadedFileDescriptors(List<IHapiTerminologyLoaderSvc.FileDescriptor> theFileDescriptors) {
+		public LoadedFileDescriptors(List<IHapiTerminologyLoaderSvc.FileDescriptor> theFileDescriptors) {
 			try {
 				for (FileDescriptor next : theFileDescriptors) {
 					if (next.getFilename().toLowerCase().endsWith(".zip")) {
@@ -756,6 +670,92 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		}
 
 
+	}
+
+	@Nonnull
+	public static Map<String, TermConcept> processCustomTerminologyFiles(LoadedFileDescriptors theDescriptors, TermCodeSystemVersion theCsv) {
+		IRecordHandler handler;// Concept File
+		final Map<String, TermConcept> code2concept = new HashMap<>();
+		handler = new ConceptHandler(code2concept, theCsv);
+		iterateOverZipFile(theDescriptors, CUSTOM_CONCEPTS_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
+
+		// Hierarchy
+		if (theDescriptors.hasFile(CUSTOM_HIERARCHY_FILE)) {
+			handler = new HierarchyHandler(code2concept);
+			iterateOverZipFile(theDescriptors, CUSTOM_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
+		}
+
+		// Add root concepts to CodeSystemVersion
+		for (TermConcept nextConcept : code2concept.values()) {
+			if (nextConcept.getParents().isEmpty()) {
+				theCsv.getConcepts().add(nextConcept);
+			}
+		}
+		return code2concept;
+	}
+
+	private static void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
+
+		boolean foundMatch = false;
+		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
+			String nextFilename = nextZipBytes.getFilename();
+			boolean matches;
+			if (theIsPartialFilename) {
+				matches = nextFilename.contains(theFileNamePart);
+			} else {
+				matches = nextFilename.endsWith("/" + theFileNamePart) || nextFilename.equals(theFileNamePart);
+			}
+
+			if (matches) {
+				ourLog.info("Processing file {}", nextFilename);
+				foundMatch = true;
+
+				Reader reader;
+				CSVParser parsed;
+				try {
+					reader = new InputStreamReader(nextZipBytes.getInputStream(), Charsets.UTF_8);
+
+					parsed = newCsvRecords(theDelimiter, theQuoteMode, reader);
+					Iterator<CSVRecord> iter = parsed.iterator();
+					ourLog.debug("Header map: {}", parsed.getHeaderMap());
+
+					int count = 0;
+					int nextLoggedCount = 0;
+					while (iter.hasNext()) {
+						CSVRecord nextRecord = iter.next();
+						if (nextRecord.isConsistent() == false) {
+							continue;
+						}
+						theHandler.accept(nextRecord);
+						count++;
+						if (count >= nextLoggedCount) {
+							ourLog.info(" * Processed {} records in {}", count, nextFilename);
+							nextLoggedCount += LOG_INCREMENT;
+						}
+					}
+
+				} catch (IOException e) {
+					throw new InternalErrorException(e);
+				}
+			}
+
+		}
+
+		if (!foundMatch) {
+			throw new InvalidRequestException("Did not find file matching " + theFileNamePart);
+		}
+
+	}
+
+	@Nonnull
+	public static CSVParser newCsvRecords(char theDelimiter, QuoteMode theQuoteMode, Reader theReader) throws IOException {
+		CSVParser parsed;
+		CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
+		if (theQuoteMode != null) {
+			format = format.withQuote('"').withQuoteMode(theQuoteMode);
+		}
+		parsed = new CSVParser(theReader, format);
+		return parsed;
 	}
 
 	public static String firstNonBlank(String... theStrings) {

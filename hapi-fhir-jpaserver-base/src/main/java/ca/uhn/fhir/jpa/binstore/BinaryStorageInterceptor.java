@@ -29,6 +29,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
 @Interceptor
 public class BinaryStorageInterceptor {
 
+	private static final Logger ourLog = LoggerFactory.getLogger(BinaryStorageInterceptor.class);
 	@Autowired
 	private IBinaryStorageSvc myBinaryStorageSvc;
 	@Autowired
@@ -59,8 +62,9 @@ public class BinaryStorageInterceptor {
 		for (String next : attachmentIds) {
 			myBinaryStorageSvc.expungeBlob(theResource.getIdElement(), next);
 			theCounter.incrementAndGet();
+
+			ourLog.info("Deleting binary blob {} because resource {} is being expunged", next, theResource.getIdElement().getValue());
 		}
 
 	}
-
 }

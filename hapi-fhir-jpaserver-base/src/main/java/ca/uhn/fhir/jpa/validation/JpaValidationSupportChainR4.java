@@ -20,10 +20,8 @@ package ca.uhn.fhir.jpa.validation;
  * #L%
  */
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -32,11 +30,13 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 public class JpaValidationSupportChainR4 extends ValidationSupportChain {
 
-	private DefaultProfileValidationSupport myDefaultProfileValidationSupport = new DefaultProfileValidationSupport();
+	@Autowired
+	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
 	@Autowired
 	private FhirContext myFhirContext;

@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.method.ResourceParameter.Mode;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ReflectionUtil;
+import ca.uhn.fhir.util.ValidateUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
@@ -225,7 +226,9 @@ public class MethodUtil {
 						OperationParam operationParam = (OperationParam) nextAnnotation;
 						param = new OperationParameter(theContext, op.name(), operationParam);
 						if (isNotBlank(operationParam.typeName())) {
-							Class<?> newParameterType = theContext.getElementDefinition(operationParam.typeName()).getImplementingClass();
+							BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(operationParam.typeName());
+							org.apache.commons.lang3.Validate.notNull(elementDefinition, "Unknown type name in @OperationParam: typeName=\"%s\"", operationParam.typeName());
+							Class<?> newParameterType = elementDefinition.getImplementingClass();
 							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
 								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
 							}
