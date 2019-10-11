@@ -26,9 +26,14 @@ public class TermVersionAdapterSvcDstu3 extends BaseTermVersionAdapterSvcImpl im
 	@Autowired
 	private ApplicationContext myAppCtx;
 
+	public TermVersionAdapterSvcDstu3() {
+		super();
+	}
+
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
+		myAppCtx.publishEvent();
 		myCodeSystemResourceDao = (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoDstu3");
 		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoDstu3");
 		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoDstu3");
