@@ -10,6 +10,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.PostConstruct;
 
@@ -23,9 +25,17 @@ public class TermVersionAdapterSvcR4 extends BaseTermVersionAdapterSvcImpl imple
 	@Autowired
 	private ApplicationContext myAppCtx;
 
-	@SuppressWarnings("unchecked")
-	@PostConstruct
-	public void start() {
+	/**
+	 * Initialize the beans that are used by this service.
+	 *
+	 * Note: There is a circular dependency here where the CodeSystem DAO
+	 * needs terminology services, and the term services need the CodeSystem DAO.
+	 * So we look these up in a refresh event instead of just autowiring them
+	 * in order to avoid weird circular reference errors.
+	 */
+	@SuppressWarnings({"unchecked", "unused"})
+	@EventListener
+	public void start(ContextRefreshedEvent theEvent) {
 		myCodeSystemResourceDao = (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoR4");
 		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoR4");
 		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoR4");

@@ -9,8 +9,8 @@ import org.hl7.fhir.r5.model.ConceptMap;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-
-import javax.annotation.PostConstruct;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -22,9 +22,17 @@ public class TermVersionAdapterSvcR5 extends BaseTermVersionAdapterSvcImpl imple
 	@Autowired
 	private ApplicationContext myAppCtx;
 
-	@SuppressWarnings("unchecked")
-	@PostConstruct
-	public void start() {
+	/**
+	 * Initialize the beans that are used by this service.
+	 *
+	 * Note: There is a circular dependency here where the CodeSystem DAO
+	 * needs terminology services, and the term services need the CodeSystem DAO.
+	 * So we look these up in a refresh event instead of just autowiring them
+	 * in order to avoid weird circular reference errors.
+	 */
+	@SuppressWarnings({"unchecked", "unused"})
+	@EventListener
+	public void start(ContextRefreshedEvent theEvent) {
 		myCodeSystemResourceDao = (IFhirResourceDao<CodeSystem>) myAppCtx.getBean("myCodeSystemDaoR5");
 		myValueSetResourceDao = (IFhirResourceDao<ValueSet>) myAppCtx.getBean("myValueSetDaoR5");
 		myConceptMapResourceDao = (IFhirResourceDao<ConceptMap>) myAppCtx.getBean("myConceptMapDaoR5");
