@@ -54,6 +54,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -194,13 +195,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Add root concepts
 		for (TermConcept nextRootConcept : theAdditions.getRootConcepts()) {
 			List<String> parentCodes = Collections.emptyList();
-			addConcepts(csv, codeToConceptPid, parentCodes, nextRootConcept, parentCodeToChildCodes, retVal);
+			addConcept(csv, codeToConceptPid, parentCodes, nextRootConcept, parentCodeToChildCodes, retVal, true);
 		}
 
 		// Add unanchored child concepts
 		for (TermConcept nextUnanchoredChild : theAdditions.getUnanchoredChildConceptsToParentCodes().keySet()) {
 			List<String> nextParentCodes = theAdditions.getUnanchoredChildConceptsToParentCodes().get(nextUnanchoredChild);
-			addConcepts(csv, codeToConceptPid, nextParentCodes, nextUnanchoredChild, parentCodeToChildCodes, retVal);
+			addConcept(csv, codeToConceptPid, nextParentCodes, nextUnanchoredChild, parentCodeToChildCodes, retVal, true);
 		}
 
 		return retVal;
@@ -240,7 +241,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myCodeSystemDao.save(cs);
 		myCodeSystemDao.flush();
 
-		int i = 0;
 		List<TermCodeSystemVersion> codeSystemVersions = myCodeSystemVersionDao.findByCodeSystemPid(theCodeSystem.getPid());
 		for (TermCodeSystemVersion next : codeSystemVersions) {
 			deleteCodeSystemVersion(next.getPid());
@@ -478,7 +478,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.isTrue(myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3), "Terminology operations only supported in DSTU3+ mode");
 	}
 
-	private void addConcepts(TermCodeSystemVersion theCsv, Map<String, Long> theCodeToConceptPid, Collection<String> theParentCodes, TermConcept theConceptToAdd, ListMultimap<String, String> theParentCodeToChildCodes, UploadStatistics theStatisticsTracker) {
+	private void addConcept(TermCodeSystemVersion theCsv, Map<String, Long> theCodeToConceptPid, Collection<String> theParentCodes, TermConcept theConceptToAdd, ListMultimap<String, String> theParentCodeToChildCodes, UploadStatistics theStatisticsTracker, boolean theForceResequence) {
 		TermConcept nextConceptToAdd = theConceptToAdd;
 
 		String nextCodeToAdd = nextConceptToAdd.getCode();
@@ -500,13 +500,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		if (theCodeToConceptPid.containsKey(nextCodeToAdd)) {
 
 			TermConcept existingCode = myConceptDao.getOne(theCodeToConceptPid.get(nextCodeToAdd));
-
 			existingCode.setIndexStatus(null);
 			existingCode.setDisplay(nextConceptToAdd.getDisplay());
 			nextConceptToAdd = existingCode;
 
-		} else {
+		}
 
+		if (theConceptToAdd.getSequence() == null || theForceResequence) {
 			// If this is a new code, give it a sequence number based on how many concepts the
 			// parent already has (or the highest number, if the code has multiple parents)
 			int sequence = 0;
@@ -519,15 +519,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				sequence = Math.max(sequence, theParentCodeToChildCodes.get("").size());
 			}
 			nextConceptToAdd.setSequence(sequence);
-
 		}
+
 
 		// Drop any old parent-child links if they aren't explicitly specified in the
 		// hierarchy being added
 		for (Iterator<TermConceptParentChildLink> iter = nextConceptToAdd.getParents().iterator(); iter.hasNext(); ) {
 			TermConceptParentChildLink nextLink = iter.next();
 			String parentCode = nextLink.getParent().getCode();
-			boolean shouldRemove = !theParentCodes.contains(nextCodeToAdd);
+			boolean shouldRemove = !theParentCodes.contains(parentCode);
 			if (shouldRemove) {
 				ourLog.info("Dropping existing parent/child link from {} -> {}", parentCode, nextCodeToAdd);
 				myConceptParentChildLinkDao.delete(nextLink);
@@ -539,20 +539,42 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		nextConceptToAdd.setParentPids(null);
-		saveConceptsRecursively(nextConceptToAdd, theCsv, theStatisticsTracker);
-		myConceptDao.save(nextConceptToAdd);
+		nextConceptToAdd.setCodeSystemVersion(theCsv);
+		nextConceptToAdd = myConceptDao.save(nextConceptToAdd);
 
+		Long nextConceptPid = nextConceptToAdd.getId();
+		Validate.notNull(nextConceptPid);
+		theCodeToConceptPid.put(nextCodeToAdd, nextConceptPid);
+		theStatisticsTracker.incrementUpdatedConceptCount();
+
+		// Add link to new child to the parent if this link doesn't already exist (this will be the
+		// case for concepts being added to an existing child concept, but won't be the case when
+		// we're recursively adding children)
 		for (TermConcept nextParentConcept : parentConcepts) {
-			TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
-			parentLink.setParent(nextParentConcept);
-			parentLink.setChild(nextConceptToAdd);
-			parentLink.setCodeSystem(theCsv);
-			parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
-			nextParentConcept.getChildren().add(parentLink);
-			nextConceptToAdd.getParents().add(parentLink);
-			myConceptParentChildLinkDao.save(parentLink);
+			if (nextParentConcept.getChildren().stream().noneMatch(t->t.getChild().getCode().equals(nextCodeToAdd))) {
+				TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
+				parentLink.setParent(nextParentConcept);
+				parentLink.setChild(nextConceptToAdd);
+				parentLink.setCodeSystem(theCsv);
+				parentLink.setRelationshipType(TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+				nextParentConcept.getChildren().add(parentLink);
+				nextConceptToAdd.getParents().add(parentLink);
+				myConceptParentChildLinkDao.save(parentLink);
+			}
 		}
 
+		// Save children recursively
+		for (TermConceptParentChildLink nextChildConceptLink : nextConceptToAdd.getChildren()) {
+
+			TermConcept nextChild = nextChildConceptLink.getChild();
+			Collection<String> parentCodes = nextChild.getParents().stream().map(t -> t.getParent().getCode()).collect(Collectors.toList());
+			addConcept(theCsv, theCodeToConceptPid, parentCodes, nextChild, theParentCodeToChildCodes, theStatisticsTracker, false);
+
+			if (nextChildConceptLink.getId() == null) {
+				nextChildConceptLink.setCodeSystem(theCsv);
+				myConceptParentChildLinkDao.save(nextChildConceptLink);
+			}
+		}
 
 	}
 
@@ -562,22 +584,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	private Long getCodeSystemResourcePid(IIdType theIdType, RequestDetails theRequestDetails) {
 		return myIdHelperService.translateForcedIdToPid(theIdType, theRequestDetails);
-	}
-
-	private void saveConceptsRecursively(TermConcept theConcept, TermCodeSystemVersion theCsv, UploadStatistics theStatisticsTracker) {
-		theConcept.setCodeSystemVersion(theCsv);
-		theStatisticsTracker.incrementUpdatedConceptCount();
-		saveConcept(theConcept);
-
-		for (TermConceptParentChildLink nextChildLink : theConcept.getChildren()) {
-			TermConcept nextChild = nextChildLink.getChild();
-			nextChildLink.setCodeSystem(theCsv);
-			saveConceptsRecursively(nextChild, theCsv, theStatisticsTracker);
-
-			if (nextChildLink.getId() == null) {
-				myConceptParentChildLinkDao.save(nextChildLink);
-			}
-		}
 	}
 
 	private void persistChildren(TermConcept theConcept, TermCodeSystemVersion theCodeSystem, IdentityHashMap<TermConcept, Object> theConceptsStack, int theTotalConcepts) {

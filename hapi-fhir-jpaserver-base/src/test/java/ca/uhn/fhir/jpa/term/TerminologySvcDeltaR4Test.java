@@ -50,8 +50,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA",
-			"RootB"
+			"RootA seq=1",
+			"RootB seq=2"
 		);
 
 		delta = new CustomTerminologySet();
@@ -59,10 +59,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootD", "Root D");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA",
-			"RootB",
-			"RootC",
-			"RootD"
+			"RootA seq=1",
+			"RootB seq=2",
+			"RootC seq=3",
+			"RootD seq=4"
 		);
 	}
 
@@ -97,8 +97,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA",
-			"RootB"
+			"RootA seq=1",
+			"RootB seq=2"
 		);
 
 		delta = new CustomTerminologySet();
@@ -106,10 +106,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addUnanchoredChildConcept("RootA", "ChildAB", "Child AB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA",
-			" ChildAA",
-			" ChildAB",
-			"RootB"
+			"RootA seq=1",
+			" ChildAA seq=1",
+			" ChildAB seq=2",
+			"RootB seq=2"
 		);
 	}
 
@@ -127,9 +127,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("RootB", "Root B");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertHierarchyContains(
-			"RootA",
-			" ChildAA",
-			"RootB"
+			"RootA seq=1",
+			" ChildAA seq=1",
+			"RootB seq=2"
 		);
 		assertEquals(3, outcome.getUpdatedConceptCount());
 
@@ -138,9 +138,9 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(1, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"RootA",
-			"RootB",
-			" ChildAA"
+			"RootA seq=1",
+			"RootB seq=2",
+			" ChildAA seq=1"
 		);
 
 	}
@@ -255,14 +255,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(8, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA",
-			" CodeAA",
-			"  CodeAAA",
-			"  CodeAAB",
-			"CodeB",
-			" CodeBA",
-			"  CodeBAA",
-			"  CodeBAB"
+			"CodeA seq=1",
+			" CodeAA seq=1",
+			"  CodeAAA seq=1",
+			"  CodeAAB seq=2",
+			"CodeB seq=2",
+			" CodeBA seq=1",
+			"  CodeBAA seq=1",
+			"  CodeBAB seq=2"
 		);
 
 		// Move a single child code to a new spot and make sure the hierarchy comes along
@@ -272,14 +272,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 		assertEquals(3, outcome.getUpdatedConceptCount());
 		assertHierarchyContains(
-			"CodeA",
-			"CodeB",
-			" CodeBA",
-			"  CodeBAA",
-			"  CodeBAB",
-			" CodeAA",
-			"  CodeAAA",
-			"  CodeAAB"
+			"CodeA seq=1",
+			"CodeB seq=2",
+			" CodeBA seq=1",
+			"  CodeBAA seq=1",
+			"  CodeBAB seq=2",
+			" CodeAA seq=2", // <-- CodeAA got added here so it comes second
+			"  CodeAAA seq=1",
+			"  CodeAAB seq=2"
 		);
 
 	}
@@ -438,13 +438,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	private void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
 		theCodes.sort((o1,o2)->{
-			int s1 = o1.getSequence() != null ? o1.getSequence() : 0;
-			int s2 = o2.getSequence() != null ? o2.getSequence() : 0;
+			int s1 = o1.getSequence() != null ? o1.getSequence() : o1.getCode().hashCode();
+			int s2 = o2.getSequence() != null ? o2.getSequence() : o2.getCode().hashCode();
 			return s1-s2;
 		});
 
 		for (TermConcept nextCode : theCodes) {
-			String hierarchyEntry = thePrefix + nextCode.getCode();
+			String hierarchyEntry = thePrefix + nextCode.getCode() + " seq=" + nextCode.getSequence();
 			theFlattenedHierarchy.add(hierarchyEntry);
 
 			List<TermConcept> children = nextCode.getChildCodes();
