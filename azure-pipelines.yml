@@ -23,9 +23,9 @@ jobs:
         inputs:
           goals: 'clean install'
           # These are Maven CLI options (and show up in the build logs) - "-nsu"=Don't update snapshots. We can remove this when Maven OSS is more healthy
-          options: '-P ALLMODULES -nsu'
+          options: '-P ALLMODULES -nsu  -Dmaven.test.skip'
           # These are JVM options (and don't show up in the build logs)
-          mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto -Dmaven.test.skip'
+          mavenOptions: '-Xmx2048m $(MAVEN_OPTS) -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
       - task: Maven@3
         inputs:
            goals: 'clean install'
