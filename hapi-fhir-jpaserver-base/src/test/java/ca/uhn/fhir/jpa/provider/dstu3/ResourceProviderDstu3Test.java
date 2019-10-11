@@ -3922,7 +3922,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE), matchesPattern("#[a-ZA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 
 		patient.setId(patientid);
