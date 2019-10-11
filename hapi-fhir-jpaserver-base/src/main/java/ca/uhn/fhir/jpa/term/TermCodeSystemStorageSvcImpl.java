@@ -490,7 +490,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			for (String nextParentCode : theParentCodes) {
 				Long nextParentCodePid = theCodeToConceptPid.get(nextParentCode);
 				if (nextParentCodePid == null) {
-					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
+					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode + " currently have: " + theCodeToConceptPid.keySet());
 				}
 				parentConcepts.add(myConceptDao.getOne(nextParentCodePid));
 			}
