@@ -186,20 +186,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	 * none was created, returns null.
 	 */
 	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
+		ForcedId retVal = null;
 		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
-			if (!theCreateForPureNumericIds && IdHelperService.isValidPid(theId)) {
-				return null;
+			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theId)) {
+				retVal = new ForcedId();
+				retVal.setResourceType(theEntity.getResourceType());
+				retVal.setForcedId(theId.getIdPart());
+				retVal.setResource(theEntity);
+				theEntity.setForcedId(retVal);
 			}
-
-			ForcedId fid = new ForcedId();
-			fid.setResourceType(theEntity.getResourceType());
-			fid.setForcedId(theId.getIdPart());
-			fid.setResource(theEntity);
-			theEntity.setForcedId(fid);
-			return fid;
 		}
 
-		return null;
+		return retVal;
 	}
 
 	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {

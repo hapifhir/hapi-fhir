@@ -31,29 +31,31 @@ public class LoadedFileDescriptors implements Closeable {
 						try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 							try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
 								for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
-									BOMInputStream fis = new BOMInputStream(zis);
-									File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-									ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
-									nextTemporaryFile.deleteOnExit();
-									FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
-									IOUtils.copy(fis, fos);
-									String nextEntryFileName = nextEntry.getName();
-									myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
-										@Override
-										public String getFilename() {
-											return nextEntryFileName;
-										}
+									try (BOMInputStream fis = new BOMInputStream(zis)) {
+										File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
+										ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
+										nextTemporaryFile.deleteOnExit();
+										try (FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false)) {
+											IOUtils.copy(fis, fos);
+											String nextEntryFileName = nextEntry.getName();
+											myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
+												@Override
+												public String getFilename() {
+													return nextEntryFileName;
+												}
 
-										@Override
-										public InputStream getInputStream() {
-											try {
-												return new FileInputStream(nextTemporaryFile);
-											} catch (FileNotFoundException e) {
-												throw new InternalErrorException(e);
-											}
+												@Override
+												public InputStream getInputStream() {
+													try {
+														return new FileInputStream(nextTemporaryFile);
+													} catch (FileNotFoundException e) {
+														throw new InternalErrorException(e);
+													}
+												}
+											});
+											myTemporaryFiles.add(nextTemporaryFile);
 										}
-									});
-									myTemporaryFiles.add(nextTemporaryFile);
+									}
 								}
 							}
 						}
@@ -104,14 +106,14 @@ public class LoadedFileDescriptors implements Closeable {
 		return notFoundFileNameFragments;
 	}
 
-	public void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
+	void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
 		List<String> notFound = notFound(theExpectedFilenameFragments);
 		if (!notFound.isEmpty()) {
 			throw new UnprocessableEntityException("Could not find the following mandatory files in input: " + notFound);
 		}
 	}
 
-	public void verifyOptionalFilesExist(List<String> theExpectedFilenameFragments) {
+	void verifyOptionalFilesExist(List<String> theExpectedFilenameFragments) {
 		List<String> notFound = notFound(theExpectedFilenameFragments);
 		if (!notFound.isEmpty()) {
 			ourLog.warn("Could not find the following optional files: " + notFound);
