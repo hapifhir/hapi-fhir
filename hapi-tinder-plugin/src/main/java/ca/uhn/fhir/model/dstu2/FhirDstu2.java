@@ -107,7 +107,7 @@ public class FhirDstu2 implements IFhirVersion {
 
 	@Override
 	public IVersionSpecificBundleFactory newBundleFactory(FhirContext theContext) {
-		return new Dstu2BundleFactory(theContext);
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

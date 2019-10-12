@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.util.TestUtil;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -185,8 +186,10 @@ public class SearchCoordinatorSvcImplTest {
 
 		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(allResults);
 
-		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t -> {
-			Search search = t.getArgument(0, Search.class);
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
+			Object argument = t.getArgument(0);
+			Validate.isTrue( argument instanceof Search, "Argument is " + argument);
+			Search search = (Search) argument;
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
 			search.setStatus(SearchStatusEnum.LOADING);
 			return Optional.of(search);
