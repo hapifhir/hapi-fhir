@@ -134,12 +134,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Load all concepts for the code system
 		Map<String, Long> codeToConceptPid = new HashMap<>();
 		{
-			ourLog.info("Loading all concepts in CodeSystem url[" + theSystem + "]");
+			ourLog.info("Loading all concepts in CodeSystem versionPid[{}] and url[{}]", cs.getPid(), theSystem);
 			StopWatch sw = new StopWatch();
 			CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TermConcept> query = criteriaBuilder.createQuery(TermConcept.class);
 			Root<TermConcept> root = query.from(TermConcept.class);
-			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), cs.getPid());
+			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), csv.getPid());
 			query.where(predicate);
 			TypedQuery<TermConcept> typedQuery = myEntityManager.createQuery(query.select(root));
 			org.hibernate.query.Query<TermConcept> hibernateQuery = (org.hibernate.query.Query<TermConcept>) typedQuery;
@@ -163,7 +163,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			CriteriaBuilder criteriaBuilder = myEntityManager.getCriteriaBuilder();
 			CriteriaQuery<TermConceptParentChildLink> query = criteriaBuilder.createQuery(TermConceptParentChildLink.class);
 			Root<TermConceptParentChildLink> root = query.from(TermConceptParentChildLink.class);
-			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), cs.getPid());
+			Predicate predicate = criteriaBuilder.equal(root.get("myCodeSystemVersionPid").as(Long.class), csv.getPid());
 			root.fetch("myChild");
 			root.fetch("myParent");
 			query.where(predicate);
@@ -490,7 +490,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			for (String nextParentCode : theParentCodes) {
 				Long nextParentCodePid = theCodeToConceptPid.get(nextParentCode);
 				if (nextParentCodePid == null) {
-					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode + " currently have: " + theCodeToConceptPid.keySet());
+					throw new InvalidRequestException("Unable to add code \"" + nextCodeToAdd + "\" to unknown parent: " + nextParentCode);
 				}
 				parentConcepts.add(myConceptDao.getOne(nextParentCodePid));
 			}

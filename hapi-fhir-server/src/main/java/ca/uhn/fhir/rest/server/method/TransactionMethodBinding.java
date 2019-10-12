@@ -120,15 +120,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			return response;
 		}
 
-		// Grab the IDs of all of the resources in the transaction
-		List<IResource> resources;
-		resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
-
-		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
-		for (IResource next : resources) {
-			oldIds.put(next, next.getId());
-		}
-
 		// Call the server implementation method
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);

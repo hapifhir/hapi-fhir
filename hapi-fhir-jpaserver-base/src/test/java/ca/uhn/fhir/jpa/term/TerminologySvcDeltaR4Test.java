@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -89,8 +88,17 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testAddHierarchyConcepts() {
+		ourLog.info("Starting testAddHierarchyConcepts");
+
 		createNotPresentCodeSystem();
 		assertHierarchyContains();
+
+		ourLog.info("Have created code system");
+		runInTransaction(() -> {
+			ourLog.info("All code systems: {}", myTermCodeSystemDao.findAll());
+			ourLog.info("All code system versions: {}", myTermCodeSystemVersionDao.findAll());
+			ourLog.info("All concepts: {}", myTermConceptDao.findAll());
+		});
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("RootA", "Root A");
@@ -100,6 +108,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"RootA seq=1",
 			"RootB seq=2"
 		);
+
+		ourLog.info("Have performed add");
+		runInTransaction(() -> {
+			ourLog.info("All code systems: {}", myTermCodeSystemDao.findAll());
+			ourLog.info("All code system versions: {}", myTermCodeSystemVersionDao.findAll());
+			ourLog.info("All concepts: {}", myTermConceptDao.findAll());
+		});
 
 		delta = new CustomTerminologySet();
 		delta.addUnanchoredChildConcept("RootA", "ChildAA", "Child AA");
@@ -437,10 +452,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	}
 
 	private void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
-		theCodes.sort((o1,o2)->{
+		theCodes.sort((o1, o2) -> {
 			int s1 = o1.getSequence() != null ? o1.getSequence() : o1.getCode().hashCode();
 			int s2 = o2.getSequence() != null ? o2.getSequence() : o2.getCode().hashCode();
-			return s1-s2;
+			return s1 - s2;
 		});
 
 		for (TermConcept nextCode : theCodes) {

@@ -19,41 +19,43 @@ import java.util.zip.ZipInputStream;
 
 public class LoadedFileDescriptors implements Closeable {
 	private static final Logger ourLog = LoggerFactory.getLogger(LoadedFileDescriptors.class);
-
 	private List<File> myTemporaryFiles = new ArrayList<>();
 	private List<ITermLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
 
-	public LoadedFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFileDescriptors) {
+	LoadedFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFileDescriptors) {
 		try {
 			for (ITermLoaderSvc.FileDescriptor next : theFileDescriptors) {
 				if (next.getFilename().toLowerCase().endsWith(".zip")) {
 					ourLog.info("Uncompressing {} into temporary files", next.getFilename());
 					try (InputStream inputStream = next.getInputStream()) {
-						ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream));
-						for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
-							BOMInputStream fis = new BOMInputStream(zis);
-							File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-							ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
-							nextTemporaryFile.deleteOnExit();
-							FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
-							IOUtils.copy(fis, fos);
-							String nextEntryFileName = nextEntry.getName();
-							myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
-								@Override
-								public String getFilename() {
-									return nextEntryFileName;
-								}
+						try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
+							try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
+								for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
+									BOMInputStream fis = new BOMInputStream(zis);
+									File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
+									ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
+									nextTemporaryFile.deleteOnExit();
+									FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
+									IOUtils.copy(fis, fos);
+									String nextEntryFileName = nextEntry.getName();
+									myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
+										@Override
+										public String getFilename() {
+											return nextEntryFileName;
+										}
 
-								@Override
-								public InputStream getInputStream() {
-									try {
-										return new FileInputStream(nextTemporaryFile);
-									} catch (FileNotFoundException e) {
-										throw new InternalErrorException(e);
-									}
+										@Override
+										public InputStream getInputStream() {
+											try {
+												return new FileInputStream(nextTemporaryFile);
+											} catch (FileNotFoundException e) {
+												throw new InternalErrorException(e);
+											}
+										}
+									});
+									myTemporaryFiles.add(nextTemporaryFile);
 								}
-							});
-							myTemporaryFiles.add(nextTemporaryFile);
+							}
 						}
 					}
 				} else {
@@ -61,10 +63,10 @@ public class LoadedFileDescriptors implements Closeable {
 				}
 
 			}
-		} catch (Exception e) {
-			close();
+		} catch (IOException e) {
 			throw new InternalErrorException(e);
 		}
+
 	}
 
 	public boolean hasFile(String theFilename) {

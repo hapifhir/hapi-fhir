@@ -63,6 +63,7 @@ public class AttachmentUtil {
 
 	public static void setUrl(FhirContext theContext, ICompositeType theAttachment, String theUrl) {
 		BaseRuntimeChildDefinition entryChild = getChild(theContext, theAttachment, "url");
+		assert entryChild != null : "Version " + theContext + " has no child " + "url";
 		String typeName = "uri";
 		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 			typeName = "url";
