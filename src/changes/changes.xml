@@ -352,7 +352,7 @@
 			</action>
 			<action type="add">
 				Auto generated transaction IDs will now use both upper- and lowercase letters for more uniqueness in
-				the same amount of space
+				the same amount of space.
 			</action>
 			<action type="fix">
 				Paging requests that are incorrectly executed at the type level were interpreted by the plain server
