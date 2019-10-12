@@ -31,8 +31,8 @@ public class CustomTerminologySet {
 	/**
 	 * Constructor
 	 */
-	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theParentCodeToChildrenWithMissingParent, Collection<TermConcept> theRootConcepts) {
-		this(theSize, theParentCodeToChildrenWithMissingParent, new ArrayList<>(theRootConcepts));
+	private CustomTerminologySet(int theSize, ListMultimap<TermConcept, String> theUnanchoredChildConceptsToParentCodes, Collection<TermConcept> theRootConcepts) {
+		this(theSize, theUnanchoredChildConceptsToParentCodes, new ArrayList<>(theRootConcepts));
 	}
 
 	/**
