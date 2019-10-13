@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.BOMInputStream;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.w3c.dom.ls.LSInput;
@@ -152,7 +153,9 @@ public class SchemaBaseValidator implements IValidatorModule {
 			}
 			try (BOMInputStream bomInputStream = new BOMInputStream(baseIs, false)) {
 				try (InputStreamReader baseReader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
-					return new StreamSource(baseReader, null);
+					// Buffer to be sure we close the stream
+					String contents = IOUtils.toString(baseReader);
+					return new StreamSource(new StringReader(contents), null);
 				}
 			}
 		} catch (IOException e) {

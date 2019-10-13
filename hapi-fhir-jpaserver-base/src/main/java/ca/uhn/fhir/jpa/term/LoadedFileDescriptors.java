@@ -31,30 +31,29 @@ public class LoadedFileDescriptors implements Closeable {
 						try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 							try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
 								for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
-									try (BOMInputStream fis = new BOMInputStream(zis)) {
-										File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-										ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
-										nextTemporaryFile.deleteOnExit();
-										try (FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false)) {
-											IOUtils.copy(fis, fos);
-											String nextEntryFileName = nextEntry.getName();
-											myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
-												@Override
-												public String getFilename() {
-													return nextEntryFileName;
-												}
+									BOMInputStream fis = new BOMInputStream(zis);
+									File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
+									ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
+									nextTemporaryFile.deleteOnExit();
+									try (FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false)) {
+										IOUtils.copy(fis, fos);
+										String nextEntryFileName = nextEntry.getName();
+										myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
+											@Override
+											public String getFilename() {
+												return nextEntryFileName;
+											}
 
-												@Override
-												public InputStream getInputStream() {
-													try {
-														return new FileInputStream(nextTemporaryFile);
-													} catch (FileNotFoundException e) {
-														throw new InternalErrorException(e);
-													}
+											@Override
+											public InputStream getInputStream() {
+												try {
+													return new FileInputStream(nextTemporaryFile);
+												} catch (FileNotFoundException e) {
+													throw new InternalErrorException(e);
 												}
-											});
-											myTemporaryFiles.add(nextTemporaryFile);
-										}
+											}
+										});
+										myTemporaryFiles.add(nextTemporaryFile);
 									}
 								}
 							}
