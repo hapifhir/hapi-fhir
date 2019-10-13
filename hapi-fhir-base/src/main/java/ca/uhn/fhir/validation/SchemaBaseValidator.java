@@ -153,7 +153,7 @@ public class SchemaBaseValidator implements IValidatorModule {
 			}
 			try (BOMInputStream bomInputStream = new BOMInputStream(baseIs, false)) {
 				try (InputStreamReader baseReader = new InputStreamReader(bomInputStream, StandardCharsets.UTF_8)) {
-					// Buffer to be sure we close the stream
+					// Buffer so that we can close the input stream
 					String contents = IOUtils.toString(baseReader);
 					return new StreamSource(new StringReader(contents), null);
 				}
