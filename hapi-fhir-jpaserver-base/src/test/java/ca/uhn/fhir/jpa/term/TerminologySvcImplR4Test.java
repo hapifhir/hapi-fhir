@@ -614,7 +614,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 				assertEquals(Enumerations.ConceptMapEquivalence.NARROWER, target.getEquivalence());
 				assertEquals(VS_URL_2, target.getValueSet());
 				assertEquals(CM_URL, target.getConceptMapUrl());
-			}
+	}
 		});
 	}
 

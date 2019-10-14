@@ -653,7 +653,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					countForBatch.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
 					try {
-						addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
 					} catch (ExpansionTooCostlyException e) {
 						return false;
 					}
@@ -680,18 +680,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
-							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
-								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-								if (code != null) {
-									if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
-										theValueSetCodeAccumulator.includeConcept(system, nextCode, code.getDisplay());
-									}
-									if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
-										theValueSetCodeAccumulator.excludeConcept(system, nextCode);
-									}
+						if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
+							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+							if (code != null) {
+								if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
+									theValueSetCodeAccumulator.includeConcept(system, nextCode, code.getDisplay());
+								}
+								if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
+									theValueSetCodeAccumulator.excludeConcept(system, nextCode);
 								}
 							}
 						}
+					}
 					}
 				} else {
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();

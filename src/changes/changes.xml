@@ -72,7 +72,7 @@
 			<action type="add" issue="1489">
 				<![CDATA[
 				<b>Performance Improvement</b>:
-				When unning inside a JPA server, The DSTU3+ validator now performs code validations
+				When running inside a JPA server, The DSTU3+ validator now performs code validations
 				by directly testing ValueSet membership against a pre-calculated copy of the ValueSet,
 				instead of first expanding the ValueSet and then examining the expanded contents.
 				This can yield a significant improvement in validation speed in many cases.

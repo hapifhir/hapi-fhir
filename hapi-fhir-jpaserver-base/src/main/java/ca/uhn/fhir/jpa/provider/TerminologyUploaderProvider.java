@@ -102,8 +102,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
-			ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
-		}
+				ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
+			}
 
 		try {
 			List<ITermLoaderSvc.FileDescriptor> localFiles = convertAttachmentsToFileDescriptors(theFiles);

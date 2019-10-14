@@ -233,20 +233,20 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		}
 
 		if (!haveValidated) {
-			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c->c.toVersionIndependentConcept()));
 		}
 
 		if (codeOpt != null && codeOpt.isPresent()) {
 			VersionIndependentConcept code = codeOpt.get();
-			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-			def.setCode(code.getCode());
-			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
-			return retVal;
-		}
+				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+				def.setCode(code.getCode());
+				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+				return retVal;
+			}
 
-		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
+			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override
