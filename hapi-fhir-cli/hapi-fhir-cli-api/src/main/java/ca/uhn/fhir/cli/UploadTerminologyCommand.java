@@ -40,10 +40,7 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -51,9 +48,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class UploadTerminologyCommand extends BaseCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
-	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
-	private static long ourTransferSizeLimit = 10 * FileUtils.ONE_MB;
+	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
+	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
 
 	@Override
 	public String getCommandDescription() {
@@ -111,19 +108,19 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		switch (mode) {
 			case SNAPSHOT:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
 				break;
 			case ADD:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
 				break;
 			case REMOVE:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 				break;
 		}
 
 	}
 
-	private void invokeOperation(CommandLine theCommandLine, String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
+	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -210,7 +207,11 @@ public class UploadTerminologyCommand extends BaseCommand {
 			try {
 				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
 				tempFile.deleteOnExit();
-
+				try (OutputStream fileOutputStream = new FileOutputStream(tempFile, false)) {
+					fileOutputStream.write(bytes);
+					bytes = null;
+					fileName = "localfile:" + tempFile.getAbsolutePath();
+				}
 			} catch (IOException e) {
 				throw new CommandFailureException(e);
 			}
@@ -218,7 +219,9 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
 		AttachmentUtil.setUrl(myFhirCtx, attachment, fileName);
-		AttachmentUtil.setData(myFhirCtx, attachment, bytes);
+		if (bytes != null) {
+			AttachmentUtil.setData(myFhirCtx, attachment, bytes);
+		}
 		ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
 	}
 
@@ -228,7 +231,11 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 	@VisibleForTesting
 	static void setTransferSizeLimitForUnitTest(long theTransferSizeLimit) {
-		ourTransferSizeLimit = theTransferSizeLimit;
+		if (theTransferSizeLimit <= 0) {
+			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+		}else {
+			ourTransferSizeLimit = theTransferSizeLimit;
+		}
 	}
 
 	static String stripPath(String thePath) {

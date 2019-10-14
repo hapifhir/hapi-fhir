@@ -104,7 +104,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSet(valueSetToExpandR4).getExpansion();
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4).getExpansion();
 			return VersionConvertor_30_40.convertValueSetExpansionComponent(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -118,7 +118,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4);
 			return VersionConvertor_30_40.convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);

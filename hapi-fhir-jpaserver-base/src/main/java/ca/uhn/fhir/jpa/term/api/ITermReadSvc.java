@@ -53,7 +53,7 @@ import java.util.Set;
  */
 public interface ITermReadSvc {
 
-	ValueSet expandValueSet(ValueSet theValueSetToExpand);
+	ValueSet expandValueSetInMemory(ValueSet theValueSetToExpand);
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand, int theOffset, int theCount);
 

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -21,6 +22,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -96,7 +98,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	@Override
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSet(valueSetToExpand);
+		return super.expandValueSetInMemory(valueSetToExpand);
 	}
 
 	@Override
@@ -111,11 +113,12 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		super.expandValueSet(valueSetToExpand, theValueSetCodeAccumulator);
 	}
 
+	@Transactional(dontRollbackOn = {ExpansionTooCostlyException.class})
 	@Override
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSet valueSetToExpand = new ValueSet();
 		valueSetToExpand.getCompose().addInclude(theInclude);
-		ValueSet expanded = super.expandValueSet(valueSetToExpand);
+		ValueSet expanded = super.expandValueSetInMemory(valueSetToExpand);
 		return new ValueSetExpander.ValueSetExpansionOutcome(expanded);
 	}
 
@@ -219,7 +222,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return txTemplate.execute(t-> {
+		return txTemplate.execute(t -> {
 			Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
 			if (codeOpt.isPresent()) {
 				TermConcept code = codeOpt.get();

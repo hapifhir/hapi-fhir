@@ -74,6 +74,10 @@ public class DaoConfig {
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+
+	// update setter javadoc if default changes
+	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
+
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -115,10 +119,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private int myMaximumExpansionSize = 5000;
+	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
@@ -564,8 +565,12 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Sets the maximum number of codes that will be added to a valueset expansion before
-	 * the operation will be failed as too costly
+	 * Sets the maximum number of codes that will be added to an in-memory valueset expansion before
+	 * the operation will be failed as too costly. Note that this setting applies only to
+	 * in-memory expansions and does not apply to expansions that are being pre-calculated.
+	 * <p>
+	 *    The default value for this setting is 1000.
+	 * </p>
 	 */
 	public void setMaximumExpansionSize(int theMaximumExpansionSize) {
 		Validate.isTrue(theMaximumExpansionSize > 0, "theMaximumExpansionSize must be > 0");

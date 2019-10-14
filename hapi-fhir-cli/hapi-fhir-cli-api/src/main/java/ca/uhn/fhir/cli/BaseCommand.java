@@ -398,7 +398,7 @@ public abstract class BaseCommand implements Comparable<BaseCommand> {
 	}
 
 	protected IGenericClient newClientWithBaseUrl(CommandLine theCommandLine, String theBaseUrl, String theBasicAuthOptionName, String theBearerTokenOptionName) throws ParseException {
-		myFhirCtx.getRestfulClientFactory().setSocketTimeout(10 * 60 * 1000);
+		myFhirCtx.getRestfulClientFactory().setSocketTimeout((int) DateUtils.MILLIS_PER_HOUR);
 		IGenericClient retVal = myFhirCtx.newRestfulGenericClient(theBaseUrl);
 
 		String basicAuthHeaderValue = getAndParseOptionBasicAuthHeader(theCommandLine, theBasicAuthOptionName);

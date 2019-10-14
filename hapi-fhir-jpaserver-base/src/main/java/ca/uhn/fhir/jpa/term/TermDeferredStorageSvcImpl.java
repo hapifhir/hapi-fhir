@@ -163,28 +163,38 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			return;
 		}
 
-		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
-		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		if (isDeferredConceptsOrConceptLinksToSaveLater()) {
-			tt.execute(t -> {
-				processDeferredConcepts();
-				return null;
-			});
-		}
+		for (int i = 0; i < 10; i++) {
 
-		if (isDeferredValueSets()) {
-			tt.execute(t -> {
-				processDeferredValueSets();
-				return null;
-			});
-		}
-		if (isDeferredConceptMaps()) {
-			tt.execute(t -> {
-				processDeferredConceptMaps();
-				return null;
-			});
-		}
+			if (!isDeferredConcepts() &&
+				!isConceptLinksToSaveLater() &&
+				!isDeferredValueSets() &&
+				!isDeferredConceptMaps()) {
+				return;
+			}
 
+			TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
+			tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+			if (isDeferredConceptsOrConceptLinksToSaveLater()) {
+				tt.execute(t -> {
+					processDeferredConcepts();
+					return null;
+				});
+			}
+
+			if (isDeferredValueSets()) {
+				tt.execute(t -> {
+					processDeferredValueSets();
+					return null;
+				});
+			}
+			if (isDeferredConceptMaps()) {
+				tt.execute(t -> {
+					processDeferredConceptMaps();
+					return null;
+				});
+			}
+
+		}
 	}
 
 	@Override

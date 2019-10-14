@@ -97,7 +97,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	@Override
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpand = org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet((ValueSet) theInput);
-		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSet(valueSetToExpand);
+		org.hl7.fhir.r4.model.ValueSet valueSetR4 = super.expandValueSetInMemory(valueSetToExpand);
 		return org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetR4);
 	}
 
@@ -118,7 +118,7 @@ public class TermReadSvcR5 extends BaseTermReadSvcImpl implements IValidationSup
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSet valueSetToExpand = new ValueSet();
 		valueSetToExpand.getCompose().addInclude(theInclude);
-		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetToExpand));
+		org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(valueSetToExpand));
 		return new ValueSetExpander.ValueSetExpansionOutcome(org.hl7.fhir.convertors.conv40_50.ValueSet.convertValueSet(expandedR4));
 	}
 

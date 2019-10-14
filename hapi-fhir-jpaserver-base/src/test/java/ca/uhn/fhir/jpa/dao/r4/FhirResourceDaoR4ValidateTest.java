@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -43,7 +45,52 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private IValidatorModule myValidatorModule;
 	@Autowired
-	private ITermReadSvc myTerminologySvc;
+	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
+
+	@Test
+	public void testValidateWhereValueSetExceedsPreExpansionCapabilities() throws Exception {
+		myDaoConfig.setPreExpandValueSets(false);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
+		// and not just certain ones
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+
+		myDaoConfig.setMaximumExpansionSize(50);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		obs.setValue(new StringType("This is the value"));
+		try {
+			MethodOutcome outcome = myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			ourLog.info(encode(outcome.getOperationOutcome()));
+		} catch (PreconditionFailedException e) {
+			ourLog.info(encode(e.getOperationOutcome()));
+		}
+	}
+
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
@@ -144,8 +191,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
-	private String encode(Patient thePatient) {
-		return myFhirCtx.newJsonParser().encodeResourceToString(thePatient);
+	private String encode(IBaseResource thePatient) {
+		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(thePatient);
 	}
 
 
@@ -280,7 +327,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-
+		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@Test

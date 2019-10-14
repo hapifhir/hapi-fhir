@@ -99,7 +99,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSet(theSource);
+			return myTerminologySvc.expandValueSetInMemory(theSource);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);

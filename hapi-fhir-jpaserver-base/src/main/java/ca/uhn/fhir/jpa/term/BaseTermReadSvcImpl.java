@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -75,6 +76,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.NoRollbackRuleAttribute;
+import org.springframework.transaction.interceptor.RuleBasedTransactionAttribute;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.Nonnull;
@@ -193,7 +196,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		if (retVal) {
 			if (theSetToPopulate.size() >= myDaoConfig.getMaximumExpansionSize()) {
 				String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
-				throw new InvalidRequestException(msg);
+				throw new ExpansionTooCostlyException(msg);
 			}
 		}
 		return retVal;
@@ -291,9 +294,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public ValueSet expandValueSet(ValueSet theValueSetToExpand) {
+	public ValueSet expandValueSetInMemory(ValueSet theValueSetToExpand) {
 
-		ValueSetExpansionComponentWithConceptAccumulator expansionComponent = new ValueSetExpansionComponentWithConceptAccumulator();
+		int maxCapacity = myDaoConfig.getMaximumExpansionSize();
+		ValueSetExpansionComponentWithConceptAccumulator expansionComponent = new ValueSetExpansionComponentWithConceptAccumulator(myContext, maxCapacity);
 		expansionComponent.setIdentifier(UUID.randomUUID().toString());
 		expansionComponent.setTimestamp(new Date());
 
@@ -327,7 +331,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		if (!optionalTermValueSet.isPresent()) {
 			ourLog.warn("ValueSet is not present in terminology tables. Will perform in-memory expansion without parameters. {}", getValueSetInfo(theValueSetToExpand));
-			return expandValueSet(theValueSetToExpand); // In-memory expansion.
+			return expandValueSetInMemory(theValueSetToExpand); // In-memory expansion.
 		}
 
 		TermValueSet termValueSet = optionalTermValueSet.get();
@@ -335,7 +339,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		if (termValueSet.getExpansionStatus() != TermValueSetPreExpansionStatusEnum.EXPANDED) {
 			ourLog.warn("{} is present in terminology tables but not ready for persistence-backed invocation of operation $expand. Will perform in-memory expansion without parameters. Current status: {} | {}",
 				getValueSetInfo(theValueSetToExpand), termValueSet.getExpansionStatus().name(), termValueSet.getExpansionStatus().getDescription());
-			return expandValueSet(theValueSetToExpand); // In-memory expansion.
+			return expandValueSetInMemory(theValueSetToExpand); // In-memory expansion.
 		}
 
 		ValueSet.ValueSetExpansionComponent expansionComponent = new ValueSet.ValueSetExpansionComponent();
@@ -457,6 +461,12 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			}
 		}
 
+		// If the accumulator filled up, abort
+		if (Integer.valueOf(0).equals(theValueSetCodeAccumulator.getCapacityRemaining())) {
+			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
+			throw new ExpansionTooCostlyException(msg);
+		}
+
 		// Handle excludes
 		ourLog.debug("Handling excludes");
 		for (ValueSet.ConceptSetComponent exclude : theValueSetToExpand.getCompose().getExclude()) {
@@ -516,7 +526,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	}
 
 	protected List<VersionIndependentConcept> expandValueSetAndReturnVersionIndependentConcepts(org.hl7.fhir.r4.model.ValueSet theValueSetToExpandR4) {
-		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSet(theValueSetToExpandR4).getExpansion();
+		org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = expandValueSetInMemory(theValueSetToExpandR4).getExpansion();
 
 		ArrayList<VersionIndependentConcept> retVal = new ArrayList<>();
 		for (org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent nextContains : expandedR4.getContains()) {
@@ -603,6 +613,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 				AtomicInteger count = new AtomicInteger(0);
 
 				int maxResultsPerBatch = 10000;
+
+				/*
+				 * If the accumulator is bounded, we may reduce the size of the query to
+				 * Lucene in order to be more efficient.
+				 */
+				if (theAdd) {
+					Integer accumulatorCapacityRemaining = theValueSetCodeAccumulator.getCapacityRemaining();
+					if (accumulatorCapacityRemaining != null) {
+						maxResultsPerBatch = Math.min(maxResultsPerBatch, accumulatorCapacityRemaining + 1);
+					}
+					if (maxResultsPerBatch <= 0) {
+						return false;
+					}
+				}
+
 				jpaQuery.setMaxResults(maxResultsPerBatch);
 				jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
 
@@ -618,7 +643,11 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					count.incrementAndGet();
 					countForBatch.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
-					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+					try {
+						addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+					} catch (ExpansionTooCostlyException e) {
+						return false;
+					}
 				}
 
 				ourLog.info("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
@@ -1226,7 +1255,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	@PostConstruct
 	public void start() {
 		myValueSetResourceDao = myApplicationContext.getBean(IFhirResourceDaoValueSet.class);
-		myTxTemplate = new TransactionTemplate(myTransactionManager);
+		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
+		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
+		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
 	}
 
 	@PostConstruct
