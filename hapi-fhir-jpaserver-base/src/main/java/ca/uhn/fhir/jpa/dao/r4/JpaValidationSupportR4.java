@@ -190,7 +190,7 @@ public class JpaValidationSupportR4 implements IJpaValidationSupportR4, Applicat
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

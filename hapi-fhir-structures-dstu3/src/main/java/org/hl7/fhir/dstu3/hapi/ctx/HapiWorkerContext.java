@@ -275,7 +275,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -303,7 +303,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       }
     }
 
-
     boolean caseSensitive = true;
     if (isNotBlank(theSystem)) {
       CodeSystem system = fetchCodeSystem(theSystem);
@@ -327,44 +326,49 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
      */
     if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
-      ValueSet expansion = new ValueSet();
-      for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
-        for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
-          expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
-        }
-      }
-      expandedValueSet = new ValueSetExpansionOutcome(expansion);
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
     }
 
     /*
-     * We'll just accept all mimetypes, since this is pretty much impossible to exhaustively
-     * validate.
+     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getId())) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(wantCode);
-      definition.setDisplay(wantCode);
-      ValidationResult retVal = new ValidationResult(definition);
-      return retVal;
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
     }
 
-    if (expandedValueSet == null) {
+    if (theVs != null && isNotBlank(theVs.getUrl())) {
+      IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      if (outcome != null && outcome.isOk()) {
+        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+        definition.setCode(theCode);
+        definition.setDisplay(outcome.getDisplay());
+        return new ValidationResult(definition);
+      }
+    } else {
       expandedValueSet = expand(theVs, null);
     }
 
-    for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-      String nextCode = next.getCode();
-      if (!caseSensitive) {
-        nextCode = nextCode.toUpperCase();
-      }
+    if (expandedValueSet != null) {
+      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
+        String nextCode = next.getCode();
+        if (!caseSensitive) {
+          nextCode = nextCode.toUpperCase();
+        }
 
-      if (nextCode.equals(wantCode)) {
-        if (theSystem == null || next.getSystem().equals(theSystem)) {
-          ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-          definition.setCode(next.getCode());
-          definition.setDisplay(next.getDisplay());
-          ValidationResult retVal = new ValidationResult(definition);
-          return retVal;
+        if (nextCode.equals(wantCode)) {
+          if (theSystem == null || next.getSystem().equals(theSystem)) {
+            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+            definition.setCode(next.getCode());
+            definition.setDisplay(next.getDisplay());
+            ValidationResult retVal = new ValidationResult(definition);
+            return retVal;
+          }
         }
       }
     }

@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
@@ -92,13 +91,13 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 			super.throwInvalidValueSet(theValueSet);
 		}
 
-		return expandValueSetAndReturnVersionIndependentConcepts(vs);
+		return expandValueSetAndReturnVersionIndependentConcepts(vs, null);
 	}
 
 	@Override
 	public IBaseResource expandValueSet(IBaseResource theInput) {
 		ValueSet valueSetToExpand = (ValueSet) theInput;
-		return super.expandValueSetInMemory(valueSetToExpand);
+		return super.expandValueSetInMemory(valueSetToExpand, null);
 	}
 
 	@Override
@@ -118,7 +117,7 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 	public ValueSetExpander.ValueSetExpansionOutcome expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSet valueSetToExpand = new ValueSet();
 		valueSetToExpand.getCompose().addInclude(theInclude);
-		ValueSet expanded = super.expandValueSetInMemory(valueSetToExpand);
+		ValueSet expanded = super.expandValueSetInMemory(valueSetToExpand, null);
 		return new ValueSetExpander.ValueSetExpansionOutcome(expanded);
 	}
 
@@ -217,25 +216,37 @@ public class TermReadSvcR4 extends BaseTermReadSvcImpl implements ITermReadSvcR4
 		return null;
 	}
 
+	@Override
+	protected ValueSet toCanonicalValueSet(IBaseResource theValueSet) {
+		return (ValueSet) theValueSet;
+	}
+
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return txTemplate.execute(t -> {
-			Optional<TermConcept> codeOpt = findCode(theCodeSystem, theCode);
-			if (codeOpt.isPresent()) {
-				TermConcept code = codeOpt.get();
-				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-				def.setCode(code.getCode());
-				def.setDisplay(code.getDisplay());
-				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
-				retVal.setProperties(code.toValidationProperties());
-				return retVal;
-			}
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
+		boolean haveValidated = false;
 
-			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
-		});
+		if (isNotBlank(theValueSetUrl)) {
+			codeOpt = super.validateCodeInValueSet(theValueSetUrl, theCodeSystem, theCode);
+			haveValidated = true;
+		}
+
+		if (!haveValidated) {
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c->c.toVersionIndependentConcept()));
+		}
+
+		if (codeOpt != null && codeOpt.isPresent()) {
+			VersionIndependentConcept code = codeOpt.get();
+			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+			def.setCode(code.getCode());
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+			return retVal;
+		}
+
+		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override

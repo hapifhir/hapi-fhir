@@ -196,7 +196,7 @@ public class JpaValidationSupportDstu3 implements IJpaValidationSupportDstu3, Ap
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

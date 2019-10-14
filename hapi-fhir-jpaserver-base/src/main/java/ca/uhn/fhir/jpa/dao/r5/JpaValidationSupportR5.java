@@ -179,6 +179,7 @@ public class JpaValidationSupportR5 implements IJpaValidationSupportR5, Applicat
 		myApplicationContext = theApplicationContext;
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
 		myStructureDefinitionDao = myApplicationContext.getBean("myStructureDefinitionDaoR5", IFhirResourceDao.class);
@@ -190,7 +191,7 @@ public class JpaValidationSupportR5 implements IJpaValidationSupportR5, Applicat
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

@@ -46,6 +46,7 @@ public interface IValidationSupport
    * @param uri Canonical Uri of the ValueSet
    * @return The valueset (must not be null, but can be an empty ValueSet)
    */
+  @Override
   ValueSet fetchValueSet(FhirContext theContext, String uri);
 
   /**
@@ -97,7 +98,7 @@ public interface IValidationSupport
    * @return Returns a validation result object
    */
   @Override
-  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
+  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
 
   class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
 

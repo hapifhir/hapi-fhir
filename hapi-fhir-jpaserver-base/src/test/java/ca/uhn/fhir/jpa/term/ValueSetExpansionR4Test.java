@@ -762,7 +762,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		try {
-			myTermSvc.expandValueSetInMemory(vs);
+			myTermSvc.expandValueSetInMemory(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
 			assertEquals("Expansion produced too many (> 50) results", e.getMessage());
@@ -773,7 +773,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(109, outcome.getExpansion().getContains().size());
 
 	}

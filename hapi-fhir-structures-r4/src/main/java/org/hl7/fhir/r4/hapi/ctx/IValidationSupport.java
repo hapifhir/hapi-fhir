@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.hapi.ctx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -46,6 +47,7 @@ public interface IValidationSupport
    * @param uri Canonical Uri of the ValueSet
    * @return The valueset (must not be null, but can be an empty ValueSet)
    */
+  @Override
   ValueSet fetchValueSet(FhirContext theContext, String uri);
 
   /**
@@ -93,7 +95,7 @@ public interface IValidationSupport
    * @return Returns a validation result object
    */
   @Override
-  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
+  CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
 
   class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
 

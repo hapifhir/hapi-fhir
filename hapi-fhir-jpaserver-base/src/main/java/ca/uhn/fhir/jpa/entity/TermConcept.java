@@ -23,6 +23,7 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.search.DeferConceptIndexingInterceptor;
+import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.util.ValidateUtil;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -407,4 +408,7 @@ public class TermConcept implements Serializable {
 	}
 
 
+	public VersionIndependentConcept toVersionIndependentConcept() {
+		return new VersionIndependentConcept(myCodeSystem.getCodeSystem().getCodeSystemUri(), myCode);
+	}
 }

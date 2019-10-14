@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -19,7 +18,10 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.*;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -247,7 +249,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		include.addConcept().setCode("childAAB");
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
 
 		List<String> codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAB"));
@@ -281,7 +283,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("propA")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("valueAAA");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAA"));
 
@@ -294,7 +296,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("propB")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("foo");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
 
@@ -307,7 +309,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("propA")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("valueAAA");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, empty());
 	}
@@ -334,7 +336,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("3rdParty");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
 
@@ -351,7 +353,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("3rdparty");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
 	}
@@ -378,7 +380,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("LOINC");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
 
@@ -395,7 +397,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("loinc");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
 	}
@@ -418,7 +420,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("3rdParty");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
 
@@ -431,7 +433,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("3rdparty");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("47239-9"));
 	}
@@ -454,7 +456,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("LOINC");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
 
@@ -467,7 +469,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("copyright")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("loinc");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4"));
 	}
@@ -491,7 +493,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle op=ISA on property copyright");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -514,7 +516,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -536,7 +538,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle value=bogus on property copyright");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -561,7 +563,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -578,7 +580,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 
@@ -595,7 +597,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
@@ -612,7 +614,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 	}
@@ -639,7 +641,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 	}
@@ -662,7 +664,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 
@@ -675,7 +677,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 
@@ -688,7 +690,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 
 		// Include
@@ -700,7 +702,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 	}
 
@@ -722,7 +724,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("ancestor")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 	}
@@ -746,7 +748,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle op=ISA on property ancestor");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -769,7 +771,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -794,7 +796,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
@@ -811,7 +813,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 
@@ -828,7 +830,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
 
@@ -845,7 +847,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
 	}
@@ -872,7 +874,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 	}
@@ -895,7 +897,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 
 		// Include
@@ -907,7 +909,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -920,7 +922,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3"));
 
@@ -933,7 +935,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3"));
 	}
@@ -956,7 +958,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("child")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 	}
@@ -980,7 +982,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle op=ISA on property child");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1003,7 +1005,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1028,7 +1030,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
@@ -1045,7 +1047,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 
@@ -1062,7 +1064,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 
@@ -1079,7 +1081,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 	}
@@ -1106,7 +1108,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 	}
@@ -1129,7 +1131,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 
 		// Include
@@ -1141,7 +1143,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -1154,7 +1156,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 
@@ -1167,7 +1169,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 	}
@@ -1190,7 +1192,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("descendant")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 	}
@@ -1214,7 +1216,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle op=ISA on property descendant");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1237,7 +1239,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1262,7 +1264,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-4", "47239-9"));
 
@@ -1279,7 +1281,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3"));
 
@@ -1296,7 +1298,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 
@@ -1313,7 +1315,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "43343-3", "43343-4", "47239-9"));
 	}
@@ -1340,7 +1342,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 	}
@@ -1363,7 +1365,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3"));
 
@@ -1376,7 +1378,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-3");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-4", "47239-9"));
 
@@ -1389,7 +1391,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 
 		// Include
@@ -1401,7 +1403,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		assertEquals(0, outcome.getExpansion().getContains().size());
 	}
 
@@ -1423,7 +1425,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("parent")
 			.setOp(ValueSet.FilterOperator.IN)
 			.setValue("50015-7,43343-3,43343-4,47239-9");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 	}
@@ -1447,7 +1449,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Don't know how to handle op=ISA on property parent");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1470,7 +1472,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		expectedException.expect(InvalidRequestException.class);
 		expectedException.expectMessage("Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
-		myTermSvc.expandValueSetInMemory(vs);
+		myTermSvc.expandValueSetInMemory(vs, null);
 	}
 
 	@Test
@@ -1495,7 +1497,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue(".*\\^Donor$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4", "47239-9"));
 	}
@@ -1522,7 +1524,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("HELLO")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("12345-1|12345-2");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7", "47239-9"));
 	}
@@ -1545,7 +1547,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue(".*\\^Donor$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -1558,7 +1560,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("\\^Donor$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -1571,7 +1573,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("\\^Dono$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, empty());
 
@@ -1584,7 +1586,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("^Donor$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, empty());
 
@@ -1597,7 +1599,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("\\^Dono");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("50015-7"));
 
@@ -1610,7 +1612,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setProperty("SYSTEM")
 			.setOp(ValueSet.FilterOperator.REGEX)
 			.setValue("^Ser$");
-		outcome = myTermSvc.expandValueSetInMemory(vs);
+		outcome = myTermSvc.expandValueSetInMemory(vs, null);
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("43343-3", "43343-4"));
 
@@ -1625,7 +1627,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("ParentWithNoChildrenA", "ParentWithNoChildrenB", "ParentWithNoChildrenC", "ParentA", "childAAA", "childAAB", "childAA", "childAB", "ParentB"));
@@ -1742,7 +1744,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		include.addConcept().setCode("childAAB");
-		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs);
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
 
 		codes = toCodesContains(outcome.getExpansion().getContains());
 		assertThat(codes, containsInAnyOrder("childAAB"));
@@ -1936,7 +1938,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
-		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null);
+		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null, null);
 		assertEquals(true, code.isOk());
 		assertEquals(2, code.getProperties().size());
 	}

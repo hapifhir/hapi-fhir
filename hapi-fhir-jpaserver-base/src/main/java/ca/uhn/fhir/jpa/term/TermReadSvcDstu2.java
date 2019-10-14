@@ -73,6 +73,11 @@ public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 	}
 
 	@Override
+	protected ValueSet toCanonicalValueSet(IBaseResource theValueSet) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public IBaseResource expandValueSet(IBaseResource theValueSetToExpand) {
 		throw new UnsupportedOperationException();
 	}

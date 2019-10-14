@@ -1008,7 +1008,7 @@
 						"url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
 						"valueString" : "VitalSigns"
 					}],
-					"strength" : "extensible",
+					"strength" : "required",
 					"description" : "This identifies the vital sign result type.",
 					"valueSet" : "http://example.com/fhir/ValueSet/observation-vitalsignresult"
 				},
@@ -2455,9 +2455,9 @@
 						"url" : "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
 						"valueString" : "VitalSigns"
 					}],
-					"strength" : "extensible",
+					"strength" : "required",
 					"description" : "This identifies the vital sign result type.",
-					"valueSet" : "http://hl7.org/fhir/ValueSet/observation-vitalsignresult"
+					"valueSet" : "http://example.com/fhir/ValueSet/observation-vitalsignresult"
 				}
 			},
 			{
