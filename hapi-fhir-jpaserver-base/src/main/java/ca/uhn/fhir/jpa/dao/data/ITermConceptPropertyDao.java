@@ -29,9 +29,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface ITermConceptPropertyDao extends JpaRepository<TermConceptProperty, Long> {
 
-	@Query("SELECT t FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
-	Slice<TermConceptProperty> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
-
 	@Query("SELECT t.myId FROM TermConceptProperty t WHERE t.myCodeSystemVersion.myId = :cs_pid")
 	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 

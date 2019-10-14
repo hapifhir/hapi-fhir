@@ -103,13 +103,6 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
 	/**
-	 * Is a given ValueSet supported for expansion by this validation support module
-	 */
-	default boolean isValueSetSupported(FhirContext theContext, String theValueSetUrl) {
-		return fetchValueSet(theContext, theValueSetUrl) != null;
-	}
-
-	/**
 	 * Fetch the given ValueSet by URL
 	 */
 	IBaseResource fetchValueSet(FhirContext theContext, String theValueSetUrl);

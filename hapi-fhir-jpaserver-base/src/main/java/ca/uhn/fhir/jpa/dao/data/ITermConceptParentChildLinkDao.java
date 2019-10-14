@@ -37,9 +37,6 @@ public interface ITermConceptParentChildLinkDao extends JpaRepository<TermConcep
 	@Query("SELECT t.myParentPid FROM TermConceptParentChildLink t WHERE t.myChildPid = :child_pid")
 	Collection<Long> findAllWithChild(@Param("child_pid") Long theConceptPid);
 
-	@Query("SELECT t FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
-	Slice<TermConceptParentChildLink> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
-
 	@Query("SELECT t.myPid FROM TermConceptParentChildLink t WHERE t.myCodeSystem.myId = :cs_pid")
 	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 }
