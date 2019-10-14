@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa;
+package ca.uhn.fhir.test;
 
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;

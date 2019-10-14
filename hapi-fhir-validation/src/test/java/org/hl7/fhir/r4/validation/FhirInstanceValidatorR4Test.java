@@ -102,7 +102,7 @@ public class FhirInstanceValidatorR4Test {
 		myVal.setValidateAgainstStandardSchematron(false);
 
 		myMockSupport = mock(IValidationSupport.class);
-		CachingValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(myMockSupport, myDefaultValidationSupport));
+		CachingValidationSupport validationSupport = new CachingValidationSupport(new ValidationSupportChain(myDefaultValidationSupport, myMockSupport));
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -582,7 +582,7 @@ public class FhirInstanceValidatorR4Test {
 	public void testValidateProfileWithExtension() throws IOException, FHIRException {
 		PrePopulatedValidationSupport valSupport = new PrePopulatedValidationSupport();
 		DefaultProfileValidationSupport defaultSupport = new DefaultProfileValidationSupport();
-		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(valSupport, defaultSupport));
+		CachingValidationSupport support = new CachingValidationSupport(new ValidationSupportChain(defaultSupport, valSupport));
 
 		// Prepopulate SDs
 		valSupport.addStructureDefinition(loadStructureDefinition(defaultSupport, "/dstu3/myconsent-profile.xml"));

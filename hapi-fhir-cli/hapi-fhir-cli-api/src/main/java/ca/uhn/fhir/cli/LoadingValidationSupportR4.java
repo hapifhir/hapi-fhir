@@ -98,7 +98,7 @@ public class LoadingValidationSupportR4 implements org.hl7.fhir.r4.hapi.ctx.IVal
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSet) {
 		return null;
 	}
 

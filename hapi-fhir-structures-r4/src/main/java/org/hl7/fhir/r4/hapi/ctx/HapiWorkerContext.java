@@ -227,7 +227,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theSystem);
       definition.setDisplay(theCode);
@@ -237,7 +237,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     /*
      * The following valueset is a special case, since the mime types codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getId())) {
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theSystem);
       definition.setDisplay(theCode);
