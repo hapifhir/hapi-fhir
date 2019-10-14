@@ -242,9 +242,6 @@ public class SearchCoordinatorSvcImplTest {
 			return Optional.empty();
 		});
 
-		IFhirResourceDao dao = myCallingDao;
-		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
-
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null);
 			fail();
@@ -266,9 +263,6 @@ public class SearchCoordinatorSvcImplTest {
 			sleepAtLeast(100);
 			return Optional.ofNullable(myCurrentSearch);
 		});
-
-		IFhirResourceDao dao = myCallingDao;
-		when(myDaoRegistry.getResourceDao(any(String.class))).thenReturn(dao);
 
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null);
