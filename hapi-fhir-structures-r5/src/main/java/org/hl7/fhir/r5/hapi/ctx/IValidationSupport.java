@@ -95,6 +95,9 @@ public interface IValidationSupport
    * @param theCodeSystem The code system, e.g. "<code>http://loinc.org</code>"
    * @param theCode       The code, e.g. "<code>1234-5</code>"
    * @param theDisplay    The display name, if it should also be validated
+	* @param theValueSetUrl When validating that a code exists as a part of a specific ValueSet, the ValueSet URI
+	*                       will be provided in this parameter value. If <code>null</code>, the validation should simply
+	*                       confirm that the code exists.
    * @return Returns a validation result object
    */
   @Override
