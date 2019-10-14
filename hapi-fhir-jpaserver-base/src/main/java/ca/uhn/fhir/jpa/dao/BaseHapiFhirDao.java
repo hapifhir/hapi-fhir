@@ -20,13 +20,13 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
-import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.IResource;
@@ -53,7 +53,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.CoverageIgnore;
 import ca.uhn.fhir.util.MetaUtil;
-import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.XmlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -62,8 +61,6 @@ import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.slf4j.Logger;
@@ -81,7 +78,6 @@ import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
@@ -139,7 +135,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	@Autowired
 	protected ISearchParamRegistry mySerarchParamRegistry;
 	@Autowired
-	protected IHapiTerminologySvc myTerminologySvc;
+	protected ITermReadSvc myTerminologySvc;
 	@Autowired
 	protected IResourceHistoryTableDao myResourceHistoryTableDao;
 	@Autowired
@@ -160,8 +156,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	private PlatformTransactionManager myPlatformTransactionManager;
 	@Autowired
 	private ISearchCacheSvc mySearchCacheSvc;
-	@Autowired
-	private ISearchResultCacheSvc mySearchResultCacheSvc;
 	@Autowired
 	private ISearchParamPresenceSvc mySearchParamPresenceSvc;
 	@Autowired
@@ -192,20 +186,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 	 * none was created, returns null.
 	 */
 	protected ForcedId createForcedIdIfNeeded(ResourceTable theEntity, IIdType theId, boolean theCreateForPureNumericIds) {
+		ForcedId retVal = null;
 		if (theId.isEmpty() == false && theId.hasIdPart() && theEntity.getForcedId() == null) {
-			if (!theCreateForPureNumericIds && IdHelperService.isValidPid(theId)) {
-				return null;
+			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theId)) {
+				retVal = new ForcedId();
+				retVal.setResourceType(theEntity.getResourceType());
+				retVal.setForcedId(theId.getIdPart());
+				retVal.setResource(theEntity);
+				theEntity.setForcedId(retVal);
 			}
-
-			ForcedId fid = new ForcedId();
-			fid.setResourceType(theEntity.getResourceType());
-			fid.setForcedId(theId.getIdPart());
-			fid.setResource(theEntity);
-			theEntity.setForcedId(fid);
-			return fid;
 		}
 
-		return null;
+		return retVal;
 	}
 
 	private void extractTagsHapi(IResource theResource, ResourceTable theEntity, Set<ResourceTag> allDefs) {
@@ -285,39 +277,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 
 	}
 
-	private void findMatchingTagIds(RequestDetails theRequest, String theResourceName, IIdType theResourceId, Set<Long> tagIds, Class<? extends BaseTag> entityClass) {
-		{
-			CriteriaBuilder builder = myEntityManager.getCriteriaBuilder();
-			CriteriaQuery<Tuple> cq = builder.createTupleQuery();
-			Root<? extends BaseTag> from = cq.from(entityClass);
-			cq.multiselect(from.get("myTagId").as(Long.class)).distinct(true);
-
-			if (theResourceName != null) {
-				Predicate typePredicate = builder.equal(from.get("myResourceType"), theResourceName);
-				if (theResourceId != null) {
-					cq.where(typePredicate, builder.equal(from.get("myResourceId"), myIdHelperService.translateForcedIdToPid(theResourceName, theResourceId.getIdPart(), theRequest)));
-				} else {
-					cq.where(typePredicate);
-				}
-			}
-
-			TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
-			for (Tuple next : query.getResultList()) {
-				tagIds.add(next.get(0, Long.class));
-			}
-		}
-	}
-
-	protected void flushJpaSession() {
-		SessionImpl session = (SessionImpl) myEntityManager.unwrap(Session.class);
-		int insertionCount = session.getActionQueue().numberOfInsertions();
-		int updateCount = session.getActionQueue().numberOfUpdates();
-
-		StopWatch sw = new StopWatch();
-		myEntityManager.flush();
-		ourLog.debug("Session flush took {}ms for {} inserts and {} updates", sw.getMillis(), insertionCount, updateCount);
-	}
-
 	private Set<ResourceTag> getAllTagDefinitions(ResourceTable theEntity) {
 		HashSet<ResourceTag> retVal = Sets.newHashSet();
 		if (theEntity.isHasTags()) {
@@ -358,7 +317,6 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public <R extends IBaseResource> IFhirResourceDao<R> getDao(Class<R> theType) {
 		return myDaoRegistry.getResourceDaoOrNull(theType);
 	}
@@ -446,6 +404,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 			newVersion = Long.toString(newVersionLong);
 		}
 
+		assert theResourceId != null;
 		IIdType newId = theResourceId.withVersion(newVersion);
 		theResource.getIdElement().setValue(newId.getValue());
 		theSavedEntity.setVersion(newVersionLong);

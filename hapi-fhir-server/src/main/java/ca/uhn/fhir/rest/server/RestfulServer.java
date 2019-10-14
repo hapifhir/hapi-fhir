@@ -50,6 +50,7 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
 import ca.uhn.fhir.util.*;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -1126,10 +1127,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		if (isBlank(requestId)) {
-			requestId = Long.toHexString(RANDOM.nextLong());
-			requestId = leftPad(requestId, Constants.REQUEST_ID_LENGTH, '0');
+			int requestIdLength = Constants.REQUEST_ID_LENGTH;
+			requestId = newRequestId(requestIdLength);
 		}
 
+		return requestId;
+	}
+
+	/**
+	 * Generate a new request ID string. Subclasses may ovrride.
+	 */
+	protected String newRequestId(int theRequestIdLength) {
+		String requestId;
+		requestId = RandomStringUtils.randomAlphanumeric(theRequestIdLength);
 		return requestId;
 	}
 

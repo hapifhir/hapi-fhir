@@ -25,9 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.instance.hapi.validation.IValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,7 +34,7 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
+public class TermReadSvcDstu2 extends BaseTermReadSvcImpl {
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
@@ -65,22 +63,7 @@ public class HapiTerminologySvcDstu2 extends BaseHapiTerminologySvcImpl {
 	}
 
 	@Override
-	protected IIdType createOrUpdateCodeSystem(CodeSystem theCodeSystemResource) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void createOrUpdateConceptMap(ConceptMap theNextConceptMap) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected void createOrUpdateValueSet(ValueSet theValueSet) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	protected CodeSystem getCodeSystemFromContext(String theSystem) {
+	public CodeSystem getCodeSystemFromContext(String theSystem) {
 		return null;
 	}
 

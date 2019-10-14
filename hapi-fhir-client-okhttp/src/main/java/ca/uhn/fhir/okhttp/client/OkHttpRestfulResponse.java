@@ -52,22 +52,18 @@ public class OkHttpRestfulResponse extends BaseHttpResponse implements IHttpResp
 	}
 
 	@Override
-	public void bufferEntitity() throws IOException {
-		bufferEntity();
-	}
-
-	@Override
 	public void bufferEntity() throws IOException {
 		if (myEntityBuffered) {
 			return;
 		}
-		InputStream responseEntity = readEntity();
-		if (responseEntity != null) {
-			myEntityBuffered = true;
-			try {
-				myEntityBytes = IOUtils.toByteArray(responseEntity);
-			} catch (IllegalStateException e) {
-				throw new InternalErrorException(e);
+		try (InputStream responseEntity = readEntity()) {
+			if (responseEntity != null) {
+				myEntityBuffered = true;
+				try {
+					myEntityBytes = IOUtils.toByteArray(responseEntity);
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
 			}
 		}
 	}

@@ -4,8 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.custom.ConceptHandler;
-import ca.uhn.fhir.jpa.term.custom.HierarchyHandler;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerConcept;
 import ca.uhn.fhir.jpa.term.snomedct.SctHandlerDescription;
@@ -15,7 +17,6 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ValidateUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
@@ -23,9 +24,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.csv.QuoteMode;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -41,8 +40,7 @@ import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -67,64 +65,29 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * #L%
  */
 
-public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
-	public static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
-	public static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
-	public static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
-
-	public static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
-	public static final String IMGTHLA_HLA_XML = "hla.xml";
-
+public class TermLoaderSvcImpl implements ITermLoaderSvc {
 	public static final String CUSTOM_CONCEPTS_FILE = "concepts.csv";
 	public static final String CUSTOM_HIERARCHY_FILE = "hierarchy.csv";
-	public static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
-	public static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
+	static final String IMGTHLA_HLA_NOM_TXT = "hla_nom.txt";
+	static final String IMGTHLA_HLA_XML = "hla.xml";
+	static final String CUSTOM_CODESYSTEM_JSON = "codesystem.json";
+	private static final String SCT_FILE_CONCEPT = "Terminology/sct2_Concept_Full_";
+	private static final String SCT_FILE_DESCRIPTION = "Terminology/sct2_Description_Full-en";
+	private static final String SCT_FILE_RELATIONSHIP = "Terminology/sct2_Relationship_Full";
+	private static final String CUSTOM_CODESYSTEM_XML = "codesystem.xml";
 
 	private static final int LOG_INCREMENT = 1000;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcImpl.class);
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TermLoaderSvcImpl.class);
 	// FYI: Hardcoded to R4 because that's what the term svc uses internally
 	private final FhirContext myCtx = FhirContext.forR4();
 	@Autowired
-	private IHapiTerminologySvc myTermSvc;
-
-	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept, Counter theCircularCounter) {
-
-		theChain.add(theConcept.getCode());
-		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
-			TermConceptParentChildLink next = childIter.next();
-			TermConcept nextChild = next.getChild();
-			if (theChain.contains(nextChild.getCode())) {
-
-				StringBuilder b = new StringBuilder();
-				b.append("Removing circular reference code ");
-				b.append(nextChild.getCode());
-				b.append(" from parent ");
-				b.append(next.getParent().getCode());
-				b.append(". Chain was: ");
-				for (String nextInChain : theChain) {
-					TermConcept nextCode = theCode2concept.get(nextInChain);
-					b.append(nextCode.getCode());
-					b.append('[');
-					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20).replace("[", "").replace("]", "").trim());
-					b.append("] ");
-				}
-				ourLog.info(b.toString(), theConcept.getCode());
-				childIter.remove();
-				nextChild.getParents().remove(next);
-
-			} else {
-				dropCircularRefs(nextChild, theChain, theCode2concept, theCircularCounter);
-			}
-		}
-		theChain.remove(theChain.size() - 1);
-
-	}
+	private ITermDeferredStorageSvc myDeferredStorageSvc;
+	@Autowired
+	private ITermCodeSystemStorageSvc myCodeSystemStorageSvc;
 
 	@Override
 	public UploadStatistics loadImgthla(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
-		LoadedFileDescriptors descriptors = null;
-		try {
-			descriptors = new LoadedFileDescriptors(theFiles);
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
 			List<String> mandatoryFilenameFragments = Arrays.asList(
 				IMGTHLA_HLA_NOM_TXT,
 				IMGTHLA_HLA_XML
@@ -134,15 +97,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			ourLog.info("Beginning IMGTHLA processing");
 
 			return processImgthlaFiles(descriptors, theRequestDetails);
-		} finally {
-			IOUtils.closeQuietly(descriptors);
 		}
 	}
 
 	@Override
 	public UploadStatistics loadLoinc(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			List<String> loincUploadPropertiesFragment = Arrays.asList(
+			List<String> loincUploadPropertiesFragment = Collections.singletonList(
 				LOINC_UPLOAD_PROPERTIES_FILE.getCode()
 			);
 			descriptors.verifyMandatoryFilesExist(loincUploadPropertiesFragment);
@@ -180,23 +141,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		}
 	}
 
-	@NotNull
-	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
-		Properties retVal = new Properties();
-		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
-			if (next.getFilename().endsWith(thePropertiesFile)) {
-				try {
-					try (InputStream inputStream = next.getInputStream()) {
-						retVal.load(inputStream);
-					}
-				} catch (IOException e) {
-					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
-				}
-			}
-		}
-		return retVal;
-	}
-
 	@Override
 	public UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
@@ -216,8 +160,6 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	@Override
 	public UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
 		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
-			IRecordHandler handler;
-
 			Optional<String> codeSystemContent = loadFile(descriptors, CUSTOM_CODESYSTEM_JSON, CUSTOM_CODESYSTEM_XML);
 			CodeSystem codeSystem;
 			if (codeSystemContent.isPresent()) {
@@ -233,12 +175,81 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 				codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 			}
 
-			TermCodeSystemVersion csv = new TermCodeSystemVersion();
-			final Map<String, TermConcept> code2concept = processCustomTerminologyFiles(descriptors, csv);
+			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
+			TermCodeSystemVersion csv = terminologySet.toCodeSystemVersion();
 
 			IIdType target = storeCodeSystem(theRequestDetails, csv, codeSystem, null, null);
-			return new UploadStatistics(code2concept.size(), target);
+			return new UploadStatistics(terminologySet.getSize(), target);
 		}
+	}
+
+
+	@Override
+	public UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		ourLog.info("Processing terminology delta ADD for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, false);
+			return myCodeSystemStorageSvc.applyDeltaCodeSystemsAdd(theSystem, terminologySet);
+		}
+	}
+
+	@Override
+	public UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) {
+		ourLog.info("Processing terminology delta REMOVE for system[{}] with files: {}", theSystem, theFiles.stream().map(t -> t.getFilename()).collect(Collectors.toList()));
+		try (LoadedFileDescriptors descriptors = new LoadedFileDescriptors(theFiles)) {
+			CustomTerminologySet terminologySet = CustomTerminologySet.load(descriptors, true);
+			return myCodeSystemStorageSvc.applyDeltaCodeSystemsRemove(theSystem, terminologySet);
+		}
+	}
+
+	private void dropCircularRefs(TermConcept theConcept, ArrayList<String> theChain, Map<String, TermConcept> theCode2concept) {
+
+		theChain.add(theConcept.getCode());
+		for (Iterator<TermConceptParentChildLink> childIter = theConcept.getChildren().iterator(); childIter.hasNext(); ) {
+			TermConceptParentChildLink next = childIter.next();
+			TermConcept nextChild = next.getChild();
+			if (theChain.contains(nextChild.getCode())) {
+
+				StringBuilder b = new StringBuilder();
+				b.append("Removing circular reference code ");
+				b.append(nextChild.getCode());
+				b.append(" from parent ");
+				b.append(next.getParent().getCode());
+				b.append(". Chain was: ");
+				for (String nextInChain : theChain) {
+					TermConcept nextCode = theCode2concept.get(nextInChain);
+					b.append(nextCode.getCode());
+					b.append('[');
+					b.append(StringUtils.substring(nextCode.getDisplay(), 0, 20).replace("[", "").replace("]", "").trim());
+					b.append("] ");
+				}
+				ourLog.info(b.toString(), theConcept.getCode());
+				childIter.remove();
+				nextChild.getParents().remove(next);
+
+			} else {
+				dropCircularRefs(nextChild, theChain, theCode2concept);
+			}
+		}
+		theChain.remove(theChain.size() - 1);
+
+	}
+
+	@NotNull
+	private Properties getProperties(LoadedFileDescriptors theDescriptors, String thePropertiesFile) {
+		Properties retVal = new Properties();
+		for (FileDescriptor next : theDescriptors.getUncompressedFileDescriptors()) {
+			if (next.getFilename().endsWith(thePropertiesFile)) {
+				try {
+					try (InputStream inputStream = next.getInputStream()) {
+						retVal.load(inputStream);
+					}
+				} catch (IOException e) {
+					throw new InternalErrorException("Failed to read " + thePropertiesFile, e);
+				}
+			}
+		}
+		return retVal;
 	}
 
 	private Optional<String> loadFile(LoadedFileDescriptors theDescriptors, String... theFilenames) {
@@ -257,15 +268,14 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		return Optional.empty();
 	}
 
-	UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
+	private UploadStatistics processImgthlaFiles(LoadedFileDescriptors theDescriptors, RequestDetails theRequestDetails) {
 		final TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
-		final Map<String, TermConcept> code2concept = new HashMap<>();
 		final List<ValueSet> valueSets = new ArrayList<>();
 		final List<ConceptMap> conceptMaps = new ArrayList<>();
 
 		CodeSystem imgthlaCs;
 		try {
-			String imgthlaCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
+			String imgthlaCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/imgthla/imgthla.xml"), Charsets.UTF_8);
 			imgthlaCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, imgthlaCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load imgthla.xml", e);
@@ -353,7 +363,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		int valueSetCount = valueSets.size();
 		int rootConceptCount = codeSystemVersion.getConcepts().size();
-		int conceptCount = code2concept.size();
+		int conceptCount = rootConceptCount;
 		ourLog.info("Have {} total concepts, {} root concepts, {} ValueSets", conceptCount, rootConceptCount, valueSetCount);
 
 		// remove this when fully implemented ...
@@ -372,7 +382,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 
 		CodeSystem loincCs;
 		try {
-			String loincCsString = IOUtils.toString(BaseHapiTerminologySvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
+			String loincCsString = IOUtils.toString(BaseTermReadSvcImpl.class.getResourceAsStream("/ca/uhn/fhir/jpa/term/loinc/loinc.xml"), Charsets.UTF_8);
 			loincCs = FhirContext.forR4().newXmlParser().parseResource(CodeSystem.class, loincCsString);
 		} catch (IOException e) {
 			throw new InternalErrorException("Failed to load loinc.xml", e);
@@ -501,7 +511,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		retVal.setPublisher("Regenstrief Institute, Inc.");
 		retVal.setDescription("A value set that includes all LOINC codes");
 		retVal.setCopyright("This content from LOINC® is copyright © 1995 Regenstrief Institute, Inc. and the LOINC Committee, and available at no cost under the license at https://loinc.org/license/");
-		retVal.getCompose().addInclude().setSystem(IHapiTerminologyLoaderSvc.LOINC_URI);
+		retVal.getCompose().addInclude().setSystem(ITermLoaderSvc.LOINC_URI);
 
 		return retVal;
 	}
@@ -540,7 +550,7 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 			long count = circularCounter.getThenAdd();
 			float pct = ((float) count / rootConcepts.size()) * 100.0f;
 			ourLog.info(" * Scanning for circular refs - have scanned {} / {} codes ({}%)", count, rootConcepts.size(), pct);
-			dropCircularRefs(next, new ArrayList<>(), code2concept, circularCounter);
+			dropCircularRefs(next, new ArrayList<>(), code2concept);
 		}
 
 		codeSystemVersion.getConcepts().addAll(rootConcepts.values());
@@ -555,8 +565,13 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	}
 
 	@VisibleForTesting
-	void setTermSvcForUnitTests(IHapiTerminologySvc theTermSvc) {
-		myTermSvc = theTermSvc;
+	void setTermDeferredStorageSvc(ITermDeferredStorageSvc theDeferredStorageSvc) {
+		myDeferredStorageSvc = theDeferredStorageSvc;
+	}
+
+	@VisibleForTesting
+	void setTermCodeSystemStorageSvcForUnitTests(ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc) {
+		myCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
 	}
 
 	private IIdType storeCodeSystem(RequestDetails theRequestDetails, final TermCodeSystemVersion theCodeSystemVersion, CodeSystem theCodeSystem, List<ValueSet> theValueSets, List<ConceptMap> theConceptMaps) {
@@ -566,135 +581,14 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		List<ConceptMap> conceptMaps = ObjectUtils.defaultIfNull(theConceptMaps, Collections.emptyList());
 
 		IIdType retVal;
-		myTermSvc.setProcessDeferred(false);
-		retVal = myTermSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
-		myTermSvc.setProcessDeferred(true);
+		myDeferredStorageSvc.setProcessDeferred(false);
+		retVal = myCodeSystemStorageSvc.storeNewCodeSystemVersion(theCodeSystem, theCodeSystemVersion, theRequestDetails, valueSets, conceptMaps);
+		myDeferredStorageSvc.setProcessDeferred(true);
 
 		return retVal;
 	}
 
-	public static class LoadedFileDescriptors implements Closeable {
-
-		private List<File> myTemporaryFiles = new ArrayList<>();
-		private List<IHapiTerminologyLoaderSvc.FileDescriptor> myUncompressedFileDescriptors = new ArrayList<>();
-
-		public LoadedFileDescriptors(List<IHapiTerminologyLoaderSvc.FileDescriptor> theFileDescriptors) {
-			try {
-				for (FileDescriptor next : theFileDescriptors) {
-					if (next.getFilename().toLowerCase().endsWith(".zip")) {
-						ourLog.info("Uncompressing {} into temporary files", next.getFilename());
-						try (InputStream inputStream = next.getInputStream()) {
-							ZipInputStream zis = new ZipInputStream(new BufferedInputStream(inputStream));
-							for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
-								BOMInputStream fis = new BOMInputStream(zis);
-								File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-								nextTemporaryFile.deleteOnExit();
-								FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false);
-								IOUtils.copy(fis, fos);
-								String nextEntryFileName = nextEntry.getName();
-								myUncompressedFileDescriptors.add(new FileDescriptor() {
-									@Override
-									public String getFilename() {
-										return nextEntryFileName;
-									}
-
-									@Override
-									public InputStream getInputStream() {
-										try {
-											return new FileInputStream(nextTemporaryFile);
-										} catch (FileNotFoundException e) {
-											throw new InternalErrorException(e);
-										}
-									}
-								});
-								myTemporaryFiles.add(nextTemporaryFile);
-							}
-						}
-					} else {
-						myUncompressedFileDescriptors.add(next);
-					}
-
-				}
-			} catch (Exception e) {
-				close();
-				throw new InternalErrorException(e);
-			}
-		}
-
-		boolean hasFile(String theFilename) {
-			return myUncompressedFileDescriptors
-				.stream()
-				.map(t -> t.getFilename().replaceAll(".*[\\\\/]", "")) // Strip the path from the filename
-				.anyMatch(t -> t.equals(theFilename));
-		}
-
-		@Override
-		public void close() {
-			for (File next : myTemporaryFiles) {
-				FileUtils.deleteQuietly(next);
-			}
-		}
-
-		List<IHapiTerminologyLoaderSvc.FileDescriptor> getUncompressedFileDescriptors() {
-			return myUncompressedFileDescriptors;
-		}
-
-		private List<String> notFound(List<String> theExpectedFilenameFragments) {
-			Set<String> foundFragments = new HashSet<>();
-			for (String nextExpected : theExpectedFilenameFragments) {
-				for (FileDescriptor next : myUncompressedFileDescriptors) {
-					if (next.getFilename().contains(nextExpected)) {
-						foundFragments.add(nextExpected);
-						break;
-					}
-				}
-			}
-
-			ArrayList<String> notFoundFileNameFragments = new ArrayList<>(theExpectedFilenameFragments);
-			notFoundFileNameFragments.removeAll(foundFragments);
-			return notFoundFileNameFragments;
-		}
-
-		private void verifyMandatoryFilesExist(List<String> theExpectedFilenameFragments) {
-			List<String> notFound = notFound(theExpectedFilenameFragments);
-			if (!notFound.isEmpty()) {
-				throw new UnprocessableEntityException("Could not find the following mandatory files in input: " + notFound);
-			}
-		}
-
-		private void verifyOptionalFilesExist(List<String> theExpectedFilenameFragments) {
-			List<String> notFound = notFound(theExpectedFilenameFragments);
-			if (!notFound.isEmpty()) {
-				ourLog.warn("Could not find the following optional files: " + notFound);
-			}
-		}
-
-
-	}
-
-	@Nonnull
-	public static Map<String, TermConcept> processCustomTerminologyFiles(LoadedFileDescriptors theDescriptors, TermCodeSystemVersion theCsv) {
-		IRecordHandler handler;// Concept File
-		final Map<String, TermConcept> code2concept = new HashMap<>();
-		handler = new ConceptHandler(code2concept, theCsv);
-		iterateOverZipFile(theDescriptors, CUSTOM_CONCEPTS_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
-
-		// Hierarchy
-		if (theDescriptors.hasFile(CUSTOM_HIERARCHY_FILE)) {
-			handler = new HierarchyHandler(code2concept);
-			iterateOverZipFile(theDescriptors, CUSTOM_HIERARCHY_FILE, handler, ',', QuoteMode.NON_NUMERIC, false);
-		}
-
-		// Add root concepts to CodeSystemVersion
-		for (TermConcept nextConcept : code2concept.values()) {
-			if (nextConcept.getParents().isEmpty()) {
-				theCsv.getConcepts().add(nextConcept);
-			}
-		}
-		return code2concept;
-	}
-
-	private static void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
+	public static void iterateOverZipFile(LoadedFileDescriptors theDescriptors, String theFileNamePart, IRecordHandler theHandler, char theDelimiter, QuoteMode theQuoteMode, boolean theIsPartialFilename) {
 
 		boolean foundMatch = false;
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
@@ -748,9 +642,12 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 	}
 
 	@Nonnull
-	public static CSVParser newCsvRecords(char theDelimiter, QuoteMode theQuoteMode, Reader theReader) throws IOException {
+	private static CSVParser newCsvRecords(char theDelimiter, QuoteMode theQuoteMode, Reader theReader) throws IOException {
 		CSVParser parsed;
-		CSVFormat format = CSVFormat.newFormat(theDelimiter).withFirstRecordAsHeader();
+		CSVFormat format = CSVFormat
+			.newFormat(theDelimiter)
+			.withFirstRecordAsHeader()
+			.withTrim();
 		if (theQuoteMode != null) {
 			format = format.withQuote('"').withQuoteMode(theQuoteMode);
 		}
@@ -769,12 +666,11 @@ public class TerminologyLoaderSvcImpl implements IHapiTerminologyLoaderSvc {
 		return retVal;
 	}
 
-	public static TermConcept getOrCreateConcept(TermCodeSystemVersion codeSystemVersion, Map<String, TermConcept> id2concept, String id) {
+	public static TermConcept getOrCreateConcept(Map<String, TermConcept> id2concept, String id) {
 		TermConcept concept = id2concept.get(id);
 		if (concept == null) {
 			concept = new TermConcept();
 			id2concept.put(id, concept);
-			concept.setCodeSystemVersion(codeSystemVersion);
 		}
 		return concept;
 	}

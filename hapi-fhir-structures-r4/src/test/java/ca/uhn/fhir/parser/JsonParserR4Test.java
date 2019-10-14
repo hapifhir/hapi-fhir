@@ -166,6 +166,17 @@ public class JsonParserR4Test {
 	}
 
 	@Test
+	public void testEncodeBinary() {
+		Binary b = new Binary();
+		b.setContent(new byte[]{0,1,2,3,4});
+		b.setContentType("application/octet-stream");
+
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
+		String output = parser.encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
+	}
+
+	@Test
 	public void testEncodeWithInvalidExtensionMissingUrl() {
 
 		Patient p = new Patient();

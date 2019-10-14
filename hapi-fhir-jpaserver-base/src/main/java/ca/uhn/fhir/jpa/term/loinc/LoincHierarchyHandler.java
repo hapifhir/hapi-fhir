@@ -23,7 +23,7 @@ package ca.uhn.fhir.jpa.term.loinc;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
 
@@ -56,13 +56,13 @@ public class LoincHierarchyHandler implements IRecordHandler {
 
          parent.addPropertyCoding(
          	"child",
-				IHapiTerminologyLoaderSvc.LOINC_URI,
+				ITermLoaderSvc.LOINC_URI,
 				child.getCode(),
 				child.getDisplay());
 
          child.addPropertyCoding(
          	"parent",
-				IHapiTerminologyLoaderSvc.LOINC_URI,
+				ITermLoaderSvc.LOINC_URI,
 				parent.getCode(),
 				parent.getDisplay());
       }

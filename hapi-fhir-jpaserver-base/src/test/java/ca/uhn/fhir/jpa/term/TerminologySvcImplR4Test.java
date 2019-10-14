@@ -1,15 +1,10 @@
 package ca.uhn.fhir.jpa.term;
 
-import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.UriParam;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -17,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence;
-import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
@@ -33,8 +27,6 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -117,23 +109,24 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		TermConcept parentB = new TermConcept(cs, "ParentB");
 		cs.getConcepts().add(parentB);
 
-		myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		return id;
 	}
 
-	private void createAndPersistConceptMap(HttpVerb theVerb) {
+	private void createAndPersistConceptMap() {
 		ConceptMap conceptMap = createConceptMap();
 		conceptMap.setId("ConceptMap/cm");
 		persistConceptMap(conceptMap, HttpVerb.POST);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistConceptMap(ConceptMap theConceptMap, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myConceptMapId = myConceptMapDao.create(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -141,7 +134,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			case PUT:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myConceptMapId = myConceptMapDao.update(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -151,9 +144,9 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		}
 	}
 
-	private void loadAndPersistCodeSystemAndValueSet(HttpVerb theVerb) throws IOException {
-		loadAndPersistCodeSystem(theVerb);
-		loadAndPersistValueSet(theVerb);
+	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
+		loadAndPersistCodeSystem();
+		loadAndPersistValueSet(HttpVerb.POST);
 	}
 
 	private void loadAndPersistCodeSystemAndValueSetWithDesignations(HttpVerb theVerb) throws IOException {
@@ -166,10 +159,10 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		loadAndPersistValueSetWithExclude(theVerb);
 	}
 
-	private void loadAndPersistCodeSystem(HttpVerb theVerb) throws IOException {
+	private void loadAndPersistCodeSystem() throws IOException {
 		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
 		codeSystem.setId("CodeSystem/cs");
-		persistCodeSystem(codeSystem, theVerb);
+		persistCodeSystem(codeSystem, HttpVerb.POST);
 	}
 
 	private void loadAndPersistCodeSystemWithDesignations(HttpVerb theVerb) throws IOException {
@@ -178,12 +171,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		persistCodeSystem(codeSystem, theVerb);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistCodeSystem(CodeSystem theCodeSystem, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -191,7 +185,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			case PUT:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myExtensionalCsId = myCodeSystemDao.update(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -214,12 +208,13 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		persistValueSet(valueSet, theVerb);
 	}
 
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistValueSet(ValueSet theValueSet, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -227,7 +222,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 			case PUT:
 				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 					}
 				});
@@ -237,304 +232,6 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		}
 		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
 	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAdd() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		delta
-			.addConcept()
-			.setCode("codeB")
-			.setDisplay("displayB");
-		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeZZZ").isPresent()));
-
-	}
-
-	/**
-	 * This would be a good check, but there is no easy eay to do it...
-	 */
-	@Test
-	@Ignore
-	public void testApplyCodeSystemDeltaAddNotPermittedForNonExternalCodeSystem() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		try {
-			myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
-		}
-
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAddWithoutPreExistingCodeSystem() {
-
-		CodeSystem delta = new CodeSystem();
-		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		delta.setUrl("http://foo");
-		delta.setName("Acme Lab Codes");
-		delta
-			.addConcept()
-			.setCode("CBC")
-			.setDisplay("Complete Blood Count");
-		delta
-			.addConcept()
-			.setCode("URNL")
-			.setDisplay("Routine Urinalysis");
-		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		SearchParameterMap params = new SearchParameterMap();
-		params.setLoadSynchronous(true);
-		params.add(CodeSystem.SP_URL, new UriParam("http://foo"));
-		IBundleProvider searchResult = myCodeSystemDao.search(params, mySrd);
-		assertEquals(1, searchResult.size().intValue());
-		CodeSystem outcome = (CodeSystem) searchResult.getResources(0,1).get(0);
-
-		assertEquals("http://foo", outcome.getUrl());
-		assertEquals("Acme Lab Codes", outcome.getName());
-	}
-
-
-	@Test
-	public void testApplyCodeSystemDeltaAddDuplicatesIgnored() {
-
-		// Add codes
-		CodeSystem delta = new CodeSystem();
-		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		delta.setUrl("http://foo");
-		delta.setName("Acme Lab Codes");
-		delta
-			.addConcept()
-			.setCode("codea")
-			.setDisplay("CODEA0");
-		delta
-			.addConcept()
-			.setCode("codeb")
-			.setDisplay("CODEB0");
-		AtomicInteger outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-		assertEquals(2, outcome.get());
-
-		// Add codes again with different display
-		delta = new CodeSystem();
-		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		delta.setUrl("http://foo");
-		delta.setName("Acme Lab Codes");
-		delta
-			.addConcept()
-			.setCode("codea")
-			.setDisplay("CODEA1");
-		delta
-			.addConcept()
-			.setCode("codeb")
-			.setDisplay("CODEB1");
-		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-		assertEquals(2, outcome.get());
-
-		// Add codes again with no changes
-		outcome = myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-		assertEquals(0, outcome.get());
-	}
-
-
-	@Test
-	public void testApplyCodeSystemDeltaAddAsChild() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		delta
-			.addConcept()
-			.setCode("codeB")
-			.setDisplay("displayB");
-		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent codeAA = delta
-			.addConcept()
-			.setCode("codeAA")
-			.setDisplay("displayAA");
-		codeAA
-			.addConcept()
-			.setCode("codeAAA")
-			.setDisplay("displayAAA");
-		myTermSvc.applyDeltaCodesystemsAdd("http://foo", "codeA", delta);
-
-		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY, myTermSvc.subsumes(toString("codeAA"), toString("codeAAA"), toString("http://foo"), null, null).getOutcome());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED, myTermSvc.subsumes(toString("codeB"), toString("codeAA"), toString("http://foo"), null, null).getOutcome());
-
-		runInTransaction(() -> {
-			List<TermConceptParentChildLink> allChildren = myTermConceptParentChildLinkDao.findAll();
-			assertEquals(2, allChildren.size());
-		});
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaAddWithPropertiesAndDesignations() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setName("Description of my life");
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		cs.setVersion("1.2.3");
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent concept = delta
-			.addConcept()
-			.setCode("lunch")
-			.setDisplay("I'm having dog food");
-		concept
-			.addDesignation()
-			.setLanguage("fr")
-			.setUse(new Coding("http://sys", "code", "display"))
-			.setValue("Je mange une pomme");
-		concept
-			.addDesignation()
-			.setLanguage("es")
-			.setUse(new Coding("http://sys", "code", "display"))
-			.setValue("Como una pera");
-		concept.addProperty()
-			.setCode("flavour")
-			.setValue(new StringType("Hints of lime"));
-		concept.addProperty()
-			.setCode("useless_sct_code")
-			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
-		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		IContextValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(myFhirCtx, "http://foo", "lunch");
-		assertEquals(true, result.isFound());
-		assertEquals("lunch", result.getSearchedForCode());
-		assertEquals("http://foo", result.getSearchedForSystem());
-
-		Parameters output = (Parameters) result.toParameters(myFhirCtx, null);
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
-
-		assertEquals("Description of my life", ((StringType) output.getParameter("name")).getValue());
-		assertEquals("1.2.3", ((StringType) output.getParameter("version")).getValue());
-		assertEquals(false, output.getParameterBool("abstract"));
-
-		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
-		assertEquals("language", designations.get(0).getPart().get(0).getName());
-		assertEquals("fr", ((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("use", designations.get(0).getPart().get(1).getName());
-		assertEquals("http://sys", ((Coding) designations.get(0).getPart().get(1).getValue()).getSystem());
-		assertEquals("code", ((Coding) designations.get(0).getPart().get(1).getValue()).getCode());
-		assertEquals("display", ((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay());
-		assertEquals("value", designations.get(0).getPart().get(2).getName());
-		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
-
-		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
-		assertEquals("code", properties.get(0).getPart().get(0).getName());
-		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("value", properties.get(0).getPart().get(1).getName());
-		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
-
-		assertEquals("code", properties.get(1).getPart().get(0).getName());
-		assertEquals("useless_sct_code", ((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString());
-		assertEquals("value", properties.get(1).getPart().get(1).getName());
-		assertEquals("http://snomed.info", ((Coding) properties.get(1).getPart().get(1).getValue()).getSystem());
-		assertEquals("1234567", ((Coding) properties.get(1).getPart().get(1).getValue()).getCode());
-		assertEquals("Choked on large meal (finding)", ((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay());
-
-	}
-
-	@Test
-	public void testApplyCodeSystemDeltaRemove() {
-
-		// Create not-present
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl("http://foo");
-		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		myCodeSystemDao.create(cs);
-
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent codeA = delta
-			.addConcept()
-			.setCode("codeA")
-			.setDisplay("displayA");
-		delta
-			.addConcept()
-			.setCode("codeB")
-			.setDisplay("displayB");
-		CodeSystem.ConceptDefinitionComponent codeAA = codeA
-			.addConcept()
-			.setCode("codeAA")
-			.setDisplay("displayAA");
-		codeAA
-			.addConcept()
-			.setCode("codeAAA")
-			.setDisplay("displayAAA");
- 		myTermSvc.applyDeltaCodesystemsAdd("http://foo", null, delta);
-
-		// Remove CodeB
-		delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeB")
-			.setDisplay("displayB");
-		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
-
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(true, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
-
-		// Remove CodeA
-		delta = new CodeSystem();
-		delta
-			.addConcept()
-			.setCode("codeA");
-		myTermSvc.applyDeltaCodesystemsRemove("http://foo", delta);
-
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeB").isPresent()));
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeA").isPresent()));
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAA").isPresent()));
-		assertEquals(false, runInTransaction(()->myTermSvc.findCode("http://foo", "codeAAA").isPresent()));
-
-	}
-
-
-	@Nonnull
-	private StringType toString(String theString) {
-		return new StringType(theString);
-	}
-
 
 	@Test
 	public void testCreateConceptMapWithMissingSourceSystem() {
@@ -654,7 +351,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
@@ -691,7 +388,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				myTermValueSetConceptDesignationDao.deleteByTermValueSetId(termValueSetId);
 				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSetId(termValueSetId).intValue());
 				myTermValueSetConceptDao.deleteByTermValueSetId(termValueSetId);
@@ -704,22 +401,22 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testDuplicateCodeSystemUrls() throws Exception {
-		loadAndPersistCodeSystem(HttpVerb.POST);
+		loadAndPersistCodeSystem();
 
 		expectedException.expect(UnprocessableEntityException.class);
 		expectedException.expectMessage("Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
 
-		loadAndPersistCodeSystem(HttpVerb.POST);
+		loadAndPersistCodeSystem();
 	}
 
 	@Test
 	public void testDuplicateConceptMapUrls() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 
 		expectedException.expect(UnprocessableEntityException.class);
 		expectedException.expectMessage("Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
 
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 	}
 
 	@Test
@@ -727,7 +424,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		myDaoConfig.setPreExpandValueSets(true);
 
 		// DM 2019-03-05 - We pre-load our custom CodeSystem otherwise pre-expansion of the ValueSet will fail.
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		expectedException.expect(UnprocessableEntityException.class);
 		expectedException.expectMessage("Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
@@ -735,6 +432,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		loadAndPersistValueSet(HttpVerb.POST);
 	}
 
+	@SuppressWarnings("SpellCheckingInspection")
 	@Test
 	public void testExpandTermValueSetAndChildren() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
@@ -1239,7 +937,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
 
-		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
 		assertEquals("http://acme.org", containsComponent.getSystem());
 		assertEquals("11378-7", containsComponent.getCode());
 		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
@@ -1300,7 +998,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
 
-		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
 		assertEquals("http://acme.org", containsComponent.getSystem());
 		assertEquals("11378-7", containsComponent.getCode());
 		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
@@ -1361,7 +1059,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
 
-		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
 		assertEquals("http://acme.org", containsComponent.getSystem());
 		assertEquals("11378-7", containsComponent.getCode());
 		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
@@ -1416,7 +1114,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
 
-		ValueSet.ValueSetExpansionContainsComponent  containsComponent = expandedValueSet.getExpansion().getContains().get(0);
+		ValueSet.ValueSetExpansionContainsComponent containsComponent = expandedValueSet.getExpansion().getContains().get(0);
 		assertEquals("http://acme.org", containsComponent.getSystem());
 		assertEquals("11378-7", containsComponent.getCode());
 		assertEquals("Systolic blood pressure at First encounter", containsComponent.getDisplay());
@@ -1465,7 +1163,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
 				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
 				assertNull(codeSystem.getName());
@@ -1533,7 +1231,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
 				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
 				assertNull(codeSystem.getName());
@@ -1599,7 +1297,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement(), null);
 				Long codeSystemResourcePid = resourceTable.getId();
 				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
@@ -1692,14 +1390,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermConceptMapAndChildren() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
 				assertTrue(optionalConceptMap.isPresent());
 
@@ -1870,14 +1568,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreTermConceptMapAndChildrenWithClientAssignedId() {
-		createAndPersistConceptMap(HttpVerb.PUT);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				Optional<TermConceptMap> optionalConceptMap = myTermConceptMapDao.findTermConceptMapByUrl(CM_URL);
 				assertTrue(optionalConceptMap.isPresent());
 
@@ -2058,7 +1756,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2076,7 +1774,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2160,7 +1858,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2178,7 +1876,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2262,7 +1960,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2280,7 +1978,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2364,7 +2062,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.info("ValueSet:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2382,7 +2080,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable);
 			assertTrue(optionalValueSetByResourcePid.isPresent());
 
@@ -2456,14 +2154,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToMany() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -2473,7 +2171,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2503,21 +2201,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeOneToOne() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -2527,7 +2225,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2577,21 +2275,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateByCodeSystemsAndSourceCodeUnmapped() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
@@ -2637,14 +2335,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateUsingPredicatesWithCodeOnly() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2656,7 +2354,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2698,21 +2396,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceAndTargetSystem2() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2728,7 +2426,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2746,21 +2444,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceAndTargetSystem3() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2776,7 +2474,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2806,21 +2504,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceSystem() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2834,7 +2532,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2876,21 +2574,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceSystemAndVersion1() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2906,7 +2604,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2924,21 +2622,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(1, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceSystemAndVersion3() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -2954,7 +2652,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -2984,21 +2682,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(2, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithSourceValueSet() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3012,7 +2710,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -3054,21 +2752,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateUsingPredicatesWithTargetValueSet() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3082,7 +2780,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElementTarget> targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 
 				TermConceptMapGroupElementTarget target = targets.get(0);
 
@@ -3124,21 +2822,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				targets = myTermSvc.translate(translationRequest);
 				assertNotNull(targets);
 				assertEquals(3, targets.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverse() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3156,7 +2854,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3173,21 +2871,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseByCodeSystemsAndSourceCodeUnmapped() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				TranslationRequest translationRequest = new TranslationRequest();
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL_3)
@@ -3203,14 +2901,14 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithCodeOnly() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3224,7 +2922,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3252,21 +2950,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem1() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3284,7 +2982,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3301,21 +2999,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithSourceAndTargetSystem4() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3333,7 +3031,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3350,21 +3048,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(1, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithSourceSystem() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3380,7 +3078,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3408,21 +3106,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithSourceSystemAndVersion() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3440,7 +3138,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3468,21 +3166,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithSourceValueSet() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3498,7 +3196,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3526,21 +3224,21 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}
 
 	@Test
 	public void testTranslateWithReverseUsingPredicatesWithTargetValueSet() {
-		createAndPersistConceptMap(HttpVerb.POST);
+		createAndPersistConceptMap();
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 
 		ourLog.info("ConceptMap:\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
 		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
 			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
 				/*
 				 * Provided:
 				 *   source code
@@ -3556,7 +3254,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				List<TermConceptMapGroupElement> elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertFalse(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertFalse(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
 				TermConceptMapGroupElement element = elements.get(0);
 
@@ -3584,7 +3282,7 @@ public class TerminologySvcImplR4Test extends BaseJpaR4Test {
 				elements = myTermSvc.translateWithReverse(translationRequest);
 				assertNotNull(elements);
 				assertEquals(2, elements.size());
-				assertTrue(BaseHapiTerminologySvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+				assertTrue(BaseTermReadSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 			}
 		});
 	}

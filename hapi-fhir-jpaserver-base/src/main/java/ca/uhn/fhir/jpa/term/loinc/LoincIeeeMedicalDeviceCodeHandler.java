@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -57,8 +57,8 @@ public class LoincIeeeMedicalDeviceCodeHandler extends BaseLoincHandler implemen
 		String ieeeDisplayName = trim(theRecord.get("IEEE_REFID"));
 
 		// LOINC Part -> IEEE 11073:10101 Mappings
-		String sourceCodeSystemUri = IHapiTerminologyLoaderSvc.LOINC_URI;
-		String targetCodeSystemUri = IHapiTerminologyLoaderSvc.IEEE_11073_10101_URI;
+		String sourceCodeSystemUri = ITermLoaderSvc.LOINC_URI;
+		String targetCodeSystemUri = ITermLoaderSvc.IEEE_11073_10101_URI;
 		addConceptMapEntry(
 			new ConceptMapping()
 				.setConceptMapId(LOINC_IEEE_CM_ID)

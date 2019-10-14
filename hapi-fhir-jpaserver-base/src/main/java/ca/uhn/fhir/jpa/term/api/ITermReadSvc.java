@@ -1,20 +1,25 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.entity.*;
+import ca.uhn.fhir.jpa.entity.TermConcept;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
+import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.*;
+import ca.uhn.fhir.jpa.term.IValueSetConceptAccumulator;
+import ca.uhn.fhir.jpa.term.TranslationRequest;
+import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
+import org.hl7.fhir.instance.model.api.IBaseDatatype;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * #%L
@@ -36,9 +41,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * #L%
  */
 
-public interface IHapiTerminologySvc {
-
-	void deleteCodeSystem(TermCodeSystem theCodeSystem);
+/**
+ * This interface is the "read" interface for the terminology service. It handles things like
+ * lookups, code validations, expansions, concept mappings, etc.
+ * <p>
+ * It is intended to only handle read operations, leaving various write operations to
+ * other services within the terminology service APIs.
+ * (Note that at present, a few write operations remain here- they should be moved but haven't
+ * been moved yet)
+ * </p>
+ */
+public interface ITermReadSvc {
 
 	ValueSet expandValueSet(ValueSet theValueSetToExpand);
 
@@ -74,22 +87,7 @@ public interface IHapiTerminologySvc {
 
 	List<VersionIndependentConcept> findCodesBelowUsingBuiltInSystems(String theSystem, String theCode);
 
-	void saveDeferred();
-
-	/**
-	 * This is mostly for unit tests - we can disable processing of deferred concepts
-	 * by changing this flag
-	 */
-	void setProcessDeferred(boolean theProcessDeferred);
-
-	void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable);
-
-	/**
-	 * @return Returns the ID of the created/updated code system
-	 */
-	IIdType storeNewCodeSystemVersion(org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource, TermCodeSystemVersion theCodeSystemVersion, RequestDetails theRequestDetails, List<org.hl7.fhir.r4.model.ValueSet> theValueSets, List<org.hl7.fhir.r4.model.ConceptMap> theConceptMaps);
-
-	void storeNewCodeSystemVersionIfNeeded(CodeSystem theCodeSystem, ResourceTable theResourceEntity);
+	CodeSystem getCodeSystemFromContext(String theSystem);
 
 	void deleteConceptMapAndChildren(ResourceTable theResourceTable);
 
@@ -107,10 +105,6 @@ public interface IHapiTerminologySvc {
 
 	IFhirResourceDaoCodeSystem.SubsumesResult subsumes(IPrimitiveType<String> theCodeA, IPrimitiveType<String> theCodeB, IPrimitiveType<String> theSystem, IBaseCoding theCodingA, IBaseCoding theCodingB);
 
-	AtomicInteger applyDeltaCodesystemsAdd(String theSystem, @Nullable String theParent, CodeSystem theValue);
-
-	AtomicInteger applyDeltaCodesystemsRemove(String theSystem, CodeSystem theDelta);
-
 	void preExpandDeferredValueSetsToTerminologyTables();
 
 	/**
@@ -124,4 +118,6 @@ public interface IHapiTerminologySvc {
 	 * Version independent
 	 */
 	boolean isValueSetPreExpandedForCodeValidation(IBaseResource theValueSet);
+
+
 }

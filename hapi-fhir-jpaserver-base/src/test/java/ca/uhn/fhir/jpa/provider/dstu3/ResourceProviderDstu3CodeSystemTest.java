@@ -2,32 +2,27 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest;
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
-	public static FhirContext ourCtx = FhirContext.forDstu3();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3CodeSystemTest.class);
-	private IIdType myExtensionalVsId;
+	public static FhirContext ourCtx = FhirContext.forDstu3();
 
 	@Before
 	@Transactional
@@ -36,12 +31,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		myCodeSystemDao.create(cs, mySrd);
 
 		ValueSet upload = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		myExtensionalVsId = myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
+		myValueSetDao.create(upload, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
+		ResourceProviderDstu3ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 
 		Parameters respParam = ourClient
 			.operation()
@@ -89,7 +84,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 	@Test
 	public void testDeleteCodeSystemComplete2() {
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 
 		String input = "{\n" +
 			"    \"resourceType\": \"CodeSystem\",\n" +
@@ -119,19 +114,13 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		// Create the code system
 		CodeSystem cs = (CodeSystem) myFhirCtx.newJsonParser().parseResource(input);
 		ourClient.update().resource(cs).execute();
-		runInTransaction(()->{
-			assertEquals(26, myConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(26, myConceptDao.count()));
 
 		// Delete the code system
 		ourClient.delete().resource(cs).execute();
-		runInTransaction(()->{
-			assertEquals(24L, myConceptDao.count());
-		});
+		runInTransaction(() -> assertEquals(24L, myConceptDao.count()));
 
 	}
-
-
 
 
 	@Test
@@ -193,7 +182,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -231,7 +220,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		assertEquals("display", respParam.getParameter().get(1).getName());
 		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue().booleanValue());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -333,14 +322,6 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info("Encoded:\n{}", encoded);
-	}
-
-	private String loadResource(String theFileName) throws IOException {
-		InputStream resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName);
-		if (resourceAsStream == null) {
-			resourceAsStream = ResourceProviderDstu3CodeSystemTest.class.getResourceAsStream(theFileName.substring(1));
-		}
-		return IOUtils.toString(resourceAsStream, Charsets.UTF_8);
 	}
 
 	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {

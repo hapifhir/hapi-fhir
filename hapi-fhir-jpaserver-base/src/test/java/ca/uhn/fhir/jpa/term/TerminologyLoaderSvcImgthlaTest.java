@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -16,18 +17,18 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
-	private TerminologyLoaderSvcImpl mySvc;
+	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermStorageSvc;
 
 	private ZipCollectionBuilder myFiles;
 
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvcImpl();
-		mySvc.setTermSvcForUnitTests(myTermSvc);
+		mySvc = new TermLoaderSvcImpl();
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
@@ -78,8 +79,8 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 
 
 	public static void addImgthlaMandatoryFilesToZip(ZipCollectionBuilder theFiles) throws IOException {
-		theFiles.addFileZip("/imgthla/", TerminologyLoaderSvcImpl.IMGTHLA_HLA_NOM_TXT);
-		theFiles.addFileZip("/imgthla/", TerminologyLoaderSvcImpl.IMGTHLA_HLA_XML);
+		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_NOM_TXT);
+		theFiles.addFileZip("/imgthla/", TermLoaderSvcImpl.IMGTHLA_HLA_XML);
 	}
 
 	@AfterClass

@@ -37,6 +37,7 @@ import javax.persistence.Index;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.left;
 import static org.apache.commons.lang3.StringUtils.length;
@@ -106,6 +107,13 @@ public class TermConcept implements Serializable {
 	public TermConcept(TermCodeSystemVersion theCs, String theCode) {
 		setCodeSystemVersion(theCs);
 		setCode(theCode);
+	}
+
+	public TermConcept addChild(RelationshipTypeEnum theRelationshipType) {
+		TermConcept child = new TermConcept();
+		child.setCodeSystemVersion(myCodeSystem);
+		addChild(child, theRelationshipType);
+		return child;
 	}
 
 	public TermConceptParentChildLink addChild(TermConcept theChild, RelationshipTypeEnum theRelationshipType) {
@@ -200,7 +208,7 @@ public class TermConcept implements Serializable {
 
 	public TermConcept setCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion) {
 		myCodeSystem = theCodeSystemVersion;
-		if (theCodeSystemVersion.getPid() != null) {
+		if (theCodeSystemVersion != null && theCodeSystemVersion.getPid() != null) {
 			myCodeSystemVersionPid = theCodeSystemVersion.getPid();
 		}
 		return this;
@@ -365,10 +373,13 @@ public class TermConcept implements Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("code", myCode)
-			.append("display", myDisplay)
-			.build();
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("code", myCode);
+		b.append("display", myDisplay);
+		if (mySequence != null) {
+			b.append("sequence", mySequence);
+		}
+		return b.build();
 	}
 
 	public List<IContextValidationSupport.BaseConceptProperty> toValidationProperties() {
@@ -387,4 +398,13 @@ public class TermConcept implements Serializable {
 		}
 		return retVal;
 	}
+
+	/**
+	 * Returns a view of {@link #getChildren()} but containing the actual child codes
+	 */
+	public List<TermConcept> getChildCodes() {
+		return getChildren().stream().map(t -> t.getChild()).collect(Collectors.toList());
+	}
+
+
 }

@@ -1,4 +1,4 @@
-package ca.uhn.fhir.jpa.term;
+package ca.uhn.fhir.jpa.term.api;
 
 /*
  * #%L
@@ -20,13 +20,18 @@ package ca.uhn.fhir.jpa.term;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-public interface IHapiTerminologyLoaderSvc {
+/**
+ * This service handles bulk loading concepts into the terminology service concept tables
+ * using any of several predefined input formats
+ */
+public interface ITermLoaderSvc {
 
 	String IMGTHLA_URI = "http://www.ebi.ac.uk/ipd/imgt/hla";
 	String LOINC_URI = "http://loinc.org";
@@ -39,8 +44,14 @@ public interface IHapiTerminologyLoaderSvc {
 
 	UploadStatistics loadSnomedCt(List<FileDescriptor> theFiles, RequestDetails theRequestDetails);
 
-	// FIXME: remove the default implementation before 4.0.0
+	// FIXME: remove the default implementation before 4.1.0
 	default UploadStatistics loadCustom(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+
+	// FIXME: remove the default implementation before 4.1.0
+	default UploadStatistics loadDeltaAdd(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
+
+	// FIXME: remove the default implementation before 4.1.0
+	default UploadStatistics loadDeltaRemove(String theSystem, List<FileDescriptor> theFiles, RequestDetails theRequestDetails) { return null; };
 
 	interface FileDescriptor {
 
@@ -50,23 +61,25 @@ public interface IHapiTerminologyLoaderSvc {
 
 	}
 
-	class UploadStatistics {
-		private final int myConceptCount;
-		private final IIdType myTarget;
+	class ByteArrayFileDescriptor implements FileDescriptor {
 
-		public UploadStatistics(int theConceptCount, IIdType theTarget) {
-			myConceptCount = theConceptCount;
-			myTarget = theTarget;
+		private final String myNextUrl;
+		private final byte[] myNextData;
+
+		public ByteArrayFileDescriptor(String theNextUrl, byte[] theNextData) {
+			myNextUrl = theNextUrl;
+			myNextData = theNextData;
 		}
 
-		public int getConceptCount() {
-			return myConceptCount;
+		@Override
+		public String getFilename() {
+			return myNextUrl;
 		}
 
-		public IIdType getTarget() {
-			return myTarget;
+		@Override
+		public InputStream getInputStream() {
+			return new ByteArrayInputStream(myNextData);
 		}
-
 	}
 
 }
