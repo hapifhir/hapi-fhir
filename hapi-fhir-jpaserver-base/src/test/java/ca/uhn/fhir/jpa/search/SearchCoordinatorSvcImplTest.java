@@ -469,6 +469,62 @@ public class SearchCoordinatorSvcImplTest {
 		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
+	/**
+	 * Simulate results being removed from the search result cache but not the search cache
+	 */
+	@Test
+	public void testFetchResultsReturnsNull() {
+
+		Search search = new Search();
+		search.setStatus(SearchStatusEnum.FINISHED);
+		search.setNumFound(100);
+		search.setTotalCount(100);
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+
+		when(mySearchResultCacheSvc.fetchResultPids(any(), anyInt(), anyInt())).thenReturn(null);
+
+		try {
+			mySvc.getResources("0000-1111", 0, 10, null);
+			fail();
+		}  catch (ResourceGoneException e) {
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+		}
+
+	}
+
+	/**
+	 * Simulate results being removed from the search result cache but not the search cache
+	 */
+	@Test
+	public void testFetchAllResultsReturnsNull() {
+
+		when(myDaoRegistry.getResourceDao(anyString())).thenReturn(myCallingDao);
+		when(myCallingDao.getContext()).thenReturn(ourCtx);
+
+		Search search = new Search();
+		search.setUuid("0000-1111");
+		search.setResourceType("Patient");
+		search.setStatus(SearchStatusEnum.PASSCMPLET);
+		search.setNumFound(5);
+		search.setSearchParameterMap(new SearchParameterMap());
+		when(mySearchCacheSvc.fetchByUuid(eq("0000-1111"))).thenReturn(Optional.of(search));
+
+		when(mySearchCacheSvc.tryToMarkSearchAsInProgress(any())).thenAnswer(t->{
+			search.setStatus(SearchStatusEnum.LOADING);
+			return Optional.of(search);
+		});
+
+		when(mySearchResultCacheSvc.fetchAllResultPids(any())).thenReturn(null);
+
+		try {
+			mySvc.getResources("0000-1111", 0, 10, null);
+			fail();
+		}  catch (ResourceGoneException e) {
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+		}
+
+	}
+
 	public static class FailAfterNIterator extends BaseIterator<Long> implements IResultIterator {
 
 		private int myCount;
