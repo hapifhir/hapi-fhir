@@ -359,6 +359,10 @@
 				as search requests with no search parameters, leading to confusing search results. These will now
 				result in an HTTP 400 error with a meaningful error message.
 			</action>
+			<action type="add" issue="1541">
+				The server CapabilityStatement (/metadata) endpoint now respects the Cache-Control header. Thanks
+				to Jens Villadsen for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
