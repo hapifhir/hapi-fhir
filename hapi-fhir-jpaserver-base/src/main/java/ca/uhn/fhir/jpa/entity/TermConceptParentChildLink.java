@@ -28,7 +28,6 @@ import java.io.Serializable;
 
 @Entity
 @Table(name = "TRM_CONCEPT_PC_LINK", indexes = {
-	@Index(name = "IDX_TRMCONCPCLNK_CSV", columnList = "CODESYSTEM_PID")
 })
 public class TermConceptParentChildLink implements Serializable {
 	private static final long serialVersionUID = 1L;

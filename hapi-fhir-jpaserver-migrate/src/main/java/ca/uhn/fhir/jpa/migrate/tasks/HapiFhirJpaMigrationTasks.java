@@ -60,12 +60,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	protected void init410() {
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
-		// TRM_CONCEPT_PC_LINK
-		version.onTable("TRM_CONCEPT_PC_LINK")
-			.dropIndex("FK_TERM_CONCEPTPC_CS");
-		version.onTable("TRM_CONCEPT_PC_LINK")
-			.addIndex("IDX_TRMCONCPCLNK_CSV").unique(false).withColumns("CODESYSTEM_PID");
-
 		// HFJ_SEARCH
 		version.onTable("HFJ_SEARCH").addColumn("EXPIRY_OR_NULL").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP);
 		version.onTable("HFJ_SEARCH").addColumn("NUM_BLOCKED").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
