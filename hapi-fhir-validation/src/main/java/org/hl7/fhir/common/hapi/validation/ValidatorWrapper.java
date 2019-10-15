@@ -28,7 +28,6 @@ import java.util.List;
 public class ValidatorWrapper {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
-	private final DocumentBuilderFactory myDocBuilderFactory;
 	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
@@ -39,7 +38,7 @@ public class ValidatorWrapper {
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
-		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
+		super();
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
@@ -95,9 +94,7 @@ public class ValidatorWrapper {
 		if (encoding == EncodingEnum.XML) {
 			Document document;
 			try {
-				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-				InputSource src = new InputSource(new StringReader(input));
-				document = builder.parse(src);
+				document = XmlUtil.parseDocument(input);
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();

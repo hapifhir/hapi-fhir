@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
@@ -1269,7 +1270,9 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	@PostConstruct
 	public void start() {
 		myValueSetResourceDao = myApplicationContext.getBean(IFhirResourceDaoValueSet.class);
-		myValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
+		if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			myValidationSupport = myApplicationContext.getBean(IContextValidationSupport.class);
+		}
 		RuleBasedTransactionAttribute rules = new RuleBasedTransactionAttribute();
 		rules.getRollbackRules().add(new NoRollbackRuleAttribute(ExpansionTooCostlyException.class));
 		myTxTemplate = new TransactionTemplate(myTransactionManager, rules);
