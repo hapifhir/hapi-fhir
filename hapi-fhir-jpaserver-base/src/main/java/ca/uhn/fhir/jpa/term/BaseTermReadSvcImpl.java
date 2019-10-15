@@ -61,6 +61,7 @@ import org.hibernate.search.jpa.FullTextQuery;
 import org.hibernate.search.query.dsl.BooleanJunction;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -654,7 +655,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					countForBatch.incrementAndGet();
 					TermConcept concept = (TermConcept) next;
 					try {
-					addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
+						addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, concept, theAdd, theCodeCounter);
 					} catch (ExpansionTooCostlyException e) {
 						return false;
 					}
@@ -681,24 +682,24 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
-						if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
-							CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-							if (code != null) {
-								if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
-									theValueSetCodeAccumulator.includeConcept(system, nextCode, code.getDisplay());
-								}
-								if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
-									theValueSetCodeAccumulator.excludeConcept(system, nextCode);
+							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
+								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+								if (code != null) {
+									if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
+										theValueSetCodeAccumulator.includeConcept(system, nextCode, code.getDisplay());
+									}
+									if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
+										theValueSetCodeAccumulator.excludeConcept(system, nextCode);
+									}
 								}
 							}
 						}
-					}
 					}
 				} else {
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
 					concept = concept
 						.stream()
-						.filter(t->theWantConceptOrNull == null || t.getCode().equals(theWantConceptOrNull.getCode()))
+						.filter(t -> theWantConceptOrNull == null || t.getCode().equals(theWantConceptOrNull.getCode()))
 						.collect(Collectors.toList());
 					addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, system, concept, theAdd);
 				}
@@ -1810,10 +1811,18 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	Optional<VersionIndependentConcept> validateCodeInValueSet(String theValueSetUrl, String theCodeSystem, String theCode) {
 		IBaseResource valueSet = myValidationSupport.fetchValueSet(myContext, theValueSetUrl);
-		if (isValueSetPreExpandedForCodeValidation(valueSet)) {
-			ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(valueSet, theCodeSystem, theCode, null, null, null);
-			if (outcome != null && outcome.isResult()) {
-				return Optional.of(new VersionIndependentConcept(theCodeSystem, theCode));
+
+		// If we don't have a PID, this came from some source other than the JPA
+		// database, so we don't need to check if it's pre-expanded or not
+		if (valueSet instanceof IAnyResource) {
+			Long pid = IDao.RESOURCE_PID.get((IAnyResource) valueSet);
+			if (pid != null) {
+				if (isValueSetPreExpandedForCodeValidation(valueSet)) {
+					ValidateCodeResult outcome = validateCodeIsInPreExpandedValueSet(valueSet, theCodeSystem, theCode, null, null, null);
+					if (outcome != null && outcome.isResult()) {
+						return Optional.of(new VersionIndependentConcept(theCodeSystem, theCode));
+					}
+				}
 			}
 		}
 
