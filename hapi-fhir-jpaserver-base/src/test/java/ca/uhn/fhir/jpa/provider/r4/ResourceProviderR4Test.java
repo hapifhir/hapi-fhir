@@ -2669,15 +2669,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testMetadata() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/metadata");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
 		}
 	}
 
