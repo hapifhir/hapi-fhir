@@ -383,6 +383,14 @@
 				built-in implementations of this interface, but any direct user implementations
 				of this interface will need to add the new parameter.
 			</action>
+			<action type="add" issue="1541">
+				The server CapabilityStatement (/metadata) endpoint now respects the Cache-Control header. Thanks
+				to Jens Villadsen for the pull request!
+			</action>
+			<action type="add">
+				The @Metadata annotation now has an attribute that can be used to control
+				the cache timeout
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

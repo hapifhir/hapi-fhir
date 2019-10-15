@@ -39,6 +39,10 @@ public enum SearchStatusEnum {
 	/**
 	 * The search failed and will not continue
 	 */
-	FAILED
+	FAILED,
+	/**
+	 * The search has been expired and will be expunged shortly
+	 */
+	GONE
 
 }
