@@ -1834,25 +1834,6 @@ public class XmlUtil {
 		}
 	}
 
-	public static DocumentBuilderFactory newDocumentBuilderFactory() {
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-		docBuilderFactory.setNamespaceAware(true);
-		docBuilderFactory.setXIncludeAware(false);
-		docBuilderFactory.setExpandEntityReferences(false);
-		try {
-			docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-			docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-			docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-			docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-			throwUnitTestExceptionIfConfiguredToDoSo();
-		} catch (Exception e) {
-			ourLog.warn("Failed to set feature on XML parser: " + e.toString());
-		}
-
-		return docBuilderFactory;
-	}
-
 	public static Document parseDocument(String theInput) throws IOException, SAXException {
 		DocumentBuilder builder = null;
 		try {

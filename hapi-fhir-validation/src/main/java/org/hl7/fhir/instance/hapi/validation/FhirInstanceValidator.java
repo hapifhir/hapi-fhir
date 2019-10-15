@@ -41,13 +41,9 @@ import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -63,7 +59,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
-	private DocumentBuilderFactory myDocBuilderFactory;
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
@@ -85,7 +80,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -280,9 +274,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
 			try {
-				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-				InputSource src = new InputSource(new StringReader(theInput));
-				document = builder.parse(src);
+				document = XmlUtil.parseDocument(theInput);
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();

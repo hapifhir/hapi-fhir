@@ -14,6 +14,9 @@ import org.junit.*;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 
 public class XmlUtilDstu3Test {
 
@@ -72,11 +75,11 @@ public class XmlUtilDstu3Test {
 	}
 
 	@Test
-	public void testApplyUnsupportedFeature() {
-		assertNotNull(XmlUtil.newDocumentBuilderFactory());
+	public void testApplyUnsupportedFeature() throws IOException, SAXException {
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 
 		XmlUtil.setThrowExceptionForUnitTest(new ParserConfigurationException("AA"));
-		assertNotNull(XmlUtil.newDocumentBuilderFactory());
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 	}
 
 	@AfterClass

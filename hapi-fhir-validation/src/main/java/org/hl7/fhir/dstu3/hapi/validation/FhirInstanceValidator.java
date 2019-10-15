@@ -3,7 +3,6 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -38,7 +37,6 @@ import org.w3c.dom.NodeList;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -51,7 +49,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
-	private DocumentBuilderFactory myDocBuilderFactory;
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 	private boolean noTerminologyChecks = false;
@@ -75,7 +72,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 * @param theValidationSupport The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 		myValidationSupport = theValidationSupport;
 	}
 
