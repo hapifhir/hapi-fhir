@@ -344,11 +344,6 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		refreshCacheWithRetry();
 	}
 
-	@VisibleForTesting
-	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
-		mySearchParamProvider = theSearchParamProvider;
-	}
-
 	int refreshCacheWithRetry() {
 		Retrier<Integer> refreshCacheRetrier = new Retrier<>(() -> {
 			synchronized (BaseSearchParamRegistry.this) {
@@ -356,6 +351,11 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			}
 		}, MAX_RETRIES);
 		return refreshCacheRetrier.runWithRetry();
+	}
+
+	@VisibleForTesting
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	@PostConstruct
