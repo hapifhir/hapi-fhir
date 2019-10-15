@@ -62,6 +62,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// TRM_CONCEPT_PC_LINK
 		version.onTable("TRM_CONCEPT_PC_LINK")
+			.dropIndex("FK_TERM_CONCEPTPC_CS");
+		version.onTable("TRM_CONCEPT_PC_LINK")
 			.addIndex("IDX_TRMCONCPCLNK_CSV").unique(false).withColumns("CODESYSTEM_PID");
 
 		// HFJ_SEARCH
