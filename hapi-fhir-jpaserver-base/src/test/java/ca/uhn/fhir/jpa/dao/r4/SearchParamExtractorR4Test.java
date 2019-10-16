@@ -49,8 +49,9 @@ public class SearchParamExtractorR4Test {
 			}
 
 			@Override
-			public void refreshCacheIfNecessary() {
+			public boolean refreshCacheIfNecessary() {
 				// nothing
+				return false;
 			}
 
 			@Override

@@ -93,7 +93,7 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	@Override
 	public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
 		requiresActiveSearchParams();
-		return myActiveSearchParams.get(theResourceName);
+		return getActiveSearchParams().get(theResourceName);
 	}
 
 	private void requiresActiveSearchParams() {
@@ -207,12 +207,8 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 			if (next.getCompositeOf() != null) {
 				next.getCompositeOf().sort((theO1, theO2) -> StringUtils.compare(theO1.getName(), theO2.getName()));
 				for (String nextBase : next.getBase()) {
-					if (!activeParamNamesToUniqueSearchParams.containsKey(nextBase)) {
-						activeParamNamesToUniqueSearchParams.put(nextBase, new HashMap<>());
-					}
-					if (!activeParamNamesToUniqueSearchParams.get(nextBase).containsKey(paramNames)) {
-						activeParamNamesToUniqueSearchParams.get(nextBase).put(paramNames, new ArrayList<>());
-					}
+					activeParamNamesToUniqueSearchParams.computeIfAbsent(nextBase, v -> new HashMap<>());
+					activeParamNamesToUniqueSearchParams.get(nextBase).computeIfAbsent(paramNames, t -> new ArrayList<>());
 					activeParamNamesToUniqueSearchParams.get(nextBase).get(paramNames).add(next);
 				}
 			}
@@ -224,9 +220,19 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		myActiveParamNamesToUniqueSearchParams = activeParamNamesToUniqueSearchParams;
 	}
 
+	@VisibleForTesting
+	void setFhirContextForUnitTest(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
+
 	@PostConstruct
 	public void postConstruct() {
 		myBuiltInSearchParams = createBuiltInSearchParamMap(myFhirContext);
+	}
+
+	@VisibleForTesting
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
 	}
 
 	public int doRefresh(long theRefreshInterval) {
@@ -314,8 +320,10 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 
 			myLastRefresh = System.currentTimeMillis();
 			ourLog.info("Refreshed search parameter cache in {}ms", sw.getMillis());
+			return myActiveSearchParams.size();
+		} else {
+			return 0;
 		}
-		return myActiveSearchParams.size();
 	}
 
 	protected abstract RuntimeSearchParam toRuntimeSp(SP theNextSp);
@@ -367,10 +375,12 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	}
 
 	@Override
-	public void refreshCacheIfNecessary() {
-		if (myActiveSearchParams == null ||
-			System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
+	public boolean refreshCacheIfNecessary() {
+		if (myActiveSearchParams == null || System.currentTimeMillis() - REFRESH_INTERVAL > myLastRefresh) {
 			refreshCacheWithRetry();
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -378,6 +388,11 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 	public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
 		requiresActiveSearchParams();
 		return Collections.unmodifiableMap(myActiveSearchParams);
+	}
+
+	@VisibleForTesting
+	void setSchedulerServiceForUnitTest(ISchedulerService theSchedulerService) {
+		mySchedulerService = theSchedulerService;
 	}
 
 	public static class SubmitJob implements Job {

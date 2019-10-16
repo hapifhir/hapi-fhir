@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
-import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu3;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
@@ -44,8 +43,9 @@ public class SearchParamExtractorDstu3Test {
 			}
 
 			@Override
-			public void refreshCacheIfNecessary() {
+			public boolean refreshCacheIfNecessary() {
 				// nothing
+				return false;
 			}
 
 			@Override
