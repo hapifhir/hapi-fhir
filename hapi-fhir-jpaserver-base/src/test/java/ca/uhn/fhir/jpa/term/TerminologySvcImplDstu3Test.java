@@ -18,10 +18,7 @@ import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.ExpectedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +38,10 @@ import static org.junit.Assert.*;
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);
-
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
-
 	private static final String CS_URL = "http://example.com/my_code_system";
 	private static final String CS_URL_2 = "http://example.com/my_code_system2";
+	@Rule
+	public final ExpectedException expectedException = ExpectedException.none();
 
 	@After
 	public void after() {
@@ -121,7 +116,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermConcept parentA = new TermConcept(cs, "CS2");
 		cs.getConcepts().add(parentA);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL_2, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 	}
 
@@ -190,7 +185,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 				code2.getDisplay());
 			cs.getConcepts().add(code4);
 
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), LOINC_URI, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -206,7 +201,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		TermCodeSystemVersion cs = new TermCodeSystemVersion();
 		cs.setResource(table);
 
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Update
 		cs = new TermCodeSystemVersion();
@@ -215,7 +210,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		id = myCodeSystemDao.update(codeSystem, null, true, true, mySrd).getId().toUnqualified();
 		table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow(IllegalArgumentException::new);
 		cs.setResource(table);
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 
 		// Try to update to a different resource
 		codeSystem = new CodeSystem();
@@ -1785,7 +1780,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		child.addChild(parent, RelationshipTypeEnum.ISA);
 
 		try {
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION" , cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), "http://foo", "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals("CodeSystem contains circular reference around code parent", e.getMessage());
@@ -1897,7 +1892,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	@Test
 	public void testCustomValueSetExpansion() {
 
-		CodeSystem cs=  new CodeSystem();
+		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://codesystems-r-us");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		IIdType csId = myCodeSystemDao.create(cs).getId().toUnqualifiedVersionless();
@@ -1907,10 +1902,10 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		version.getConcepts().add(new TermConcept(version, "B"));
 		version.getConcepts().add(new TermConcept(version, "C"));
 		version.getConcepts().add(new TermConcept(version, "D"));
-		runInTransaction(()->{
+		runInTransaction(() -> {
 			ResourceTable resTable = myEntityManager.find(ResourceTable.class, csId.getIdPartAsLong());
 			version.setResource(resTable);
-			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(csId.getIdPartAsLong(), cs.getUrl(), "My System", "SYSTEM VERSION" , version, resTable);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(csId.getIdPartAsLong(), cs.getUrl(), "My System", "SYSTEM VERSION", version, resTable);
 		});
 
 		org.hl7.fhir.dstu3.model.ValueSet vs = new org.hl7.fhir.dstu3.model.ValueSet();
@@ -1930,12 +1925,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.map(t -> t.getCode())
 			.sorted()
 			.collect(Collectors.toList());
-		assertEquals(Lists.newArrayList("A","C"), expansionCodes);
+		assertEquals(Lists.newArrayList("A", "C"), expansionCodes);
 
 	}
 
 
 	@Test
+	@Ignore
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(myFhirCtx, CS_URL, "childAAB", null, null);
@@ -1944,7 +1940,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	}
 
 
-		public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
+	public static List<String> toCodesContains(List<ValueSet.ValueSetExpansionContainsComponent> theContains) {
 		List<String> retVal = new ArrayList<>();
 
 		for (ValueSet.ValueSetExpansionContainsComponent next : theContains) {

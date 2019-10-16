@@ -23,7 +23,7 @@ import java.io.IOException;
 @TestPropertySource(properties = {
 	"scheduling_disabled=true"
 })
-public class BaseTermR4Test extends BaseJpaR4Test {
+public abstract class BaseTermR4Test extends BaseJpaR4Test {
 
 	IIdType myExtensionalCsId;
 	IIdType myExtensionalVsId;

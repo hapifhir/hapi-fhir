@@ -108,7 +108,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: No 'localfile' or 'package' parameter, or package had no data", e.getMessage());
+			assertEquals("HTTP 400 Bad Request: No 'file' parameter, or package had no data", e.getMessage());
 		}
 	}
 
@@ -163,7 +163,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.onType(CodeSystem.class)
 			.named("upload-external-code-system")
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
-			.andParameter("localfile", new StringType(tempFile.getAbsolutePath()))
+			.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("localfile:"+tempFile.getAbsolutePath()))
 			.execute();
 
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);

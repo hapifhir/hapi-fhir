@@ -464,7 +464,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		}
 
 		// If the accumulator filled up, abort
-		if (Integer.valueOf(0).equals(theValueSetCodeAccumulator.getCapacityRemaining())) {
+		if (theValueSetCodeAccumulator.getCapacityRemaining() != null && theValueSetCodeAccumulator.getCapacityRemaining() <= 0) {
 			String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionTooLarge", myDaoConfig.getMaximumExpansionSize());
 			throw new ExpansionTooCostlyException(msg);
 		}

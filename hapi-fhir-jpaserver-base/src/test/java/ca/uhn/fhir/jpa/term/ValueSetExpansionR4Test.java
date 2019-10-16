@@ -25,8 +25,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
@@ -765,7 +764,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myTermSvc.expandValueSetInMemory(vs, null);
 			fail();
 		} catch (InternalErrorException e) {
-			assertEquals("Expansion produced too many (> 50) results", e.getMessage());
+			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
 		}
 
 		// Increase the max so it won't exceed
@@ -781,6 +780,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	@Test
 	public void testExpandValueSetWithValueSetCodeAccumulator() {
 		createCodeSystem();
+
+		when(myValueSetCodeAccumulator.getCapacityRemaining()).thenReturn(100);
 
 		ValueSet vs = new ValueSet();
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
