@@ -391,6 +391,10 @@
 				The @Metadata annotation now has an attribute that can be used to control
 				the cache timeout
 			</action>
+			<action type="fix" issue="1544">
+				QuestionnaireResponse validation in the JPA server was not able to load Questionnaire resources that
+				were referenced using a canonical URI instead of a local reference. Thanks to Vu Vuong for reporting!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

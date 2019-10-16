@@ -361,6 +361,11 @@ public abstract class BaseSearchParamRegistry<SP extends IBaseResource> implemen
 		return refreshCacheRetrier.runWithRetry();
 	}
 
+	@VisibleForTesting
+	public void setSearchParamProviderForUnitTest(ISearchParamProvider theSearchParamProvider) {
+		mySearchParamProvider = theSearchParamProvider;
+	}
+
 	@PostConstruct
 	public void registerScheduledJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();

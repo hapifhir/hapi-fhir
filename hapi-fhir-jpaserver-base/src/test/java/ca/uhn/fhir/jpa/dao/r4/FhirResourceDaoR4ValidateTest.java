@@ -651,6 +651,85 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
+	@Test
+	public void testValidateQuestionnaireResponseWithCanonicalReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("http://foo/q");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		try {
+			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+			String encode = encode(oo);
+			ourLog.info(encode);
+			fail("Didn't fail- response was " + encode);
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+		}
+
+	}
+
+	@Test
+	public void testValidateQuestionnaireResponseWithLocalReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("Questionnaire/q");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		try {
+			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+			String encode = encode(oo);
+			ourLog.info(encode);
+			fail("Didn't fail- response was " + encode);
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+		}
+
+	}
+
+	@Test
+	public void testValidateQuestionnaireResponseWithUnknownReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("Questionnaire/DOES_NOT_EXIST");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		assertEquals("The questionnaire \"Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+	}
+
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;
 		for (BundleEntryComponent next : vss.getEntry()) {
