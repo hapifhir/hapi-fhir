@@ -1,11 +1,10 @@
 package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.BaseTest;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
-import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import com.google.common.base.Charsets;
@@ -185,6 +184,37 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
+	/**
+	 * When transferring large files, we use a local file to store the binary instead of
+	 * using HTTP to transfer a giant base 64 encoded attachment. Hopefully we can
+	 * replace this with a bulk data import at some point when that gets implemented.
+	 */
+	@Test
+	public void testSnapshotLargeFile() throws IOException {
+		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(10);
+
+		writeConceptAndHierarchyFiles();
+
+		when(myTermLoaderSvc.loadCustom(any(), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+		App.main(new String[]{
+			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+			"-v", "r4",
+			"-m", "SNAPSHOT",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", myConceptsFileName,
+			"-d", myHierarchyFileName
+		});
+
+		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
+
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors.get(0).getFilename(), matchesPattern(".*\\.zip$"));
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
 
 	private void writeConceptAndHierarchyFiles() throws IOException {
 		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
@@ -229,6 +259,8 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		FileUtils.deleteQuietly(myConceptsFile);
 		FileUtils.deleteQuietly(myHierarchyFile);
 		FileUtils.deleteQuietly(myArchiveFile);
+
+		UploadTerminologyCommand.setTransferSizeLimitForUnitTest(-1);
 	}
 
 	@Before

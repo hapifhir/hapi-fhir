@@ -451,7 +451,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Parent/Child links
 		{
 			String descriptor = "parent/child links";
-			Supplier<Slice<TermConceptParentChildLink>> loader = () -> myConceptParentChildLinkDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Slice<Long>> loader = () -> myConceptParentChildLinkDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptParentChildLinkDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptParentChildLinkDao);
 		}
@@ -459,7 +459,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Properties
 		{
 			String descriptor = "concept properties";
-			Supplier<Slice<TermConceptProperty>> loader = () -> myConceptPropertyDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Slice<Long>> loader = () -> myConceptPropertyDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptPropertyDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptPropertyDao);
 		}
@@ -467,7 +467,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// Designations
 		{
 			String descriptor = "concept designations";
-			Supplier<Slice<TermConceptDesignation>> loader = () -> myConceptDesignationDao.findByCodeSystemVersion(page1000, theCodeSystemVersionPid);
+			Supplier<Slice<Long>> loader = () -> myConceptDesignationDao.findIdsByCodeSystemVersion(page1000, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptDesignationDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptDesignationDao);
 		}
@@ -477,7 +477,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			String descriptor = "concepts";
 			// For some reason, concepts are much slower to delete, so use a smaller batch size
 			PageRequest page100 = PageRequest.of(0, 100);
-			Supplier<Slice<TermConcept>> loader = () -> myConceptDao.findByCodeSystemVersion(page100, theCodeSystemVersionPid);
+			Supplier<Slice<Long>> loader = () -> myConceptDao.findIdsByCodeSystemVersion(page100, theCodeSystemVersionPid);
 			Supplier<Integer> counter = () -> myConceptDao.countByCodeSystemVersion(theCodeSystemVersionPid);
 			doDelete(descriptor, loader, counter, myConceptDao);
 		}
@@ -718,14 +718,14 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 
-	private <T> void doDelete(String theDescriptor, Supplier<Slice<T>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, ?> theDao) {
+	private <T> void doDelete(String theDescriptor, Supplier<Slice<Long>> theLoader, Supplier<Integer> theCounter, JpaRepository<T, Long> theDao) {
 		int count;
 		ourLog.info(" * Deleting {}", theDescriptor);
 		int totalCount = theCounter.get();
 		StopWatch sw = new StopWatch();
 		count = 0;
 		while (true) {
-			Slice<T> link = theLoader.get();
+			Slice<Long> link = theLoader.get();
 			if (!link.hasContent()) {
 				break;
 			}
@@ -733,7 +733,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 			txTemplate.execute(t -> {
-				theDao.deleteAll(link);
+				link.forEach(id -> theDao.deleteById(id));
 				return null;
 			});
 

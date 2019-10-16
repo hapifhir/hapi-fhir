@@ -27,18 +27,20 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.ParametersUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -46,8 +48,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class UploadTerminologyCommand extends BaseCommand {
 	static final String UPLOAD_TERMINOLOGY = "upload-terminology";
-	// TODO: Don't use qualified names for loggers in HAPI CLI.
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UploadTerminologyCommand.class);
+	private static final long DEFAULT_TRANSFER_SIZE_LIMIT = 10 * FileUtils.ONE_MB;
+	private static long ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
 
 	@Override
 	public String getCommandDescription() {
@@ -105,23 +108,25 @@ public class UploadTerminologyCommand extends BaseCommand {
 
 		switch (mode) {
 			case SNAPSHOT:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_UPLOAD_EXTERNAL_CODE_SYSTEM);
 				break;
 			case ADD:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD);
 				break;
 			case REMOVE:
-				invokeOperation(theCommandLine, termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+				invokeOperation(termUrl, datafile, client, inputParameters, JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 				break;
 		}
 
 	}
 
-	private void invokeOperation(CommandLine theCommandLine, String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
+	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, IBaseParameters theInputParameters, String theOperationName) throws ParseException {
 		ParametersUtil.addParameterToParametersUri(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
+		int compressedSourceBytesCount = 0;
+		int compressedFileCount = 0;
 		boolean haveCompressedContents = false;
 		try {
 			for (String nextDataFile : theDatafile) {
@@ -133,19 +138,19 @@ public class UploadTerminologyCommand extends BaseCommand {
 						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
 						zipOutputStream.putNextEntry(nextEntry);
 
-						IOUtils.copy(fileInputStream, zipOutputStream);
+						CountingInputStream countingInputStream = new CountingInputStream(fileInputStream);
+						IOUtils.copy(countingInputStream, zipOutputStream);
 						haveCompressedContents = true;
+						compressedSourceBytesCount += countingInputStream.getCount();
 
 						zipOutputStream.flush();
-						ourLog.info("Finished compressing {} into {}", nextEntry.getSize(), nextEntry.getCompressedSize());
+						ourLog.info("Finished compressing {}", nextDataFile);
 
 					} else {
 
 						ourLog.info("Adding file: {}", nextDataFile);
-						ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
-						AttachmentUtil.setUrl(myFhirCtx, attachment, "file:" + nextDataFile);
-						AttachmentUtil.setData(myFhirCtx, attachment, IOUtils.toByteArray(fileInputStream));
-						ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+						String fileName = "file:" + nextDataFile;
+						addFileToRequestBundle(theInputParameters, fileName, IOUtils.toByteArray(fileInputStream));
 
 					}
 				}
@@ -158,16 +163,16 @@ public class UploadTerminologyCommand extends BaseCommand {
 		}
 
 		if (haveCompressedContents) {
-			ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
-			AttachmentUtil.setUrl(myFhirCtx, attachment, "file:/files.zip");
-			AttachmentUtil.setData(myFhirCtx, attachment, byteArrayOutputStream.toByteArray());
-			ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
+			ourLog.info("Compressed {} bytes in {} file(s) into {} bytes", FileUtil.formatFileSize(compressedSourceBytesCount), compressedFileCount, FileUtil.formatFileSize(compressedBytes.length));
+
+			addFileToRequestBundle(theInputParameters, "file:/files.zip", compressedBytes);
 		}
 
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || "true".equals(System.getProperty("test"))) {
-		ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theInputParameters));
+			ourLog.info("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(theInputParameters));
 		}
 
 		IBaseParameters response;
@@ -190,11 +195,50 @@ public class UploadTerminologyCommand extends BaseCommand {
 		ourLog.info("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
+	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
+
+		byte[] bytes = theBytes;
+		String fileName = theFileName;
+
+		if (bytes.length > ourTransferSizeLimit) {
+			ourLog.info("File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.", FileUtil.formatFileSize(ourTransferSizeLimit));
+
+			String suffix = fileName.substring(fileName.lastIndexOf("."));
+			try {
+				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
+				tempFile.deleteOnExit();
+				try (OutputStream fileOutputStream = new FileOutputStream(tempFile, false)) {
+					fileOutputStream.write(bytes);
+					bytes = null;
+					fileName = "localfile:" + tempFile.getAbsolutePath();
+				}
+			} catch (IOException e) {
+				throw new CommandFailureException(e);
+			}
+		}
+
+		ICompositeType attachment = AttachmentUtil.newInstance(myFhirCtx);
+		AttachmentUtil.setUrl(myFhirCtx, attachment, fileName);
+		if (bytes != null) {
+			AttachmentUtil.setData(myFhirCtx, attachment, bytes);
+		}
+		ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+	}
+
 	private enum ModeEnum {
 		SNAPSHOT, ADD, REMOVE
 	}
 
-	public static String stripPath(String thePath) {
+	@VisibleForTesting
+	static void setTransferSizeLimitForUnitTest(long theTransferSizeLimit) {
+		if (theTransferSizeLimit <= 0) {
+			ourTransferSizeLimit = DEFAULT_TRANSFER_SIZE_LIMIT;
+		}else {
+			ourTransferSizeLimit = theTransferSizeLimit;
+		}
+	}
+
+	static String stripPath(String thePath) {
 		String retVal = thePath;
 		if (retVal.contains("/")) {
 			retVal = retVal.substring(retVal.lastIndexOf("/"));

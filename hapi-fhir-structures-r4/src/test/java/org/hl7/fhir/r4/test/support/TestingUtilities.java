@@ -1,20 +1,21 @@
 package org.hl7.fhir.r4.test.support;
 
 import ca.uhn.fhir.util.XmlUtil;
+import com.google.common.base.Charsets;
 import com.google.gson.*;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.utilities.CSFile;
-import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -172,30 +173,8 @@ public class TestingUtilities {
 	}
 
 	private static Document loadXml(InputStream fn) throws Exception {
-		DocumentBuilderFactory factory = XmlUtil.newDocumentBuilderFactory();
-		DocumentBuilder builder = factory.newDocumentBuilder();
-		return builder.parse(fn);
-	}
-
-	public static String checkJsonIsSame(String f1, String f2) throws JsonSyntaxException, FileNotFoundException, IOException {
-		String result = compareJson(f1, f2);
-		if (result != null && SHOW_DIFF) {
-			String diff = Utilities.path(System.getenv("ProgramFiles(X86)"), "WinMerge", "WinMergeU.exe");
-			List<String> command = new ArrayList<String>();
-			command.add("\"" + diff + "\" \"" + f1 + "\" \"" + f2 + "\"");
-
-			ProcessBuilder builder = new ProcessBuilder(command);
-			builder.directory(new CSFile("c:\\temp"));
-			builder.start();
-
-		}
-		return result;
-	}
-
-	private static String compareJson(String f1, String f2) throws JsonSyntaxException, FileNotFoundException, IOException {
-		JsonObject o1 = (JsonObject) new com.google.gson.JsonParser().parse(TextFile.fileToString(f1));
-		JsonObject o2 = (JsonObject) new com.google.gson.JsonParser().parse(TextFile.fileToString(f2));
-		return compareObjects("", o1, o2);
+		String input = IOUtils.toString(fn, Charsets.UTF_8);
+		return XmlUtil.parseDocument(input);
 	}
 
 	private static String compareObjects(String path, JsonObject o1, JsonObject o2) {
@@ -250,9 +229,9 @@ public class TestingUtilities {
 			JsonArray a2 = (JsonArray) n2;
 
 			if (a1.size() != a2.size())
-				return "array properties differ at " + path + ": count " + Integer.toString(a1.size()) + "/" + Integer.toString(a2.size());
+				return "array properties differ at " + path + ": count " + a1.size() + "/" + a2.size();
 			for (int i = 0; i < a1.size(); i++) {
-				String s = compareNodes(path + "[" + Integer.toString(i) + "]", a1.get(i), a2.get(i));
+				String s = compareNodes(path + "[" + i + "]", a1.get(i), a2.get(i));
 				if (!Utilities.noString(s))
 					return s;
 			}

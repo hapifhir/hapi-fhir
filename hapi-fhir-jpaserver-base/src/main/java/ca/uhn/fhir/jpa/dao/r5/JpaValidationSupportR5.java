@@ -87,7 +87,7 @@ public class JpaValidationSupportR5 extends BaseJpaValidationSupport implements 
 
 	@Override
 	@Transactional(value = TxType.SUPPORTS)
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theSystemUrl) {
 		return null;
 	}
 

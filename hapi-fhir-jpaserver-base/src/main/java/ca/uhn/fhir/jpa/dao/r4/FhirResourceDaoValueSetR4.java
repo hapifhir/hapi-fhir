@@ -99,7 +99,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSet(theSource);
+			return myTerminologySvc.expandValueSetInMemory(theSource, null);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -111,12 +111,6 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 
 		return retVal;
 
-		// ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
-		//
-		// ValueSet retVal = new ValueSet();
-		// retVal.getMeta().setLastUpdated(new Date());
-		// retVal.setExpansion(expansion);
-		// return retVal;
 	}
 
 	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {

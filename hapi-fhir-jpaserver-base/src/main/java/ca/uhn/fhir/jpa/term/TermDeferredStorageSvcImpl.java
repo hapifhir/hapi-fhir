@@ -183,6 +183,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			return;
 		}
 
+		for (int i = 0; i < 10; i++) {
+
+			if (!isDeferredConcepts() &&
+				!isConceptLinksToSaveLater() &&
+				!isDeferredValueSets() &&
+				!isDeferredConceptMaps()) {
+				return;
+			}
+
 		TransactionTemplate tt = new TransactionTemplate(myTransactionMgr);
 		tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 		if (isDeferredConceptsOrConceptLinksToSaveLater()) {
@@ -205,6 +214,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc {
 			});
 		}
 
+	}
 	}
 
 	@Override

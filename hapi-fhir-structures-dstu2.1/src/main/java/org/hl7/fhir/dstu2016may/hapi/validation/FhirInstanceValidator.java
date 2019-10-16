@@ -29,7 +29,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
-	private DocumentBuilderFactory myDocBuilderFactory;
 	private StructureDefinition myStructureDefintion;
 	private IValidationSupport myValidationSupport;
 
@@ -49,7 +48,6 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 	 *           The validation support
 	 */
 	public FhirInstanceValidator(IValidationSupport theValidationSupport) {
-		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
 		myValidationSupport = theValidationSupport;
 	}
 
@@ -139,9 +137,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IValid
 		if (theEncoding == EncodingEnum.XML) {
 			Document document;
 			try {
-				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-				InputSource src = new InputSource(new StringReader(theInput));
-				document = builder.parse(src);
+				document = XmlUtil.parseDocument(theInput);
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();

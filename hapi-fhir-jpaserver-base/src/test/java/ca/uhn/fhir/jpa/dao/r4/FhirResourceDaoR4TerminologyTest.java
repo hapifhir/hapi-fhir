@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -837,7 +838,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		try {
 			myObservationDao.search(params).size();
 			fail();
-		} catch (InvalidRequestException e) {
+		} catch (InternalErrorException e) {
 			assertEquals("Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!", e.getMessage());
 		}
 	}

@@ -51,12 +51,31 @@
 				to Elastic in the future.
 				]]>
 			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				A new set of operations have been added to the JPA server that allow CodeSystem deltas to be
+				uploaded. A CodeSystem Delta consists of a set of codes and relationships that are added or
+				removed incrementally to the live CodeSystem without requiring a downtime or a complete
+				upload of the contents. In addition, the HAPI FHIR CLI
+				<code>upload-terminology</code> command has been modified to support this new functionality.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
-				<b>Improvement</b>:
+				<b>Performance Improvement</b>:
 				A significant performance improvement was made to the parsers (particularly the Json Parser)
 				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
 				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
+			</action>
+			<action type="add" issue="1489">
+				<![CDATA[
+				<b>Performance Improvement</b>:
+				When running inside a JPA server, The DSTU3+ validator now performs code validations
+				by directly testing ValueSet membership against a pre-calculated copy of the ValueSet,
+				instead of first expanding the ValueSet and then examining the expanded contents.
+				This can yield a significant improvement in validation speed in many cases.
             ]]>
 			</action>
 			<action type="add" issue="1357">
@@ -316,9 +335,6 @@
 				corrected to account for names up to 40 characters long.
 			</action>
 			<action type="fix">
-                A new command has been added to the HAPI FHIR CLI that allows external (not-present) codesystem deltas to be manually uploaded
-			</action>
-			<action type="fix">
 				The subscription triggering operation was not able to handle commas within search URLs being
 				used to trigger resources for subscription checking. This has been corrected.
 			</action>
@@ -358,6 +374,14 @@
 				Paging requests that are incorrectly executed at the type level were interpreted by the plain server
 				as search requests with no search parameters, leading to confusing search results. These will now
 				result in an HTTP 400 error with a meaningful error message.
+			</action>
+			<action type="change">
+				The
+				<![CDATA[<code>IValidationSupport#validateCode(...)</code>]]>
+				method has been modified to add an additional parameter (String theValueSetUrl).
+				Most users will be unaffected by this change as HAPI FHIR provides a number of
+				built-in implementations of this interface, but any direct user implementations
+				of this interface will need to add the new parameter.
 			</action>
 			<action type="add" issue="1541">
 				The server CapabilityStatement (/metadata) endpoint now respects the Cache-Control header. Thanks

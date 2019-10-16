@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
-import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcDstu3;
@@ -103,8 +102,8 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSet(valueSetToExpandR4).getExpansion();
+			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionComponent expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null).getExpansion();
 			return VersionConvertor_30_40.convertValueSetExpansionComponent(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -117,12 +116,19 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
-			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4);
+			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
+			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSetInMemory(valueSetToExpandR4, null);
 			return VersionConvertor_30_40.convertValueSet(expandedR4);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
+	}
+
+	@Override
+	protected org.hl7.fhir.r4.model.ValueSet toCanonicalValueSet(IBaseResource theValueSet) throws FHIRException {
+		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
+		valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet((ValueSet) theValueSet);
+		return valueSetToExpandR4;
 	}
 
 	@Override
@@ -131,7 +137,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			org.hl7.fhir.r4.model.ValueSet expandedR4 = super.expandValueSet(valueSetToExpandR4, theOffset, theCount);
 			return VersionConvertor_30_40.convertValueSet(expandedR4);
 		} catch (FHIRException e) {
@@ -145,7 +151,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		try {
 			org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
-			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(valueSetToExpand);
+			valueSetToExpandR4 = toCanonicalValueSet(valueSetToExpand);
 			super.expandValueSet(valueSetToExpandR4, theValueSetCodeAccumulator);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
@@ -162,13 +168,13 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		org.hl7.fhir.r4.model.ValueSet valueSetToExpandR4;
 		try {
-			valueSetToExpandR4 = VersionConvertor_30_40.convertValueSet(vs);
+			valueSetToExpandR4 = toCanonicalValueSet(vs);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
 
 
-		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4);
+		return expandValueSetAndReturnVersionIndependentConcepts(valueSetToExpandR4, null);
 	}
 
 	@Override
@@ -262,7 +268,7 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 		org.hl7.fhir.r4.model.ValueSet valueSetR4;
 		try {
-			valueSetR4 = VersionConvertor_30_40.convertValueSet(valueSet);
+			valueSetR4 = toCanonicalValueSet(valueSet);
 		} catch (FHIRException e) {
 			throw new InternalErrorException(e);
 		}
@@ -277,25 +283,30 @@ public class TermReadSvcDstu3 extends BaseTermReadSvcImpl implements IValidation
 
 	@CoverageIgnore
 	@Override
-	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
-		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-		return txTemplate.execute(t->{
-			Optional<TermConcept> codeOpt = myTerminologySvc.findCode(theCodeSystem, theCode);
-			if (codeOpt.isPresent()) {
-				ConceptDefinitionComponent def = new ConceptDefinitionComponent();
-				TermConcept code = codeOpt.get();
-				def.setCode(code.getCode());
-				def.setDisplay(code.getDisplay());
-				IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
-				retVal.setProperties(code.toValidationProperties());
-				retVal.setCodeSystemName(code.getCodeSystemVersion().getCodeSystem().getName());
-				return retVal;
-			}
+	public IValidationSupport.CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		Optional<VersionIndependentConcept> codeOpt = Optional.empty();
+		boolean haveValidated = false;
 
-			return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
-		});
+		if (isNotBlank(theValueSetUrl)) {
+			codeOpt = super.validateCodeInValueSet(theValueSetUrl, theCodeSystem, theCode);
+			haveValidated = true;
+		}
 
+		if (!haveValidated) {
+			TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
+			txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+			codeOpt = txTemplate.execute(t -> findCode(theCodeSystem, theCode).map(c->c.toVersionIndependentConcept()));
+		}
+
+		if (codeOpt != null && codeOpt.isPresent()) {
+			VersionIndependentConcept code = codeOpt.get();
+			ConceptDefinitionComponent def = new ConceptDefinitionComponent();
+			def.setCode(code.getCode());
+			IValidationSupport.CodeValidationResult retVal = new IValidationSupport.CodeValidationResult(def);
+			return retVal;
+		}
+
+		return new IValidationSupport.CodeValidationResult(IssueSeverity.ERROR, "Unknown code {" + theCodeSystem + "}" + theCode);
 	}
 
 	@Override

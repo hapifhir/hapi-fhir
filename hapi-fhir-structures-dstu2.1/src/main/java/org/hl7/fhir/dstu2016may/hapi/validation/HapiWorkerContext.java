@@ -177,7 +177,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
@@ -231,7 +231,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		/*
 		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
 		 */
-		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
+		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
 			ValueSet expansion = new ValueSet();
 			for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
 				for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {

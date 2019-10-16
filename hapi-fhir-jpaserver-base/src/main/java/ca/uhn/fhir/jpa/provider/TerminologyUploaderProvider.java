@@ -29,7 +29,6 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
@@ -40,7 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,7 +88,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	public IBaseParameters uploadSnapshot(
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = PARAM_SYSTEM, min = 1, typeName = "uri") IPrimitiveType<String> theCodeSystemUrl,
-		@OperationParam(name = "localfile", min = 1, max = OperationParam.MAX_UNLIMITED, typeName = "string") List<IPrimitiveType<String>> theLocalFile,
 		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
 		RequestDetails theRequestDetails
 	) {
@@ -97,66 +98,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 
-		if (theLocalFile == null || theLocalFile.size() == 0) {
-			if (theFiles == null || theFiles.size() == 0) {
-				throw new InvalidRequestException("No 'localfile' or 'package' parameter, or package had no data");
-			}
-			for (ICompositeType next : theFiles) {
+		if (theFiles == null || theFiles.size() == 0) {
+			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
+		}
+		for (ICompositeType next : theFiles) {
 				ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
 			}
-		}
 
 		try {
-			List<ITermLoaderSvc.FileDescriptor> localFiles = new ArrayList<>();
-			if (theLocalFile != null && theLocalFile.size() > 0) {
-				for (IPrimitiveType<String> nextLocalFile : theLocalFile) {
-					if (isNotBlank(nextLocalFile.getValue())) {
-						ourLog.info("Reading in local file: {}", nextLocalFile.getValue());
-						File nextFile = new File(nextLocalFile.getValue());
-						if (!nextFile.exists() || !nextFile.isFile()) {
-							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
-						}
-						localFiles.add(new ITermLoaderSvc.FileDescriptor() {
-							@Override
-							public String getFilename() {
-								return nextFile.getAbsolutePath();
-							}
-
-							@Override
-							public InputStream getInputStream() {
-								try {
-									return new FileInputStream(nextFile);
-								} catch (FileNotFoundException theE) {
-									throw new InternalErrorException(theE);
-								}
-							}
-						});
-					}
-				}
-			}
-
-			if (theFiles != null) {
-				for (ICompositeType nextPackage : theFiles) {
-					final String url = AttachmentUtil.getOrCreateUrl(myCtx, nextPackage).getValueAsString();
-
-					if (isBlank(url)) {
-						throw new UnprocessableEntityException("Package is missing mandatory url element");
-					}
-
-					localFiles.add(new ITermLoaderSvc.FileDescriptor() {
-						@Override
-						public String getFilename() {
-							return url;
-						}
-
-						@Override
-						public InputStream getInputStream() {
-							byte[] data = AttachmentUtil.getOrCreateData(myCtx, nextPackage).getValue();
-							return new ByteArrayInputStream(data);
-						}
-					});
-				}
-			}
+			List<ITermLoaderSvc.FileDescriptor> localFiles = convertAttachmentsToFileDescriptors(theFiles);
 
 			String codeSystemUrl = theCodeSystemUrl.getValue();
 			codeSystemUrl = trim(codeSystemUrl);
@@ -266,12 +216,30 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
 		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
 		for (ICompositeType next : theFiles) {
-			byte[] nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+
 			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
-			ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
 			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
 
-			files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
+			byte[] nextData;
+			if (nextUrl.startsWith("localfile:")) {
+				String nextLocalFile = nextUrl.substring("localfile:".length());
+
+
+				if (isNotBlank(nextLocalFile)) {
+					ourLog.info("Reading in local file: {}", nextLocalFile);
+					File nextFile = new File(nextLocalFile);
+					if (!nextFile.exists() || !nextFile.isFile()) {
+						throw new InvalidRequestException("Unknown file: " + nextFile.getName());
+					}
+					files.add(new FileBackedFileDescriptor(nextFile));
+				}
+
+			} else {
+				nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+				ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
+				files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
+			}
+
 		}
 		return files;
 	}
@@ -284,4 +252,25 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 
+	private static class FileBackedFileDescriptor implements ITermLoaderSvc.FileDescriptor {
+		private final File myNextFile;
+
+		public FileBackedFileDescriptor(File theNextFile) {
+			myNextFile = theNextFile;
+		}
+
+		@Override
+		public String getFilename() {
+			return myNextFile.getAbsolutePath();
+		}
+
+		@Override
+		public InputStream getInputStream() {
+			try {
+				return new FileInputStream(myNextFile);
+			} catch (FileNotFoundException theE) {
+				throw new InternalErrorException(theE);
+			}
+		}
+	}
 }

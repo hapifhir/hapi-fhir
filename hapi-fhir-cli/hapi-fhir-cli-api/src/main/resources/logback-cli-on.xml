@@ -37,6 +37,12 @@
 	<logger name="ca.uhn.fhir.jpa.term.BaseTermReadSvcImpl" additivity="false" level="info">
 		<appender-ref ref="STDOUT" />
 	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
+	<logger name="ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl" additivity="false" level="info">
+		<appender-ref ref="STDOUT" />
+	</logger>
 
 	<!--
 	Always log the migrator
