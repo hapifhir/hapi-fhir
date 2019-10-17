@@ -539,6 +539,23 @@ public class FhirInstanceValidatorR4Test {
 		assertThat(output.getMessages().toString(), containsString("Element 'Bundle.type': minimum required = 1"));
 	}
 
+	/**
+	 * See #848
+	 */
+	@Test
+	public void testValidateJsonWithDuplicateEntries() {
+		String patient = "{" +
+			"\"resourceType\":\"Patient\", " +
+			"\"active\": true, " +
+			"\"name\":[ {\"family\":\"foo\"} ]," +
+			"\"name\":[ {\"family\":\"bar\"} ]" +
+			"}";
+
+		ValidationResult output = myVal.validateWithResult(patient);
+		logResultsAndReturnNonInformationalOnes(output);
+		assertThat(output.getMessages().toString(), containsString("Error parsing JSON source: Duplicated property name"));
+	}
+
 	@Test
 	@Ignore
 	public void testValidateBundleWithObservations() throws Exception {
