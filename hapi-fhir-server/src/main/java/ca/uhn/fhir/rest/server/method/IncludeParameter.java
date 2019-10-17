@@ -49,7 +49,7 @@ class IncludeParameter extends BaseQueryParameter {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
-			myAllow = new HashSet<String>();
+			myAllow = new HashSet<>();
 			for (String next : theAnnotation.allow()) {
 				if (next != null) {
 					myAllow.add(next);

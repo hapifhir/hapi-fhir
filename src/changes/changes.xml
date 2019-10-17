@@ -408,6 +408,10 @@
 				An unintended dependency from hapi-fhir-base on Jetty was introduced in HAPI FHIR 4.0.0. This 
 				has been removed.
 			</action>
+			<action type="fix">
+				The JPA migrator tool was not able to correctly drop tables containing foreign key references
+				 in some cases. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

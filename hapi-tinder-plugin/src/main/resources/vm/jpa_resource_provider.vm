@@ -117,8 +117,9 @@ public class ${className}ResourceProvider extends
 
 			@IncludeParam(allow= {
 #foreach ( $include in $includes )
-				"${include.path}" #{if}($foreach.hasNext), #{end}
+				"${include.path}",
 #end
+				"*"
 			})
 			Set<Include> theIncludes,
 			
