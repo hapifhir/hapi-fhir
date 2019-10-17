@@ -400,6 +400,10 @@
 				raw JSON to the validator. This meant that the validator was unable to catch certain structural
 				errors that are ignored by Gson. Thanks to Michael Lawley for reporting!
 			</action>
+			<action type="fix" issue="1546">
+				The JPA server exposed a number of duplicate entries in the CapabilityStatement's list of
+				supported _include values for a given resource. Thanks to Jens Villadsen for reporting!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
