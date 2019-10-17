@@ -395,6 +395,11 @@
 				QuestionnaireResponse validation in the JPA server was not able to load Questionnaire resources that
 				were referenced using a canonical URI instead of a local reference. Thanks to Vu Vuong for reporting!
 			</action>
+			<action type="fix" issue="848">
+				When validating JSON payloads, the JSON structure was parsed by Gson instead of passing the
+				raw JSON to the validator. This meant that the validator was unable to catch certain structural
+				errors that are ignored by Gson. Thanks to Michael Lawley for reporting!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
