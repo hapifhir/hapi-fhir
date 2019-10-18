@@ -559,6 +559,10 @@
 			<id>CodeAndChoke</id>
 			<name>Long Nguyen</name>
 		</developer>
+		<developer>
+			<id>tuomoa</id>
+			<name>Tuomo Ala-Vannesluoma</name>
+		</developer>
 	</developers>
 
 	<licenses>

@@ -411,7 +411,12 @@
 			<action type="fix">
 				The JPA migrator tool was not able to correctly drop tables containing foreign key references
 				 in some cases. This has been corrected.
-			</action>
+			 </action>
+			 <action type="fix" issue="1547">
+				 An issue was fixed where the JPA server would occasionally fail to save a resource because
+				 it contained a string containing characters that change length when normalized. Thanks to 
+				 Tuomo Ala-Vannesluoma for the pull request!
+				 </action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
