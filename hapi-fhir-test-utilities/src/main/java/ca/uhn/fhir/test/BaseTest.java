@@ -44,6 +44,6 @@ public class BaseTest {
 
 	protected <T extends IBaseResource> T loadResource(FhirContext theCtx, Class<T> theType, String theClasspath) throws IOException {
 		String raw = loadResource(theClasspath);
-		EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);
+		return EncodingEnum.detectEncodingNoDefault(raw).newParser(theCtx).parseResource(theType, raw);
 	}
 }
