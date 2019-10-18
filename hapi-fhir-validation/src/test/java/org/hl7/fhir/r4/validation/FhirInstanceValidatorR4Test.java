@@ -2,6 +2,7 @@ package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -54,7 +55,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class FhirInstanceValidatorR4Test {
+public class FhirInstanceValidatorR4Test extends BaseTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorR4Test.class);
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport();
@@ -71,7 +72,7 @@ public class FhirInstanceValidatorR4Test {
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
-	private Set<String> myValidSystems = new HashSet<String>();
+	private Set<String> myValidSystems = new HashSet<>();
 
 	private void addValidConcept(String theSystem, String theCode) {
 		myValidSystems.add(theSystem);
@@ -111,21 +112,18 @@ public class FhirInstanceValidatorR4Test {
 
 		myValidConcepts = new ArrayList<>();
 
-		when(myMockSupport.expandValueSet(nullable(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(new Answer<ValueSetExpander.ValueSetExpansionOutcome>() {
-			@Override
-			public ValueSetExpander.ValueSetExpansionOutcome answer(InvocationOnMock theInvocation) throws Throwable {
-				ConceptSetComponent arg = (ConceptSetComponent) theInvocation.getArguments()[1];
-				ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
-				if (retVal == null) {
-					ValueSetExpander.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(ourCtx, arg);
-					return outcome;
-				}
-				ourLog.debug("expandValueSet({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
-
-				ValueSet valueset = new ValueSet();
-				valueset.setExpansion(retVal);
-				return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
+		when(myMockSupport.expandValueSet(nullable(FhirContext.class), nullable(ConceptSetComponent.class))).thenAnswer(t -> {
+			ConceptSetComponent arg = (ConceptSetComponent) t.getArguments()[1];
+			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getSystem());
+			if (retVal == null) {
+				ValueSetExpander.ValueSetExpansionOutcome outcome = myDefaultValidationSupport.expandValueSet(ourCtx, arg);
+				return outcome;
 			}
+			ourLog.debug("expandValueSet({}) : {}", new Object[]{t.getArguments()[0], retVal});
+
+			ValueSet valueset = new ValueSet();
+			valueset.setExpansion(retVal);
+			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
 		});
 		when(myMockSupport.isCodeSystemSupported(nullable(FhirContext.class), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
 			@Override
@@ -217,7 +215,7 @@ public class FhirInstanceValidatorR4Test {
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
 			ourLog.info("Result {}: {} - {}:{} {} - {}",
-				new Object[]{index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage()});
+				index, next.getSeverity(), defaultString(next.getLocationLine()), defaultString(next.getLocationCol()), next.getLocationString(), next.getMessage());
 			index++;
 
 			retVal.add(next);
@@ -304,11 +302,11 @@ public class FhirInstanceValidatorR4Test {
 
 
 	private List<SingleValidationMessage> logResultsAndReturnNonInformationalOnes(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}", new Object[]{index, next.getSeverity(), next.getLocationString(), next.getMessage()});
+			ourLog.info("Result {}: {} - {} - {}", index, next.getSeverity(), next.getLocationString(), next.getMessage());
 			index++;
 
 			if (next.getSeverity() != ResultSeverityEnum.INFORMATION) {
@@ -320,11 +318,11 @@ public class FhirInstanceValidatorR4Test {
 	}
 
 	private List<SingleValidationMessage> logResultsAndReturnErrorOnes(ValidationResult theOutput) {
-		List<SingleValidationMessage> retVal = new ArrayList<SingleValidationMessage>();
+		List<SingleValidationMessage> retVal = new ArrayList<>();
 
 		int index = 0;
 		for (SingleValidationMessage next : theOutput.getMessages()) {
-			ourLog.info("Result {}: {} - {} - {}", new Object[]{index, next.getSeverity(), next.getLocationString(), next.getMessage()});
+			ourLog.info("Result {}: {} - {} - {}", index, next.getSeverity(), next.getLocationString(), next.getMessage());
 			index++;
 
 			if (next.getSeverity().ordinal() > ResultSeverityEnum.WARNING.ordinal()) {
@@ -359,7 +357,7 @@ public class FhirInstanceValidatorR4Test {
 
 	@Test
 	public void testValidateBundleWithNoFullUrl() throws IOException {
-		String encoded = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/r4-caredove-bundle.json"));
+		String encoded = loadResource("/r4/r4-caredove-bundle.json");
 
 		ValidationResult output = myVal.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -459,9 +457,7 @@ public class FhirInstanceValidatorR4Test {
 	@Test
 	@Ignore
 	public void testValidateBigRawJsonResource() throws Exception {
-		InputStream stream = FhirInstanceValidatorR4Test.class.getResourceAsStream("/conformance.json.gz");
-		stream = new GZIPInputStream(stream);
-		String input = IOUtils.toString(stream);
+		String input = super.loadCompressedResource("/conformance.json.gz");
 
 		long start = System.currentTimeMillis();
 		ValidationResult output = null;
@@ -485,8 +481,7 @@ public class FhirInstanceValidatorR4Test {
 		org.hl7.fhir.r4.model.Bundle bundle;
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
-		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), "UTF-8");
+		String vsContents = loadResource("/org/hl7/fhir/r4/model/profile/" + name + ".xml");
 
 		TreeSet<String> ids = new TreeSet<>();
 
@@ -532,7 +527,7 @@ public class FhirInstanceValidatorR4Test {
 
 	@Test
 	public void testValidateBundleWithNoType() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/bundle-with-no-type.json"), "UTF-8");
+		String vsContents = loadResource("/r4/bundle-with-no-type.json");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -562,7 +557,7 @@ public class FhirInstanceValidatorR4Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String inputString;
-		inputString = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), "UTF-8");
+		inputString = loadResource("/brian_reinhold_bundle.json");
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
 		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
@@ -588,7 +583,7 @@ public class FhirInstanceValidatorR4Test {
 	@Test
 	@Ignore
 	public void testValidateDocument() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/sample-document.xml"), "UTF-8");
+		String vsContents = loadResource("/sample-document.xml");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -608,7 +603,7 @@ public class FhirInstanceValidatorR4Test {
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(support));
 
-		Consent input = ourCtx.newJsonParser().parseResource(Consent.class, IOUtils.toString(ResourceValidatorDstu3Test.class.getResourceAsStream("/r4/myconsent-resource.json")));
+		Consent input = super.loadResource(ourCtx, Consent.class, "/r4/myconsent-resource.json");
 
 		input.getPolicyFirstRep().setAuthority("http://foo");
 		//input.setScope(Consent.ConsentScope.ADR);
@@ -639,7 +634,7 @@ public class FhirInstanceValidatorR4Test {
 	@Test
 	@Ignore
 	public void testValidateQuestionnaireResponse() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/qr_jon.xml"));
+		String input = loadResource("/qr_jon.xml");
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
@@ -681,14 +676,18 @@ public class FhirInstanceValidatorR4Test {
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/Patient", output.getMessages().get(0).getLocationString());
 		assertEquals("Unrecognised property '@foo'", output.getMessages().get(0).getMessage());
+
+		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
+		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
+		assertEquals("Unrecognised property '@foo'", operationOutcome.getIssue().get(0).getDiagnostics());
+		assertEquals("/Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line 5, Col 24", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
 	@Ignore
 	public void testValidateRawJsonResourceFromExamples() throws Exception {
-		// @formatter:off
-		String input = IOUtils.toString(FhirInstanceValidator.class.getResourceAsStream("/testscript-search.json"));
-		// @formatter:on
+		String input = loadResource("/testscript-search.json");
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -884,7 +883,7 @@ public class FhirInstanceValidatorR4Test {
 	 * A reference with only an identifier should be valid
 	 */
 	@Test
-	public void testValidateReferenceWithDisplayValid() throws Exception {
+	public void testValidateReferenceWithDisplayValid() {
 		Patient p = new Patient();
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.getManagingOrganization().setDisplay("HELLO");
@@ -898,7 +897,7 @@ public class FhirInstanceValidatorR4Test {
 	 * A reference with only an identifier should be valid
 	 */
 	@Test
-	public void testValidateReferenceWithIdentifierValid() throws Exception {
+	public void testValidateReferenceWithIdentifierValid() {
 		Patient p = new Patient();
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.getManagingOrganization().getIdentifier().setSystem("http://acme.org");
@@ -1166,11 +1165,9 @@ public class FhirInstanceValidatorR4Test {
 
 		ValidationResult output = myVal.validateWithResult(o);
 		List<SingleValidationMessage> valMessages = logResultsAndReturnAll(output);
-		List<String> messages = new ArrayList<>();
-		for (String msg : messages) {
-			messages.add(msg);
+		for (SingleValidationMessage msg : valMessages) {
+			assertThat(msg.getMessage(), not(containsString("have a performer")));
 		}
-		assertThat(messages, not(hasItem("All observations should have a performer")));
 	}
 
 	@Test
@@ -1194,7 +1191,7 @@ public class FhirInstanceValidatorR4Test {
 	@Test
 	@Ignore
 	public void testValidateStructureDefinition() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/sdc-questionnaire.profile.xml"));
+		String input = loadResource("/sdc-questionnaire.profile.xml");
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
