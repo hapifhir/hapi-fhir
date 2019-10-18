@@ -43,7 +43,7 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IResourceLoader;
 import ca.uhn.fhir.validation.ValidationResult;
 
-public class FhirResourceDaoQuestionnaireResponseDstu2 extends FhirResourceDaoDstu2<QuestionnaireResponse> {
+public class FhirResourceDaoQuestionnaireResponseDstu2 extends BaseHapiFhirResourceDao<QuestionnaireResponse> {
 
 	@Autowired
 	@Qualifier("myFhirContextDstu2Hl7Org")

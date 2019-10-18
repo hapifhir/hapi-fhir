@@ -94,6 +94,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
+	@Autowired
+	private IInstanceValidatorModule myInstanceValidator;
 
 	private String myResourceName;
 	private Class<T> myResourceType;
@@ -182,9 +184,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
 	}
 
-	protected abstract IValidatorModule getInstanceValidator();
+	protected final IInstanceValidatorModule getInstanceValidator() {
+		return myInstanceValidator;
+	}
 
-	protected abstract IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode);
+	protected final IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
+		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
+		return oo;
+	}
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId) {

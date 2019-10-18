@@ -7,11 +7,11 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
-import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.instance.hapi.validation.CachingValidationSupport;
 import org.hl7.fhir.instance.hapi.validation.DefaultProfileValidationSupport;
@@ -83,7 +83,7 @@ public class BaseDstu2Config extends BaseConfig {
 
 	@Bean(name = "myInstanceValidatorDstu2")
 	@Lazy
-	public IValidatorModule instanceValidatorDstu2() {
+	public IInstanceValidatorModule instanceValidatorDstu2() {
 		FhirInstanceValidator retVal = new FhirInstanceValidator();
 		retVal.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 		retVal.setValidationSupport(new CachingValidationSupport(new ValidationSupportChain(new DefaultProfileValidationSupport(), jpaValidationSupportDstu2())));
@@ -134,8 +134,8 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvc terminologyService() {
-		return new HapiTerminologySvcDstu2();
+	public ITermReadSvc terminologyService() {
+		return new TermReadSvcDstu2();
 	}
 
 }

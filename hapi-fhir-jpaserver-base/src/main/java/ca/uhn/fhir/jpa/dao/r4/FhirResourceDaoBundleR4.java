@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 
@@ -30,7 +31,7 @@ import java.util.TreeSet;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class FhirResourceDaoBundleR4 extends FhirResourceDaoR4<Bundle> {
+public class FhirResourceDaoBundleR4 extends BaseHapiFhirResourceDao<Bundle> {
 
 	@Override
 	protected void preProcessResourceForStorage(Bundle theResource) {

@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -44,7 +45,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
-public class FhirInstanceValidator extends BaseValidatorBridge implements IValidatorModule {
+public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 

@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class FhirResourceDaoSearchParameterDstu2 extends FhirResourceDaoDstu2<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
+public class FhirResourceDaoSearchParameterDstu2 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
 
 	@Autowired
 	private IFhirSystemDao<Bundle, MetaDt> mySystemDao;

@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR5;
 import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
@@ -92,7 +93,7 @@ public class BaseR5Config extends BaseConfig {
 
 	@Bean(name = "myInstanceValidatorR5")
 	@Lazy
-	public IValidatorModule instanceValidatorR5() {
+	public IInstanceValidatorModule instanceValidatorR5() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);

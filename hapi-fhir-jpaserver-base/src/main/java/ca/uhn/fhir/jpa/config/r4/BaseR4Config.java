@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.config.r4;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.jpa.config.BaseConfig;
+import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
@@ -12,13 +12,15 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR4;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR4;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcR4;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR4;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR4;
-import ca.uhn.fhir.validation.IValidatorModule;
+import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
@@ -55,11 +57,17 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-public class BaseR4Config extends BaseConfig {
+public class BaseR4Config extends BaseConfigDstu3Plus {
 
 	@Override
 	public FhirContext fhirContext() {
 		return fhirContextR4();
+	}
+
+	@Bean
+	@Override
+	public ITermVersionAdapterSvc terminologyVersionAdapterSvc() {
+		return new TermVersionAdapterSvcR4();
 	}
 
 	@Bean
@@ -92,7 +100,7 @@ public class BaseR4Config extends BaseConfig {
 
 	@Bean(name = "myInstanceValidatorR4")
 	@Lazy
-	public IValidatorModule instanceValidatorR4() {
+	public IInstanceValidatorModule instanceValidatorR4() {
 		FhirInstanceValidator val = new FhirInstanceValidator();
 		IResourceValidator.BestPracticeWarningLevel level = IResourceValidator.BestPracticeWarningLevel.Warning;
 		val.setBestPracticeWarningLevel(level);
@@ -154,13 +162,13 @@ public class BaseR4Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologyLoaderSvc terminologyLoaderService() {
-		return new TerminologyLoaderSvcImpl();
+	public ITermLoaderSvc termLoaderService() {
+		return new TermLoaderSvcImpl();
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvcR4 terminologyService() {
-		return new HapiTerminologySvcR4();
+	public ITermReadSvcR4 terminologyService() {
+		return new TermReadSvcR4();
 	}
 
 	@Primary
