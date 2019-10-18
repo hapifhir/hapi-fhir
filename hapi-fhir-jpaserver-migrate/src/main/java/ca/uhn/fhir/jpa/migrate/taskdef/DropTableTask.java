@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class DropTableTask extends BaseTableTask<DropTableTask> {
@@ -53,9 +54,11 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 		}
 
 		for (String nextIndex : indexNames) {
-			String sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
-			ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
-			executeSql(getTableName(), sql);
+			Optional<String> sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
+			if (sql.isPresent()) {
+				ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+				executeSql(getTableName(), sql.get());
+			}
 		}
 
 		ourLog.info("Dropping table: {}", getTableName());
