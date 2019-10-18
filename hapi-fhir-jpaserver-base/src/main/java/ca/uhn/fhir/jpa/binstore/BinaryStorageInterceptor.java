@@ -132,7 +132,7 @@ public class BinaryStorageInterceptor {
 			public boolean acceptElement(IBase theElement, List<IBase> theContainingElementPath, List<BaseRuntimeChildDefinition> theChildDefinitionPath, List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
 
 				if (theElement.getClass().equals(myBinaryType)) {
-					IBase parent = theContainingElementPath.get(theContainingElementPath.size() - 1);
+					IBase parent = theContainingElementPath.get(theContainingElementPath.size() - 2);
 					Optional<IBinaryTarget> binaryTarget = myBinaryAccessProvider.toBinaryTarget(parent);
 					if (binaryTarget.isPresent()) {
 						binaryTargets.add(binaryTarget.get());

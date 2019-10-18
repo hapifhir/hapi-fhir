@@ -1,25 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.interceptor.api.HookParams;
-import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.binstore.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.ContentType;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.Binary;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,13 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.matchesPattern;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertThat;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
@@ -71,7 +53,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		binary.setData(SOME_BYTES);
 		DaoMethodOutcome outcome = myBinaryDao.create(binary, mySrd);
 
-		ourLog.info("Encoded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource()));
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("data")));
 
 
 	}

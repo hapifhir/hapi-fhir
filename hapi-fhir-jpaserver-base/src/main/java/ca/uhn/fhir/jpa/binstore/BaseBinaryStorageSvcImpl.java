@@ -88,13 +88,13 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Nonnull
 	CountingInputStream createCountingInputStream(InputStream theInputStream) {
-		InputStream is = ByteStreams.limit(theInputStream, myMaximumBinarySize + 1L);
+		InputStream is = ByteStreams.limit(theInputStream, getMaximumBinarySize() + 1L);
 		return new CountingInputStream(is) {
 			@Override
 			public int getCount() {
 				int retVal = super.getCount();
-				if (retVal > getMinimumBinarySize()) {
-					throw new PayloadTooLargeException("Binary size exceeds maximum: " + myMaximumBinarySize);
+				if (retVal > getMaximumBinarySize()) {
+					throw new PayloadTooLargeException("Binary size exceeds maximum: " + getMaximumBinarySize());
 				}
 				return retVal;
 			}
