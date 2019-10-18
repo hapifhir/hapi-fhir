@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Test;
@@ -10,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,7 +37,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
@@ -56,7 +54,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		 * Read back the details
 		 */
 
-		IBinaryStorageSvc.StoredDetails details = mySvc.fetchBlobDetails(resourceId, outcome.getBlobId());
+		StoredDetails details = mySvc.fetchBlobDetails(resourceId, outcome.getBlobId());
 		assertEquals(16L, details.getBytes());
 		assertEquals(outcome.getBlobId(), details.getBlobId());
 		assertEquals("image/png", details.getContentType());
@@ -84,7 +82,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
 		String blobId = outcome.getBlobId();
 
 		// Expunge
@@ -106,7 +104,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
 
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();

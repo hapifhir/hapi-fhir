@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -41,11 +39,11 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testStoreAndRetrieve() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
+		StoredDetails outcome = mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
 
 		ourLog.info("Got id: {}", outcome);
 
-		IBinaryStorageSvc.StoredDetails details = mySvc.fetchBlobDetails(id, outcome.getBlobId());
+		StoredDetails details = mySvc.fetchBlobDetails(id, outcome.getBlobId());
 		assertEquals(16L, details.getBytes());
 		assertEquals(outcome.getBlobId(), details.getBlobId());
 		assertEquals("image/png", details.getContentType());
@@ -63,11 +61,11 @@ public class FilesystemBinaryStorageSvcImplTest {
 	public void testExpunge() throws IOException {
 		IIdType id = new IdType("Patient/123");
 		String contentType = "image/png";
-		IBinaryStorageSvc.StoredDetails outcome = mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
+		StoredDetails outcome = mySvc.storeBlob(id, contentType, new ByteArrayInputStream(SOME_BYTES));
 
 		ourLog.info("Got id: {}", outcome);
 
-		IBinaryStorageSvc.StoredDetails details = mySvc.fetchBlobDetails(id, outcome.getBlobId());
+		StoredDetails details = mySvc.fetchBlobDetails(id, outcome.getBlobId());
 		assertEquals(16L, details.getBytes());
 		assertEquals(outcome.getBlobId(), details.getBlobId());
 		assertEquals("image/png", details.getContentType());

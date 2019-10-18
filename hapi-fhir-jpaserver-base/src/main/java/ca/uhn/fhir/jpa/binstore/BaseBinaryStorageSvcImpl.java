@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.binstore;
  * #L%
  */
 
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
@@ -94,7 +93,7 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			@Override
 			public int getCount() {
 				int retVal = super.getCount();
-				if (retVal > myMaximumBinarySize) {
+				if (retVal > getMinimumBinarySize()) {
 					throw new PayloadTooLargeException("Binary size exceeds maximum: " + myMaximumBinarySize);
 				}
 				return retVal;
