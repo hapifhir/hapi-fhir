@@ -79,8 +79,8 @@ import static org.junit.Assert.*;
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	public static final int LARGE_NUMBER = 77;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@Autowired
@@ -526,7 +526,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, containsString("true"));
 		}
-
 
 
 	}
@@ -3925,7 +3924,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
 			runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new IllegalStateException());
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new IllegalStateException());
 				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), -2));
 				mySearchEntityDao.save(search);
 			});
@@ -4011,7 +4010,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		Bundle result2 = ourClient
@@ -4024,7 +4023,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
@@ -4066,7 +4065,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		sleepOneClick();
@@ -4079,7 +4078,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
@@ -5277,8 +5276,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp,
-				stringContainsInOrder(">ERROR<", "[Patient.contact[0]]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
+			assertThat(resp, containsString("<issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization [name.exists() or telecom.exists() or address.exists() or organization.exists()]\"/><location value=\"Patient.contact[0]\"/><location value=\"Line 0, Col 0\"/></issue>"));
 		}
 	}
 
@@ -5298,7 +5296,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 
-			assertThat(resp,stringContainsInOrder("Error parsing JSON source: Syntax error in json reading special word false at Line 1"));
+			assertThat(resp, stringContainsInOrder("Error parsing JSON source: Syntax error in json reading special word false at Line 1"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
