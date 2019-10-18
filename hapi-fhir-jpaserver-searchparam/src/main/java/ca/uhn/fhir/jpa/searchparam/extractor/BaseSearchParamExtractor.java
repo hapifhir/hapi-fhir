@@ -69,30 +69,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		if (isBlank(searchTerm)) {
 			return;
 		}
-		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		String normalizedString = StringNormalizer.normalizeString(searchTerm);
-		if (normalizedString.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			normalizedString = normalizedString.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), resourceName, normalizedString, searchTerm);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
+		retVal.add(createResourceIndexedSearchParamString(theEntity, resourceName, searchTerm));
 	}
 
 	protected void addStringParam(ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
-		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		String normalizedValue = StringNormalizer.normalizeString(value);
-		if (normalizedValue.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			normalizedValue = normalizedValue.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), nextSpDef.getName(), normalizedValue, value);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
+		retVal.add(createResourceIndexedSearchParamString(theEntity, nextSpDef.getName(), value));
 	}
 
 	@Override
@@ -134,5 +115,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myContext = theContext;
 	}
 
+	private ResourceIndexedSearchParamString createResourceIndexedSearchParamString(ResourceTable theEntity, String name, String value) {
+		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		String normalizedValue = StringNormalizer.normalizeString(value);
+		if (normalizedValue.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			normalizedValue = normalizedValue.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), name, normalizedValue, value);
+		nextEntity.setResource(theEntity);
+		return nextEntity;
+	}
 
 }
