@@ -86,18 +86,11 @@ public class BinaryAccessProvider {
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
 
-		Optional<? extends IBaseExtension<?, ?>> attachmentId = target
-			.getTarget()
-			.getExtension()
-			.stream()
-			.filter(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.findFirst();
-
+		Optional<String> attachmentId = target.getAttachmentId();
 		if (attachmentId.isPresent()) {
 
 			@SuppressWarnings("unchecked")
-			IPrimitiveType<String> value = (IPrimitiveType<String>) attachmentId.get().getValue();
-			String blobId = value.getValueAsString();
+			String blobId = attachmentId.get();
 
 			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
 			if (blobDetails == null) {
@@ -179,7 +172,7 @@ public class BinaryAccessProvider {
 		if (size > 0) {
 			if (myBinaryStorageSvc != null) {
 				if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, requestContentType, theRequestDetails.getInputStream());
+					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, theRequestDetails.getInputStream());
 					size = storedDetails.getBytes();
 					blobId = storedDetails.getBlobId();
 					Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen

@@ -61,6 +61,14 @@
 				<code>upload-terminology</code> command has been modified to support this new functionality.
 				]]>
 			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				When using Externalized Binary Storage in the JPA server, the system will now automatically
+				externalize Binary and Attachment payloads, meaning that these will automatically not be
+				stored in the RDBMS.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
 				<b>Performance Improvement</b>:

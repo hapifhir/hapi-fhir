@@ -27,8 +27,13 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.IModelVisitor2;
+import org.apache.commons.io.FileUtils;
 import org.hl7.fhir.instance.model.api.*;
+import org.hl7.fhir.r4.model.IdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +42,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -55,15 +61,30 @@ public class BinaryStorageInterceptor {
 	private BinaryAccessProvider myBinaryAccessProvider;
 
 	private Class<? extends IPrimitiveType<byte[]>> myBinaryType;
-	private Class<? extends IBaseBinary> myBinaryResourceType;
-	private Class<? extends ICompositeType> myAttachmentType;
+	private String myDeferredListKey;
+	private long myAutoDeExternalizeMaximumBytes = 10 * FileUtils.ONE_MB;
+
+	/**
+	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
+	 * reading the resource back. Default is 10MB.
+	 */
+	public long getAutoDeExternalizeMaximumBytes() {
+		return myAutoDeExternalizeMaximumBytes;
+	}
+
+	/**
+	 * Any externalized binaries will be rehydrated if their size is below this thhreshold when
+	 * reading the resource back. Default is 10MB.
+	 */
+	public void setAutoDeExternalizeMaximumBytes(long theAutoDeExternalizeMaximumBytes) {
+		myAutoDeExternalizeMaximumBytes = theAutoDeExternalizeMaximumBytes;
+	}
 
 	@SuppressWarnings("unchecked")
 	@PostConstruct
 	public void start() {
-		myBinaryResourceType = (Class<? extends IBaseBinary>) myCtx.getResourceDefinition("Binary").getImplementingClass();
-		myAttachmentType = (Class<? extends ICompositeType>) myCtx.getElementDefinition("Attachment").getImplementingClass();
 		myBinaryType = (Class<? extends IPrimitiveType<byte[]>>) myCtx.getElementDefinition("base64Binary").getImplementingClass();
+		myDeferredListKey = getClass().getName() + "_" + hashCode() + "_DEFERRED_LIST";
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_EXPUNGE_RESOURCE)
@@ -88,40 +109,112 @@ public class BinaryStorageInterceptor {
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED)
-	public void extractLargeBinariesBeforeCreate(IBaseResource theResource) throws IOException {
-		extractLargeBinaries(theResource);
+	public void extractLargeBinariesBeforeCreate(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		extractLargeBinaries(theRequestDetails, theResource, thePoincut);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED)
-	public void extractLargeBinariesBeforeUpdate(IBaseResource theResource) throws IOException {
-		extractLargeBinaries(theResource);
+	public void extractLargeBinariesBeforeUpdate(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		extractLargeBinaries(theRequestDetails, theResource, thePoincut);
 	}
 
-	private void extractLargeBinaries(IBaseResource theResource) throws IOException {
+	private void extractLargeBinaries(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
 		IIdType resourceId = theResource.getIdElement();
+		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
+			String resourceType = myCtx.getResourceDefinition(theResource).getName();
+			resourceId = new IdType(resourceType + "/" + resourceId.getIdPart());
+		}
 
 		List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(theResource);
 		for (IBinaryTarget nextTarget : attachments) {
-			if (nextTarget.getData() != null) {
+			byte[] data = nextTarget.getData();
+			if (data != null && data.length > 0) {
 
-				long nextPayloadLength = nextTarget.getData().length;
+				long nextPayloadLength = data.length;
 				String nextContentType = nextTarget.getContentType();
 				boolean shouldStoreBlob = myBinaryStorageSvc.shouldStoreBlob(nextPayloadLength, resourceId, nextContentType);
 				if (shouldStoreBlob) {
 
-					ByteArrayInputStream inputStream = new ByteArrayInputStream(nextTarget.getData());
-					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(resourceId, nextContentType, inputStream);
-					if (storedDetails != null) {
-						String blobId = storedDetails.getBlobId();
-						myBinaryAccessProvider.replaceDataWithExtension(nextTarget, blobId);
+					String newBlobId;
+					if (resourceId.hasIdPart()) {
+						ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
+						StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(resourceId, null, nextContentType, inputStream);
+						newBlobId = storedDetails.getBlobId();
+					} else {
+						assert thePoincut == Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED : thePoincut.name();
+						newBlobId = myBinaryStorageSvc.newBlobId();
+						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theRequestDetails);
+						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
+						deferredBinaryTargets.add(newDeferredBinaryTarget);
 					}
 
+					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
 				}
+			}
 
+		}
+	}
+
+	@Nonnull
+	@SuppressWarnings("unchecked")
+	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(ServletRequestDetails theRequestDetails) {
+		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
+		if (deferredBinaryTargets == null) {
+			deferredBinaryTargets = new ArrayList<>();
+			theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
+		}
+		return deferredBinaryTargets;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
+	public void storeLargeBinariesBeforeCreatePersistence(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
+		if (deferredBinaryTargets != null) {
+			IIdType resourceId = theResource.getIdElement();
+			for (DeferredBinaryTarget next : deferredBinaryTargets) {
+				String blobId = next.getBlobId();
+				IBinaryTarget target = next.getBinaryTarget();
+				InputStream dataStream = next.getDataStream();
+				String contentType = target.getContentType();
+				myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream);
 			}
 		}
+	}
 
+	private String getDeferredListKey() {
+		return myDeferredListKey;
+	}
 
+	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
+	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
+		int unmarshalledByteCount = 0;
+
+		for (IBaseResource nextResource : theDetails) {
+
+			IIdType resourceId = nextResource.getIdElement();
+			List<IBinaryTarget> attachments = recursivelyScanResourceForBinaryData(nextResource);
+
+			for (IBinaryTarget nextTarget : attachments) {
+				Optional<String> attachmentId = nextTarget.getAttachmentId();
+				if (attachmentId.isPresent()) {
+
+					StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(resourceId, attachmentId.get());
+					if (blobDetails == null) {
+						String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
+						throw new InvalidRequestException(msg);
+					}
+
+					if ((unmarshalledByteCount + blobDetails.getBytes()) < myAutoDeExternalizeMaximumBytes) {
+
+						byte[] bytes = myBinaryStorageSvc.fetchBlob(resourceId, attachmentId.get());
+						nextTarget.setData(bytes);
+						unmarshalledByteCount += blobDetails.getBytes();
+					}
+				}
+			}
+
+		}
 	}
 
 	@Nonnull
@@ -144,6 +237,29 @@ public class BinaryStorageInterceptor {
 		return binaryTargets;
 	}
 
+	private static class DeferredBinaryTarget {
+		private final String myBlobId;
+		private final IBinaryTarget myBinaryTarget;
+		private final InputStream myDataStream;
+
+		private DeferredBinaryTarget(String theBlobId, IBinaryTarget theBinaryTarget, byte[] theData) {
+			myBlobId = theBlobId;
+			myBinaryTarget = theBinaryTarget;
+			myDataStream = new ByteArrayInputStream(theData);
+		}
+
+		String getBlobId() {
+			return myBlobId;
+		}
+
+		IBinaryTarget getBinaryTarget() {
+			return myBinaryTarget;
+		}
+
+		InputStream getDataStream() {
+			return myDataStream;
+		}
+	}
 
 
 }

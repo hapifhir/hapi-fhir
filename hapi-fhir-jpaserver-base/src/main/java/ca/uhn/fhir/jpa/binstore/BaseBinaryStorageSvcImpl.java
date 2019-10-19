@@ -33,6 +33,8 @@ import javax.annotation.Nonnull;
 import java.io.InputStream;
 import java.security.SecureRandom;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	private final SecureRandom myRandom;
 	private final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -65,7 +67,8 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		myMinimumBinarySize = theMinimumBinarySize;
 	}
 
-	String newRandomId() {
+	@Override
+	public String newBlobId() {
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < ID_LENGTH; i++) {
 			int nextInt = Math.abs(myRandom.nextInt());
@@ -102,4 +105,11 @@ abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 
+	String provideIdForNewBlob(String theBlobIdOrNull) {
+		String id = theBlobIdOrNull;
+		if (isBlank(theBlobIdOrNull)) {
+			id = newBlobId();
+		}
+		return id;
+	}
 }

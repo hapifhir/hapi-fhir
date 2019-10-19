@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.binstore;
 
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,14 +68,21 @@ public interface IBinaryStorageSvc {
 	boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType);
 
 	/**
+	 * Generate a new blob ID that will be passed to {@link #storeBlob(IIdType, String, String, InputStream)} later
+	 */
+	String newBlobId();
+
+	/**
 	 * Store a new binary blob
 	 *
-	 * @param theResourceId  The resource ID that owns this blob. Note that it should not be possible to retrieve a blob without both the resource ID and the blob ID being correct.
-	 * @param theContentType The content type to associate with this blob
-	 * @param theInputStream An InputStream to read from. This method should close the stream when it has been fully consumed.
+	 * @param theResourceId   The resource ID that owns this blob. Note that it should not be possible to retrieve a blob without both the resource ID and the blob ID being correct.
+	 * @param theBlobIdOrNull If set, forces
+	 * @param theContentType  The content type to associate with this blob
+	 * @param theInputStream  An InputStream to read from. This method should close the stream when it has been fully consumed.
 	 * @return Returns details about the stored data
 	 */
-	StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) throws IOException;
+	@Nonnull
+	StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException;
 
 	StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException;
 
@@ -85,5 +93,12 @@ public interface IBinaryStorageSvc {
 
 	void expungeBlob(IIdType theResourceId, String theBlobId);
 
-
+	/**
+	 * Fetch the contents of the given blob
+	 *
+	 * @param theResourceId The resource ID
+	 * @param theBlobId     The blob ID
+	 * @return The payload as a byte array
+	 */
+	byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException;
 }

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import java.io.IOException;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
 
 @ContextConfiguration(classes = DatabaseBlobBinaryStorageSvcImplTest.MyConfig.class)
 public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
@@ -37,7 +37,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream);
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
@@ -69,9 +69,66 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		mySvc.writeBlob(resourceId, outcome.getBlobId(), capture);
 
 		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-
-
+		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
 	}
+
+
+	@Test
+	public void testStoreAndRetrieveWithManualId() throws IOException {
+
+		myCaptureQueriesListener.clear();
+
+		/*
+		 * Store the binary
+		 */
+		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
+		String contentType = "image/png";
+		IdType resourceId = new IdType("Binary/123");
+		StoredDetails outcome = mySvc.storeBlob(resourceId, "ABCDEFG", contentType, inputStream);
+		assertEquals("ABCDEFG", outcome.getBlobId());
+
+		myCaptureQueriesListener.logAllQueriesForCurrentThread();
+
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(2, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+
+		myCaptureQueriesListener.clear();
+
+		assertEquals(16, outcome.getBytes());
+
+		/*
+		 * Read back the details
+		 */
+
+		StoredDetails details = mySvc.fetchBlobDetails(resourceId, outcome.getBlobId());
+		assertEquals(16L, details.getBytes());
+		assertEquals(outcome.getBlobId(), details.getBlobId());
+		assertEquals("image/png", details.getContentType());
+		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
+		assertNotNull(details.getPublished());
+
+		/*
+		 * Read back the contents
+		 */
+
+		ByteArrayOutputStream capture = new ByteArrayOutputStream();
+		mySvc.writeBlob(resourceId, outcome.getBlobId(), capture);
+
+		assertArrayEquals(SOME_BYTES, capture.toByteArray());
+		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
+	}
+
+	@Test
+	public void testFetchBlobUnknown() throws IOException {
+		try {
+			mySvc.fetchBlob(new IdType("Patient/123"), "1111111");
+			fail();
+		} catch (ResourceNotFoundException e) {
+			assertEquals("Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
+		}
+	}
+
 
 	@Test
 	public void testExpunge() throws IOException {
@@ -82,12 +139,12 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream);
 		String blobId = outcome.getBlobId();
 
 		// Expunge
 		mySvc.expungeBlob(resourceId, blobId);
-		
+
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		assertFalse(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
 		assertEquals(0, capture.size());
@@ -104,7 +161,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayInputStream inputStream = new ByteArrayInputStream(SOME_BYTES);
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
-		StoredDetails outcome = mySvc.storeBlob(resourceId, contentType, inputStream);
+		StoredDetails outcome = mySvc.storeBlob(resourceId, null, contentType, inputStream);
 
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
