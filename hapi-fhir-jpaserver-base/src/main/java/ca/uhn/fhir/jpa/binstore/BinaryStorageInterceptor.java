@@ -188,7 +188,7 @@ public class BinaryStorageInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void preShow(IPreResourceShowDetails theDetails) throws IOException {
-		int unmarshalledByteCount = 0;
+		long unmarshalledByteCount = 0;
 
 		for (IBaseResource nextResource : theDetails) {
 
