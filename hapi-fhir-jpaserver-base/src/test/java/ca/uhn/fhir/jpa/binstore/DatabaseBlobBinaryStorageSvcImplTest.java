@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.Test;
@@ -14,9 +15,14 @@ import org.springframework.test.context.ContextConfiguration;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Blob;
+import java.sql.SQLException;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = DatabaseBlobBinaryStorageSvcImplTest.MyConfig.class)
 public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
@@ -127,6 +133,9 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		} catch (ResourceNotFoundException e) {
 			assertEquals("Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
 		}
+
+		StoredDetails details = mySvc.fetchBlobDetails(new IdType("Patient/123"), "1111111");
+		assertNull(details);
 	}
 
 
@@ -173,6 +182,40 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		assertFalse(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture));
 		assertEquals(0, capture.size());
 
+	}
+
+	@Test
+	public void testCopyBlobToOutputStream_Exception() throws SQLException {
+		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl();
+
+		BinaryStorageEntity mockInput = new BinaryStorageEntity();
+		Blob blob = mock(Blob.class);
+		when(blob.getBinaryStream()).thenThrow(new SQLException("FOO"));
+		mockInput.setBlob(blob);
+
+		try {
+			svc.copyBlobToOutputStream(new ByteArrayOutputStream(), (mockInput));
+			fail();
+		} catch (IOException e) {
+			assertThat(e.getMessage(), containsString("FOO"));
+		}
+	}
+
+	@Test
+	public void testCopyBlobToByteArray_Exception() throws SQLException {
+		DatabaseBlobBinaryStorageSvcImpl svc = new DatabaseBlobBinaryStorageSvcImpl();
+
+		BinaryStorageEntity mockInput = new BinaryStorageEntity();
+		Blob blob = mock(Blob.class);
+		when(blob.getBinaryStream()).thenThrow(new SQLException("FOO"));
+		mockInput.setBlob(blob);
+
+		try {
+			svc.copyBlobToByteArray(mockInput);
+			fail();
+		} catch (IOException e) {
+			assertThat(e.getMessage(), containsString("FOO"));
+		}
 	}
 
 	@Configuration

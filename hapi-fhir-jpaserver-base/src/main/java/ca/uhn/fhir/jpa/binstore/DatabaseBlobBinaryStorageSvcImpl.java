@@ -127,12 +127,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			return false;
 		}
 
-		try {
-			InputStream inputStream = entityOpt.get().getBlob().getBinaryStream();
-			IOUtils.copy(inputStream, theOutputStream);
-		} catch (SQLException e) {
-			throw new IOException(e);
-		}
+		copyBlobToOutputStream(theOutputStream, entityOpt.get());
 
 		return true;
 	}
@@ -149,9 +144,21 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
 			.orElseThrow(() -> new ResourceNotFoundException("Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId));
 
-		int size = entityOpt.getSize();
+		return copyBlobToByteArray(entityOpt);
+	}
+
+	void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity) throws IOException {
+		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
+			IOUtils.copy(inputStream, theOutputStream);
+		} catch (SQLException e) {
+			throw new IOException(e);
+		}
+	}
+
+	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
+		int size = theEntity.getSize();
 		try {
-			return IOUtils.toByteArray(entityOpt.getBlob().getBinaryStream(), size);
+			return IOUtils.toByteArray(theEntity.getBlob().getBinaryStream(), size);
 		} catch (SQLException e) {
 			throw new IOException(e);
 		}
