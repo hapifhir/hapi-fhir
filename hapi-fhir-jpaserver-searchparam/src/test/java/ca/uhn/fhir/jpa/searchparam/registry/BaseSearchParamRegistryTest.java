@@ -1,16 +1,22 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Map;
+
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseSearchParamRegistryTest {
@@ -19,6 +25,13 @@ public class BaseSearchParamRegistryTest {
 	private ISchedulerService mySchedulerService;
 	@Mock
 	private ISearchParamProvider mySearchParamProvider;
+	private int myAnswerCount = 0;
+
+
+	@Before
+	public void before() {
+		myAnswerCount = 0;
+	}
 
 	@Test
 	public void testRefreshAfterExpiry() {
@@ -44,7 +57,7 @@ public class BaseSearchParamRegistryTest {
 		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
 
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
-		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t->{
+		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
 			registry.doRefresh(t.getArgument(1, Long.class));
 			return 0;
 		});
@@ -57,6 +70,34 @@ public class BaseSearchParamRegistryTest {
 
 		assertTrue(registry.refreshCacheIfNecessary());
 		assertFalse(registry.refreshCacheIfNecessary());
+	}
+
+	@Test
+	public void testGetActiveUniqueSearchParams_Empty() {
+		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		assertThat(registry.getActiveUniqueSearchParams("Patient"), Matchers.empty());
+	}
+
+	@Test
+	public void testGetActiveSearchParams() {
+		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
+		registry.setFhirContextForUnitTest(FhirContext.forR4());
+		registry.postConstruct();
+
+		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
+		when(mySearchParamProvider.refreshCache(any(), anyLong())).thenAnswer(t -> {
+			if (myAnswerCount == 0) {
+				myAnswerCount++;
+				throw new InternalErrorException("this is an error!");
+			}
+
+			registry.doRefresh(0);
+
+			return 0;
+		});
+
+		registry.setSearchParamProviderForUnitTest(mySearchParamProvider);
+		Map<String, RuntimeSearchParam> outcome = registry.getActiveSearchParams("Patient");
 	}
 
 }

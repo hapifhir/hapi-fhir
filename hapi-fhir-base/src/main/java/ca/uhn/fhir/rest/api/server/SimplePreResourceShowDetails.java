@@ -24,9 +24,10 @@ import com.google.common.collect.Lists;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.util.Iterator;
 import java.util.List;
 
-public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
+public class SimplePreResourceShowDetails implements IPreResourceShowDetails, Iterable<IBaseResource> {
 
 	private final List<IBaseResource> myResources;
 	private final boolean[] mySubSets;
@@ -63,5 +64,10 @@ public class SimplePreResourceShowDetails implements IPreResourceShowDetails {
 		Validate.isTrue(theIndex >= 0, "Invalid index %d - theIndex must not be < 0", theIndex);
 		Validate.isTrue(theIndex < myResources.size(), "Invalid index {} - theIndex must be < %d", theIndex, myResources.size());
 		mySubSets[theIndex] = true;
+	}
+
+	@Override
+	public Iterator<IBaseResource> iterator() {
+		return myResources.iterator();
 	}
 }
