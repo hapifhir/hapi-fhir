@@ -428,6 +428,11 @@
 			 <action type="add">
 				 Validation errors will now include details about the line number where the issue was found
 			 </action>
+			 <action type="change">
+				 The hapi-fhir-testpage-overlay project now uses WebJars for importing
+				 JavaScript dependency libraries. This reduces our Git repository size and
+				 should make it easier to stay up-to-date.
+			 </action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
