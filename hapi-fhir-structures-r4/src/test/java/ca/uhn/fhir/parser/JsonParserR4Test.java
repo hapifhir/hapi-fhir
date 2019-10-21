@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -26,7 +27,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-public class JsonParserR4Test {
+public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 
@@ -42,6 +43,14 @@ public class JsonParserR4Test {
 		b.addEntry().setResource(p);
 		return b;
 	}
+
+	@Test
+	public void testEntitiesNotConverted() throws IOException {
+		Device input = loadResource(ourCtx, Device.class, "/entities-from-cerner.json");
+		String narrative = input.getText().getDivAsString();
+		ourLog.info(narrative);
+	}
+
 
 	@Test
 	public void testEncodeExtensionOnBinaryData() {

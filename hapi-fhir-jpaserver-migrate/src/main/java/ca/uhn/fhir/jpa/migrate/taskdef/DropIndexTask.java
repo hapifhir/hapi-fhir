@@ -93,7 +93,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					sql = "drop index " + theIndexName;
 					break;
 				case POSTGRES_9_4:
-					sql = "alter table " + theTableName + " drop constraint " + theIndexName + " cascade";
+					sql = "drop index " + theIndexName + " cascade";
 					break;
 				case ORACLE_12C:
 				case MSSQL_2012:
