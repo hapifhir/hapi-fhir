@@ -23,10 +23,10 @@ package ca.uhn.fhir.rest.api.server;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
- * This interface is a parameter type for the {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESHOW_RESOURCE}
+ * This interface is a parameter type for the {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PRESHOW_RESOURCES}
  * hook.
  */
-public interface IPreResourceShowDetails {
+public interface IPreResourceShowDetails extends Iterable<IBaseResource> {
 
 	/**
 	 * @return Returns the number of resources being shown

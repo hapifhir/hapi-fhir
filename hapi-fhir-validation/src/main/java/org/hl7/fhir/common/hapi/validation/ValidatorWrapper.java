@@ -5,7 +5,10 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import com.google.gson.*;
+import org.apache.commons.codec.Charsets;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.ValidationProfileSet;
@@ -20,6 +23,8 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -128,7 +133,11 @@ public class ValidatorWrapper {
 				}
 			}
 
-			v.validate(null, messages, json, profileSet);
+			String resourceAsString = theValidationContext.getResourceAsString();
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+
+			Manager.FhirFormat format = Manager.FhirFormat.JSON;
+			v.validate(null, messages, inputStream, format, profileSet);
 
 		} else {
 			throw new IllegalArgumentException("Unknown encoding: " + encoding);

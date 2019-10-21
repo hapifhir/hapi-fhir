@@ -61,6 +61,14 @@
 				<code>upload-terminology</code> command has been modified to support this new functionality.
 				]]>
 			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				When using Externalized Binary Storage in the JPA server, the system will now automatically
+				externalize Binary and Attachment payloads, meaning that these will automatically not be
+				stored in the RDBMS.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
 				<b>Performance Improvement</b>:
@@ -395,6 +403,31 @@
 				QuestionnaireResponse validation in the JPA server was not able to load Questionnaire resources that
 				were referenced using a canonical URI instead of a local reference. Thanks to Vu Vuong for reporting!
 			</action>
+			<action type="fix" issue="848">
+				When validating JSON payloads, the JSON structure was parsed by Gson instead of passing the
+				raw JSON to the validator. This meant that the validator was unable to catch certain structural
+				errors that are ignored by Gson. Thanks to Michael Lawley for reporting!
+			</action>
+			<action type="fix" issue="1546">
+				The JPA server exposed a number of duplicate entries in the CapabilityStatement's list of
+				supported _include values for a given resource. Thanks to Jens Villadsen for reporting!
+			</action>
+			<action type="fix" issue="1481">
+				An unintended dependency from hapi-fhir-base on Jetty was introduced in HAPI FHIR 4.0.0. This 
+				has been removed.
+			</action>
+			<action type="fix">
+				The JPA migrator tool was not able to correctly drop tables containing foreign key references
+				 in some cases. This has been corrected.
+			 </action>
+			 <action type="fix" issue="1547">
+				 An issue was fixed where the JPA server would occasionally fail to save a resource because
+				 it contained a string containing characters that change length when normalized. Thanks to 
+				 Tuomo Ala-Vannesluoma for the pull request!
+			 </action>
+			 <action type="add">
+				 Validation errors will now include details about the line number where the issue was found
+			 </action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

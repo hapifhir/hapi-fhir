@@ -53,7 +53,12 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) {
+	public String newBlobId() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -69,6 +74,11 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 
 	@Override
 	public void expungeBlob(IIdType theIdElement, String theBlobId) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
 		throw new UnsupportedOperationException();
 	}
 }

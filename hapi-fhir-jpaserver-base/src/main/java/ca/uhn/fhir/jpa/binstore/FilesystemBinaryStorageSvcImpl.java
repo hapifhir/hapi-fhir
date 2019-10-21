@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.binstore;
  */
 
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +65,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) throws IOException {
-		String id = newRandomId();
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
+		String id = super.provideIdForNewBlob(theBlobIdOrNull);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -111,17 +113,31 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@Override
 	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+		InputStream inputStream = getInputStream(theResourceId, theBlobId);
+
+		if (inputStream != null) {
+			try {
+				IOUtils.copy(inputStream, theOutputStream);
+				theOutputStream.close();
+			} finally {
+				inputStream.close();
+			}
+		}
+
+		return false;
+	}
+
+	@Nullable
+	private InputStream getInputStream(IIdType theResourceId, String theBlobId) throws FileNotFoundException {
 		File storagePath = getStoragePath(theBlobId, false);
+		InputStream inputStream = null;
 		if (storagePath != null) {
 			File file = getStorageFilename(storagePath, theResourceId, theBlobId);
 			if (file.exists()) {
-				try (InputStream inputStream = new FileInputStream(file)) {
-					IOUtils.copy(inputStream, theOutputStream);
-					theOutputStream.close();
-				}
+				inputStream = new FileInputStream(file);
 			}
 		}
-		return false;
+		return inputStream;
 	}
 
 	@Override
@@ -137,6 +153,20 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 				delete(descriptorFile, theBlobId);
 			}
 		}
+	}
+
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
+		StoredDetails details = fetchBlobDetails(theResourceId, theBlobId);
+		try (InputStream inputStream = getInputStream(theResourceId, theBlobId)) {
+
+			if (inputStream != null) {
+				return IOUtils.toByteArray(inputStream, details.getBytes());
+			}
+
+		}
+
+		throw new ResourceNotFoundException("Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId);
 	}
 
 	private void delete(File theStorageFile, String theBlobId) {
@@ -164,7 +194,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	private File getStoragePath(String theId, boolean theCreate) {
 		File path = myBasePath;
 		for (int i = 0; i < 10; i++) {
-			path = new File(path, theId.substring(i, i+1));
+			path = new File(path, theId.substring(i, i + 1));
 			if (!path.exists()) {
 				if (theCreate) {
 					mkdir(path);

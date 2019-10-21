@@ -251,6 +251,11 @@ public class TermConcept implements Serializable {
 		return myId;
 	}
 
+	public TermConcept setId(Long theId) {
+		myId = theId;
+		return this;
+	}
+
 	public Long getIndexStatus() {
 		return myIndexStatus;
 	}
