@@ -433,6 +433,12 @@
 				 JavaScript dependency libraries. This reduces our Git repository size and
 				 should make it easier to stay up-to-date.
 			 </action>
+			<action type="fix">
+				In the (fairly unlikely) circumstance that a JPA server was called with a parameter where the parameter name referenced
+				a custom search parameter with an invalid chain attached, and the value was missing entirely (e.g.
+				<![CDATA[<code>ProcedureRequest?someCustomParameter.BAD_NAME=</code>]]>, the server would ignore this
+				parameter instead of incorrectly returning an error. This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">

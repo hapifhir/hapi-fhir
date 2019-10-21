@@ -3,14 +3,17 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.param.ReferenceParam;
-import org.hl7.fhir.instance.model.api.IIdType;
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.*;
 
 public class ResourceIndexedSearchParamsTest {
@@ -77,6 +80,32 @@ public class ResourceIndexedSearchParamsTest {
 		ReferenceParam retval = new ReferenceParam();
 		retval.setValue(theId);
 		return retval;
+	}
+
+
+	@Test
+	public void testExtractCompositeStringUniquesValueChains() {
+		List<List<String>> partsChoices;
+		Set<String> values;
+
+		partsChoices = Lists.newArrayList(
+			Lists.newArrayList("gender=male"),
+			Lists.newArrayList("name=SMITH", "name=JOHN")
+		);
+		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN","Patient?gender=male&name=SMITH"));
+
+		partsChoices = Lists.newArrayList(
+			Lists.newArrayList("gender=male", ""),
+			Lists.newArrayList("name=SMITH", "name=JOHN", "")
+		);
+		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
+		assertThat(values.toString(), values, containsInAnyOrder("Patient?gender=male&name=JOHN","Patient?gender=male&name=SMITH"));
+
+		partsChoices = Lists.newArrayList(
+		);
+		values = ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains("Patient", partsChoices);
+		assertThat(values.toString(), values, empty());
 	}
 
 }
