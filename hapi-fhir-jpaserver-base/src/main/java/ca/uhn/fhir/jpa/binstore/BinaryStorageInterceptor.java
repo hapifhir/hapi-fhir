@@ -169,6 +169,9 @@ public class BinaryStorageInterceptor {
 	@SuppressWarnings("unchecked")
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED)
 	public void storeLargeBinariesBeforeCreatePersistence(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		if (theRequestDetails == null) {
+			return;
+		}
 		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
 		if (deferredBinaryTargets != null) {
 			IIdType resourceId = theResource.getIdElement();
