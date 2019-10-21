@@ -23,8 +23,9 @@ package ca.uhn.fhir.jpa.searchparam.matcher;
 public class InMemoryMatchResult {
 	public static final String PARSE_FAIL = "Failed to translate parse query string";
 	public static final String STANDARD_PARAMETER = "Standard parameters not supported";
-	public static final String CHAIN = "Chained references are not supported";
-	public static final String PARAM = "Param not supported";
+	public static final String CHAIN = "Chained parameters are not supported";
+	public static final String PARAM = "Parameter not supported";
+	public static final String QUALIFIER = "Qualified parameter not supported";
 
 	private final boolean myMatch;
 	private final boolean mySupported;

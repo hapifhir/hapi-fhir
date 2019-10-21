@@ -44,6 +44,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class InMemoryResourceMatcher {
@@ -100,7 +101,15 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (hasQualifiers(theAndOrParams)) {
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.STANDARD_PARAMETER);
+			Optional<IQueryParameterType> optionalParameter = theAndOrParams.stream().flatMap(List::stream).filter(param -> param.getQueryParameterQualifier() != null).findAny();
+			if (optionalParameter.isPresent()) {
+				IQueryParameterType parameter = optionalParameter.get();
+				if (parameter instanceof ReferenceParam) {
+					ReferenceParam referenceParam = (ReferenceParam) parameter;
+					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
+				}
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + parameter.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
+			}
 		}
 
 		if (hasChain(theAndOrParams)) {
