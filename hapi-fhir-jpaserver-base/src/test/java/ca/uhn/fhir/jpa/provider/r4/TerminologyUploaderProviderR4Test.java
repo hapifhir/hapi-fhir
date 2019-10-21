@@ -173,7 +173,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testApplyDeltaAdd() throws IOException {
+	public void testApplyDeltaAdd_UsingCsv() throws IOException {
 		String conceptsCsv = loadResource("/custom_term/concepts.csv");
 		Attachment conceptsAttachment = new Attachment()
 			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
@@ -194,6 +194,38 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
 			.andParameter(TerminologyUploaderProvider.PARAM_FILE, hierarchyAttachment)
+			.prettyPrint()
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 5",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo/cs");
+		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
+		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
+		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
 			.prettyPrint()
 			.execute();
 		ourClient.unregisterInterceptor(interceptor);

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.provider;
  */
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -32,9 +33,16 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import org.hl7.fhir.convertors.VersionConvertor_30_40;
+import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -44,13 +52,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	public static final String PARAM_FILE = "file";
+	public static final String PARAM_CODESYSTEM = "codeSystem";
 	public static final String PARAM_SYSTEM = "system";
 	private static final String RESP_PARAM_CONCEPT_COUNT = "conceptCount";
 	private static final String RESP_PARAM_TARGET = "target";
@@ -102,8 +113,8 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
-				ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
-			}
+			ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
+		}
 
 		try {
 			List<ITermLoaderSvc.FileDescriptor> localFiles = convertAttachmentsToFileDescriptors(theFiles);
@@ -149,15 +160,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
+		@OperationParam(name = PARAM_CODESYSTEM, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "CodeSystem") List<IBaseResource> theCodeSystems,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
 			validateHaveSystem(theSystem);
-			validateHaveFiles(theFiles);
+			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
 			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaAdd(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
@@ -178,15 +191,17 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		HttpServletRequest theServletRequest,
 		@OperationParam(name = PARAM_SYSTEM, min = 1, max = 1, typeName = "uri") IPrimitiveType<String> theSystem,
 		@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles,
+		@OperationParam(name = PARAM_CODESYSTEM, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "CodeSystem") List<IBaseResource> theCodeSystems,
 		RequestDetails theRequestDetails
 	) {
 
 		startRequest(theServletRequest);
 		try {
 			validateHaveSystem(theSystem);
-			validateHaveFiles(theFiles);
+			validateHaveFiles(theFiles, theCodeSystems);
 
 			List<ITermLoaderSvc.FileDescriptor> files = convertAttachmentsToFileDescriptors(theFiles);
+			convertCodeSystemsToFileDescriptors(files, theCodeSystems);
 			UploadStatistics outcome = myTerminologyLoaderSvc.loadDeltaRemove(theSystem.getValue(), files, theRequestDetails);
 			return toDeltaResponse(outcome);
 		} finally {
@@ -195,16 +210,56 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	}
 
+	private void convertCodeSystemsToFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
+		Set<String> codes = new HashSet<>();
+		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
+
+		for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
+			CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
+			convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, codeToParentCodes);
+		}
+	}
+
+	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
+	@Nonnull
+	CodeSystem canonicalizeCodeSystem(@Nonnull IBaseResource theCodeSystem) {
+		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(theCodeSystem);
+		ValidateUtil.isTrueOrThrowInvalidRequest(resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
+
+		CodeSystem nextCodeSystem;
+		switch (myCtx.getVersion().getVersion()) {
+			case DSTU3:
+				nextCodeSystem = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
+				break;
+			case R5:
+				nextCodeSystem = org.hl7.fhir.convertors.conv40_50.CodeSystem.convertCodeSystem((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem);
+				break;
+			default:
+				nextCodeSystem = (CodeSystem) theCodeSystem;
+		}
+		return nextCodeSystem;
+	}
+
+	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Set<String> theCodes, Multimap<String, String> theCodeToParentCodes) {
+	}
+
 	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
 		if (theSystem == null || isBlank(theSystem.getValueAsString())) {
 			throw new InvalidRequestException("Missing mandatory parameter: " + PARAM_SYSTEM);
 		}
 	}
 
-	private void validateHaveFiles(List<ICompositeType> theFiles) {
+	private void validateHaveFiles(List<ICompositeType> theFiles, List<IBaseResource> theCodeSystems) {
 		if (theFiles != null) {
 			for (ICompositeType nextFile : theFiles) {
 				if (!nextFile.isEmpty()) {
+					return;
+				}
+			}
+		}
+		if (theCodeSystems != null) {
+			for (IBaseResource next : theCodeSystems) {
+				if (!next.isEmpty()) {
 					return;
 				}
 			}
@@ -215,31 +270,32 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	@Nonnull
 	private List<ITermLoaderSvc.FileDescriptor> convertAttachmentsToFileDescriptors(@OperationParam(name = PARAM_FILE, min = 0, max = OperationParam.MAX_UNLIMITED, typeName = "attachment") List<ICompositeType> theFiles) {
 		List<ITermLoaderSvc.FileDescriptor> files = new ArrayList<>();
-		for (ICompositeType next : theFiles) {
+		if (theFiles != null) {
+			for (ICompositeType next : theFiles) {
 
-			String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
-			ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
+				String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
+				ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
 
-			byte[] nextData;
-			if (nextUrl.startsWith("localfile:")) {
-				String nextLocalFile = nextUrl.substring("localfile:".length());
+				byte[] nextData;
+				if (nextUrl.startsWith("localfile:")) {
+					String nextLocalFile = nextUrl.substring("localfile:".length());
 
 
-				if (isNotBlank(nextLocalFile)) {
-					ourLog.info("Reading in local file: {}", nextLocalFile);
-					File nextFile = new File(nextLocalFile);
-					if (!nextFile.exists() || !nextFile.isFile()) {
-						throw new InvalidRequestException("Unknown file: " + nextFile.getName());
+					if (isNotBlank(nextLocalFile)) {
+						ourLog.info("Reading in local file: {}", nextLocalFile);
+						File nextFile = new File(nextLocalFile);
+						if (!nextFile.exists() || !nextFile.isFile()) {
+							throw new InvalidRequestException("Unknown file: " + nextFile.getName());
+						}
+						files.add(new FileBackedFileDescriptor(nextFile));
 					}
-					files.add(new FileBackedFileDescriptor(nextFile));
+
+				} else {
+					nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+					ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
+					files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
 				}
-
-			} else {
-				nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
-				ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
-				files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
 			}
-
 		}
 		return files;
 	}
