@@ -70,7 +70,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
-	public void testDeliverySuccessful() {
+	public void testRestHookDeliverySuccessful() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
 		Patient patient = new Patient();
@@ -92,7 +92,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	}
 
 	@Test
-	public void testDeliveryFails_ShouldRollBack() {
+	public void testRestHookDeliveryFails_ShouldRollBack() {
 		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
 		Patient patient = new Patient();
@@ -114,15 +114,16 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail();
 		} catch (MessagingException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("Failure handling subscription payload for subscription: Subscription/123; nested exception is ca.uhn.fhir.rest.server.exceptions.InternalErrorException: FOO", e.getMessage());
 		}
 
 		verify(myGenericClient, times(1)).update();
 	}
 
 	@Test
-	public void testDeliveryFails_InterceptorDealsWithIt() {
+	public void testRestHookDeliveryFails_InterceptorDealsWithIt() {
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(true);
 		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_AFTER_DELIVERY_FAILED), any())).thenReturn(false);
 
 		Patient patient = new Patient();
@@ -144,6 +145,29 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 
 		verify(myGenericClient, times(1)).update();
+	}
+
+	@Test
+	public void testRestHookDeliveryAbortedByInterceptor() {
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_DELIVERY), any())).thenReturn(true);
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY), any())).thenReturn(false);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+
+		CanonicalSubscription subscription = new CanonicalSubscription();
+		subscription.setIdElement(new IdType("Subscription/123"));
+		subscription.setEndpointUrl("http://example.com/fhir");
+		subscription.setPayloadString("application/fhir+json");
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
+
+		verify(myGenericClient, times(0)).update();
 	}
 
 	@Test
