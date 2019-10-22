@@ -217,44 +217,50 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		Map<String, String> codes = new LinkedHashMap<>();
 		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
 
-		for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
-			CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-			convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, null, codeToParentCodes);
+		if (theCodeSystems != null) {
+			for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
+				CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
+				convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, null, codeToParentCodes);
+			}
 		}
 
 		// Create concept file
-		StringBuilder b = new StringBuilder();
-		b.append(ConceptHandler.CODE);
-		b.append(",");
-		b.append(ConceptHandler.DISPLAY);
-		b.append("\n");
-		for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
-			b.append(nextEntry.getKey());
+		if (codes.size() > 0) {
+			StringBuilder b = new StringBuilder();
+			b.append(ConceptHandler.CODE);
 			b.append(",");
-			b.append(defaultString(nextEntry.getValue()));
+			b.append(ConceptHandler.DISPLAY);
 			b.append("\n");
+			for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
+				b.append(nextEntry.getKey());
+				b.append(",");
+				b.append(defaultString(nextEntry.getValue()));
+				b.append("\n");
+			}
+			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			theFiles.add(fileDescriptor);
 		}
-		byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
-		String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
-		ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-		theFiles.add(fileDescriptor);
 
 		// Create hierarchy file
-		b = new StringBuilder();
-		b.append(HierarchyHandler.CHILD);
-		b.append(",");
-		b.append(HierarchyHandler.PARENT);
-		b.append("\n");
-		for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
-			b.append(nextEntry.getKey());
+		if (codeToParentCodes.size() > 0) {
+			StringBuilder b = new StringBuilder();
+			b.append(HierarchyHandler.CHILD);
 			b.append(",");
-			b.append(defaultString(nextEntry.getValue()));
+			b.append(HierarchyHandler.PARENT);
 			b.append("\n");
+			for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
+				b.append(nextEntry.getKey());
+				b.append(",");
+				b.append(defaultString(nextEntry.getValue()));
+				b.append("\n");
+			}
+			byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+			String fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
+			ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+			theFiles.add(fileDescriptor);
 		}
-		bytes = b.toString().getBytes(Charsets.UTF_8);
-		fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
-		fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
-		theFiles.add(fileDescriptor);
 
 	}
 
