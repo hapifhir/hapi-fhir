@@ -123,35 +123,34 @@ public class ExportConceptMapToCsvCommand extends AbstractImportExportCsvConcept
 	private void convertConceptMapToCsv(ConceptMap theConceptMap) {
 		Path path = Paths.get(file);
 		ourLog.info("Exporting ConceptMap to CSV: {}", path);
-		try (
-			Writer writer = Files.newBufferedWriter(path);
-			CSVPrinter csvPrinter = new CSVPrinter(
-				writer,
-				CSVFormat
-					.DEFAULT
-					.withRecordSeparator("\n")
-					.withHeader(Header.class)
-					.withQuoteMode(QuoteMode.ALL));
-		) {
-			for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
-				for (SourceElementComponent element : group.getElement()) {
-					for (ConceptMap.TargetElementComponent target : element.getTarget()) {
+		try (Writer writer = Files.newBufferedWriter(path)) {
 
-						List<String> columns = new ArrayList<>();
-						columns.add(defaultString(group.getSource()));
-						columns.add(defaultString(group.getSourceVersion()));
-						columns.add(defaultString(group.getTarget()));
-						columns.add(defaultString(group.getTargetVersion()));
-						columns.add(defaultString(element.getCode()));
-						columns.add(defaultString(element.getDisplay()));
-						columns.add(defaultString(target.getCode()));
-						columns.add(defaultString(target.getDisplay()));
-						columns.add(defaultString(target.getEquivalence().toCode()));
-						columns.add(defaultString(target.getComment()));
+			CSVFormat format = CSVFormat.DEFAULT
+				.withRecordSeparator("\n")
+				.withHeader(Header.class)
+				.withQuoteMode(QuoteMode.ALL);
+			try (CSVPrinter csvPrinter = new CSVPrinter(writer, format)) {
+				for (ConceptMapGroupComponent group : theConceptMap.getGroup()) {
+					for (SourceElementComponent element : group.getElement()) {
+						for (ConceptMap.TargetElementComponent target : element.getTarget()) {
 
-						csvPrinter.printRecord(columns);
+							List<String> columns = new ArrayList<>();
+							columns.add(defaultString(group.getSource()));
+							columns.add(defaultString(group.getSourceVersion()));
+							columns.add(defaultString(group.getTarget()));
+							columns.add(defaultString(group.getTargetVersion()));
+							columns.add(defaultString(element.getCode()));
+							columns.add(defaultString(element.getDisplay()));
+							columns.add(defaultString(target.getCode()));
+							columns.add(defaultString(target.getDisplay()));
+							columns.add(defaultString(target.getEquivalence().toCode()));
+							columns.add(defaultString(target.getComment()));
+
+							csvPrinter.printRecord(columns);
+						}
 					}
 				}
+				csvPrinter.flush();
 			}
 		} catch (IOException ioe) {
 			throw new InternalErrorException(ioe);
