@@ -50,6 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @Service
 class ResourceExpungeService implements IResourceExpungeService {
@@ -147,11 +148,11 @@ class ResourceExpungeService implements IResourceExpungeService {
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
 		if (version.getProvenance() != null) {
-			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
+			myResourceHistoryProvenanceTableDao.deleteByPid(version.getProvenance().getId());
 		}
-		
-		myResourceHistoryTagDao.deleteAll(version.getTags());
-		myResourceHistoryTableDao.delete(version);
+
+		myResourceHistoryTagDao.deleteByPid(version.getTags().stream().map(t->t.getId()).collect(Collectors.toList()));
+		myResourceHistoryTableDao.deleteByPid(version.getId());
 
 		theRemainingCount.decrementAndGet();
 	}
@@ -215,8 +216,12 @@ class ResourceExpungeService implements IResourceExpungeService {
 			myIdHelperService.delete(forcedId);
 		}
 
-		myResourceTableDao.delete(resource);
+		myResourceTableDao.deleteByPid(resource.getId());
 	}
+
+
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Override
 	@Transactional
@@ -228,6 +233,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		myResourceIndexedSearchParamQuantityDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamStringDao.deleteByResourceId(theResourceId);
 		myResourceIndexedSearchParamTokenDao.deleteByResourceId(theResourceId);
+		mySearchParamPresentDao.deleteByResourceId(theResourceId);
 		myResourceLinkDao.deleteByResourceId(theResourceId);
 
 		myResourceTagDao.deleteByResourceId(theResourceId);
