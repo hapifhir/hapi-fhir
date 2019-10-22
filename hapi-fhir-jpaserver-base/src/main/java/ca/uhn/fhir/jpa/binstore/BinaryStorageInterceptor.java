@@ -147,7 +147,7 @@ public class BinaryStorageInterceptor {
 		List<? extends IPrimitiveType<byte[]>> base64fields = myCtx.newTerser().getAllPopulatedChildElementsOfType(theResource, myBinaryType);
 		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
 			if (nextBase64 instanceof IBaseHasExtensions) {
-				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
+				Optional<String> hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
 					.getExtension()
 					.stream()
 					.filter(t -> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
@@ -155,12 +155,12 @@ public class BinaryStorageInterceptor {
 					.map(t->(IPrimitiveType) t.getValue())
 					.map(t->t.getValueAsString())
 					.filter(t->isNotBlank(t))
-					.anyMatch(t->{
+					.filter(t->{
 						return !existingBinaryIds.contains(t);
-					})
-					;
-				if (hasExternalizedBinaryReference) {
-					String msg = myCtx.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
+					}).findFirst();
+
+				if (hasExternalizedBinaryReference.isPresent()) {
+					String msg = myCtx.getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID, hasExternalizedBinaryReference.get());
 					throw new InvalidRequestException(msg);
 				}
 			}

@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
@@ -191,8 +192,12 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Create a resource with a big enough docRef
 		DocumentReference docRef = new DocumentReference();
-		docRef.getContentFirstRep().getAttachment().setContentType("application/octet-stream");
-		docRef.getContentFirstRep().getAttachment().setData(SOME_BYTES);
+		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
+		content.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().setData(SOME_BYTES);
+		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
+		content2.getAttachment().setContentType("application/octet-stream");
+		content2.getAttachment().setData(SOME_BYTES_2);
 		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
 
 		// Make sure it was externalized
@@ -226,6 +231,54 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
 		assertArrayEquals(SOME_BYTES, output.getContentFirstRep().getAttachment().getData());
 
+	}
+
+
+	@Test
+	public void testUpdateRejectsIncorrectBinary() {
+
+		// Create a resource with a big enough docRef
+		DocumentReference docRef = new DocumentReference();
+		DocumentReference.DocumentReferenceContentComponent content = docRef.addContent();
+		content.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().setData(SOME_BYTES);
+		DocumentReference.DocumentReferenceContentComponent content2 = docRef.addContent();
+		content2.getAttachment().setContentType("application/octet-stream");
+		content2.getAttachment().setData(SOME_BYTES_2);
+		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(binaryId, not(blankOrNullString()));
+
+		// Now update
+		docRef = new DocumentReference();
+		docRef.setId(id.toUnqualifiedVersionless());
+		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		content = docRef.addContent();
+		content.getAttachment().setContentType("application/octet-stream");
+		content.getAttachment().getDataElement().addExtension(
+			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			new StringType(binaryId)
+		);
+		content2 = docRef.addContent();
+		content2.getAttachment().setContentType("application/octet-stream");
+		content2.getAttachment().getDataElement().addExtension(
+			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			new StringType("12345-67890")
+		);
+
+		try {
+			myDocumentReferenceDao.update(docRef, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals("Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"", e.getMessage());
+		}
 	}
 
 
