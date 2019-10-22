@@ -68,7 +68,7 @@
 
 	<dependencies>
 		<!-- Cobertura is here as a 'provided' depdendency just to get the @CoverageIgnore annotation. It would be nice if there was a better way for this.. -->
-		<!-- <dependency> <groupId>net.sourceforge.cobertura</groupId> <artifactId>cobertura</artifactId> <version>2.1.1</version> <scope>provided</scope> <exclusions> <exclusion> <artifactId>jetty</artifactId> 
+		<!-- <dependency> <groupId>net.sourceforge.cobertura</groupId> <artifactId>cobertura</artifactId> <version>2.1.1</version> <scope>provided</scope> <exclusions> <exclusion> <artifactId>jetty</artifactId>
 			<groupId>org.mortbay.jetty</groupId> </exclusion> </exclusions> </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -1819,7 +1819,7 @@
 										<ignore></ignore>
 									</action>
 								</pluginExecution>
-								<!-- 
+								<!--
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
@@ -2335,7 +2335,7 @@
 			</modules>
 			<build>
 				<plugins>
-					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals> 
+					<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <version>${maven_assembly_plugin_version}</version> <executions> <execution> <phase>package</phase> <goals> <goal>single</goal> </goals>
 						<configuration> <attach>false</attach> <descriptors> <descriptor>${project.basedir}/src/assembly/hapi-fhir-sample-projects.xml</descriptor> </descriptors> </configuration> </execution> </executions> </plugin> -->
 				</plugins>
 			</build>
@@ -2360,7 +2360,7 @@
 									<goal>sign</goal>
 								</goals>
 								<configuration>
-									<!-- 
+									<!--
 									These arguments are needed for GPG 2.1+ per
 									https://stackoverflow.com/questions/53992950/maven-gpg-plugin-failing-with-inappropriate-ioctl-for-device-when-running-unde
 									-->
@@ -2468,6 +2468,7 @@
 				<module>example-projects/hapi-fhir-jpaserver-dynamic</module>
 				<module>example-projects/hapi-fhir-jpaserver-example-postgres</module>
 				-->
+				<module>tests/hapi-fhir-base-test-jaxrsserver-kotlin</module>
 				<module>tests/hapi-fhir-base-test-mindeps-client</module>
 				<module>tests/hapi-fhir-base-test-mindeps-server</module>
 				<module>hapi-fhir-spring-boot</module>
