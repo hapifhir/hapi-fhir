@@ -35,7 +35,7 @@ public class BulkExportCollectionEntity {
 	@SequenceGenerator(name = "SEQ_BLKEXCOL_PID", sequenceName = "SEQ_BLKEXCOL_PID")
 	@Column(name = "PID")
 	private Long myId;
-	@ManyToOne
+	@ManyToOne()
 	@JoinColumn(name = "JOB_PID", referencedColumnName = "PID", nullable = false, foreignKey = @ForeignKey(name="FK_BLKEXCOL_JOB"))
 	private BulkExportJobEntity myJob;
 	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)

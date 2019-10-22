@@ -452,11 +452,23 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(Transactional.TxType.NEVER)
 	public synchronized void cancelAndPurgeAllJobs() {
-		myBulkExportCollectionFileDao.deleteAll();
-		myBulkExportCollectionDao.deleteAll();
-		myBulkExportJobDao.deleteAll();
+		ourLog.info("Deleting all files");
+		myTxTemplate.execute(t -> {
+			myBulkExportCollectionFileDao.deleteAll();
+			return null;
+		});
+		ourLog.info("Deleting all collections");
+		myTxTemplate.execute(t -> {
+			myBulkExportCollectionDao.deleteAll();
+			return null;
+		});
+		ourLog.info("Deleting all jobs");
+		myTxTemplate.execute(t -> {
+			myBulkExportJobDao.deleteAll();
+			return null;
+		});
 	}
 
 	@DisallowConcurrentExecution
