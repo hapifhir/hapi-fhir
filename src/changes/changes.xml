@@ -442,6 +442,10 @@
 				<![CDATA[<code>ProcedureRequest?someCustomParameter.BAD_NAME=</code>]]>, the server would ignore this
 				parameter instead of incorrectly returning an error. This has been corrected.
 			</action>
+			<action type="fix" issue="1526">
+				Several issues with HAPI FHIR's annotation scanner that prevented use with Kotlin based
+				resource providers have been corrected. Thanks to Jelmer ter Wal for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
