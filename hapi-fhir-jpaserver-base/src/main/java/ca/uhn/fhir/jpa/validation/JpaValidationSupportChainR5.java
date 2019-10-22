@@ -51,7 +51,8 @@ public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 	public JpaValidationSupportChainR5() {
 		super();
 	}
-	
+
+	@PreDestroy
 	public void flush() {
 		myDefaultProfileValidationSupport.flush();
 	}
@@ -82,11 +83,5 @@ public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext, this));
 	}
-	
-	@PreDestroy
-	public void preDestroy() {
-		flush();
-	}
-	
 	
 }

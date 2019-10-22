@@ -119,6 +119,10 @@ public class BinaryStorageInterceptor {
 	}
 
 	private void extractLargeBinaries(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		if (theRequestDetails == null) {
+			// RequestDetails will only be null for internal HAPI events.  If externalization is required for them it will need to be done in a different way.
+			return;
+		}
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
 			String resourceType = myCtx.getResourceDefinition(theResource).getName();

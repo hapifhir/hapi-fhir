@@ -559,11 +559,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myEntityManager.merge(entity);
 	}
 
-    private void validateExpungeEnabled() {
-        if (!myDaoConfig.isExpungeEnabled()) {
-            throw new MethodNotAllowedException("$expunge is not enabled on this server");
-        }
-    }
+	private void validateExpungeEnabled() {
+		if (!myDaoConfig.isExpungeEnabled()) {
+			throw new MethodNotAllowedException("$expunge is not enabled on this server");
+		}
+	}
 
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
@@ -892,8 +892,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
 					.getExtension()
 					.stream()
-					.filter(t-> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
-					.anyMatch(t-> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
+					.filter(t -> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
+					.anyMatch(t -> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
 				if (hasExternalizedBinaryReference) {
 					String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
 					throw new InvalidRequestException(msg);
@@ -1326,12 +1326,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
-				if (isNotBlank(nextValue)) {
-					QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
-					List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-					IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
-					theTarget.add(qualifiedParamName.getParamName(), parsedParam);
-				}
+				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
+				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
+				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
+				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
 			}
 
 		}
