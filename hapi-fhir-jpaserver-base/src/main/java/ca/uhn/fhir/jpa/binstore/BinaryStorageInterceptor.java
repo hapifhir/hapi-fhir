@@ -149,7 +149,7 @@ public class BinaryStorageInterceptor {
 						newBlobId = myBinaryStorageSvc.newBlobId();
 						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theRequestDetails);
 						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
-							deferredBinaryTargets.add(newDeferredBinaryTarget);
+						deferredBinaryTargets.add(newDeferredBinaryTarget);
 					}
 
 					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
@@ -163,9 +163,9 @@ public class BinaryStorageInterceptor {
 	@SuppressWarnings("unchecked")
 	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(ServletRequestDetails theRequestDetails) {
 		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
-			if (deferredBinaryTargets == null) {
-				deferredBinaryTargets = new ArrayList<>();
-				theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
+		if (deferredBinaryTargets == null) {
+			deferredBinaryTargets = new ArrayList<>();
+			theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
 		}
 		return deferredBinaryTargets;
 	}
