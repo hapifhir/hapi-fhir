@@ -6,8 +6,12 @@ import ca.uhn.fhir.jpa.binstore.MemoryBinaryStorageSvcImpl;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
+import org.hl7.fhir.r4.model.DocumentReference;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,8 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
@@ -181,6 +184,50 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertArrayEquals(SOME_BYTES_2, output.getData());
 
 	}
+
+
+	@Test
+	public void testUpdatePreservingExistingExternalizedBinary() {
+
+		// Create a resource with a big enough docRef
+		DocumentReference docRef = new DocumentReference();
+		docRef.getContentFirstRep().getAttachment().setContentType("application/octet-stream");
+		docRef.getContentFirstRep().getAttachment().setData(SOME_BYTES);
+		DaoMethodOutcome outcome = myDocumentReferenceDao.create(docRef, mySrd);
+
+		// Make sure it was externalized
+		IIdType id = outcome.getId().toUnqualifiedVersionless();
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getResource());
+		ourLog.info("Encoded: {}", encoded);
+		assertThat(encoded, containsString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID));
+		assertThat(encoded, not(containsString("\"data\"")));
+		String binaryId = docRef.getContentFirstRep().getAttachment().getDataElement().getExtensionString(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		assertThat(binaryId, not(blankOrNullString()));
+
+		// Now update
+		docRef = new DocumentReference();
+		docRef.setId(id.toUnqualifiedVersionless());
+		docRef.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+		docRef.getContentFirstRep().getAttachment().setContentType("application/octet-stream");
+		docRef.getContentFirstRep().getAttachment().getDataElement().addExtension(
+			JpaConstants.EXT_EXTERNALIZED_BINARY_ID,
+			new StringType(binaryId)
+		);
+		outcome = myDocumentReferenceDao.update(docRef, mySrd);
+		assertEquals("2", outcome.getId().getVersionIdPart());
+
+		// Now read it back the first version
+		DocumentReference output = myDocumentReferenceDao.read(id.withVersion("1"), mySrd);
+		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES, output.getContentFirstRep().getAttachment().getData());
+
+		// Now read back the second version
+		output = myDocumentReferenceDao.read(id.withVersion("2"), mySrd);
+		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES, output.getContentFirstRep().getAttachment().getData());
+
+	}
+
 
 
 	@Test
