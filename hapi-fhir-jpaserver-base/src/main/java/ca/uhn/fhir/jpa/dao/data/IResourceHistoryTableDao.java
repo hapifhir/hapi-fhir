@@ -91,14 +91,12 @@ public interface IResourceHistoryTableDao extends JpaRepository<ResourceHistoryT
 		"LEFT OUTER JOIN ResourceTable t ON (v.myResourceId = t.myId) " +
 		"WHERE v.myResourceVersion != t.myVersion")
 	Slice<Long> findIdsOfPreviousVersionsOfResources(Pageable thePage);
-	
-	@Query("" + 
-		"SELECT h FROM ResourceHistoryTable h " + 
-		"INNER JOIN ResourceTable r ON (r.myId = h.myResourceId and r.myVersion = h.myResourceVersion) " + 
-		"WHERE r.myId in (:pids)")
-	Collection<ResourceHistoryTable> findByResourceIds(@Param("pids") Collection<Long> pids);
 
 	@Modifying
 	@Query("UPDATE ResourceHistoryTable r SET r.myResourceVersion = :newVersion WHERE r.myResourceId = :id AND r.myResourceVersion = :oldVersion")
 	void updateVersion(@Param("id") long theId, @Param("oldVersion") long theOldVersion, @Param("newVersion") long theNewVersion);
+
+	@Modifying
+	@Query("DELETE FROM ResourceHistoryTable t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
 }

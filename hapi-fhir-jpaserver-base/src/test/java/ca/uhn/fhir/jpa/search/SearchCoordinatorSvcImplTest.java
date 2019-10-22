@@ -296,6 +296,35 @@ public class SearchCoordinatorSvcImplTest {
 
 	}
 
+	@Test
+	public void testCancelActiveSearches() {
+		SearchParameterMap params = new SearchParameterMap();
+		params.add("name", new StringParam("ANAME"));
+
+		List<Long> pids = createPidSequence(10, 800);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
+
+		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+
+		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
+		assertNotNull(result.getUuid());
+		assertEquals(null, result.size());
+
+		List<IBaseResource> resources;
+
+		resources = result.getResources(0, 1);
+		assertEquals(1, resources.size());
+
+		mySvc.cancelAllActiveSearches();
+
+		try {
+			result.getResources(10, 20);
+		} catch (InternalErrorException e) {
+			assertEquals("Abort has been requested", e.getMessage());
+		}
+	}
+
 	/**
 	 * Subsequent requests for the same search (i.e. a request for the next
 	 * page) within the same JVM will not use the original bundle provider

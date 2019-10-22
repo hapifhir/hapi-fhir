@@ -58,4 +58,9 @@ public interface IResourceTableDao extends JpaRepository<ResourceTable, Long> {
 	@Modifying
 	@Query("UPDATE ResourceTable t SET t.myIndexStatus = :status WHERE t.myId = :id")
 	void updateIndexStatus(@Param("id") Long theId, @Param("status") Long theIndexStatus);
+
+	@Modifying
+	@Query("DELETE FROM ResourceTable t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

@@ -71,18 +71,18 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected ApacheHttpClient getHttpClient(String theServerBase) {
+	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
 			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
 				theHeaders);
 	}
 
-	public synchronized HttpClient getNativeHttpClient() {
+	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
 			//FIXME potential resoource leak

@@ -93,7 +93,9 @@ public class ExpungeOperation implements Callable<ExpungeOutcome> {
 	}
 
 	private Slice<Long> findHistoricalVersionsOfDeletedResources() {
-		return myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
+		Slice<Long> retVal = myExpungeDaoService.findHistoricalVersionsOfDeletedResources(myResourceName, myResourceId, myRemainingCount.get());
+		ourLog.debug("Found {} historical versions", retVal.getSize());
+		return retVal;
 	}
 
 	private Slice<Long> findHistoricalVersionsOfNonDeletedResources() {

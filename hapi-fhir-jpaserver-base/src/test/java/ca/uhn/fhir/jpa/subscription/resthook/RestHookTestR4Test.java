@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.jpa.config.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
-import ca.uhn.fhir.model.dstu2.valueset.SubscriptionStatusEnum;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -308,7 +307,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		int modCount = myCountingInterceptor.getSentCount();
 		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount(), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");

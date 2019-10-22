@@ -90,4 +90,7 @@ public class ForcedId {
 		myResourceType = theResourceType;
 	}
 
+	public Long getId() {
+		return myId;
+	}
 }

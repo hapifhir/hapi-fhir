@@ -12,9 +12,12 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 				<ul>
-					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>SLF4j (All): 1.7.25 -&gt; 1.7.28</li>
+					<li>Spring (JPA): 5.1.8.Final -&gt; 5.2.0.Final</li>
+					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.6.Final</li>
 					<li>Hibernate Search (JPA): 5.11.1.Final -&gt; 5.11.3.Final</li>
 					<li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li>
+					<li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li>
 				</ul>
 				]]>
 			</action>

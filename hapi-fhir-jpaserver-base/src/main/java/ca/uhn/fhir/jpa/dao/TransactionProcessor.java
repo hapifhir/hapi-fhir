@@ -30,14 +30,15 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.*;
 import com.google.common.base.Charsets;
@@ -89,8 +91,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
 	@Autowired
-	private MatchUrlService myMatchUrlService;
-	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired(required = false)
 	private HapiFhirHibernateJpaDialect myHapiFhirHibernateJpaDialect;
@@ -127,7 +127,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 
 		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
-		long start = System.currentTimeMillis();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -173,7 +172,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			}
 		}
 		idToPersistedOutcome.put(newId, outcome);
-		if (outcome.getCreated().booleanValue()) {
+		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
@@ -517,7 +516,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * Look for duplicate conditional creates and consolidate them
 			 */
 			final HashMap<String, String> keyToUuid = new HashMap<>();
-			final IdentityHashMap<IBaseResource, String> identityToUuid = new IdentityHashMap<>();
 			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 				BUNDLEENTRY nextReqEntry = theEntries.get(index);
 				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
@@ -551,7 +549,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					if (consolidateEntry) {
 						if (!keyToUuid.containsKey(key)) {
 							keyToUuid.put(key, entryUrl);
-							identityToUuid.put(resource, entryUrl);
 						} else {
 							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
 							theEntries.remove(index);

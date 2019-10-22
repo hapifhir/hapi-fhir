@@ -35,4 +35,8 @@ import java.util.Map;
 
 public interface IResourceProvenanceDao extends JpaRepository<ResourceHistoryProvenanceEntity, Long> {
 
+	@Modifying
+	@Query("DELETE FROM ResourceHistoryProvenanceEntity t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }
