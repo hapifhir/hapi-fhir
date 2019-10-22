@@ -136,12 +136,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
 
-		get = new HttpGet(ourServerBase + "/Procedure?focalAccess.status:not=foo");
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(output, containsString("Invalid parameter chain: focalAccess.a ne e"));
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-		}
 	}
 
 	@Test
