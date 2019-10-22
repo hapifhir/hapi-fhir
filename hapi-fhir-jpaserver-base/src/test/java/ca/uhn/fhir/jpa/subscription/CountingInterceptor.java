@@ -1,11 +1,8 @@
 package ca.uhn.fhir.jpa.subscription;
 
-import jdk.internal.joptsimple.internal.Strings;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +24,6 @@ public class CountingInterceptor implements ChannelInterceptor {
 
 	@Override
 	public String toString() {
-		return "[" + Strings.join(mySent, "\n") + "]";
+		return "[" + String.join("\n", mySent) + "]";
 	}
 }
