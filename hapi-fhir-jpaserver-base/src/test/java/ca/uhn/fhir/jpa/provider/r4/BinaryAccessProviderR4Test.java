@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -278,23 +279,20 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	/**
-	 * Stores a binary large enough that it should live in binary storage
-	 */
 	@Test
-	public void testDontAllowUpdateWithAttachmentId() {
+	public void testDontAllowUpdateWithAttachmentId_NoneExists() {
 
 		DocumentReference dr = new DocumentReference();
 		dr.addContent()
 			.getAttachment()
 			.getDataElement()
-			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("XUcR1qL9p4i8Ck6L2RzVbSpHv1ZPHYuBSd50LR39nzhDDR4N4efJ7Q0ywZLyzcLeLIPi60UvCCNmdZBlbyvT1KfNaDeHV1zBHbDp") );
+			.addExtension(JpaConstants.EXT_EXTERNALIZED_BINARY_ID, new StringType("0000-1111") );
 
 		try {
 			ourClient.create().resource(dr).execute();
 			fail();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), containsString("Illegal extension found in request payload: http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id"));
+			assertThat(e.getMessage(), containsString("Can not find the requested binary content. It may have been deleted."));
 		}
 	}
 

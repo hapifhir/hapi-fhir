@@ -135,6 +135,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(output, containsString("Invalid parameter chain: focalAccess.a ne e"));
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 		}
+
 	}
 
 	@Test
