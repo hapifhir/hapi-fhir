@@ -147,7 +147,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 		callHooks(theRequestDetails, theRemainingCount, version, id);
 
 		if (version.getProvenance() != null) {
-			myResourceHistoryProvenanceTableDao.deleteByPid(version.getProvenance().getId());
+			myResourceHistoryProvenanceTableDao.delete(version.getProvenance());
 		}
 		
 		myResourceHistoryTagDao.deleteAll(version.getTags());
@@ -215,7 +215,7 @@ class ResourceExpungeService implements IResourceExpungeService {
 			myIdHelperService.delete(forcedId);
 		}
 
-		myResourceTableDao.deleteByPid(resource.getId());
+		myResourceTableDao.delete(resource);
 	}
 
 	@Override
