@@ -120,7 +120,6 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	public String toString() {
 		return new ToStringBuilder(this)
 			.append("mySubscription", mySubscription)
-//			.append("mySubscriptionString", mySubscriptionString)
 			.append("myPayloadString", myPayloadString)
 			.append("myPayload", myPayload)
 			.append("myPayloadId", myPayloadId)
@@ -134,7 +133,10 @@ public class ResourceDeliveryMessage extends BaseResourceMessage implements IRes
 	public String getSubscriptionId(FhirContext theFhirContext) {
 		String retVal = null;
 		if (getSubscription() != null) {
-			retVal = getSubscription().getIdElement(theFhirContext).getValue();
+			IIdType idElement = getSubscription().getIdElement(theFhirContext);
+			if (idElement != null) {
+				retVal = idElement.getValue();
+			}
 		}
 		return retVal;
 	}

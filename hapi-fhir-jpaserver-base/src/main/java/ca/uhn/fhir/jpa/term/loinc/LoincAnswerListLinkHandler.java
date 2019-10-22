@@ -36,13 +36,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincAnswerListLinkHandler implements IRecordHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
-	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 
-	public LoincAnswerListLinkHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets) {
+	public LoincAnswerListLinkHandler(Map<String, TermConcept> theCode2concept) {
 		myCode2Concept = theCode2concept;
-		for (ValueSet next : theValueSets) {
-			myIdToValueSet.put(next.getId(), next);
-		}
 	}
 
 	@Override

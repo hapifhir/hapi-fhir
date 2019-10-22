@@ -135,7 +135,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Override
 	public void expungeBlob(IIdType theResourceId, String theBlobId) {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
-		entityOpt.ifPresent(theBinaryStorageEntity -> myBinaryStorageEntityDao.delete(theBinaryStorageEntity));
+		entityOpt.ifPresent(theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
 	}
 
 	@Override

@@ -247,7 +247,14 @@
 			<groupId>org.fusesource.jansi</groupId>
 			<artifactId>jansi</artifactId>
 		</dependency>
-		
+
+		<!-- Test Deps -->
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

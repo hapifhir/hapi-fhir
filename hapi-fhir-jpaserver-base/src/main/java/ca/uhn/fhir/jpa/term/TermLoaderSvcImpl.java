@@ -281,15 +281,6 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 			throw new InternalErrorException("Failed to load imgthla.xml", e);
 		}
 
-		Map<String, CodeSystem.PropertyType> propertyNamesToTypes = new HashMap<>();
-		for (CodeSystem.PropertyComponent nextProperty : imgthlaCs.getProperty()) {
-			String nextPropertyCode = nextProperty.getCode();
-			CodeSystem.PropertyType nextPropertyType = nextProperty.getType();
-			if (isNotBlank(nextPropertyCode)) {
-				propertyNamesToTypes.put(nextPropertyCode, nextPropertyType);
-			}
-		}
-
 		boolean foundHlaNom = false;
 		boolean foundHlaXml = false;
 		for (FileDescriptor nextZipBytes : theDescriptors.getUncompressedFileDescriptors()) {
@@ -424,7 +415,7 @@ public class TermLoaderSvcImpl implements ITermLoaderSvc {
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_ANSWERLIST_FILE.getCode(), LOINC_ANSWERLIST_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// Answer list links (connects LOINC observation codes to answer list codes)
-		handler = new LoincAnswerListLinkHandler(code2concept, valueSets);
+		handler = new LoincAnswerListLinkHandler(code2concept);
 		iterateOverZipFile(theDescriptors, theUploadProperties.getProperty(LOINC_ANSWERLIST_LINK_FILE.getCode(), LOINC_ANSWERLIST_LINK_FILE_DEFAULT.getCode()), handler, ',', QuoteMode.NON_NUMERIC, false);
 
 		// RSNA playbook

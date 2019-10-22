@@ -23,6 +23,7 @@ package ca.uhn.fhir.cli;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
@@ -39,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.ICompositeType;
+import org.hl7.fhir.r4.model.CodeSystem;
 
 import java.io.*;
 import java.util.zip.ZipEntry;
@@ -132,7 +134,7 @@ public class UploadTerminologyCommand extends BaseCommand {
 			for (String nextDataFile : theDatafile) {
 
 				try (FileInputStream fileInputStream = new FileInputStream(nextDataFile)) {
-					if (!nextDataFile.endsWith(".zip")) {
+					if (nextDataFile.endsWith(".csv")) {
 
 						ourLog.info("Compressing and adding file: {}", nextDataFile);
 						ZipEntry nextEntry = new ZipEntry(stripPath(nextDataFile));
@@ -146,11 +148,28 @@ public class UploadTerminologyCommand extends BaseCommand {
 						zipOutputStream.flush();
 						ourLog.info("Finished compressing {}", nextDataFile);
 
-					} else {
+					} else if (nextDataFile.endsWith(".zip")) {
 
-						ourLog.info("Adding file: {}", nextDataFile);
+						ourLog.info("Adding ZIP file: {}", nextDataFile);
 						String fileName = "file:" + nextDataFile;
 						addFileToRequestBundle(theInputParameters, fileName, IOUtils.toByteArray(fileInputStream));
+
+					} else if (nextDataFile.endsWith(".json") || nextDataFile.endsWith(".xml")) {
+
+						ourLog.info("Adding CodeSystem resource file: {}", nextDataFile);
+
+						String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
+						EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
+						if (encoding == null) {
+							throw new ParseException("Could not detect FHIR encoding for file: " + nextDataFile);
+						}
+
+						CodeSystem resource = encoding.newParser(myFhirCtx).parseResource(CodeSystem.class, contents);
+						ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+
+					} else {
+
+						throw new ParseException("Don't know how to handle file: " + nextDataFile);
 
 					}
 				}
