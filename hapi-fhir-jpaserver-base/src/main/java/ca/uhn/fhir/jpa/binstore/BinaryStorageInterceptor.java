@@ -155,8 +155,8 @@ public class BinaryStorageInterceptor {
 					.map(t->(IPrimitiveType) t.getValue())
 					.map(t->t.getValueAsString())
 					.filter(t->isNotBlank(t))
-					.filter(t->{
-						
+					.anyMatch(t->{
+						return !existingBinaryIds.contains(t);
 					})
 					;
 				if (hasExternalizedBinaryReference) {
