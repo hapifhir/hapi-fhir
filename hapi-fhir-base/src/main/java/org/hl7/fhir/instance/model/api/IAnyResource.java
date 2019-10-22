@@ -50,14 +50,12 @@ public interface IAnyResource extends IBaseResource {
 
 	String getId();
 
-	@Override
 	IIdType getIdElement();
 
 	IPrimitiveType<String> getLanguageElement();
 
 	Object getUserData(String name);
 
-	@Override
 	IAnyResource setId(String theId);
 
 	void setUserData(String name, Object value);
