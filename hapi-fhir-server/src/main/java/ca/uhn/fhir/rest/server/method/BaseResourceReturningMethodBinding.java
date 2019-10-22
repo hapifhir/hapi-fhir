@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server.method;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.api.IResource;
@@ -103,7 +104,8 @@ public abstract class BaseResourceReturningMethodBinding extends BaseMethodBindi
 				// type let's grab it
 				if (!Modifier.isAbstract(theReturnResourceType.getModifiers()) && !Modifier.isInterface(theReturnResourceType.getModifiers())) {
 					Class<? extends IBaseResource> resourceType = (Class<? extends IResource>) theReturnResourceType;
-					myResourceName = theContext.getResourceDefinition(resourceType).getName();
+					RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resourceType);
+					myResourceName = resourceDefinition.getName();
 				}
 			}
 		}

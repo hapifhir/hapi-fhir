@@ -149,8 +149,7 @@ public final class ResourceIndexedSearchParams {
 	 * @param theResourceType E.g. <code>Patient
 	 * @param thePartsChoices E.g. <code>[[gender=male], [name=SMITH, name=JOHN]]</code>
 	 */
-	public static Set<String> extractCompositeStringUniquesValueChains(String
-																								 theResourceType, List<List<String>> thePartsChoices) {
+	public static Set<String> extractCompositeStringUniquesValueChains(String theResourceType, List<List<String>> thePartsChoices) {
 
 		for (List<String> next : thePartsChoices) {
 			next.removeIf(StringUtils::isBlank);
