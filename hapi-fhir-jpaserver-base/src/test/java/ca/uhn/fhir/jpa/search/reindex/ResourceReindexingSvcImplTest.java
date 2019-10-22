@@ -239,6 +239,24 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		verifyNoMoreInteractions(myReindexJobDao);
 	}
 
+	@Test
+	public void testReindexThrowsError() {
+		mockNothingToExpunge();
+		mockSingleReindexingJob("Patient");
+		List<Long> values = Arrays.asList(0L, 1L, 2L, 3L);
+		when(myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myTypeCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture())).thenReturn(new SliceImpl<>(values));
+		when(myResourceTableDao.findById(anyLong())).thenThrow(new NullPointerException("A MESSAGE"));
+
+		int count = mySvc.forceReindexingPass();
+		assertEquals(0, count);
+
+		// Make sure we didn't do anything unexpected
+		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
+		verify(myReindexJobDao, times(1)).findAll(any(), eq(true));
+		verify(myReindexJobDao, times(1)).setSuspendedUntil(any());
+		verifyNoMoreInteractions(myReindexJobDao);
+	}
+
 	private void mockWhenResourceTableFindById(long[] theUpdatedTimes, String[] theResourceTypes) {
 		when(myResourceTableDao.findById(any())).thenAnswer(t -> {
 			ResourceTable retVal = new ResourceTable();

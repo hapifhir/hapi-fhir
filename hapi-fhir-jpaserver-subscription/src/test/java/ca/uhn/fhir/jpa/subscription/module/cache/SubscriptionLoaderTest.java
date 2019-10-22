@@ -1,6 +1,8 @@
-package ca.uhn.fhir.jpa.subscription.module.standalone;
+package ca.uhn.fhir.jpa.subscription.module.cache;
 
+import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionLoader;
 import ca.uhn.fhir.jpa.subscription.module.config.MockFhirClientSubscriptionProvider;
+import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.After;
 import org.junit.Before;
@@ -43,4 +45,13 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 		mySubscriptionActivatedPost.awaitExpected();
 		assertEquals(0, myMockFhirClientSubscriptionProvider.getFailCount());
 	}
+
+
+	@Test
+	public void testMultipleThreadsDontBlock() throws InterruptedException {
+		SubscriptionLoader svc = new SubscriptionLoader();
+		svc.acquireSemaphoreForUnitTest();
+		svc.syncSubscriptions();
+	}
+
 }
