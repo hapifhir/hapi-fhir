@@ -119,6 +119,10 @@ public class BinaryStorageInterceptor {
 	}
 
 	private void extractLargeBinaries(ServletRequestDetails theRequestDetails, IBaseResource theResource, Pointcut thePoincut) throws IOException {
+		if (theRequestDetails == null) {
+			// RequestDetails will only be null for internal HAPI events.  If externalization is required for them it will need to be done in a different way.
+			return;
+		}
 		IIdType resourceId = theResource.getIdElement();
 		if (!resourceId.hasResourceType() && resourceId.hasIdPart()) {
 			String resourceType = myCtx.getResourceDefinition(theResource).getName();
@@ -145,7 +149,7 @@ public class BinaryStorageInterceptor {
 						newBlobId = myBinaryStorageSvc.newBlobId();
 						List<DeferredBinaryTarget> deferredBinaryTargets = getOrCreateDeferredBinaryStorageMap(theRequestDetails);
 						DeferredBinaryTarget newDeferredBinaryTarget = new DeferredBinaryTarget(newBlobId, nextTarget, data);
-						deferredBinaryTargets.add(newDeferredBinaryTarget);
+							deferredBinaryTargets.add(newDeferredBinaryTarget);
 					}
 
 					myBinaryAccessProvider.replaceDataWithExtension(nextTarget, newBlobId);
@@ -159,9 +163,9 @@ public class BinaryStorageInterceptor {
 	@SuppressWarnings("unchecked")
 	private List<DeferredBinaryTarget> getOrCreateDeferredBinaryStorageMap(ServletRequestDetails theRequestDetails) {
 		List<DeferredBinaryTarget> deferredBinaryTargets = (List<DeferredBinaryTarget>) theRequestDetails.getUserData().get(getDeferredListKey());
-		if (deferredBinaryTargets == null) {
-			deferredBinaryTargets = new ArrayList<>();
-			theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
+			if (deferredBinaryTargets == null) {
+				deferredBinaryTargets = new ArrayList<>();
+				theRequestDetails.getUserData().put(getDeferredListKey(), deferredBinaryTargets);
 		}
 		return deferredBinaryTargets;
 	}
