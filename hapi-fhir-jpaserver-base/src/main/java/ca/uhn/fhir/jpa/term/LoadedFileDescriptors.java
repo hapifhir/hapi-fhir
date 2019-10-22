@@ -51,29 +51,30 @@ public class LoadedFileDescriptors implements Closeable {
 						try (BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
 							try (ZipInputStream zis = new ZipInputStream(bufferedInputStream)) {
 								for (ZipEntry nextEntry; (nextEntry = zis.getNextEntry()) != null; ) {
-									BOMInputStream fis = new BOMInputStream(zis);
-									File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
-									ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
-									nextTemporaryFile.deleteOnExit();
-									try (FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false)) {
-										IOUtils.copy(fis, fos);
-										String nextEntryFileName = nextEntry.getName();
-										myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
-											@Override
-											public String getFilename() {
-												return nextEntryFileName;
-											}
-
-											@Override
-											public InputStream getInputStream() {
-												try {
-													return new FileInputStream(nextTemporaryFile);
-												} catch (FileNotFoundException e) {
-													throw new InternalErrorException(e);
+									try (BOMInputStream fis = new NonClosableBOMInputStream(zis)) {
+										File nextTemporaryFile = File.createTempFile("hapifhir", ".tmp");
+										ourLog.info("Creating temporary file: {}", nextTemporaryFile.getAbsolutePath());
+										nextTemporaryFile.deleteOnExit();
+										try (FileOutputStream fos = new FileOutputStream(nextTemporaryFile, false)) {
+											IOUtils.copy(fis, fos);
+											String nextEntryFileName = nextEntry.getName();
+											myUncompressedFileDescriptors.add(new ITermLoaderSvc.FileDescriptor() {
+												@Override
+												public String getFilename() {
+													return nextEntryFileName;
 												}
-											}
-										});
-										myTemporaryFiles.add(nextTemporaryFile);
+
+												@Override
+												public InputStream getInputStream() {
+													try {
+														return new FileInputStream(nextTemporaryFile);
+													} catch (FileNotFoundException e) {
+														throw new InternalErrorException(e);
+													}
+												}
+											});
+											myTemporaryFiles.add(nextTemporaryFile);
+										}
 									}
 								}
 							}
@@ -140,4 +141,14 @@ public class LoadedFileDescriptors implements Closeable {
 	}
 
 
+	private static class NonClosableBOMInputStream extends BOMInputStream {
+		NonClosableBOMInputStream(InputStream theWrap) {
+			super(theWrap);
+		}
+
+		@Override
+		public void close() {
+			// nothing
+		}
+	}
 }
