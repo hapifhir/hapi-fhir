@@ -42,6 +42,6 @@ public interface IBinaryStorageEntityDao extends JpaRepository<BinaryStorageEnti
 	Optional<BinaryStorageEntity> findByIdAndResourceId(@Param("blob_id") String theBlobId, @Param("resource_id") String theResourceId);
 
 	@Modifying
-	@Query("DELETE FROM BulkExportJobEntity t WHERE t.myId = :pid")
+	@Query("DELETE FROM BinaryStorageEntity t WHERE t.myBlobId = :pid")
 	void deleteByPid(@Param("pid") String theId);
 }
