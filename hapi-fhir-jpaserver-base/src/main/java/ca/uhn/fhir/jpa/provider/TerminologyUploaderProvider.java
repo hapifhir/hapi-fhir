@@ -23,8 +23,11 @@ package ca.uhn.fhir.jpa.provider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
+import ca.uhn.fhir.jpa.term.custom.ConceptHandler;
+import ca.uhn.fhir.jpa.term.custom.HierarchyHandler;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -33,16 +36,15 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.AttachmentUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
-import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.CodeSystem;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nonnull;
@@ -51,10 +53,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -69,8 +68,6 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	private static final String RESP_PARAM_SUCCESS = "success";
 
 	@Autowired
-	private FhirContext myCtx;
-	@Autowired
 	private ITermLoaderSvc myTerminologyLoaderSvc;
 
 	/**
@@ -82,9 +79,15 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	/**
 	 * Constructor
+	 *
+	 * @deprecated
 	 */
+	@Deprecated
 	public TerminologyUploaderProvider(FhirContext theContext, ITermLoaderSvc theTerminologyLoaderSvc) {
-		myCtx = theContext;
+		this(theTerminologyLoaderSvc);
+	}
+
+	public TerminologyUploaderProvider(ITermLoaderSvc theTerminologyLoaderSvc) {
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 	}
 
@@ -113,7 +116,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 			throw new InvalidRequestException("No '" + PARAM_FILE + "' parameter, or package had no data");
 		}
 		for (ICompositeType next : theFiles) {
-			ValidateUtil.isTrueOrThrowInvalidRequest(myCtx.getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
+			ValidateUtil.isTrueOrThrowInvalidRequest(getContext().getElementDefinition(next.getClass()).getName().equals("Attachment"), "Package must be of type Attachment");
 		}
 
 		try {
@@ -138,10 +141,10 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					break;
 			}
 
-			IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-			ParametersUtil.addParameterToParametersBoolean(myCtx, retVal, RESP_PARAM_SUCCESS, true);
-			ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
-			ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
+			IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+			ParametersUtil.addParameterToParametersBoolean(getContext(), retVal, RESP_PARAM_SUCCESS, true);
+			ParametersUtil.addParameterToParametersInteger(getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, stats.getUpdatedConceptCount());
+			ParametersUtil.addParameterToParametersReference(getContext(), retVal, RESP_PARAM_TARGET, stats.getTarget().getValue());
 
 			return retVal;
 		} finally {
@@ -211,23 +214,58 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private void convertCodeSystemsToFileDescriptors(List<ITermLoaderSvc.FileDescriptor> theFiles, List<IBaseResource> theCodeSystems) {
-		Set<String> codes = new HashSet<>();
+		Map<String, String> codes = new LinkedHashMap<>();
 		Multimap<String, String> codeToParentCodes = ArrayListMultimap.create();
 
 		for (IBaseResource nextCodeSystemUncast : theCodeSystems) {
 			CodeSystem nextCodeSystem = canonicalizeCodeSystem(nextCodeSystemUncast);
-			convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, codeToParentCodes);
+			convertCodeSystemCodesToCsv(nextCodeSystem.getConcept(), codes, null, codeToParentCodes);
 		}
+
+		// Create concept file
+		StringBuilder b = new StringBuilder();
+		b.append(ConceptHandler.CODE);
+		b.append(",");
+		b.append(ConceptHandler.DISPLAY);
+		b.append("\n");
+		for (Map.Entry<String, String> nextEntry : codes.entrySet()) {
+			b.append(nextEntry.getKey());
+			b.append(",");
+			b.append(defaultString(nextEntry.getValue()));
+			b.append("\n");
+		}
+		byte[] bytes = b.toString().getBytes(Charsets.UTF_8);
+		String fileName = TermLoaderSvcImpl.CUSTOM_CONCEPTS_FILE;
+		ITermLoaderSvc.ByteArrayFileDescriptor fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+		theFiles.add(fileDescriptor);
+
+		// Create hierarchy file
+		b = new StringBuilder();
+		b.append(HierarchyHandler.CHILD);
+		b.append(",");
+		b.append(HierarchyHandler.PARENT);
+		b.append("\n");
+		for (Map.Entry<String, String> nextEntry : codeToParentCodes.entries()) {
+			b.append(nextEntry.getKey());
+			b.append(",");
+			b.append(defaultString(nextEntry.getValue()));
+			b.append("\n");
+		}
+		bytes = b.toString().getBytes(Charsets.UTF_8);
+		fileName = TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE;
+		fileDescriptor = new ITermLoaderSvc.ByteArrayFileDescriptor(fileName, bytes);
+		theFiles.add(fileDescriptor);
+
 	}
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Nonnull
 	CodeSystem canonicalizeCodeSystem(@Nonnull IBaseResource theCodeSystem) {
-		RuntimeResourceDefinition resourceDef = myCtx.getResourceDefinition(theCodeSystem);
+		RuntimeResourceDefinition resourceDef = getContext().getResourceDefinition(theCodeSystem);
 		ValidateUtil.isTrueOrThrowInvalidRequest(resourceDef.getName().equals("CodeSystem"), "Resource '%s' is not a CodeSystem", resourceDef.getName());
 
 		CodeSystem nextCodeSystem;
-		switch (myCtx.getVersion().getVersion()) {
+		switch (getContext().getVersion().getVersion()) {
 			case DSTU3:
 				nextCodeSystem = VersionConvertor_30_40.convertCodeSystem((org.hl7.fhir.dstu3.model.CodeSystem) theCodeSystem);
 				break;
@@ -240,7 +278,16 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		return nextCodeSystem;
 	}
 
-	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Set<String> theCodes, Multimap<String, String> theCodeToParentCodes) {
+	private void convertCodeSystemCodesToCsv(List<CodeSystem.ConceptDefinitionComponent> theConcept, Map<String, String> theCodes, String theParentCode, Multimap<String, String> theCodeToParentCodes) {
+		for (CodeSystem.ConceptDefinitionComponent nextConcept : theConcept) {
+			if (isNotBlank(nextConcept.getCode())) {
+				theCodes.put(nextConcept.getCode(), nextConcept.getDisplay());
+				if (isNotBlank(theParentCode)) {
+					theCodeToParentCodes.put(nextConcept.getCode(), theParentCode);
+				}
+				convertCodeSystemCodesToCsv(nextConcept.getConcept(), theCodes, nextConcept.getCode(), theCodeToParentCodes);
+			}
+		}
 	}
 
 	private void validateHaveSystem(IPrimitiveType<String> theSystem) {
@@ -273,7 +320,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 		if (theFiles != null) {
 			for (ICompositeType next : theFiles) {
 
-				String nextUrl = AttachmentUtil.getOrCreateUrl(myCtx, next).getValue();
+				String nextUrl = AttachmentUtil.getOrCreateUrl(getContext(), next).getValue();
 				ValidateUtil.isNotBlankOrThrowUnprocessableEntity(nextUrl, "Missing Attachment.url value");
 
 				byte[] nextData;
@@ -291,7 +338,7 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 					}
 
 				} else {
-					nextData = AttachmentUtil.getOrCreateData(myCtx, next).getValue();
+					nextData = AttachmentUtil.getOrCreateData(getContext(), next).getValue();
 					ValidateUtil.isTrueOrThrowInvalidRequest(nextData != null && nextData.length > 0, "Missing Attachment.data value");
 					files.add(new ITermLoaderSvc.ByteArrayFileDescriptor(nextUrl, nextData));
 				}
@@ -301,9 +348,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 	}
 
 	private IBaseParameters toDeltaResponse(UploadStatistics theOutcome) {
-		IBaseParameters retVal = ParametersUtil.newInstance(myCtx);
-		ParametersUtil.addParameterToParametersInteger(myCtx, retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
-		ParametersUtil.addParameterToParametersReference(myCtx, retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
+		IBaseParameters retVal = ParametersUtil.newInstance(getContext());
+		ParametersUtil.addParameterToParametersInteger(getContext(), retVal, RESP_PARAM_CONCEPT_COUNT, theOutcome.getUpdatedConceptCount());
+		ParametersUtil.addParameterToParametersReference(getContext(), retVal, RESP_PARAM_TARGET, theOutcome.getTarget().getValue());
 		return retVal;
 	}
 

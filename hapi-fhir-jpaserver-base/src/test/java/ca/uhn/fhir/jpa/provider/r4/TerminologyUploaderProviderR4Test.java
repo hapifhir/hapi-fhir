@@ -11,7 +11,10 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
+import javax.lang.model.util.Types;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,11 +28,12 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderR4Test.class);
-
 
 	private byte[] createSctZip() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -238,6 +242,10 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
 		));
+
+		assertHierarchyContains(
+			""
+		);
 	}
 
 	@Test
