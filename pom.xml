@@ -563,6 +563,10 @@
 			<id>tuomoa</id>
 			<name>Tuomo Ala-Vannesluoma</name>
 		</developer>
+		<developer>
+			<id>jelmerterwal</id>
+			<name>Jelmer ter Wal</name>
+		</deveoper>
 	</developers>
 
 	<licenses>
