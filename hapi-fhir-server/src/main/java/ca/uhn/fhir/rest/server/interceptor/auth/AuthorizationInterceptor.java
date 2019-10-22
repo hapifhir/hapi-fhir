@@ -108,10 +108,14 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
 		Set<AuthorizationFlagsEnum> flags = getFlags();
-		ourLog.trace("Applying {} rules to render an auth decision for operation {}", rules.size(), theOperation);
+		ourLog.trace("Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={} ", rules.size(), theOperation,
+			((theInputResource != null) && (theInputResource.getIdElement() != null)) ? theInputResource.getIdElement().getResourceType() : "",
+			((theOutputResource != null) && (theOutputResource.getIdElement() != null)) ? theOutputResource.getIdElement().getResourceType() : "");
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Rule being applied - {}",
+				nextRule);
 			verdict = nextRule.applyRule(theOperation, theRequestDetails, theInputResource, theInputResourceId, theOutputResource, this, flags, thePointcut);
 			if (verdict != null) {
 				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
