@@ -79,15 +79,9 @@ public class TerminologyUploaderProvider extends BaseJpaProvider {
 
 	/**
 	 * Constructor
-	 *
-	 * @deprecated
 	 */
-	@Deprecated
 	public TerminologyUploaderProvider(FhirContext theContext, ITermLoaderSvc theTerminologyLoaderSvc) {
-		this(theTerminologyLoaderSvc);
-	}
-
-	public TerminologyUploaderProvider(ITermLoaderSvc theTerminologyLoaderSvc) {
+		setContext(theContext);
 		myTerminologyLoaderSvc = theTerminologyLoaderSvc;
 	}
 
