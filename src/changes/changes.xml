@@ -57,7 +57,10 @@
 				A new set of operations have been added to the JPA server that allow CodeSystem deltas to be
 				uploaded. A CodeSystem Delta consists of a set of codes and relationships that are added or
 				removed incrementally to the live CodeSystem without requiring a downtime or a complete
-				upload of the contents. In addition, the HAPI FHIR CLI
+				upload of the contents. Deltas may be specified using either a custom CSV format or a partial 
+				CodeSystem resource.
+				<br/>
+				In addition, the HAPI FHIR CLI
 				<code>upload-terminology</code> command has been modified to support this new functionality.
 				]]>
 			</action>

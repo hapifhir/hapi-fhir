@@ -244,7 +244,11 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 		));
 
 		assertHierarchyContains(
-			""
+			"CHEM seq=1",
+				" HB seq=1",
+				" NEUT seq=2",
+				"MICRO seq=2",
+				" C&S seq=1"
 		);
 	}
 
