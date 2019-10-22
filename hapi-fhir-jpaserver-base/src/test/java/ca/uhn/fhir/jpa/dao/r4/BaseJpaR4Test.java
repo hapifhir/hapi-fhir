@@ -9,6 +9,9 @@ import ca.uhn.fhir.jpa.config.TestR4Config;
 import ca.uhn.fhir.jpa.dao.*;
 import ca.uhn.fhir.jpa.dao.data.*;
 import ca.uhn.fhir.jpa.dao.dstu2.FhirResourceDaoDstu2SearchNoFtTest;
+import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
+import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
@@ -66,9 +69,14 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -451,6 +459,39 @@ public abstract class BaseJpaR4Test extends BaseJpaTest {
 		dao.update(resourceParsed);
 	}
 
+
+	protected void assertHierarchyContains(String... theStrings) {
+		List<String> hierarchy = runInTransaction(() -> {
+			List<String> hierarchyHolder = new ArrayList<>();
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findAll().iterator().next();
+			TermCodeSystemVersion csv = codeSystem.getCurrentVersion();
+			List<TermConcept> codes = myTermConceptDao.findByCodeSystemVersion(csv);
+			List<TermConcept> rootCodes = codes.stream().filter(t -> t.getParents().isEmpty()).collect(Collectors.toList());
+			flattenExpansionHierarchy(hierarchyHolder, rootCodes, "");
+			return hierarchyHolder;
+		});
+		if (theStrings.length == 0) {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, empty());
+		} else {
+			assertThat("\n" + String.join("\n", hierarchy), hierarchy, contains(theStrings));
+		}
+	}
+
+	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
+		theCodes.sort((o1, o2) -> {
+			int s1 = o1.getSequence() != null ? o1.getSequence() : o1.getCode().hashCode();
+			int s2 = o2.getSequence() != null ? o2.getSequence() : o2.getCode().hashCode();
+			return s1 - s2;
+		});
+
+		for (TermConcept nextCode : theCodes) {
+			String hierarchyEntry = thePrefix + nextCode.getCode() + " seq=" + nextCode.getSequence();
+			theFlattenedHierarchy.add(hierarchyEntry);
+
+			List<TermConcept> children = nextCode.getChildCodes();
+			flattenExpansionHierarchy(theFlattenedHierarchy, children, thePrefix + " ");
+		}
+	}
 
 	@AfterClass
 	public static void afterClassClearContextBaseJpaR4Test() {

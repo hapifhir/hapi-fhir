@@ -34,6 +34,7 @@ import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class CustomTerminologySet {
 
@@ -163,12 +164,28 @@ public class CustomTerminologySet {
 				TermLoaderSvcImpl.iterateOverZipFile(theDescriptors, TermLoaderSvcImpl.CUSTOM_HIERARCHY_FILE, hierarchyHandler, ',', QuoteMode.NON_NUMERIC, false);
 			}
 
-			// Find root concepts
+			Map<String, Integer> codesInOrder = new HashMap<>();
+			for (String nextCode : code2concept.keySet()) {
+				codesInOrder.put(nextCode, codesInOrder.size());
+			}
+
 			List<TermConcept> rootConcepts = new ArrayList<>();
 			for (TermConcept nextConcept : code2concept.values()) {
+
+				// Find root concepts
 				if (nextConcept.getParents().isEmpty()) {
 					rootConcepts.add(nextConcept);
 				}
+
+				// Sort children so they appear in the same order as they did in the concepts.csv file
+				nextConcept.getChildren().sort((o1,o2)->{
+					String code1 = o1.getChild().getCode();
+					String code2 = o2.getChild().getCode();
+					int order1 = codesInOrder.get(code1);
+					int order2 = codesInOrder.get(code2);
+					return order1 - order2;
+				});
+
 			}
 
 			return new CustomTerminologySet(code2concept.size(), unanchoredChildConceptsToParentCodes, rootConcepts);

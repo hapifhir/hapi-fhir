@@ -34,6 +34,8 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class HierarchyHandler implements IRecordHandler {
 
+	public static final String PARENT = "PARENT";
+	public static final String CHILD = "CHILD";
 	private final Map<String, TermConcept> myCode2Concept;
 	private final ArrayListMultimap<TermConcept, String> myUnanchoredChildConceptsToParentCodes;
 
@@ -44,8 +46,8 @@ public class HierarchyHandler implements IRecordHandler {
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		String parent = trim(theRecord.get("PARENT"));
-		String child = trim(theRecord.get("CHILD"));
+		String parent = trim(theRecord.get(PARENT));
+		String child = trim(theRecord.get(CHILD));
 		if (isNotBlank(parent) && isNotBlank(child)) {
 
 			TermConcept childConcept = myCode2Concept.get(child);

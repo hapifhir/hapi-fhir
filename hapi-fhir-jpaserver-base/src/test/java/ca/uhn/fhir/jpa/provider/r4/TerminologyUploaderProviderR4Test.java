@@ -11,7 +11,10 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.r4.model.*;
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 
+import javax.lang.model.util.Types;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,11 +28,12 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyUploaderProviderR4Test.class);
-
 
 	private byte[] createSctZip() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -173,7 +177,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testApplyDeltaAdd() throws IOException {
+	public void testApplyDeltaAdd_UsingCsv() throws IOException {
 		String conceptsCsv = loadResource("/custom_term/concepts.csv");
 		Attachment conceptsAttachment = new Attachment()
 			.setData(conceptsCsv.getBytes(Charsets.UTF_8))
@@ -206,6 +210,46 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
 		));
+	}
+
+	@Test
+	public void testApplyDeltaAdd_UsingCodeSystem() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://foo/cs");
+		CodeSystem.ConceptDefinitionComponent chem = codeSystem.addConcept().setCode("CHEM").setDisplay("Chemistry");
+		chem.addConcept().setCode("HB").setDisplay("Hemoglobin");
+		chem.addConcept().setCode("NEUT").setDisplay("Neutrophils");
+		CodeSystem.ConceptDefinitionComponent micro = codeSystem.addConcept().setCode("MICRO").setDisplay("Microbiology");
+		micro.addConcept().setCode("C&S").setDisplay("Culture And Sensitivity");
+
+		LoggingInterceptor interceptor = new LoggingInterceptor(true);
+		ourClient.registerInterceptor(interceptor);
+		Parameters outcome = ourClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+			.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
+			.andParameter(TerminologyUploaderProvider.PARAM_CODESYSTEM, codeSystem)
+			.prettyPrint()
+			.execute();
+		ourClient.unregisterInterceptor(interceptor);
+
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+		assertThat(encoded, stringContainsInOrder(
+			"\"name\": \"conceptCount\"",
+			"\"valueInteger\": 5",
+			"\"name\": \"target\"",
+			"\"reference\": \"CodeSystem/"
+		));
+
+		assertHierarchyContains(
+			"CHEM seq=1",
+				" HB seq=1",
+				" NEUT seq=2",
+				"MICRO seq=2",
+				" C&S seq=1"
+		);
 	}
 
 	@Test

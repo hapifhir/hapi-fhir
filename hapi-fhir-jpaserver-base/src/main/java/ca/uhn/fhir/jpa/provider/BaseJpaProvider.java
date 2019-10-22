@@ -47,6 +47,7 @@ public class BaseJpaProvider {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseJpaProvider.class);
 	@Autowired
 	protected DaoConfig myDaoConfig;
+	@Autowired
 	private FhirContext myContext;
 
 	public BaseJpaProvider() {
