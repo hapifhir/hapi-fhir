@@ -80,4 +80,7 @@ public class ResourceHistoryProvenanceEntity {
 		myRequestId = theRequestId;
 	}
 
+	public Long getId() {
+		return myId;
+	}
 }

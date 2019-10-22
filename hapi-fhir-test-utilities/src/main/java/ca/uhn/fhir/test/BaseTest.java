@@ -25,6 +25,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.io.IOException;
@@ -33,6 +35,10 @@ import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 
 public class BaseTest {
+
+	static {
+		ToStringBuilder.setDefaultStyle(ToStringStyle.SHORT_PREFIX_STYLE);
+	}
 
 	protected String loadResource(String theClasspath) throws IOException {
 		Function<InputStream, InputStream> streamTransform = t->t;
