@@ -60,7 +60,7 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	private String myArchiveFileName;
 
 	@Test
-	public void testAddDelta() throws IOException {
+	public void testDeltaAdd() throws IOException {
 
 		writeConceptAndHierarchyFiles();
 
@@ -85,7 +85,37 @@ public class UploadTerminologyCommandTest extends BaseTest {
 	}
 
 	@Test
-	public void testAddDeltaUsingCompressedFile() throws IOException {
+	public void testDeltaAddUsingCodeSystemResource() throws IOException {
+
+		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
+			w.append("CODE,DISPLAY\n");
+			w.append("ANIMALS,Animals\n");
+			w.append("CATS,Cats\n");
+			w.append("DOGS,Dogs\n");
+		}
+
+		when(myTermLoaderSvc.loadDeltaAdd(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
+
+		App.main(new String[]{
+			UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+			"-v", "r4",
+			"-m", "ADD",
+			"-t", "http://localhost:" + myPort,
+			"-u", "http://foo",
+			"-d", myConceptsFileName,
+			"-d", myHierarchyFileName
+		});
+
+		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
+
+		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
+		assertEquals(1, listOfDescriptors.size());
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
+	}
+
+	@Test
+	public void testDeltaAddUsingCompressedFile() throws IOException {
 
 		writeConceptAndHierarchyFiles();
 		writeArchiveFile(myConceptsFile, myHierarchyFile);
@@ -109,33 +139,28 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
-	private void writeArchiveFile(File... theFiles) throws IOException {
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
+	@Test
+	public void testDeltaAddInvalidFileName() throws IOException {
 
-		for (File next : theFiles) {
-			ZipEntry nextEntry = new ZipEntry(UploadTerminologyCommand.stripPath(next.getAbsolutePath()));
-			zipOutputStream.putNextEntry(nextEntry);
+		writeConceptAndHierarchyFiles();
 
-			try (FileInputStream fileInputStream = new FileInputStream(next)) {
-				IOUtils.copy(fileInputStream, zipOutputStream);
-			}
-
-		}
-
-		zipOutputStream.flush();
-		zipOutputStream.close();
-
-		myArchiveFile = File.createTempFile("temp", ".zip");
-		myArchiveFile.deleteOnExit();
-		myArchiveFileName = myArchiveFile.getAbsolutePath();
-		try (FileOutputStream fos = new FileOutputStream(myArchiveFile, false)) {
-			fos.write(byteArrayOutputStream.toByteArray());
+		try {
+			App.main(new String[]{
+				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
+				"-v", "r4",
+				"-m", "ADD",
+				"-t", "http://localhost:" + myPort,
+				"-u", "http://foo",
+				"-d", myConceptsFileName + "/foo.csv",
+				"-d", myHierarchyFileName
+			});
+		} catch (Error e) {
+			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
 		}
 	}
 
 	@Test
-	public void testRemoveDelta() throws IOException {
+	public void testDeltaRemove() throws IOException {
 		writeConceptAndHierarchyFiles();
 
 		when(myTermLoaderSvc.loadDeltaRemove(eq("http://foo"), anyList(), any())).thenReturn(new UploadStatistics(100, new IdType("CodeSystem/101")));
@@ -215,6 +240,31 @@ public class UploadTerminologyCommandTest extends BaseTest {
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length, greaterThan(100));
 	}
 
+	private void writeArchiveFile(File... theFiles) throws IOException {
+		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
+
+		for (File next : theFiles) {
+			ZipEntry nextEntry = new ZipEntry(UploadTerminologyCommand.stripPath(next.getAbsolutePath()));
+			zipOutputStream.putNextEntry(nextEntry);
+
+			try (FileInputStream fileInputStream = new FileInputStream(next)) {
+				IOUtils.copy(fileInputStream, zipOutputStream);
+			}
+
+		}
+
+		zipOutputStream.flush();
+		zipOutputStream.close();
+
+		myArchiveFile = File.createTempFile("temp", ".zip");
+		myArchiveFile.deleteOnExit();
+		myArchiveFileName = myArchiveFile.getAbsolutePath();
+		try (FileOutputStream fos = new FileOutputStream(myArchiveFile, false)) {
+			fos.write(byteArrayOutputStream.toByteArray());
+		}
+	}
+
 
 	private void writeConceptAndHierarchyFiles() throws IOException {
 		try (FileWriter w = new FileWriter(myConceptsFile, false)) {
@@ -228,26 +278,6 @@ public class UploadTerminologyCommandTest extends BaseTest {
 			w.append("PARENT,CHILD\n");
 			w.append("ANIMALS,CATS\n");
 			w.append("ANIMALS,DOGS\n");
-		}
-	}
-
-	@Test
-	public void testAddInvalidFileName() throws IOException {
-
-		writeConceptAndHierarchyFiles();
-
-		try {
-			App.main(new String[]{
-				UploadTerminologyCommand.UPLOAD_TERMINOLOGY,
-				"-v", "r4",
-				"-m", "ADD",
-				"-t", "http://localhost:" + myPort,
-				"-u", "http://foo",
-				"-d", myConceptsFileName + "/foo.csv",
-				"-d", myHierarchyFileName
-			});
-		} catch (Error e) {
-			assertThat(e.toString(), Matchers.containsString("FileNotFoundException: target/concepts.csv/foo.csv"));
 		}
 	}
 
