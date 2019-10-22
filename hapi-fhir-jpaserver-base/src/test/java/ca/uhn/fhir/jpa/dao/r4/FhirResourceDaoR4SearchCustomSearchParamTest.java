@@ -1,8 +1,13 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -10,11 +15,13 @@ import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Appointment.AppointmentStatus;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.junit.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.internal.util.collections.ListUtil;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -23,8 +30,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SearchCustomSearchParamTest.class);
@@ -181,7 +191,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider outcome = myPatientDao.search(params);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		ourLog.info("IDS: " + ids);
-		assertThat(ids, contains(pid.getValue()));
+		assertThat(ids, Matchers.contains(pid.getValue()));
 	}
 
 
@@ -1325,6 +1335,39 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 
 	}
+
+
+	@Test
+	public void testCompositeWithInvalidTarget() {
+		SearchParameter sp = new SearchParameter();
+		sp.addBase("Patient");
+		sp.setCode("myDoctor");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setTitle("My Doctor");
+		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		sp.addComponent()
+			.setDefinition("http://foo");
+		mySearchParameterDao.create(sp);
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, interceptor);
+
+		try {
+			mySearchParamRegistry.forceRefresh();
+
+			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
+
+			StorageProcessingMessage msg = paramsCaptor.getValue().get(StorageProcessingMessage.class);
+			assertThat(msg.getMessage(), containsString("refers to unknown component foo, ignoring this parameter"));
+
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+
+
 
 	@AfterClass
 	public static void afterClassClearContext() {
