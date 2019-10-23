@@ -97,6 +97,36 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 
 	@Test
+	public void testSearchBySourceTransactionId() {
+
+		Patient p1 = new Patient();
+		p1.setActive(true);
+		ourClient
+			.create()
+			.resource(p1)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "11111")
+			.execute();
+
+		Patient p2 = new Patient();
+		p2.setActive(true);
+		ourClient
+			.create()
+			.resource(p2)
+			.withAdditionalHeader(Constants.HEADER_REQUEST_ID, "22222")
+			.execute();
+
+		Bundle results = ourClient
+			.search()
+			.byUrl(ourServerBase + "/Patient?_source=%2311111")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertEquals(1, results.getEntry().size());
+
+	}
+
+
+	@Test
 	public void testSearchByExternalReference() {
 		myDaoConfig.setAllowExternalReferences(true);
 
@@ -4063,7 +4093,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
 			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp,				containsString("<issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization [name.exists() or telecom.exists() or address.exists() or organization.exists()]\"/><location value=\"Patient.contact[0]\"/><location value=\"Line 0, Col 0\"/></issue>"));
+			assertThat(resp, containsString("<issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization [name.exists() or telecom.exists() or address.exists() or organization.exists()]\"/><location value=\"Patient.contact[0]\"/><location value=\"Line 0, Col 0\"/></issue>"));
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
