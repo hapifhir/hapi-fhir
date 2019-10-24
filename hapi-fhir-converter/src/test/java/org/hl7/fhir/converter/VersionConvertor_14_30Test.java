@@ -1,7 +1,8 @@
-package org.hl7.fhir.convertors;
+package org.hl7.fhir.converter;
 
 import static org.junit.Assert.assertEquals;
 
+import org.hl7.fhir.convertors.VersionConvertor_14_30;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.junit.Test;
 
