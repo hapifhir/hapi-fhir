@@ -25,7 +25,6 @@ import ca.uhn.fhir.jpa.searchparam.extractor.LogicalReferenceHelper;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
-import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
@@ -900,15 +899,8 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 				+ (isNotBlank(provenanceRequestId) ? "#" : "")
 				+ defaultString(provenanceRequestId);
 
-			if (myContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
-				IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) retVal.getMeta()).addExtension();
-				sourceExtension.setUrl(JpaConstants.EXT_META_SOURCE);
-				IPrimitiveType<String> value = (IPrimitiveType<String>) myContext.getElementDefinition("uri").newInstance();
-				value.setValue(sourceString);
-				sourceExtension.setValue(value);
-			} else if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-				MetaUtil.setSource(myContext, retVal.getMeta(), sourceString);
-			}
+			MetaUtil.setSource(myContext, retVal, sourceString);
+
 		}
 
 		return retVal;
@@ -1078,7 +1070,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> implements IDao, 
 					source = ((IBaseHasExtensions) theResource.getMeta())
 						.getExtension()
 						.stream()
-						.filter(t -> JpaConstants.EXT_META_SOURCE.equals(t.getUrl()))
+						.filter(t -> Constants.EXT_META_SOURCE.equals(t.getUrl()))
 						.filter(t -> t.getValue() instanceof IPrimitiveType)
 						.map(t -> ((IPrimitiveType) t.getValue()).getValueAsString())
 						.findFirst()
