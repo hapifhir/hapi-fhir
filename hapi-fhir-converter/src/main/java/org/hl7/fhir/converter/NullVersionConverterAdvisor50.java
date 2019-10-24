@@ -1,4 +1,4 @@
-package org.hl7.fhir.convertors;
+package org.hl7.fhir.converter;
 
 /*
  * #%L
@@ -20,6 +20,7 @@ package org.hl7.fhir.convertors;
  * #L%
  */
 
+import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
 import org.hl7.fhir.dstu2.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r5.model.Bundle;

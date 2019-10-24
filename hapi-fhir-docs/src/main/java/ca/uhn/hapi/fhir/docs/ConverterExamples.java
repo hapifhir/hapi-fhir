@@ -20,7 +20,7 @@ package ca.uhn.hapi.fhir.docs;
  * #L%
  */
 
-import org.hl7.fhir.convertors.NullVersionConverterAdvisor30;
+import org.hl7.fhir.converter.NullVersionConverterAdvisor30;
 import org.hl7.fhir.convertors.VersionConvertor_10_30;
 import org.hl7.fhir.convertors.VersionConvertor_14_30;
 import org.hl7.fhir.exceptions.FHIRException;
