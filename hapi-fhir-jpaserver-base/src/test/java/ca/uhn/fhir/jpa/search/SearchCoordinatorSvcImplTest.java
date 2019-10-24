@@ -52,8 +52,6 @@ public class SearchCoordinatorSvcImplTest {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchCoordinatorSvcImplTest.class);
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	@Captor
-	ArgumentCaptor<List<Long>> mySearchResultIterCaptor;
 	@Mock
 	private IFhirResourceDao<?> myCallingDao;
 	@Mock
@@ -68,7 +66,6 @@ public class SearchCoordinatorSvcImplTest {
 	private SearchCoordinatorSvcImpl mySvc;
 	@Mock
 	private PlatformTransactionManager myTxManager;
-	private DaoConfig myDaoConfig;
 	private Search myCurrentSearch;
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -92,8 +89,8 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 
-		myDaoConfig = new DaoConfig();
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		DaoConfig daoConfig = new DaoConfig();
+		mySvc.setDaoConfigForUnitTest(daoConfig);
 
 		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuilder);
 
@@ -139,7 +136,7 @@ public class SearchCoordinatorSvcImplTest {
 
 		List<Long> pids = createPidSequence(10, 800);
 		IResultIterator iter = new FailAfterNIterator(new SlowIterator(pids.iterator(), 2), 300);
-		when(mySearchBuilder.createQuery(Mockito.same(params), any(), any())).thenReturn(iter);
+		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 		assertNotNull(result.getUuid());
@@ -301,8 +298,8 @@ public class SearchCoordinatorSvcImplTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
 
-		List<Long> pids = createPidSequence(10, 800);
-		SlowIterator iter = new SlowIterator(pids.iterator(), 500);
+		List<Long> pids = createPidSequence(10, 400);
+		SlowIterator iter = new SlowIterator(pids.iterator(), 50);
 		when(mySearchBuilder.createQuery(same(params), any(), any())).thenReturn(iter);
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
@@ -483,7 +480,7 @@ public class SearchCoordinatorSvcImplTest {
 		params.add("name", new StringParam("ANAME"));
 
 		List<Long> pids = createPidSequence(10, 800);
-		when(mySearchBuilder.createQuery(Mockito.same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class))).thenReturn(new ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(10, 110);
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(eq(pids), any(Collection.class), any(List.class), anyBoolean(), nullable(RequestDetails.class));

@@ -34,7 +34,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 	public ValueSetExpansionComponent expandValueSet(FhirContext theContext, ConceptSetComponent theInclude) {
 		ValueSetExpansionComponent retVal = new ValueSetExpansionComponent();
 
-		Set<String> wantCodes = new HashSet<String>();
+		Set<String> wantCodes = new HashSet<>();
 		for (ConceptReferenceComponent next : theInclude.getConcept()) {
 			wantCodes.add(next.getCode());
 		}
@@ -60,7 +60,7 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public List<StructureDefinition> fetchAllStructureDefinitions(FhirContext theContext) {
-		return new ArrayList<StructureDefinition>(provideStructureDefinitionMap(theContext).values());
+		return new ArrayList<>(provideStructureDefinitionMap(theContext).values());
 	}
 
 	@Override
