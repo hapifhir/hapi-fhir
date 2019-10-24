@@ -49,8 +49,7 @@ public class MetaUtil {
 	/**
 	 * Sets the value for <code>Resource.meta.source</code> for R4+ resources, and places the value in
 	 * an extension on <code>Resource.meta</code>
-	 * with the URL <code>http://hapifhir.io/fhir/StructureDefinition/resource-meta-source</code> for DSTU3
-	 * and below.
+	 * with the URL <code>http://hapifhir.io/fhir/StructureDefinition/resource-meta-source</code> for DSTU3.
 	 *
 	 * @param theContext  The FhirContext object
 	 * @param theResource The resource to modify
@@ -61,7 +60,7 @@ public class MetaUtil {
 	public static void setSource(FhirContext theContext, IBaseResource theResource, String theValue) {
 		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
 			MetaUtil.setSource(theContext, theResource.getMeta(), theValue);
-		} else {
+		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
 			IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) theResource.getMeta()).addExtension();
 			sourceExtension.setUrl(Constants.EXT_META_SOURCE);
 			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();

@@ -17,7 +17,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * This interceptor examines a header on the incoming request and places it in
  * <code>Resource.meta.source</code> (R4 and above) or in an extension on <code>Resource.meta</code>
- * with the URL <code>http://hapifhir.io/fhir/StructureDefinition/resource-meta-source</code> (DSTU3 and below).
+ * with the URL <code>http://hapifhir.io/fhir/StructureDefinition/resource-meta-source</code> (DSTU3).
  * <p>
  * This interceptor does not support versions of FHIR below DSTU3.
  * </p>
