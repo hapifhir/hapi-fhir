@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.r4.ResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -3952,7 +3951,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 
 		patient.setId(patientid);
@@ -3960,12 +3959,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourClient.update().resource(patient).execute();
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 
 			readPatient.addName().setFamily("testUpdateWithSource");
 			ourClient.update().resource(readPatient).execute();
 			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
+			assertThat(readPatient.getMeta().getExtensionString(Constants.EXT_META_SOURCE), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 	}
 

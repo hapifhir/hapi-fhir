@@ -22,7 +22,6 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.ProvidedResourceScanner;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
@@ -106,7 +105,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
-	private static final Random RANDOM = new Random();
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 	private IInterceptorService myInterceptorService;
@@ -370,7 +368,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			throw new ConfigurationException("Failure scanning class " + clazz.getSimpleName() + ": " + e.getMessage(), e);
 		}
 		if (count == 0) {
-			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getCanonicalName());
+			throw new ConfigurationException("Did not find any annotated RESTful methods on provider class " + theProvider.getClass().getName());
 		}
 	}
 
@@ -667,9 +665,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
 
 		myPlainProviders.clear();
-		if (theProviders != null) {
-			myPlainProviders.addAll(theProviders);
-		}
+		myPlainProviders.addAll(theProviders);
 	}
 
 	/**
@@ -714,9 +710,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		Validate.noNullElements(theProviders, "theProviders must not contain any null elements");
 
 		myResourceProviders.clear();
-		if (theProviders != null) {
-			myResourceProviders.addAll(theProviders);
-		}
+		myResourceProviders.addAll(theProviders);
 	}
 
 	/**
@@ -959,6 +953,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				for (String string : parts) {
 					if (string.equals("gzip")) {
 						respondGzip = true;
+						break;
 					}
 				}
 			}
@@ -1198,9 +1193,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			Object confProvider;
 			try {
 				ourLog.info("Initializing HAPI FHIR restful server running in " + getFhirContext().getVersion().getVersion().name() + " mode");
-
-				ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
-				providedResourceScanner.scanForProvidedResources(this);
 
 				Collection<IResourceProvider> resourceProvider = getResourceProviders();
 				// 'true' tells registerProviders() that
@@ -1552,7 +1544,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 		List<IResourceProvider> newResourceProviders = new ArrayList<>();
 		List<Object> newPlainProviders = new ArrayList<>();
-		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 
 		if (theProviders != null) {
 			for (Object provider : theProviders) {
@@ -1565,7 +1556,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 					if (!inInit) {
 						myResourceProviders.add(rsrcProvider);
 					}
-					providedResourceScanner.scanForProvidedResources(rsrcProvider);
 					newResourceProviders.add(rsrcProvider);
 				} else {
 					if (!inInit) {
@@ -1761,15 +1751,11 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Unregister a {@code Collection} of providers
 	 */
 	public void unregisterProviders(Collection<?> providers) {
-		ProvidedResourceScanner providedResourceScanner = new ProvidedResourceScanner(getFhirContext());
 		if (providers != null) {
 			for (Object provider : providers) {
 				removeResourceMethods(provider);
 				if (provider instanceof IResourceProvider) {
 					myResourceProviders.remove(provider);
-					IResourceProvider rsrcProvider = (IResourceProvider) provider;
-					Class<? extends IBaseResource> resourceType = rsrcProvider.getResourceType();
-					providedResourceScanner.removeProvidedResources(rsrcProvider);
 				} else {
 					myPlainProviders.remove(provider);
 				}

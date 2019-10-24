@@ -461,6 +461,18 @@
 			<action type="change">
 				DSTU2.1 profile validation now uses the same R5 validation as all other versions of FHIR.
 			</action>
+			<action type="add">
+				A new built-in server interceptor called
+				<![CDATA[<code>CaptureResourceSourceFromHeaderInterceptor</code>]]>
+				has been added.
+				This interceptor can be used to capture an incoming source system URI in an HTTP Request
+				Header and automatically place it in
+				<![CDATA[<code>Resource.meta.source</code>]]>
+			</action>
+			<action type="remove">
+				The @ProvidesResources annotation has been removed from HAPI FHIR, as it was not documented
+				and did not do anything useful. Please get in touch if this causes any issues.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
