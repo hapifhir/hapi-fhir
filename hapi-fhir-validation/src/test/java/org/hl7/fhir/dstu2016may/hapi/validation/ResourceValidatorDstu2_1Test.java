@@ -1,44 +1,25 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.io.IOUtils;
-import org.hamcrest.core.StringContains;
-import org.hl7.fhir.dstu2016may.model.CodeableConcept;
-import org.hl7.fhir.dstu2016may.model.Coding;
-import org.hl7.fhir.dstu2016may.model.Condition;
-import org.hl7.fhir.dstu2016may.model.Condition.ConditionVerificationStatus;
-import org.hl7.fhir.dstu2016may.model.DateType;
-import org.hl7.fhir.dstu2016may.model.Narrative.NarrativeStatus;
-import org.hl7.fhir.dstu2016may.model.OperationOutcome;
-import org.hl7.fhir.dstu2016may.model.Patient;
-import org.hl7.fhir.dstu2016may.model.Reference;
-import org.hl7.fhir.dstu2016may.model.StringType;
-import org.junit.AfterClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.parser.XmlParserDstu2_1Test;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.SchemaBaseValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
+import org.apache.commons.io.IOUtils;
+import org.hamcrest.core.StringContains;
+import org.hl7.fhir.dstu2016may.model.*;
+import org.junit.AfterClass;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.io.IOException;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 public class ResourceValidatorDstu2_1Test {
 
@@ -84,50 +65,6 @@ public class ResourceValidatorDstu2_1Test {
 	}
 
 	
-	/**
-	 * Make sure that the elements that appear in all resources (meta, language, extension, etc) all appear in the correct order
-	 */
-	@Test
-	public void testValidateResourceWithResourceElements() {
-
-		XmlParserDstu2_1Test.TestPatientFor327 patient = new XmlParserDstu2_1Test.TestPatientFor327();
-		patient.setBirthDate(new Date());
-		patient.setId("123");
-		patient.getText().setDivAsString("<div>FOO</div>");
-		patient.getText().setStatus(NarrativeStatus.GENERATED);
-		patient.getLanguageElement().setValue("en");
-		patient.addExtension().setUrl("http://foo").setValue(new StringType("MOD"));
-		patient.getMeta().setLastUpdated(new Date());
-
-		List<Reference> conditions = new ArrayList<Reference>();
-		Condition condition = new Condition();
-		condition.getPatient().setReference("Patient/123");
-		condition.addBodySite().setText("BODY SITE");
-		condition.getCode().setText("CODE");
-		condition.setClinicalStatus("active");
-		condition.setVerificationStatus(ConditionVerificationStatus.CONFIRMED);
-		conditions.add(new Reference(condition));
-		patient.setCondition(conditions);
-		patient.addIdentifier().setSystem("http://foo").setValue("123");
-
-		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
-		ourLog.info(encoded);
-
-		FhirValidator val = ourCtx.newValidator();
-		val.registerValidatorModule(new SchemaBaseValidator(ourCtx));
-		val.registerValidatorModule(new SchematronBaseValidator(ourCtx));
-		val.registerValidatorModule(new FhirInstanceValidator());
-
-		ValidationResult result = val.validateWithResult(encoded);
-
-		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
-		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
-		ourLog.info(ooencoded);
-
-		assertTrue(result.isSuccessful());
-
-		assertThat(ooencoded, containsString("No issues detected"));
-	}
 
 	/**
 	 * See https://groups.google.com/d/msgid/hapi-fhir/a266083f-6454-4cf0-a431-c6500f052bea%40googlegroups.com?utm_medium= email&utm_source=footer
@@ -173,8 +110,6 @@ public class ResourceValidatorDstu2_1Test {
 		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
-
-		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
 		assertThat(messageString, not(containsString("valueResource")));
@@ -242,8 +177,6 @@ public class ResourceValidatorDstu2_1Test {
 		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
-
-		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
 		assertThat(messageString, not(containsString("valueResource")));
