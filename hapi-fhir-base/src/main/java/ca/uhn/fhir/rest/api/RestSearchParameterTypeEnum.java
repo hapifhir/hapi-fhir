@@ -89,12 +89,17 @@ public enum RestSearchParameterTypeEnum {
 	 */
 	HAS("string", "http://hl7.org/fhir/search-param-type"),
 
-	/**
+		/**
 	 * Code Value: <b>number</b>
 	 *
 	 * Search parameter SHALL be a number (a whole number, or a decimal).
 	 */
 	SPECIAL("special", "http://hl7.org/fhir/search-param-type"),
+
+	/**
+	 * _has parameter
+	 */
+	SOURCE("string", "http://hl7.org/fhir/search-param-type"),
 
 	;
 
@@ -119,7 +124,7 @@ public enum RestSearchParameterTypeEnum {
 	
 	static {
 		for (RestSearchParameterTypeEnum next : RestSearchParameterTypeEnum.values()) {
-			if (next == HAS) {
+			if (next == HAS || next == SOURCE) {
 				continue;
 			}
 			

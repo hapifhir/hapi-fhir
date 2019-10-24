@@ -243,7 +243,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			int qIndex = url.indexOf('?');
 			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-			requestDetails.setParameters(new HashMap<String, String[]>());
+			requestDetails.setParameters(new HashMap<>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
 				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);

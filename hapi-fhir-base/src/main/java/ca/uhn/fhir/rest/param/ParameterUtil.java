@@ -61,43 +61,47 @@ public class ParameterUtil {
 	 * This is a utility method intended provided to help the JPA module.
 	 */
 	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RestSearchParameterTypeEnum paramType,
-			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		QueryParameterAndBinder binder = null;
 		switch (paramType) {
-		case COMPOSITE:
-			throw new UnsupportedOperationException();
-		case DATE:
-			binder = new QueryParameterAndBinder(DateAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case NUMBER:
-			binder = new QueryParameterAndBinder(NumberAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case QUANTITY:
-			binder = new QueryParameterAndBinder(QuantityAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case REFERENCE:
-			binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case STRING:
-			binder = new QueryParameterAndBinder(StringAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case TOKEN:
-			binder = new QueryParameterAndBinder(TokenAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case URI:
-			binder = new QueryParameterAndBinder(UriAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
-		case HAS:
-			binder = new QueryParameterAndBinder(HasAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>> emptyList());
-			break;
+			case COMPOSITE:
+				throw new UnsupportedOperationException();
+			case DATE:
+				binder = new QueryParameterAndBinder(DateAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case NUMBER:
+				binder = new QueryParameterAndBinder(NumberAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case QUANTITY:
+				binder = new QueryParameterAndBinder(QuantityAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case REFERENCE:
+				binder = new QueryParameterAndBinder(ReferenceAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case STRING:
+				binder = new QueryParameterAndBinder(StringAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case TOKEN:
+				binder = new QueryParameterAndBinder(TokenAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case URI:
+				binder = new QueryParameterAndBinder(UriAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case HAS:
+				binder = new QueryParameterAndBinder(HasAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
+			case SOURCE:
+				binder = new QueryParameterAndBinder(SourceAndListParam.class,
+					Collections.<Class<? extends IQueryParameterType>>emptyList());
+				break;
 		}
 
 		// FIXME null access
@@ -108,7 +112,7 @@ public class ParameterUtil {
 	 * This is a utility method intended provided to help the JPA module.
 	 */
 	public static IQueryParameterAnd<?> parseQueryParams(FhirContext theContext, RuntimeSearchParam theParamDef,
-			String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
+																		  String theUnqualifiedParamName, List<QualifiedParamList> theParameters) {
 		RestSearchParameterTypeEnum paramType = theParamDef.getParamType();
 		return parseQueryParams(theContext, paramType, theUnqualifiedParamName, theParameters);
 	}
@@ -126,14 +130,14 @@ public class ParameterUtil {
 		for (int i = 0; i < theValue.length(); i++) {
 			char next = theValue.charAt(i);
 			switch (next) {
-			case '$':
-			case ',':
-			case '|':
-			case '\\':
-				b.append('\\');
-				break;
-			default:
-				break;
+				case '$':
+				case ',':
+				case '|':
+				case '\\':
+					b.append('\\');
+					break;
+				default:
+					break;
 			}
 			b.append(next);
 		}
@@ -207,7 +211,7 @@ public class ParameterUtil {
 
 	public static boolean isBindableIntegerType(Class<?> theClass) {
 		return Integer.class.isAssignableFrom(theClass)
-				|| IPrimitiveType.class.isAssignableFrom(theClass);
+			|| IPrimitiveType.class.isAssignableFrom(theClass);
 	}
 
 	public static String escapeAndJoinOrList(Collection<String> theValues) {
@@ -236,7 +240,7 @@ public class ParameterUtil {
 				if (value.charAt(0) == '"') {
 					eTagVersion = value.substring(1, value.length() - 1);
 				} else if (value.length() > 3 && value.charAt(0) == 'W' && value.charAt(1) == '/'
-						&& value.charAt(2) == '"') {
+					&& value.charAt(2) == '"') {
 					eTagVersion = value.substring(3, value.length() - 1);
 				} else {
 					eTagVersion = value;
@@ -262,16 +266,16 @@ public class ParameterUtil {
 
 			@Override
 			public void setValuesAsQueryTokens(FhirContext theContext, String theParamName,
-					QualifiedParamList theParameters) {
+														  QualifiedParamList theParameters) {
 				if (theParameters.isEmpty()) {
 					return;
 				}
 				if (theParameters.size() > 1) {
 					throw new IllegalArgumentException(
-							"Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
+						"Type " + theParam.getClass().getCanonicalName() + " does not support multiple values");
 				}
 				theParam.setValueAsQueryToken(theContext, theParamName, theParameters.getQualifier(),
-						theParameters.get(0));
+					theParameters.get(0));
 			}
 		};
 	}
@@ -351,13 +355,13 @@ public class ParameterUtil {
 					b.append(next);
 				} else {
 					switch (theValue.charAt(i + 1)) {
-					case '$':
-					case ',':
-					case '|':
-					case '\\':
-						continue;
-					default:
-						b.append(next);
+						case '$':
+						case ',':
+						case '|':
+						case '\\':
+							continue;
+						default:
+							b.append(next);
 					}
 				}
 			} else {

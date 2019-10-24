@@ -179,6 +179,7 @@ public class InMemoryResourceMatcher {
 				case COMPOSITE:
 				case HAS:
 				case SPECIAL:
+				case SOURCE:
 				default:
 					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			}

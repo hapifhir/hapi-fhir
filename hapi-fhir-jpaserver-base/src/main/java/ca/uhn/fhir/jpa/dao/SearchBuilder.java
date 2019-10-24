@@ -861,19 +861,10 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextParameter : theList) {
-			String nextParamValue = nextParameter.getValueAsQueryToken(myContext);
-			int lastHashValueIndex = nextParamValue.lastIndexOf('#');
-			String sourceUri;
-			String requestId;
-			if (lastHashValueIndex == -1) {
-				sourceUri = nextParamValue;
-				requestId = null;
-			} else {
-				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
-				requestId = nextParamValue.substring(lastHashValueIndex + 1);
-			}
-			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-
+			// FIXME KHS this works, but is it right?
+			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
+			String sourceUri = sourceParameter.getSourceUri();
+			String requestId = sourceParameter.getRequestId();
 			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
 			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
@@ -1280,6 +1271,7 @@ public class SearchBuilder implements ISearchBuilder {
 				retVal = createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
 				break;
 			}
+			case SOURCE:
 			case COMPOSITE:
 			case HAS:
 			case NUMBER:
@@ -2747,6 +2739,7 @@ public class SearchBuilder implements ISearchBuilder {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
 		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
+			// FIXME KHS remove this
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());
@@ -3007,6 +3000,9 @@ public class SearchBuilder implements ISearchBuilder {
 				break;
 			case REFERENCE:
 				qp = new ReferenceParam();
+				break;
+			case SOURCE:
+				qp = new SourceParam();
 				break;
 			case SPECIAL:
 			case URI:

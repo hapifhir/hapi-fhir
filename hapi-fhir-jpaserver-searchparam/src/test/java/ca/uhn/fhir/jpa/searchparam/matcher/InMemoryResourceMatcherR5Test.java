@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -15,6 +16,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +88,14 @@ public class InMemoryResourceMatcherR5Test {
 		codeableConcept.addCoding().setCode(OBSERVATION_CODE);
 		myObservation.setCode(codeableConcept);
 		mySearchParams = extractDateSearchParam(myObservation);
+	}
+
+	// FIXME KHS get this test to work
+	@Ignore
+	@Test
+	public void testSupportedSource() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=FOO", myObservation, mySearchParams);
+		assertTrue(result.supported());
 	}
 
 	@Test
