@@ -53,7 +53,7 @@ public class BaseSearchParamRegistryTest {
 	}
 
 	@Test
-	public void testRefreshCacheIfNeccessary() {
+	public void testRefreshCacheIfNecessary() {
 		SearchParamRegistryR4 registry = new SearchParamRegistryR4();
 
 		when(mySearchParamProvider.search(any())).thenReturn(new SimpleBundleProvider());
@@ -70,6 +70,9 @@ public class BaseSearchParamRegistryTest {
 
 		assertTrue(registry.refreshCacheIfNecessary());
 		assertFalse(registry.refreshCacheIfNecessary());
+
+		registry.requestRefresh();
+		assertTrue(registry.refreshCacheIfNecessary());
 	}
 
 	@Test
