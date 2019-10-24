@@ -97,7 +97,7 @@ public enum RestSearchParameterTypeEnum {
 	SPECIAL("special", "http://hl7.org/fhir/search-param-type"),
 
 	/**
-	 * _has parameter
+	 * _source parameter
 	 */
 	SOURCE("string", "http://hl7.org/fhir/search-param-type"),
 
