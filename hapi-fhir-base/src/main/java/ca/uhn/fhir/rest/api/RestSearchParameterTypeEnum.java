@@ -21,10 +21,10 @@ package ca.uhn.fhir.rest.api;
  * #L%
  */
 
+import ca.uhn.fhir.model.api.IValueSetEnumBinder;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import ca.uhn.fhir.model.api.IValueSetEnumBinder;
 
 public enum RestSearchParameterTypeEnum {
 

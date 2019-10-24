@@ -138,7 +138,6 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
-	// FIXME KHS move these clustered methods out
 	private boolean matchSourcesAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
 		if (theResource == null) {
 			return true;
