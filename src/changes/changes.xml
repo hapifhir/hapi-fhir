@@ -458,6 +458,10 @@
 				Header and automatically place it in
 				<![CDATA[<code>Resource.meta.source</code>]]>
 			</action>
+			<action type="remove">
+				The @ProvidesResources annotation has been removed from HAPI FHIR, as it was not documented
+				and did not do anything useful. Please get in touch if this causes any issues.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
