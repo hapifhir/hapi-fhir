@@ -3,6 +3,8 @@ package ca.uhn.fhir.rest.param;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
@@ -50,7 +52,9 @@ public class SourceParam extends BaseParam implements IQueryParameterType {
 			mySourceUri = theParameterValue;
 			requestId = null;
 		} else {
-			mySourceUri = theParameterValue.substring(0, lastHashValueIndex);
+			if (lastHashValueIndex != 0) {
+				mySourceUri = theParameterValue.substring(0, lastHashValueIndex);
+			}
 			requestId = theParameterValue.substring(lastHashValueIndex + 1);
 		}
 		myRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
@@ -58,7 +62,7 @@ public class SourceParam extends BaseParam implements IQueryParameterType {
 
 	@Override
 	String doGetQueryParameterQualifier() {
-		return myParameterValue;
+		return null;
 	}
 	
 	@Override

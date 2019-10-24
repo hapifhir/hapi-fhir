@@ -30,11 +30,9 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
-import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceParam;
-import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -125,7 +123,6 @@ public class InMemoryResourceMatcher {
 
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
-
 				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
 
 			case IAnyResource.SP_RES_LANGUAGE:
@@ -133,14 +130,37 @@ public class InMemoryResourceMatcher {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
-
+			case Constants.PARAM_SOURCE:
+				return InMemoryMatchResult.fromBoolean(matchSourcesAndOr(theAndOrParams, theResource));
 			default:
-
-
 				return matchResourceParam(theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
+	}
+
+	// FIXME KHS move these clustered methods out
+	private boolean matchSourcesAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
+		if (theResource == null) {
+			return true;
+		}
+		return theAndOrParams.stream().allMatch(nextAnd -> matchSourcesOr(nextAnd, theResource));
+	}
+
+	private boolean matchSourcesOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
+		return theOrParams.stream().anyMatch(param -> matchSource(param, theResource));
+	}
+
+	private boolean matchSource(IQueryParameterType theSourceParam, IBaseResource theResource) {
+		SourceParam paramSource = new SourceParam(theSourceParam.getValueAsQueryToken(myFhirContext));
+		SourceParam resourceSource = new SourceParam(MetaUtil.getSource(myFhirContext, theResource.getMeta()));
+		boolean matches = true;
+		if (paramSource.getSourceUri() != null) {
+			matches = paramSource.getSourceUri().equals(resourceSource.getSourceUri());
+		}
+		if (paramSource.getRequestId() != null) {
+			matches &= paramSource.getRequestId().equals(resourceSource.getRequestId());
+		}
+		return matches;
 	}
 
 	private boolean matchIdsAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
@@ -151,9 +171,6 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
-		if (theResource == null) {
-			return true;
-		}
 		return theOrParams.stream().anyMatch(param -> param instanceof StringParam && matchId(((StringParam) param).getValue(), theResource.getIdElement()));
 	}
 
@@ -176,8 +193,6 @@ public class InMemoryResourceMatcher {
 					} else {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
-				case SOURCE:
-					// FIXME KHS implement
 				case COMPOSITE:
 				case HAS:
 				case SPECIAL:
