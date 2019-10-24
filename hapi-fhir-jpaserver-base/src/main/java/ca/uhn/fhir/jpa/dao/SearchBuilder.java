@@ -2739,7 +2739,6 @@ public class SearchBuilder implements ISearchBuilder {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected string type for language search");
 			}
 		} else if (searchParam.getName().equals(Constants.PARAM_SOURCE)) {
-			// FIXME KHS remove this
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
 				TokenParam param = new TokenParam();
 				param.setValueAsQueryToken(null, null, null, theFilter.getValue());

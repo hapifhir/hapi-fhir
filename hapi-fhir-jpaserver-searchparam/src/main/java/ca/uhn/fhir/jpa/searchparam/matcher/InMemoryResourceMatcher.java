@@ -176,10 +176,11 @@ public class InMemoryResourceMatcher {
 					} else {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream().anyMatch(nextAnd -> matchParams(theResourceName, theParamName, theParamDef, nextAnd, theSearchParams)));
 					}
+				case SOURCE:
+					// FIXME KHS implement
 				case COMPOSITE:
 				case HAS:
 				case SPECIAL:
-				case SOURCE:
 				default:
 					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
 			}
