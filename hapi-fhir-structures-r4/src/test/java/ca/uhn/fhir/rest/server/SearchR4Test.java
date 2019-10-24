@@ -87,9 +87,8 @@ public class SearchR4Test {
 	 * A paging request that incorrectly executes at the type level shouldn't be grabbed by the search method binding
 	 */
 	@Test
-	public void tesPageRequestCantTriggerSearchAccidentally() throws Exception {
+	public void testPageRequestCantTriggerSearchAccidentally() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Constants.PARAM_PAGINGACTION + "=12345");
-		Bundle bundle;
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
