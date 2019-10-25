@@ -24,7 +24,11 @@ import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.apache.commons.lang3.ObjectUtils;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -37,6 +41,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
@@ -60,6 +65,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	protected BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	protected void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
+		if (isBlank(searchTerm)) {
+			return;
+		}
+		retVal.add(createResourceIndexedSearchParamString(theEntity, resourceName, searchTerm));
+	}
+
+	protected void addStringParam(ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
+		retVal.add(createResourceIndexedSearchParamString(theEntity, nextSpDef.getName(), value));
 	}
 
 	protected Set<Class<?>> getIgnoredForSearchDatatypes() {

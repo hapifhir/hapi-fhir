@@ -43,6 +43,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -236,9 +237,9 @@ public class XmlParser extends BaseParser {
 
 			switch (childDef.getChildType()) {
 				case ID_DATATYPE: {
-					IIdType value = IIdType.class.cast(theElement);
+					IIdType value = (IIdType) theElement;
 					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
-					if (StringUtils.isNotBlank(encodedValue) || !super.hasNoExtensions(value)) {
+					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
 						theEventWriter.writeStartElement(theChildName);
 						if (StringUtils.isNotBlank(encodedValue)) {
 							theEventWriter.writeAttribute("value", encodedValue);
@@ -249,9 +250,9 @@ public class XmlParser extends BaseParser {
 					break;
 				}
 				case PRIMITIVE_DATATYPE: {
-					IPrimitiveType<?> pd = IPrimitiveType.class.cast(theElement);
+					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
 					String value = pd.getValueAsString();
-					if (value != null || !super.hasNoExtensions(pd)) {
+					if (value != null || !hasNoExtensions(pd)) {
 						theEventWriter.writeStartElement(theChildName);
 						String elementId = getCompositeElementId(theElement);
 						if (isNotBlank(elementId)) {
@@ -308,14 +309,14 @@ public class XmlParser extends BaseParser {
 					break;
 				}
 				case PRIMITIVE_XHTML: {
-					XhtmlDt dt = XhtmlDt.class.cast(theElement);
+					XhtmlDt dt = (XhtmlDt) theElement;
 					if (dt.hasContent()) {
 						encodeXhtml(dt, theEventWriter);
 					}
 					break;
 				}
 				case PRIMITIVE_XHTML_HL7ORG: {
-					IBaseXhtml dt = IBaseXhtml.class.cast(theElement);
+					IBaseXhtml dt = (IBaseXhtml) theElement;
 					if (!dt.isEmpty()) {
 						// TODO: this is probably not as efficient as it could be
 						XhtmlDt hdt = new XhtmlDt();
@@ -354,17 +355,19 @@ public class XmlParser extends BaseParser {
 			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				INarrative narr = (INarrative) nextChild.getAccessor().getFirstValueOrNull(theElement);
+				Optional<INarrative> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null && (narr == null || narr.isEmpty())) {
+				if (gen != null && (narr.isPresent() == false || narr.get().isEmpty())) {
 					gen.populateResourceNarrative(myContext, theResource);
+					narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 				}
-				if (narr != null && narr.isEmpty() == false) {
+
+				if (narr.isPresent() && narr.get().isEmpty() == false) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr, childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr.get(), childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
 					continue;
 				}
 			}

@@ -690,8 +690,8 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 * Override parent because we're using FHIRPath here
 	 */
 	@Override
-	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		List<Object> values = new ArrayList<>();
+	protected List<IBase> extractValues(String thePaths, IBaseResource theResource) {
+		List<IBase> values = new ArrayList<>();
 		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
 		for (String nextPath : nextPathsSplit) {
 			List<Base> allValues;
@@ -707,7 +707,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		}
 
 		for (int i = 0; i < values.size(); i++) {
-			Object nextObject = values.get(i);
+			IBase nextObject = values.get(i);
 			if (nextObject instanceof Extension) {
 				Extension nextExtension = (Extension) nextObject;
 				nextObject = nextExtension.getValue();
