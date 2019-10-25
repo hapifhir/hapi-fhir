@@ -8,8 +8,10 @@ import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -96,7 +98,7 @@ public class BulkDataExportProviderTest {
 	}
 
 	@Test
-	public void testSuccessfulInitiateBulkRequest() throws IOException {
+	public void testSuccessfulInitiateBulkRequest_Post() throws IOException {
 
 		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
 			.setJobId(A_JOB_ID);
@@ -110,10 +112,47 @@ public class BulkDataExportProviderTest {
 		input.addParameter(JpaConstants.PARAM_EXPORT_SINCE, now);
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE_FILTER, new StringType("Patient?identifier=foo"));
 
+		ourLog.info(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
 		HttpPost post = new HttpPost("http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
+			ourLog.info("Response: {}", response.toString());
+
+			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertEquals("http://localhost:" + myPort + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		}
+
+		verify(myBulkDataExportSvc, times(1)).submitJob(myOutputFormatCaptor.capture(), myResourceTypesCaptor.capture(), mySinceCaptor.capture(), myFiltersCaptor.capture());
+		assertEquals(Constants.CT_FHIR_NDJSON, myOutputFormatCaptor.getValue());
+		assertThat(myResourceTypesCaptor.getValue(), containsInAnyOrder("Patient", "Practitioner"));
+		assertThat(mySinceCaptor.getValue(), notNullValue());
+		assertThat(myFiltersCaptor.getValue(), containsInAnyOrder("Patient?identifier=foo"));
+
+	}
+
+	@Test
+	public void testSuccessfulInitiateBulkRequest_Get() throws IOException {
+
+		IBulkDataExportSvc.JobInfo jobInfo = new IBulkDataExportSvc.JobInfo()
+			.setJobId(A_JOB_ID);
+		when(myBulkDataExportSvc.submitJob(any(), any(), any(), any())).thenReturn(jobInfo);
+
+		InstantType now = InstantType.now();
+
+		String url = "http://localhost:" + myPort + "/" + JpaConstants.OPERATION_EXPORT
+			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
+			+ "&" + JpaConstants.PARAM_EXPORT_SINCE+ "="+  UrlUtil.escapeUrlParam(now.getValueAsString())
+			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo");
+
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		ourLog.info("Request: {}", url);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
 			assertEquals(202, response.getStatusLine().getStatusCode());
