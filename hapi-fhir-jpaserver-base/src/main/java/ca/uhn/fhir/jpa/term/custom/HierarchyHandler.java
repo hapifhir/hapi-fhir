@@ -24,9 +24,8 @@ import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.util.ValidateUtil;
+import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
@@ -35,24 +34,31 @@ import static org.apache.commons.lang3.StringUtils.trim;
 
 public class HierarchyHandler implements IRecordHandler {
 
+	public static final String PARENT = "PARENT";
+	public static final String CHILD = "CHILD";
 	private final Map<String, TermConcept> myCode2Concept;
+	private final ArrayListMultimap<TermConcept, String> myUnanchoredChildConceptsToParentCodes;
 
-	public HierarchyHandler(Map<String, TermConcept> theCode2concept) {
+	public HierarchyHandler(Map<String, TermConcept> theCode2concept, ArrayListMultimap<TermConcept, String> theunanchoredChildConceptsToParentCodes) {
 		myCode2Concept = theCode2concept;
+		myUnanchoredChildConceptsToParentCodes = theunanchoredChildConceptsToParentCodes;
 	}
 
 	@Override
 	public void accept(CSVRecord theRecord) {
-		String parent = trim(theRecord.get("PARENT"));
-		String child = trim(theRecord.get("CHILD"));
+		String parent = trim(theRecord.get(PARENT));
+		String child = trim(theRecord.get(CHILD));
 		if (isNotBlank(parent) && isNotBlank(child)) {
 
-			TermConcept parentConcept = myCode2Concept.get(parent);
-			ValidateUtil.isNotNullOrThrowUnprocessableEntity(parentConcept, "Parent code %s not found", parent);
 			TermConcept childConcept = myCode2Concept.get(child);
 			ValidateUtil.isNotNullOrThrowUnprocessableEntity(childConcept, "Child code %s not found", child);
 
-			parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			TermConcept parentConcept = myCode2Concept.get(parent);
+			if (parentConcept == null) {
+				myUnanchoredChildConceptsToParentCodes.put(childConcept, parent);
+			} else {
+				parentConcept.addChild(childConcept, TermConceptParentChildLink.RelationshipTypeEnum.ISA);
+			}
 		}
 	}
 }

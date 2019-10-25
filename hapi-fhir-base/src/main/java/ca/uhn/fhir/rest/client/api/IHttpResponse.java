@@ -34,12 +34,6 @@ import java.util.Map;
 public interface IHttpResponse {
 
 	/**
-	 * @deprecated This method was deprecated in HAPI FHIR 2.2 because its name has a typo. Use {@link #bufferEntity()} instead.
-	 */
-	@Deprecated
-	void bufferEntitity() throws IOException;
-
-	/**
 	 * Buffer the message entity data.
 	 * <p>
 	 * In case the message entity is backed by an unconsumed entity input stream,

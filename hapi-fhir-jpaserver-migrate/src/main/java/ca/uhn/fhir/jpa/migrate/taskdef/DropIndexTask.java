@@ -26,8 +26,8 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Set;
 
 public class DropIndexTask extends BaseTableTask<DropIndexTask> {
@@ -56,17 +56,26 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 		boolean isUnique = JdbcUtils.isIndexUnique(getConnectionProperties(), getTableName(), myIndexName);
 		String uniquenessString = isUnique ? "unique" : "non-unique";
-		ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 
-		String sql = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
-		executeSql(getTableName(), sql);
-
+		Optional<String> sql = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
+		if (sql.isPresent()) {
+			ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
+			executeSql(getTableName(), sql.get());
+		}
 	}
 
-	@Nonnull
-	static String createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
+	public DropIndexTask setIndexName(String theIndexName) {
+		myIndexName = theIndexName;
+		return this;
+	}
+
+	static Optional<String> createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
 		Validate.notBlank(theIndexName, "theIndexName must not be blank");
 		Validate.notBlank(theTableName, "theTableName must not be blank");
+
+		if (!JdbcUtils.getIndexNames(theConnectionProperties, theTableName).contains(theIndexName)) {
+			return Optional.empty();
+		}
 
 		boolean isUnique = JdbcUtils.isIndexUnique(theConnectionProperties, theTableName, theIndexName);
 
@@ -84,6 +93,8 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					sql = "drop index " + theIndexName;
 					break;
 				case POSTGRES_9_4:
+					sql = "drop index " + theIndexName + " cascade";
+					break;
 				case ORACLE_12C:
 				case MSSQL_2012:
 					sql = "alter table " + theTableName + " drop constraint " + theIndexName;
@@ -107,12 +118,6 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 					break;
 			}
 		}
-		return sql;
-	}
-
-
-	public DropIndexTask setIndexName(String theIndexName) {
-		myIndexName = theIndexName;
-		return this;
+		return Optional.of(sql);
 	}
 }

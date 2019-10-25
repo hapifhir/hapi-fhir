@@ -1,24 +1,13 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import org.hl7.fhir.dstu2016may.model.*;
-import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
-import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2016may.formats.IParser;
 import org.hl7.fhir.dstu2016may.formats.ParserType;
 import org.hl7.fhir.dstu2016may.hapi.validation.IValidationSupport.CodeValidationResult;
+import org.hl7.fhir.dstu2016may.model.*;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.dstu2016may.model.ValueSet.ConceptSetComponent;
@@ -28,16 +17,17 @@ import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu2016may.terminologies.ValueSetExpanderSimple;
+import org.hl7.fhir.dstu2016may.utils.INarrativeGenerator;
 import org.hl7.fhir.dstu2016may.utils.IWorkerContext;
-import org.hl7.fhir.dstu2016may.validation.IResourceValidator;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import java.util.*;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpanderFactory  {
 	private final FhirContext myCtx;
-	private Map<String, Resource> myFetchedResourceCache = new HashMap<String, Resource>();
+	private Map<String, Resource> myFetchedResourceCache = new HashMap<>();
 	private IValidationSupport myValidationSupport;
 
 	public HapiWorkerContext(FhirContext theCtx, IValidationSupport theValidationSupport) {
@@ -159,7 +149,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 	public ValidationResult validateCode(CodeableConcept theCode, ValueSet theVs) {
 		for (Coding next : theCode.getCoding()) {
 			ValidationResult retVal = validateCode(next, theVs);
-			if (retVal != null && retVal.isOk()) {
+			if (retVal.isOk()) {
 				return retVal;
 			}
 		}
@@ -177,7 +167,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+		CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
 		if (result == null) {
 			return null;
 		}
@@ -231,7 +221,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 		/*
 		 * The following valueset is a special case, since the BCP codesystem is very difficult to expand
 		 */
-		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
+		if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
 			ValueSet expansion = new ValueSet();
 			for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
 				for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
@@ -256,8 +246,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 					ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
 					definition.setCode(next.getCode());
 					definition.setDisplay(next.getDisplay());
-					ValidationResult retVal = new ValidationResult(definition);
-					return retVal;
+					return new ValidationResult(definition);
 				}
 			}
 		}
@@ -267,8 +256,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
 	@Override
 	public ValueSetExpander getExpander() {
-		ValueSetExpanderSimple retVal = new ValueSetExpanderSimple(this, this);
-		return retVal;
+		return new ValueSetExpanderSimple(this, this);
 	}
 
 	@Override

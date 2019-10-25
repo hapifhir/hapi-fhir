@@ -1965,7 +1965,7 @@ public class JsonParserDstu2Test {
 		ProcedureRequest p = parser.parseResource(ProcedureRequest.class, input);
 
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
-		verify(peh, Mockito.never()).unknownElement(Mockito.isNull(IParseLocation.class), capt.capture());
+		verify(peh, Mockito.never()).unknownElement(nullable(IParseLocation.class), capt.capture());
 		assertParsedResourcesExtensionMetadata(p);
 	}
 

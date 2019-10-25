@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
@@ -35,26 +38,29 @@ import static org.mockito.Mockito.verify;
 
 public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcSnomedCtTest.class);
-	private TerminologyLoaderSvcImpl mySvc;
+	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Captor
 	private ArgumentCaptor<TermCodeSystemVersion> myCsvCaptor;
 	private ZipCollectionBuilder myFiles;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvcImpl();
-		mySvc.setTermSvcForUnitTests(myTermSvc);
+		mySvc = new TermLoaderSvcImpl();
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
 
-	private ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
-		ArrayList<IHapiTerminologyLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
+	private ArrayList<ITermLoaderSvc.FileDescriptor> list(byte[]... theByteArray) {
+		ArrayList<ITermLoaderSvc.FileDescriptor> retVal = new ArrayList<>();
 		for (byte[] next : theByteArray) {
-			retVal.add(new IHapiTerminologyLoaderSvc.FileDescriptor() {
+			retVal.add(new ITermLoaderSvc.FileDescriptor() {
 				@Override
 				public String getFilename() {
 					return "aaa.zip";				}
@@ -80,7 +86,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 
 		mySvc.loadSnomedCt(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyListOf(ConceptMap.class));
+		verify(myTermCodeSystemStorageSvc).storeNewCodeSystemVersion(any(CodeSystem.class), myCsvCaptor.capture(), any(RequestDetails.class), anyList(), anyListOf(ConceptMap.class));
 
 		TermCodeSystemVersion csv = myCsvCaptor.getValue();
 		TreeSet<String> allCodes = toCodes(csv, true);

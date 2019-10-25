@@ -87,6 +87,12 @@
 			<artifactId>slf4j-simple</artifactId>
 			<version>1.7.28</version>
 		</dependency>
+		<!-- Needed for JEE/Servlet support -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

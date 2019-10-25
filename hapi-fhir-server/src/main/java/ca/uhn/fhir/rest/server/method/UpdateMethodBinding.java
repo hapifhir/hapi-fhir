@@ -49,38 +49,13 @@ public class UpdateMethodBinding extends BaseOutcomeReturningMethodBindingWithRe
 
 	@Override
 	protected void addParametersForServerRequest(RequestDetails theRequest, Object[] theParams) {
-		/*
-		 * We are being a bit lenient here, since technically the client is supposed to include the version in the
-		 * Content-Location header, but we allow it in the PUT URL as well..
-		 */
-		String locationHeader = theRequest.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		IIdType id = theRequest.getId();
-		if (isNotBlank(locationHeader)) {
-			id.setValue(locationHeader);
-			if (isNotBlank(id.getResourceType())) {
-				if (!getResourceName().equals(id.getResourceType())) {
-					throw new InvalidRequestException(
-							"Attempting to update '" + getResourceName() + "' but content-location header specifies different resource type '" + id.getResourceType() + "' - header value: " + locationHeader);
-				}
-			}
-		}
-
 		id = applyETagAsVersion(theRequest, id);
-
 		if (theRequest.getId() != null && theRequest.getId().hasVersionIdPart() == false) {
 			if (id != null && id.hasVersionIdPart()) {
 				theRequest.getId().setValue(id.getValue());
 			}
 		}
-
-		if (isNotBlank(locationHeader)) {
-			MethodOutcome mo = new MethodOutcome();
-			parseContentLocation(getContext(), mo, locationHeader);
-			if (mo.getId() == null || mo.getId().isEmpty()) {
-				throw new InvalidRequestException("Invalid Content-Location header for resource " + getResourceName() + ": " + locationHeader);
-			}
-		}
-
 		super.addParametersForServerRequest(theRequest, theParams);
 	}
 

@@ -305,7 +305,7 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		int modCount = myCountingInterceptor.getSentCount();
 		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount());
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount(), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");

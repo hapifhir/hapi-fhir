@@ -5,7 +5,7 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
-import ca.uhn.fhir.rest.annotation.RequiredParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -82,6 +82,21 @@ public class SearchR4Test {
 		}
 		return bundle;
 	}
+
+	/**
+	 * A paging request that incorrectly executes at the type level shouldn't be grabbed by the search method binding
+	 */
+	@Test
+	public void testPageRequestCantTriggerSearchAccidentally() throws Exception {
+		HttpGet httpGet = new HttpGet("http://localhost:" + ourPort + "/Patient?" + Constants.PARAM_PAGINGACTION + "=12345");
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
+			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(responseContent);
+			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(responseContent, containsString("not know how to handle GET operation[Patient] with parameters [[_getpages]]"));
+		}
+	}
+
 
 	@Test
 	public void testPagingPreservesElements() throws Exception {
@@ -368,7 +383,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
 		}
 	}
 
@@ -390,7 +405,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId, matchesPattern("[a-z0-9]{16}"));
+			assertThat(requestId, matchesPattern("[a-zA-Z0-9]{16}"));
 		}
 	}
 
@@ -461,7 +476,7 @@ public class SearchR4Test {
 		@SuppressWarnings("rawtypes")
 		@Search()
 		public List search(
-			@RequiredParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
+			@OptionalParam(name = Patient.SP_IDENTIFIER) TokenAndListParam theIdentifiers) {
 			ourLastMethod = "search";
 			ourIdentifiers = theIdentifiers;
 			ArrayList<Patient> retVal = new ArrayList<>();

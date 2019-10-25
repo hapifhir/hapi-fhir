@@ -17,6 +17,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+
 @SuppressWarnings("unchecked")
 public class CachingValidationSupport implements IValidationSupport {
 
@@ -73,8 +75,9 @@ public class CachingValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
-		return myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay);
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+		String key = "validateCode " + theCodeSystem + " " + theCode + " " + defaultIfBlank(theValueSetUrl, "NO_VS");
+		return loadFromCache(key, t -> myWrap.validateCode(theContext, theCodeSystem, theCode, theDisplay, theValueSetUrl));
 	}
 
 	@Override

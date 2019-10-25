@@ -148,5 +148,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
+	private ResourceIndexedSearchParamString createResourceIndexedSearchParamString(ResourceTable theEntity, String name, String value) {
+		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		String normalizedValue = StringNormalizer.normalizeString(value);
+		if (normalizedValue.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			normalizedValue = normalizedValue.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), name, normalizedValue, value);
+		nextEntity.setResource(theEntity);
+		return nextEntity;
+	}
 
 }

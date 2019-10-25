@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
@@ -101,7 +101,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 		String loincPartMapUri;
 		String loincPartMapName;
 		switch (extCodeSystem) {
-			case IHapiTerminologyLoaderSvc.SCT_URI:
+			case ITermLoaderSvc.SCT_URI:
 				loincPartMapId = LOINC_SCT_PART_MAP_ID;
 				loincPartMapUri = LOINC_SCT_PART_MAP_URI;
 				loincPartMapName = LOINC_SCT_PART_MAP_NAME;
@@ -133,7 +133,7 @@ public class LoincPartRelatedCodeMappingHandler extends BaseLoincHandler impleme
 				.setConceptMapId(loincPartMapId)
 				.setConceptMapUri(loincPartMapUri)
 				.setConceptMapName(loincPartMapName)
-				.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+				.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 				.setSourceCode(partNumber)
 				.setSourceDisplay(partName)
 				.setTargetCodeSystem(extCodeSystem)

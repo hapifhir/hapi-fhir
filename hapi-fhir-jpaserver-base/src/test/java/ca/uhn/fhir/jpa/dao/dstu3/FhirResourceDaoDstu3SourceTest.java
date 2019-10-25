@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -46,12 +45,12 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
@@ -62,7 +61,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result), containsInAnyOrder(pt0id.getValue()));
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE));
+		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
 
 		// Search by request ID
 		params = new SearchParameterMap();
@@ -87,17 +86,17 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:2"));
+		pt2.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:2"));
 		pt2.setActive(true);
 		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -118,17 +117,17 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 
 		when(mySrd.getRequestId()).thenReturn(requestId);
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt1 = new Patient();
-		pt1.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt1.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt1.setActive(true);
 		IIdType pt1id = myPatientDao.create(pt1, mySrd).getId().toUnqualifiedVersionless();
 
 		Patient pt2 = new Patient();
-		pt2.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:2"));
+		pt2.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:2"));
 		pt2.setActive(true);
 		myPatientDao.create(pt2, mySrd).getId().toUnqualifiedVersionless();
 
@@ -148,7 +147,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		when(mySrd.getRequestId()).thenReturn(requestId);
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
@@ -166,19 +165,19 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 	public void testSourceNotPreservedAcrossUpdate() {
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE));
+		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
 
 		pt0.getMeta().getExtension().clear();
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
 
 	}
 
@@ -188,19 +187,19 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		when(mySrd.getRequestId()).thenReturn("0000000000000000");
 
 		Patient pt0 = new Patient();
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:0"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:0"));
 		pt0.setActive(true);
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals(null, pt0.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
 
-		pt0.getMeta().addExtension(JpaConstants.EXT_META_SOURCE, new StringType("urn:source:1"));
+		pt0.getMeta().addExtension(Constants.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(JpaConstants.EXT_META_SOURCE));
+		assertEquals(null, pt0.getMeta().getExtensionString(Constants.EXT_META_SOURCE));
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();

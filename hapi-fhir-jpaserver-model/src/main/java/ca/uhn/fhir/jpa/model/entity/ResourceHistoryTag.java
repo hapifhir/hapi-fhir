@@ -87,4 +87,7 @@ public class ResourceHistoryTag extends BaseTag implements Serializable {
 		myResourceHistory = theResourceHistory;
 	}
 
+	public Long getId() {
+		return myId;
+	}
 }

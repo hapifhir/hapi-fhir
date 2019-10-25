@@ -25,7 +25,7 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -57,7 +57,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
-	private IHapiTerminologySvc myHapiTerminologySvc;
+	private ITermReadSvc myHapiTerminologySvc;
 
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
@@ -100,7 +100,7 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSet(theSource);
+			return myTerminologySvc.expandValueSetInMemory(theSource, null);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -112,12 +112,6 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 
 		return retVal;
 
-		// ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
-		//
-		// ValueSet retVal = new ValueSet();
-		// retVal.getMeta().setLastUpdated(new Date());
-		// retVal.setExpansion(expansion);
-		// return retVal;
 	}
 
 	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {
@@ -144,14 +138,6 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 		retVal.setStatus(PublicationStatus.ACTIVE);
 
 		return retVal;
-	}
-
-	private void validateIncludes(String name, List<ConceptSetComponent> listToValidate) {
-		for (ConceptSetComponent nextExclude : listToValidate) {
-			if (isBlank(nextExclude.getSystem()) && !ElementUtil.isEmpty(nextExclude.getConcept(), nextExclude.getFilter())) {
-				throw new InvalidRequestException("ValueSet contains " + name + " criteria with no system defined");
-			}
-		}
 	}
 
 	@Override

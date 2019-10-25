@@ -49,8 +49,8 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public StoredDetails storeBlob(IIdType theResourceId, String theContentType, InputStream theInputStream) throws IOException {
-		String id = newRandomId();
+	public StoredDetails storeBlob(IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream) throws IOException {
+		String id = super.provideIdForNewBlob(theBlobIdOrNull);
 		String key = toKey(theResourceId, id);
 
 		HashingInputStream hashingIs = createHashingInputStream(theInputStream);
@@ -88,8 +88,18 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 		myDetailsMap.remove(key);
 	}
 
+	@Override
+	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+		String key = toKey(theResourceId, theBlobId);
+		return myDataMap.get(key);
+	}
+
 	private String toKey(IIdType theResourceId, String theBlobId) {
 		return theBlobId + '-' + theResourceId.toUnqualifiedVersionless().getValue();
 	}
 
+	public void clear() {
+		myDetailsMap.clear();
+		myDataMap.clear();
+	}
 }

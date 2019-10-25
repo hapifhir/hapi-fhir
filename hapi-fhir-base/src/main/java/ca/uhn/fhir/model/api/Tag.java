@@ -168,18 +168,6 @@ public class Tag extends BaseElement implements IElement, IBaseCoding {
 		return this;
 	}
 
-	public String toHeaderValue() {
-		StringBuilder b = new StringBuilder();
-		b.append(this.getTerm());
-		if (isNotBlank(this.getLabel())) {
-			b.append("; label=\"").append(this.getLabel()).append('"');
-		}
-		if (isNotBlank(this.getScheme())) {
-			b.append("; scheme=\"").append(this.getScheme()).append('"');
-		}
-		return b.toString();
-	}
-
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);

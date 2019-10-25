@@ -193,7 +193,8 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public DecimalDt getValueElement() {  
+	@Override
+	public DecimalDt getValueElement() {
 		if (myValue == null) {
 			myValue = new DecimalDt();
 		}
@@ -264,7 +265,8 @@ public class QuantityDt
      * The value of the measured amount. The value includes an implicit precision in the presentation of the value
      * </p> 
 	 */
-	public QuantityDt setValue( java.math.BigDecimal theValue) {
+	@Override
+	public QuantityDt setValue(java.math.BigDecimal theValue) {
 		myValue = new DecimalDt(theValue); 
 		return this; 
 	}
@@ -280,7 +282,8 @@ public class QuantityDt
      * How the value should be understood and represented - whether the actual value is greater or less than the stated value due to measurement issues; e.g. if the comparator is \&quot;&lt;\&quot; , then the real value is &lt; stated value
      * </p> 
 	 */
-	public BoundCodeDt<QuantityComparatorEnum> getComparatorElement() {  
+	@Override
+	public BoundCodeDt<QuantityComparatorEnum> getComparatorElement() {
 		if (myComparator == null) {
 			myComparator = new BoundCodeDt<QuantityComparatorEnum>(QuantityComparatorEnum.VALUESET_BINDER);
 		}
@@ -406,7 +409,8 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public UriDt getSystemElement() {  
+	@Override
+	public UriDt getSystemElement() {
 		if (mySystem == null) {
 			mySystem = new UriDt();
 		}
@@ -451,7 +455,8 @@ public class QuantityDt
      * The identification of the system that provides the coded form of the unit
      * </p> 
 	 */
-	public QuantityDt setSystem( String theUri) {
+	@Override
+	public QuantityDt setSystem(String theUri) {
 		mySystem = new UriDt(theUri); 
 		return this; 
 	}
@@ -467,7 +472,8 @@ public class QuantityDt
      * A computer processable form of the unit in some unit representation system
      * </p> 
 	 */
-	public CodeDt getCodeElement() {  
+	@Override
+	public CodeDt getCodeElement() {
 		if (myCode == null) {
 			myCode = new CodeDt();
 		}
@@ -512,7 +518,8 @@ public class QuantityDt
      * A computer processable form of the unit in some unit representation system
      * </p> 
 	 */
-	public QuantityDt setCode( String theCode) {
+	@Override
+	public QuantityDt setCode(String theCode) {
 		myCode = new CodeDt(theCode); 
 		return this; 
 	}

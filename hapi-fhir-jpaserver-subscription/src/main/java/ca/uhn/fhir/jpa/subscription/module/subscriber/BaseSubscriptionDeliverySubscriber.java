@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.module.cache.SubscriptionRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,4 +98,22 @@ public abstract class BaseSubscriptionDeliverySubscriber implements MessageHandl
 
 	public abstract void handleMessage(ResourceDeliveryMessage theMessage) throws Exception;
 
+	@VisibleForTesting
+	void setFhirContextForUnitTest(FhirContext theCtx) {
+		myFhirContext = theCtx;
+	}
+
+	@VisibleForTesting
+	void setInterceptorBroadcasterForUnitTest(IInterceptorBroadcaster theInterceptorBroadcaster) {
+		myInterceptorBroadcaster = theInterceptorBroadcaster;
+	}
+
+	@VisibleForTesting
+	void setSubscriptionRegistryForUnitTest(SubscriptionRegistry theSubscriptionRegistry) {
+		mySubscriptionRegistry = theSubscriptionRegistry;
+	}
+
+	public IInterceptorBroadcaster getInterceptorBroadcaster() {
+		return myInterceptorBroadcaster;
+	}
 }

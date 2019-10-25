@@ -1,34 +1,30 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.*;
-
-import java.nio.charset.StandardCharsets;
-
-import ca.uhn.fhir.jpa.term.BaseHapiTerminologySvcImpl;
+import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
+import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.Enumerations;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.AfterClass;
 import org.junit.Test;
 
-import ca.uhn.fhir.util.TestUtil;
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu3CodeSystemTest.class);
-
 	@AfterClass
 	public static void afterClassClearContext() {
 		TestUtil.clearAllStaticFieldsForUnitTest();
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
 	
 	@Test
 	public void testIndexContained() throws Exception {
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
 		
 		String input = IOUtils.toString(getClass().getResource("/dstu3_codesystem_complete.json"), StandardCharsets.UTF_8);
 		CodeSystem cs = myFhirCtx.newJsonParser().parseResource(CodeSystem.class, input);
@@ -39,13 +35,13 @@ public class FhirResourceDaoDstu3CodeSystemTest extends BaseJpaDstu3Test {
 		int outcome= myResourceReindexingSvc.forceReindexingPass();
 		assertNotEquals(-1, outcome); // -1 means there was a failure
 		
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 		
 	}
 
 	@Test
 	public void testDeleteCodeSystemComplete() {
-		BaseHapiTerminologySvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 
 		// Create the code system
 		CodeSystem cs = new CodeSystem();

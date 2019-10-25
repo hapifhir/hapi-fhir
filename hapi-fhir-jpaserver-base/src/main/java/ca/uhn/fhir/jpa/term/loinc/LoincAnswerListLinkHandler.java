@@ -20,18 +20,14 @@ package ca.uhn.fhir.jpa.term.loinc;
  * #L%
  */
 
-import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -40,13 +36,9 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class LoincAnswerListLinkHandler implements IRecordHandler {
 
 	private final Map<String, TermConcept> myCode2Concept;
-	private final Map<String, ValueSet> myIdToValueSet = new HashMap<>();
 
-	public LoincAnswerListLinkHandler(Map<String, TermConcept> theCode2concept, List<ValueSet> theValueSets) {
+	public LoincAnswerListLinkHandler(Map<String, TermConcept> theCode2concept) {
 		myCode2Concept = theCode2concept;
-		for (ValueSet next : theValueSets) {
-			myIdToValueSet.put(next.getId(), next);
-		}
 	}
 
 	@Override

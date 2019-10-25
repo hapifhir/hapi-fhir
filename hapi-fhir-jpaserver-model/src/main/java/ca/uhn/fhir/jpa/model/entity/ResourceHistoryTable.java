@@ -38,10 +38,14 @@ import java.util.Collection;
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
+
 	/**
 	 * @see ResourceEncodingEnum
 	 */
-	static final int ENCODING_COL_LENGTH = 5;
+	// Don't reduce the visibility here, we reference this from Smile
+	@SuppressWarnings("WeakerAccess")
+	public static final int ENCODING_COL_LENGTH = 5;
+
 	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
@@ -52,7 +56,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE", length = 30, nullable = false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	@Column(name = "RES_VER", nullable = false)
@@ -111,10 +115,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Long getId() {
 		return myId;
-	}
-
-	public void setId(Long theId) {
-		myId = theId;
 	}
 
 	public byte[] getResource() {

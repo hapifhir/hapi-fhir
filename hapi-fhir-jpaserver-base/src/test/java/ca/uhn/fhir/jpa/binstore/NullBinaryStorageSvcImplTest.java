@@ -16,7 +16,7 @@ public class NullBinaryStorageSvcImplTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void storeBlob() {
-		mySvc.storeBlob(null, null, null);
+		mySvc.storeBlob(null, null, null, null);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -34,4 +34,13 @@ public class NullBinaryStorageSvcImplTest {
 		mySvc.expungeBlob(null, null);
 	}
 
+	@Test(expected = UnsupportedOperationException.class)
+	public void fetchBlob() {
+		mySvc.fetchBlob(null, null);
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void newBlobId() {
+		mySvc.newBlobId();
+	}
 }

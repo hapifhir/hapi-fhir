@@ -30,14 +30,15 @@ import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
-import ca.uhn.fhir.jpa.provider.ServletSubRequestDetails;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
 import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.api.*;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.PatchTypeEnum;
+import ca.uhn.fhir.rest.api.PreferReturnEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -49,11 +50,12 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
 import ca.uhn.fhir.util.*;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.NameValuePair;
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -88,8 +90,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 	private FhirContext myContext;
 	@Autowired
 	private ITransactionProcessorVersionAdapter<BUNDLE, BUNDLEENTRY> myVersionAdapter;
-	@Autowired
-	private MatchUrlService myMatchUrlService;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired(required = false)
@@ -127,7 +127,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 		}
 
 		ourLog.info("Beginning storing collection with {} resources", myVersionAdapter.getEntries(theRequest).size());
-		long start = System.currentTimeMillis();
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -173,7 +172,7 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			}
 		}
 		idToPersistedOutcome.put(newId, outcome);
-		if (outcome.getCreated().booleanValue()) {
+		if (outcome.getCreated()) {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_201_CREATED));
 		} else {
 			myVersionAdapter.setResponseStatus(newEntry, toStatusString(Constants.STATUS_HTTP_200_OK));
@@ -402,37 +401,14 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			Integer originalOrder = originalRequestOrder.get(nextReqEntry);
 			BUNDLEENTRY nextRespEntry = myVersionAdapter.getEntries(response).get(originalOrder);
 
-			ServletSubRequestDetails requestDetails = new ServletSubRequestDetails(theRequestDetails);
-			requestDetails.setServletRequest(theRequestDetails.getServletRequest());
-			requestDetails.setRequestType(RequestTypeEnum.GET);
-			requestDetails.setServer(theRequestDetails.getServer());
-
-			String url = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
-
-			int qIndex = url.indexOf('?');
 			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-			requestDetails.setParameters(new HashMap<>());
-			if (qIndex != -1) {
-				String params = url.substring(qIndex);
-				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
-				for (NameValuePair next : parameters) {
-					paramValues.put(next.getName(), next.getValue());
-				}
-				for (Map.Entry<String, Collection<String>> nextParamEntry : paramValues.asMap().entrySet()) {
-					String[] nextValue = nextParamEntry.getValue().toArray(new String[nextParamEntry.getValue().size()]);
-					requestDetails.addParameter(nextParamEntry.getKey(), nextValue);
-				}
-				url = url.substring(0, qIndex);
-			}
 
-			if (url.length() > 0 && url.charAt(0) == '/') {
-				url = url.substring(1);
-			}
+			String transactionUrl = extractTransactionUrlOrThrowException(nextReqEntry, "GET");
 
-			requestDetails.setRequestPath(url);
-			requestDetails.setFhirServerBase(theRequestDetails.getFhirServerBase());
+			ServletSubRequestDetails requestDetails = ServletRequestUtil.getServletSubRequestDetails(theRequestDetails, transactionUrl, paramValues);
 
-			theRequestDetails.getServer().populateRequestDetailsFromRequestPath(requestDetails, url);
+			String url = requestDetails.getRequestPath();
+
 			BaseMethodBinding<?> method = theRequestDetails.getServer().determineResourceMethod(requestDetails, url);
 			if (method == null) {
 				throw new IllegalArgumentException("Unable to handle GET " + url);
@@ -540,7 +516,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 			 * Look for duplicate conditional creates and consolidate them
 			 */
 			final HashMap<String, String> keyToUuid = new HashMap<>();
-			final IdentityHashMap<IBaseResource, String> identityToUuid = new IdentityHashMap<>();
 			for (int index = 0, originalIndex = 0; index < theEntries.size(); index++, originalIndex++) {
 				BUNDLEENTRY nextReqEntry = theEntries.get(index);
 				IBaseResource resource = myVersionAdapter.getResource(nextReqEntry);
@@ -574,7 +549,6 @@ public class TransactionProcessor<BUNDLE extends IBaseBundle, BUNDLEENTRY> {
 					if (consolidateEntry) {
 						if (!keyToUuid.containsKey(key)) {
 							keyToUuid.put(key, entryUrl);
-							identityToUuid.put(resource, entryUrl);
 						} else {
 							ourLog.info("Discarding transaction bundle entry {} as it contained a duplicate conditional {}", originalIndex, verb);
 							theEntries.remove(index);

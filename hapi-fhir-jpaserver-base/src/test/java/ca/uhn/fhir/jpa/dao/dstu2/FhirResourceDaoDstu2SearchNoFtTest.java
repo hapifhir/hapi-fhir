@@ -921,7 +921,6 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			Patient patient = new Patient();
 			patient.addIdentifier().setSystem("urn:system").setValue("001");
 			patient.addName().addFamily("testSearchNameParam01Fam").addGiven("testSearchNameParam01Giv");
-			ResourceMetadataKeyEnum.TITLE.put(patient, "P1TITLE");
 			id1 = myPatientDao.create(patient, mySrd).getId();
 		}
 		{

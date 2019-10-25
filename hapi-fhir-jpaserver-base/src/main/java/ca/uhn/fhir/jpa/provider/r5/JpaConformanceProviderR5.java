@@ -58,7 +58,6 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	@CoverageIgnore
 	public JpaConformanceProviderR5(){
 		super();
-		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}
 	
@@ -66,11 +65,10 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	 * Constructor
 	 */
 	public JpaConformanceProviderR5(RestfulServer theRestfulServer, IFhirSystemDao<Bundle, Meta> theSystemDao, DaoConfig theDaoConfig) {
-		super(theRestfulServer);
+		super();
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myDaoConfig = theDaoConfig;
-		super.setCache(false);
 		setIncludeResourceCounts(true);
 		setSearchParamRegistry(theSystemDao.getSearchParamRegistry());
 	}

@@ -313,6 +313,18 @@
 				
 			</subsection>
 
+			<subsection name="Capturing Meta.source from an HTTP Header">
+
+				<p>
+					If you wish to override the value of <code>Resource.meta.source</code> using the value
+					supplied in an HTTP header, you can use the
+					<a href="./apidocs/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html">CaptureResourceSourceFromHeaderInterceptor</a>
+					(<a href="./xref/ca/uhn/fhir/rest/server/interceptor/CaptureResourceSourceFromHeaderInterceptor.html">code</a>)
+					to accomplish this.
+				</p>
+
+			</subsection>
+
 		</section>
 				
 		<section name="Creating Interceptors">

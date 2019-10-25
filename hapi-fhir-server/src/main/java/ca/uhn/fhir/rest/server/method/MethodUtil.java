@@ -227,7 +227,11 @@ public class MethodUtil {
 						param = new OperationParameter(theContext, op.name(), operationParam);
 						if (isNotBlank(operationParam.typeName())) {
 							BaseRuntimeElementDefinition<?> elementDefinition = theContext.getElementDefinition(operationParam.typeName());
+							if (elementDefinition == null) {
+								elementDefinition = theContext.getResourceDefinition(operationParam.typeName());
+							}
 							org.apache.commons.lang3.Validate.notNull(elementDefinition, "Unknown type name in @OperationParam: typeName=\"%s\"", operationParam.typeName());
+
 							Class<?> newParameterType = elementDefinition.getImplementingClass();
 							if (!declaredParameterType.isAssignableFrom(newParameterType)) {
 								throw new ConfigurationException("Non assignable parameter typeName=\"" + operationParam.typeName() + "\" specified on method " + theMethod);
