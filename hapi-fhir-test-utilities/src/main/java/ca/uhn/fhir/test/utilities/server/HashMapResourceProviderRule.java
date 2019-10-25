@@ -1,6 +1,5 @@
 package ca.uhn.fhir.test.utilities.server;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.rules.TestRule;
@@ -14,7 +13,6 @@ public class HashMapResourceProviderRule<T extends IBaseResource> extends HashMa
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext  The FHIR context
 	 * @param theResourceType The resource type to support
 	 */
 	public HashMapResourceProviderRule(RestfulServerRule theRestfulServerRule, Class<T> theResourceType) {
