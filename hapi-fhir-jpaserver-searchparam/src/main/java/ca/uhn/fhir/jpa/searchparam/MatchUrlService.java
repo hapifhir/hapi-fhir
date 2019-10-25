@@ -93,16 +93,10 @@ public class MatchUrlService {
 						paramMap.setLastUpdated(p1);
 					}
 				}
-				continue;
-			}
-
-			if (Constants.PARAM_HAS.equals(nextParamName)) {
+			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
-				continue;
-			}
-
-			if (Constants.PARAM_COUNT.equals(nextParamName)) {
+			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
@@ -111,16 +105,16 @@ public class MatchUrlService {
 						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
-				continue;
-			}
-
-			if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
+			} else if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
 				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
 					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
+			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
+				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {

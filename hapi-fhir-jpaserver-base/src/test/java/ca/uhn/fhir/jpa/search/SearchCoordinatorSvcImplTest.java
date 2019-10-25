@@ -68,7 +68,6 @@ public class SearchCoordinatorSvcImplTest {
 	private SearchCoordinatorSvcImpl mySvc;
 	@Mock
 	private PlatformTransactionManager myTxManager;
-	private DaoConfig myDaoConfig;
 	private Search myCurrentSearch;
 	@Mock
 	private DaoRegistry myDaoRegistry;
@@ -92,8 +91,8 @@ public class SearchCoordinatorSvcImplTest {
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
 
-		myDaoConfig = new DaoConfig();
-		mySvc.setDaoConfigForUnitTest(myDaoConfig);
+		DaoConfig daoConfig = new DaoConfig();
+		mySvc.setDaoConfigForUnitTest(daoConfig);
 
 		when(myCallingDao.newSearchBuilder()).thenReturn(mySearchBuilder);
 
@@ -312,7 +311,7 @@ public class SearchCoordinatorSvcImplTest {
 				ourLog.info("About to pull the first resource");
 				List<IBaseResource> resources = result.getResources(0, 1);
 				ourLog.info("Done pulling the first resource");
-				assertEquals(1, resources.size());
+		assertEquals(1, resources.size());
 			} finally {
 				completionLatch.countDown();
 			}

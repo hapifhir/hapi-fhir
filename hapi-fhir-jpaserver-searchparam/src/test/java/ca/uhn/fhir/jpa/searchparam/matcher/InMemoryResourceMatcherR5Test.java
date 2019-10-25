@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -38,10 +39,12 @@ public class InMemoryResourceMatcherR5Test {
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
 	public static final String OBSERVATION_CODE = "MATCH";
+	private static final String SOURCE_URI = "urn:source:0";
+	private static final String REQUEST_ID = "a_request_id";
+	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
 
 	@Autowired
-	private
-	InMemoryResourceMatcher myInMemoryResourceMatcher;
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
@@ -81,11 +84,32 @@ public class InMemoryResourceMatcherR5Test {
 		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
 
 		myObservation = new Observation();
+		myObservation.getMeta().setSource(TEST_SOURCE);
 		myObservation.setEffective(new DateTimeType(OBSERVATION_DATE));
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setCode(OBSERVATION_CODE);
 		myObservation.setCode(codeableConcept);
 		mySearchParams = extractDateSearchParam(myObservation);
+	}
+
+	@Test
+	public void testSupportedSource() {
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + TEST_SOURCE, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + SOURCE_URI, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + REQUEST_ID, myObservation, mySearchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
 	}
 
 	@Test
