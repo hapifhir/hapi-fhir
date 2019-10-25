@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-server</artifactId>
-	<packaging>jar</packaging>
+	<packaging>bundle</packaging>
 
 	<name>HAPI FHIR - Server Framework</name>
 
@@ -100,7 +100,24 @@
 					<argLine>@{argLine} -Dfile.encoding=UTF-8 -Xmx712m</argLine>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <_nouses>true</_nouses>
+                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
+                    </instructions>
+                </configuration>
+            </plugin>
 		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 	</build>
 
 </project>
