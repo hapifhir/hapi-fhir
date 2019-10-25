@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -54,7 +55,6 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor.ActionRequestDetai
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.UrlUtil.UrlParts;
@@ -243,7 +243,7 @@ public class FhirSystemDaoDstu2 extends BaseHapiFhirSystemDao<Bundle, MetaDt> {
 
 			int qIndex = url.indexOf('?');
 			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
-			requestDetails.setParameters(new HashMap<>());
+			requestDetails.setParameters(new HashMap<String, String[]>());
 			if (qIndex != -1) {
 				String params = url.substring(qIndex);
 				List<NameValuePair> parameters = myMatchUrlService.translateMatchUrl(params);
