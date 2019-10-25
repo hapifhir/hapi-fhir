@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.*;
@@ -861,19 +862,9 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextParameter : theList) {
-			String nextParamValue = nextParameter.getValueAsQueryToken(myContext);
-			int lastHashValueIndex = nextParamValue.lastIndexOf('#');
-			String sourceUri;
-			String requestId;
-			if (lastHashValueIndex == -1) {
-				sourceUri = nextParamValue;
-				requestId = null;
-			} else {
-				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
-				requestId = nextParamValue.substring(lastHashValueIndex + 1);
-			}
-			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-
+			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
+			String sourceUri = sourceParameter.getSourceUri();
+			String requestId = sourceParameter.getRequestId();
 			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
 			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
