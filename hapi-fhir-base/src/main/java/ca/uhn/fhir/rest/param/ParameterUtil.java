@@ -98,10 +98,6 @@ public class ParameterUtil {
 				binder = new QueryParameterAndBinder(HasAndListParam.class,
 					Collections.<Class<? extends IQueryParameterType>>emptyList());
 				break;
-			case SOURCE:
-				binder = new QueryParameterAndBinder(SourceAndListParam.class,
-					Collections.<Class<? extends IQueryParameterType>>emptyList());
-				break;
 		}
 
 		// FIXME null access

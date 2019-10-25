@@ -39,6 +39,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.*;
@@ -1270,7 +1271,6 @@ public class SearchBuilder implements ISearchBuilder {
 				retVal = createPredicateQuantity(leftValue, theResourceName, theParam.getName(), myBuilder, dateJoin);
 				break;
 			}
-			case SOURCE:
 			case COMPOSITE:
 			case HAS:
 			case NUMBER:
@@ -2998,9 +2998,6 @@ public class SearchBuilder implements ISearchBuilder {
 				break;
 			case REFERENCE:
 				qp = new ReferenceParam();
-				break;
-			case SOURCE:
-				qp = new SourceParam();
 				break;
 			case SPECIAL:
 			case URI:

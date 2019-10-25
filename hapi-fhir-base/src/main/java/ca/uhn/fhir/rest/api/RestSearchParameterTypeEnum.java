@@ -96,11 +96,6 @@ public enum RestSearchParameterTypeEnum {
 	 */
 	SPECIAL("special", "http://hl7.org/fhir/search-param-type"),
 
-	/**
-	 * _source parameter
-	 */
-	SOURCE("string", "http://hl7.org/fhir/search-param-type"),
-
 	;
 
 	
@@ -124,7 +119,7 @@ public enum RestSearchParameterTypeEnum {
 	
 	static {
 		for (RestSearchParameterTypeEnum next : RestSearchParameterTypeEnum.values()) {
-			if (next == HAS || next == SOURCE) {
+			if (next == HAS) {
 				continue;
 			}
 			

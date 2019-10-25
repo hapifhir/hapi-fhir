@@ -44,8 +44,7 @@ public class InMemoryResourceMatcherR5Test {
 	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
 
 	@Autowired
-	private
-	InMemoryResourceMatcher myInMemoryResourceMatcher;
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;

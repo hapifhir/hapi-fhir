@@ -1,7 +1,5 @@
-package ca.uhn.fhir.rest.param;
+package ca.uhn.fhir.jpa.searchparam.util;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 
 import static org.apache.commons.lang3.StringUtils.left;
@@ -27,22 +25,16 @@ import static org.apache.commons.lang3.StringUtils.left;
  */
 
 /**
- * Implementation of the _has method parameter
+ * Model of the _source parameter
  */
-public class SourceParam extends BaseParam implements IQueryParameterType {
+public class SourceParam {
 
 	private static final long serialVersionUID = 1L;
-	private String myParameterValue;
-	private String mySourceUri;
-	private String myRequestId;
-
-	public SourceParam() {}
+	private final String myParameterValue;
+	private final String mySourceUri;
+	private final String myRequestId;
 
 	public SourceParam(String theParameterValue) {
-		setValue(theParameterValue);
-	}
-
-	private void setValue(String theParameterValue) {
 		myParameterValue = theParameterValue;
 		String requestId;
 		int lastHashValueIndex = theParameterValue.lastIndexOf('#');
@@ -50,27 +42,14 @@ public class SourceParam extends BaseParam implements IQueryParameterType {
 			mySourceUri = theParameterValue;
 			requestId = null;
 		} else {
-			if (lastHashValueIndex != 0) {
+			if (lastHashValueIndex == 0) {
+				mySourceUri = null;
+			} else {
 				mySourceUri = theParameterValue.substring(0, lastHashValueIndex);
 			}
 			requestId = theParameterValue.substring(lastHashValueIndex + 1);
 		}
 		myRequestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-	}
-
-	@Override
-	String doGetQueryParameterQualifier() {
-		return null;
-	}
-	
-	@Override
-	String doGetValueAsQueryToken(FhirContext theContext) {
-		return myParameterValue;
-	}
-
-	@Override
-	void doSetValueAsQueryToken(FhirContext theContext, String theParamName, String theQualifier, String theValue) {
-		setValue(theValue);
 	}
 
 	public String getSourceUri() {

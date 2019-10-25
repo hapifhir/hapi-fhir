@@ -113,7 +113,7 @@ public class MatchUrlService {
 				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
 			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
-				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.SOURCE, nextParamName, paramList);
+				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
