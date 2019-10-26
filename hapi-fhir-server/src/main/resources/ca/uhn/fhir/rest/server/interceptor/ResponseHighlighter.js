@@ -1,32 +1,33 @@
+let selectedLines = [];
 
-var selectedLines = new Array();
 function updateHighlightedLine() {
 	updateHighlightedLineTo(window.location.hash);
 }
 
 function updateHighlightedLineTo(theNewHash) {
-	
-	for (var next in selectedLines) {
+
+   let next;
+   for (next in selectedLines) {
 		document.getElementById('line' + selectedLines[next]).className = '';
 		document.getElementById('anchor' + selectedLines[next]).className = 'lineAnchor';
 	}
-	selectedLines = new Array();
-	
-	var line = -1;
-	if (theNewHash && theNewHash.match('L[0-9]+-L[0-9]+')) {
-		var dashIndex = theNewHash.indexOf('-');
-		var start = parseInt(theNewHash.substring(2, dashIndex));
-		var end = parseInt(theNewHash.substring(dashIndex+2));
-		for (var i = start; i <= end; i++) {
+	selectedLines = [];
+
+   let line = -1;
+   if (theNewHash && theNewHash.match('L[0-9]+-L[0-9]+')) {
+      const dashIndex = theNewHash.indexOf('-');
+      const start = parseInt(theNewHash.substring(2, dashIndex));
+      const end = parseInt(theNewHash.substring(dashIndex + 2));
+      for (let i = start; i <= end; i++) {
 			selectedLines.push(i);
 		}
 	} else if (theNewHash && theNewHash.match('L[0-9]+')) {
-		var line = parseInt(theNewHash.substring(2));
+		line = parseInt(theNewHash.substring(2));
 		selectedLines.push(line);
 	}
 
 
-	for (var next in selectedLines) {
+	for (next in selectedLines) {
 		// Prevent us from scrolling to the selected line
 		document.getElementById('L' + selectedLines[next]).name = '';
 		// Select the line number column
@@ -41,7 +42,7 @@ function updateHighlightedLineTo(theNewHash) {
 function updateHyperlinksAndStyles() {
     /* adds hyperlinks and CSS styles to dates and UUIDs (e.g. to enable user-select: all) */
     const logicalReferenceRegex = /^[A-Z][A-Za-z]+\/[0-9]+$/;
-    const dateTimeRegex = /^-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|(\+|-)((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?$/; // from the spec - https://www.hl7.org/fhir/datatypes.html#datetime
+    const dateTimeRegex = /^-?[0-9]{4}(-(0[1-9]|1[0-2])(-(0[0-9]|[1-2][0-9]|3[0-1])(T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9]+)?(Z|([+\-])((0[0-9]|1[0-3]):[0-5][0-9]|14:00)))?)?)?$/; // from the spec - https://www.hl7.org/fhir/datatypes.html#datetime
     const uuidRegex = /^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$/;
 
     const allQuotes = document.querySelectorAll(".hlQuot");
@@ -93,11 +94,11 @@ function updateHyperlinksAndStyles() {
     updateHyperlinksAndStyles();
     console.timeEnd("updateHyperlinksAndStyles");
 
-    window.addEventListener("load", function(event) {
+    window.addEventListener("load", function() {
       // https://developer.mozilla.org/en-US/docs/Web/API/Navigation_timing_API
-      var now = new Date().getTime();
-      var page_load_time = now - performance.timing.navigationStart;
-      console.log("User-perceived page loading time: " + page_load_time + "ms");
+       const now = new Date().getTime();
+       const page_load_time = now - performance.timing.navigationStart;
+       console.log("User-perceived page loading time: " + page_load_time + "ms");
     });
 
 })();
