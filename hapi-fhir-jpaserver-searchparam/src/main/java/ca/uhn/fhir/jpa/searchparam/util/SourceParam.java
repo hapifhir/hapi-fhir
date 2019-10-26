@@ -6,7 +6,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 
 /*
  * #%L
- * HAPI FHIR - Core Library
+ * HAPI FHIR Search Parameters
  * %%
  * Copyright (C) 2014 - 2019 University Health Network
  * %%
