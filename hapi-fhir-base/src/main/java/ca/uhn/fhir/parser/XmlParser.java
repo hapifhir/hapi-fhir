@@ -43,6 +43,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -354,17 +355,18 @@ public class XmlParser extends BaseParser {
 			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				INarrative narr = (INarrative) nextChild.getAccessor().getFirstValueOrNull(theElement);
-
+				Optional<IBase> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null && (narr == null || narr.isEmpty())) {
+				if (gen != null && narr.isPresent() == false) {
 					gen.populateResourceNarrative(myContext, theResource);
 				}
-				if (narr != null && narr.isEmpty() == false) {
+
+				narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
+				if (narr.isPresent()) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);
-					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr, childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
+					encodeChildElementToStreamWriter(theResource, theEventWriter, nextChild, narr.get(), childName, type, null, theContainedResource, nextChildElem, theEncodeContext);
 					continue;
 				}
 			}

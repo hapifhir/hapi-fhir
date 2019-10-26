@@ -19,34 +19,34 @@ package ca.uhn.fhir.rest.client.method;
  * limitations under the License.
  * #L%
  */
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.*;
-
-import org.hl7.fhir.instance.model.api.*;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
-import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.annotation.Operation;
+import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.client.impl.BaseHttpClientInvocation;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.FhirTerser;
+import org.hl7.fhir.instance.model.api.*;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationMethodBinding.class);
 	private BundleTypeEnum myBundleType;
-	private boolean myCanOperateAtInstanceLevel;
-	private boolean myCanOperateAtServerLevel;
-	private boolean myCanOperateAtTypeLevel;
 	private String myDescription;
 	private final boolean myIdempotent;
 	private final Integer myIdParamIndex;
@@ -63,15 +63,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		myBundleType = theBundleType;
 		myIdempotent = theIdempotent;
 		myIdParamIndex = ParameterUtil.findIdParameterIndex(theMethod, getContext());
-		if (myIdParamIndex != null) {
-			for (Annotation next : theMethod.getParameterAnnotations()[myIdParamIndex]) {
-				if (next instanceof IdParam) {
-					myCanOperateAtTypeLevel = ((IdParam) next).optional() == true;
-				}
-			}
-		} else {
-			myCanOperateAtTypeLevel = true;
-		}
 
 		Description description = theMethod.getAnnotation(Description.class);
 		if (description != null) {
@@ -113,7 +104,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			myOtherOperatiopnType = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
 
-		myReturnParams = new ArrayList<OperationMethodBinding.ReturnType>();
+		myReturnParams = new ArrayList<>();
 		if (theReturnParams != null) {
 			for (OperationParam next : theReturnParams) {
 				ReturnType type = new ReturnType();
@@ -131,13 +122,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 				}
 				myReturnParams.add(type);
 			}
-		}
-
-		if (myIdParamIndex != null) {
-			myCanOperateAtInstanceLevel = true;
-		}
-		if (getResourceName() == null) {
-			myCanOperateAtServerLevel = true;
 		}
 
 	}
@@ -169,10 +153,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		return myOtherOperatiopnType;
 	}
 
-	public List<ReturnType> getReturnParams() {
-		return Collections.unmodifiableList(myReturnParams);
-	}
-
 	@Override
 	public ReturnTypeEnum getReturnType() {
 		return myReturnType;
@@ -195,18 +175,6 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 		}
 
 		return createOperationInvocation(getContext(), getResourceName(), id, null, myName, parameters, false);
-	}
-
-	public boolean isCanOperateAtInstanceLevel() {
-		return this.myCanOperateAtInstanceLevel;
-	}
-
-	public boolean isCanOperateAtServerLevel() {
-		return this.myCanOperateAtServerLevel;
-	}
-
-	public boolean isCanOperateAtTypeLevel() {
-		return myCanOperateAtTypeLevel;
 	}
 
 	public boolean isIdempotent() {
@@ -243,9 +211,9 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			return new HttpPostClientInvocation(theContext, theInput, b.toString());
 		}
 		FhirTerser t = theContext.newTerser();
-		List<Object> parameters = t.getValues(theInput, "Parameters.parameter");
+		List<IBase> parameters = t.getValues(theInput, "Parameters.parameter");
 
-		Map<String, List<String>> params = new LinkedHashMap<String, List<String>>();
+		Map<String, List<String>> params = new LinkedHashMap<>();
 		for (Object nextParameter : parameters) {
 			IPrimitiveType<?> nextNameDt = (IPrimitiveType<?>) t.getSingleValueOrNull((IBase) nextParameter, "name");
 			if (nextNameDt == null || nextNameDt.isEmpty()) {
@@ -254,7 +222,7 @@ public class OperationMethodBinding extends BaseResourceReturningMethodBinding {
 			}
 			String nextName = nextNameDt.getValueAsString();
 			if (!params.containsKey(nextName)) {
-				params.put(nextName, new ArrayList<String>());
+				params.put(nextName, new ArrayList<>());
 			}
 
 			IBaseDatatype value = (IBaseDatatype) t.getSingleValueOrNull((IBase) nextParameter, "value[x]");

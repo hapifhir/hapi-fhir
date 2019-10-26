@@ -1,23 +1,23 @@
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.FhirContext;
+import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
+import org.hl7.fhir.r4.model.*;
+import org.junit.AfterClass;
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.util.*;
-
-import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
-import org.junit.AfterClass;
-import org.junit.Test;
-
-import ca.uhn.fhir.context.FhirContext;
-
 public class FhirTerserTest {
 
   private static FhirContext ourCtx = FhirContext.forR4();
-
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirTerserTest.class);
 
   @Test
   public void testGetAllPopulatedChildElementsOfType() {
@@ -53,13 +53,13 @@ public class FhirTerserTest {
 
     // As string
     {
-      List<Object> values = t.getValues(obs, "Observation.valueString");
+      List<IBase> values = t.getValues(obs, "Observation.valueString");
       assertEquals(0, values.size());
     }
 
     // As quantity
     {
-      List<Object> values = t.getValues(obs, "Observation.valueQuantity");
+      List<IBase> values = t.getValues(obs, "Observation.valueQuantity");
       assertEquals(1, values.size());
       Quantity actual = (Quantity) values.get(0);
       assertEquals("123", actual.getValueElement().getValueAsString());
