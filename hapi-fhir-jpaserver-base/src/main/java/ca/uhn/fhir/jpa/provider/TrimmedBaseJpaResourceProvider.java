@@ -40,59 +40,43 @@ import java.util.Date;
 
 public abstract class TrimmedBaseJpaResourceProvider<T extends IBaseResource> extends BaseJpaProvider implements IResourceProvider {
 
-    private IFhirResourceDao<T> myDao;
+	private IFhirResourceDao<T> myDao;
 
 
-    @CoverageIgnore
-    public TrimmedBaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
-        myDao = theDao;
-    }
+	@CoverageIgnore
+	public TrimmedBaseJpaResourceProvider(IFhirResourceDao<T> theDao) {
+		myDao = theDao;
+	}
 
 
-    protected Parameters doExpunge(IIdType theIdParam, IPrimitiveType<? extends Integer> theLimit, IPrimitiveType<? extends Boolean> theExpungeDeletedResources, IPrimitiveType<? extends Boolean> theExpungeOldVersions, IPrimitiveType<? extends Boolean> theExpungeEverything, RequestDetails theRequest) {
+	public IFhirResourceDao<T> getDao() {
+		return myDao;
+	}
 
-        ExpungeOptions options = createExpungeOptions(theLimit, theExpungeDeletedResources, theExpungeOldVersions, theExpungeEverything);
-
-        ExpungeOutcome outcome;
-        if (theIdParam != null) {
-            outcome = getDao().expunge(theIdParam, options, theRequest);
-        } else {
-            outcome = getDao().expunge(options, theRequest);
-        }
-
-        return createExpungeResponse(outcome);
-    }
-
-    public IFhirResourceDao<T> getDao() {
-        return myDao;
-    }
-
-    @Required
-    public void setDao(IFhirResourceDao<T> theDao) {
-        myDao = theDao;
-    }
+	@Required
+	public void setDao(IFhirResourceDao<T> theDao) {
+		myDao = theDao;
+	}
 
 
-
-    @Override
-    public Class<? extends IBaseResource> getResourceType() {
-        return myDao.getResourceType();
-    }
-
+	@Override
+	public Class<? extends IBaseResource> getResourceType() {
+		return myDao.getResourceType();
+	}
 
 
-    @Read(version = true)
-    public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
-        startRequest(theRequest);
-        try {
-            return myDao.read(theId, theRequestDetails);
-        } finally {
-            endRequest(theRequest);
-        }
-    }
+	@Read(version = true)
+	public T read(HttpServletRequest theRequest, @IdParam IIdType theId, RequestDetails theRequestDetails) {
+		startRequest(theRequest);
+		try {
+			return myDao.read(theId, theRequestDetails);
+		} finally {
+			endRequest(theRequest);
+		}
+	}
 
-    public DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
-        return super.processSinceOrAt(theSince, theAt);
-    }
+	public DateRangeParam processSinceOrAt(Date theSince, DateRangeParam theAt) {
+		return super.processSinceOrAt(theSince, theAt);
+	}
 
 }
