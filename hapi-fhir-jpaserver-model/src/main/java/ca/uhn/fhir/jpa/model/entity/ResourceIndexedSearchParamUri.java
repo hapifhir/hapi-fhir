@@ -80,8 +80,9 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(String theName, String theUri) {
-		setParamName(theName);
+	public ResourceIndexedSearchParamUri(String theResourceType, String theParamName, String theUri) {
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setUri(theUri);
 	}
 
@@ -115,8 +116,8 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		ResourceIndexedSearchParamUri obj = (ResourceIndexedSearchParamUri) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getUri(), obj.getUri());
 		b.append(getHashUri(), obj.getHashUri());
 		b.append(getHashIdentity(), obj.getHashIdentity());
@@ -156,15 +157,16 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return myUri;
 	}
 
-	public void setUri(String theUri) {
+	public ResourceIndexedSearchParamUri setUri(String theUri) {
 		myUri = StringUtils.defaultIfBlank(theUri, null);
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getUri());
 		b.append(getHashUri());
 		return b.toHashCode();

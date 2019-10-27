@@ -735,24 +735,14 @@ public class FhirTerser {
 									valueType = (Class<? extends IBase>) valueType.getSuperclass();
 								}
 
-								if (childElementDef == null) {
-									StringBuilder b = new StringBuilder();
-									b.append("Found value of type[");
-									b.append(nextValue.getClass().getSimpleName());
-									b.append("] which is not valid for field[");
-									b.append(nextChild.getElementName());
-									b.append("] in ");
-									b.append(childDef.getName());
-									b.append(" - Valid types: ");
-									for (Iterator<String> iter = new TreeSet<>(nextChild.getValidChildNames()).iterator(); iter.hasNext(); ) {
-										BaseRuntimeElementDefinition<?> childByName = nextChild.getChildByName(iter.next());
-										b.append(childByName.getImplementingClass().getSimpleName());
-										if (iter.hasNext()) {
-											b.append(", ");
-										}
-									}
-									throw new DataFormatException(b.toString());
+								Class<? extends IBase> typeClass = nextValue.getClass();
+								while (childElementDef == null && IBase.class.isAssignableFrom(typeClass)) {
+									//noinspection unchecked
+									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
+									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
 								}
+
+								Validate.notNull(childElementDef, "Found value of type[%s] which is not valid for field[%s] in %s", nextValue.getClass(), nextChild.getElementName(), childDef.getName());
 
 								visit(nextValue, nextChild, childElementDef, theCallback, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath);
 							}

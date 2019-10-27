@@ -78,8 +78,9 @@ public class Dstu2BundleFactory implements IVersionSpecificBundleFactory {
 				List<IResource> addedResourcesThisPass = new ArrayList<IResource>();
 
 				for (ResourceReferenceInfo nextRefInfo : references) {
-					if (!theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes))
+					if (theBundleInclusionRule != null && !theBundleInclusionRule.shouldIncludeReferencedResource(nextRefInfo, theIncludes)) {
 						continue;
+					}
 
 					IResource nextRes = (IResource) nextRefInfo.getResourceReference().getResource();
 					if (nextRes != null) {

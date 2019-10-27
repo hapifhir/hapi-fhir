@@ -79,8 +79,8 @@ import static org.junit.Assert.*;
 @SuppressWarnings("Duplicates")
 public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	public static final int LARGE_NUMBER = 77;
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4Test.class);
 	private SearchCoordinatorSvcImpl mySearchCoordinatorSvcRaw;
 	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
 	@Autowired
@@ -114,6 +114,49 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myDaoConfig.setAllowMultipleDelete(true);
 		ourClient.registerInterceptor(myCapturingInterceptor);
 		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
+	}
+
+	@Test
+	public void testParameterWithNoValueThrowsError_InvalidChainOnCustomSearch() throws IOException {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.setCode("focalAccess");
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ourClient.create().resource(searchParameter).execute();
+
+		mySearchParamRegistry.forceRefresh();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Procedure?focalAccess.a%20ne%20e");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(output, containsString("Invalid parameter chain: focalAccess.a ne e"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
+
+	}
+
+	@Test
+	public void testParameterWithNoValueThrowsError_InvalidRootParam() throws IOException {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.addBase("BodySite").addBase("Procedure");
+		searchParameter.setCode("focalAccess");
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter.setExpression("Procedure.extension('Procedure#focalAccess')");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ourClient.create().resource(searchParameter).execute();
+
+		mySearchParamRegistry.forceRefresh();
+
+		HttpGet get = new HttpGet(ourServerBase + "/Procedure?a");
+		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
+			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
+			assertThat(output, containsString("Unknown search parameter &quot;a&quot;"));
+			assertEquals(400, resp.getStatusLine().getStatusCode());
+		}
 	}
 
 	@Test
@@ -526,7 +569,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertThat(responseContent, containsString("true"));
 		}
-
 
 
 	}
@@ -2669,15 +2711,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testMetadata() throws Exception {
 		HttpGet get = new HttpGet(ourServerBase + "/metadata");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
+		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
-		} finally {
-			response.getEntity().getContent().close();
-			response.close();
 		}
 	}
 
@@ -3929,7 +3967,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			final String uuid1 = toSearchUuidFromLinkNext(result1);
 			runInTransaction(() -> {
-				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new IllegalStateException());
+				Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new IllegalStateException());
 				search.setExpiryOrNull(DateUtils.addSeconds(new Date(), -2));
 				mySearchEntityDao.save(search);
 			});
@@ -4015,7 +4053,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		Bundle result2 = ourClient
@@ -4028,7 +4066,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
@@ -4070,7 +4108,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid1 = toSearchUuidFromLinkNext(result1);
-		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(()->new InternalErrorException("")));
+		Search search1 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid1).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned1 = search1.getSearchLastReturned();
 
 		sleepOneClick();
@@ -4083,7 +4121,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		mySearchCacheSvc.flushLastUpdated();
 
 		final String uuid2 = toSearchUuidFromLinkNext(result2);
-		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(()->new InternalErrorException("")));
+		Search search2 = newTxTemplate().execute(theStatus -> mySearchEntityDao.findByUuidAndFetchIncludes(uuid2).orElseThrow(() -> new InternalErrorException("")));
 		Date lastReturned2 = search2.getSearchLastReturned();
 
 		assertTrue(lastReturned2.getTime() > lastReturned1.getTime());
@@ -5130,7 +5168,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 
 		patient.setId(patientid);
@@ -5138,12 +5176,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourClient.update().resource(patient).execute();
 		{
 			Patient readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-zA-Z0-9]+"));
 
 			readPatient.addName().setFamily("testUpdateWithSource");
 			ourClient.update().resource(readPatient).execute();
 			readPatient = (Patient) ourClient.read().resource("Patient").withId(patientid).execute();
-			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-f0-9]+"));
+			assertThat(readPatient.getMeta().getSource(), matchesPattern("#[a-zA-Z0-9]+"));
 		}
 	}
 
@@ -5276,14 +5314,32 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
 		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 
+		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
+			ourLog.info(resp);
+			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertThat(resp, not(containsString("Resource has no id")));
+			assertThat(resp, containsString("<issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"SHALL at least contain a contact's details or a reference to an organization [name.exists() or telecom.exists() or address.exists() or organization.exists()]\"/><location value=\"Patient.contact[0]\"/><location value=\"Line 0, Col 0\"/></issue>"));
+		}
+	}
+
+	/**
+	 * Make sure we don't filter keys
+	 */
+	@Test
+	public void testValidateJsonWithDuplicateKey() throws IOException {
+
+		String inputStr = "{\"resourceType\":\"Patient\", \"name\":[{\"text\":foo\"}], name:[{\"text\":\"foo\"}] }";
+		HttpPost post = new HttpPost(ourServerBase + "/Patient/$validate");
+		post.setEntity(new StringEntity(inputStr, ContentType.create(Constants.CT_FHIR_JSON_NEW, "UTF-8")));
+
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertEquals(412, response.getStatusLine().getStatusCode());
-			assertThat(resp, not(containsString("Resource has no id")));
-			assertThat(resp,
-				stringContainsInOrder(">ERROR<", "[Patient.contact[0]]", "<pre>SHALL at least contain a contact's details or a reference to an organization", "<issue><severity value=\"error\"/>"));
+
+			assertThat(resp, stringContainsInOrder("Error parsing JSON source: Syntax error in json reading special word false at Line 1"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();

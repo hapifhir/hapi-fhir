@@ -139,19 +139,21 @@ public class FhirInstanceValidatorR5Test {
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
+		when(myMockSupport.validateCode(nullable(FhirContext.class), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<CodeValidationResult>() {
 			@Override
-			public CodeValidationResult answer(InvocationOnMock theInvocation) throws Throwable {
-				FhirContext ctx = (FhirContext) theInvocation.getArguments()[0];
-				String system = (String) theInvocation.getArguments()[1];
-				String code = (String) theInvocation.getArguments()[2];
+			public CodeValidationResult answer(InvocationOnMock theInvocation) {
+				FhirContext ctx = theInvocation.getArgument(0, FhirContext.class);
+				String system = theInvocation.getArgument(1, String.class);
+				String code = theInvocation.getArgument(2, String.class);
+				String display = theInvocation.getArgument(3, String.class);
+				String valueSetUrl = theInvocation.getArgument(4, String.class);
 				CodeValidationResult retVal;
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(code)));
 				} else {
-					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, (String) theInvocation.getArguments()[2]);
+					retVal = myDefaultValidationSupport.validateCode(ctx, system, code, display, valueSetUrl);
 				}
-				ourLog.debug("validateCode({}, {}, {}) : {}", new Object[]{system, code, (String) theInvocation.getArguments()[2], retVal});
+				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
 				return retVal;
 			}
 		});
@@ -326,12 +328,12 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testBase64Invalid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
-		Media med = new Media();
+		DocumentReference med = new DocumentReference();
 		med.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		med.getContent().setContentType(Constants.CT_OCTET_STREAM);
-		med.getContent().setDataElement(value);
-		med.getContent().setTitle("bbbb syst");
-		med.setStatus(Media.MediaStatus.NOTDONE);
+		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
+		med.getContentFirstRep().getAttachment().setDataElement(value);
+		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
+		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		encoded = encoded.replace(value.getValueAsString(), "%%%2@()()");
@@ -348,12 +350,12 @@ public class FhirInstanceValidatorR5Test {
 	@Test
 	public void testBase64Valid() {
 		Base64BinaryType value = new Base64BinaryType(new byte[]{2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1});
-		Media med = new Media();
+		DocumentReference med = new DocumentReference();
 		med.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		med.getContent().setContentType(Constants.CT_OCTET_STREAM);
-		med.getContent().setDataElement(value);
-		med.getContent().setTitle("bbbb syst");
-		med.setStatus(Media.MediaStatus.NOTDONE);
+		med.getContentFirstRep().getAttachment().setContentType(Constants.CT_OCTET_STREAM);
+		med.getContentFirstRep().getAttachment().setDataElement(value);
+		med.getContentFirstRep().getAttachment().setTitle("bbbb syst");
+		med.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(med);
 
 		ourLog.info("Encoded: {}", encoded);
@@ -377,7 +379,7 @@ public class FhirInstanceValidatorR5Test {
 		period.setStartElement(new DateTimeType("2000-01-01T00:00:01+05:00"));
 		period.setEndElement(new DateTimeType("2000-01-01T00:00:00+04:00"));
 		assertThat(period.getStart().getTime(), lessThan(period.getEnd().getTime()));
-		procedure.setPerformed(period);
+		procedure.setOccurrence(period);
 
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myDefaultValidationSupport));

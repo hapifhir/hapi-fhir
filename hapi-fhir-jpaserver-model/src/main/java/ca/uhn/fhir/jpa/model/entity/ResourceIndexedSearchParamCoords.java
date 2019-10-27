@@ -61,8 +61,9 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {
 	}
 
-	public ResourceIndexedSearchParamCoords(String theName, double theLatitude, double theLongitude) {
-		setParamName(theName);
+	public ResourceIndexedSearchParamCoords(String theResourceType, String theParamName, double theLatitude, double theLongitude) {
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
 	}
@@ -95,17 +96,12 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		}
 		ResourceIndexedSearchParamCoords obj = (ResourceIndexedSearchParamCoords) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
-		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public Long getHashIdentity() {
-		calculateHashes();
-		return myHashIdentity;
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {
@@ -127,23 +123,25 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return myLatitude;
 	}
 
-	public void setLatitude(double theLatitude) {
+	public ResourceIndexedSearchParamCoords setLatitude(double theLatitude) {
 		myLatitude = theLatitude;
+		return this;
 	}
 
 	public double getLongitude() {
 		return myLongitude;
 	}
 
-	public void setLongitude(double theLongitude) {
+	public ResourceIndexedSearchParamCoords setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getParamName());
-		b.append(getResource());
+		b.append(getResourceType());
 		b.append(getLatitude());
 		b.append(getLongitude());
 		return b.toHashCode();

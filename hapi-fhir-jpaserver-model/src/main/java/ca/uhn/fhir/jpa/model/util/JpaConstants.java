@@ -244,16 +244,6 @@ public class JpaConstants {
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
-	 * <p>
-	 * This extension represents the equivalent of the
-	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
-	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
-	 * and will be located on the Resource.meta
-	 * </p>
-	 */
-	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
-
-	/**
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";

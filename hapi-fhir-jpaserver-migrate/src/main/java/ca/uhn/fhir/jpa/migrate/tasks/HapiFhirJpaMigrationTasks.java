@@ -80,14 +80,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		bulkExportJob.addIndex("IDX_BLKEX_EXPTIME").unique(false).withColumns("EXP_TIME");
 		bulkExportJob.addIndex("IDX_BLKEX_JOB_ID").unique(true).withColumns("JOB_ID");
 
-
-			// HFJ_BLK_EXPORT_COLLECTION
+		// HFJ_BLK_EXPORT_COLLECTION
 		version.addIdGenerator("SEQ_BLKEXCOL_PID");
 		Builder.BuilderAddTableByColumns bulkExportCollection = version.addTableByColumns("HFJ_BLK_EXPORT_COLLECTION", "PID");
 		bulkExportCollection.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		bulkExportCollection.addColumn("JOB_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		bulkExportCollection.addForeignKey("FK_BLKEXCOL_JOB").toColumn("JOB_PID").references("HFJ_BLK_EXPORT_JOB", "PID");
-		bulkExportCollection.addColumn("RES_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		bulkExportCollection.addColumn("RES_TYPE").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
 		bulkExportCollection.addColumn("TYPE_FILTER").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 1000);
 		bulkExportCollection.addColumn("OPTLOCK").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
@@ -99,7 +98,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		bulkExportCollectionFile.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		bulkExportCollectionFile.addForeignKey("FK_BLKEXCOLFILE_COLLECT").toColumn("COLLECTION_PID").references("HFJ_BLK_EXPORT_COLLECTION", "PID");
 
-
+		// HFJ_RES_VER_PROV
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: HFJ_RES_VER_PROV");
 		Builder.BuilderAddTableByColumns resVerProv = version.addTableByColumns("HFJ_RES_VER_PROV", "RES_VER_PID");
 		resVerProv.addColumn("RES_VER_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
@@ -149,13 +148,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(true)
 			.withColumns("VALUESET_PID", "VALUESET_ORDER");
 
-
-		// Account for RESTYPE_LEN column increasing from 30 to 35
-		version.onTable("HFJ_RESOURCE").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
-		version.onTable("HFJ_HISTORY_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
-		version.onTable("HFJ_RES_LINK").modifyColumn("SOURCE_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
-		version.onTable("HFJ_RES_LINK").modifyColumn("TARGET_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
-		version.onTable("HFJ_RES_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 35);
+		// Account for RESTYPE_LEN column increasing from 30 to 40
+		version.onTable("HFJ_RESOURCE").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_VER").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_HISTORY_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("SOURCE_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_LINK").modifyColumn("TARGET_RESOURCE_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
+		version.onTable("HFJ_RES_TAG").modifyColumn("RES_TYPE").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 40);
 
 		// TermConceptDesignation
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_DESIG");
@@ -165,8 +164,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_C_DESIGNATION");
 		version.onTable("TRM_VALUESET_C_DESIGNATION").modifyColumn("VAL").nonNullable().withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 2000);
 
+		// TermConceptProperty
 		version.startSectionWithMessage("Processing table: TRM_CONCEPT_PROPERTY");
-		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("PROP_VAL_LOB").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.CLOB);
+		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("PROP_VAL_LOB").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
 	}
 
 	protected void init400() {

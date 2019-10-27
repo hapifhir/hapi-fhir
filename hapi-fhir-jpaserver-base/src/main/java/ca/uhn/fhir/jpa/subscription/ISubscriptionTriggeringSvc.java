@@ -21,15 +21,15 @@ package ca.uhn.fhir.jpa.subscription;
  */
 
 import ca.uhn.fhir.rest.annotation.IdParam;
-import ca.uhn.fhir.rest.param.StringParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.util.List;
 
 public interface ISubscriptionTriggeringSvc {
-	IBaseParameters triggerSubscription(List<UriParam> theResourceIds, List<StringParam> theSearchUrls, @IdParam IIdType theSubscriptionId);
+
+	IBaseParameters triggerSubscription(List<IPrimitiveType<String>> theResourceIds, List<IPrimitiveType<String>> theSearchUrls, @IdParam IIdType theSubscriptionId);
 
 	void runDeliveryPass();
 }

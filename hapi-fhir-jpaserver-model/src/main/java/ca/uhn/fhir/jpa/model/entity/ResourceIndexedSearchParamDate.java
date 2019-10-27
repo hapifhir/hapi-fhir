@@ -77,8 +77,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamDate(String theName, Date theLow, Date theHigh, String theOriginalValue) {
-		setParamName(theName);
+	public ResourceIndexedSearchParamDate(String theResourceType, String theParamName, Date theLow, Date theHigh, String theOriginalValue) {
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setValueLow(theLow);
 		setValueHigh(theHigh);
 		myOriginalValue = theOriginalValue;
@@ -112,18 +113,12 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		ResourceIndexedSearchParamDate obj = (ResourceIndexedSearchParamDate) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-
-		b.append(getResource(), obj.getResource());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
-		b.append(getHashIdentity(), obj.getHashIdentity());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public Long getHashIdentity() {
-		calculateHashes();
-		return myHashIdentity;
 	}
 
 	public void setHashIdentity(Long theHashIdentity) {
@@ -151,23 +146,25 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		return myValueHigh;
 	}
 
-	public void setValueHigh(Date theValueHigh) {
+	public ResourceIndexedSearchParamDate setValueHigh(Date theValueHigh) {
 		myValueHigh = theValueHigh;
+		return this;
 	}
 
 	public Date getValueLow() {
 		return myValueLow;
 	}
 
-	public void setValueLow(Date theValueLow) {
+	public ResourceIndexedSearchParamDate setValueLow(Date theValueLow) {
 		myValueLow = theValueLow;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getResource());
 		b.append(getTimeFromDate(getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()));
 		return b.toHashCode();

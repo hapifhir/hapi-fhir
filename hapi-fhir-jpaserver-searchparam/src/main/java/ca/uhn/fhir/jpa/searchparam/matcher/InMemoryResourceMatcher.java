@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.MetaUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,6 +46,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class InMemoryResourceMatcher {
@@ -100,7 +103,15 @@ public class InMemoryResourceMatcher {
 		}
 
 		if (hasQualifiers(theAndOrParams)) {
-			return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.STANDARD_PARAMETER);
+			Optional<IQueryParameterType> optionalParameter = theAndOrParams.stream().flatMap(List::stream).filter(param -> param.getQueryParameterQualifier() != null).findAny();
+			if (optionalParameter.isPresent()) {
+				IQueryParameterType parameter = optionalParameter.get();
+				if (parameter instanceof ReferenceParam) {
+					ReferenceParam referenceParam = (ReferenceParam) parameter;
+					return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + "." + referenceParam.getChain(), InMemoryMatchResult.CHAIN);
+				}
+				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName + parameter.getQueryParameterQualifier(), InMemoryMatchResult.QUALIFIER);
+			}
 		}
 
 		if (hasChain(theAndOrParams)) {
@@ -116,7 +127,6 @@ public class InMemoryResourceMatcher {
 
 		switch (theParamName) {
 			case IAnyResource.SP_RES_ID:
-
 				return InMemoryMatchResult.fromBoolean(matchIdsAndOr(theAndOrParams, theResource));
 
 			case IAnyResource.SP_RES_LANGUAGE:
@@ -124,14 +134,36 @@ public class InMemoryResourceMatcher {
 			case Constants.PARAM_TAG:
 			case Constants.PARAM_PROFILE:
 			case Constants.PARAM_SECURITY:
-
 				return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, InMemoryMatchResult.PARAM);
-
+			case Constants.PARAM_SOURCE:
+				return InMemoryMatchResult.fromBoolean(matchSourcesAndOr(theAndOrParams, theResource));
 			default:
-
-
 				return matchResourceParam(theParamName, theAndOrParams, theSearchParams, resourceName, paramDef);
 		}
+	}
+
+	private boolean matchSourcesAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
+		if (theResource == null) {
+			return true;
+		}
+		return theAndOrParams.stream().allMatch(nextAnd -> matchSourcesOr(nextAnd, theResource));
+	}
+
+	private boolean matchSourcesOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
+		return theOrParams.stream().anyMatch(param -> matchSource(param, theResource));
+	}
+
+	private boolean matchSource(IQueryParameterType theSourceParam, IBaseResource theResource) {
+		SourceParam paramSource = new SourceParam(theSourceParam.getValueAsQueryToken(myFhirContext));
+		SourceParam resourceSource = new SourceParam(MetaUtil.getSource(myFhirContext, theResource.getMeta()));
+		boolean matches = true;
+		if (paramSource.getSourceUri() != null) {
+			matches = paramSource.getSourceUri().equals(resourceSource.getSourceUri());
+		}
+		if (paramSource.getRequestId() != null) {
+			matches &= paramSource.getRequestId().equals(resourceSource.getRequestId());
+		}
+		return matches;
 	}
 
 	private boolean matchIdsAndOr(List<List<IQueryParameterType>> theAndOrParams, IBaseResource theResource) {
@@ -142,9 +174,6 @@ public class InMemoryResourceMatcher {
 	}
 
 	private boolean matchIdsOr(List<IQueryParameterType> theOrParams, IBaseResource theResource) {
-		if (theResource == null) {
-			return true;
-		}
 		return theOrParams.stream().anyMatch(param -> param instanceof StringParam && matchId(((StringParam) param).getValue(), theResource.getIdElement()));
 	}
 

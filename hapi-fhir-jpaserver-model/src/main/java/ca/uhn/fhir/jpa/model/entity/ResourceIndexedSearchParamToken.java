@@ -101,9 +101,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamToken(String theName, String theSystem, String theValue) {
+	public ResourceIndexedSearchParamToken(String theResourceType, String theParamName, String theSystem, String theValue) {
 		super();
-		setParamName(theName);
+		setResourceType(theResourceType);
+		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 	}
@@ -205,9 +206,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myValue;
 	}
 
-	public void setValue(String theValue) {
+	public ResourceIndexedSearchParamToken setValue(String theValue) {
 		clearHashes();
 		myValue = StringUtils.defaultIfBlank(theValue, null);
+		return this;
 	}
 
 	@Override
@@ -273,7 +275,9 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public static long calculateHashValue(String theResourceType, String theParamName, String theValue) {
-		return hash(theResourceType, theParamName, trim(theValue));
+		String value = trim(theValue);
+		return hash(theResourceType, theParamName, value);
 	}
+
 
 }

@@ -313,10 +313,12 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		myContained = theContained;
 	}
 	
+	@Override
 	public void setId(IdDt theId) {
 		myId = theId;
 	}
 
+	@Override
 	public BaseResource setId(IIdType theId) {
 		if (theId instanceof IdDt) {
 			myId = (IdDt) theId;
@@ -328,6 +330,7 @@ public abstract class BaseResource extends BaseElement implements IResource {
 		return this;
 	}
 
+	@Override
 	public BaseResource setId(String theId) {
 		if (theId == null) {
 			myId = null;

@@ -2,6 +2,7 @@ package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
@@ -26,7 +27,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
-public class JsonParserR4Test {
+public class JsonParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonParserR4Test.class);
 	private static FhirContext ourCtx = FhirContext.forR4();
 
@@ -42,6 +43,14 @@ public class JsonParserR4Test {
 		b.addEntry().setResource(p);
 		return b;
 	}
+
+	@Test
+	public void testEntitiesNotConverted() throws IOException {
+		Device input = loadResource(ourCtx, Device.class, "/entities-from-cerner.json");
+		String narrative = input.getText().getDivAsString();
+		ourLog.info(narrative);
+	}
+
 
 	@Test
 	public void testEncodeExtensionOnBinaryData() {
@@ -162,7 +171,18 @@ public class JsonParserR4Test {
 		ourLog.info(encoded);
 
 		p = (Patient) ourCtx.newJsonParser().parseResource(encoded);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy &copy; 1999</div>", p.getText().getDivAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">Copy © 1999</div>", p.getText().getDivAsString());
+	}
+
+	@Test
+	public void testEncodeBinary() {
+		Binary b = new Binary();
+		b.setContent(new byte[]{0,1,2,3,4});
+		b.setContentType("application/octet-stream");
+
+		IParser parser = ourCtx.newJsonParser().setPrettyPrint(false);
+		String output = parser.encodeResourceToString(b);
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"application/octet-stream\",\"data\":\"AAECAwQ=\"}", output);
 	}
 
 	@Test
@@ -447,6 +467,34 @@ public class JsonParserR4Test {
 		assertEquals("535", ((StringType) houseNumberExt.getValue()).getValue());
 
 	}
+	
+	private Composition createComposition(String sectionText) {
+		Composition c = new Composition();
+		Narrative compositionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionText.setDivAsString("Composition");		
+		Narrative compositionSectionText = new Narrative().setStatus(Narrative.NarrativeStatus.GENERATED);
+		compositionSectionText.setDivAsString(sectionText);		
+		c.setText(compositionText);
+		c.addSection().setText(compositionSectionText);
+		return c;
+	}
+
+	/**
+	 * See #402 (however JSON is fine)
+	 */
+	@Test
+	public void testEncodingTextSection() {
+
+		String sectionText = "sectionText";
+		Composition composition = createComposition(sectionText);
+
+		String encoded = ourCtx.newJsonParser().encodeResourceToString(composition);
+		ourLog.info(encoded);
+
+		int idx = encoded.indexOf(sectionText);
+		assertNotEquals(-1, idx);
+	}
+
 
 	/**
 	 * 2019-09-19 - Pre #1489

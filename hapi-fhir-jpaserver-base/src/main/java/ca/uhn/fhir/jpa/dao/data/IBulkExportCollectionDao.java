@@ -1,13 +1,10 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.BulkExportCollectionEntity;
-import ca.uhn.fhir.jpa.entity.BulkExportJobEntity;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
-import java.util.Optional;
 
 /*
  * #%L
@@ -30,5 +27,13 @@ import java.util.Optional;
  */
 
 public interface IBulkExportCollectionDao extends JpaRepository<BulkExportCollectionEntity, Long> {
-	// nothing currently
+
+	@Modifying
+	@Query("DELETE FROM BulkExportCollectionEntity t")
+	void deleteAllFiles();
+
+	@Modifying
+	@Query("DELETE FROM BulkExportCollectionEntity t WHERE t.myId = :pid")
+	void deleteByPid(@Param("pid") Long theId);
+
 }

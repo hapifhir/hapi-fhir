@@ -62,7 +62,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		ValidationSupportChain validationSupport = new ValidationSupportChain(myValSupport, myDefaultValidationSupport);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(myDefaultValidationSupport, myValSupport);
 		myInstanceVal = new FhirInstanceValidator(validationSupport);
 
 		myVal.registerValidatorModule(myInstanceVal);
@@ -191,9 +191,9 @@ public class QuestionnaireResponseValidatorR5Test {
 
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system"))).thenReturn(true);
 		when(myValSupport.isCodeSystemSupported(any(), eq("http://codesystems.com/system2"))).thenReturn(true);
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any()))
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code0"), any(), any()))
 			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent().setCode("code0")));
-		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any()))
+		when(myValSupport.validateCode(any(), eq("http://codesystems.com/system"), eq("code1"), any(), any()))
 			.thenReturn(new CodeValidationResult(ValidationMessage.IssueSeverity.ERROR, "Unknown code"));
 
 		CodeSystem codeSystem = new CodeSystem();
@@ -248,7 +248,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Validation failed for 'http://codesystems.com/system2#code3'"));
+		assertThat(errors.toString(), containsString("Unknown code: http://codesystems.com/system2 / code3"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -345,7 +345,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class)))
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), any()))
 			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -402,7 +402,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode(codeValue);
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq(valueSetRef)))
 			.thenReturn(options);
-		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class)))
+		when(myValSupport.validateCode(any(FhirContext.class), eq(codeSystemUrl), eq(codeValue), any(String.class), any()))
 			.thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType(codeValue))));
 
 		IParser xmlParser = ourCtx.newXmlParser().setPrettyPrint(true);
@@ -522,7 +522,7 @@ public class QuestionnaireResponseValidatorR5Test {
 		options.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
 		when(myValSupport.fetchResource(any(FhirContext.class), eq(ValueSet.class), eq("http://somevalueset"))).thenReturn(options);
 
-		when(myValSupport.validateCode(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(String.class))).thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType("code0"))));
+		when(myValSupport.validateCode(any(FhirContext.class), eq("http://codesystems.com/system"), eq("code0"), any(String.class), any())).thenReturn(new CodeValidationResult(new ConceptDefinitionComponent(new CodeType("code0"))));
 
 		QuestionnaireResponse qa;
 		ValidationResult errors;

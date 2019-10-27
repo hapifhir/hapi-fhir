@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
@@ -50,6 +51,8 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 	public static final DefaultProfileValidationSupport VALIDATION_SUPPORT = new DefaultProfileValidationSupport();
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
@@ -86,10 +89,10 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
 	}
 
-	public static void validateSearchParam(Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
+	public static void validateSearchParam(ISearchParamExtractor theSearchParamExtractor, Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
 		if (theStatus == null) {
 			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
 		}
@@ -111,7 +114,7 @@ public class FhirResourceDaoSearchParameterR4 extends BaseHapiFhirResourceDao<Se
 			theExpression = theExpression.trim();
 
 			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-				String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
+				String[] expressionSplit = theSearchParamExtractor.split(theExpression);
 				for (String nextPath : expressionSplit) {
 					nextPath = nextPath.trim();
 

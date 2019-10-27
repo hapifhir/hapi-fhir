@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
@@ -98,7 +98,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 			vs
 				.getCompose()
 				.getIncludeFirstRep()
-				.setSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+				.setSystem(ITermLoaderSvc.LOINC_URI)
 				.addConcept()
 				.setCode(loincNumber)
 				.setDisplay(longCommonName);
@@ -167,7 +167,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 
 		TermConcept code = myCode2Concept.get(loincNumber);
 		if (code != null) {
-			code.addPropertyCoding(loincCodePropName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, partName);
+			code.addPropertyCoding(loincCodePropName, ITermLoaderSvc.LOINC_URI, partNumber, partName);
 		}
 
 		// LOINC Part -> Radlex RID code mappings
@@ -177,7 +177,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_ID)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_URI)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_PART_TO_RID_PART_MAP_NAME)
-					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 					.setSourceCode(partNumber)
 					.setSourceDisplay(partName)
 					.setTargetCodeSystem(RID_CS_URI)
@@ -194,7 +194,7 @@ public class LoincRsnaPlaybookHandler extends BaseLoincHandler implements IRecor
 					.setConceptMapId(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_ID)
 					.setConceptMapUri(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_URI)
 					.setConceptMapName(LoincPartRelatedCodeMappingHandler.LOINC_TERM_TO_RPID_PART_MAP_NAME)
-					.setSourceCodeSystem(IHapiTerminologyLoaderSvc.LOINC_URI)
+					.setSourceCodeSystem(ITermLoaderSvc.LOINC_URI)
 					.setSourceCode(loincNumber)
 					.setSourceDisplay(longCommonName)
 					.setTargetCodeSystem(RPID_CS_URI)

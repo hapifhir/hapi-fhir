@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -33,23 +34,40 @@ public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implemen
 
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String thePaths) {
+	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
+			String path = theSinglePath;
+
+			String needContactPointSystem = null;
+			if (path.endsWith("(system=phone)")) {
+				path = path.substring(0, path.length() - "(system=phone)".length());
+				needContactPointSystem = "phone";
+			}
+			if (path.endsWith("(system=email)")) {
+				path = path.substring(0, path.length() - "(system=email)".length());
+				needContactPointSystem = "email";
+			}
+
 			List<IBase> values = new ArrayList<>();
-			String[] nextPathsSplit = split(thePaths);
 			FhirTerser t = getContext().newTerser();
-			for (String nextPath : nextPathsSplit) {
-				String nextPathTrimmed = nextPath.trim();
-				List<IBase> allValues = t.getValues(theResource, nextPathTrimmed);
-				for (IBase next : allValues) {
-					if (next instanceof IBaseExtension) {
-						IBaseDatatype value = ((IBaseExtension) next).getValue();
-						if (value != null) {
-							values.add(value);
-						}
-					} else {
-						values.add(next);
+			List<IBase> allValues = t.getValues(theResource, path);
+			for (IBase next : allValues) {
+				if (next instanceof IBaseExtension) {
+					IBaseDatatype value = ((IBaseExtension) next).getValue();
+					if (value != null) {
+						values.add(value);
 					}
+				} else {
+
+					if (needContactPointSystem != null) {
+						if (next instanceof ContactPointDt) {
+							if (!needContactPointSystem.equals(((ContactPointDt) next).getSystem())) {
+								continue;
+							}
+						}
+					}
+
+					values.add(next);
 				}
 			}
 			return values;

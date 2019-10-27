@@ -1,90 +1,101 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
+import ca.uhn.fhir.model.primitive.IdDt;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 public class ActiveSubscriptionCacheTest {
+	static final String ID1 = "id1";
+	static final String ID2 = "id2";
+
 	@Test
 	public void twoPhaseDelete() {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
-		ActiveSubscription activeSub1 = new ActiveSubscription(null, null);
-		String id1 = "id1";
-		activeSubscriptionCache.put(id1, activeSub1);
+		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
+		activeSubscriptionCache.put(ID1, activeSub1);
 		assertFalse(activeSub1.isFlagForDeletion());
 		List<String> saveIds = new ArrayList<>();
 
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
+		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertTrue(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(id1));
+		assertNotNull(activeSubscriptionCache.get(ID1));
+		assertEquals(0, idsToDelete.size());
 
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
-		assertNull(activeSubscriptionCache.get(id1));
+		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
+		assertThat(idsToDelete, containsInAnyOrder(ID1));
+	}
+
+	private ActiveSubscription buildActiveSubscription(String theId) {
+		CanonicalSubscription canonicalSubscription = new CanonicalSubscription();
+		canonicalSubscription.setIdElement(new IdDt(theId));
+		return new ActiveSubscription(canonicalSubscription, null);
 	}
 
 	@Test
 	public void secondPassUnflags() {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
-		ActiveSubscription activeSub1 = new ActiveSubscription(null, null);
-		String id1 = "id1";
+		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
 		List<String> saveIds = new ArrayList<>();
-		activeSubscriptionCache.put(id1, activeSub1);
+		activeSubscriptionCache.put(ID1, activeSub1);
 
 		assertFalse(activeSub1.isFlagForDeletion());
 
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
+		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertTrue(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(id1));
+		assertNotNull(activeSubscriptionCache.get(ID1));
+		assertEquals(0, idsToDelete.size());
 
-		saveIds.add(id1);
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
+		saveIds.add(ID1);
+		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 		assertFalse(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(id1));
+		assertEquals(0, idsToDelete.size());
 	}
 
 	@Test
 	public void onlyFlaggedDeleted() {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
-		ActiveSubscription activeSub1 = new ActiveSubscription(null, null);
-		String id1 = "id1";
-		ActiveSubscription activeSub2 = new ActiveSubscription(null, null);
-		String id2 = "id2";
-		activeSubscriptionCache.put(id1, activeSub1);
-		activeSubscriptionCache.put(id2, activeSub2);
+
+		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
+		ActiveSubscription activeSub2 = buildActiveSubscription(ID2);
+		activeSubscriptionCache.put(activeSub1.getId(), activeSub1);
+		activeSubscriptionCache.put(activeSub2.getId(), activeSub2);
 
 		activeSub1.setFlagForDeletion(true);
 		List<String> saveIds = new ArrayList<>();
 
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
+		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
-		assertNull(activeSubscriptionCache.get(id1));
-		assertNotNull(activeSubscriptionCache.get(id2));
+		assertThat(idsToDelete, containsInAnyOrder(ID1));
+		assertNotNull(activeSubscriptionCache.get(ID2));
 		assertTrue(activeSub2.isFlagForDeletion());
 	}
 
 	@Test
 	public void onListSavesAndUnmarksFlag() {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
-		ActiveSubscription activeSub1 = new ActiveSubscription(null, null);
-		String id1 = "id1";
-		ActiveSubscription activeSub2 = new ActiveSubscription(null, null);
-		String id2 = "id2";
-		activeSubscriptionCache.put(id1, activeSub1);
-		activeSubscriptionCache.put(id2, activeSub2);
+		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
+
+		ActiveSubscription activeSub2 = buildActiveSubscription(ID2);
+
+		activeSubscriptionCache.put(ID1, activeSub1);
+		activeSubscriptionCache.put(ID2, activeSub2);
 
 		activeSub1.setFlagForDeletion(true);
 		List<String> saveIds = new ArrayList<>();
-		saveIds.add(id1);
-		saveIds.add(id2);
+		saveIds.add(ID1);
+		saveIds.add(ID2);
 
-		activeSubscriptionCache.unregisterAllSubscriptionsNotInCollection(saveIds);
+		activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
-		assertNotNull(activeSubscriptionCache.get(id1));
+		assertNotNull(activeSubscriptionCache.get(ID1));
 		assertFalse(activeSub1.isFlagForDeletion());
-		assertNotNull(activeSubscriptionCache.get(id2));
+		assertNotNull(activeSubscriptionCache.get(ID2));
 		assertFalse(activeSub2.isFlagForDeletion());
 	}
 

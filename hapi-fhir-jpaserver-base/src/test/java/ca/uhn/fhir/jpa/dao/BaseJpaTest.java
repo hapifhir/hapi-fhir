@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.bulk.IBulkDataExportSvc;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -66,7 +67,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-public abstract class BaseJpaTest {
+public abstract class BaseJpaTest extends BaseTest {
 
 	protected static final String CM_URL = "http://example.com/my_concept_map";
 	protected static final String CS_URL = "http://example.com/my_code_system";
@@ -477,6 +478,25 @@ public abstract class BaseJpaTest {
 		}
 		if (sw.getMillis() >= theTimeout) {
 			fail("Size " + theCallable.call() + " is != target " + theTarget);
+		}
+		Thread.sleep(500);
+	}
+
+	public static void waitForSize(int theTarget, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
+		waitForSize(theTarget, 10000, theCallable, theFailureMessage);
+	}
+
+	public static void waitForSize(int theTarget, int theTimeout, Callable<Number> theCallable, Callable<String> theFailureMessage) throws Exception {
+		StopWatch sw = new StopWatch();
+		while (theCallable.call().intValue() != theTarget && sw.getMillis() < theTimeout) {
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException theE) {
+				throw new Error(theE);
+			}
+		}
+		if (sw.getMillis() >= theTimeout) {
+			fail("Size " + theCallable.call() + " is != target " + theTarget + " - " + theFailureMessage.call());
 		}
 		Thread.sleep(500);
 	}

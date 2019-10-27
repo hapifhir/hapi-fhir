@@ -20,12 +20,16 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -61,13 +65,22 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 			return;
 		}
 
-		String sql = null;
-		String sql2 = null;
-		switch (getDriverType()) {
+		List<String> sqls = generateSql(getTableName(), myConstraintName, getDriverType());
+
+		for (String next : sqls) {
+			executeSql(getTableName(), next);
+		}
+
+	}
+
+	@Nonnull
+	static List<String> generateSql(String theTableName, String theConstraintName, DriverTypeEnum theDriverType) {
+		List<String> sqls = new ArrayList<>();
+		switch (theDriverType) {
 			case MYSQL_5_7:
 				// Lousy MYQL....
-				sql = "alter table " + getTableName() + " drop constraint " + myConstraintName;
-				sql2 = "alter table " + getTableName() + " drop index " + myConstraintName;
+				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
+				sqls.add("alter table " + theTableName + " drop index " + theConstraintName);
 				break;
 			case MARIADB_10_1:
 			case POSTGRES_9_4:
@@ -75,17 +88,12 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 			case H2_EMBEDDED:
 			case ORACLE_12C:
 			case MSSQL_2012:
-				sql = "alter table " + getTableName() + " drop constraint " + myConstraintName;
+				sqls.add("alter table " + theTableName + " drop constraint " + theConstraintName);
 				break;
 			default:
 				throw new IllegalStateException();
 		}
-
-		executeSql(getTableName(), sql);
-		if (isNotBlank(sql2)) {
-			executeSql(getTableName(), sql2);
-		}
-
+		return sqls;
 	}
 
 }

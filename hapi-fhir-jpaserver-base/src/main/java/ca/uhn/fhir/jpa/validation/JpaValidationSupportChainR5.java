@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.validation;
  */
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvcR5;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.validation.SnapshotGeneratingValidationSupport;
@@ -46,12 +46,13 @@ public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 	public ca.uhn.fhir.jpa.dao.r5.IJpaValidationSupportR5 myJpaValidationSupportR5;
 	
 	@Autowired
-	private IHapiTerminologySvcR5 myTerminologyService;
+	private ITermReadSvcR5 myTerminologyService;
 	
 	public JpaValidationSupportChainR5() {
 		super();
 	}
-	
+
+	@PreDestroy
 	public void flush() {
 		myDefaultProfileValidationSupport.flush();
 	}
@@ -82,11 +83,5 @@ public class JpaValidationSupportChainR5 extends ValidationSupportChain {
 		addValidationSupport(myTerminologyService);
 		addValidationSupport(new SnapshotGeneratingValidationSupport(myFhirContext, this));
 	}
-	
-	@PreDestroy
-	public void preDestroy() {
-		flush();
-	}
-	
 	
 }

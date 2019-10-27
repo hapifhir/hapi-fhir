@@ -2,6 +2,11 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /*
  * #%L
@@ -24,5 +29,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 
 public interface IResourceHistoryTagDao extends JpaRepository<ResourceHistoryTag, Long> {
-	// nothing
+
+	@Modifying
+	@Query("DELETE FROM ResourceHistoryTag t WHERE t.myId IN :pids")
+	void deleteByPid(@Param("pids") List<Long> thePids);
+
 }

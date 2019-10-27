@@ -20,63 +20,35 @@ package ca.uhn.fhir.jpa.subscription.module.cache;
  * #L%
  */
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
-import com.google.common.annotations.VisibleForTesting;
-import org.hl7.fhir.instance.model.api.IIdType;
+import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscriptionChannelType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.SubscribableChannel;
 
-import java.io.Closeable;
-import java.util.Collection;
-import java.util.HashSet;
-
-public class ActiveSubscription implements Closeable {
+public class ActiveSubscription {
 	private static final Logger ourLog = LoggerFactory.getLogger(ActiveSubscription.class);
 
 	private CanonicalSubscription mySubscription;
-	private final SubscribableChannel mySubscribableChannel;
-	private final Collection<MessageHandler> myDeliveryHandlerSet = new HashSet<>();
+	private final String myChannelName;
+	private final String myId;
 	private boolean flagForDeletion;
 
-	public ActiveSubscription(CanonicalSubscription theSubscription, SubscribableChannel theSubscribableChannel) {
+	public ActiveSubscription(CanonicalSubscription theSubscription, String theChannelName) {
 		mySubscription = theSubscription;
-		mySubscribableChannel = theSubscribableChannel;
+		myChannelName = theChannelName;
+		myId = theSubscription.getIdPart();
 	}
 
 	public CanonicalSubscription getSubscription() {
 		return mySubscription;
 	}
 
-	public SubscribableChannel getSubscribableChannel() {
-		return mySubscribableChannel;
-	}
-
-	public void register(MessageHandler theHandler) {
-		mySubscribableChannel.subscribe(theHandler);
-		myDeliveryHandlerSet.add(theHandler);
-	}
-
-	public void unregister(MessageHandler theMessageHandler) {
-		if (mySubscribableChannel != null) {
-			mySubscribableChannel.unsubscribe(theMessageHandler);
-		}
-	}
-
-	public IIdType getIdElement(FhirContext theFhirContext) {
-		return mySubscription.getIdElement(theFhirContext);
+	public String getChannelName() {
+		return myChannelName;
 	}
 
 	public String getCriteriaString() {
 		return mySubscription.getCriteriaString();
-	}
-
-	@VisibleForTesting
-	public MessageHandler getDeliveryHandlerForUnitTest() {
-		return myDeliveryHandlerSet.iterator().next();
 	}
 
 	public void setSubscription(CanonicalSubscription theCanonicalizedSubscription) {
@@ -91,26 +63,11 @@ public class ActiveSubscription implements Closeable {
 		flagForDeletion = theFlagForDeletion;
 	}
 
-	@Override
-	public void close() {
-		for (MessageHandler messageHandler : myDeliveryHandlerSet) {
-			unregister(messageHandler);
-		}
-		if (mySubscribableChannel instanceof DisposableBean) {
-			try {
-				((DisposableBean) mySubscribableChannel).destroy();
-			} catch (Exception e) {
-				ourLog.error("Failed to destroy channel bean", e);
-			}
-		}
+	public String getId() {
+		return myId;
 	}
 
-	/**
-	 * Use close() instead
-	 * KHS 15 Apr 2019
-	 */
-	@Deprecated
-	public void unregisterAll() {
-		close();
+	public CanonicalSubscriptionChannelType getChannelType() {
+		return mySubscription.getChannelType();
 	}
 }

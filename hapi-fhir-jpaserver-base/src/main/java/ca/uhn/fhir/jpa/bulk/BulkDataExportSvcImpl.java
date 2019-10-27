@@ -165,7 +165,7 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 
 		if (jobToDelete.isPresent()) {
 
-			ourLog.info("Deleting bulk export job: {}", jobToDelete.get().getJobId());
+			ourLog.info("Deleting bulk export job: {}", jobToDelete.get());
 
 			myTxTemplate.execute(t -> {
 
@@ -176,16 +176,19 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 						ourLog.info("Purging bulk data file: {}", nextFile.getResourceId());
 						getBinaryDao().delete(toId(nextFile.getResourceId()));
 						getBinaryDao().forceExpungeInExistingTransaction(toId(nextFile.getResourceId()), new ExpungeOptions().setExpungeDeletedResources(true).setExpungeOldVersions(true), null);
-						myBulkExportCollectionFileDao.delete(nextFile);
+						myBulkExportCollectionFileDao.deleteByPid(nextFile.getId());
 
 					}
 
-					myBulkExportCollectionDao.delete(nextCollection);
+					myBulkExportCollectionDao.deleteByPid(nextCollection.getId());
 				}
 
-				myBulkExportJobDao.delete(job);
+				ourLog.info("*** ABOUT TO DELETE");
+				myBulkExportJobDao.deleteByPid(job.getId());
 				return null;
 			});
+
+			ourLog.info("Finished deleting bulk export job: {}", jobToDelete.get());
 
 		}
 
@@ -452,11 +455,17 @@ public class BulkDataExportSvcImpl implements IBulkDataExportSvc {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(Transactional.TxType.NEVER)
 	public synchronized void cancelAndPurgeAllJobs() {
-		myBulkExportCollectionFileDao.deleteAll();
-		myBulkExportCollectionDao.deleteAll();
-		myBulkExportJobDao.deleteAll();
+		myTxTemplate.execute(t -> {
+			ourLog.info("Deleting all files");
+			myBulkExportCollectionFileDao.deleteAllFiles();
+			ourLog.info("Deleting all collections");
+			myBulkExportCollectionDao.deleteAllFiles();
+			ourLog.info("Deleting all jobs");
+			myBulkExportJobDao.deleteAllFiles();
+			return null;
+		});
 	}
 
 	@DisallowConcurrentExecution

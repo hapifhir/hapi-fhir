@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -42,6 +43,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,21 +57,22 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 
 	@Autowired
 	private ITermCodeSystemDao myCsDao;
-
 	@Autowired
 	private ValidationSupportChain myValidationSupport;
+	@Autowired
+	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 
 	@Override
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(String theCode, String theSystem, RequestDetails theRequest) {
-		List<IIdType> valueSetIds;
 		Set<Long> ids = searchForIds(new SearchParameterMap(CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)), theRequest );
-		valueSetIds = new ArrayList<>();
+		List<IIdType> valueSetIds = new ArrayList<>();
 		for (Long next : ids) {
 			valueSetIds.add(new IdType("CodeSystem", next));
 		}
 		return valueSetIds;
 	}
 
+	@Nonnull
 	@Override
 	public IContextValidationSupport.LookupCodeResult lookupCode(IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, Coding theCoding, RequestDetails theRequestDetails) {
 		boolean haveCoding = theCoding != null && isNotBlank(theCoding.getSystem()) && isNotBlank(theCoding.getCode());
@@ -120,7 +123,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		if (isNotBlank(codeSystemUrl)) {
 			TermCodeSystem persCs = myCsDao.findByCodeSystemUri(codeSystemUrl);
 			if (persCs != null) {
-				myTerminologySvc.deleteCodeSystem(persCs);
+				myTerminologyCodeSystemStorageSvc.deleteCodeSystem(persCs);
 			}
 		}
 	}
@@ -135,7 +138,7 @@ public class FhirResourceDaoCodeSystemDstu3 extends BaseHapiFhirResourceDao<Code
 		org.hl7.fhir.r4.model.CodeSystem cs = VersionConvertor_30_40.convertCodeSystem(csDstu3);
 		addPidToResource(theEntity, cs);
 
-		myTerminologySvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
 
 		return retVal;
 	}

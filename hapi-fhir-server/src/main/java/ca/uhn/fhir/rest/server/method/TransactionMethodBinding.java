@@ -120,15 +120,6 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 			return response;
 		}
 
-		// Grab the IDs of all of the resources in the transaction
-		List<IResource> resources;
-		resources = (List<IResource>) theMethodParams[myTransactionParamIndex];
-
-		IdentityHashMap<IResource, IdDt> oldIds = new IdentityHashMap<IResource, IdDt>();
-		for (IResource next : resources) {
-			oldIds.put(next, next.getId());
-		}
-
 		// Call the server implementation method
 		Object response = invokeServerMethod(theServer, theRequest, theMethodParams);
 		IBundleProvider retVal = toResourceList(response);
@@ -142,17 +133,10 @@ public class TransactionMethodBinding extends BaseResourceReturningMethodBinding
 
 		List<IBaseResource> retResources = retVal.getResources(0, retVal.size());
 		for (int i = 0; i < retResources.size(); i++) {
-			IdDt oldId = oldIds.get(retResources.get(i));
 			IBaseResource newRes = retResources.get(i);
 			if (newRes.getIdElement() == null || newRes.getIdElement().isEmpty()) {
 				if (!(newRes instanceof BaseOperationOutcome)) {
 					throw new InternalErrorException("Transaction method returned resource at index " + i + " with no id specified - IResource#setId(IdDt)");
-				}
-			}
-
-			if (oldId != null && !oldId.isEmpty()) {
-				if (!oldId.equals(newRes.getIdElement()) && newRes instanceof IResource) {
-					((IResource) newRes).getResourceMetadata().put(ResourceMetadataKeyEnum.PREVIOUS_ID, oldId);
 				}
 			}
 		}

@@ -65,7 +65,7 @@ public class StandaloneSubscriptionMessageHandler implements MessageHandler {
 		switch (theResourceModifiedMessage.getOperationType()) {
 			case DELETE:
 				if (isSubscription(theResourceModifiedMessage)) {
-					mySubscriptionRegistry.unregisterSubscription(theResourceModifiedMessage.getId(myFhirContext));
+					mySubscriptionRegistry.unregisterSubscription(theResourceModifiedMessage.getId(myFhirContext).getIdPart());
 				}
 				return;
 			case CREATE:

@@ -134,13 +134,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+				return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

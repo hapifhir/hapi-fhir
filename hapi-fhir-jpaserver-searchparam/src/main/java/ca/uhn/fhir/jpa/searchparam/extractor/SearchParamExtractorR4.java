@@ -44,26 +44,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
-	private static final Set<Class<?>> ourIgnoredForSearchDatatypes;
-
-	static {
-		//noinspection unchecked
-		ourIgnoredForSearchDatatypes = Collections.unmodifiableSet(Sets.newHashSet(
-			Age.class,
-			Annotation.class,
-			Attachment.class,
-			Count.class,
-			Distance.class,
-			Ratio.class,
-			SampledData.class,
-			Signature.class,
-			LocationPositionComponent.class
-		));
-	}
-
-	@Autowired
-	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
-
+	private IValidationSupport myValidationSupport;
 	private FHIRPathEngine myFhirPathEngine;
 
 	/**
@@ -97,6 +78,9 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 
 	@PostConstruct
 	public void initFhirPath() {
+		if (myValidationSupport == null) {
+			myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+		}
 		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());

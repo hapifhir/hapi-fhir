@@ -91,8 +91,9 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 
-	public ResourceIndexedSearchParamQuantity(String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
+	public ResourceIndexedSearchParamQuantity(String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		this();
+		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
@@ -132,14 +133,12 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		}
 		ResourceIndexedSearchParamQuantity obj = (ResourceIndexedSearchParamQuantity) theObj;
 		EqualsBuilder b = new EqualsBuilder();
+		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getResource(), obj.getResource());
 		b.append(getSystem(), obj.getSystem());
 		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
-		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
+		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
@@ -202,14 +201,14 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		return myValue;
 	}
 
-	public void setValue(BigDecimal theValue) {
+	public ResourceIndexedSearchParamQuantity setValue(BigDecimal theValue) {
 		clearHashes();
 		myValue = theValue;
+		return this;
 	}
 
 	@Override
 	public int hashCode() {
-		calculateHashes();
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());

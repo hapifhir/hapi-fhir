@@ -24,6 +24,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.TestUtil;
+import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -201,8 +202,13 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		Patient pat = new Patient();
 		pat.setId("Patient/123");
 		pat.addName().addFamily(methodName);
-		myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
-
+		try {
+			myPatientDao.validate(pat, null, null, null, ValidationModeEnum.UPDATE, null, mySrd);
+		} catch (PreconditionFailedException e) {
+			// should not happen
+			IBaseOperationOutcome oo = e.getOperationOutcome();
+			fail(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+		}
 		pat.setId("");
 
 		try {

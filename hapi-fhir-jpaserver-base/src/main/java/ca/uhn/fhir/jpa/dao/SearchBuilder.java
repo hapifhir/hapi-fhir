@@ -39,7 +39,8 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.model.api.*;
@@ -64,7 +65,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -95,6 +95,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.*;
 
 /**
@@ -134,7 +135,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	private List<Long> myAlsoIncludePids;
@@ -242,7 +243,7 @@ public class SearchBuilder implements ISearchBuilder {
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
 				paramName = parameterName.replaceAll("\\..*", "");
-				parameters.add(QualifiedParamList.singleton(paramName, next.getValueAsQueryToken(myContext)));
+				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myContext)));
 			}
 
 			if (paramName == null) {
@@ -364,7 +365,7 @@ public class SearchBuilder implements ISearchBuilder {
 				}
 
 				final Expression<BigDecimal> fromObj = join.get("myValue");
-				ParamPrefixEnum prefix = ObjectUtils.defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
+				ParamPrefixEnum prefix = defaultIfNull(param.getPrefix(), ParamPrefixEnum.EQUAL);
 				if (operation == SearchFilterParser.CompareOperation.ne) {
 					prefix = ParamPrefixEnum.NOT_EQUAL;
 				} else if (operation == SearchFilterParser.CompareOperation.lt) {
@@ -772,15 +773,31 @@ public class SearchBuilder implements ISearchBuilder {
 		return chainValue;
 	}
 
-	private Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, RequestDetails theRequest) {
-		return addPredicateResourceId(theValues,
-			null, theRequest);
+	private Predicate addPredicateResourceId(String theResourceName, List<List<IQueryParameterType>> theValues, RequestDetails theRequest) {
+		return addPredicateResourceId(theValues, theResourceName, null, theRequest);
 	}
 
-	private Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues,
-														  SearchFilterParser.CompareOperation operation, RequestDetails theRequest) {
+	private Predicate addPredicateResourceId(List<List<IQueryParameterType>> theValues, String theResourceName, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+
+		Predicate nextPredicate = createPredicateResourceId(myResourceTableRoot, theResourceName, theValues, theOperation, theRequest);
+
+		if (nextPredicate != null) {
+			myPredicates.add(nextPredicate);
+			return nextPredicate;
+		}
+
+		return null;
+	}
+
+	@org.jetbrains.annotations.Nullable
+	private Predicate createPredicateResourceId(Root<ResourceTable> theRoot, String theResourceName, List<List<IQueryParameterType>> theValues, SearchFilterParser.CompareOperation theOperation, RequestDetails theRequest) {
+		Predicate nextPredicate = null;
+
+		Set<Long> allOrPids = null;
+
 		for (List<? extends IQueryParameterType> nextValue : theValues) {
 			Set<Long> orPids = new HashSet<>();
+			boolean haveValue = false;
 			for (IQueryParameterType next : nextValue) {
 				String value = next.getValueAsQueryToken(myContext);
 				if (value != null && value.startsWith("|")) {
@@ -789,8 +806,9 @@ public class SearchBuilder implements ISearchBuilder {
 
 				IdType valueAsId = new IdType(value);
 				if (isNotBlank(value)) {
+					haveValue = true;
 					try {
-						Long pid = myIdHelperService.translateForcedIdToPid(myResourceName, valueAsId.getIdPart(), theRequest);
+						Long pid = myIdHelperService.translateForcedIdToPid(theResourceName, valueAsId.getIdPart(), theRequest);
 						orPids.add(pid);
 					} catch (ResourceNotFoundException e) {
 						// This is not an error in a search, it just results in no matchesFhirResourceDaoR4InterceptorTest
@@ -798,29 +816,38 @@ public class SearchBuilder implements ISearchBuilder {
 					}
 				}
 			}
-
-			Predicate nextPredicate = null;
-			if (orPids.size() > 0) {
-				if ((operation == null) ||
-					(operation == SearchFilterParser.CompareOperation.eq)) {
-					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids);
-				} else if (operation == SearchFilterParser.CompareOperation.ne) {
-					nextPredicate = myResourceTableRoot.get("myId").as(Long.class).in(orPids).not();
+			if (haveValue) {
+				if (allOrPids == null) {
+					allOrPids = orPids;
 				} else {
-					throw new InvalidRequestException("Unsupported operator specified in resource ID query, only \"eq\" and \"ne\" are supported");
+					allOrPids.retainAll(orPids);
 				}
-				myPredicates.add(nextPredicate);
-			} else {
-				// This will never match
-				nextPredicate = myBuilder.equal(myResourceTableRoot.get("myId").as(Long.class), -1);
-				myPredicates.add(nextPredicate);
-			}
 
-			if (operation != null) {
-				return nextPredicate;
 			}
 		}
-		return null;
+
+		if (allOrPids != null && allOrPids.isEmpty()) {
+
+			// This will never match
+			nextPredicate = myBuilder.equal(theRoot.get("myId").as(Long.class), -1);
+
+		} else if (allOrPids != null) {
+
+			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
+			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			switch (operation) {
+				default:
+				case eq:
+					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids);
+					break;
+				case ne:
+					nextPredicate = theRoot.get("myId").as(Long.class).in(allOrPids).not();
+					break;
+			}
+
+		}
+
+		return nextPredicate;
 	}
 
 
@@ -835,19 +862,9 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextParameter : theList) {
-			String nextParamValue = nextParameter.getValueAsQueryToken(myContext);
-			int lastHashValueIndex = nextParamValue.lastIndexOf('#');
-			String sourceUri;
-			String requestId;
-			if (lastHashValueIndex == -1) {
-				sourceUri = nextParamValue;
-				requestId = null;
-			} else {
-				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
-				requestId = nextParamValue.substring(lastHashValueIndex + 1);
-			}
-			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-
+			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
+			String sourceUri = sourceParameter.getSourceUri();
+			String requestId = sourceParameter.getRequestId();
 			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
 			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {
@@ -1582,7 +1599,7 @@ public class SearchBuilder implements ISearchBuilder {
 				code = theBuilder.equal(theFrom.get("myUnits"), unitsValue);
 			}
 
-			cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+			cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 			final Expression<BigDecimal> path = theFrom.get("myValue");
 			String invalidMessageName = "invalidQuantityPrefix";
 
@@ -1614,7 +1631,7 @@ public class SearchBuilder implements ISearchBuilder {
 			hashPredicate = myBuilder.equal(theFrom.get("myHashIdentity"), hash);
 		}
 
-		cmpValue = ObjectUtils.defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
+		cmpValue = defaultIfNull(cmpValue, ParamPrefixEnum.EQUAL);
 		final Expression<BigDecimal> path = theFrom.get("myValue");
 		String invalidMessageName = "invalidQuantityPrefix";
 
@@ -2700,7 +2717,7 @@ public class SearchBuilder implements ISearchBuilder {
 	private Predicate processFilterParameter(SearchFilterParser.FilterParameter theFilter,
 														  String theResourceName, RequestDetails theRequest) {
 
-		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName,	theFilter.getParamPath().getName());
+		RuntimeSearchParam searchParam = mySearchParamRegistry.getActiveSearchParam(theResourceName, theFilter.getParamPath().getName());
 
 		if (searchParam.getName().equals(IAnyResource.SP_RES_ID)) {
 			if (searchParam.getParamType() == RestSearchParameterTypeEnum.TOKEN) {
@@ -2709,8 +2726,7 @@ public class SearchBuilder implements ISearchBuilder {
 					null,
 					null,
 					theFilter.getValue());
-				return addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)),
-					theFilter.getOperation(), theRequest);
+				return addPredicateResourceId(Collections.singletonList(Collections.singletonList(param)), myResourceName, theFilter.getOperation(), theRequest);
 			} else {
 				throw new InvalidRequestException("Unexpected search parameter type encountered, expected token type for _id search");
 			}
@@ -2833,7 +2849,7 @@ public class SearchBuilder implements ISearchBuilder {
 
 		if (theParamName.equals(IAnyResource.SP_RES_ID)) {
 
-			addPredicateResourceId(theAndOrParams, theRequest);
+			addPredicateResourceId(theResourceName, theAndOrParams, theRequest);
 
 		} else if (theParamName.equals(IAnyResource.SP_RES_LANGUAGE)) {
 

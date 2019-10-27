@@ -83,55 +83,5 @@ public class FhirResourceDaoSubscriptionDstu2 extends BaseHapiFhirResourceDao<Su
 		return retVal;
 	}
 
-	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(Subscription theResource) {
-		if (theResource.getStatus() == null) {
-			throw new UnprocessableEntityException("Can not process submitted Subscription - Subscription.status must be populated on this server");
-		}
-
-		String query = theResource.getCriteria();
-		if (isBlank(query)) {
-			throw new UnprocessableEntityException("Subscription.criteria must be populated");
-		}
-
-		int sep = query.indexOf('?');
-		if (sep <= 1) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		String resType = query.substring(0, sep);
-		if (resType.contains("/")) {
-			throw new UnprocessableEntityException("Subscription.criteria must be in the form \"{Resource Type}?[params]\"");
-		}
-
-		RuntimeResourceDefinition resDef;
-		try {
-			resDef = getContext().getResourceDefinition(resType);
-		} catch (DataFormatException e) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resType);
-		}
-		return resDef;
-	}
-
-	@Override
-	protected void validateResourceForStorage(Subscription theResource, ResourceTable theEntityToSave) {
-		super.validateResourceForStorage(theResource, theEntityToSave);
-
-		RuntimeResourceDefinition resDef = validateCriteriaAndReturnResourceDefinition(theResource);
-
-		IFhirResourceDao<? extends IBaseResource> dao = getDao(resDef.getImplementingClass());
-		if (dao == null) {
-			throw new UnprocessableEntityException("Subscription.criteria contains invalid/unsupported resource type: " + resDef);
-		}
-
-		if (theResource.getChannel().getType() == null) {
-			throw new UnprocessableEntityException("Subscription.channel.type must be populated on this server");
-		}
-
-		SubscriptionStatusEnum status = theResource.getStatusElement().getValueAsEnum();
-		if (status == null) {
-			throw new UnprocessableEntityException("Subscription.status must be populated on this server");
-		}
-
-	}
 
 }

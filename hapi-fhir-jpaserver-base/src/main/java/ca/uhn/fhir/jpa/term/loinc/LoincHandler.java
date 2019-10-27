@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
-import ca.uhn.fhir.jpa.term.TerminologyLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.Validate;
@@ -58,7 +58,7 @@ public class LoincHandler implements IRecordHandler {
 			String longCommonName = trim(theRecord.get("LONG_COMMON_NAME"));
 			String shortName = trim(theRecord.get("SHORTNAME"));
 			String consumerName = trim(theRecord.get("CONSUMER_NAME"));
-			String display = TerminologyLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
+			String display = TermLoaderSvcImpl.firstNonBlank(longCommonName, shortName, consumerName);
 
 			TermConcept concept = new TermConcept(myCodeSystemVersion, code);
 			concept.setDisplay(display);
@@ -117,7 +117,7 @@ public class LoincHandler implements IRecordHandler {
 							}
 
 							if (isNotBlank(partNumber)) {
-								concept.addPropertyCoding(nextPropertyName, IHapiTerminologyLoaderSvc.LOINC_URI, partNumber, nextPropertyValue);
+								concept.addPropertyCoding(nextPropertyName, ITermLoaderSvc.LOINC_URI, partNumber, nextPropertyValue);
 							} else {
 								String msg = "Unable to find part code with TYPE[" + key.getPartType() + "] and NAME[" + nextPropertyValue + "] (using name " + propertyValue + ")";
 								ourLog.warn(msg);

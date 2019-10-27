@@ -87,11 +87,13 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	}
 
 
+	@Override
 	protected IHttpRequest createHttpRequest() {
 		IHttpRequest retVal = createHttpRequest((HttpEntity)null);
 		return retVal;
 	}
 
+	@Override
 	protected IHttpRequest createHttpRequest(byte[] content) {
 		/*
 		 * Note: Be careful about changing which constructor we use for
@@ -109,6 +111,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 		return result;
 	}
 
+	@Override
 	protected IHttpRequest createHttpRequest(Map<String, List<String>> theParams) {
 		List<NameValuePair> parameters = new ArrayList<NameValuePair>();
 		for (Entry<String, List<String>> nextParam : theParams.entrySet()) {
@@ -124,6 +127,7 @@ public class ApacheHttpClient extends BaseHttpClient implements IHttpClient {
 	}
 
 
+	@Override
 	protected IHttpRequest createHttpRequest(String theContents) {
 		/*
 		 * We aren't using a StringEntity here because the constructors

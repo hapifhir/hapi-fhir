@@ -24,13 +24,19 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
+import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Base;
+import org.hl7.fhir.dstu3.model.CodeSystem;
+import org.hl7.fhir.dstu3.model.ConceptMap;
+import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -65,22 +71,22 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		return () -> {
 			List<IBase> values = new ArrayList<>();
 			String[] nextPathsSplit = split(thePaths);
-			for (String nextPath : nextPathsSplit) {
+		for (String nextPath : nextPathsSplit) {
 				List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, trim(nextPath));
-				if (allValues.isEmpty() == false) {
-					values.addAll(allValues);
-				}
+			if (allValues.isEmpty() == false) {
+				values.addAll(allValues);
 			}
+		}
 
-			return values;
+		return values;
 		};
 	}
 
-	@Override
-	@PostConstruct
-	public void start() {
-		myWorkerContext = new HapiWorkerContext(getContext(), myValidationSupport);
-		myFhirPathEngine = new FHIRPathEngine(myWorkerContext);
+	@EventListener
+	public void start(ContextRefreshedEvent theEvent) {
+		myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
 	}
 
 }

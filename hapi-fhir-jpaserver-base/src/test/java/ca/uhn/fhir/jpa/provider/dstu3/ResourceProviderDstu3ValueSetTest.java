@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -27,7 +27,6 @@ import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.dstu3.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
-import org.hl7.fhir.dstu3.model.codesystems.HttpVerb;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -36,6 +35,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,84 +48,50 @@ import static org.junit.Assert.*;
 public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderDstu3ValueSetTest.class);
-	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
 	private IIdType myLocalValueSetId;
-	private Long myExtensionalCsIdOnResourceTable;
-	private Long myExtensionalVsIdOnResourceTable;
 	private ValueSet myLocalVs;
 
-	private void loadAndPersistCodeSystemAndValueSet(HttpVerb theVerb) throws IOException {
-		loadAndPersistCodeSystem(theVerb);
-		loadAndPersistValueSet(theVerb);
+	private void loadAndPersistCodeSystemAndValueSet() throws IOException {
+		loadAndPersistCodeSystem();
+		loadAndPersistValueSet();
 	}
 
-	private void loadAndPersistCodeSystem(HttpVerb theVerb) throws IOException {
+	private void loadAndPersistCodeSystem() throws IOException {
 		CodeSystem codeSystem = loadResourceFromClasspath(CodeSystem.class, "/extensional-case-3-cs.xml");
 		codeSystem.setId("CodeSystem/cs");
-		persistCodeSystem(codeSystem, theVerb);
+		persistCodeSystem(codeSystem);
 	}
 
-	private void persistCodeSystem(CodeSystem theCodeSystem, HttpVerb theVerb) {
-		switch (theVerb) {
-			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-					}
-				});
-				break;
-			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalCsId = myCodeSystemDao.update(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-					}
-				});
-				break;
-			default:
-				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
-		}
-		myExtensionalCsIdOnResourceTable = myCodeSystemDao.readEntity(myExtensionalCsId, null).getId();
+	private void persistCodeSystem(CodeSystem theCodeSystem) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+				@Override
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+					myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
+				}
+			});
 	}
 
-	private void loadAndPersistValueSet(HttpVerb theVerb) throws IOException {
+	private void loadAndPersistValueSet() throws IOException {
 		ValueSet valueSet = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 		valueSet.setId("ValueSet/vs");
-		persistValueSet(valueSet, theVerb);
+		persistValueSet(valueSet);
 	}
 
-	private void persistValueSet(ValueSet theValueSet, HttpVerb theVerb) {
-		switch (theVerb) {
-			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
-				});
-				break;
-			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
-				});
-				break;
-			default:
-				throw new IllegalArgumentException("HTTP verb is not supported: " + theVerb);
-		}
-		myExtensionalVsIdOnResourceTable = myValueSetDao.readEntity(myExtensionalVsId, null).getId();
+	private void persistValueSet(ValueSet theValueSet) {
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+				@Override
+				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
+				}
+			});
 	}
 
 	private CodeSystem createExternalCs() {
 		IFhirResourceDao<CodeSystem> codeSystemDao = myCodeSystemDao;
 		IResourceTableDao resourceTableDao = myResourceTableDao;
-		IHapiTerminologySvc termSvc = myTermSvc;
 
-		return createExternalCs(codeSystemDao, resourceTableDao, termSvc, mySrd);
+		return createExternalCs(codeSystemDao, resourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 	}
 
 	private void createExternalCsAndLocalVs() {
@@ -185,7 +151,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			code.addPropertyString("HELLO", "12345-2");
 			cs.getConcepts().add(code);
 
-			myTermSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		});
 	}
 
@@ -229,7 +195,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandValueSetPropertySearchWithRegexExcludeUsingOr() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		createLoincSystemWithSomeCodes();
 
@@ -270,7 +236,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandValueSetPropertySearchWithRegexExcludeNoFilter() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		createLoincSystemWithSomeCodes();
 
@@ -299,7 +265,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandById() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -331,7 +297,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByIdWithPreExpansion() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Parameters respParam = ourClient
@@ -362,7 +328,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByIdWithFilter() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -388,7 +354,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 */
 	@Test
 	public void testExpandByIdentifier() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -408,7 +374,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrl() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -428,7 +394,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByUrlWithBogusUrl() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		try {
 			ourClient
@@ -447,7 +413,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByUrlWithPreExpansion() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Parameters respParam = ourClient
@@ -470,11 +436,11 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	public void testExpandByUrlWithPreExpansionAndBogusUrl() throws Exception {
 		myDaoConfig.setPreExpandValueSets(true);
 
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		try {
-			Parameters respParam = ourClient
+			ourClient
 				.operation()
 				.onType(ValueSet.class)
 				.named("expand")
@@ -488,7 +454,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandByValueSet() throws IOException {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
 
@@ -552,7 +518,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testExpandInvalidParams() throws IOException {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		try {
 			ourClient
@@ -708,8 +674,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		HttpPost post = new HttpPost(ourServerBase + "/ValueSet/%24expand");
 		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
-		CloseableHttpResponse resp = ourHttpClient.execute(post);
-		try {
+		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(respString);
@@ -719,14 +684,12 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			assertEquals(400, resp.getStatusLine().getStatusCode());
 			assertThat(respString, Matchers.containsString("Unknown FilterOperator code 'n'"));
 
-		} finally {
-			IOUtils.closeQuietly(resp);
 		}
 	}
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -744,7 +707,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
@@ -769,7 +732,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 	@Test
 	public void testValidateCodeOperationByCodeAndSystemType() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -790,7 +753,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 */
 	@Test
 	public void testValidateCodeAgainstBuiltInSystem() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -820,7 +783,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	 */
 	@Test
 	public void testValidateCodeAgainstBuiltInSystemByUrl() throws Exception {
-		loadAndPersistCodeSystemAndValueSet(HttpVerb.POST);
+		loadAndPersistCodeSystemAndValueSet();
 
 		Parameters respParam = ourClient
 			.operation()
@@ -855,7 +818,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		TestUtil.clearAllStaticFieldsForUnitTest();
 	}
 
-	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, IHapiTerminologySvc theTermSvc, ServletRequestDetails theRequestDetails) {
+	public static CodeSystem createExternalCs(IFhirResourceDao<CodeSystem> theCodeSystemDao, IResourceTableDao theResourceTableDao, ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc, ServletRequestDetails theRequestDetails) {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
@@ -886,7 +849,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		TermConcept parentB = new TermConcept(cs, "ParentB").setDisplay("Parent B");
 		cs.getConcepts().add(parentB);
 
-		theTermSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
+		theTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getId(), URL_MY_CODE_SYSTEM, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 		return codeSystem;
 	}
 

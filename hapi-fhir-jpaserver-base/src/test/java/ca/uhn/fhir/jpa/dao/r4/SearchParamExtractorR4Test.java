@@ -49,8 +49,9 @@ public class SearchParamExtractorR4Test {
 			}
 
 			@Override
-			public void refreshCacheIfNecessary() {
+			public boolean refreshCacheIfNecessary() {
 				// nothing
+				return false;
 			}
 
 			@Override
@@ -103,7 +104,7 @@ public class SearchParamExtractorR4Test {
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
-		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
+		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertEquals("category", token.getParamName());
@@ -155,21 +156,6 @@ public class SearchParamExtractorR4Test {
 	}
 
 	@Test
-	public void testIndexNumberFromDuration() {
-
-		Duration duration = new Duration();
-		duration.setValue(123);
-		Encounter enc = new Encounter();
-		enc.setLength(duration);
-
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4();
-		ResourceTable table = new ResourceTable();
-		extractor.extractSearchParamNumber(table, enc);
-
-	}
-
-
-	@Test
 	public void testExtractComponentQuantities() {
 		Observation o1 = new Observation();
 		o1.addComponent()
@@ -180,7 +166,7 @@ public class SearchParamExtractorR4Test {
 			.setValue(new Quantity().setSystem("http://bar").setCode("code2").setValue(200));
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
-		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(new ResourceTable(), o1);
+		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());
 	}
