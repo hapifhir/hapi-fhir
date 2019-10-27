@@ -438,7 +438,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
-		subscriptionTemp.setCriteria(criteria1);
+		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
+
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
@@ -518,7 +520,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
 
-		subscriptionTemp.setCriteria(criteria1);
+		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
+
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
@@ -593,7 +597,8 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 
 		Subscription subscriptionTemp = ourClient.read(Subscription.class, subscription2.getId());
 		Assert.assertNotNull(subscriptionTemp);
-		subscriptionTemp.setCriteria(criteria1);
+		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteria1);
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
 
@@ -719,7 +724,10 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 		Subscription subscriptionTemp = ourClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
 		Assert.assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
-		subscriptionTemp.setCriteria(criteriaGood);
+
+		Topic topic = (Topic) subscriptionTemp.getTopic().getResource();
+		topic.getResourceTrigger().getQueryCriteria().setCurrent(criteriaGood);
+
 		ourLog.info("** About to update subscription");
 		ourClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();

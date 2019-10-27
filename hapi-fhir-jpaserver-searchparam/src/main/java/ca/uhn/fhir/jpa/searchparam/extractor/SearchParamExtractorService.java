@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Set;
 
 @Service
@@ -37,50 +38,64 @@ public class SearchParamExtractorService {
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	public void extractFromResource(ResourceIndexedSearchParams theParams, ResourceTable theEntity, IBaseResource theResource) {
-		theParams.myStringParams.addAll(extractSearchParamStrings(theEntity, theResource));
-		theParams.myNumberParams.addAll(extractSearchParamNumber(theEntity, theResource));
-		theParams.myQuantityParams.addAll(extractSearchParamQuantity(theEntity, theResource));
-		theParams.myDateParams.addAll(extractSearchParamDates(theEntity, theResource));
-		theParams.myUriParams.addAll(extractSearchParamUri(theEntity, theResource));
-		theParams.myCoordsParams.addAll(extractSearchParamCoords(theEntity, theResource));
+		theParams.myStringParams.addAll(extractSearchParamStrings(theResource));
+		theParams.myNumberParams.addAll(extractSearchParamNumber(theResource));
+		theParams.myQuantityParams.addAll(extractSearchParamQuantity(theResource));
+		theParams.myDateParams.addAll(extractSearchParamDates(theResource));
+		theParams.myUriParams.addAll(extractSearchParamUri(theResource));
+		theParams.myCoordsParams.addAll(extractSearchParamCoords(theResource));
 
 		ourLog.trace("Storing date indexes: {}", theParams.myDateParams);
 
-		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theEntity, theResource)) {
+		for (BaseResourceIndexedSearchParam next : extractSearchParamTokens(theResource)) {
 			if (next instanceof ResourceIndexedSearchParamToken) {
 				theParams.myTokenParams.add((ResourceIndexedSearchParamToken) next);
 			} else {
 				theParams.myStringParams.add((ResourceIndexedSearchParamString) next);
 			}
 		}
+
+		populateResourceTable(theParams.myStringParams, theEntity);
+		populateResourceTable(theParams.myNumberParams, theEntity);
+		populateResourceTable(theParams.myQuantityParams, theEntity);
+		populateResourceTable(theParams.myDateParams, theEntity);
+		populateResourceTable(theParams.myUriParams, theEntity);
+		populateResourceTable(theParams.myCoordsParams, theEntity);
+		populateResourceTable(theParams.myTokenParams, theEntity);
 	}
 
-	protected Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamCoords(theEntity, theResource);
+	private void populateResourceTable(Collection<? extends BaseResourceIndexedSearchParam> theParams, ResourceTable theResourceTable) {
+		for (BaseResourceIndexedSearchParam next : theParams) {
+			next.setResource(theResourceTable);
+		}
 	}
 
-	protected Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamDates(theEntity, theResource);
+	private Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamCoords(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamNumber(theEntity, theResource);
+	private Set<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamDates(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamQuantity(theEntity, theResource);
+	private Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamNumber(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamStrings(theEntity, theResource);
+	private Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamQuantity(theResource);
 	}
 
-	protected Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamTokens(theEntity, theResource);
+	private Set<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamStrings(theResource);
 	}
 
-	protected Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource) {
-		return mySearchParamExtractor.extractSearchParamUri(theEntity, theResource);
+	private Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamTokens(theResource);
+	}
+
+	private Set<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
+		return mySearchParamExtractor.extractSearchParamUri(theResource);
 	}
 
 

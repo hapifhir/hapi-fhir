@@ -62,9 +62,13 @@ public class FhirResourceDaoValueSetR4 extends BaseHapiFhirResourceDao<ValueSet>
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
 
-	@Autowired
-	@Qualifier("myJpaValidationSupportChainR4")
 	private IValidationSupport myValidationSupport;
+
+	@Override
+	public void start() {
+		super.start();
+		myValidationSupport = getApplicationContext().getBean(IValidationSupport.class,"myJpaValidationSupportChainR4" );
+	}
 
 	@Autowired
 	private IFhirResourceDaoCodeSystem<CodeSystem, Coding, CodeableConcept> myCodeSystemDao;

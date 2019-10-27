@@ -20,7 +20,6 @@ package ca.uhn.fhir.jpa.dao;
  * #L%
  */
 
-import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -29,7 +28,6 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.delete.DeleteConflictList;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -57,6 +55,7 @@ import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
+import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
@@ -74,7 +73,6 @@ import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.*;
 
-import static ca.uhn.fhir.jpa.model.util.JpaConstants.EXT_EXTERNALIZED_BINARY_ID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Transactional(propagation = Propagation.REQUIRED)
@@ -92,9 +90,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private MatchResourceUrlService myMatchResourceUrlService;
 	@Autowired
 	private IResourceReindexingSvc myResourceReindexingSvc;
-	@Autowired
 	private IInstanceValidatorModule myInstanceValidator;
-
 	private String myResourceName;
 	private Class<T> myResourceType;
 
@@ -180,11 +176,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return createOperationOutcome(OO_SEVERITY_INFO, theMessage, "informational");
 	}
 
-	protected final IInstanceValidatorModule getInstanceValidator() {
+	private IInstanceValidatorModule getInstanceValidator() {
 		return myInstanceValidator;
 	}
 
-	protected final IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
+	private IBaseOperationOutcome createOperationOutcome(String theSeverity, String theMessage, String theCode) {
 		IBaseOperationOutcome oo = OperationOutcomeUtil.newInstance(getContext());
 		OperationOutcomeUtil.addIssue(getContext(), oo, theSeverity, theMessage, null, theCode);
 		return oo;
@@ -834,6 +830,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public void start() {
 		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
+		myInstanceValidator = getApplicationContext().getBean(IInstanceValidatorModule.class);
 		super.start();
 	}
 

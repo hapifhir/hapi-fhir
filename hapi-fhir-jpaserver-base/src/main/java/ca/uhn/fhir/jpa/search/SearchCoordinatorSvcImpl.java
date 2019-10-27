@@ -155,6 +155,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Override
 	public void cancelAllActiveSearches() {
 		for (SearchTask next : myIdToSearchTask.values()) {
+			ourLog.info("Requesting immediate abort of search: {}", next.getSearch().getUuid());
 			next.requestImmediateAbort();
 			AsyncUtil.awaitLatchAndIgnoreInterrupt(next.getCompletionLatch(), 30, TimeUnit.SECONDS);
 		}
@@ -631,6 +632,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Integer awaitInitialSync() {
 			ourLog.trace("Awaiting initial sync");
 			do {
+				ourLog.trace("Search {} aborted: {}", getSearch().getUuid(), !isNotAborted());
 				if (AsyncUtil.awaitLatchAndThrowInternalErrorExceptionOnInterrupt(getInitialCollectionLatch(), 250L, TimeUnit.MILLISECONDS)) {
 					break;
 				}

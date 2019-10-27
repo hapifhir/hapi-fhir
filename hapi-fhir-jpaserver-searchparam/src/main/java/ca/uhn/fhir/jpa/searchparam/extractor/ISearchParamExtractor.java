@@ -29,20 +29,21 @@ import java.util.Set;
 
 public interface ISearchParamExtractor {
 
-	Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamDate> extractSearchParamDates(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamString> extractSearchParamStrings(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 
-	Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(ResourceTable theEntity, IBaseResource theResource);
+	Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamUri> extractSearchParamUri(ResourceTable theEntity, IBaseResource theResource);
+	Set<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 
 	List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef);
 
+	String[] split(String theExpression);
 }

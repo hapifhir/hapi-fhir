@@ -3,8 +3,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
-import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.dstu3.model.*;
@@ -33,6 +32,9 @@ import java.util.List;
  */
 
 public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao<SearchParameter> implements IFhirResourceDaoSearchParameter<SearchParameter> {
+
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
@@ -69,7 +71,7 @@ public class FhirResourceDaoSearchParameterDstu3 extends BaseHapiFhirResourceDao
 		FhirContext context = getContext();
 		Enumerations.SearchParamType type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR4.validateSearchParam(type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
 	}
 
 }

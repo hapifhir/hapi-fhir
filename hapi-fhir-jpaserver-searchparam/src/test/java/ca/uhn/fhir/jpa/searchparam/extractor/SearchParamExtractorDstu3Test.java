@@ -97,7 +97,7 @@ public class SearchParamExtractorDstu3Test {
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
-		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(new ResourceTable(), obs);
+		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertEquals(1, tokens.size());
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertEquals("category", token.getParamName());
@@ -176,7 +176,7 @@ public class SearchParamExtractorDstu3Test {
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
-		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(new ResourceTable(), questionnaire);
+		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
 		assertEquals(1, params.size());
 	}
 

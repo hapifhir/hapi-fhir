@@ -6,8 +6,10 @@ import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoSearchParameter;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoSearchParameterR4;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
+import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ElementUtil;
@@ -50,6 +52,8 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 	public static final DefaultProfileValidationSupport VALIDATION_SUPPORT = new DefaultProfileValidationSupport();
 	@Autowired
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
+	@Autowired
+	private ISearchParamExtractor mySearchParamExtractor;
 
 	protected void markAffectedResources(SearchParameter theResource) {
 		Boolean reindex = theResource != null ? CURRENTLY_REINDEXING.get(theResource) : null;
@@ -86,71 +90,8 @@ public class FhirResourceDaoSearchParameterR5 extends BaseHapiFhirResourceDao<Se
 		FhirContext context = getContext();
 		Enum<?> type = theResource.getType();
 
-		FhirResourceDaoSearchParameterR5.validateSearchParam(type, status, base, expression, context, getConfig());
+		FhirResourceDaoSearchParameterR4.validateSearchParam(mySearchParamExtractor, type, status, base, expression, context, getConfig());
 	}
 
-	public static void validateSearchParam(Enum<?> theType, Enum<?> theStatus, List<? extends IPrimitiveType> theBase, String theExpression, FhirContext theContext, DaoConfig theDaoConfig) {
-		if (theStatus == null) {
-			throw new UnprocessableEntityException("SearchParameter.status is missing or invalid");
-		}
-
-		if (ElementUtil.isEmpty(theBase) && (theType == null || !Enumerations.SearchParamType.COMPOSITE.name().equals(theType.name()))) {
-			throw new UnprocessableEntityException("SearchParameter.base is missing");
-		}
-
-		if (theType != null && theType.name().equals(Enumerations.SearchParamType.COMPOSITE.name()) && isBlank(theExpression)) {
-
-			// this is ok
-
-		} else if (isBlank(theExpression)) {
-
-			throw new UnprocessableEntityException("SearchParameter.expression is missing");
-
-		} else {
-
-			theExpression = theExpression.trim();
-
-			if (!theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R5)) {
-				String[] expressionSplit = BaseSearchParamExtractor.SPLIT.split(theExpression);
-				for (String nextPath : expressionSplit) {
-					nextPath = nextPath.trim();
-
-					int dotIdx = nextPath.indexOf('.');
-					if (dotIdx == -1) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\". Must start with a resource name");
-					}
-
-					String resourceName = nextPath.substring(0, dotIdx);
-					try {
-						theContext.getResourceDefinition(resourceName);
-					} catch (DataFormatException e) {
-						throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + nextPath + "\": " + e.getMessage());
-					}
-
-					if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-						if (theDaoConfig.isValidateSearchParameterExpressionsOnSave()) {
-							IBaseResource temporaryInstance = theContext.getResourceDefinition(resourceName).newInstance();
-							try {
-								theContext.newFluentPath().evaluate(temporaryInstance, nextPath, IBase.class);
-							} catch (Exception e) {
-								String msg = theContext.getLocalizer().getMessage(FhirResourceDaoSearchParameterR5.class, "invalidSearchParamExpression", nextPath, e.getMessage());
-								throw new UnprocessableEntityException(msg, e);
-							}
-						}
-					}
-				}
-
-			} else {
-
-				FHIRPathEngine fhirPathEngine = new FHIRPathEngine(new HapiWorkerContext(theContext, VALIDATION_SUPPORT));
-				try {
-					fhirPathEngine.parse(theExpression);
-				} catch (FHIRLexer.FHIRLexerException e) {
-					throw new UnprocessableEntityException("Invalid SearchParameter.expression value \"" + theExpression + "\": " + e.getMessage());
-				}
-
-			}
-		} // if have expression
-	}
 
 }

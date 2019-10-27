@@ -237,9 +237,9 @@ public class XmlParser extends BaseParser {
 
 			switch (childDef.getChildType()) {
 				case ID_DATATYPE: {
-					IIdType value = (IIdType) theElement;
+					IIdType value = IIdType.class.cast(theElement);
 					String encodedValue = "id".equals(theChildName) ? value.getIdPart() : value.getValue();
-					if (StringUtils.isNotBlank(encodedValue) || !hasNoExtensions(value)) {
+					if (StringUtils.isNotBlank(encodedValue) || !super.hasNoExtensions(value)) {
 						theEventWriter.writeStartElement(theChildName);
 						if (StringUtils.isNotBlank(encodedValue)) {
 							theEventWriter.writeAttribute("value", encodedValue);
@@ -250,9 +250,9 @@ public class XmlParser extends BaseParser {
 					break;
 				}
 				case PRIMITIVE_DATATYPE: {
-					IPrimitiveType<?> pd = (IPrimitiveType) theElement;
+					IPrimitiveType<?> pd = IPrimitiveType.class.cast(theElement);
 					String value = pd.getValueAsString();
-					if (value != null || !hasNoExtensions(pd)) {
+					if (value != null || !super.hasNoExtensions(pd)) {
 						theEventWriter.writeStartElement(theChildName);
 						String elementId = getCompositeElementId(theElement);
 						if (isNotBlank(elementId)) {
@@ -309,14 +309,14 @@ public class XmlParser extends BaseParser {
 					break;
 				}
 				case PRIMITIVE_XHTML: {
-					XhtmlDt dt = (XhtmlDt) theElement;
+					XhtmlDt dt = XhtmlDt.class.cast(theElement);
 					if (dt.hasContent()) {
 						encodeXhtml(dt, theEventWriter);
 					}
 					break;
 				}
 				case PRIMITIVE_XHTML_HL7ORG: {
-					IBaseXhtml dt = (IBaseXhtml) theElement;
+					IBaseXhtml dt = IBaseXhtml.class.cast(theElement);
 					if (!dt.isEmpty()) {
 						// TODO: this is probably not as efficient as it could be
 						XhtmlDt hdt = new XhtmlDt();
@@ -355,15 +355,14 @@ public class XmlParser extends BaseParser {
 			}
 
 			if (nextChild instanceof RuntimeChildNarrativeDefinition) {
-				Optional<INarrative> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
-
+				Optional<IBase> narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 				INarrativeGenerator gen = myContext.getNarrativeGenerator();
-				if (gen != null && (narr.isPresent() == false || narr.get().isEmpty())) {
+				if (gen != null && narr.isPresent() == false) {
 					gen.populateResourceNarrative(myContext, theResource);
-					narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
 				}
 
-				if (narr.isPresent() && narr.get().isEmpty() == false) {
+				narr = nextChild.getAccessor().getFirstValueOrNull(theElement);
+				if (narr.isPresent()) {
 					RuntimeChildNarrativeDefinition child = (RuntimeChildNarrativeDefinition) nextChild;
 					String childName = nextChild.getChildNameByDatatype(child.getDatatype());
 					BaseRuntimeElementDefinition<?> type = child.getChildByName(childName);

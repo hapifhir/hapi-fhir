@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.*;
+import org.hl7.fhir.r5.model.codesystems.SubscriptionChannelType;
 import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -120,14 +121,19 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	protected Subscription newSubscription(String theCriteria, String thePayload) {
+		Topic topic = new Topic();
+		topic.getResourceTrigger().getQueryCriteria().setCurrent(theCriteria);
+
 		Subscription subscription = new Subscription();
+		subscription.getTopic().setResource(topic);
 		subscription.setReason("Monitor new neonatal function (note, age will be determined by the monitor)");
 		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
-		subscription.setCriteria(theCriteria);
 
 		Subscription.SubscriptionChannelComponent channel = subscription.getChannel();
-		channel.setType(Subscription.SubscriptionChannelType.RESTHOOK);
-		channel.setPayload(thePayload);
+		channel.getType().addCoding()
+			.setSystem(SubscriptionChannelType.RESTHOOK.getSystem())
+			.setCode(SubscriptionChannelType.RESTHOOK.toCode());
+		channel.getPayload().setContentType(thePayload);
 		channel.setEndpoint(ourListenerServerBase);
 		return subscription;
 	}

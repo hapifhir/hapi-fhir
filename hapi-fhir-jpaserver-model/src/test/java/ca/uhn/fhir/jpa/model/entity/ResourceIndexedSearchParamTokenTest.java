@@ -9,7 +9,7 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results
@@ -20,7 +20,7 @@ public class ResourceIndexedSearchParamTokenTest {
 
 	@Test
 	public void testHashFunctionsWithOverlapNames() {
-		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("NAME", "SYSTEM", "VALUE");
+		ResourceIndexedSearchParamToken token = new ResourceIndexedSearchParamToken("Patient", "NAME", "SYSTEM", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
 
 		// Make sure our hashing function gives consistent results

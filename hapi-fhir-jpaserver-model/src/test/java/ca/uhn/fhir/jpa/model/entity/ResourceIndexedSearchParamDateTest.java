@@ -35,8 +35,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingNullDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", null, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -45,8 +45,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", date1A, date2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", date1B, date2B, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1B, date2B, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -55,8 +55,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingTimeStampsThatMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", timestamp1A, timestamp2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", timestamp1B, timestamp2B, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1B, timestamp2B, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -67,8 +67,8 @@ public class ResourceIndexedSearchParamDateTest {
 	// other will be equivalent but will be a java.sql.Timestamp. Equals should work in both directions.
 	@Test
 	public void equalsIsTrueForMixedTimestampsAndDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", date1A, date2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", timestamp1A, timestamp2A, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp2A, "SomeValue");
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -77,8 +77,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", date1A, date2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", date2A, date1A, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date2A, date1A, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -87,8 +87,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDatesNullCase() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", date1A, date2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -97,8 +97,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingTimeStamps() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", timestamp1A, timestamp2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", timestamp2A, timestamp1A, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, timestamp2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, timestamp1A, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -107,8 +107,8 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForMixedTimestampsAndDatesThatDoNotMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("SomeResource", date1A, date2A, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("SomeResource", timestamp2A, timestamp1A, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, date2A, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, timestamp1A, "SomeValue");
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));

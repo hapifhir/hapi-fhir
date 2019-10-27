@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.DEFAULT_CUTOFF_SLACK;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
@@ -165,13 +166,10 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 		DatabaseSearchCacheSvcImpl.setNowForUnitTests(search3timestamp.get() + 2100);
 
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theArg0) {
-				assertFalse("Search 1 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent());
-				assertFalse("Search 3 still exists", mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent());
-			}
-		});
+
+		await().until(()-> newTxTemplate().execute(t -> !mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid1).isPresent()));
+		await().until(()-> newTxTemplate().execute(t -> !mySearchEntityDao.findByUuidAndFetchIncludes(searchUuid3).isPresent()));
+
 
 	}
 

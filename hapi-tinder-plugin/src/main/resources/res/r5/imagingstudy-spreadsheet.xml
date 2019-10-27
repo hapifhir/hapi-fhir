@@ -3,7 +3,7 @@
   <Author>Grahame</Author>
   <LastAuthor>John Moehrke</LastAuthor>
   <Created>2012-03-19T11:12:07Z</Created>
-  <LastSaved>2018-10-30T14:39:41Z</LastSaved>
+  <LastSaved>2019-10-02T21:40:04Z</LastSaved>
   <Version>16.00</Version>
  </DocumentProperties>
  <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
@@ -19,6 +19,7 @@
   
   
   <ActiveSheet>8</ActiveSheet>
+  <FirstVisibleSheet>2</FirstVisibleSheet>
   <RefModeR1C1/>
   <ProtectStructure>False</ProtectStructure>
   <ProtectWindows>False</ProtectWindows>
@@ -849,6 +850,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <PaperSizeIndex>9</PaperSizeIndex>
@@ -862,9 +864,9 @@
  </Worksheet>
  <Worksheet ss:Name="Data Elements">
   <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R99C26"/>
+   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='Data Elements'!R1C1:R100C26"/>
   </Names>
-  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="99" ss:StyleID="s69" x:FullColumns="1" x:FullRows="1">
+  <Table ss:ExpandedColumnCount="26" ss:ExpandedRowCount="100" ss:StyleID="s69" x:FullColumns="1" x:FullRows="1">
    <Column ss:AutoFitWidth="0" ss:StyleID="s70" ss:Width="274.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s69" ss:Width="180.0"/>
    <Column ss:StyleID="s69" ss:Width="29.0"/>
@@ -1013,8 +1015,8 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">All series modality if actual acquisition modalities</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">A list of all the series.modality values that are actual acquisition modalities, i.e. those in the DICOM Context Group 29 (value set OID 1.2.840.10008.6.1.19)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">All of the distinct values for series' modalities</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">A list of all the distinct values of series.modality. This may include both aquisition and non-aquisition modalities.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1278,21 +1280,49 @@
     <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
+   <Row ss:AutoFitHeight="0" ss:Height="90">
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedure</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The performed procedure or code</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell><Data ss:Type="String">The procedure or code from which this ImagingStudy was part of.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><Data ss:Type="String">.outboundRelationship[typeCode=COMP].target[classCode=PROC, moodCode=EVN]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s96"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s97"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s95"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+   </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedureReference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedure.value[x]</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">0..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(Procedure)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">Reference(Procedure) | CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">ImagingProcedureCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">The performed Procedure reference</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The performed Procedure </Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><Data ss:Type="String">The procedure which this ImagingStudy was part of.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1307,15 +1337,14 @@
     <Cell ss:StyleID="s98"><NamedCell ss:Name="_FilterDatabase"/></Cell>
    </Row>
    <Row ss:AutoFitHeight="0" ss:Height="60">
-    <Cell ss:StyleID="s91"><Data ss:Type="String">ImagingStudy.procedureCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s91"><Data ss:Type="String">!ImagingStudy.procedureCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">ProcedureCodeSequence</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">CodeableConcept</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">ImagingProcedureCode</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:Index="9" ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1393,7 +1422,7 @@
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><Data ss:Type="String">0..*</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Reference(Condition|Observation|Media|DiagnosticReport|DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Reference(Condition|Observation|DiagnosticReport|DocumentReference)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1566,8 +1595,8 @@
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s92"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s92"><Data ss:Type="String">The modality of the instances in the series</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s93"><Data ss:Type="String">The modality of this series sequence</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s92"><Data ss:Type="String">The modality used for this series</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s93"><Data ss:Type="String">The distinct modality for this series. This may include both aquisition and non-aquisition modalities.</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s93"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s94"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -1832,7 +1861,7 @@
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell><Data ss:Type="String">1..1</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s102"><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s101"><Data ss:Type="String">Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
+    <Cell ss:StyleID="s101"><Data ss:Type="String">Reference(Practitioner|PractitionerRole|Organization|CareTeam|Patient|Device|RelatedPerson|HealthcareService)</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><Data ss:Type="String">Y</Data><NamedCell ss:Name="_FilterDatabase"/></Cell>
     <Cell ss:StyleID="s101"><NamedCell ss:Name="_FilterDatabase"/></Cell>
@@ -3651,6 +3680,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <HorizontalResolution>600</HorizontalResolution>
@@ -3659,7 +3689,7 @@
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>7</TopRowBottomPane>
+   <TopRowBottomPane>29</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
    <LeftColumnRightPane>1</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
@@ -3669,20 +3699,20 @@
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C3,R33C3:R34C3,R19C3,R4C3,R9C3</Range>
+   <Range>R18C3,R34C3:R35C3,R20C3,R4C3,R9C3</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"0..1,1..1,0..*,1..*"</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C19:R17C21,R34C21:R35C21,R33C20:R35C20,R35C19,R19C19:R19C21,R4C19:R4C21,R9C19:R9C21</Range>
+   <Range>R18C19:R18C21,R35C21:R36C21,R34C20:R36C20,R36C19,R20C19:R20C21,R4C19:R4C21,R9C19:R9C21</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"N/A"</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C22,R33C22:R35C22,R19C22,R4C22,R9C22</Range>
+   <Range>R18C22,R34C22:R36C22,R20C22,R4C22,R9C22</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"left,right,up,down,[xpixels];[ypixels]"</Value>
@@ -3690,32 +3720,32 @@
    <ErrorStyle>Info</ErrorStyle>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C6:R17C7,R33C6:R35C7,R19C6:R19C7,R4C6:R4C7,R9C6:R9C7</Range>
+   <Range>R18C6:R18C7,R34C6:R36C7,R20C6:R20C7,R4C6:R4C7,R9C6:R9C7</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"Y,N"</Value>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C5,R33C5:R35C5,R19C5,R4C5,R9C5</Range>
+   <Range>R18C5,R34C5:R36C5,R20C5,R4C5,R9C5</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"*,Reference(A|B),boolean,string,code,id,oid,uuid,integer,decimal,date,dateTime,time,instant,uri,base64Binary,CodeableConcept,Coding,Identifier,Period,Timing,Range,Quantity,Age,Distance,Duration,Count,Money,Ratio,HumanName,Address,ContactPoint,SampledData"</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C4,R33C4:R35C4,R19C4,R4C4,R9C4</Range>
+   <Range>R18C4,R34C4:R36C4,R20C4,R4C4,R9C4</Range>
    <Type>List</Type>
    <Value>'\\ERICS-AIR-2\ehaas\work\subversion\fhir\build\source\colorectal\Archive\[Invariants]Invariants'!#REF!</Value>
    <ErrorHide/>
   </DataValidation>
   <DataValidation xmlns="urn:schemas-microsoft-com:office:excel">
-   <Range>R17C8:R17C9,R33C9:R34C9,R33C8:R35C8,R19C8:R19C9,R4C8:R4C9,R9C8:R9C9</Range>
+   <Range>R18C8:R18C9,R34C9:R35C9,R34C8:R36C8,R20C8:R20C9,R4C8:R4C9,R9C8:R9C9</Range>
    <Type>List</Type>
    <CellRangeList/>
    <Value>"Bindings!A2..A30"</Value>
    <ErrorHide/>
   </DataValidation>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R99C26">
+  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R100C26">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="Invariants">
@@ -4187,6 +4217,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <HorizontalResolution>600</HorizontalResolution>
@@ -4414,6 +4445,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <HorizontalResolution>600</HorizontalResolution>
@@ -5004,6 +5036,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5260,6 +5293,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <HorizontalResolution>600</HorizontalResolution>
@@ -5533,6 +5567,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5918,6 +5953,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -5938,13 +5974,13 @@
    <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=Bindings!R1C1:R1C13"/>
   </Names>
   <Table ss:ExpandedColumnCount="13" ss:ExpandedRowCount="26" ss:StyleID="s129" x:FullColumns="1" x:FullRows="1">
-   <Column ss:StyleID="s129" ss:Width="115.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="275.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="130.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="334.0"/>
    <Column ss:StyleID="s129" ss:Width="51.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="81.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="261.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="473.0"/>
    <Column ss:StyleID="s129" ss:Width="173.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="38.0"/>
+   <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="181.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="36.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="114.0"/>
    <Column ss:AutoFitWidth="0" ss:StyleID="s129" ss:Width="339.0"/>
@@ -5985,7 +6021,7 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">Type of acquired data in the instance</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s132"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:HRef="http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html" ss:StyleID="s164"><Data ss:Type="String">http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_29.html</Data></Cell>
+    <Cell ss:HRef="http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_33.html" ss:StyleID="s164"><Data ss:Type="String">http://dicom.nema.org/medical/dicom/current/output/chtml/part16/sect_CID_33.html</Data></Cell>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
@@ -5995,7 +6031,7 @@
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s136"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s163"><Data ss:Type="String">BodySite</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Codes describing anatomical locations. May include laterality.</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
@@ -6010,7 +6046,7 @@
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s136"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="30">
+   <Row ss:AutoFitHeight="0">
     <Cell ss:StyleID="s163"><Data ss:Type="String">Laterality</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">Codes describing body site laterality (left, right, etc.).</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
@@ -6045,17 +6081,17 @@
     <Cell ss:StyleID="s92"><Data ss:Type="String">The performed procedure type</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">extensible</Data></Cell>
-    <Cell ss:HRef="http://www.rsna.org/RadLex_Playbook.aspx" ss:StyleID="s62"><Data ss:Type="String">http://www.rsna.org/RadLex_Playbook.aspx</Data></Cell>
+    <Cell ss:HRef="http://loinc.org/download/loincrsna-radiology-playbook-file/" ss:StyleID="s62"><Data ss:Type="String">http://loinc.org/download/loincrsna-radiology-playbook-file/</Data></Cell>
     <Cell><Data ss:Type="String">Use of RadLex is preferred</Data></Cell>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">1.3.6.1.4.1.12009.10.2.5.1</Data></Cell>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s135"/>
+    <Cell ss:StyleID="s135"><Data ss:Type="String">RSNA and/or LOINC and/or RadLex</Data></Cell>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s135"/>
     <Cell ss:StyleID="s136"/>
    </Row>
-   <Row ss:AutoFitHeight="0" ss:Height="44">
+   <Row ss:AutoFitHeight="0" ss:Height="45">
     <Cell ss:StyleID="s163"><Data ss:Type="String">sopClass</Data></Cell>
     <Cell ss:StyleID="s92"><Data ss:Type="String">The sopClass for the instance</Data></Cell>
     <Cell ss:StyleID="s135"><Data ss:Type="String">value set</Data></Cell>
@@ -6333,6 +6369,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <Print>
     <ValidPrinterInfo/>
     <HorizontalResolution>600</HorizontalResolution>
@@ -6344,7 +6381,7 @@
    <SplitHorizontal>1</SplitHorizontal>
    <TopRowBottomPane>1</TopRowBottomPane>
    <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
+   <LeftColumnRightPane>2</LeftColumnRightPane>
    <ActivePane>0</ActivePane>
    
    <ProtectObjects>False</ProtectObjects>
@@ -6352,611 +6389,6 @@
    <x:PageLayoutZoom>0</x:PageLayoutZoom>
   </WorksheetOptions>
   <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R1C13">
-  </AutoFilter>
- </Worksheet>
- <Worksheet ss:Name="modality">
-  <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="=modality!R1C1:R1C9"/>
-  </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="54" ss:StyleID="s154" x:FullColumns="1" x:FullRows="1">
-   <Column ss:StyleID="s154" ss:Width="80.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s154" ss:Width="35.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s154" ss:Width="155.0"/>
-   <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s154" ss:Width="80.0"/>
-   <Column ss:AutoFitWidth="0" ss:Index="6" ss:StyleID="s154" ss:Width="245.0"/>
-   <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s154" ss:Width="84.0"/>
-   <Column ss:AutoFitWidth="0" ss:Index="9" ss:StyleID="s154" ss:Width="242.0"/>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">System</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Parent</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code this code is a specialization of (if any).  Content should be "#" + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Display</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Definition</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v2 codes - See Confluence for syntax</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v3 codes - See Confluence for syntax</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s156"><Data ss:Type="String">AR</Data></Cell>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s157"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">AU</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">BDUS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">BI</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">BMD</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">CR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">CT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">DG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">DX</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">ECG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">EPS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">ES</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">GM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">HC</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">HD</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IO</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IVOCT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IVUS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">KER</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">KO</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">LEN</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">LS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">MG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">MR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">NM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OAM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OCT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OP</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPV</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">PR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">PT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">PX</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">REG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RF</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RTDOSE</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RTIMAGE</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RTPLAN</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RTRECORD</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RTSTRUCT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SEG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SMR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SRF</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s160"><Data ss:Type="String">TG</Data></Cell>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s139"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s162"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell><Data ss:Type="String">US</Data></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell><Data ss:Type="String">VA</Data></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell><Data ss:Type="String">XA</Data></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell><Data ss:Type="String">XC</Data></Cell>
-    <Cell ss:Index="3"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-   </Row>
-  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
-   <PageSetup>
-    <Header x:Margin="0.3"/>
-    <Footer x:Margin="0.3"/>
-    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
-   </PageSetup>
-   <Print>
-    <ValidPrinterInfo/>
-    <HorizontalResolution>600</HorizontalResolution>
-    <VerticalResolution>600</VerticalResolution>
-   </Print>
-   <FreezePanes/>
-   <FrozenNoSplit/>
-   <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>34</TopRowBottomPane>
-   <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
-   <ActivePane>0</ActivePane>
-   
-   <ProtectObjects>False</ProtectObjects>
-   <ProtectScenarios>False</ProtectScenarios>
-   <x:PageLayoutZoom>0</x:PageLayoutZoom>
-  </WorksheetOptions>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R1C9">
   </AutoFilter>
  </Worksheet>
  <Worksheet ss:Name="instance-availability">
@@ -7529,591 +6961,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
-   <FreezePanes/>
-   <FrozenNoSplit/>
-   <SplitHorizontal>1</SplitHorizontal>
-   <TopRowBottomPane>1</TopRowBottomPane>
-   <SplitVertical>1</SplitVertical>
-   <LeftColumnRightPane>1</LeftColumnRightPane>
-   <ActivePane>0</ActivePane>
    
-   <ProtectObjects>False</ProtectObjects>
-   <ProtectScenarios>False</ProtectScenarios>
-   <x:PageLayoutZoom>0</x:PageLayoutZoom>
-  </WorksheetOptions>
-  <AutoFilter xmlns="urn:schemas-microsoft-com:office:excel" x:Range="R1C1:R1C9">
-  </AutoFilter>
- </Worksheet>
- <Worksheet ss:Name="imaging-modality">
-  <Names>
-   <NamedRange ss:Hidden="1" ss:Name="_FilterDatabase" ss:RefersTo="='imaging-modality'!R1C1:R1C9"/>
-  </Names>
-  <Table ss:ExpandedColumnCount="9" ss:ExpandedRowCount="51" ss:StyleID="s154" x:FullColumns="1" x:FullRows="1">
-   <Column ss:StyleID="s154" ss:Width="80.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s154" ss:Width="35.0"/>
-   <Column ss:AutoFitWidth="0" ss:StyleID="s154" ss:Width="155.0"/>
-   <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s154" ss:Width="80.0"/>
-   <Column ss:AutoFitWidth="0" ss:Index="6" ss:StyleID="s154" ss:Width="245.0"/>
-   <Column ss:AutoFitWidth="0" ss:Span="1" ss:StyleID="s154" ss:Width="84.0"/>
-   <Column ss:AutoFitWidth="0" ss:Index="9" ss:StyleID="s154" ss:Width="242.0"/>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s119"><Data ss:Type="String">Code</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code to be sent over the wire</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Id</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Unique number for the code.  Required when System is not specified, not permitted otherwise</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">System</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The URL of the external code system from which the list is selected.  Must be the same for all codes if specified.</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Parent</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">The code this code is a specialization of (if any).  Content should be "#" + the Id of the parent code</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Display</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Display value for code.  Omit if the code *is* the display value (as for internal codes)</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">Definition</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Meaning of the code.  Include unless meaning obvious to all users.  Required if display not</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">v2</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v2 codes - See Confluence for syntax</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s120"><Data ss:Type="String">v3</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Mappings to v3 codes - See Confluence for syntax</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-    <Cell ss:StyleID="s121"><Data ss:Type="String">Committee Notes</Data><Comment ss:Author=""><ss:Data xmlns="http://www.w3.org/TR/REC-html40">        <Font html:Color="#000000" html:Face="Tahoma" html:Size="8" x:Family="Swiss">Additional notes about the code.  Not published</Font>       </ss:Data></Comment><NamedCell ss:Name="_FilterDatabase"/></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s156"><Data ss:Type="String">AR</Data></Cell>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s132"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s167"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s145"/>
-    <Cell ss:StyleID="s157"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">BMD </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">BDUS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">EPS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">CR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">CT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">DX</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">ECG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">ES</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">XC</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"><Data ss:Type="String">Use this for general photography</Data></Cell>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">GM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">HD</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IO</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IVOCT </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">IVUS</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">KER</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">LEN</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">MR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">MG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">NM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OAM </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OCT </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OP</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPR</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPT</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">OPV </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">PX</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">PT </Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RF</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">RG</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SM</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">SRF</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">US</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">VA</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"><Data ss:Type="String">XA</Data></Cell>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"><Data ss:Type="String">http://dicom.nema.org/resources/ontology/DCM</Data></Cell>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s158"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s135"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s168"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s148"/>
-    <Cell ss:StyleID="s159"/>
-   </Row>
-   <Row ss:AutoFitHeight="0">
-    <Cell ss:StyleID="s160"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s139"/>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s169"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s151"/>
-    <Cell ss:StyleID="s162"/>
-   </Row>
-   <Row ss:AutoFitHeight="0"/>
-  </Table>
-  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
-   <PageSetup>
-    <Header x:Margin="0.3"/>
-    <Footer x:Margin="0.3"/>
-    <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
-   </PageSetup>
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -8699,6 +7547,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <FreezePanes/>
    <FrozenNoSplit/>
    <SplitHorizontal>1</SplitHorizontal>
@@ -8788,6 +7637,7 @@
     <Footer x:Margin="0.3"/>
     <PageMargins x:Bottom="0.75" x:Left="0.7" x:Right="0.7" x:Top="0.75"/>
    </PageSetup>
+   
    <ProtectObjects>False</ProtectObjects>
    <ProtectScenarios>False</ProtectScenarios>
   </WorksheetOptions>
