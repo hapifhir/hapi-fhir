@@ -85,4 +85,8 @@ public class BinaryStorageEntity {
 	public void setBlob(Blob theBlob) {
 		myBlob = theBlob;
 	}
+
+	public String getBlobId() {
+		return myBlobId;
+	}
 }

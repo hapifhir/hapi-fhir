@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -86,28 +85,6 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
 		}
-	}
-
-	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
-		if (isBlank(searchTerm)) {
-			return;
-		}
-		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), resourceName, StringNormalizer.normalizeString(searchTerm), searchTerm);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
-	}
-
-	private void addStringParam(ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
-		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), nextSpDef.getName(), StringNormalizer.normalizeString(value), value);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
 	}
 
 	@Override

@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.client.apache;
  */
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import ca.uhn.fhir.rest.client.impl.BaseHttpResponse;
@@ -53,25 +54,19 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 		this.myResponse = theResponse;
 	}
 
-	@Deprecated // override deprecated method
-	@Override
-	public void bufferEntitity() throws IOException {
-		bufferEntity();
-	}
-
 	@Override
 	public void bufferEntity() throws IOException {
 		if (myEntityBuffered) {
 			return;
 		}
-		InputStream respEntity = readEntity();
-		if (respEntity != null) {
-			this.myEntityBuffered = true;
-			try {
-				this.myEntityBytes = IOUtils.toByteArray(respEntity);
-			} catch (IllegalStateException e) {
-				// FIXME resouce leak
-				throw new InternalErrorException(e);
+		try (InputStream respEntity = readEntity()) {
+			if (respEntity != null) {
+				this.myEntityBuffered = true;
+				try {
+					this.myEntityBytes = IOUtils.toByteArray(respEntity);
+				} catch (IllegalStateException e) {
+					throw new InternalErrorException(e);
+				}
 			}
 		}
 	}
@@ -103,7 +98,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 			if (Constants.STATUS_HTTP_204_NO_CONTENT != myResponse.getStatusLine().getStatusCode()) {
 				ourLog.debug("Response did not specify a charset, defaulting to utf-8");
 			}
-			charset = Charset.forName("UTF-8");
+			charset = StandardCharsets.UTF_8;
 		}
 
 		return new InputStreamReader(readEntity(), charset);
@@ -115,11 +110,7 @@ public class ApacheHttpResponse extends BaseHttpResponse implements IHttpRespons
 		if (myResponse.getAllHeaders() != null) {
 			for (Header next : myResponse.getAllHeaders()) {
 				String name = next.getName().toLowerCase();
-				List<String> list = headers.get(name);
-				if (list == null) {
-					list = new ArrayList<>();
-					headers.put(name, list);
-				}
+				List<String> list = headers.computeIfAbsent(name, k -> new ArrayList<>());
 				list.add(next.getValue());
 			}
 

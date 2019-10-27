@@ -126,6 +126,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		return new MethodOutcome()
 			.setCreated(true)
+			.setResource(theResource)
 			.setId(theResource.getIdElement());
 	}
 
@@ -373,6 +374,7 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 
 		return new MethodOutcome()
 			.setCreated(created)
+			.setResource(theResource)
 			.setId(theResource.getIdElement());
 	}
 
@@ -414,6 +416,19 @@ public class HashMapResourceProvider<T extends IBaseResource> implements IResour
 			createInternal(theResource);
 		}
 		return theResource.getIdElement();
+	}
+
+	/**
+	 * Returns an unmodifiable list containing the current version of all resources stored in this provider
+	 *
+	 * @since 4.1.0
+	 */
+	public List<T> getStoredResources() {
+		List<T> retVal = new ArrayList<>();
+		for (TreeMap<Long, T> next : myIdToVersionToResourceMap.values()) {
+			retVal.add(next.lastEntry().getValue());
+		}
+		return Collections.unmodifiableList(retVal);
 	}
 
 	private static <T extends IBaseResource> T fireInterceptorsAndFilterAsNeeded(T theResource, RequestDetails theRequestDetails) {

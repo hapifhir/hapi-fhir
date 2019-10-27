@@ -36,6 +36,7 @@ import org.thymeleaf.ITemplateEngine;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
@@ -649,7 +650,9 @@ public class BaseController {
 			if (lastResponse != null) {
 				resultStatus = "HTTP " + lastResponse.getStatus() + " " + lastResponse.getStatusInfo();
 				lastResponse.bufferEntity();
-				resultBody = IOUtils.toString(lastResponse.readEntity(), Constants.CHARSET_UTF8);
+				try (InputStream input = lastResponse.readEntity()) {
+					resultBody = IOUtils.toString(input, Constants.CHARSET_UTF8);
+				}
 
 				List<String> ctStrings = lastResponse.getHeaders(Constants.HEADER_CONTENT_TYPE);
 				if (ctStrings != null && ctStrings.isEmpty() == false) {

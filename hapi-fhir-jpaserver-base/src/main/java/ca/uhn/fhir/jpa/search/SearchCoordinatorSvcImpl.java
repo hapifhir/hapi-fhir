@@ -53,6 +53,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.AsyncUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
@@ -76,6 +77,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -153,13 +155,16 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 	@Override
 	public void cancelAllActiveSearches() {
 		for (SearchTask next : myIdToSearchTask.values()) {
+			ourLog.info("Requesting immediate abort of search: {}", next.getSearch().getUuid());
 			next.requestImmediateAbort();
-			try {
-				next.getCompletionLatch().await(30, TimeUnit.SECONDS);
-			} catch (InterruptedException e) {
-				ourLog.warn("Failed to wait for completion", e);
-			}
+			AsyncUtil.awaitLatchAndIgnoreInterrupt(next.getCompletionLatch(), 30, TimeUnit.SECONDS);
 		}
+	}
+
+	@SuppressWarnings("SameParameterValue")
+	@VisibleForTesting
+	void setMaxMillisToWaitForRemoteResultsForUnitTest(long theMaxMillisToWaitForRemoteResults) {
+		myMaxMillisToWaitForRemoteResults = theMaxMillisToWaitForRemoteResults;
 	}
 
 	/**
@@ -189,29 +194,23 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				if (searchTask != null) {
 					ourLog.trace("Local search found");
 					List<Long> resourcePids = searchTask.getResourcePids(theFrom, theTo);
-					if (resourcePids != null) {
-						ourLog.trace("Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
+					ourLog.trace("Local search returned {} pids, wanted {}-{} - Search: {}", resourcePids.size(), theFrom, theTo, searchTask.getSearch());
 
-						/*
-						 * Generally, if a search task is open, the fastest possible thing is to just return its results. This
-						 * will work most of the time, but can fail if the task hit a search threshold and the client is requesting
-						 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
-						 * task.
-						 */
-						if ((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
-							return resourcePids;
-						}
+					/*
+					 * Generally, if a search task is open, the fastest possible thing is to just return its results. This
+					 * will work most of the time, but can fail if the task hit a search threshold and the client is requesting
+					 * results beyond that threashold. In that case, we'll keep going below, since that will trigger another
+					 * task.
+					 */
+					if ((searchTask.getSearch().getNumFound() - searchTask.getSearch().getNumBlocked()) >= theTo || resourcePids.size() == (theTo - theFrom)) {
+						return resourcePids;
 					}
 				}
 			}
 
 			search = mySearchCacheSvc
 				.fetchByUuid(theUuid)
-				.orElseThrow(() -> {
-					ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
-					String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
-					return new ResourceGoneException(msg);
-				});
+				.orElseThrow(() -> newResourceGoneException(theUuid));
 
 			verifySearchHasntFailedOrThrowInternalErrorException(search);
 			if (search.getStatus() == SearchStatusEnum.FINISHED) {
@@ -244,20 +243,26 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				}
 			}
 
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// ignore
-			}
+			AsyncUtil.sleep(500);
 		}
 
 		ourLog.trace("Finished looping");
 
 		List<Long> pids = mySearchResultCacheSvc.fetchResultPids(search, theFrom, theTo);
+		if (pids == null) {
+			throw newResourceGoneException(theUuid);
+		}
 
 		ourLog.trace("Fetched {} results", pids.size());
 
 		return pids;
+	}
+
+	@Nonnull
+	private ResourceGoneException newResourceGoneException(String theUuid) {
+		ourLog.trace("Client requested unknown paging ID[{}]", theUuid);
+		String msg = myContext.getLocalizer().getMessage(PageMethodBinding.class, "unknownSearchId", theUuid);
+		return new ResourceGoneException(msg);
 	}
 
 
@@ -627,14 +632,9 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 		Integer awaitInitialSync() {
 			ourLog.trace("Awaiting initial sync");
 			do {
-				try {
-					if (getInitialCollectionLatch().await(250, TimeUnit.MILLISECONDS)) {
-						break;
-					}
-				} catch (InterruptedException e) {
-					// Shouldn't happen
-					Thread.currentThread().interrupt();
-					throw new InternalErrorException(e);
+				ourLog.trace("Search {} aborted: {}", getSearch().getUuid(), !isNotAborted());
+				if (AsyncUtil.awaitLatchAndThrowInternalErrorExceptionOnInterrupt(getInitialCollectionLatch(), 250L, TimeUnit.MILLISECONDS)) {
+					break;
 				}
 			} while (getSearch().getStatus() == SearchStatusEnum.LOADING);
 			ourLog.trace("Initial sync completed");
@@ -663,7 +663,8 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 			return sb;
 		}
 
-		public List<Long> getResourcePids(int theFromIndex, int theToIndex) {
+		@Nonnull
+		List<Long> getResourcePids(int theFromIndex, int theToIndex) {
 			ourLog.debug("Requesting search PIDs from {}-{}", theFromIndex, theToIndex);
 
 			boolean keepWaiting;
@@ -698,11 +699,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 
 				if (keepWaiting) {
 					ourLog.info("Waiting as we only have {} results - Search status: {}", mySyncedPids.size(), mySearch.getStatus());
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException theE) {
-						// ignore
-					}
+					AsyncUtil.sleep(500L);
 				}
 			} while (keepWaiting);
 
@@ -1081,11 +1078,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 					}
 
 					if (myLoadingThrottleForUnitTests != null) {
-						try {
-							Thread.sleep(myLoadingThrottleForUnitTests);
-						} catch (InterruptedException e) {
-							// ignore
-						}
+						AsyncUtil.sleep(myLoadingThrottleForUnitTests);
 					}
 
 				}
@@ -1116,14 +1109,21 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc {
 				txTemplate.afterPropertiesSet();
 				txTemplate.execute(t -> {
 					List<Long> previouslyAddedResourcePids = mySearchResultCacheSvc.fetchAllResultPids(getSearch());
+					if (previouslyAddedResourcePids == null) {
+						throw newResourceGoneException(getSearch().getUuid());
+					}
+
 					ourLog.debug("Have {} previously added IDs in search: {}", previouslyAddedResourcePids.size(), getSearch().getUuid());
 					setPreviouslyAddedResourcePids(previouslyAddedResourcePids);
 					return null;
 				});
 			} catch (Throwable e) {
 				ourLog.error("Failure processing search", e);
-				getSearch().setFailureMessage(e.toString());
+				getSearch().setFailureMessage(e.getMessage());
 				getSearch().setStatus(SearchStatusEnum.FAILED);
+				if (e instanceof BaseServerResponseException) {
+					getSearch().setFailureCode(((BaseServerResponseException) e).getStatusCode());
+				}
 
 				saveSearch();
 				return null;

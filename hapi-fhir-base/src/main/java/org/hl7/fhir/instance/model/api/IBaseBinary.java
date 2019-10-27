@@ -25,6 +25,8 @@ public interface IBaseBinary extends IBaseResource {
 
 	byte[] getContent();
 
+	IPrimitiveType<byte[]> getContentElement();
+
 	String getContentAsBase64();
 
 	String getContentType();

@@ -23,9 +23,9 @@ package ca.uhn.fhir.util;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
 import ca.uhn.fhir.context.FhirContext;
-import org.hl7.fhir.instance.model.api.IBase;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.rest.api.Constants;
+import org.hl7.fhir.instance.model.api.*;
 
 import java.util.List;
 
@@ -44,6 +44,29 @@ public class MetaUtil {
 			retVal = ((IPrimitiveType<?>) sourceValues.get(0)).getValueAsString();
 		}
 		return retVal;
+	}
+
+	/**
+	 * Sets the value for <code>Resource.meta.source</code> for R4+ resources, and places the value in
+	 * an extension on <code>Resource.meta</code>
+	 * with the URL <code>http://hapifhir.io/fhir/StructureDefinition/resource-meta-source</code> for DSTU3.
+	 *
+	 * @param theContext  The FhirContext object
+	 * @param theResource The resource to modify
+	 * @param theValue    The source URI
+	 * @see <a href="http://hl7.org/fhir/resource-definitions.html#Resource.meta">Meta.source</a>
+	 */
+	@SuppressWarnings("unchecked")
+	public static void setSource(FhirContext theContext, IBaseResource theResource, String theValue) {
+		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			MetaUtil.setSource(theContext, theResource.getMeta(), theValue);
+		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+			IBaseExtension<?, ?> sourceExtension = ((IBaseHasExtensions) theResource.getMeta()).addExtension();
+			sourceExtension.setUrl(Constants.EXT_META_SOURCE);
+			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
+			value.setValue(theValue);
+			sourceExtension.setValue(value);
+		}
 	}
 
 	public static void setSource(FhirContext theContext, IBaseMetaType theMeta, String theValue) {

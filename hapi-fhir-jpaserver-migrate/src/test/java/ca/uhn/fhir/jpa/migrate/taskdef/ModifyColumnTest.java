@@ -9,7 +9,28 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 
 public class ModifyColumnTest extends BaseTest {
+	@Test
+	public void testColumnWithJdbcTypeClob() throws SQLException {
+		executeSql("create table SOMETABLE (TEXTCOL clob)");
 
+		ModifyColumnTask task = new ModifyColumnTask();
+		task.setTableName("SOMETABLE");
+		task.setColumnName("TEXTCOL");
+		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
+		task.setNullable(true);
+		task.setColumnLength(250);
+		getMigrator().addTask(task);
+
+		getMigrator().migrate();
+
+		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 250), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
+		assertEquals(1, task.getExecutedStatements().size());
+
+		// Make sure additional migrations don't crash
+		getMigrator().migrate();
+		getMigrator().migrate();
+
+	}
 
 	@Test
 	public void testColumnAlreadyExists() throws SQLException {

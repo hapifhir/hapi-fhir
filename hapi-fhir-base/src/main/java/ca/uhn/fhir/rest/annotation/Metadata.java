@@ -36,5 +36,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value=ElementType.METHOD)
 public @interface Metadata {
-	// nothing for now
+
+	long cacheMillis() default 60 * 1000L;
+
 }

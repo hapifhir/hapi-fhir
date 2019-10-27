@@ -25,6 +25,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.util.Collections;
 import java.util.List;
 
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -120,7 +121,19 @@ public class ValidationResult {
 				location = null;
 			}
 			String severity = next.getSeverity() != null ? next.getSeverity().getCode() : null;
-			OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			IBase issue = OperationOutcomeUtil.addIssue(myCtx, theOperationOutcome, severity, next.getMessage(), location, Constants.OO_INFOSTATUS_PROCESSING);
+			
+			if (next.getLocationLine() != null || next.getLocationCol() != null) {
+				String line = "(unknown)";
+				if (next.getLocationLine() != null) {
+					line = next.getLocationLine().toString();
+				}
+				String col = "(unknown)";
+				if (next.getLocationCol() != null) {
+					col = next.getLocationCol().toString();
+				}
+				OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "Line " + line + ", Col " + col);
+			}
 		}
 
 		if (myMessages.isEmpty()) {

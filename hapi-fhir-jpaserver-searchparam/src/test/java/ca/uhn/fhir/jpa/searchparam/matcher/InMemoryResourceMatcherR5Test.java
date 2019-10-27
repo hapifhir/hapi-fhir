@@ -7,9 +7,12 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.primitive.BaseDateTimeDt;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
+import ca.uhn.fhir.rest.param.TokenParamModifier;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
+import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
 import org.junit.Before;
@@ -27,6 +30,7 @@ import java.util.Date;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
@@ -34,10 +38,13 @@ public class InMemoryResourceMatcherR5Test {
 	public static final String OBSERVATION_DATE = "1970-10-17";
 	private static final String EARLY_DATE = "1965-08-09";
 	private static final String LATE_DATE = "2000-06-29";
+	public static final String OBSERVATION_CODE = "MATCH";
+	private static final String SOURCE_URI = "urn:source:0";
+	private static final String REQUEST_ID = "a_request_id";
+	private static final String TEST_SOURCE = SOURCE_URI + "#" + REQUEST_ID;
 
 	@Autowired
-	private
-	InMemoryResourceMatcher myInMemoryResourceMatcher;
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 
 	@MockBean
 	ISearchParamRegistry mySearchParamRegistry;
@@ -64,24 +71,70 @@ public class InMemoryResourceMatcherR5Test {
 
 	@Before
 	public void before() {
-		RuntimeSearchParam searchParams = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-		when(mySearchParamRegistry.getSearchParamByName(any(), any())).thenReturn(searchParams);
-		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(searchParams);
+		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		when(mySearchParamRegistry.getSearchParamByName(any(), eq("date"))).thenReturn(dateSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam("Observation", "date")).thenReturn(dateSearchParam);
+
+		RuntimeSearchParam codeSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.code", RestSearchParameterTypeEnum.TOKEN, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		when(mySearchParamRegistry.getSearchParamByName(any(), eq("code"))).thenReturn(codeSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam("Observation", "code")).thenReturn(codeSearchParam);
+
+		RuntimeSearchParam encSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.encounter", RestSearchParameterTypeEnum.REFERENCE, null, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		when(mySearchParamRegistry.getSearchParamByName(any(), eq("encounter"))).thenReturn(encSearchParam);
+		when(mySearchParamRegistry.getActiveSearchParam("Observation", "encounter")).thenReturn(encSearchParam);
+
 		myObservation = new Observation();
+		myObservation.getMeta().setSource(TEST_SOURCE);
 		myObservation.setEffective(new DateTimeType(OBSERVATION_DATE));
+		CodeableConcept codeableConcept = new CodeableConcept();
+		codeableConcept.addCoding().setCode(OBSERVATION_CODE);
+		myObservation.setCode(codeableConcept);
 		mySearchParams = extractDateSearchParam(myObservation);
 	}
 
-
 	@Test
-	public void testDateUnsupportedOps() {
-		testDateUnsupportedOp(ParamPrefixEnum.APPROXIMATE);
-		testDateUnsupportedOp(ParamPrefixEnum.STARTS_AFTER);
-		testDateUnsupportedOp(ParamPrefixEnum.ENDS_BEFORE);
-		testDateUnsupportedOp(ParamPrefixEnum.NOT_EQUAL);
+	public void testSupportedSource() {
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + TEST_SOURCE, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + SOURCE_URI, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=" + REQUEST_ID, myObservation, mySearchParams);
+			assertFalse(result.matched());
+		}
+		{
+			InMemoryMatchResult result = myInMemoryResourceMatcher.match(Constants.PARAM_SOURCE + "=#" + REQUEST_ID, myObservation, mySearchParams);
+			assertTrue(result.matched());
+		}
 	}
 
-	private void testDateUnsupportedOp(ParamPrefixEnum theOperator) {
+	@Test
+	public void testUnsupportedChained() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("encounter.class=FOO", myObservation, mySearchParams);
+		assertFalse(result.supported());
+		assertEquals("Parameter: <encounter.class> Reason: Chained parameters are not supported", result.getUnsupportedReason());
+	}
+
+	@Test
+	public void testUnsupportedNot() {
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT.getValue() + "=" + OBSERVATION_CODE, myObservation, mySearchParams);
+		assertFalse(result.supported());
+		assertEquals("Parameter: <code:not> Reason: Qualified parameter not supported", result.getUnsupportedReason());
+	}
+
+	@Test
+	public void testDateUnsupportedDateOps() {
+		testDateUnsupportedDateOp(ParamPrefixEnum.APPROXIMATE);
+		testDateUnsupportedDateOp(ParamPrefixEnum.STARTS_AFTER);
+		testDateUnsupportedDateOp(ParamPrefixEnum.ENDS_BEFORE);
+		testDateUnsupportedDateOp(ParamPrefixEnum.NOT_EQUAL);
+	}
+
+	private void testDateUnsupportedDateOp(ParamPrefixEnum theOperator) {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATE, myObservation, mySearchParams);
 		assertFalse(result.supported());
 		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());

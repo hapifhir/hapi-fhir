@@ -29,6 +29,8 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import org.hl7.fhir.converter.NullVersionConverterAdvisor30;
+import org.hl7.fhir.converter.NullVersionConverterAdvisor40;
 import org.hl7.fhir.convertors.*;
 import org.hl7.fhir.dstu3.model.Resource;
 import org.hl7.fhir.exceptions.FHIRException;

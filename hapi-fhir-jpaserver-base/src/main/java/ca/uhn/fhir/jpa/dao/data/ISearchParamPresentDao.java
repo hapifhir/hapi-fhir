@@ -24,6 +24,7 @@ import java.util.Date;
  */
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -34,5 +35,9 @@ public interface ISearchParamPresentDao extends JpaRepository<SearchParamPresent
 
 	@Query("SELECT s FROM SearchParamPresent s WHERE s.myResource = :res")
 	Collection<SearchParamPresent> findAllForResource(@Param("res") ResourceTable theResource);
+
+	@Modifying
+	@Query("delete from SearchParamPresent t WHERE t.myResourcePid = :resid")
+	void deleteByResourceId(@Param("resid") Long theResourcePid);
 
 }

@@ -21,7 +21,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  */
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import ca.uhn.fhir.jpa.term.IHapiTerminologyLoaderSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.IRecordHandler;
 import org.apache.commons.csv.CSVRecord;
 import org.hl7.fhir.r4.model.ConceptMap;
@@ -46,7 +46,7 @@ public class LoincGroupTermsFileHandler extends BaseLoincHandler implements IRec
 		String loincNumber = trim(theRecord.get("LoincNumber"));
 
 		ValueSet valueSet = getValueSet(groupId, LoincGroupFileHandler.VS_URI_PREFIX + groupId, null, null);
-		addCodeAsIncludeToValueSet(valueSet, IHapiTerminologyLoaderSvc.LOINC_URI, loincNumber, null);
+		addCodeAsIncludeToValueSet(valueSet, ITermLoaderSvc.LOINC_URI, loincNumber, null);
 	}
 
 

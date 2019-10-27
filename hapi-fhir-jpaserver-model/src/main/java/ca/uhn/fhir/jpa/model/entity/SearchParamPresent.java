@@ -46,6 +46,8 @@ public class SearchParamPresent implements Serializable {
 	@ManyToOne()
 	@JoinColumn(name = "RES_ID", referencedColumnName = "RES_ID", nullable = false, foreignKey = @ForeignKey(name = "FK_RESPARMPRES_RESID"))
 	private ResourceTable myResource;
+	@Column(name="RES_ID", nullable = false, insertable = false, updatable = false)
+	private Long myResourcePid;
 	@Transient
 	private transient String myParamName;
 	@Column(name = "HASH_PRESENCE")

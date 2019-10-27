@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RunWith(MockitoJUnitRunner.class)
-abstract class BaseLoaderTest {
+abstract class BaseLoaderTest extends BaseTest {
 
 	@Mock
 	protected RequestDetails mySrd;

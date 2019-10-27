@@ -41,17 +41,13 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, Long> {
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system AND c.myCode = :code")
 	Optional<TermConcept> findByCodeSystemAndCode(@Param("code_system") TermCodeSystemVersion theCodeSystem, @Param("code") String theCode);
 
-	@Query("SELECT t FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
-	Slice<TermConcept> findByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
+	@Query("SELECT t.myId FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
+	Slice<Long> findIdsByCodeSystemVersion(Pageable thePage, @Param("cs_pid") Long thePid);
 
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystem = :code_system")
 	List<TermConcept> findByCodeSystemVersion(@Param("code_system") TermCodeSystemVersion theCodeSystem);
 
 	@Query("SELECT t FROM TermConcept t WHERE t.myIndexStatus = null")
 	Page<TermConcept> findResourcesRequiringReindexing(Pageable thePageRequest);
-
-	@Query("UPDATE TermConcept t SET t.myIndexStatus = null")
-	@Modifying
-	int markAllForReindexing();
 
 }

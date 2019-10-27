@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 
+import javax.annotation.Nullable;
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.*;
@@ -235,6 +236,8 @@ public class JdbcUtils {
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.DATE_TIMESTAMP, length);
 							case Types.BLOB:
 								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB, length);
+							case Types.CLOB:
+								return new ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.CLOB, length);
 							default:
 								throw new IllegalArgumentException("Don't know how to handle datatype " + dataType + " for column " + theColumnName + " on table " + theTableName);
 						}
@@ -254,8 +257,9 @@ public class JdbcUtils {
 	/**
 	 * Retrieve all index names
 	 */
-	public static Set<String> getForeignKeys(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theForeignTable) throws SQLException {
+	public static Set<String> getForeignKeys(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, @Nullable String theForeignTable) throws SQLException {
 		DataSource dataSource = Objects.requireNonNull(theConnectionProperties.getDataSource());
+
 		try (Connection connection = dataSource.getConnection()) {
 			return theConnectionProperties.getTxTemplate().execute(t -> {
 				DatabaseMetaData metadata;
@@ -263,27 +267,30 @@ public class JdbcUtils {
 					metadata = connection.getMetaData();
 					String catalog = connection.getCatalog();
 					String schema = connection.getSchema();
-					String parentTable = massageIdentifier(metadata, theTableName);
-					String foreignTable = massageIdentifier(metadata, theForeignTable);
-					ResultSet indexes = metadata.getCrossReference(catalog, schema, parentTable, catalog, schema, foreignTable);
 
-					Set<String> columnNames = new HashSet<>();
-					while (indexes.next()) {
-						String tableName = toUpperCase(indexes.getString("PKTABLE_NAME"), Locale.US);
-						if (!theTableName.equalsIgnoreCase(tableName)) {
-							continue;
-						}
-						tableName = toUpperCase(indexes.getString("FKTABLE_NAME"), Locale.US);
-						if (!theForeignTable.equalsIgnoreCase(tableName)) {
-							continue;
-						}
 
-						String fkName = indexes.getString("FK_NAME");
-						fkName = toUpperCase(fkName, Locale.US);
-						columnNames.add(fkName);
+					List<String> parentTables = new ArrayList<>();
+					if (theTableName != null) {
+						parentTables.add(massageIdentifier(metadata, theTableName));
+					} else {
+						// If no foreign table is specified, we'll try all of them
+						parentTables.addAll(JdbcUtils.getTableNames(theConnectionProperties));
 					}
 
-					return columnNames;
+					String foreignTable = massageIdentifier(metadata, theForeignTable);
+
+					Set<String> fkNames = new HashSet<>();
+					for (String nextParentTable : parentTables) {
+						ResultSet indexes = metadata.getCrossReference(catalog, schema, nextParentTable, catalog, schema, foreignTable);
+
+						while (indexes.next()) {
+							String fkName = indexes.getString("FK_NAME");
+							fkName = toUpperCase(fkName, Locale.US);
+							fkNames.add(fkName);
+						}
+					}
+
+					return fkNames;
 				} catch (SQLException e) {
 					throw new InternalErrorException(e);
 				}
@@ -487,7 +494,9 @@ public class JdbcUtils {
 
 	private static String massageIdentifier(DatabaseMetaData theMetadata, String theCatalog) throws SQLException {
 		String retVal = theCatalog;
-		if (theMetadata.storesLowerCaseIdentifiers()) {
+		if (theCatalog == null) {
+			return null;
+		} else if (theMetadata.storesLowerCaseIdentifiers()) {
 			retVal = retVal.toLowerCase();
 		} else {
 			retVal = retVal.toUpperCase();

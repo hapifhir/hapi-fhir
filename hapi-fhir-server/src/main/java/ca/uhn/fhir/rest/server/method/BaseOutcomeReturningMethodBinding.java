@@ -53,7 +53,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 
 		if (!theMethod.getReturnType().equals(MethodOutcome.class)) {
 			if (!allowVoidReturnType()) {
-				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getCanonicalName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
+				throw new ConfigurationException("Method " + theMethod.getName() + " in type " + theMethod.getDeclaringClass().getName() + " is a @" + theMethodAnnotation.getSimpleName() + " method but it does not return " + MethodOutcome.class);
 			} else if (theMethod.getReturnType() == void.class) {
 				myReturnVoid = true;
 			}
@@ -79,7 +79,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding<Metho
 		switch (getRestOperationType()) {
 			case CREATE:
 				validateResponseNotNullIfItShouldntBe(response);
-				if (response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
+				if (response == null || response.getCreated() == null || Boolean.TRUE.equals(response.getCreated())) {
 					return Constants.STATUS_HTTP_201_CREATED;
 				}
 				return Constants.STATUS_HTTP_200_OK;

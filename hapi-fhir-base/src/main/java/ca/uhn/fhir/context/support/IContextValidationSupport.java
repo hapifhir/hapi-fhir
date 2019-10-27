@@ -103,6 +103,11 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	boolean isCodeSystemSupported(FhirContext theContext, String theSystem);
 
 	/**
+	 * Fetch the given ValueSet by URL
+	 */
+	IBaseResource fetchValueSet(FhirContext theContext, String theValueSetUrl);
+
+	/**
 	 * Validates that the given code exists and if possible returns a display
 	 * name. This method is called to check codes which are found in "example"
 	 * binding fields (e.g. <code>Observation.code</code> in the default profile.
@@ -112,7 +117,7 @@ public interface IContextValidationSupport<EVS_IN, EVS_OUT, SDT, CST, CDCT, IST>
 	 * @param theDisplay    The display name, if it should also be validated
 	 * @return Returns a validation result object
 	 */
-	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
+	CodeValidationResult<CDCT, IST> validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
 
 	/**
 	 * Look up a code using the system and code value

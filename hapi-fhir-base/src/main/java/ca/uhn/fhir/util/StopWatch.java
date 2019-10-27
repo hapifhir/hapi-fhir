@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.DecimalFormat;
@@ -8,8 +9,6 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -48,12 +47,14 @@ public class StopWatch {
 	private long myStarted = now();
 	private TaskTiming myCurrentTask;
 	private LinkedList<TaskTiming> myTasks;
+
 	/**
 	 * Constructor
 	 */
 	public StopWatch() {
 		super();
 	}
+
 	/**
 	 * Constructor
 	 *
@@ -63,7 +64,13 @@ public class StopWatch {
 		myStarted = theStart.getTime();
 	}
 
-	public StopWatch(long theL) {
+	/**
+	 * Constructor
+	 *
+	 * @param theStart The time that the stopwatch was started
+	 */
+	public StopWatch(long theStart) {
+		myStarted = theStart;
 	}
 
 	private void addNewlineIfContentExists(StringBuilder theB) {
@@ -120,6 +127,8 @@ public class StopWatch {
 				b.append(": ");
 				b.append(formatMillis(delta));
 			}
+		} else {
+			b.append("No tasks");
 		}
 
 		TaskTiming last = null;
@@ -257,12 +266,11 @@ public class StopWatch {
 	 */
 	public void startTask(String theTaskName) {
 		endCurrentTask();
-		if (isNotBlank(theTaskName)) {
-			myCurrentTask = new TaskTiming()
-				.setTaskName(theTaskName)
-				.setStart(now());
-			myTasks.add(myCurrentTask);
-		}
+		Validate.notBlank(theTaskName, "Task name must not be blank");
+		myCurrentTask = new TaskTiming()
+			.setTaskName(theTaskName)
+			.setStart(now());
+		myTasks.add(myCurrentTask);
 	}
 
 	/**
@@ -331,18 +339,18 @@ public class StopWatch {
 	/**
 	 * Append a right-aligned and zero-padded numeric value to a `StringBuilder`.
 	 */
-	static private void append(StringBuilder tgt, String pfx, int dgt, long val) {
-		tgt.append(pfx);
-		if (dgt > 1) {
-			int pad = (dgt - 1);
-			for (long xa = val; xa > 9 && pad > 0; xa /= 10) {
+	static void appendRightAlignedNumber(StringBuilder theStringBuilder, String thePrefix, int theNumberOfDigits, long theValueToAppend) {
+		theStringBuilder.append(thePrefix);
+		if (theNumberOfDigits > 1) {
+			int pad = (theNumberOfDigits - 1);
+			for (long xa = theValueToAppend; xa > 9 && pad > 0; xa /= 10) {
 				pad--;
 			}
 			for (int xa = 0; xa < pad; xa++) {
-				tgt.append('0');
+				theStringBuilder.append('0');
 			}
 		}
-		tgt.append(val);
+		theStringBuilder.append(theValueToAppend);
 	}
 
 	/**
@@ -399,11 +407,11 @@ public class StopWatch {
 			}
 		} else {
 			long millisAsLong = (long) theMillis;
-			append(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
-			append(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
-			append(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
+			appendRightAlignedNumber(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
 			if (theMillis <= DateUtils.MILLIS_PER_MINUTE) {
-				append(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
+				appendRightAlignedNumber(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
 			}
 		}
 		return buf.toString();

@@ -12,9 +12,12 @@
 				latest versions (dependent HAPI modules listed in brackets):
 				<![CDATA[
 				<ul>
-					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.4.Final</li>
+					<li>SLF4j (All): 1.7.25 -&gt; 1.7.28</li>
+					<li>Spring (JPA): 5.1.8.Final -&gt; 5.2.0.Final</li>
+					<li>Hibernate Core (JPA): 5.4.2.Final -&gt; 5.4.6.Final</li>
 					<li>Hibernate Search (JPA): 5.11.1.Final -&gt; 5.11.3.Final</li>
 					<li>Jackson Databind (JPA): 2.9.9 -&gt; 2.9.10 (CVE-2019-16335, CVE-2019-14540)</li>
+					<li>Spring Boot (Boot): 2.1.1 -&gt; 2.2.0</li>
 				</ul>
 				]]>
 			</action>
@@ -28,7 +31,8 @@
 			<action type="add">
 				<![CDATA[
 				<b>New Feature</b>:
-				The JPA server now saves and supports searching on <code>Resource.meta.source</code>. The server automatically
+				The JPA server now saves and supports searching on <code>Resource.meta.source</code> via the
+				<code>_source</code> search parameter. The server automatically
 				appends the Request ID as a hash value on the URI as well in order to provide request level tracking. Searches
 				 can use either the source URI, the request ID, or both.
 				]]>
@@ -51,12 +55,42 @@
 				to Elastic in the future.
 				]]>
 			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				A new set of operations have been added to the JPA server that allow CodeSystem deltas to be
+				uploaded. A CodeSystem Delta consists of a set of codes and relationships that are added or
+				removed incrementally to the live CodeSystem without requiring a downtime or a complete
+				upload of the contents. Deltas may be specified using either a custom CSV format or a partial 
+				CodeSystem resource.
+				<br/>
+				In addition, the HAPI FHIR CLI
+				<code>upload-terminology</code> command has been modified to support this new functionality.
+				]]>
+			</action>
+			<action type="fix">
+				<![CDATA[
+				<b>New Feature</b>:
+				When using Externalized Binary Storage in the JPA server, the system will now automatically
+				externalize Binary and Attachment payloads, meaning that these will automatically not be
+				stored in the RDBMS.
+				]]>
+			</action>
 			<action type="add" issue="1489">
             <![CDATA[
-				<b>Improvement</b>:
+				<b>Performance Improvement</b>:
 				A significant performance improvement was made to the parsers (particularly the Json Parser)
 				when serializing resources. This work yields improvements of 20-50% in raw encode speed when
 				encoding large resources. Thanks to David Maplesden for the pull request!
+            ]]>
+			</action>
+			<action type="add" issue="1489">
+				<![CDATA[
+				<b>Performance Improvement</b>:
+				When running inside a JPA server, The DSTU3+ validator now performs code validations
+				by directly testing ValueSet membership against a pre-calculated copy of the ValueSet,
+				instead of first expanding the ValueSet and then examining the expanded contents.
+				This can yield a significant improvement in validation speed in many cases.
             ]]>
 			</action>
 			<action type="add" issue="1357">
@@ -316,9 +350,6 @@
 				corrected to account for names up to 40 characters long.
 			</action>
 			<action type="fix">
-                A new command has been added to the HAPI FHIR CLI that allows external (not-present) codesystem deltas to be manually uploaded
-			</action>
-			<action type="fix">
 				The subscription triggering operation was not able to handle commas within search URLs being
 				used to trigger resources for subscription checking. This has been corrected.
 			</action>
@@ -339,6 +370,111 @@
 				Content-Location header. This behaviour was allowed in DSTU1 and was never removed from HAPI even though
 				it hasn't been permitted in the spec for a very long time. Hopefully this change will not
 				impact anyone!
+			</action>
+			<action type="fix" issue="1529">
+				HAPI FHIR allows transactions in DSTU3 to contain a JSON/XML Patch in a Binary resource without
+				specifying a verb in Bundle.entry.request.method, since the valueset defined in DSTU3 for that
+				field does not include the PATCH verb. The AuthorizationInterceptor however did not understand
+				this and would reject these requests. This is now corrected.
+			</action>
+			<action type="fix" issue="1530">
+				A potential XXE vulnerability in the validator was corrected. The XML parser used for validating
+				XML payloads (i.e. FHIR resources) will no longer read from DTD declarations.
+			</action>
+			<action type="add">
+				Auto generated transaction IDs will now use both upper- and lowercase letters for more uniqueness in
+				the same amount of space.
+			</action>
+			<action type="fix">
+				Paging requests that are incorrectly executed at the type level were interpreted by the plain server
+				as search requests with no search parameters, leading to confusing search results. These will now
+				result in an HTTP 400 error with a meaningful error message.
+			</action>
+			<action type="change">
+				The
+				<![CDATA[<code>IValidationSupport#validateCode(...)</code>]]>
+				method has been modified to add an additional parameter (String theValueSetUrl).
+				Most users will be unaffected by this change as HAPI FHIR provides a number of
+				built-in implementations of this interface, but any direct user implementations
+				of this interface will need to add the new parameter.
+			</action>
+			<action type="add" issue="1541">
+				The server CapabilityStatement (/metadata) endpoint now respects the Cache-Control header. Thanks
+				to Jens Villadsen for the pull request!
+			</action>
+			<action type="add">
+				The @Metadata annotation now has an attribute that can be used to control
+				the cache timeout
+			</action>
+			<action type="fix" issue="1544">
+				QuestionnaireResponse validation in the JPA server was not able to load Questionnaire resources that
+				were referenced using a canonical URI instead of a local reference. Thanks to Vu Vuong for reporting!
+			</action>
+			<action type="fix" issue="848">
+				When validating JSON payloads, the JSON structure was parsed by Gson instead of passing the
+				raw JSON to the validator. This meant that the validator was unable to catch certain structural
+				errors that are ignored by Gson. Thanks to Michael Lawley for reporting!
+			</action>
+			<action type="fix" issue="1546">
+				The JPA server exposed a number of duplicate entries in the CapabilityStatement's list of
+				supported _include values for a given resource. Thanks to Jens Villadsen for reporting!
+			</action>
+			<action type="fix" issue="1481">
+				An unintended dependency from hapi-fhir-base on Jetty was introduced in HAPI FHIR 4.0.0. This 
+				has been removed.
+			</action>
+			<action type="fix">
+				The JPA migrator tool was not able to correctly drop tables containing foreign key references
+				 in some cases. This has been corrected.
+			 </action>
+			 <action type="fix" issue="1547">
+				 An issue was fixed where the JPA server would occasionally fail to save a resource because
+				 it contained a string containing characters that change length when normalized. Thanks to 
+				 Tuomo Ala-Vannesluoma for the pull request!
+			 </action>
+			 <action type="add">
+				 Validation errors will now include details about the line number where the issue was found
+			 </action>
+			 <action type="change">
+				 The hapi-fhir-testpage-overlay project now uses WebJars for importing
+				 JavaScript dependency libraries. This reduces our Git repository size and
+				 should make it easier to stay up-to-date.
+			 </action>
+			<action type="fix">
+				In the (fairly unlikely) circumstance that a JPA server was called with a parameter where the parameter name referenced
+				a custom search parameter with an invalid chain attached, and the value was missing entirely (e.g.
+				<![CDATA[<code>ProcedureRequest?someCustomParameter.BAD_NAME=</code>]]>, the server would ignore this
+				parameter instead of incorrectly returning an error. This has been corrected.
+			</action>
+			<action type="fix" issue="1526">
+				Several issues with HAPI FHIR's annotation scanner that prevented use with Kotlin based
+				resource providers have been corrected. Thanks to Jelmer ter Wal for the pull request!
+			</action>
+			<action type="change">
+				The JPA server in DST2 mode previously automatically validated submitted QuestionnaireResponse resource against
+				their corresponding Questionnaires and rejected non-conformant QuestionnaireResponse resources from being
+				stored. This was in contrast to every other version where the
+				RequestValidatingInterceptor has to be registered in order to achieve this specific behaviour. This
+				behaviour has been removed from the JPA server, and the same interceptor must be used for
+				QR validation in the DSTU2 JPA server as in all other versions of FHIR.
+			</action>
+			<action type="change">
+				DSTU2.1 profile validation now uses the same R5 validation as all other versions of FHIR.
+			</action>
+			<action type="add">
+				A new built-in server interceptor called
+				<![CDATA[<code>CaptureResourceSourceFromHeaderInterceptor</code>]]>
+				has been added.
+				This interceptor can be used to capture an incoming source system URI in an HTTP Request
+				Header and automatically place it in
+				<![CDATA[<code>Resource.meta.source</code>]]>
+			</action>
+			<action type="remove">
+				The @ProvidesResources annotation has been removed from HAPI FHIR, as it was not documented
+				and did not do anything useful. Please get in touch if this causes any issues.
+			</action>
+			<action type="fix">
+				Search parameters of type URI did not work in the hapi-fhir-testpage-overlay. This has been corrected.
 			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">

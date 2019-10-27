@@ -139,13 +139,13 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 
 		ourLog.debug("Validating code {} in chain with {} items", theCode, myChain.size());
 
 		for (IValidationSupport next : myChain) {
-			if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
-				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+			if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+				CodeValidationResult result = next.validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 				if (result != null) {
 					ourLog.debug("Chain item {} returned outcome {}", next, result.isOk());
 					return result;
@@ -154,7 +154,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				ourLog.debug("Chain item {} does not support code system {}", next, theCodeSystem);
 			}
 		}
-		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay);
+		return myChain.get(0).validateCode(theCtx, theCodeSystem, theCode, theDisplay, theValueSetUrl);
 	}
 
 	@Override

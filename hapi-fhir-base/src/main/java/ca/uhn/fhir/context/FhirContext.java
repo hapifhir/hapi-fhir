@@ -20,6 +20,7 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import ca.uhn.fhir.util.VersionUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.jena.riot.Lang;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -894,6 +895,11 @@ public class FhirContext {
 				}
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "FhirContext[" + myVersion.getVersion().name() + "]";
 	}
 
 	/**

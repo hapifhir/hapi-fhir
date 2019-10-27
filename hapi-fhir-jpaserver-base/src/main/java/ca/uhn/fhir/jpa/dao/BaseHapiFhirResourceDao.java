@@ -55,8 +55,6 @@ import ca.uhn.fhir.validation.*;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.InstantType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -97,8 +95,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private String myResourceName;
 	private Class<T> myResourceType;
-	private String mySecondaryPrimaryKeyParamName;
-	private Class<? extends IPrimitiveType<byte[]>> myBase64Type;
 
 	@Override
 	public void addTag(IIdType theId, TagTypeEnum theTagType, String theScheme, String theTerm, String theLabel, RequestDetails theRequest) {
@@ -193,9 +189,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, DeleteConflictList theDeleteConflicts, RequestDetails theRequest) {
-		if (theId == null || !theId.hasIdPart()) {
-			throw new InvalidRequestException("Can not perform delete, no ID provided");
-		}
+		validateIdPresentForDelete(theId);
+
 		final ResourceTable entity = readEntityLatestVersion(theId, theRequest);
 		if (theId.hasVersionIdPart() && Long.parseLong(theId.getVersionIdPart()) != entity.getVersion()) {
 			throw new ResourceVersionConflictException("Trying to delete " + theId + " but this is not the current version");
@@ -271,8 +266,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	@Override
 	public DaoMethodOutcome delete(IIdType theId, RequestDetails theRequestDetails) {
+		validateIdPresentForDelete(theId);
+
 		DeleteConflictList deleteConflicts = new DeleteConflictList();
-		if (theId != null && isNotBlank(theId.getValue())) {
+		if (isNotBlank(theId.getValue())) {
 			deleteConflicts.setResourceIdMarkedForDeletion(theId);
 		}
 
@@ -374,6 +371,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myDeleteConflictService.validateDeleteConflictsEmptyOrThrowException(deleteConflicts);
 
 		return outcome;
+	}
+
+	private void validateIdPresentForDelete(IIdType theId) {
+		if (theId == null || !theId.hasIdPart()) {
+			throw new InvalidRequestException("Can not perform delete, no ID provided");
+		}
 	}
 
 	@PostConstruct
@@ -554,12 +557,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		myEntityManager.merge(entity);
 	}
 
-    private void validateExpungeEnabled() {
-        if (!myDaoConfig.isExpungeEnabled()) {
-            throw new MethodNotAllowedException("$expunge is not enabled on this server");
-        }
-    }
-    
+	private void validateExpungeEnabled() {
+		if (!myDaoConfig.isExpungeEnabled()) {
+			throw new MethodNotAllowedException("$expunge is not enabled on this server");
+		}
+	}
+
 	@Override
 	@Transactional(propagation = Propagation.NEVER)
 	public ExpungeOutcome expunge(IIdType theId, ExpungeOptions theExpungeOptions, RequestDetails theRequest) {
@@ -573,9 +576,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		TransactionTemplate txTemplate = new TransactionTemplate(myPlatformTransactionManager);
 
 		BaseHasResource entity = txTemplate.execute(t -> readEntity(theId, theRequest));
+		Validate.notNull(entity, "Resource with ID %s not found in database", theId);
+
 		if (theId.hasVersionIdPart()) {
 			BaseHasResource currentVersion;
 			currentVersion = txTemplate.execute(t -> readEntity(theId.toVersionless(), theRequest));
+			Validate.notNull(currentVersion, "Current version of resource with ID %s not found in database", theId.toVersionless());
+
 			if (entity.getVersion() == currentVersion.getVersion()) {
 				throw new PreconditionFailedException("Can not perform version-specific expunge of resource " + theId.toUnqualified().getValue() + " as this is the current version");
 			}
@@ -816,20 +823,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@PostConstruct
+	@Override
+	public void start() {
+		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
+		super.start();
+	}
+
+	@PostConstruct
 	public void postConstruct() {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(myResourceType);
 		myResourceName = def.getName();
-
-		if (mySecondaryPrimaryKeyParamName != null) {
-			RuntimeSearchParam sp = mySearchParamRegistry.getSearchParamByName(def, mySecondaryPrimaryKeyParamName);
-			if (sp == null) {
-				throw new ConfigurationException("Unknown search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "]");
-			}
-			if (sp.getParamType() != RestSearchParameterTypeEnum.TOKEN) {
-				throw new ConfigurationException("Search param on resource[" + myResourceName + "] for secondary key[" + mySecondaryPrimaryKeyParamName + "] is not a token type, only token is supported");
-			}
-		}
-
 	}
 
 	/**
@@ -873,25 +876,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				}
 			}
 		}
-
-		/*
-		 * Don't allow clients to submit resources with binary storage attachments present.
-		 */
-		List<? extends IPrimitiveType<byte[]>> base64fields = getContext().newTerser().getAllPopulatedChildElementsOfType(theResource, myBase64Type);
-		for (IPrimitiveType<byte[]> nextBase64 : base64fields) {
-			if (nextBase64 instanceof IBaseHasExtensions) {
-				boolean hasExternalizedBinaryReference = ((IBaseHasExtensions) nextBase64)
-					.getExtension()
-					.stream()
-					.filter(t-> t.getUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED) == null)
-					.anyMatch(t-> t.getUrl().equals(EXT_EXTERNALIZED_BINARY_ID));
-				if (hasExternalizedBinaryReference) {
-					String msg = getContext().getLocalizer().getMessage(BaseHapiFhirDao.class, "externalizedBinaryStorageExtensionFoundInRequestBody", EXT_EXTERNALIZED_BINARY_ID);
-					throw new InvalidRequestException(msg);
-				}
-			}
-		}
-
 
 	}
 
@@ -1188,21 +1172,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
-	/**
-	 * If set, the given param will be treated as a secondary primary key, and multiple resources will not be able to share the same value.
-	 */
-	public void setSecondaryPrimaryKeyParamName(String theSecondaryPrimaryKeyParamName) {
-		mySecondaryPrimaryKeyParamName = theSecondaryPrimaryKeyParamName;
-	}
-
-	@Override
-	@PostConstruct
-	public void start() {
-		super.start();
-		ourLog.debug("Starting resource DAO for type: {}", getResourceName());
-		myBase64Type = (Class<? extends IPrimitiveType<byte[]>>) getContext().getElementDefinition("base64Binary").getImplementingClass();
-	}
-
 	protected <MT extends IBaseMetaType> MT toMetaDt(Class<MT> theType, Collection<TagDefinition> tagDefinitions) {
 		MT retVal;
 		try {
@@ -1317,12 +1286,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RuntimeSearchParam paramDef = mySearchParamRegistry.getSearchParamByName(resourceDef, qualifiedParamName.getParamName());
 
 			for (String nextValue : theSource.get(nextParamName)) {
-				if (isNotBlank(nextValue)) {
-					QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
-					List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
-					IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
-					theTarget.add(qualifiedParamName.getParamName(), parsedParam);
-				}
+				QualifiedParamList qualifiedParam = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifiedParamName.getWholeQualifier(), nextValue);
+				List<QualifiedParamList> paramList = Collections.singletonList(qualifiedParam);
+				IQueryParameterAnd<?> parsedParam = ParameterUtil.parseQueryParams(getContext(), paramDef, nextParamName, paramList);
+				theTarget.add(qualifiedParamName.getParamName(), parsedParam);
 			}
 
 		}
@@ -1341,6 +1308,16 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public DaoMethodOutcome update(T theResource, String theMatchUrl) {
 		return update(theResource, theMatchUrl, null);
+	}
+
+	@Override
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, true, theRequestDetails);
+	}
+
+	@Override
+	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
+		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
 	}
 
 	@Override
@@ -1440,16 +1417,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public DaoMethodOutcome update(T theResource, String theMatchUrl, RequestDetails theRequestDetails) {
-		return update(theResource, theMatchUrl, true, theRequestDetails);
-	}
-
-	@Override
-	public DaoMethodOutcome update(T theResource, String theMatchUrl, boolean thePerformIndexing, RequestDetails theRequestDetails) {
-		return update(theResource, theMatchUrl, thePerformIndexing, false, theRequestDetails);
-	}
-
-	@Override
 	public MethodOutcome validate(T theResource, IIdType theId, String theRawResource, EncodingEnum theEncoding, ValidationModeEnum theMode, String theProfile, RequestDetails theRequest) {
 		if (theRequest != null) {
 			ActionRequestDetails requestDetails = new ActionRequestDetails(theRequest, theResource, null, theId);
@@ -1500,11 +1467,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		} else if (isNotBlank(theRawResource)) {
 			result = validator.validateWithResult(theRawResource, options);
-		} else if (theResource != null) {
-			result = validator.validateWithResult(theResource, options);
 		} else {
-			String msg = getContext().getLocalizer().getMessage(BaseHapiFhirResourceDao.class, "cantValidateWithNoResource");
-			throw new InvalidRequestException(msg);
+			result = validator.validateWithResult(theResource, options);
 		}
 
 		if (result.isSuccessful()) {
@@ -1519,9 +1483,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	/**
 	 * Get the resource definition from the criteria which specifies the resource type
-	 *
-	 * @param criteria
-	 * @return
 	 */
 	@Override
 	public RuntimeResourceDefinition validateCriteriaAndReturnResourceDefinition(String criteria) {

@@ -39,7 +39,8 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.searchparam.util.SourceParam;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.VersionIndependentConcept;
 import ca.uhn.fhir.jpa.util.*;
 import ca.uhn.fhir.model.api.*;
@@ -64,7 +65,6 @@ import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -135,7 +135,7 @@ public class SearchBuilder implements ISearchBuilder {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private ITermReadSvc myTerminologySvc;
 	@Autowired
 	private MatchUrlService myMatchUrlService;
 	private List<Long> myAlsoIncludePids;
@@ -834,7 +834,7 @@ public class SearchBuilder implements ISearchBuilder {
 		} else if (allOrPids != null) {
 
 			SearchFilterParser.CompareOperation operation = defaultIfNull(theOperation, SearchFilterParser.CompareOperation.eq);
-			assert operation == null || operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
+			assert operation == SearchFilterParser.CompareOperation.eq || operation == SearchFilterParser.CompareOperation.ne;
 			switch (operation) {
 				default:
 				case eq:
@@ -862,19 +862,9 @@ public class SearchBuilder implements ISearchBuilder {
 		List<Predicate> codePredicates = new ArrayList<>();
 
 		for (IQueryParameterType nextParameter : theList) {
-			String nextParamValue = nextParameter.getValueAsQueryToken(myContext);
-			int lastHashValueIndex = nextParamValue.lastIndexOf('#');
-			String sourceUri;
-			String requestId;
-			if (lastHashValueIndex == -1) {
-				sourceUri = nextParamValue;
-				requestId = null;
-			} else {
-				sourceUri = nextParamValue.substring(0, lastHashValueIndex);
-				requestId = nextParamValue.substring(lastHashValueIndex + 1);
-			}
-			requestId = left(requestId, Constants.REQUEST_ID_LENGTH);
-
+			SourceParam sourceParameter = new SourceParam(nextParameter.getValueAsQueryToken(myContext));
+			String sourceUri = sourceParameter.getSourceUri();
+			String requestId = sourceParameter.getRequestId();
 			Predicate sourceUriPredicate = myBuilder.equal(join.get("mySourceUri"), sourceUri);
 			Predicate requestIdPredicate = myBuilder.equal(join.get("myRequestId"), requestId);
 			if (isNotBlank(sourceUri) && isNotBlank(requestId)) {

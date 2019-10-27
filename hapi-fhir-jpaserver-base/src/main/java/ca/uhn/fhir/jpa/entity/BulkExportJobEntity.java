@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.jpa.bulk.BulkJobStatusEnum;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r5.model.InstantType;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 }, indexes = {
 	@Index(name = "IDX_BLKEX_EXPTIME", columnList = "EXP_TIME")
 })
-public class BulkExportJobEntity {
+public class BulkExportJobEntity implements Serializable {
 
 	public static final int REQUEST_LENGTH = 500;
 	public static final int STATUS_MESSAGE_LEN = 500;
@@ -64,7 +66,7 @@ public class BulkExportJobEntity {
 	private Date myExpiry;
 	@Column(name = "REQUEST", nullable = false, length = REQUEST_LENGTH)
 	private String myRequest;
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "myJob", orphanRemoval = false)
 	private Collection<BulkExportCollectionEntity> myCollections;
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
@@ -120,7 +122,8 @@ public class BulkExportJobEntity {
 
 	@Override
 	public String toString() {
-		ToStringBuilder b = new ToStringBuilder(this);
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("pid", myId);
 		if (isNotBlank(myJobId)) {
 			b.append("jobId", myJobId);
 		}

@@ -91,7 +91,7 @@ public class ValidationSupportChain implements IValidationSupport {
   @Override
   public CodeValidationResult validateCode(FhirContext theCtx, String theCodeSystem, String theCode, String theDisplay) {
     for (IValidationSupport next : myChain) {
-      if (next.isCodeSystemSupported(theCtx, theCodeSystem)) {
+      if (theCodeSystem != null && next.isCodeSystemSupported(theCtx, theCodeSystem)) {
         return next.validateCode(theCtx, theCodeSystem, theCode, theDisplay);
       }
     }

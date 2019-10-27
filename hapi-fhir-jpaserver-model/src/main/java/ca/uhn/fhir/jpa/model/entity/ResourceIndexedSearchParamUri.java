@@ -156,8 +156,9 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return myUri;
 	}
 
-	public void setUri(String theUri) {
+	public ResourceIndexedSearchParamUri setUri(String theUri) {
 		myUri = StringUtils.defaultIfBlank(theUri, null);
+		return this;
 	}
 
 	@Override
