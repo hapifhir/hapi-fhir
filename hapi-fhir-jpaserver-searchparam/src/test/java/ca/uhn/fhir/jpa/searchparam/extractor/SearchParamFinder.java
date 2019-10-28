@@ -14,80 +14,65 @@ public class SearchParamFinder {
 
 	public static void main(String[] args) {
 
-		FhirContext ctx = FhirContext.forR5();
-		RestSearchParameterTypeEnum wantType = RestSearchParameterTypeEnum.NUMBER;
-
-		for (String nextResourceName : ctx.getResourceNames()) {
-			RuntimeResourceDefinition nextResDef = ctx.getResourceDefinition(nextResourceName);
-			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-
-				if (nextSp.getParamType() == wantType) {
-
-					boolean logged = false;
-					for (String nextPath : nextSp.getPathsSplit()) {
-
-						List<String> pathsPart = new ArrayList<>(Arrays.asList(nextPath.split("\\.")));
-
-						BaseRuntimeElementCompositeDefinition def = null;
-
-						traverse(ctx, pathsPart, def);
-//						for (int i = 0; i < pathsPart.length; i++) {
-//							String nextPart = pathsPart[i];
-//
-//							if (i == 0) {
-//								def = ctx.getResourceDefinition(nextPart);
-//							} else {
-//								BaseRuntimeChildDefinition child = def.getChildByName(nextPart);
-//								if (child == null) {
-//									child = def.getChildByName(nextPart + "[x]");
-//								}
-//								BaseRuntimeElementDefinition<?> childDef = child.getChildByName(nextPart);
-//								if (childDef instanceof RuntimePrimitiveDatatypeDefinition) {
-//									ourLog.info("SearchParam {} : {} : {} has {}", nextResourceName, nextSp.getName(), nextSp.getPath(), childDef.getName());
-//									logged = true;
-//									break;
-//								}
-//								def = (BaseRuntimeElementCompositeDefinition) childDef;
-//							}
-//
-//						}
-					}
-
-					if (!logged) {
-						ourLog.info("SearchParam {} : {} : {}", nextResourceName, nextSp.getName(), nextSp.getPath());
-					}
-
-				}
-
-
-			}
-		}
+		RestSearchParameterTypeEnum type = RestSearchParameterTypeEnum.TOKEN;
+		process(FhirContext.forDstu2(), type);
+		process(FhirContext.forDstu3(), type);
+		process(FhirContext.forR4(), type);
+		process(FhirContext.forR5(), type);
 
 	}
 
-	private static void traverse(FhirContext theContext, List<String> thePathsPart, BaseRuntimeElementCompositeDefinition theDef) {
+	public static void process(FhirContext theCtx, RestSearchParameterTypeEnum theWantType) {
+		for (String nextResourceName : theCtx.getResourceNames()) {
+			RuntimeResourceDefinition nextResDef = theCtx.getResourceDefinition(nextResourceName);
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				if (nextSp.getParamType() == theWantType) {
+					for (String nextPath : nextSp.getPathsSplit()) {
+						List<String> pathsPart = new ArrayList<>(Arrays.asList(nextPath.split("\\.")));
+						BaseRuntimeElementCompositeDefinition def = null;
+						traverse(theCtx, nextSp, pathsPart, theCtx, pathsPart, def);
+					}
+				}
+			}
+		}
+	}
+
+	private static void traverse(FhirContext theCtx, RuntimeSearchParam theSearchParam, List<String> theFullPath, FhirContext theContext, List<String> thePathsPart, BaseRuntimeElementCompositeDefinition theDef) {
 		if (thePathsPart.size() == 0) {
-			ourLog.info("{} - {}", thePathsPart, theDef.getName());
+			ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), theDef.getName());
 			return;
 		}
 
 		String nextName = thePathsPart.get(0);
 		if (theDef == null) {
 			RuntimeResourceDefinition def = theContext.getResourceDefinition(nextName);
-			traverse(theContext, thePathsPart.subList(1, thePathsPart.size()), def);
+			traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 		} else {
 			BaseRuntimeChildDefinition child = theDef.getChildByName(nextName);
 			if (child != null) {
-				BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) child.getChildByName(nextName);
-				traverse(theContext, thePathsPart.subList(1, thePathsPart.size()), def);
+				BaseRuntimeElementDefinition<?> subChild = child.getChildByName(nextName);
+				if (subChild instanceof RuntimePrimitiveDatatypeDefinition) {
+					assert thePathsPart.size() == 1;
+					ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), subChild.getName());
+					return;
+				}
+
+				BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) subChild;
+				traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 			}
 
 			RuntimeChildChoiceDefinition choiceChild = (RuntimeChildChoiceDefinition) theDef.getChildByName(nextName + "[x]");
 			if (choiceChild != null){
 				for (String nextChildName : choiceChild.getValidChildNames()) {
 					if (nextChildName.startsWith(nextName)) {
-						BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) 		choiceChild.getChildByName(nextChildName);
-						traverse(theContext, thePathsPart.subList(1, thePathsPart.size()), def);
+						BaseRuntimeElementDefinition<?> subChild = choiceChild.getChildByName(nextChildName);
+						if (subChild instanceof RuntimePrimitiveDatatypeDefinition) {
+							assert thePathsPart.size() == 1;
+							ourLog.info("Found {} - {} - {} - {}", theCtx.getVersion().getVersion(), theSearchParam.getName(), String.join(".", theFullPath), subChild.getName());
+							return;
+						}
+						BaseRuntimeElementCompositeDefinition def = (BaseRuntimeElementCompositeDefinition) subChild;
+						traverse(theCtx, theSearchParam, theFullPath, theContext, thePathsPart.subList(1, thePathsPart.size()), def);
 					}
 				}
 			}

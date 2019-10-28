@@ -1,21 +1,21 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ModelConfig;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
-import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.JpaRuntimeSearchParam;
+import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
+import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
+import com.google.common.collect.Sets;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
-import org.hl7.fhir.dstu3.model.Observation;
-import org.hl7.fhir.dstu3.model.Questionnaire;
+import org.hl7.fhir.dstu3.model.*;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,63 +37,7 @@ public class SearchParamExtractorDstu3Test {
 		Observation obs = new Observation();
 		obs.addCategory().addCoding().setSystem("SYSTEM").setCode("CODE");
 
-		ISearchParamRegistry searchParamRegistry = new ISearchParamRegistry() {
-			@Override
-			public void forceRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public boolean refreshCacheIfNecessary() {
-				// nothing
-				return false;
-			}
-
-			@Override
-			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-				Map<String, RuntimeSearchParam> sps = new HashMap<>();
-				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-					sps.put(nextSp.getName(), nextSp);
-				}
-				return sps;
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void requestRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-				return null;
-			}
-
-			@Override
-			public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-				return null;
-			}
-		};
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
@@ -116,68 +60,189 @@ public class SearchParamExtractorDstu3Test {
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);
 
-		ISearchParamRegistry searchParamRegistry = new ISearchParamRegistry() {
-			@Override
-			public void forceRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public boolean refreshCacheIfNecessary() {
-				// nothing
-				return false;
-			}
-
-			@Override
-			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-				Map<String, RuntimeSearchParam> sps = new HashMap<>();
-				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-					sps.put(nextSp.getName(), nextSp);
-				}
-				return sps;
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void requestRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-				return null;
-			}
-
-			@Override
-			public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-				return null;
-			}
-		};
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
 
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
 		assertEquals(1, params.size());
+	}
+
+	@Test
+	public void testEncounterDuration_Normalized() {
+
+		Encounter enc = new Encounter();
+		Duration value = new Duration();
+		value.setSystem(SearchParamConstants.UCUM_NS);
+		value.setCode("min");
+		value.setValue(2 * 24 * 60);
+		enc.setLength(value);
+
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
+		assertEquals(1, params.size());
+		// Normalized to days
+		assertEquals("2", params.iterator().next().getValue().toPlainString());
+	}
+
+	@Test
+	public void testEncounterDuration_NotNormalized() {
+
+		Encounter enc = new Encounter();
+		Duration value = new Duration();
+		value.setValue(15);
+		enc.setLength(value);
+
+		ISearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
+		assertEquals(1, params.size());
+		// Normalized to days
+		assertEquals("15", params.iterator().next().getValue().toPlainString());
+	}
+
+
+	@Test
+	public void testInvalidType() {
+
+		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamStrings(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamTokens(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamQuantity(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamDates(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamNumber(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamUri(resource);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+		try {
+			RuntimeSearchParam sp = new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.REFERENCE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+			searchParamRegistry.addSearchParam(sp);
+			Patient resource = new Patient();
+			extractor.extractResourceLinks(resource, sp);
+		} catch (ConfigurationException e) {
+			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+		}
+
+	}
+
+
+	private static class MySearchParamRegistry implements ISearchParamRegistry {
+
+		private List<RuntimeSearchParam> myAddedSearchParams = new ArrayList<>();
+
+		public void addSearchParam(RuntimeSearchParam... theSearchParam) {
+			myAddedSearchParams.clear();
+			for (RuntimeSearchParam next : theSearchParam) {
+				myAddedSearchParams.add(next);
+			}
+		}
+
+		@Override
+		public void forceRefresh() {
+			// nothing
+		}
+
+		@Override
+		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean refreshCacheIfNecessary() {
+			// nothing
+			return false;
+		}
+
+		@Override
+		public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
+			Map<String, RuntimeSearchParam> sps = new HashMap<>();
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				sps.put(nextSp.getName(), nextSp);
+			}
+			for (RuntimeSearchParam next : myAddedSearchParams) {
+				sps.put(next.getName(), next);
+			}
+			return sps;
+		}
+
+		@Override
+		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void requestRefresh() {
+			// nothing
+		}
+
+		@Override
+		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+			return null;
+		}
+
+		@Override
+		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
+			return null;
+		}
 	}
 
 	@AfterClass
