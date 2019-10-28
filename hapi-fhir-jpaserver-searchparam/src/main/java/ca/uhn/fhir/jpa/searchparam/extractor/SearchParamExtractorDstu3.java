@@ -28,9 +28,6 @@ import org.hl7.fhir.dstu3.context.IWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.Base;
-import org.hl7.fhir.dstu3.model.CodeSystem;
-import org.hl7.fhir.dstu3.model.ConceptMap;
-import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,27 +60,27 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 	public SearchParamExtractorDstu3(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
+		start(null);
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String thePaths) {
+	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
 			List<IBase> values = new ArrayList<>();
-			String[] nextPathsSplit = split(thePaths);
-		for (String nextPath : nextPathsSplit) {
-				List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, trim(nextPath));
+			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
 			if (allValues.isEmpty() == false) {
 				values.addAll(allValues);
 			}
-		}
 
-		return values;
+			return values;
 		};
 	}
 
 	@EventListener
 	public void start(ContextRefreshedEvent theEvent) {
-		myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+		if (myValidationSupport == null) {
+			myValidationSupport = myApplicationContext.getBean(IValidationSupport.class);
+		}
 		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
 		myFhirPathEngine = new FHIRPathEngine(worker);
 	}

@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.dstu3;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.term.TranslationMatch;
 import ca.uhn.fhir.jpa.term.TranslationRequest;

@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -33,9 +32,7 @@ import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
-import org.hl7.fhir.r4.model.Location.LocationPositionComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
@@ -63,16 +60,10 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	}
 
 	@Override
-	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String thePaths) {
+	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {
 		return () -> {
-			List<IBase> values = new ArrayList<>();
-			String[] nextPathsSplit = split(thePaths);
-			for (String nextPath : nextPathsSplit) {
-				List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, nextPath);
-				values.addAll(allValues);
-			}
-
-			return values;
+			List<Base> allValues = myFhirPathEngine.evaluate((Base) theResource, theSinglePath);
+			return (List<IBase>) new ArrayList<IBase>(allValues);
 		};
 	}
 

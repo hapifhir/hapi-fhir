@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.dao.r4;
  * #L%
  */
 
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoConceptMap;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;

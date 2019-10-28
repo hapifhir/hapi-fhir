@@ -110,7 +110,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				IBaseEnumeration<?> obj = (IBaseEnumeration<?>) value;
 				String system = extractSystem(obj);
 				String code = obj.getValueAsString();
-				addTokenIfNotBlank(resourceTypeName, params, searchParam, system, code);
+				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, system, code);
 				return;
 			}
 
@@ -124,7 +124,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					system = boundCode.getBinder().toSystemString(valueAsEnum);
 				}
 				String code = boundCode.getValueAsString();
-				addTokenIfNotBlank(resourceTypeName, params, searchParam, system, code);
+				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, system, code);
 				return;
 			}
 
@@ -138,7 +138,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					systemAsString = useSystem;
 				}
 
-				addTokenIfNotBlank(resourceTypeName, params, searchParam, systemAsString, valueAsString);
+				createTokenIndexIfNotBlank(resourceTypeName, params, searchParam, systemAsString, valueAsString);
 				return;
 			}
 
@@ -308,7 +308,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (value instanceof IPrimitiveType) {
 				IPrimitiveType<?> nextValue = (IPrimitiveType<?>) value;
 				String valueAsString = nextValue.getValueAsString();
-				addSearchTermIfNotBlank(resourceType, params, searchParam, valueAsString);
+				createStringIndexIfNotBlank(resourceType, params, searchParam, valueAsString);
 				return;
 			}
 
@@ -482,13 +482,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		String system = extractValueAsString(identifierSystemValueChild, theValue);
 		String value = extractValueAsString(identifierValueValueChild, theValue);
 		if (isNotBlank(value)) {
-			addTokenIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
+			createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 		}
 
 		Optional<IBase> type = identifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (type.isPresent()) {
 			String text = extractValueAsString(identifierTypeTextValueChild, type.get());
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 		}
 
 	}
@@ -505,7 +505,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		String text = extractValueAsString(codeableConceptTextValueChild, theValue);
 		if (isNotBlank(text)) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, text);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 		}
 	}
 
@@ -517,10 +517,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		String system = extractValueAsString(codingSystemValueChild, theValue);
 		String code = extractValueAsString(codingCodeValueChild, theValue);
-		addTokenIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
+		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
 
 		String text = extractValueAsString(codingDisplayValueChild, theValue);
-		addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, text);
+		createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 	}
 
 	private void addToken_ContactPoint(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -530,7 +530,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		String system = extractValueAsString(contactPointSystemValueChild, theValue);
 		String value = extractValueAsString(contactPointValueValueChild, theValue);
-		addTokenIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
+		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 	}
 
 	private void addToken_PatientCommunication(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
@@ -681,12 +681,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		List<String> families = extractValuesAsStrings(humanNameFamilyValueChild, theValue);
 		for (String next : families) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, next);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
 
 		List<String> givens = extractValuesAsStrings(humanNameGivenValueChild, theValue);
 		for (String next : givens) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, next);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
 
 	}
@@ -697,7 +697,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		BigDecimal value = extractValueAsBigDecimal(quantityValueChild, theValue);
 		if (value != null) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
 		}
 	}
 
@@ -707,7 +707,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		BigDecimal value = extractValueAsBigDecimal(rangeLowValueChild, theValue);
 		if (value != null) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
 		}
 	}
 
@@ -717,7 +717,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		String value = extractValueAsString(contactPointValueValueChild, theValue);
 		if (isNotBlank(value)) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, value);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
 	}
 
@@ -752,7 +752,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		for (String nextName : allNames) {
-			addSearchTermIfNotBlank(theResourceType, theParams, theSearchParam, nextName);
+			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, nextName);
 		}
 
 	}
@@ -809,7 +809,28 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	private void addTokenIfNotBlank(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
+	@SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
+	private void createStringIndexIfNotBlank(String theResourceType, Set<? extends BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theValue) {
+		String value = theValue;
+		if (isNotBlank(value)) {
+			if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+				value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+			}
+
+			String searchParamName = theSearchParam.getName();
+			String valueNormalized = StringNormalizer.normalizeString(value);
+			if (valueNormalized.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+				valueNormalized = valueNormalized.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+			}
+
+			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), theResourceType, searchParamName, valueNormalized, value);
+
+			Set params = theParams;
+			params.add(nextEntity);
+		}
+	}
+
+	private void createTokenIndexIfNotBlank(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theSystem, String theValue) {
 		String system = theSystem;
 		String value = theValue;
 		if (isNotBlank(system) || isNotBlank(value)) {
@@ -825,22 +846,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			theParams.add(nextEntity);
 		}
 	}
-
-	@SuppressWarnings({"unchecked", "UnnecessaryLocalVariable"})
-	private void addSearchTermIfNotBlank(String theResourceType, Set<? extends BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, String theValue) {
-		if (isNotBlank(theValue)) {
-			if (theValue.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-				theValue = theValue.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-			}
-
-			String searchParamName = theSearchParam.getName();
-			ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), theResourceType, searchParamName, StringNormalizer.normalizeString(theValue), theValue);
-
-			Set params = theParams;
-			params.add(nextEntity);
-		}
-	}
-
 
 	@Override
 	public String[] split(String thePaths) {

@@ -31,10 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.exceptions.FHIRException;
-import org.hl7.fhir.instance.model.api.IBaseMetaType;
-import org.hl7.fhir.instance.model.api.IBaseReference;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.instance.model.api.*;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r5.model.Coding;
 import org.slf4j.Logger;
@@ -371,7 +368,15 @@ public class SubscriptionCanonicalizer {
 		IBaseMetaType meta = theSubscription.getMeta();
 
 		// Remove any existing strategy tag
-		meta.getTag().removeIf(t -> JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(t.getSystem()));
+		meta
+			.getTag()
+			.stream()
+			.filter(t->JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY.equals(t.getSystem()))
+			.forEach(t->{
+				t.setCode(null);
+				t.setSystem(null);
+				t.setDisplay(null);
+			});
 
 		if (theStrategy == null) {
 			return;
