@@ -442,11 +442,7 @@ class ParserState<T> {
 					((IIdentifiableElement) myInstance).setElementSpecificId((theValue));
 				} else if (myInstance instanceof IBaseElement) {
 					((IBaseElement) myInstance).setId(theValue);
-				} else if (myInstance instanceof IBaseResource) {
-					new IdDt(theValue).applyTo((IBaseResource) myInstance);
 				}
-			} else if ("url".equals(theName) && myInstance instanceof ExtensionDt) {
-				((ExtensionDt) myInstance).setUrl(theValue);
 			} else {
 				if (myJsonMode) {
 					myErrorHandler.incorrectJsonType(null, myElementName, ValueType.OBJECT, null, ValueType.SCALAR, ScalarType.STRING);
@@ -1251,7 +1247,7 @@ class ParserState<T> {
 					myErrorHandler.unknownAttribute(null, theName);
 				}
 			} else {
-				myErrorHandler.unknownAttribute(null, theName);
+				super.attributeValue(theName, theValue);
 			}
 		}
 
@@ -1273,7 +1269,7 @@ class ParserState<T> {
 
 		@Override
 		public void enteringNewElement(String theNamespaceUri, String theLocalPart) throws DataFormatException {
-			myErrorHandler.unknownElement(null, theLocalPart);
+			super.enteringNewElement(theNamespaceUri, theLocalPart);
 			push(new SwallowChildrenWholeState(getPreResourceState()));
 		}
 
