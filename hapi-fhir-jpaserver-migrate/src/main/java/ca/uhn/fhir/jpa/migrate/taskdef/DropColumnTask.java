@@ -32,8 +32,8 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 
-	public DropColumnTask(String theVersion) {
-		super(theVersion);
+	public DropColumnTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	@Override

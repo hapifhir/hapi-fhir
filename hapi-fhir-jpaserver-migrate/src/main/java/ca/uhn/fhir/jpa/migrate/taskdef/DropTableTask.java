@@ -33,8 +33,8 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 
-	public DropTableTask(String theVersion) {
-		super(theVersion);
+	public DropTableTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	@Override

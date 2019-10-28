@@ -43,10 +43,12 @@ public abstract class BaseTask<T extends BaseTask> {
 	private boolean myDryRun;
 	private List<ExecutedStatement> myExecutedStatements = new ArrayList<>();
 	private boolean myNoColumnShrink;
-	private final String version;
+	private final String myRelease;
+	private final String myVersion;
 
-	protected BaseTask(String theVersion) {
-		version = theVersion;
+	protected BaseTask(String theRelease, String theVersion) {
+		myRelease = theRelease;
+		myVersion = theVersion;
 	}
 
 	public boolean isNoColumnShrink() {
@@ -135,8 +137,8 @@ public abstract class BaseTask<T extends BaseTask> {
 
 	public abstract void execute() throws SQLException;
 
-	public String getVersion() {
-		return version;
+	public String getFlywayVersion() {
+		return myRelease + "." + myVersion;
 	}
 
 	public static class ExecutedStatement {

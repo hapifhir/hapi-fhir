@@ -37,8 +37,8 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
 
-	public AddTableRawSqlTask(String theVersion) {
-		super(theVersion);
+	public AddTableRawSqlTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	public void addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {

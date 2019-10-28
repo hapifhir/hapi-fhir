@@ -36,8 +36,8 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIdGeneratorTask.class);
 	private final String myGeneratorName;
 
-	public DropIdGeneratorTask(String theVersion, String theGeneratorName) {
-		super(theVersion);
+	public DropIdGeneratorTask(String theRelease, String theVersion, String theGeneratorName) {
+		super(theRelease, theVersion);
 		myGeneratorName = theGeneratorName;
 	}
 

@@ -25,8 +25,8 @@ import org.apache.commons.lang3.Validate;
 public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	private String myTableName;
 
-	public BaseTableTask(String theVersion) {
-		super(theVersion);
+	public BaseTableTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	public String getTableName() {

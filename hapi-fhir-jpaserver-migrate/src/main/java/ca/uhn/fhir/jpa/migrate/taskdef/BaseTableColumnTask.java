@@ -29,8 +29,8 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 
 	private String myColumnName;
 
-	public BaseTableColumnTask(String theVersion) {
-		super(theVersion);
+	public BaseTableColumnTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	@SuppressWarnings("unchecked")

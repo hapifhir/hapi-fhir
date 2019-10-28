@@ -28,8 +28,8 @@ public class LogStartSectionWithMessageTask extends BaseTask {
 	private static final Logger ourLog = LoggerFactory.getLogger(LogStartSectionWithMessageTask.class);
 	private final String myMessage;
 
-	public LogStartSectionWithMessageTask(String theVersion, String theMessage) {
-		super(theVersion);
+	public LogStartSectionWithMessageTask(String theRelease, String theVersion, String theMessage) {
+		super(theRelease, theVersion);
 		myMessage = theMessage;
 	}
 

@@ -37,8 +37,8 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 	 *
 	 * @param theVersion
 	 */
-	public ModifyColumnTask(String theVersion) {
-		super(theVersion);
+	public ModifyColumnTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	@Override

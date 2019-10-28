@@ -35,8 +35,8 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(DropIndexTask.class);
 	private String myIndexName;
 
-	public DropIndexTask(String theVersion) {
-		super(theVersion);
+	public DropIndexTask(String theRelease, String theVersion) {
+		super(theRelease, theVersion);
 	}
 
 	@Override

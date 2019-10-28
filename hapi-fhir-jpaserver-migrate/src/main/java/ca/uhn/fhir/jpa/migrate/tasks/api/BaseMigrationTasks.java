@@ -60,12 +60,12 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retVal;
 	}
 
-	public Builder forVersion(T theVersion) {
+	public Builder forVersion(T theRelease) {
 		IAcceptsTasks sink = theTask -> {
 			theTask.validate();
-			myTasks.put(theVersion, theTask);
+			myTasks.put(theRelease, theTask);
 		};
-		return new Builder(sink);
+		return new Builder(theRelease.name(), sink);
 	}
 
 	public interface IAcceptsTasks {
@@ -74,14 +74,16 @@ public class BaseMigrationTasks<T extends Enum> {
 
 	public static class Builder {
 
+		private final String myRelease;
 		private final IAcceptsTasks mySink;
 
-		public Builder(IAcceptsTasks theSink) {
+		public Builder(String theRelease, IAcceptsTasks theSink) {
+			myRelease = theRelease;
 			mySink = theSink;
 		}
 
 		public BuilderWithTableName onTable(String theTableName) {
-			return new BuilderWithTableName(mySink, theTableName);
+			return new BuilderWithTableName(myRelease, mySink, theTableName);
 		}
 
 		public void addTask(BaseTask<?> theTask) {
@@ -93,32 +95,32 @@ public class BaseMigrationTasks<T extends Enum> {
 		}
 
 		public Builder executeRawSql(String theVersion, @Language("SQL") String theSql) {
-			mySink.addTask(new ExecuteRawSqlTask(theVersion).addSql(theSql));
+			mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql));
 			return this;
 		}
 
 		public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {
-			mySink.addTask(new ExecuteRawSqlTask(theVersion).addSql(theDriver, theSql));
+			mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
 			return this;
 		}
 
 		public Builder startSectionWithMessage(String theMessage) {
 			Validate.notBlank(theMessage);
-			addTask(new LogStartSectionWithMessageTask("log message", theMessage));
+			addTask(new LogStartSectionWithMessageTask(myRelease, "log message", theMessage));
 			return this;
 		}
 
 		public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String thePkColumnName) {
-			return new BuilderAddTableByColumns(theVersion, mySink, theTableName, thePkColumnName);
+			return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, thePkColumnName);
 		}
 
 		public void addIdGenerator(String theVersion, String theGeneratorName) {
-			AddIdGeneratorTask task = new AddIdGeneratorTask(theVersion, theGeneratorName);
+			AddIdGeneratorTask task = new AddIdGeneratorTask(myRelease, theVersion, theGeneratorName);
 			addTask(task);
 		}
 
 		public void dropIdGenerator(String theVersion, String theIdGeneratorName) {
-			DropIdGeneratorTask task = new DropIdGeneratorTask(theVersion, theIdGeneratorName);
+			DropIdGeneratorTask task = new DropIdGeneratorTask(myRelease, theVersion, theIdGeneratorName);
 			addTask(task);
 		}
 
@@ -127,7 +129,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			private final AddTableRawSqlTask myTask;
 
 			protected BuilderAddTableRawSql(String theVersion, String theTableName) {
-				myTask = new AddTableRawSqlTask(theVersion);
+				myTask = new AddTableRawSqlTask(myRelease, theVersion);
 				myTask.setTableName(theTableName);
 				addTask(myTask);
 			}
@@ -146,17 +148,17 @@ public class BaseMigrationTasks<T extends Enum> {
 		public class BuilderAddTableByColumns extends BuilderWithTableName implements IAcceptsTasks {
 			private final AddTableByColumnTask myTask;
 
-			public BuilderAddTableByColumns(String theVersion, IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
-				super(theSink, theTableName);
-				myTask = new AddTableByColumnTask(theVersion);
+			public BuilderAddTableByColumns(String theRelease, String theVersion, IAcceptsTasks theSink, String theTableName, String thePkColumnName) {
+				super(theRelease, theSink, theTableName);
+				myTask = new AddTableByColumnTask(myRelease, theVersion);
 				myTask.setTableName(theTableName);
 				myTask.setPkColumn(thePkColumnName);
 				theSink.addTask(myTask);
 			}
 
 			@Override
-			public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theColumnName) {
-				return new BuilderWithTableName.BuilderAddColumnWithName(theColumnName, this);
+			public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
+				return new BuilderWithTableName.BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
 			}
 
 			@Override
@@ -170,10 +172,12 @@ public class BaseMigrationTasks<T extends Enum> {
 		}
 
 		public static class BuilderWithTableName implements IAcceptsTasks {
-			private final String myTableName;
+			private final String myRelease;
 			private final IAcceptsTasks mySink;
+			private final String myTableName;
 
-			public BuilderWithTableName(IAcceptsTasks theSink, String theTableName) {
+			public BuilderWithTableName(String theRelease, IAcceptsTasks theSink, String theTableName) {
+				myRelease = theRelease;
 				mySink = theSink;
 				myTableName = theTableName;
 			}
@@ -183,14 +187,14 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			public void dropIndex(String theVersion, String theIndexName) {
-				DropIndexTask task = new DropIndexTask(theVersion);
+				DropIndexTask task = new DropIndexTask(myRelease, theVersion);
 				task.setIndexName(theIndexName);
 				task.setTableName(myTableName);
 				addTask(task);
 			}
 
 			public void dropThisTable(String theVersion) {
-				DropTableTask task = new DropTableTask(theVersion);
+				DropTableTask task = new DropTableTask(myRelease, theVersion);
 				task.setTableName(myTableName);
 				addTask(task);
 			}
@@ -199,13 +203,13 @@ public class BaseMigrationTasks<T extends Enum> {
 				return new BuilderAddIndexWithName(theIndexName);
 			}
 
-			public BuilderAddColumnWithName addColumn(String theColumnName) {
-				return new BuilderAddColumnWithName(theColumnName, this);
+			public BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
+				return new BuilderAddColumnWithName(myRelease, theVersion, theColumnName, this);
 			}
 
 			public void dropColumn(String theVersion, String theColumnName) {
 				Validate.notBlank(theColumnName);
-				DropColumnTask task = new DropColumnTask(theVersion);
+				DropColumnTask task = new DropColumnTask(myRelease, theVersion);
 				task.setTableName(myTableName);
 				task.setColumnName(theColumnName);
 				addTask(task);
@@ -236,7 +240,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			 * @param theDeleteTargetColumnFirstIfBothEixst Setting this to true causes the migrator to be ok with the target column existing. It will make sure that there is no data in the column with the new name, then delete it if so in order to make room for the renamed column. If there is data it will still bomb out.
 			 */
 			public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName, boolean theAllowNeitherColumnToExist, boolean theDeleteTargetColumnFirstIfBothEixst) {
-				RenameColumnTask task = new RenameColumnTask(theVersion);
+				RenameColumnTask task = new RenameColumnTask(myRelease, theVersion);
 				task.setTableName(myTableName);
 				task.setOldName(theOldName);
 				task.setNewName(theNewName);
@@ -252,7 +256,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			 * @param theParentTableName the name of the table that exports the foreign key
 			 */
 			public void dropForeignKey(String theVersion, String theFkName, String theParentTableName) {
-				DropForeignKeyTask task = new DropForeignKeyTask(theVersion);
+				DropForeignKeyTask task = new DropForeignKeyTask(myRelease, theVersion);
 				task.setConstraintName(theFkName);
 				task.setTableName(getTableName());
 				task.setParentTableName(theParentTableName);
@@ -278,7 +282,7 @@ public class BaseMigrationTasks<T extends Enum> {
 					}
 
 					public void withColumns(String theVersion, String... theColumnNames) {
-						AddIndexTask task = new AddIndexTask(theVersion);
+						AddIndexTask task = new AddIndexTask(myRelease, theVersion);
 						task.setTableName(myTableName);
 						task.setIndexName(myIndexName);
 						task.setUnique(myUnique);
@@ -331,7 +335,7 @@ public class BaseMigrationTasks<T extends Enum> {
 							}
 						}
 
-						ModifyColumnTask task = new ModifyColumnTask(theVersion);
+						ModifyColumnTask task = new ModifyColumnTask(myRelease, theVersion);
 						task.setColumnName(myColumnName);
 						task.setTableName(myTableName);
 						if (theLength != null) {
@@ -361,7 +365,7 @@ public class BaseMigrationTasks<T extends Enum> {
 					}
 
 					public void references(String theVersion, String theForeignTable, String theForeignColumn) {
-						AddForeignKeyTask task = new AddForeignKeyTask(theVersion);
+						AddForeignKeyTask task = new AddForeignKeyTask(myRelease, theVersion);
 						task.setTableName(myTableName);
 						task.setConstraintName(myForeignKeyName);
 						task.setColumnName(getColumnName());
@@ -373,26 +377,34 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			public static class BuilderAddColumnWithName {
+				private final String myRelease;
+				private final String myVersion;
 				private final String myColumnName;
 				private final IAcceptsTasks myTaskSink;
 
-				public BuilderAddColumnWithName(String theColumnName, IAcceptsTasks theTaskSink) {
+				public BuilderAddColumnWithName(String theRelease, String theVersion, String theColumnName, IAcceptsTasks theTaskSink) {
+					myRelease = theRelease;
+					myVersion = theVersion;
 					myColumnName = theColumnName;
 					myTaskSink = theTaskSink;
 				}
 
 				public BuilderAddColumnWithNameNullable nullable() {
-					return new BuilderAddColumnWithNameNullable(true);
+					return new BuilderAddColumnWithNameNullable(myRelease, myVersion, true);
 				}
 
 				public BuilderAddColumnWithNameNullable nonNullable() {
-					return new BuilderAddColumnWithNameNullable(false);
+					return new BuilderAddColumnWithNameNullable(myRelease, myVersion, false);
 				}
 
 				public class BuilderAddColumnWithNameNullable {
 					private final boolean myNullable;
+					private final String myRelease;
+					private final String myVersion;
 
-					public BuilderAddColumnWithNameNullable(boolean theNullable) {
+					public BuilderAddColumnWithNameNullable(String theRelease, String theVersion, boolean theNullable) {
+						myRelease = theRelease;
+						myVersion = theVersion;
 						myNullable = theNullable;
 					}
 
@@ -401,7 +413,7 @@ public class BaseMigrationTasks<T extends Enum> {
 					}
 
 					public void type(AddColumnTask.ColumnTypeEnum theColumnType, Integer theLength) {
-						AddColumnTask task = new AddColumnTask();
+						AddColumnTask task = new AddColumnTask(myRelease, myVersion);
 						task.setColumnName(myColumnName);
 						task.setNullable(myNullable);
 						task.setColumnType(theColumnType);
