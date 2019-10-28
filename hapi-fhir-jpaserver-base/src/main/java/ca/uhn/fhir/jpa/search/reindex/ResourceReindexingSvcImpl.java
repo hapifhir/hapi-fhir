@@ -148,7 +148,7 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		initExecutor();
 	}
 
-	private void initExecutor() {
+	public void initExecutor() {
 		// Create the threadpool executor used for reindex jobs
 		int reindexThreadCount = myDaoConfig.getReindexThreadCount();
 		RejectedExecutionHandler rejectHandler = new Executors.BlockPolicy();
