@@ -39,6 +39,10 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	private List<String> myColumns;
 	private Boolean myUnique;
 
+	public AddIndexTask(String theVersion) {
+		super(theVersion);
+	}
+
 	public void setIndexName(String theIndexName) {
 		myIndexName = StringUtils.toUpperCase(theIndexName, Locale.US);
 	}

@@ -68,9 +68,6 @@ public class FlywayMigrator {
 	}
 
 	public void addTask(BaseTask<?> theTask) {
-		if (theTask.getVersion() == null) {
-			theTask.setVersion("2." + (++ourVersion));
-		}
 		myTasks.add(new FlywayMigration(theTask, this));
 	}
 

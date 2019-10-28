@@ -53,8 +53,8 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	/**
 	 * Constructor
 	 */
-	public CalculateHashesTask() {
-		super();
+	public CalculateHashesTask(String theVersion) {
+		super(theVersion);
 	}
 
 	@Override

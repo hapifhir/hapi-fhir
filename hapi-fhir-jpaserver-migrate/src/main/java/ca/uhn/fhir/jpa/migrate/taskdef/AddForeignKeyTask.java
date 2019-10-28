@@ -37,6 +37,10 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 	private String myForeignTableName;
 	private String myForeignColumnName;
 
+	public AddForeignKeyTask(String theVersion) {
+		super(theVersion);
+	}
+
 	public void setConstraintName(String theConstraintName) {
 		myConstraintName = theConstraintName;
 	}

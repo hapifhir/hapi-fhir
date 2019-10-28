@@ -36,6 +36,10 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	private List<AddColumnTask> myAddColumnTasks = new ArrayList<>();
 	private String myPkColumn;
 
+	public AddTableByColumnTask(String theVersion) {
+		super(theVersion);
+	}
+
 	public void addAddColumnTask(AddColumnTask theTask) {
 		Validate.notNull(theTask);
 		myAddColumnTasks.add(theTask);

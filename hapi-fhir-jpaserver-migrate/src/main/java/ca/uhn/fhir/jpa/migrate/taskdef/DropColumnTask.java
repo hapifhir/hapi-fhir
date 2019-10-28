@@ -32,6 +32,9 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropColumnTask.class);
 
+	public DropColumnTask(String theVersion) {
+		super(theVersion);
+	}
 
 	@Override
 	public void execute() throws SQLException {

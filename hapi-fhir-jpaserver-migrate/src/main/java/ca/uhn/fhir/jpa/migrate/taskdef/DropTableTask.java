@@ -33,6 +33,10 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DropTableTask.class);
 
+	public DropTableTask(String theVersion) {
+		super(theVersion);
+	}
+
 	@Override
 	public void execute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());

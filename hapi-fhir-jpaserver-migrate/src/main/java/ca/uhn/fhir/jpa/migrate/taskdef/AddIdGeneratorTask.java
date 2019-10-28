@@ -36,7 +36,8 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 	private static final Logger ourLog = LoggerFactory.getLogger(AddIdGeneratorTask.class);
 	private final String myGeneratorName;
 
-	public AddIdGeneratorTask(String theGeneratorName) {
+	public AddIdGeneratorTask(String theVersion, String theGeneratorName) {
+		super(theVersion);
 		myGeneratorName = theGeneratorName;
 	}
 

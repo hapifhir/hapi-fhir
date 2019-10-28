@@ -29,6 +29,10 @@ public abstract class BaseTableColumnTask<T extends BaseTableTask> extends BaseT
 
 	private String myColumnName;
 
+	public BaseTableColumnTask(String theVersion) {
+		super(theVersion);
+	}
+
 	@SuppressWarnings("unchecked")
 	public T setColumnName(String theColumnName) {
 		myColumnName = StringUtils.toUpperCase(theColumnName, Locale.US);

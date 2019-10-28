@@ -34,6 +34,10 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 	private Map<DriverTypeEnum, List<String>> myDriverToSqls = new HashMap<>();
 	private List<String> myDriverNeutralSqls = new ArrayList<>();
 
+	public ExecuteRawSqlTask(String theVersion) {
+		super(theVersion);
+	}
+
 	public ExecuteRawSqlTask addSql(DriverTypeEnum theDriverType, @Language("SQL") String theSql) {
 		Validate.notNull(theDriverType);
 		Validate.notBlank(theSql);
