@@ -59,7 +59,7 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	public void validate() {
 		super.validate();
 		Validate.notBlank(myIndexName, "Index name not specified");
-		Validate.isTrue(myColumns.size() > 0, "Columns not specified");
+		Validate.isTrue(myColumns.size() > 0, "Columns not specified for AddIndexTask " + myIndexName + " on table " + getTableName());
 		Validate.notNull(myUnique, "Uniqueness not specified");
 	}
 

@@ -281,7 +281,7 @@ public class BaseMigrationTasks<T extends Enum> {
 					public BuilderAddIndexUnique(boolean theUnique) {
 						myUnique = theUnique;
 					}
-
+// FIXME KHS find all instances of this.  The String... messed up the conversion
 					public void withColumns(String theVersion, String... theColumnNames) {
 						AddIndexTask task = new AddIndexTask(myRelease, theVersion);
 						task.setTableName(myTableName);
