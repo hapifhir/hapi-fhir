@@ -303,9 +303,9 @@ public class RestHookTestR5Test extends BaseSubscriptionsR5Test {
 			.addExtension(JpaConstants.EXT_SUBSCRIPTION_RESTHOOK_STRIP_VERSION_IDS, new BooleanType("true"));
 		ourLog.info("** About to update subscription");
 
-		int modCount = myCountingInterceptor.getSentCount();
+		int modCount = myCountingInterceptor.getSentCount("Observation");
 		ourClient.update().resource(subscription1).execute();
-		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount(), () -> myCountingInterceptor.toString());
+		waitForSize(modCount + 1, () -> myCountingInterceptor.getSentCount("Observation"), () -> myCountingInterceptor.toString());
 
 		ourLog.info("** About to send observation");
 		Observation observation2 = sendObservation(code, "SNOMED-CT");

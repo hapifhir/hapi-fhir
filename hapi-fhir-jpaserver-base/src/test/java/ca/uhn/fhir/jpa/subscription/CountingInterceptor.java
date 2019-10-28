@@ -11,8 +11,8 @@ public class CountingInterceptor implements ChannelInterceptor {
 
 	private List<String> mySent = new ArrayList<>();
 
-	public int getSentCount() {
-		return mySent.size();
+	public int getSentCount(String theContainingKeyword) {
+		return (int)mySent.stream().filter(t -> t.contains(theContainingKeyword)).count();
 	}
 
 	@Override
