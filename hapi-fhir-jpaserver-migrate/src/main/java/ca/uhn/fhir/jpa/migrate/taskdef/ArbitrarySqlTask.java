@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,8 +45,8 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 	private String myExecuteOnlyIfTableExists;
 	private List<TableAndColumn> myConditionalOnExistenceOf = new ArrayList<>();
 
-	public ArbitrarySqlTask(String theRelease, String theVersion, String theTableName, String theDescription) {
-		super(theRelease, theVersion);
+	public ArbitrarySqlTask(VersionEnum theRelease, String theVersion, String theTableName, String theDescription) {
+		super(theRelease.toString(), theVersion);
 		myTableName = theTableName;
 		myDescription = theDescription;
 	}

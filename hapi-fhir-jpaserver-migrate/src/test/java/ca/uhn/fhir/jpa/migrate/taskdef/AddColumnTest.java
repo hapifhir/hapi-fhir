@@ -15,7 +15,7 @@ public class AddColumnTest extends BaseTest {
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
-		AddColumnTask task = new AddColumnTask();
+		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcol");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -31,7 +31,7 @@ public class AddColumnTest extends BaseTest {
 	public void testAddColumnInt() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
-		AddColumnTask task = new AddColumnTask();
+		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcolint");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.INT);
@@ -48,7 +48,7 @@ public class AddColumnTest extends BaseTest {
 	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		AddColumnTask task = new AddColumnTask();
+		AddColumnTask task = new AddColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("newcol");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);

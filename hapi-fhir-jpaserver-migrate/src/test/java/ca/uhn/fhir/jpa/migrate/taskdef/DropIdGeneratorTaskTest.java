@@ -32,7 +32,7 @@ public class DropIdGeneratorTaskTest extends BaseTest {
 
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
-			v.dropIdGenerator("SEQ_FOO");
+			v.dropIdGenerator("1", "SEQ_FOO");
 		}
 
 

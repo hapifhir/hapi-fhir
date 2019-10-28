@@ -18,7 +18,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -34,7 +34,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testBothExistDeleteTargetFirst() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -53,7 +53,7 @@ public class RenameColumnTaskTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), myTextCol varchar(255))");
 		executeSql("INSERT INTO SOMETABLE (PID, TEXTCOL, myTextCol) VALUES (123, 'AAA', 'BBB')");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -74,7 +74,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, myTextCol varchar(255))");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setDescription("Drop an index");
 		task.setOldName("myTextCol");
@@ -90,7 +90,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testNeitherColumnExists() {
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("myTextCol");
 		task.setNewName("TEXTCOL");
@@ -110,7 +110,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testNeitherColumnExistsButAllowed() {
 		executeSql("create table SOMETABLE (PID bigint not null)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("myTextCol");
 		task.setNewName("TEXTCOL");
@@ -124,7 +124,7 @@ public class RenameColumnTaskTest extends BaseTest {
 	public void testBothColumnsExist() {
 		executeSql("create table SOMETABLE (PID bigint not null, PID2 bigint)");
 
-		RenameColumnTask task = new RenameColumnTask();
+		RenameColumnTask task = new RenameColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setOldName("PID");
 		task.setNewName("PID2");

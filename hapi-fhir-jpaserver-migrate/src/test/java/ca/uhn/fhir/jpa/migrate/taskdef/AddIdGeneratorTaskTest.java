@@ -39,7 +39,7 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
-			v.addIdGenerator("SEQ_FOO");
+			v.addIdGenerator("1", "SEQ_FOO");
 		}
 
 

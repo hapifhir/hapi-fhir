@@ -22,7 +22,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (100, 1, true, null)");
 		executeSql("insert into HFJ_RES_PARAM_PRESENT (PID, SP_ID, SP_PRESENT, HASH_PRESENT) values (101, 2, true, null)");
 
-		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0,  "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setExecuteOnlyIfTableExists("hfj_search_parm");
 		task.setBatchSize(1);
 		String sql = "SELECT " +
@@ -56,7 +56,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 	@Test
 	public void testExecuteOnlyIfTableExists() {
-		ArbitrarySqlTask task = new ArbitrarySqlTask("HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
+		ArbitrarySqlTask task = new ArbitrarySqlTask(VersionEnum.V3_5_0,  "1", "HFJ_RES_PARAM_PRESENT", "Consolidate search parameter presence indexes");
 		task.setBatchSize(1);
 		String sql = "SELECT * FROM HFJ_SEARCH_PARM";
 		task.addQuery(sql, ArbitrarySqlTask.QueryModeEnum.BATCH_UNTIL_NO_MORE, t -> {
@@ -82,7 +82,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		};
 		migrator
 			.forVersion(VersionEnum.V3_5_0)
-			.addTableRawSql("A")
+			.addTableRawSql("1", "A")
 			.addSql("delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'");
 
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
@@ -106,8 +106,8 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		};
 		migrator
 			.forVersion(VersionEnum.V3_5_0)
-			.executeRawSql(DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
-			.executeRawSql(DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
+			.executeRawSql("1", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Patient'")
+			.executeRawSql("2", DriverTypeEnum.H2_EMBEDDED, "delete from TEST_UPDATE_TASK where RES_TYPE = 'Encounter'");
 
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();

@@ -18,7 +18,7 @@ public class DropTableTest extends BaseTest {
 		executeSql("create index IDX_ANINDEX on SOMETABLE (PID, TEXTCOL)");
 		executeSql("create index IDX_DIFINDEX on SOMETABLE (TEXTCOL)");
 
-		DropTableTask task = new DropTableTask();
+		DropTableTask task = new DropTableTask("1",  "1");
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
@@ -35,7 +35,7 @@ public class DropTableTest extends BaseTest {
 		executeSql("create table SOMETABLE (PID bigint not null, REMOTEPID bigint not null, primary key (PID))");
 		executeSql("alter table SOMETABLE add constraint FK_MYFK foreign key (REMOTEPID) references FOREIGNTABLE;");
 
-		DropTableTask task = new DropTableTask();
+		DropTableTask task = new DropTableTask("1",  "1");
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 
@@ -49,7 +49,7 @@ public class DropTableTest extends BaseTest {
 	@Test
 	public void testDropNonExistingTable() throws SQLException {
 
-		DropTableTask task = new DropTableTask();
+		DropTableTask task = new DropTableTask("1",  "1");
 		task.setTableName("SOMETABLE");
 		getMigrator().addTask(task);
 

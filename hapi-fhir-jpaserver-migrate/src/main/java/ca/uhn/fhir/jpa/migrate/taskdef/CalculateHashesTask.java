@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.VersionEnum;
 import com.google.common.collect.ForwardingMap;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -53,8 +54,8 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 	/**
 	 * Constructor
 	 */
-	public CalculateHashesTask(String theRelease, String theVersion) {
-		super(theRelease, theVersion);
+	public CalculateHashesTask(VersionEnum theRelease, String theVersion) {
+		super(theRelease.toString(), theVersion);
 	}
 
 	@Override

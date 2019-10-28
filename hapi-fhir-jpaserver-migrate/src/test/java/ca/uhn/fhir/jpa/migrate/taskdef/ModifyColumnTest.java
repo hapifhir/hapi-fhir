@@ -13,7 +13,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnWithJdbcTypeClob() throws SQLException {
 		executeSql("create table SOMETABLE (TEXTCOL clob)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -36,7 +36,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnAlreadyExists() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -59,7 +59,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testNoShrink_SameNullable() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -88,7 +88,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -96,7 +96,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -130,7 +130,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().setNoColumnShrink(true);
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -138,7 +138,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("DATECOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.DATE_TIMESTAMP);
@@ -167,7 +167,7 @@ public class ModifyColumnTest extends BaseTest {
 		assertEquals(new JdbcUtils.ColumnType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255), JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL"));
 
 		// PID
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("PID");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.LONG);
@@ -175,7 +175,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 
 		// STRING
-		task = new ModifyColumnTask();
+		task = new ModifyColumnTask("1", "2");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);
@@ -201,7 +201,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testColumnDoesntAlreadyExist() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint, TEXTCOL varchar(255))");
 
-		ModifyColumnTask task = new ModifyColumnTask();
+		ModifyColumnTask task = new ModifyColumnTask("1", "1");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("SOMECOLUMN");
 		task.setDescription("Make nullable");

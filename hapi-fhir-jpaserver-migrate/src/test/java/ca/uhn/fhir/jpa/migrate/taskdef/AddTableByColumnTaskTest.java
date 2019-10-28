@@ -27,15 +27,15 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		public MyMigrationTasks() {
 			Builder v = forVersion(VersionEnum.V3_5_0);
 
-			Builder.BuilderWithTableName targetTable = v.addTableByColumns("TGT_TABLE", "PID");
-			targetTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
+			Builder.BuilderWithTableName targetTable = v.addTableByColumns("1", "TGT_TABLE", "PID");
+			targetTable.addColumn("1", "PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 
-			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("FOO_TABLE", "PID");
+			Builder.BuilderAddTableByColumns fooTable = v.addTableByColumns("1", "FOO_TABLE", "PID");
 			fooTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addColumn("HELLO").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addIndex("IDX_HELLO").unique(true).withColumns("HELLO");
-			fooTable.addForeignKey("FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
+			fooTable.addForeignKey("FK_REF").toColumn("COL_REF").references("1", "TGT_TABLE", "PID");
 
 		}
 
