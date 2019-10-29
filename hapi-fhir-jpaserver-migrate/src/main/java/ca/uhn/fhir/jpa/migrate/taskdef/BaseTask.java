@@ -170,6 +170,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		}
 	}
 
+	// FIXME KHS find a way to put these back in
 	public boolean isLogMessage() {
 		return false;
 	}

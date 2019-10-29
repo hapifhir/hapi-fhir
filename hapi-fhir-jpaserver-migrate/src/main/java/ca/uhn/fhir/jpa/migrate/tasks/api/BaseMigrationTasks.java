@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.MigrationVersion;
 import org.intellij.lang.annotations.Language;
 
 import javax.annotation.Nonnull;
@@ -35,6 +36,7 @@ import java.util.List;
 
 public class BaseMigrationTasks<T extends Enum> {
 	private Multimap<T, BaseTask<?>> myTasks = MultimapBuilder.hashKeys().arrayListValues().build();
+	MigrationVersion lastVersion;
 
 	@SuppressWarnings("unchecked")
 	public List<BaseTask<?>> getTasks(@Nonnull T theFrom, @Nonnull T theTo) {
@@ -76,11 +78,29 @@ public class BaseMigrationTasks<T extends Enum> {
 			retval.add(new LogStartSectionWithMessageTask("------------------------------------------------"));
 			Collection<BaseTask<?>> nextValues = myTasks.get(nextVersion);
 			if (nextValues != null) {
+				validate(nextValues);
 				retval.addAll(nextValues);
 			}
 		}
 
 		return retval;
+	}
+
+	// FIXME KHS split this class up
+	// FIXME KHS test this
+	private void validate(Collection<BaseTask<?>> theTasks) {
+		for (BaseTask task: theTasks) {
+			if (task.isLogMessage()) {
+				continue;
+			}
+			String version = task.getFlywayVersion();
+			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
+			if (lastVersion != null) {
+				if (migrationVersion.compareTo(lastVersion) <= 0) {
+					throw new IllegalStateException("Migration version " + migrationVersion + " found after migration version " + lastVersion + ".  Migrations need to be in order by version number.");
+				}
+			}
+		}
 	}
 
 	public interface IAcceptsTasks {
@@ -267,8 +287,7 @@ public class BaseMigrationTasks<T extends Enum> {
 			}
 
 			/**
-			 *
-			 * @param theFkName the name of the foreign key
+			 * @param theFkName          the name of the foreign key
 			 * @param theParentTableName the name of the table that exports the foreign key
 			 */
 			public void dropForeignKey(String theVersion, String theFkName, String theParentTableName) {
@@ -296,7 +315,8 @@ public class BaseMigrationTasks<T extends Enum> {
 					public BuilderAddIndexUnique(boolean theUnique) {
 						myUnique = theUnique;
 					}
-// FIXME KHS find all instances of this.  The String... messed up the conversion
+
+					// FIXME KHS find all instances of this.  The String... messed up the conversion
 					public void withColumns(String theVersion, String... theColumnNames) {
 						AddIndexTask task = new AddIndexTask(myRelease, theVersion);
 						task.setTableName(myTableName);
