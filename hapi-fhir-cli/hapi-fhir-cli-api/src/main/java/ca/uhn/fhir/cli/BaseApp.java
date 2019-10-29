@@ -162,6 +162,7 @@ public abstract class BaseApp {
 		commands.add(new ExportConceptMapToCsvCommand());
 		commands.add(new ImportCsvToConceptMapCommand());
 		commands.add(new HapiMigrateDatabaseCommand());
+		commands.add(new HapiFlywayMigrateDatabaseCommand());
 		return commands;
 	}
 

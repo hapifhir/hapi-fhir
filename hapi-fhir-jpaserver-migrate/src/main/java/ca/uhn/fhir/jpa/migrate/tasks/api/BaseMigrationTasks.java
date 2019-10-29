@@ -68,6 +68,21 @@ public class BaseMigrationTasks<T extends Enum> {
 		return new Builder(theRelease.name(), sink);
 	}
 
+	public List<BaseTask<?>> getAllTasks(T[] theVersionEnumValues) {
+		List<BaseTask<?>> retval = new ArrayList<>();
+		for (T nextVersion : theVersionEnumValues) {
+			retval.add(new LogStartSectionWithMessageTask("------------------------------------------------"));
+			retval.add(new LogStartSectionWithMessageTask("Starting migrations for version " + nextVersion));
+			retval.add(new LogStartSectionWithMessageTask("------------------------------------------------"));
+			Collection<BaseTask<?>> nextValues = myTasks.get(nextVersion);
+			if (nextValues != null) {
+				retval.addAll(nextValues);
+			}
+		}
+
+		return retval;
+	}
+
 	public interface IAcceptsTasks {
 		void addTask(BaseTask<?> theTask);
 	}
@@ -106,7 +121,7 @@ public class BaseMigrationTasks<T extends Enum> {
 
 		public Builder startSectionWithMessage(String theMessage) {
 			Validate.notBlank(theMessage);
-			addTask(new LogStartSectionWithMessageTask(myRelease, "log message", theMessage));
+			addTask(new LogStartSectionWithMessageTask(theMessage));
 			return this;
 		}
 

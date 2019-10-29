@@ -40,8 +40,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class FlywayMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigrator.class);
-	// FIXME KHS
-	private static int ourVersion = 0;
 
 	private DriverTypeEnum myDriverType;
 	private String myConnectionUrl;
@@ -68,7 +66,9 @@ public class FlywayMigrator {
 	}
 
 	public void addTask(BaseTask<?> theTask) {
-		myTasks.add(new FlywayMigration(theTask, this));
+		if (!theTask.isLogMessage()) {
+			myTasks.add(new FlywayMigration(theTask, this));
+		}
 	}
 
 	public void setDryRun(boolean theDryRun) {
@@ -92,7 +92,6 @@ public class FlywayMigrator {
 	public void addTasks(List<BaseTask<?>> theTasks) {
 		theTasks.forEach(this::addTask);
 	}
-
 
 	public void setNoColumnShrink(boolean theNoColumnShrink) {
 		myNoColumnShrink = theNoColumnShrink;

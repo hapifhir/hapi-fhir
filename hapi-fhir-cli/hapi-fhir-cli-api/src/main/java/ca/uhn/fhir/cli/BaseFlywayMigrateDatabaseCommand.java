@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +33,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class FlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
 
 	private static final String FLYWAY_MIGRATE_DATABASE = "flyway-migrate-database";
 	private Set<String> myFlags;
@@ -98,6 +101,12 @@ public abstract class FlywayMigrateDatabaseCommand<T extends Enum> extends BaseC
 		boolean dryRun = theCommandLine.hasOption("r");
 		boolean noColumnShrink = theCommandLine.hasOption("no-column-shrink");
 
+		String flags = theCommandLine.getOptionValue("x");
+		myFlags = Arrays.stream(defaultString(flags).split(","))
+			.map(String::trim)
+			.filter(StringUtils::isNotBlank)
+			.collect(Collectors.toSet());
+
 		FlywayMigrator migrator = new FlywayMigrator();
 		migrator.setConnectionUrl(url);
 		migrator.setDriverType(driverType);
@@ -105,8 +114,10 @@ public abstract class FlywayMigrateDatabaseCommand<T extends Enum> extends BaseC
 		migrator.setPassword(password);
 		migrator.setDryRun(dryRun);
 		migrator.setNoColumnShrink(noColumnShrink);
-
+		addTasks(migrator);
 		migrator.migrate();
 	}
+
+	protected abstract void addTasks(FlywayMigrator theMigrator);
 
 }

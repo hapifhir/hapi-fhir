@@ -247,7 +247,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		termValueSetTable
 			.addIndex("IDX_VALUESET_URL")
 			.unique(true)
-			.withColumns("20190722.30.1", "URL");
+			.withColumns("20190722.31.1", "URL");
 		termValueSetTable.addColumn("RES_ID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		termValueSetTable
 			.addForeignKey("FK_TRMVALUESET_RES")
@@ -265,7 +265,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		termValueSetTableChange
 			.addIndex("IDX_VALUESET_EXP_STATUS")
 			.unique(false)
-			.withColumns("20190722.34.1", "EXPANSION_STATUS");
+			.withColumns("20190722.35.1", "EXPANSION_STATUS");
 
 		// TermValueSetConcept
 		version.startSectionWithMessage("Processing table: TRM_VALUESET_CONCEPT");
@@ -346,8 +346,8 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("HFJ_SPIDX_STRING").addIndex("IDX_SP_STRING_HASH_IDENT").unique(false).withColumns("20190905.12.1", "HASH_IDENTITY");
 		version.onTable("HFJ_SPIDX_COORDS").modifyColumn("RES_TYPE").nonNullable().withType("20190905.13", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_QUANTITY").modifyColumn("RES_TYPE").nonNullable().withType("20190905.14", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
-		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190905.13", "HASH_UNITS_AND_VALPREFIX");
-		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190905.14", "HASH_VALPREFIX");
+		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190905.14.1", "HASH_UNITS_AND_VALPREFIX");
+		version.onTable("HFJ_SPIDX_QUANTITY").dropColumn("20190905.14.2", "HASH_VALPREFIX");
 		version.onTable("HFJ_SPIDX_NUMBER").modifyColumn("RES_TYPE").nonNullable().withType("20190905.15", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_TOKEN").modifyColumn("RES_TYPE").nonNullable().withType("20190905.16", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
 		version.onTable("HFJ_SPIDX_URI").modifyColumn("RES_TYPE").nonNullable().withType("20190905.17", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 100);
@@ -443,11 +443,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.type(AddColumnTask.ColumnTypeEnum.LONG);
 		if (!myFlags.contains(FlagEnum.NO_MIGRATE_HASHES)) {
 			spidxDate
-				.dropIndex("20180903.4", "IDX_SP_TOKEN");
+				.dropIndex("20180903.4.1", "IDX_SP_TOKEN");
 			spidxDate
 				.addIndex("IDX_SP_DATE_HASH")
 				.unique(false)
-				.withColumns("20180903.4.1","HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
+				.withColumns("20180903.4.2","HASH_IDENTITY", "SP_VALUE_LOW", "SP_VALUE_HIGH");
 			spidxDate
 				.dropIndex("20180903.5", "IDX_SP_DATE");
 			spidxDate
@@ -817,7 +817,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.addSql(DriverTypeEnum.MSSQL_2012, "create index IDX_CNCPT_MP_GRP_ELM_TGT_CD on TRM_CONCEPT_MAP_GRP_ELM_TGT (TARGET_CODE)")
 			.addSql(DriverTypeEnum.MSSQL_2012, "alter table TRM_CONCEPT_MAP_GRP_ELM_TGT add constraint FK_TCMGETARGET_ELEMENT foreign key (CONCEPT_MAP_GRP_ELM_PID) references TRM_CONCEPT_MAP_GRP_ELEMENT");
 
-		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").modifyColumn("IDX_STRING").nonNullable().withType("20180907.6", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ").modifyColumn("IDX_STRING").nonNullable().withType("20180907.6.1", BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 
 
 	}

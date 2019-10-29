@@ -170,5 +170,7 @@ public abstract class BaseTask<T extends BaseTask> {
 		}
 	}
 
-
+	public boolean isLogMessage() {
+		return false;
+	}
 }
