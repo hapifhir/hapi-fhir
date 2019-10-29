@@ -262,6 +262,16 @@
 						<td style="background: #CEC;">4.0.0</td>
 						<td style="background: #EEB;">4.1.0-e0e3caf9ba</td>
 					</tr>
+					<tr>
+						<td>HAPI FHIR 4.1.0</td>
+						<td>JDK8</td>
+						<td style="background: #DDD;"></td>
+						<td style="background: #CEC;">1.0.2</td>
+						<td style="background: #EEB;">1.4.0</td>
+						<td style="background: #CEC;">3.0.1</td>
+						<td style="background: #CEC;">4.0.0</td>
+						<td style="background: #EEB;">4.1.0-1a7623d866</td>
+					</tr>
 
 		</tbody>
 			</table>
