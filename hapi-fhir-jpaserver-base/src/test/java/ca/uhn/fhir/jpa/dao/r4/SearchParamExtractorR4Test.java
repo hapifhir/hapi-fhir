@@ -37,64 +37,7 @@ public class SearchParamExtractorR4Test {
 	@Before
 	public void before() {
 
-		mySearchParamRegistry = new ISearchParamRegistry() {
-			@Override
-			public void forceRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
-				return getActiveSearchParams(theResourceName).get(theParamName);
-			}
-
-			@Override
-			public boolean refreshCacheIfNecessary() {
-				// nothing
-				return false;
-			}
-
-			@Override
-			public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
-				Map<String, RuntimeSearchParam> sps = new HashMap<>();
-				RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
-				for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
-					sps.put(nextSp.getName(), nextSp);
-				}
-
-				return sps;
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			public void requestRefresh() {
-				// nothing
-			}
-
-			@Override
-			public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
-				return null;
-			}
-
-			@Override
-			public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
-				return null;
-			}
-		};
+		mySearchParamRegistry = new MySearchParamRegistry();
 
 	}
 
@@ -110,6 +53,20 @@ public class SearchParamExtractorR4Test {
 		assertEquals("category", token.getParamName());
 		assertEquals("SYSTEM", token.getSystem());
 		assertEquals("CODE", token.getValue());
+	}
+
+	@Test
+	public void testTokenOnSearchParamContext() {
+		SearchParameter sp = new SearchParameter();
+		sp.addUseContext().setCode(new Coding().setSystem("http://system").setCode("code"));
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new ModelConfig(), ourCtx, ourValidationSupport, mySearchParamRegistry);
+		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
+		assertEquals(1, tokens.size());
+		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
+		assertEquals("context-type", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 	}
 
 	@Test
@@ -169,6 +126,65 @@ public class SearchParamExtractorR4Test {
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());
+	}
+
+	private static class MySearchParamRegistry implements ISearchParamRegistry {
+		@Override
+		public void forceRefresh() {
+			// nothing
+		}
+
+		@Override
+		public RuntimeSearchParam getActiveSearchParam(String theResourceName, String theParamName) {
+			return getActiveSearchParams(theResourceName).get(theParamName);
+		}
+
+		@Override
+		public boolean refreshCacheIfNecessary() {
+			// nothing
+			return false;
+		}
+
+		@Override
+		public Map<String, Map<String, RuntimeSearchParam>> getActiveSearchParams() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Map<String, RuntimeSearchParam> getActiveSearchParams(String theResourceName) {
+			Map<String, RuntimeSearchParam> sps = new HashMap<>();
+			RuntimeResourceDefinition nextResDef = ourCtx.getResourceDefinition(theResourceName);
+			for (RuntimeSearchParam nextSp : nextResDef.getSearchParams()) {
+				sps.put(nextSp.getName(), nextSp);
+			}
+
+			return sps;
+		}
+
+		@Override
+		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName, Set<String> theParamNames) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public List<JpaRuntimeSearchParam> getActiveUniqueSearchParams(String theResourceName) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void requestRefresh() {
+			// nothing
+		}
+
+		@Override
+		public RuntimeSearchParam getSearchParamByName(RuntimeResourceDefinition theResourceDef, String theParamName) {
+			return null;
+		}
+
+		@Override
+		public Collection<RuntimeSearchParam> getSearchParamsByResourceType(RuntimeResourceDefinition theResourceDef) {
+			return null;
+		}
 	}
 
 	@AfterClass
