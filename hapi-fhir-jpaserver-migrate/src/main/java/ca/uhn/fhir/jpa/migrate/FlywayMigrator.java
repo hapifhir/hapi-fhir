@@ -66,9 +66,7 @@ public class FlywayMigrator {
 	}
 
 	public void addTask(BaseTask<?> theTask) {
-		if (!theTask.isLogMessage()) {
-			myTasks.add(new FlywayMigration(theTask, this));
-		}
+		myTasks.add(new FlywayMigration(theTask, this));
 	}
 
 	public void setDryRun(boolean theDryRun) {

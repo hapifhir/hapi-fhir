@@ -71,9 +71,6 @@ public class BaseMigrationTasks<T extends Enum> {
 	public List<BaseTask<?>> getAllTasks(T[] theVersionEnumValues) {
 		List<BaseTask<?>> retval = new ArrayList<>();
 		for (T nextVersion : theVersionEnumValues) {
-			retval.add(new LogStartSectionWithMessageTask("------------------------------------------------"));
-			retval.add(new LogStartSectionWithMessageTask("Starting migrations for version " + nextVersion));
-			retval.add(new LogStartSectionWithMessageTask("------------------------------------------------"));
 			Collection<BaseTask<?>> nextValues = myTasks.get(nextVersion);
 			if (nextValues != null) {
 				validate(nextValues);
@@ -86,9 +83,6 @@ public class BaseMigrationTasks<T extends Enum> {
 
 	void validate(Collection<BaseTask<?>> theTasks) {
 		for (BaseTask task: theTasks) {
-			if (task.isLogMessage()) {
-				continue;
-			}
 			task.validateVersion();
 			String version = task.getFlywayVersion();
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);

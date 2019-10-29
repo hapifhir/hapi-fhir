@@ -50,15 +50,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.map(FlagEnum::fromCommandLineValue)
 			.collect(Collectors.toSet());
 
-		init330();
-		init340();
-		init350();
-		init360();
-		init400();
-		init410();
+		init330(); // 20180114 - 20180329
+		init340(); // 20180401 - 20180528
+		init350(); // 20180601 - 20180917
+		init360(); // 20180918 - 20181112
+		init400(); // 20190401 - 20190814
+		init410(); // 20190815 - present
 	}
 
-	protected void init410() {
+	protected void init410() { // 20190815 - present
 		Builder version = forVersion(VersionEnum.V4_1_0);
 
 		// HFJ_SEARCH
@@ -170,7 +170,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		version.onTable("TRM_CONCEPT_PROPERTY").addColumn("20191002.9", "PROP_VAL_LOB").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.BLOB);
 	}
 
-	protected void init400() {
+	protected void init400() { // 20190401 - 20190814
 		Builder version = forVersion(VersionEnum.V4_0_0);
 
 		// BinaryStorageEntity
@@ -359,7 +359,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	}
 
 
-	private void init360() {
+	private void init360() { // 20180918 - 20181112
 		Builder version = forVersion(VersionEnum.V3_6_0);
 
 		// Resource Link
@@ -396,7 +396,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	}
 
-	private void init350() {
+	private void init350() { // 20180601 - 20180917
 		Builder version = forVersion(VersionEnum.V3_5_0);
 
 		// Forced ID changes
@@ -831,47 +831,47 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		return longValue == 1L;
 	}
 
-	private void init340() {
+	private void init340() { // 20180401 - 20180528
 		Builder version = forVersion(VersionEnum.V3_4_0);
 
 		// CodeSystem Version
 		Builder.BuilderWithTableName resourceLink = version.onTable("TRM_CODESYSTEM_VER");
 		version.startSectionWithMessage("Starting work on table: " + resourceLink.getTableName());
 		resourceLink
-			.dropIndex("20180929.1", "IDX_CSV_RESOURCEPID_AND_VER");
+			.dropIndex("20180401.1", "IDX_CSV_RESOURCEPID_AND_VER");
 		resourceLink
-			.dropColumn("20180929.2", "RES_VERSION_ID");
+			.dropColumn("20180401.2", "RES_VERSION_ID");
 		resourceLink
-			.addColumn("20180929.3", "CS_VERSION_ID")
+			.addColumn("20180401.3", "CS_VERSION_ID")
 			.nullable()
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 255);
 		resourceLink
-			.addColumn("20180929.4", "CODESYSTEM_PID")
+			.addColumn("20180401.4", "CODESYSTEM_PID")
 			.nullable()
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		resourceLink
 			.addForeignKey("FK_CODESYSVER_CS_ID")
 			.toColumn("CODESYSTEM_PID")
-			.references("20180929.5", "TRM_CODESYSTEM", "PID");
+			.references("20180401.5", "TRM_CODESYSTEM", "PID");
 
 		// Concept
 		Builder.BuilderWithTableName concept = version.onTable("TRM_CONCEPT");
 		version.startSectionWithMessage("Starting work on table: " + concept.getTableName());
 		concept
-			.addColumn("20180929.6", "CODE_SEQUENCE")
+			.addColumn("20180401.6", "CODE_SEQUENCE")
 			.nullable()
 			.type(BaseTableColumnTypeTask.ColumnTypeEnum.INT);
 
 
 	}
 
-	private void init330() {
+	private void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
-		hfjResource.dropColumn("20180601.1", "RES_TEXT");
-		hfjResource.dropColumn("20180601.2", "RES_ENCODING");
+		hfjResource.dropColumn("20180114.1", "RES_TEXT");
+		hfjResource.dropColumn("20180114.2", "RES_ENCODING");
 
 		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());

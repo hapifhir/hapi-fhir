@@ -180,9 +180,4 @@ public abstract class BaseTask<T extends BaseTask> {
 			return myArguments;
 		}
 	}
-
-	// FIXME KHS find a way to put these back in
-	public boolean isLogMessage() {
-		return false;
-	}
 }

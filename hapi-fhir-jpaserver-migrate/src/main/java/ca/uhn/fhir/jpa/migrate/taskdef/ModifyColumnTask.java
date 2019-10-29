@@ -60,21 +60,22 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 			throw new InternalErrorException(e);
 		}
 
-		if (getColumnLength() != null && isNoColumnShrink()) {
+		Long columnLength = getColumnLength();
+		if (columnLength != null && isNoColumnShrink()) {
 			long existingLength = existingType.getLength() != null ? existingType.getLength() : 0;
-			if (existingLength > getColumnLength()) {
-				setColumnLength(existingLength);
+			if (existingLength > columnLength) {
+				columnLength = existingLength;
 			}
 		}
 
-		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), getColumnLength());
+		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), columnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
 			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 
-		String type = getSqlType();
+		String type = getSqlType(columnLength);
 		String notNull = getSqlNotNull();
 
 		String sql = null;

@@ -37,9 +37,10 @@ public class Builder {
 		return this;
 	}
 
+	// Flyway doesn't support these kinds of migrations
+	@Deprecated
 	public Builder startSectionWithMessage(String theMessage) {
-		Validate.notBlank(theMessage);
-		addTask(new LogStartSectionWithMessageTask(theMessage));
+		// Do nothing
 		return this;
 	}
 
@@ -214,7 +215,6 @@ public class Builder {
 					myUnique = theUnique;
 				}
 
-				// FIXME KHS find all instances of this.  The String... messed up the conversion
 				public void withColumns(String theVersion, String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, theVersion);
 					task.setTableName(myTableName);

@@ -141,11 +141,15 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	}
 
 	protected String getSqlType() {
+		return getSqlType(getColumnLength());
+	}
+
+	protected String getSqlType(Long theColumnLength) {
 		String retVal = myColumnTypeToDriverTypeToSqlType.get(myColumnType).get(getDriverType());
 		Objects.requireNonNull(retVal);
 
 		if (myColumnType == ColumnTypeEnum.STRING) {
-			retVal = retVal.replace("?", Long.toString(getColumnLength()));
+			retVal = retVal.replace("?", Long.toString(theColumnLength));
 		}
 
 		return retVal;
