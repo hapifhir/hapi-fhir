@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,14 +24,19 @@ import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
 import org.springframework.retry.RetryListener;
+import org.springframework.retry.RetryPolicy;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.listener.RetryListenerSupport;
+import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class Retrier<T> {
@@ -53,7 +58,17 @@ public class Retrier<T> {
 		backOff.setMultiplier(2);
 		myRetryTemplate.setBackOffPolicy(backOff);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(){
+			private static final long serialVersionUID = -4522467251787518700L;
+
+			@Override
+			public boolean canRetry(RetryContext context) {
+				if (context.getLastThrowable() instanceof BeanCreationException) {
+					return false;
+				}
+				return super.canRetry(context);
+			}
+		};
 		retryPolicy.setMaxAttempts(theMaxRetries);
 		myRetryTemplate.setRetryPolicy(retryPolicy);
 
@@ -61,7 +76,11 @@ public class Retrier<T> {
 			@Override
 			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 				super.onError(context, callback, throwable);
-				ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage());
+				if (throwable instanceof NullPointerException) {
+					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage(), throwable);
+				} else {
+					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage());
+				}
 			}
 		};
 		myRetryTemplate.registerListener(listener);

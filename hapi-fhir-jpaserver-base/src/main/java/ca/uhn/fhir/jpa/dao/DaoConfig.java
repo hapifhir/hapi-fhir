@@ -1,16 +1,16 @@
 package ca.uhn.fhir.jpa.dao;
 
+import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.search.warm.WarmCacheEntry;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
-import org.hl7.fhir.instance.model.Subscription;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r4.model.Bundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,9 @@ import java.util.*;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -74,6 +74,10 @@ public class DaoConfig {
 	)));
 	private static final Logger ourLog = LoggerFactory.getLogger(DaoConfig.class);
 	private static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+
+	// update setter javadoc if default changes
+	public static final int DEFAULT_MAX_EXPANSION_SIZE = 1000;
+
 	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
 
 	/**
@@ -115,10 +119,7 @@ public class DaoConfig {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myIndexContainedResources = true;
-	/**
-	 * update setter javadoc if default changes
-	 */
-	private int myMaximumExpansionSize = 5000;
+	private int myMaximumExpansionSize = DEFAULT_MAX_EXPANSION_SIZE;
 	private Integer myMaximumSearchResultCountInTransaction = DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION;
 	private ResourceEncodingEnum myResourceEncoding = ResourceEncodingEnum.JSONC;
 	/**
@@ -146,6 +147,32 @@ public class DaoConfig {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myEnforceReferenceTargetTypes = true;
 	private ClientIdStrategyEnum myResourceClientIdStrategy = ClientIdStrategyEnum.ALPHANUMERIC;
+	private boolean myFilterParameterEnabled = false;
+	private StoreMetaSourceInformationEnum myStoreMetaSourceInformation = StoreMetaSourceInformationEnum.SOURCE_URI_AND_REQUEST_ID;
+	/**
+	 * Do not change default of {@code true}!
+	 *
+	 * @since 4.1.0
+	 */
+	private boolean myPreExpandValueSets = true;
+	/**
+	 * Do not change default of {@code 0}!
+	 *
+	 * @since 4.1.0
+	 */
+	private int myPreExpandValueSetsDefaultOffset = 0;
+	/**
+	 * Do not change default of {@code 1000}!
+	 *
+	 * @since 4.1.0
+	 */
+	private int myPreExpandValueSetsDefaultCount = 1000;
+	/**
+	 * Do not change default of {@code 1000}!
+	 *
+	 * @since 4.1.0
+	 */
+	private int myPreExpandValueSetsMaxCount = 1000;
 
 	/**
 	 * Constructor
@@ -538,8 +565,12 @@ public class DaoConfig {
 	}
 
 	/**
-	 * Sets the maximum number of codes that will be added to a valueset expansion before
-	 * the operation will be failed as too costly
+	 * Sets the maximum number of codes that will be added to an in-memory valueset expansion before
+	 * the operation will be failed as too costly. Note that this setting applies only to
+	 * in-memory expansions and does not apply to expansions that are being pre-calculated.
+	 * <p>
+	 *    The default value for this setting is 1000.
+	 * </p>
 	 */
 	public void setMaximumExpansionSize(int theMaximumExpansionSize) {
 		Validate.isTrue(theMaximumExpansionSize > 0, "theMaximumExpansionSize must be > 0");
@@ -902,7 +933,7 @@ public class DaoConfig {
 	 * <p>
 	 * Default is {@literal true} beginning in HAPI FHIR 2.4, since this
 	 * feature is now specified in the FHIR specification. (Previously it
-	 * was an experimental/rpposed feature)
+	 * was an experimental/proposed feature)
 	 * </p>
 	 *
 	 * @since 1.5
@@ -969,6 +1000,8 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 *
+	 * @see CascadingDeleteInterceptor
 	 */
 	public boolean isEnforceReferentialIntegrityOnDelete() {
 		return myEnforceReferentialIntegrityOnDelete;
@@ -982,6 +1015,8 @@ public class DaoConfig {
 	 * and other FHIR features may not behave as expected when referential integrity is not
 	 * preserved. Use this feature with caution.
 	 * </p>
+	 *
+	 * @see CascadingDeleteInterceptor
 	 */
 	public void setEnforceReferentialIntegrityOnDelete(boolean theEnforceReferentialIntegrityOnDelete) {
 		myEnforceReferentialIntegrityOnDelete = theEnforceReferentialIntegrityOnDelete;
@@ -1081,16 +1116,16 @@ public class DaoConfig {
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
 	 * expunge operation.
 	 */
-	public void setExpungeBatchSize(int theExpungeBatchSize) {
-		myExpungeBatchSize = theExpungeBatchSize;
+	public int getExpungeBatchSize() {
+		return myExpungeBatchSize;
 	}
 
 	/**
 	 * The expunge batch size (default 800) determines the number of records deleted within a single transaction by the
 	 * expunge operation.
 	 */
-	public int getExpungeBatchSize() {
-		return myExpungeBatchSize;
+	public void setExpungeBatchSize(int theExpungeBatchSize) {
+		myExpungeBatchSize = theExpungeBatchSize;
 	}
 
 	/**
@@ -1597,6 +1632,191 @@ public class DaoConfig {
 
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myModelConfig.setWebsocketContextPath(theWebsocketContextPath);
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public boolean isFilterParameterEnabled() {
+		return myFilterParameterEnabled;
+	}
+
+	/**
+	 * If set to <code>true</code> the _filter search parameter will be enabled on this server. Note that _filter
+	 * is very powerful, but also potentially dangerous as it can allow a user to create a query for which there
+	 * are no indexes or efficient query plans for the database to leverage while performing the query.
+	 * As a result, this feature is recommended only for servers where the querying applications are known in advance
+	 * and a database administrator can properly tune the database for the resulting queries.
+	 */
+	public void setFilterParameterEnabled(boolean theFilterParameterEnabled) {
+		myFilterParameterEnabled = theFilterParameterEnabled;
+	}
+
+	/**
+	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
+	 * each resource. This adds extra table and index space so it should be disabled if it is not being
+	 * used.
+	 * <p>
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
+	 * </p>
+	 */
+	public StoreMetaSourceInformationEnum getStoreMetaSourceInformation() {
+		return myStoreMetaSourceInformation;
+	}
+
+	/**
+	 * If enabled, resource source information (<code>Resource.meta.source</code>) will be persisted along with
+	 * each resource. This adds extra table and index space so it should be disabled if it is not being
+	 * used.
+	 * <p>
+	 * Default is {@link StoreMetaSourceInformationEnum#SOURCE_URI_AND_REQUEST_ID}
+	 * </p>
+	 */
+	public void setStoreMetaSourceInformation(StoreMetaSourceInformationEnum theStoreMetaSourceInformation) {
+		Validate.notNull(theStoreMetaSourceInformation, "theStoreMetaSourceInformation must not be null");
+		myStoreMetaSourceInformation = theStoreMetaSourceInformation;
+	}
+
+	public enum StoreMetaSourceInformationEnum {
+		NONE(false, false),
+		SOURCE_URI(true, false),
+		REQUEST_ID(false, true),
+		SOURCE_URI_AND_REQUEST_ID(true, true);
+
+		private final boolean myStoreSourceUri;
+		private final boolean myStoreRequestId;
+
+		StoreMetaSourceInformationEnum(boolean theStoreSourceUri, boolean theStoreRequestId) {
+			myStoreSourceUri = theStoreSourceUri;
+			myStoreRequestId = theStoreRequestId;
+		}
+
+		public boolean isStoreSourceUri() {
+			return myStoreSourceUri;
+		}
+
+		public boolean isStoreRequestId() {
+			return myStoreRequestId;
+		}
+	}
+
+	/**
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code true}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public boolean isPreExpandValueSets() {
+		return myPreExpandValueSets;
+	}
+
+	/**
+	 * <p>
+	 * If set to {@code true}, ValueSets and expansions are stored in terminology tables. This is to facilitate
+	 * optimization of the $expand operation on large ValueSets.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code true}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public void setPreExpandValueSets(boolean thePreExpandValueSets) {
+		myPreExpandValueSets = thePreExpandValueSets;
+	}
+
+	/**
+	 * <p>
+	 * This is the default value of {@code offset} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 0}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public int getPreExpandValueSetsDefaultOffset() {
+		return myPreExpandValueSetsDefaultOffset;
+	}
+
+	/**
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public int getPreExpandValueSetsDefaultCount() {
+		return myPreExpandValueSetsDefaultCount;
+	}
+
+	/**
+	 * <p>
+	 * This is the default value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsDefaultCount} is greater than
+	 * {@link DaoConfig#getPreExpandValueSetsMaxCount()}, the lesser value is used.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public void setPreExpandValueSetsDefaultCount(int thePreExpandValueSetsDefaultCount) {
+		myPreExpandValueSetsDefaultCount = Math.min(thePreExpandValueSetsDefaultCount, getPreExpandValueSetsMaxCount());
+	}
+
+	/**
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public int getPreExpandValueSetsMaxCount() {
+		return myPreExpandValueSetsMaxCount;
+	}
+
+	/**
+	 * <p>
+	 * This is the max value of {@code count} parameter for the ValueSet {@code $expand} operation when
+	 * {@link DaoConfig#isPreExpandValueSets()} returns {@code true}.
+	 * </p>
+	 * <p>
+	 * If {@code thePreExpandValueSetsMaxCount} is lesser than
+	 * {@link DaoConfig#getPreExpandValueSetsDefaultCount()}, the default {@code count} is lowered to the
+	 * new max {@code count}.
+	 * </p>
+	 * <p>
+	 * The default value for this setting is {@code 1000}.
+	 * </p>
+	 *
+	 * @since 4.1.0
+	 */
+	public void setPreExpandValueSetsMaxCount(int thePreExpandValueSetsMaxCount) {
+		myPreExpandValueSetsMaxCount = thePreExpandValueSetsMaxCount;
+		setPreExpandValueSetsDefaultCount(Math.min(getPreExpandValueSetsDefaultCount(), getPreExpandValueSetsMaxCount()));
 	}
 
 	public enum IndexEnabledEnum {

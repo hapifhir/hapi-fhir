@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.api;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,10 +21,14 @@ package ca.uhn.fhir.rest.api;
  */
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Constants {
 
+	public static final String CT_TEXT_CSV = "text/csv";
+	public static final String HEADER_REQUEST_ID = "X-Request-ID";
+	public static final String HEADER_REQUEST_SOURCE = "X-Request-Source";
 	public static final String CACHE_CONTROL_MAX_RESULTS = "max-results";
 	public static final String CACHE_CONTROL_NO_CACHE = "no-cache";
 	public static final String CACHE_CONTROL_NO_STORE = "no-store";
@@ -42,6 +46,7 @@ public class Constants {
 	 */
 	public static final Set<String> CORS_ALLWED_METHODS;
 	public static final String CT_FHIR_JSON = "application/json+fhir";
+	public static final String CT_RDF_TURTLE = "application/x-turtle";
 	/**
 	 * The FHIR MimeType for JSON encoding in FHIR DSTU3+
 	 */
@@ -70,6 +75,9 @@ public class Constants {
 	public static final String FORMAT_HTML = "html";
 	public static final String FORMAT_JSON = "json";
 	public static final String FORMAT_XML = "xml";
+	public static final String FORMAT_TURTLE = "text/turtle";
+
+
 	/**
 	 * "text/html" and "html"
 	 */
@@ -133,6 +141,7 @@ public class Constants {
 	 * Used in paging links
 	 */
 	public static final String PARAM_BUNDLETYPE = "_bundletype";
+	public static final String PARAM_FILTER = "_filter";
 	public static final String PARAM_CONTENT = "_content";
 	public static final String PARAM_COUNT = "_count";
 	public static final String PARAM_DELETE = "_delete";
@@ -144,6 +153,8 @@ public class Constants {
 	public static final String PARAM_INCLUDE = "_include";
 	public static final String PARAM_INCLUDE_QUALIFIER_RECURSE = ":recurse";
 	public static final String PARAM_INCLUDE_RECURSE = "_include" + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_INCLUDE_QUALIFIER_ITERATE = ":iterate";
+	public static final String PARAM_INCLUDE_ITERATE = "_include" + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_LASTUPDATED = "_lastUpdated";
 	public static final String PARAM_NARRATIVE = "_narrative";
 	public static final String PARAM_PAGINGACTION = "_getpages";
@@ -156,12 +167,14 @@ public class Constants {
 	public static final String PARAM_RESPONSE_URL = "response-url"; //Used in messaging
 	public static final String PARAM_REVINCLUDE = "_revinclude";
 	public static final String PARAM_REVINCLUDE_RECURSE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_RECURSE;
+	public static final String PARAM_REVINCLUDE_ITERATE = PARAM_REVINCLUDE + PARAM_INCLUDE_QUALIFIER_ITERATE;
 	public static final String PARAM_SEARCH = "_search";
 	public static final String PARAM_SECURITY = "_security";
 	public static final String PARAM_SINCE = "_since";
 	public static final String PARAM_SORT = "_sort";
 	public static final String PARAM_SORT_ASC = "_sort:asc";
 	public static final String PARAM_SORT_DESC = "_sort:desc";
+	public static final String PARAM_SOURCE = "_source";
 	public static final String PARAM_SUMMARY = "_summary";
 	public static final String PARAM_TAG = "_tag";
 	public static final String PARAM_TAGS = "_tags";
@@ -207,10 +220,48 @@ public class Constants {
 	public static final String TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS = "TEST_SYSTEM_PROP_VALIDATION_RESOURCE_CACHES_MS";
 	public static final String PARAM_SEARCH_TOTAL_MODE = "_total";
 	public static final String CAPABILITYSTATEMENT_WEBSOCKET_URL = "http://hl7.org/fhir/StructureDefinition/capabilitystatement-websocket";
+	public static final String PARAMETER_CASCADE_DELETE = "_cascade";
+	public static final String HEADER_CASCADE = "X-Cascade";
+	public static final String CASCADE_DELETE = "delete";
+	public static final int MAX_RESOURCE_NAME_LENGTH = 100;
+	public static final String CACHE_CONTROL_PRIVATE = "private";
+	public static final String CT_FHIR_NDJSON = "application/fhir+ndjson";
+	public static final String CT_APP_NDJSON = "application/ndjson";
+	public static final String CT_NDJSON = "ndjson";
+	public static final Set<String> CTS_NDJSON;
+	public static final String HEADER_PREFER_RESPOND_ASYNC = "respond-async";
+	public static final int STATUS_HTTP_412_PAYLOAD_TOO_LARGE = 413;
+	public static final String OPERATION_NAME_GRAPHQL = "$graphql";
+	/**
+	 * Note that this constant is used in a number of places including DB column lengths! Be careful if you decide to change it.
+	 */
+	public static final int REQUEST_ID_LENGTH = 16;
+	public static final int STATUS_HTTP_202_ACCEPTED = 202;
+	public static final String HEADER_X_PROGRESS = "X-Progress";
+	public static final String HEADER_RETRY_AFTER = "Retry-After";
+	/**
+	 * Operation name for the $lastn operation
+	 */
+	public static final String OPERATION_LASTN = "$lastn";
+	/**
+	 * <p>
+	 * This extension represents the equivalent of the
+	 * <code>Resource.meta.source</code> field within R4+ resources, and is for
+	 * use in DSTU3 resources. It should contain a value of type <code>uri</code>
+	 * and will be located on the Resource.meta
+	 * </p>
+	 */
+	public static final String EXT_META_SOURCE = "http://hapifhir.io/fhir/StructureDefinition/resource-meta-source";
 
 	static {
-		CHARSET_UTF8 = Charset.forName(CHARSET_NAME_UTF8);
-		CHARSET_US_ASCII = Charset.forName("ISO-8859-1");
+		CHARSET_UTF8 = StandardCharsets.UTF_8;
+		CHARSET_US_ASCII = StandardCharsets.ISO_8859_1;
+
+		HashSet<String> ctsNdjson = new HashSet<>();
+		ctsNdjson.add(CT_FHIR_NDJSON);
+		ctsNdjson.add(CT_APP_NDJSON);
+		ctsNdjson.add(CT_NDJSON);
+		CTS_NDJSON = Collections.unmodifiableSet(ctsNdjson);
 
 		HashMap<Integer, String> statusNames = new HashMap<>();
 		statusNames.put(200, "OK");
@@ -226,7 +277,6 @@ public class Constants {
 		statusNames.put(300, "Multiple Choices");
 		statusNames.put(301, "Moved Permanently");
 		statusNames.put(302, "Found");
-		statusNames.put(302, "Moved Temporarily");
 		statusNames.put(303, "See Other");
 		statusNames.put(304, "Not Modified");
 		statusNames.put(305, "Use Proxy");
@@ -246,9 +296,7 @@ public class Constants {
 		statusNames.put(411, "Length Required");
 		statusNames.put(412, "Precondition Failed");
 		statusNames.put(413, "Payload Too Large");
-		statusNames.put(413, "Request Entity Too Large");
 		statusNames.put(414, "URI Too Long");
-		statusNames.put(414, "Request-URI Too Long");
 		statusNames.put(415, "Unsupported Media Type");
 		statusNames.put(416, "Requested range not satisfiable");
 		statusNames.put(417, "Expectation Failed");

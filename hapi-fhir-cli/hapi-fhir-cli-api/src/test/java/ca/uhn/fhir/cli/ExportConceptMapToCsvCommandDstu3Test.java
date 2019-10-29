@@ -4,7 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.util.PortUtil;
+import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.LoggingRule;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.FileUtils;
@@ -17,12 +18,14 @@ import org.hl7.fhir.dstu3.model.Enumerations.ConceptMapEquivalence;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 
 public class ExportConceptMapToCsvCommandDstu3Test {
@@ -33,7 +36,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 	private static final String CS_URL_1 = "http://example.com/codesystem/1";
 	private static final String CS_URL_2 = "http://example.com/codesystem/2";
 	private static final String CS_URL_3 = "http://example.com/codesystem/3";
-	private static final String FILE = "./target/output.csv";
+	private static final String FILE = "./target/output_dstu3.csv";
 
 	private static String ourBase;
 	private static IGenericClient ourClient;
@@ -46,46 +49,20 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 		System.setProperty("test", "true");
 	}
 
-	@AfterClass
-	public static void afterClassClearContext() throws Exception {
-		ourServer.stop();
-		TestUtil.clearAllStaticFieldsForUnitTest();
-	}
-
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		ourPort = PortUtil.findFreePort();
-		ourServer = new Server(ourPort);
-
-		ServletHandler servletHandler = new ServletHandler();
-
-		RestfulServer restfulServer = new RestfulServer(ourCtx);
-		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
-		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
-
-		ServletHolder servletHolder = new ServletHolder(restfulServer);
-		servletHandler.addServletWithMapping(servletHolder, "/*");
-		ourServer.setHandler(servletHandler);
-
-		ourServer.start();
-
-		ourBase = "http://localhost:" + ourPort;
-
-		ourClient = ourCtx.newRestfulGenericClient(ourBase);
-
-		ourClient.create().resource(createConceptMap()).execute();
-	}
+	@Rule
+	public LoggingRule myLoggingRule = new LoggingRule();
 
 	@Test
 	public void testExportConceptMapToCsvCommand() throws IOException {
-		ourLog.info("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
+		ourLog.debug("ConceptMap:\n" + ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(createConceptMap()));
 
-		App.main(new String[] {"export-conceptmap-to-csv",
+		App.main(new String[]{"export-conceptmap-to-csv",
 			"-v", ourVersion,
 			"-t", ourBase,
 			"-u", CM_URL,
 			"-f", FILE,
 			"-l"});
+		await().until(() -> new File(FILE).exists());
 
 		String expected = "\"SOURCE_CODE_SYSTEM\",\"SOURCE_CODE_SYSTEM_VERSION\",\"TARGET_CODE_SYSTEM\",\"TARGET_CODE_SYSTEM_VERSION\",\"SOURCE_CODE\",\"SOURCE_DISPLAY\",\"TARGET_CODE\",\"TARGET_DISPLAY\",\"EQUIVALENCE\",\"COMMENT\"\n" +
 			"\"http://example.com/codesystem/1\",\"Version 1s\",\"http://example.com/codesystem/2\",\"Version 2t\",\"Code 1a\",\"Display 1a\",\"Code 2a\",\"Display 2a\",\"equal\",\"2a This is a comment.\"\n" +
@@ -100,10 +77,42 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2b\",\"Display 2b\",\"Code 3b\",\"Display 3b\",\"equal\",\"3b This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2c\",\"Display 2c\",\"Code 3c\",\"Display 3c\",\"equal\",\"3c This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n";
+
+		ourLog.info("Going to read file: {}", FILE);
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
 		assertEquals(expected, result);
 
 		FileUtils.deleteQuietly(new File(FILE));
+	}
+
+	@AfterClass
+	public static void afterClassClearContext() throws Exception {
+		JettyUtil.closeServer(ourServer);
+		TestUtil.clearAllStaticFieldsForUnitTest();
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		ourServer = new Server(0);
+
+		ServletHandler servletHandler = new ServletHandler();
+
+		RestfulServer restfulServer = new RestfulServer(ourCtx);
+		restfulServer.registerInterceptor(new VerboseLoggingInterceptor());
+		restfulServer.setResourceProviders(new HashMapResourceProviderConceptMapDstu3(ourCtx));
+
+		ServletHolder servletHolder = new ServletHolder(restfulServer);
+		servletHandler.addServletWithMapping(servletHolder, "/*");
+		ourServer.setHandler(servletHandler);
+
+		JettyUtil.startServer(ourServer);
+		ourPort = JettyUtil.getPortForStartedServer(ourServer);
+
+		ourBase = "http://localhost:" + ourPort;
+
+		ourClient = ourCtx.newRestfulGenericClient(ourBase);
+
+		ourClient.create().resource(createConceptMap()).execute();
 	}
 
 	static ConceptMap createConceptMap() {

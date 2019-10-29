@@ -96,7 +96,7 @@ public class OperationClientDstu3Test {
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
-		Parameters request = ourCtx.newXmlParser().parseResource(Parameters.class, requestBody);
+		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
 		assertEquals(2, request.getParameter().size());
 		assertEquals("valstr", request.getParameter().get(0).getName());
@@ -131,7 +131,7 @@ public class OperationClientDstu3Test {
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
-		Parameters request = ourCtx.newXmlParser().parseResource(Parameters.class, requestBody);
+		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
 		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
 		assertEquals(2, request.getParameter().size());
 		assertEquals("valstr", request.getParameter().get(0).getName());

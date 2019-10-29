@@ -56,14 +56,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-base/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>

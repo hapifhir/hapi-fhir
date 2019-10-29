@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -243,22 +242,24 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		return myValueExact;
 	}
 
-	public void setValueExact(String theValueExact) {
+	public ResourceIndexedSearchParamString setValueExact(String theValueExact) {
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueExact.length());
 		}
 		myValueExact = theValueExact;
+		return this;
 	}
 
 	public String getValueNormalized() {
 		return myValueNormalized;
 	}
 
-	public void setValueNormalized(String theValueNormalized) {
+	public ResourceIndexedSearchParamString setValueNormalized(String theValueNormalized) {
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException("Value is too long: " + theValueNormalized.length());
 		}
 		myValueNormalized = theValueNormalized;
+		return this;
 	}
 
 	@Override

@@ -12,6 +12,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.text.StringContainsInOrder;
@@ -68,6 +69,35 @@ public class XmlParserDstu3Test {
 		}
 		ourCtx.setNarrativeGenerator(null);
 	}
+
+	/**
+	 * We specifically include extensions on CapabilityStatment even in
+	 * summary mode, since this is behaviour that people depend on
+	 */
+	@Test
+	public void testEncodeSummaryCapabilityStatementExtensions() {
+
+		CapabilityStatement cs = new CapabilityStatement();
+		CapabilityStatement.CapabilityStatementRestComponent rest = cs.addRest();
+		rest.setMode(CapabilityStatement.RestfulCapabilityMode.CLIENT);
+		rest.getSecurity()
+			.addExtension()
+			.setUrl("http://foo")
+			.setValue(new StringType("bar"));
+
+		cs.getVersionElement().addExtension()
+			.setUrl("http://goo")
+			.setValue(new StringType("ber"));
+
+		String encoded = ourCtx.newXmlParser().setSummaryMode(true).setPrettyPrint(true).setPrettyPrint(true).encodeResourceToString(cs);
+		ourLog.info(encoded);
+
+		assertThat(encoded, Matchers.containsString("http://foo"));
+		assertThat(encoded, Matchers.containsString("bar"));
+		assertThat(encoded, Matchers.containsString("http://goo"));
+		assertThat(encoded, Matchers.containsString("ber"));
+	}
+
 
 	@Test
 	public void testEncodeInvalidMetaTime() {
@@ -1041,6 +1071,28 @@ public class XmlParserDstu3Test {
 	}
 
 	/**
+	 * See #402
+	 */
+	@Test
+	public void testEncodeCompositionDoesntOverwriteNarrative() {
+		FhirContext ctx = FhirContext.forDstu3();
+		ctx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+
+		Composition composition  = new Composition();
+		composition.getText().setDivAsString("<div>root</div>");
+		composition.addSection().getText().setDivAsString("<div>section0</div>");
+		composition.addSection().getText().setDivAsString("<div>section1</div>");
+
+		String output = ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(composition);
+		ourLog.info(output);
+
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">root</div>"));
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">section0</div>"));
+		assertThat(output, containsString("<div xmlns=\"http://www.w3.org/1999/xhtml\">section1</div>"));
+
+	}
+
+	/**
 	 * See #326
 	 */
 	@Test
@@ -1336,6 +1388,62 @@ public class XmlParserDstu3Test {
 		assertThat(encoded, containsString("tag"));
 		assertThat(encoded, containsString("scheme"));
 		assertThat(encoded, not(containsString("Label")));
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionMissingUrl() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setValue(new StringType("ROOT_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("ROOT_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
+		}
+
+	}
+
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler
+		IParser parser = ourCtx.newXmlParser();
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+
+		// Strict error handler
+		try {
+			parser.setParserErrorHandler(new StrictErrorHandler());
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals("Extension contains both a value and nested extensions: Patient(res).extension", e.getMessage());
+		}
+
 	}
 
 	@Test

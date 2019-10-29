@@ -24,7 +24,7 @@ import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 public class ${className}ResourceProvider extends 
 ## We have specialized base classes for RPs that handle certain resource types. These
 ## RPs implement type specific operations 
-#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition'))
+#if ( $version != 'dstu' && (${className} == 'Encounter' || ${className} == 'Patient' || ${className} == 'ValueSet' || ${className} == 'QuestionnaireAnswers' || ${className} == 'CodeSystem' || ($version != 'dstu2' && ${className} == 'ConceptMap') || ${className} == 'MessageHeader' || ${className} == 'Composition' || ${className} == 'StructureDefinition'))
 	BaseJpaResourceProvider${className}${versionCapitalized}
 #else
 	JpaResourceProvider${versionCapitalized}<${className}>
@@ -42,7 +42,11 @@ public class ${className}ResourceProvider extends
 			javax.servlet.http.HttpServletResponse theServletResponse,
 
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,
-			
+
+			@Description(shortDefinition="Search the contents of the resource's data using a filter")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)
+			StringAndListParam theFtFilter,
+
 			@Description(shortDefinition="Search the contents of the resource's data using a fulltext search")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT)
 			StringAndListParam theFtContent, 
@@ -61,7 +65,11 @@ public class ${className}ResourceProvider extends
   
 			@Description(shortDefinition="Search for resources which have the given profile")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
-			UriAndListParam theSearchForProfile, 
+			UriAndListParam theSearchForProfile,
+
+			@Description(shortDefinition="Search for resources which have the given source value (Resource.meta.source)")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE)
+			UriAndListParam theSearchForSource,
 
 			@Description(shortDefinition="Return resources linked to by the given target")
 			@OptionalParam(name="_has")
@@ -112,20 +120,11 @@ public class ${className}ResourceProvider extends
 #end
 
 			@IncludeParam(allow= {
-#foreach ( $param in $searchParamsReference )
-#set ( $haveMore = $foreach.hasNext )
-#if ( $version == 'dstu' )
-	#foreach ( $include in $param.paths )
-				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
-	#end
-#else
-	#foreach ( $include in $includes )
-				"${include.path}" #{if}($foreach.hasNext || $haveMore), #{end}
-	#end
-#end				 
+#foreach ( $include in $includes )
+				"${include.path}",
 #end
-				#{if}($searchParamsReference.empty == false), #{end}"*"
-			}) 
+				"*"
+			})
 			Set<Include> theIncludes,
 			
 			@Sort 
@@ -142,11 +141,13 @@ public class ${className}ResourceProvider extends
 		startRequest(theServletRequest);
 		try {
 			SearchParameterMap paramMap = new SearchParameterMap();
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER, theFtFilter);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, theFtContent);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, theFtText);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_TAG, theSearchForTag);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
 			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});

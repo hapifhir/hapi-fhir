@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,15 +52,11 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 	@Autowired
 	IResourceRetriever myResourceRetriever;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringRestHookSubscriber.class);
-	@Autowired
-	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	protected void deliverPayload(ResourceDeliveryMessage theMsg, CanonicalSubscription theSubscription, EncodingEnum thePayloadType, IGenericClient theClient) {
 		IBaseResource payloadResource = getAndMassagePayload(theMsg, theSubscription);
-		if (payloadResource == null) {
-			return;
-		}
 
+		// Regardless of whether we have a payload, the rest-hook should be sent.
 		doDelivery(theMsg, theSubscription, thePayloadType, theClient, payloadResource);
 	}
 
@@ -117,8 +113,13 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 
 		if (payloadResource == null || theSubscription.getRestHookDetails().isDeliverLatestVersion()) {
 			IIdType payloadId = theMsg.getPayloadId(myFhirContext);
+
 			try {
-				payloadResource = myResourceRetriever.getResource(payloadId.toVersionless());
+				if (payloadId != null) {
+					payloadResource = myResourceRetriever.getResource(payloadId.toVersionless());
+				} else {
+					return null;
+				}
 			} catch (ResourceGoneException e) {
 				ourLog.warn("Resource {} is deleted, not going to deliver for subscription {}", payloadId.toVersionless(), theSubscription.getIdElement(myFhirContext));
 				return null;
@@ -141,7 +142,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		HookParams params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
+		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_BEFORE_REST_HOOK_DELIVERY, params)) {
 			return;
 		}
 
@@ -152,10 +153,6 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		String payloadString = subscription.getPayloadString();
 		EncodingEnum payloadType = null;
 		if (payloadString != null) {
-			if (payloadString.contains(";")) {
-				payloadString = payloadString.substring(0, payloadString.indexOf(';'));
-			}
-			payloadString = payloadString.trim();
 			payloadType = EncodingEnum.forContentType(payloadString);
 		}
 
@@ -180,7 +177,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 		params = new HookParams()
 			.add(CanonicalSubscription.class, subscription)
 			.add(ResourceDeliveryMessage.class, theMessage);
-		if (!myInterceptorBroadcaster.callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
+		if (!getInterceptorBroadcaster().callHooks(Pointcut.SUBSCRIPTION_AFTER_REST_HOOK_DELIVERY, params)) {
 			//noinspection UnnecessaryReturnStatement
 			return;
 		}

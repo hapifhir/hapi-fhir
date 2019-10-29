@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,18 +19,6 @@ package ca.uhn.fhir.rest.server.method;
  * limitations under the License.
  * #L%
  */
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -53,8 +41,18 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadMethodBinding.class);
@@ -172,11 +170,13 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 				String ifNoneMatch = theRequest.getHeader(Constants.HEADER_IF_NONE_MATCH_LC);
 				if (StringUtils.isNotBlank(ifNoneMatch)) {
 					ifNoneMatch = ParameterUtil.parseETagValue(ifNoneMatch);
-					if (responseResource.getIdElement() != null && responseResource.getIdElement().hasVersionIdPart()) {
-						if (responseResource.getIdElement().getVersionIdPart().equals(ifNoneMatch)) {
-							ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
-							throw new NotModifiedException("Not Modified");
-						}
+					String versionIdPart = responseResource.getIdElement().getVersionIdPart();
+					if (StringUtils.isBlank(versionIdPart)) {
+						versionIdPart = responseResource.getMeta().getVersionId();
+					}
+					if (ifNoneMatch.equals(versionIdPart)) {
+						ourLog.debug("Returning HTTP 304 because request specified {}={}", Constants.HEADER_IF_NONE_MATCH, ifNoneMatch);
+						throw new NotModifiedException("Not Modified");
 					}
 				}
 			}

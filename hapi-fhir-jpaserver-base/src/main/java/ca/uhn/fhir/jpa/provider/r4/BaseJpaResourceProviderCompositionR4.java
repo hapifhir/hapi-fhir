@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoComposition;
-import ca.uhn.fhir.jpa.util.JpaConstants;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.annotation.Description;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -29,9 +29,9 @@ import java.util.List;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,10 +44,7 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 	/**
 	 * Composition/123/$document
-	 *
-	 * @param theRequestDetails
 	 */
-	//@formatter:off
 	@Operation(name = JpaConstants.OPERATION_DOCUMENT, idempotent = true, bundleType=BundleTypeEnum.DOCUMENT)
 	public IBaseBundle getDocumentForComposition(
 
@@ -69,7 +66,6 @@ public class BaseJpaResourceProviderCompositionR4 extends JpaResourceProviderR4<
 
 			RequestDetails theRequestDetails
 			) {
-		//@formatter:on
 
 		startRequest(theServletRequest);
 		try {

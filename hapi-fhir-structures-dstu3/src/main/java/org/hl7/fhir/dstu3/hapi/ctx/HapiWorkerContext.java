@@ -22,6 +22,7 @@ import org.hl7.fhir.dstu3.terminologies.ValueSetExpander;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.dstu3.terminologies.ValueSetExpanderSimple;
 import org.hl7.fhir.dstu3.utils.INarrativeGenerator;
+import org.hl7.fhir.dstu3.utils.IResourceValidator;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
@@ -94,7 +95,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public StructureDefinition fetchTypeDefinition(String theCode) {
-    throw new UnsupportedOperationException();
+    return fetchResource(org.hl7.fhir.dstu3.model.StructureDefinition.class, "http://hl7.org/fhir/StructureDefinition/" + theCode);
   }
 
   @Override
@@ -161,6 +162,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
   @Override
+  public IResourceValidator newValidator() throws FHIRException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
   public IParser getParser(ParserType theType) {
     throw new UnsupportedOperationException();
   }
@@ -178,6 +184,11 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     }
     Collections.sort(result);
     return result;
+  }
+
+  @Override
+  public Set<String> getResourceNamesAsSet() {
+    return new HashSet<>(getResourceNames());
   }
 
   @Override
@@ -264,7 +275,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay) {
-    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay);
+    IValidationSupport.CodeValidationResult result = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, null);
     if (result == null) {
       return null;
     }
@@ -292,7 +303,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       }
     }
 
-
     boolean caseSensitive = true;
     if (isNotBlank(theSystem)) {
       CodeSystem system = fetchCodeSystem(theSystem);
@@ -315,33 +325,50 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getId())) {
-      ValueSet expansion = new ValueSet();
-      for (ConceptSetComponent nextInclude : theVs.getCompose().getInclude()) {
-        for (ConceptReferenceComponent nextConcept : nextInclude.getConcept()) {
-          expansion.getExpansion().addContains().setCode(nextConcept.getCode()).setDisplay(nextConcept.getDisplay());
-        }
-      }
-      expandedValueSet = new ValueSetExpansionOutcome(expansion);
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
     }
 
-    if (expandedValueSet == null) {
+    /*
+     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
+     */
+    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
+    }
+
+    if (theVs != null && isNotBlank(theVs.getUrl())) {
+      IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+      if (outcome != null && outcome.isOk()) {
+        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+        definition.setCode(theCode);
+        definition.setDisplay(outcome.getDisplay());
+        return new ValidationResult(definition);
+      }
+    } else {
       expandedValueSet = expand(theVs, null);
     }
 
-    for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-      String nextCode = next.getCode();
-      if (!caseSensitive) {
-        nextCode = nextCode.toUpperCase();
-      }
+    if (expandedValueSet != null) {
+      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
+        String nextCode = next.getCode();
+        if (!caseSensitive) {
+          nextCode = nextCode.toUpperCase();
+        }
 
-      if (nextCode.equals(wantCode)) {
-        if (theSystem == null || next.getSystem().equals(theSystem)) {
-          ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-          definition.setCode(next.getCode());
-          definition.setDisplay(next.getDisplay());
-          ValidationResult retVal = new ValidationResult(definition);
-          return retVal;
+        if (nextCode.equals(wantCode)) {
+          if (theSystem == null || next.getSystem().equals(theSystem)) {
+            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+            definition.setCode(next.getCode());
+            definition.setDisplay(next.getDisplay());
+            ValidationResult retVal = new ValidationResult(definition);
+            return retVal;
+          }
         }
       }
     }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,12 +24,12 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
-import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -38,6 +38,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.context.IWorkerContext;
+import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Enumeration;
@@ -47,6 +48,7 @@ import org.hl7.fhir.r4.model.Patient.PatientCommunicationComponent;
 import org.hl7.fhir.r4.utils.FHIRPathEngine;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import javax.measure.unit.NonSI;
 import javax.measure.unit.Unit;
 import java.math.BigDecimal;
@@ -58,8 +60,27 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParamExtractorR4.class);
+	private static final Set<Class<?>> ourIgnoredForSearchDatatypes;
+
+	static {
+		//noinspection unchecked
+		ourIgnoredForSearchDatatypes = Collections.unmodifiableSet(Sets.newHashSet(
+			Age.class,
+			Annotation.class,
+			Attachment.class,
+			Count.class,
+			Distance.class,
+			Ratio.class,
+			SampledData.class,
+			Signature.class,
+			LocationPositionComponent.class
+		));
+	}
+
 	@Autowired
 	private org.hl7.fhir.r4.hapi.ctx.IValidationSupport myValidationSupport;
+
+	private FHIRPathEngine myFhirPathEngine;
 
 	/**
 	 * Constructor
@@ -73,6 +94,14 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	public SearchParamExtractorR4(ModelConfig theModelConfig, FhirContext theCtx, IValidationSupport theValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
+		initFhirPath();
+	}
+
+	@PostConstruct
+	public void initFhirPath() {
+		IWorkerContext worker = new HapiWorkerContext(getContext(), myValidationSupport);
+		myFhirPathEngine = new FHIRPathEngine(worker);
+		myFhirPathEngine.setHostServices(new SearchParamExtractorR4HostServices());
 	}
 
 	private void addQuantity(ResourceTable theEntity, HashSet<ResourceIndexedSearchParamQuantity> retVal, String resourceName, Quantity nextValue) {
@@ -95,28 +124,6 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 			nextEntity.setResource(theEntity);
 			retVal.add(nextEntity);
 		}
-	}
-
-	private void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
-		if (isBlank(searchTerm)) {
-			return;
-		}
-		if (searchTerm.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			searchTerm = searchTerm.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), resourceName, StringNormalizer.normalizeString(searchTerm), searchTerm);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
-	}
-
-	private void addStringParam(ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
-		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
-			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
-		}
-		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), nextSpDef.getName(), StringNormalizer.normalizeString(value), value);
-		nextEntity.setResource(theEntity);
-		retVal.add(nextEntity);
 	}
 
 	@Override
@@ -378,7 +385,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 					Range nextValue = (Range) nextObject;
 					addQuantity(theEntity, retVal, resourceName, nextValue.getLow());
 					addQuantity(theEntity, retVal, resourceName, nextValue.getHigh());
-				} else if (nextObject instanceof LocationPositionComponent) {
+				} else if (ourIgnoredForSearchDatatypes.contains(nextObject.getClass())) {
 					continue;
 				} else {
 					if (!multiType) {
@@ -733,16 +740,12 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 	 */
 	@Override
 	protected List<Object> extractValues(String thePaths, IBaseResource theResource) {
-		IWorkerContext worker = new org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext(getContext(), myValidationSupport);
-		FHIRPathEngine fp = new FHIRPathEngine(worker);
-		fp.setHostServices(new SearchParamExtractorR4HostServices());
-
 		List<Object> values = new ArrayList<>();
 		String[] nextPathsSplit = SPLIT_R4.split(thePaths);
 		for (String nextPath : nextPathsSplit) {
 			List<Base> allValues;
 			try {
-				allValues = fp.evaluate((Base) theResource, nextPath);
+				allValues = myFhirPathEngine.evaluate((Base) theResource, nextPath);
 			} catch (FHIRException e) {
 				String msg = getContext().getLocalizer().getMessage(BaseSearchParamExtractor.class, "failedToExtractPaths", nextPath, e.toString());
 				throw new InternalErrorException(msg, e);
@@ -850,6 +853,11 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		@Override
 		public boolean conformsToProfile(Object appContext, Base item, String url) throws FHIRException {
 			return false;
+		}
+
+		@Override
+		public ValueSet resolveValueSet(Object appContext, String url) {
+			return null;
 		}
 	}
 

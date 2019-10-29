@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,7 +23,11 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.StringNormalizer;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.ObjectUtils;
@@ -34,7 +38,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class BaseSearchParamExtractor implements ISearchParamExtractor {
 
@@ -56,6 +63,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	protected BaseSearchParamExtractor(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
 		myContext = theCtx;
 		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	protected void addSearchTerm(ResourceTable theEntity, Set<ResourceIndexedSearchParamString> retVal, String resourceName, String searchTerm) {
+		if (isBlank(searchTerm)) {
+			return;
+		}
+		retVal.add(createResourceIndexedSearchParamString(theEntity, resourceName, searchTerm));
+	}
+
+	protected void addStringParam(ResourceTable theEntity, Set<BaseResourceIndexedSearchParam> retVal, RuntimeSearchParam nextSpDef, String value) {
+		retVal.add(createResourceIndexedSearchParamString(theEntity, nextSpDef.getName(), value));
 	}
 
 	@Override
@@ -97,5 +115,17 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		myContext = theContext;
 	}
 
+	private ResourceIndexedSearchParamString createResourceIndexedSearchParamString(ResourceTable theEntity, String name, String value) {
+		if (value.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			value = value.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		String normalizedValue = StringNormalizer.normalizeString(value);
+		if (normalizedValue.length() > ResourceIndexedSearchParamString.MAX_LENGTH) {
+			normalizedValue = normalizedValue.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH);
+		}
+		ResourceIndexedSearchParamString nextEntity = new ResourceIndexedSearchParamString(getModelConfig(), name, normalizedValue, value);
+		nextEntity.setResource(theEntity);
+		return nextEntity;
+	}
 
 }

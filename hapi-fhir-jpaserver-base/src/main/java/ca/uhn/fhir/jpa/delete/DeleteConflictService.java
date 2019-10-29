@@ -1,5 +1,25 @@
 package ca.uhn.fhir.jpa.delete;
 
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2019 University Health Network
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -10,8 +30,11 @@ import ca.uhn.fhir.jpa.dao.data.IResourceLinkDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.DeleteConflict;
+import ca.uhn.fhir.jpa.util.JpaInterceptorBroadcaster;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
@@ -40,45 +63,58 @@ public class DeleteConflictService {
 	@Autowired
 	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
-	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate) {
-		DeleteConflictList newConflicts = new DeleteConflictList();
+	public int validateOkToDelete(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, RequestDetails theRequest) {
+
+		// We want the list of resources that are marked to be the same list even as we
+		// drill into conflict resolution stacks.. this allows us to not get caught by
+		// circular references
+		DeleteConflictList newConflicts = new DeleteConflictList(theDeleteConflicts);
 
 		// In most cases, there will be no hooks, and so we only need to check if there is at least FIRST_QUERY_RESULT_COUNT conflict and populate that.
 		// Only in the case where there is a hook do we need to go back and collect larger batches of conflicts for processing.
 
-		boolean tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
+		DeleteConflictOutcome outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, FIRST_QUERY_RESULT_COUNT);
 
 		int retryCount = 0;
-		while (tryAgain && retryCount < MAX_RETRY_ATTEMPTS) {
+		while (outcome != null) {
+			int shouldRetryCount = Math.min(outcome.getShouldRetryCount(), MAX_RETRY_ATTEMPTS);
+			if (!(retryCount < shouldRetryCount)) break;
 			newConflicts = new DeleteConflictList();
-			tryAgain = findAndHandleConflicts(newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
+			outcome = findAndHandleConflicts(theRequest, newConflicts, theEntity, theForValidate, RETRY_QUERY_RESULT_COUNT);
 			++retryCount;
 		}
 		theDeleteConflicts.addAll(newConflicts);
 		return retryCount;
 	}
 
-	private boolean findAndHandleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
+	private DeleteConflictOutcome findAndHandleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, int theMinQueryResultCount) {
 		List<ResourceLink> resultList = myDeleteConflictFinderService.findConflicts(theEntity, theMinQueryResultCount);
 		if (resultList.isEmpty()) {
-			return false;
+			return null;
 		}
-		return handleConflicts(theDeleteConflicts, theEntity, theForValidate, resultList);
+
+		return handleConflicts(theRequest, theDeleteConflicts, theEntity, theForValidate, resultList);
 	}
 
-	private boolean handleConflicts(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
+	private DeleteConflictOutcome handleConflicts(RequestDetails theRequest, DeleteConflictList theDeleteConflicts, ResourceTable theEntity, boolean theForValidate, List<ResourceLink> theResultList) {
 		if (!myDaoConfig.isEnforceReferentialIntegrityOnDelete() && !theForValidate) {
 			ourLog.debug("Deleting {} resource dependencies which can no longer be satisfied", theResultList.size());
 			myResourceLinkDao.deleteAll(theResultList);
-			return false;
+			return null;
 		}
 
 		addConflictsToList(theDeleteConflicts, theEntity, theResultList);
 
+		if (theDeleteConflicts.isEmpty()) {
+			return new DeleteConflictOutcome();
+		}
+
 		// Notify Interceptors about pre-action call
 		HookParams hooks = new HookParams()
-			.add(DeleteConflictList.class, theDeleteConflicts);
-		return myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
+			.add(DeleteConflictList.class, theDeleteConflicts)
+			.add(RequestDetails.class, theRequest)
+			.addIfMatchesType(ServletRequestDetails.class, theRequest);
+		return (DeleteConflictOutcome)JpaInterceptorBroadcaster.doCallHooksAndReturnObject(myInterceptorBroadcaster, theRequest, Pointcut.STORAGE_PRESTORAGE_DELETE_CONFLICTS, hooks);
 	}
 
 	private void addConflictsToList(DeleteConflictList theDeleteConflicts, ResourceTable theEntity, List<ResourceLink> theResultList) {
@@ -86,6 +122,12 @@ public class DeleteConflictService {
 			IdDt targetId = theEntity.getIdDt();
 			IdDt sourceId = link.getSourceResource().getIdDt();
 			String sourcePath = link.getSourcePath();
+			if (theDeleteConflicts.isResourceIdMarkedForDeletion(sourceId)) {
+				if (theDeleteConflicts.isResourceIdMarkedForDeletion(targetId)) {
+					continue;
+				}
+			}
+
 			theDeleteConflicts.add(new DeleteConflict(sourceId, sourcePath, targetId));
 		}
 	}

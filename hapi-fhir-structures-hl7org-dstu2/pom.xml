@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>4.0.0-SNAPSHOT</version>
+		<version>4.1.0-SNAPSHOT</version>
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
 
@@ -22,8 +22,13 @@
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
-			<artifactId>hapi-fhir-utilities</artifactId>
-			<version>${project.version}</version>
+			<artifactId>org.hl7.fhir.utilities</artifactId>
+			<version>${fhir_core_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>org.hl7.fhir.dstu2</artifactId>
+			<version>${fhir_core_version}</version>
 		</dependency>
 
 		<!--
@@ -65,13 +70,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>xpp3</groupId>
-			<artifactId>xpp3_min</artifactId>
-			<version>1.1.4c</version>
-		</dependency>
-		<dependency>
 			<groupId>net.sf.saxon</groupId>
 			<artifactId>Saxon-HE</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Testing -->
@@ -121,6 +122,12 @@
 			<artifactId>thymeleaf</artifactId>
 			<scope>test</scope>
 		</dependency>
+        <dependency>
+            <groupId>ca.uhn.hapi.fhir</groupId>
+            <artifactId>hapi-fhir-test-utilities</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
 
 		<!-- Dependencies for Schematron -->
 		<dependency>
@@ -247,18 +254,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<configuration>
-					<classFolders>
-						<classFolder>${basedir}/target/classes</classFolder>
-						<classFolder>${basedir}../hapi-fhir-base/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-client/target/classes</classFolder>
-						<classFolder>${basedir}/../hapi-fhir-server/target/classes</classFolder>
-					</classFolders>
-					<sourceFolders>
-						<sourceFolder>${basedir}/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-base/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-client/src/main/java</sourceFolder>
-						<sourceFolder>${basedir}/../hapi-fhir-server/src/main/java</sourceFolder>
-					</sourceFolders>
 					<dumpOnExit>true</dumpOnExit>
 				</configuration>
 				<executions>

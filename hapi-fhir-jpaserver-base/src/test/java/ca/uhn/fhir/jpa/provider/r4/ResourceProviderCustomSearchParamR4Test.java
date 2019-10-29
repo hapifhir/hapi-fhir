@@ -186,6 +186,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");
@@ -238,6 +239,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
 		fooSp.setCode("foo");
+		fooSp.setName("foo");
 		fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
 		fooSp.setTitle("FOO SP");
 		fooSp.setExpression("Patient.gender");

@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.subscription.email;
 
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.SubscriptionTestUtil;
-import ca.uhn.fhir.jpa.testutil.RandomServerPortProvider;
 import ca.uhn.fhir.model.dstu2.composite.CodeableConceptDt;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
@@ -40,6 +39,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
 
+	@Override
 	@After
 	public void after() throws Exception {
 		ourLog.info("** AFTER **");
@@ -142,7 +142,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		assertEquals(1, messages[msgIdx].getHeader("Content-Type").length);
 		assertEquals("text/plain; charset=us-ascii", messages[msgIdx].getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(messages[msgIdx]);
-		assertEquals("A subscription update has been received", foundBody);
+		assertEquals("", foundBody);
 
 	}
 
@@ -154,11 +154,11 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@BeforeClass
 	public static void beforeClass() {
-		ourListenerPort = RandomServerPortProvider.findFreePort();
-		ServerSetup smtp = new ServerSetup(ourListenerPort, null, ServerSetup.PROTOCOL_SMTP);
+		ServerSetup smtp = new ServerSetup(0, null, ServerSetup.PROTOCOL_SMTP);
 		smtp.setServerStartupTimeout(2000);
 		ourTestSmtp = new GreenMail(smtp);
 		ourTestSmtp.start();
+        ourListenerPort = ourTestSmtp.getSmtp().getPort();
 	}
 
 

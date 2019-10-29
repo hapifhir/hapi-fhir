@@ -3,8 +3,8 @@ package ca.uhn.fhir.rest.server;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.*;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.util.PortUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
+import ca.uhn.fhir.test.utilities.JettyUtil;
+
 public class PlainProviderR4Test {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -44,17 +46,17 @@ public class PlainProviderR4Test {
 
 	@After
 	public void after() throws Exception {
-		myServer.stop();
+		JettyUtil.closeServer(myServer);
 	}
 
 	@Before
 	public void before() throws Exception {
-		myPort = PortUtil.findFreePort();
-		myServer = new Server(myPort);
+		myServer = new Server(0);
 
 		ServletHandler proxyHandler = new ServletHandler();
 		ServletHolder servletHolder = new ServletHolder();
 		myRestfulServer = new RestfulServer(ourCtx);
+		myRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
 		servletHolder.setServlet(myRestfulServer);
 		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
 		myServer.setHandler(proxyHandler);
@@ -71,7 +73,8 @@ public class PlainProviderR4Test {
 	public void testGlobalHistory() throws Exception {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		myRestfulServer.setProviders(provider);
-		myServer.start();
+		JettyUtil.startServer(myServer);
+        myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
 		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
@@ -109,7 +112,8 @@ public class PlainProviderR4Test {
 	public void testGlobalHistoryNoParams() throws Exception {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		myRestfulServer.setProviders(provider);
-		myServer.start();
+		JettyUtil.startServer(myServer);
+        myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
 		CloseableHttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history"));
@@ -126,7 +130,8 @@ public class PlainProviderR4Test {
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
 		myRestfulServer.setProviders(new SearchProvider());
-		myServer.start();
+		JettyUtil.startServer(myServer);
+        myPort = JettyUtil.getPortForStartedServer(myServer);
 
 		String baseUri = "http://localhost:" + myPort + "/fhir/context";
 		String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";

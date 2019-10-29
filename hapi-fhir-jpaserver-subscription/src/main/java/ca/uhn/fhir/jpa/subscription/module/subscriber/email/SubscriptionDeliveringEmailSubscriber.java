@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.email;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,10 +20,12 @@ package ca.uhn.fhir.jpa.subscription.module.subscriber.email;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.subscription.module.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.module.subscriber.ResourceDeliveryMessage;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +45,8 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 
 	@Autowired
 	private ModelConfig myModelConfig;
+	@Autowired
+	private FhirContext myCtx;
 
 	private IEmailSender myEmailSender;
 
@@ -66,13 +70,21 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 			}
 		}
 
+		String payload = "";
+		if (isNotBlank(subscription.getPayloadString())) {
+			EncodingEnum encoding = EncodingEnum.forContentType(subscription.getPayloadString());
+			if (encoding != null) {
+				payload = theMessage.getPayloadString();
+			}
+		}
+
 		String from = processEmailAddressUri(defaultString(subscription.getEmailDetails().getFrom(), myModelConfig.getEmailFromAddress()));
 		String subjectTemplate = defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 
 		EmailDetails details = new EmailDetails();
 		details.setTo(destinationAddresses);
 		details.setFrom(from);
-		details.setBodyTemplate(subscription.getPayloadString());
+		details.setBodyTemplate(payload);
 		details.setSubjectTemplate(subjectTemplate);
 		details.setSubscription(subscription.getIdElement(myFhirContext));
 

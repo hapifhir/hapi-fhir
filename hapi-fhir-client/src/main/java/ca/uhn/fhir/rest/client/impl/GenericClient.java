@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.impl;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,11 +22,14 @@ package ca.uhn.fhir.rest.client.impl;
 
 import ca.uhn.fhir.context.*;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
+import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
+import ca.uhn.fhir.model.valueset.BundleEntryTransactionMethodEnum;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.*;
@@ -746,6 +749,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@SuppressWarnings("unchecked")
 		@Override
 		public IHistoryTyped andReturnBundle(Class theType) {
+			return returnBundle(theType);
+		}
+
+		@Override
+		public IHistoryTyped returnBundle(Class theType) {
 			Validate.notNull(theType, "theType must not be null on method andReturnBundle(Class)");
 			myReturnType = theType;
 			return this;
@@ -1756,7 +1764,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_INCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_INCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_INCLUDE, next.getValue());
 				}
@@ -1764,7 +1776,11 @@ public class GenericClient extends BaseClient implements IGenericClient {
 
 			for (Include next : myRevInclude) {
 				if (next.isRecurse()) {
-					addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					if (myContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+						addParam(params, Constants.PARAM_REVINCLUDE_ITERATE, next.getValue());
+					} else {
+						addParam(params, Constants.PARAM_REVINCLUDE_RECURSE, next.getValue());
+					}
 				} else {
 					addParam(params, Constants.PARAM_REVINCLUDE, next.getValue());
 				}
@@ -2033,7 +2049,35 @@ public class GenericClient extends BaseClient implements IGenericClient {
 		@Override
 		public ITransactionTyped<List<IBaseResource>> withResources(List<? extends IBaseResource> theResources) {
 			Validate.notNull(theResources, "theResources must not be null");
-			return new TransactionExecutable<List<IBaseResource>>(theResources);
+
+			for (IBaseResource next : theResources) {
+				String entryMethod = null;
+				if (next instanceof IResource) {
+					BundleEntryTransactionMethodEnum entryMethodEnum = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IResource) next);
+					if (entryMethodEnum != null) {
+						entryMethod = entryMethodEnum.getCode();
+					}
+				} else {
+					entryMethod = ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get((IAnyResource) next);
+				}
+
+				if (isBlank(entryMethod)) {
+					if (isBlank(next.getIdElement().getValue())) {
+						entryMethod = "POST";
+					} else {
+						entryMethod = "PUT";
+					}
+					if (next instanceof IResource) {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IResource) next, BundleEntryTransactionMethodEnum.valueOf(entryMethod));
+					} else {
+						ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.put((IAnyResource) next, entryMethod);
+					}
+
+				}
+
+			}
+
+			return new TransactionExecutable<>(theResources);
 		}
 
 	}

@@ -9,9 +9,9 @@ package ca.uhn.fhir.igpacks.parser;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,6 +23,7 @@ package ca.uhn.fhir.igpacks.parser;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
@@ -93,7 +94,9 @@ public abstract class BaseIgPackParser<T> {
 					if (entry.getName().equals(igResourceName)) {
 						parsed = FhirContext.forDstu3().newJsonParser().parseResource(ImplementationGuide.class, nextReader);
 					} else {
-						parsed = myCtx.newJsonParser().parseResource(nextReader);
+						LenientErrorHandler errorHandler = new LenientErrorHandler();
+						errorHandler.setErrorOnInvalidValue(false);
+						parsed = myCtx.newJsonParser().setParserErrorHandler(errorHandler).parseResource(nextReader);
 					}
 
 					candidateResources.put(entry.getName(), parsed);

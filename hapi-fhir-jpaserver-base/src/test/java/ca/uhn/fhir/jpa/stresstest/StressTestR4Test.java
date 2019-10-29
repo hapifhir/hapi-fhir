@@ -1,10 +1,16 @@
 package ca.uhn.fhir.jpa.stresstest;
 
 import ca.uhn.fhir.jpa.config.TestR4Config;
-import ca.uhn.fhir.jpa.config.UnregisterScheduledProcessor;
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.provider.r4.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
+import ca.uhn.fhir.jpa.search.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.SortSpec;
+import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
@@ -26,16 +32,13 @@ import org.hl7.fhir.r4.hapi.validation.FhirInstanceValidator;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.junit.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.util.AopTestUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +55,7 @@ import static org.junit.Assert.fail;
 @TestPropertySource(properties = {
 	// Since scheduled tasks can cause searches, which messes up the
 	// value returned by SearchBuilder.getLastHandlerMechanismForUnitTest()
-	UnregisterScheduledProcessor.SCHEDULING_DISABLED + "=true",
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_TRUE,
 	"max_db_connections=10"
 })
 public class StressTestR4Test extends BaseResourceProviderR4Test {
@@ -64,7 +67,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(StressTestR4Test.class);
 	private RequestValidatingInterceptor myRequestValidatingInterceptor;
 	@Autowired
-	private IPagingProvider myPagingProvider;
+	private DatabaseBackedPagingProvider myPagingProvider;
+	private int myPreviousMaxPageSize;
 
 	@Override
 	@After
@@ -73,6 +77,12 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 		ourRestServer.unregisterInterceptor(myRequestValidatingInterceptor);
 		myDaoConfig.setIndexMissingFields(DaoConfig.IndexEnabledEnum.ENABLED);
+
+		myPagingProvider.setMaximumPageSize(myPreviousMaxPageSize);
+
+		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+		searchCoordinator.setLoadingThrottleForUnitTests(null);
+		myDaoConfig.setSearchPreFetchThresholds(new DaoConfig().getSearchPreFetchThresholds());
 
 	}
 
@@ -85,7 +95,91 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		FhirInstanceValidator module = new FhirInstanceValidator();
 		module.setValidationSupport(myValidationSupport);
 		myRequestValidatingInterceptor.addValidatorModule(module);
+
+		myPreviousMaxPageSize = myPagingProvider.getMaximumPageSize();
+		myPagingProvider.setMaximumPageSize(300);
 	}
+
+	@Autowired
+	private ISearchCoordinatorSvc mySearchCoordinatorSvc;
+
+
+	@Test
+	public void testNoDuplicatesInSearchResults() throws Exception {
+		int resourceCount = 1000;
+		int queryCount = 30;
+		myDaoConfig.setSearchPreFetchThresholds(Lists.newArrayList(50, 200, -1));
+
+		SearchCoordinatorSvcImpl searchCoordinator = AopTestUtils.getTargetObject(mySearchCoordinatorSvc);
+		searchCoordinator.setLoadingThrottleForUnitTests(10);
+
+		Bundle bundle = new Bundle();
+
+		for (int i = 0; i < resourceCount; i++) {
+			Observation o = new Observation();
+			o.setId("A" + leftPad(Integer.toString(i), 4, '0'));
+			o.setEffective( DateTimeType.now());
+			o.setStatus(Observation.ObservationStatus.FINAL);
+			bundle.addEntry().setFullUrl(o.getId()).setResource(o).getRequest().setMethod(HTTPVerb.PUT).setUrl("Observation/A" + i);
+		}
+		StopWatch sw = new StopWatch();
+		ourLog.info("Saving {} resources", bundle.getEntry().size());
+		mySystemDao.transaction(null, bundle);
+		ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw.toString());
+
+		Map<String, IBaseResource> ids = new HashMap<>();
+
+		IGenericClient fhirClient = this.ourClient;
+
+		String url = ourServerBase + "/Observation?date=gt2000&_sort=-_lastUpdated";
+
+		int pageIndex = 0;
+		ourLog.info("Loading page {}", pageIndex);
+		Bundle searchResult = fhirClient
+			.search()
+			.byUrl(url)
+			.count(queryCount)
+			.returnBundle(Bundle.class)
+			.execute();
+		while(true) {
+			List<String> passIds = searchResult
+				.getEntry()
+				.stream()
+				.map(t -> t.getResource().getIdElement().getValue())
+				.collect(Collectors.toList());
+
+			int index = 0;
+			for (String nextId : passIds) {
+				Resource nextResource = searchResult.getEntry().get(index).getResource();
+
+				if (ids.containsKey(nextId)) {
+					String previousContent = fhirClient.getFhirContext().newJsonParser().encodeResourceToString(ids.get(nextId));
+					String newContent = fhirClient.getFhirContext().newJsonParser().encodeResourceToString(nextResource);
+					throw new Exception("Duplicate ID " + nextId + " found at index " + index + " of page " + pageIndex + "\n\nPrevious: " + previousContent + "\n\nNew: " + newContent);
+				}
+				ids.put(nextId, nextResource);
+				index++;
+			}
+
+			if (searchResult.getLink(Constants.LINK_NEXT) == null) {
+				break;
+			} else {
+				if (searchResult.getEntry().size() != queryCount) {
+					throw new Exception("Page had " + searchResult.getEntry().size() + " resources");
+				}
+				if (passIds.size() != queryCount) {
+					throw new Exception("Page had " + passIds.size() + " unique ids");
+				}
+			}
+
+			pageIndex++;
+			ourLog.info("Loading page {}: {}", pageIndex, searchResult.getLink(Constants.LINK_NEXT).getUrl());
+			searchResult = fhirClient.loadPage().next(searchResult).execute();
+		}
+
+		assertEquals(resourceCount, ids.size());
+	}
+
 
 	@Test
 	public void testPageThroughLotsOfPages() {
@@ -139,7 +233,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 0; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid());
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count, ids.size());
 		assertEquals(count, Sets.newHashSet(ids).size());
@@ -152,7 +246,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		for (int i = 1000; i <= count; i += 100) {
 			List<IBaseResource> resultsAndIncludes = results.getResources(i, i + 100);
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
-			results = myPagingProvider.retrieveResultList(results.getUuid());
+			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
 		assertEquals(count - 1000, ids.size());
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
@@ -242,6 +336,45 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1202, resultsAndIncludes.size());
 	}
 
+	@Ignore
+	@Test
+	public void testUpdateListWithLargeNumberOfEntries() {
+		int numPatients = 3000;
+
+		ListResource lr = new ListResource();
+		lr.setId(IdType.newRandomUuid());
+
+		{
+			Bundle bundle = new Bundle();
+			for (int i = 0; i < numPatients; ++i) {
+				Patient patient = new Patient();
+				patient.setId(IdType.newRandomUuid());
+				bundle.addEntry().setFullUrl(patient.getId()).setResource(patient).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+				lr.addEntry().setItem(new Reference(patient.getId()));
+			}
+			bundle.addEntry().setFullUrl(lr.getId()).setResource(lr).getRequest().setMethod(HTTPVerb.POST).setUrl("List");
+
+			StopWatch sw = new StopWatch();
+			ourLog.info("Saving list with {} entries", lr.getEntry().size());
+			mySystemDao.transaction(null, bundle);
+			ourLog.info("Saved {} resources in {}", bundle.getEntry().size(), sw);
+		}
+
+		{
+			Bundle bundle = new Bundle();
+
+			Patient newPatient = new Patient();
+			newPatient.setId(IdType.newRandomUuid());
+			bundle.addEntry().setFullUrl(newPatient.getId()).setResource(newPatient).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
+			lr.addEntry().setItem(new Reference(newPatient.getId()));
+			bundle.addEntry().setFullUrl(lr.getId()).setResource(lr).getRequest().setMethod(HTTPVerb.PUT).setUrl(lr.getIdElement().toUnqualifiedVersionless().getValue());
+
+			StopWatch sw = new StopWatch();
+			ourLog.info("Updating list with {} entries", lr.getEntry().size());
+			mySystemDao.transaction(null, bundle);
+			ourLog.info("Updated {} resources in {}", bundle.getEntry().size(), sw);
+		}
+	}
 
 	@Test
 	public void testMultithreadedSearch() throws Exception {
@@ -390,11 +523,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 		ourClient.transaction().withBundle(input).execute();
 
-		CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"));
-		try {
+		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(ourServerBase + "/metadata"))) {
 			assertEquals(200, getMeta.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(getMeta);
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();

@@ -1,4 +1,4 @@
-package org.hl7.fhir.instance.model;
+package org.hl7.fhir.dstu2.model;
 
 
 /*
@@ -24,6 +24,7 @@ package org.hl7.fhir.instance.model;
 
 public interface IIdType extends IBase {
 
+	@Override
 	boolean isEmpty();
 
 	/**

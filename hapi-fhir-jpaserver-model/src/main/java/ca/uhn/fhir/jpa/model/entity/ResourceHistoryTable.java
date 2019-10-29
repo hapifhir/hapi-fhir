@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,6 @@ package ca.uhn.fhir.jpa.model.entity;
  * #L%
  */
 
-import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.Constants;
 import org.hibernate.annotations.OptimisticLock;
 
 import javax.persistence.*;
@@ -29,7 +27,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-//@formatter:off
 @Entity
 @Table(name = "HFJ_RES_VER", uniqueConstraints = {
 	@UniqueConstraint(name = ResourceHistoryTable.IDX_RESVER_ID_VER, columnNames = {"RES_ID", "RES_VER"})
@@ -38,16 +35,18 @@ import java.util.Collection;
 	@Index(name = "IDX_RESVER_ID_DATE", columnList = "RES_ID,RES_UPDATED"),
 	@Index(name = "IDX_RESVER_DATE", columnList = "RES_UPDATED")
 })
-//@formatter:on
 public class ResourceHistoryTable extends BaseHasResource implements Serializable {
 
-	private static final long serialVersionUID = 1L;
 	public static final String IDX_RESVER_ID_VER = "IDX_RESVER_ID_VER";
+
 	/**
 	 * @see ResourceEncodingEnum
 	 */
+	// Don't reduce the visibility here, we reference this from Smile
+	@SuppressWarnings("WeakerAccess")
 	public static final int ENCODING_COL_LENGTH = 5;
 
+	private static final long serialVersionUID = 1L;
 	@Id
 	@SequenceGenerator(name = "SEQ_RESOURCE_HISTORY_ID", sequenceName = "SEQ_RESOURCE_HISTORY_ID")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_RESOURCE_HISTORY_ID")
@@ -57,7 +56,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Column(name = "RES_ID")
 	private Long myResourceId;
 
-	@Column(name = "RES_TYPE", length = 30, nullable = false)
+	@Column(name = "RES_TYPE", length = ResourceTable.RESTYPE_LEN, nullable = false)
 	private String myResourceType;
 
 	@Column(name = "RES_VER", nullable = false)
@@ -76,17 +75,15 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@OptimisticLock(excluded = true)
 	private ResourceEncodingEnum myEncoding;
 
+	@OneToOne(mappedBy = "myResourceHistoryTable", cascade = {CascadeType.REMOVE})
+	private ResourceHistoryProvenanceEntity myProvenance;
+
 	public ResourceHistoryTable() {
 		super();
 	}
 
-	public void addTag(ResourceHistoryTag theTag) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.equals(theTag)) {
-				return;
-			}
-		}
-		getTags().add(theTag);
+	public ResourceHistoryProvenanceEntity getProvenance() {
+		return myProvenance;
 	}
 
 	public void addTag(ResourceTag theTag) {
@@ -120,10 +117,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return myId;
 	}
 
-	public void setId(Long theId) {
-		myId = theId;
-	}
-
 	public byte[] getResource() {
 		return myResource;
 	}
@@ -153,7 +146,7 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Override
 	public Collection<ResourceHistoryTag> getTags() {
 		if (myTags == null) {
-			myTags = new ArrayList<ResourceHistoryTag>();
+			myTags = new ArrayList<>();
 		}
 		return myTags;
 	}
@@ -165,15 +158,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	public void setVersion(long theVersion) {
 		myResourceVersion = theVersion;
-	}
-
-	public boolean hasTag(String theTerm, String theScheme) {
-		for (ResourceHistoryTag next : getTags()) {
-			if (next.getTag().getSystem().equals(theScheme) && next.getTag().getCode().equals(theTerm)) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.client.apache;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -71,18 +71,18 @@ public class ApacheRestfulClientFactory extends RestfulClientFactory {
 	}
 
 	@Override
-	protected ApacheHttpClient getHttpClient(String theServerBase) {
+	protected synchronized ApacheHttpClient getHttpClient(String theServerBase) {
 		return new ApacheHttpClient(getNativeHttpClient(), new StringBuilder(theServerBase), null, null, null, null);
 	}
 
 	@Override
-	public IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
+	public synchronized IHttpClient getHttpClient(StringBuilder theUrl, Map<String, List<String>> theIfNoneExistParams,
 			String theIfNoneExistString, RequestTypeEnum theRequestType, List<Header> theHeaders) {
 		return new ApacheHttpClient(getNativeHttpClient(), theUrl, theIfNoneExistParams, theIfNoneExistString, theRequestType,
 				theHeaders);
 	}
 
-	public synchronized HttpClient getNativeHttpClient() {
+	public HttpClient getNativeHttpClient() {
 		if (myHttpClient == null) {
 
 			//FIXME potential resoource leak

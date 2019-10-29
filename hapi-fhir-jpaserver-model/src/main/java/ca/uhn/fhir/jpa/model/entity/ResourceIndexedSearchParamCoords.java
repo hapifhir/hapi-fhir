@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -127,16 +127,18 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return myLatitude;
 	}
 
-	public void setLatitude(double theLatitude) {
+	public ResourceIndexedSearchParamCoords setLatitude(double theLatitude) {
 		myLatitude = theLatitude;
+		return this;
 	}
 
 	public double getLongitude() {
 		return myLongitude;
 	}
 
-	public void setLongitude(double theLongitude) {
+	public ResourceIndexedSearchParamCoords setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
+		return this;
 	}
 
 	@Override

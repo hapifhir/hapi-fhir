@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.hl7.fhir.dstu2016may.model.CodeSystem;
 import org.hl7.fhir.dstu2016may.model.CodeSystem.ConceptDefinitionComponent;
+import org.hl7.fhir.dstu2016may.model.OperationOutcome;
 import org.hl7.fhir.dstu2016may.model.ValueSet;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.dstu2016may.model.StructureDefinition;
@@ -15,7 +16,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 
 public interface IValidationSupport
-		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem, ConceptDefinitionComponent, IssueSeverity> {
+		extends ca.uhn.fhir.context.support.IContextValidationSupport<ConceptSetComponent, ValueSetExpansionComponent, StructureDefinition, CodeSystem, ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
 
 	/**
 	 * Expands the given portion of a ValueSet
@@ -50,6 +51,7 @@ public interface IValidationSupport
 	 *           Canonical Uri of the ValueSet
 	 * @return The valueset (must not be null, but can be an empty ValueSet)
 	 */
+	@Override
 	ValueSet fetchValueSet(FhirContext theContext, String uri);
 
 	/**
@@ -94,23 +96,35 @@ public interface IValidationSupport
 	 *           The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay
 	 *           The display name, if it should also be validated
+	 * @param theValueSetUrl When validating that a code exists as a part of a specific ValueSet, the ValueSet URI
+	 *                       will be provided in this parameter value. If <code>null</code>, the validation should simply
+	 *                       confirm that the code exists.
 	 * @return Returns a validation result object
 	 */
 	@Override
-	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay);
+	CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl);
 
-	public class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, IssueSeverity> {
+	class CodeValidationResult extends IContextValidationSupport.CodeValidationResult<ConceptDefinitionComponent, OperationOutcome.IssueSeverity> {
 
 		public CodeValidationResult(ConceptDefinitionComponent theNext) {
 			super(theNext);
 		}
 
-		public CodeValidationResult(IssueSeverity theSeverity, String theMessage) {
+		public CodeValidationResult(OperationOutcome.IssueSeverity theSeverity, String theMessage) {
 			super(theSeverity, theMessage);
 		}
 
-		public CodeValidationResult(IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
+		public CodeValidationResult(OperationOutcome.IssueSeverity severity, String message, ConceptDefinitionComponent definition) {
 			super(severity, message, definition);
+		}
+
+		@Override
+		protected String getDisplay() {
+			String retVal = null;
+			if (isOk()) {
+				retVal = asConceptDefinition().getDisplay();
+			}
+			return retVal;
 		}
 
 	}

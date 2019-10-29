@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.model.entity;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -47,12 +47,13 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/*
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
-	public static final int MAX_LENGTH = 255;
+	public static final int MAX_LENGTH = 254;
 
 	private static final long serialVersionUID = 1L;
 	@Column(name = "SP_URI", nullable = true, length = MAX_LENGTH)
 	@Field()
 	public String myUri;
+
 	@Id
 	@SequenceGenerator(name = "SEQ_SPIDX_URI", sequenceName = "SEQ_SPIDX_URI")
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_URI")
@@ -155,8 +156,9 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		return myUri;
 	}
 
-	public void setUri(String theUri) {
+	public ResourceIndexedSearchParamUri setUri(String theUri) {
 		myUri = StringUtils.defaultIfBlank(theUri, null);
+		return this;
 	}
 
 	@Override

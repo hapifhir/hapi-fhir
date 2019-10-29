@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,19 +23,31 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
-import ca.uhn.fhir.rest.server.interceptor.InterceptorAdapter;
+import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
+import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.servlet.ServletSubRequestDetails;
+import ca.uhn.fhir.rest.server.util.ServletRequestUtil;
+import ca.uhn.fhir.util.BundleUtil;
+import ca.uhn.fhir.util.bundle.ModifiableBundleEntry;
+import com.google.common.collect.ArrayListMultimap;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * This interceptor can be used to automatically narrow the scope of searches in order to
@@ -60,7 +72,9 @@ import java.util.*;
  *
  * @see AuthorizationInterceptor
  */
-public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
+public class SearchNarrowingInterceptor {
+	private static final Logger ourLog = LoggerFactory.getLogger(SearchNarrowingInterceptor.class);
+
 
 	/**
 	 * Subclasses should override this method to supply the set of compartments that
@@ -79,10 +93,8 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 		return null;
 	}
 
-
-	@Override
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public boolean incomingRequestPostProcessed(RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
-
 		// We don't support this operation type yet
 		Validate.isTrue(theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_SYSTEM);
 
@@ -169,6 +181,48 @@ public abstract class SearchNarrowingInterceptor extends InterceptorAdapter {
 		}
 
 		return true;
+	}
+
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
+	public void incomingRequestPreHandled(ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) throws AuthenticationException {
+		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
+			return;
+		}
+
+		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
+		FhirContext ctx = theRequestDetails.getFhirContext();
+		BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
+		BundleUtil.processEntries(ctx, bundle, processor);
+	}
+
+	private class BundleEntryUrlProcessor implements Consumer<ModifiableBundleEntry> {
+		private final FhirContext myFhirContext;
+		private final ServletRequestDetails myRequestDetails;
+		private final HttpServletRequest myRequest;
+		private final HttpServletResponse myResponse;
+
+		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse) {
+			myFhirContext = theFhirContext;
+			myRequestDetails = theRequestDetails;
+			myRequest = theRequest;
+			myResponse = theResponse;
+		}
+
+		@Override
+		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
+			ArrayListMultimap<String, String> paramValues = ArrayListMultimap.create();
+
+			String url = theModifiableBundleEntry.getRequestUrl();
+
+			ServletSubRequestDetails subServletRequestDetails = ServletRequestUtil.getServletSubRequestDetails(myRequestDetails, url, paramValues);
+			BaseMethodBinding<?> method = subServletRequestDetails.getServer().determineResourceMethod(subServletRequestDetails, url);
+			RestOperationTypeEnum restOperationType = method.getRestOperationType();
+			subServletRequestDetails.setRestOperationType(restOperationType);
+
+			incomingRequestPostProcessed(subServletRequestDetails, myRequest, myResponse);
+
+			theModifiableBundleEntry.setRequestUrl(myFhirContext, ServletRequestUtil.extractUrl(subServletRequestDetails));
+		}
 	}
 
 	private void processResourcesOrCompartments(RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, HashMap<String, List<String>> theParameterToOrValues, Collection<String> theResourcesOrCompartments, boolean theAreCompartments) {

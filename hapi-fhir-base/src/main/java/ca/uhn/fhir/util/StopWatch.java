@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.DecimalFormat;
@@ -8,8 +9,6 @@ import java.text.NumberFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /*
  * #%L
@@ -20,9 +19,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -48,12 +47,14 @@ public class StopWatch {
 	private long myStarted = now();
 	private TaskTiming myCurrentTask;
 	private LinkedList<TaskTiming> myTasks;
+
 	/**
 	 * Constructor
 	 */
 	public StopWatch() {
 		super();
 	}
+
 	/**
 	 * Constructor
 	 *
@@ -61,6 +62,15 @@ public class StopWatch {
 	 */
 	public StopWatch(Date theStart) {
 		myStarted = theStart.getTime();
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param theStart The time that the stopwatch was started
+	 */
+	public StopWatch(long theStart) {
+		myStarted = theStart;
 	}
 
 	private void addNewlineIfContentExists(StringBuilder theB) {
@@ -96,7 +106,7 @@ public class StopWatch {
 	 *
 	 * @see #formatMillis(long)
 	 */
-	public String formatMillisPerOperation(int theNumOperations) {
+	public String formatMillisPerOperation(long theNumOperations) {
 		double millisPerOperation = (((double) getMillis()) / Math.max(1.0, theNumOperations));
 		return formatMillis(millisPerOperation);
 	}
@@ -117,6 +127,8 @@ public class StopWatch {
 				b.append(": ");
 				b.append(formatMillis(delta));
 			}
+		} else {
+			b.append("No tasks");
 		}
 
 		TaskTiming last = null;
@@ -163,9 +175,9 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #getThroughput(int, TimeUnit)
+	 * @see #getThroughput(long, TimeUnit)
 	 */
-	public String formatThroughput(int theNumOperations, TimeUnit theUnit) {
+	public String formatThroughput(long theNumOperations, TimeUnit theUnit) {
 		double throughput = getThroughput(theNumOperations, theUnit);
 		return new DecimalFormat("0.0").format(throughput);
 	}
@@ -202,8 +214,8 @@ public class StopWatch {
 	/**
 	 * @param theNumOperations Ok for this to be 0, it will be treated as 1
 	 */
-	public int getMillisPerOperation(int theNumOperations) {
-		return (int) (((double) getMillis()) / Math.max(1.0, theNumOperations));
+	public long getMillisPerOperation(long theNumOperations) {
+		return (long) (((double) getMillis()) / Math.max(1.0, theNumOperations));
 	}
 
 	public Date getStartedDate() {
@@ -219,9 +231,9 @@ public class StopWatch {
 	 * this method will return 15
 	 * </p>
 	 *
-	 * @see #formatThroughput(int, TimeUnit)
+	 * @see #formatThroughput(long, TimeUnit)
 	 */
-	public double getThroughput(int theNumOperations, TimeUnit theUnit) {
+	public double getThroughput(long theNumOperations, TimeUnit theUnit) {
 		if (theNumOperations <= 0) {
 			return 0.0f;
 		}
@@ -229,10 +241,14 @@ public class StopWatch {
 		long millisElapsed = Math.max(1, getMillis());
 		long periodMillis = theUnit.toMillis(1);
 
-		double numerator = theNumOperations;
 		double denominator = ((double) millisElapsed) / ((double) periodMillis);
 
-		return numerator / denominator;
+		double throughput = (double) theNumOperations / denominator;
+		if (throughput > theNumOperations) {
+			throughput = theNumOperations;
+		}
+
+		return throughput;
 	}
 
 	public void restart() {
@@ -250,12 +266,11 @@ public class StopWatch {
 	 */
 	public void startTask(String theTaskName) {
 		endCurrentTask();
-		if (isNotBlank(theTaskName)) {
-			myCurrentTask = new TaskTiming()
-				.setTaskName(theTaskName)
-				.setStart(now());
-			myTasks.add(myCurrentTask);
-		}
+		Validate.notBlank(theTaskName, "Task name must not be blank");
+		myCurrentTask = new TaskTiming()
+			.setTaskName(theTaskName)
+			.setStart(now());
+		myTasks.add(myCurrentTask);
 	}
 
 	/**
@@ -324,18 +339,18 @@ public class StopWatch {
 	/**
 	 * Append a right-aligned and zero-padded numeric value to a `StringBuilder`.
 	 */
-	static private void append(StringBuilder tgt, String pfx, int dgt, long val) {
-		tgt.append(pfx);
-		if (dgt > 1) {
-			int pad = (dgt - 1);
-			for (long xa = val; xa > 9 && pad > 0; xa /= 10) {
+	static void appendRightAlignedNumber(StringBuilder theStringBuilder, String thePrefix, int theNumberOfDigits, long theValueToAppend) {
+		theStringBuilder.append(thePrefix);
+		if (theNumberOfDigits > 1) {
+			int pad = (theNumberOfDigits - 1);
+			for (long xa = theValueToAppend; xa > 9 && pad > 0; xa /= 10) {
 				pad--;
 			}
 			for (int xa = 0; xa < pad; xa++) {
-				tgt.append('0');
+				theStringBuilder.append('0');
 			}
 		}
-		tgt.append(val);
+		theStringBuilder.append(theValueToAppend);
 	}
 
 	/**
@@ -392,11 +407,11 @@ public class StopWatch {
 			}
 		} else {
 			long millisAsLong = (long) theMillis;
-			append(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
-			append(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
-			append(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
+			appendRightAlignedNumber(buf, "", 2, ((millisAsLong % DateUtils.MILLIS_PER_DAY) / DateUtils.MILLIS_PER_HOUR));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_HOUR) / DateUtils.MILLIS_PER_MINUTE));
+			appendRightAlignedNumber(buf, ":", 2, ((millisAsLong % DateUtils.MILLIS_PER_MINUTE) / DateUtils.MILLIS_PER_SECOND));
 			if (theMillis <= DateUtils.MILLIS_PER_MINUTE) {
-				append(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
+				appendRightAlignedNumber(buf, ".", 3, (millisAsLong % DateUtils.MILLIS_PER_SECOND));
 			}
 		}
 		return buf.toString();

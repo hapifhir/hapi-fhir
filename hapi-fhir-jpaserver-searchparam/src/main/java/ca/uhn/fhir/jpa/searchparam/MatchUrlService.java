@@ -9,9 +9,9 @@ package ca.uhn.fhir.jpa.searchparam;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,9 +34,9 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -93,16 +93,10 @@ public class MatchUrlService {
 						paramMap.setLastUpdated(p1);
 					}
 				}
-				continue;
-			}
-
-			if (Constants.PARAM_HAS.equals(nextParamName)) {
+			} else if (Constants.PARAM_HAS.equals(nextParamName)) {
 				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.HAS, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
-				continue;
-			}
-
-			if (Constants.PARAM_COUNT.equals(nextParamName)) {
+			} else if (Constants.PARAM_COUNT.equals(nextParamName)) {
 				if (paramList.size() > 0 && paramList.get(0).size() > 0) {
 					String intString = paramList.get(0).get(0);
 					try {
@@ -111,16 +105,16 @@ public class MatchUrlService {
 						throw new InvalidRequestException("Invalid " + Constants.PARAM_COUNT + " value: " + intString);
 					}
 				}
-				continue;
-			}
-
-			if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
+			} else if (ResourceMetaParams.RESOURCE_META_PARAMS.containsKey(nextParamName)) {
 				if (isNotBlank(paramList.get(0).getQualifier()) && paramList.get(0).getQualifier().startsWith(".")) {
 					throw new InvalidRequestException("Invalid parameter chain: " + nextParamName + paramList.get(0).getQualifier());
 				}
 				IQueryParameterAnd<?> type = newInstanceAnd(nextParamName);
 				type.setValuesAsQueryTokens(myContext, nextParamName, (paramList));
 				paramMap.add(nextParamName, type);
+			} else if (Constants.PARAM_SOURCE.equals(nextParamName)) {
+				IQueryParameterAnd<?> param = ParameterUtil.parseQueryParams(myContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_")) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {
@@ -138,23 +132,7 @@ public class MatchUrlService {
 	}
 
 	public List<NameValuePair> translateMatchUrl(String theMatchUrl) {
-		List<NameValuePair> parameters;
-		String matchUrl = theMatchUrl;
-		int questionMarkIndex = matchUrl.indexOf('?');
-		if (questionMarkIndex != -1) {
-			matchUrl = matchUrl.substring(questionMarkIndex + 1);
-		}
-		matchUrl = matchUrl.replace("|", "%7C");
-		matchUrl = matchUrl.replace("=>=", "=%3E%3D");
-		matchUrl = matchUrl.replace("=<=", "=%3C%3D");
-		matchUrl = matchUrl.replace("=>", "=%3E");
-		matchUrl = matchUrl.replace("=<", "=%3C");
-		if (matchUrl.contains(" ")) {
-			throw new InvalidRequestException("Failed to parse match URL[" + theMatchUrl + "] - URL is invalid (must not contain spaces)");
-		}
-
-		parameters = URLEncodedUtils.parse((matchUrl), Constants.CHARSET_UTF8, '&');
-		return parameters;
+		return UrlUtil.translateMatchUrl(theMatchUrl);
 	}
 
 	@CoverageIgnore

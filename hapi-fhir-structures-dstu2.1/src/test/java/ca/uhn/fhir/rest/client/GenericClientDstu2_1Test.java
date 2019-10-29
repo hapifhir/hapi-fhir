@@ -15,7 +15,6 @@ import com.helger.commons.io.stream.StringInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.http.*;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.message.BasicHeader;
@@ -418,9 +417,9 @@ public class GenericClientDstu2_1Test {
 		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		Binary output = ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt));
+		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
 		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), "UTF-8"));
@@ -457,9 +456,9 @@ public class GenericClientDstu2_1Test {
 		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newXmlParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
 
 	}
 
@@ -569,7 +568,7 @@ public class GenericClientDstu2_1Test {
 
 		assertEquals(myAnswerCount, capt.getAllValues().size());
 		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 
 		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
 	}
@@ -1076,6 +1075,7 @@ public class GenericClientDstu2_1Test {
 				.update()
 				.resource(bundle)
 				.prefer(PreferReturnEnum.REPRESENTATION)
+				.encodedXml()
 				.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
@@ -1670,10 +1670,10 @@ public class GenericClientDstu2_1Test {
 		assertEquals("http://example.com/fhir/Patient/111", capt.getAllValues().get(0).getURI().toASCIIString());
 		validateUserAgent(capt);
 
-		assertEquals("application/xml+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.CT_FHIR_XML, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertEquals("application/json+fhir;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.CT_FHIR_JSON, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
 		String body = extractBodyAsString(capt);
-		assertThat(body, containsString("<id value=\"111\"/>"));
+		assertThat(body, containsString("\"id\":\"111\""));
 	}
 
 	@Test

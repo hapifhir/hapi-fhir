@@ -13,6 +13,8 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 
+import javax.annotation.Nonnull;
+
 @SuppressWarnings("null")
 // START SNIPPET: provider
 public class PagingPatientProvider implements IResourceProvider {
@@ -43,7 +45,8 @@ public class PagingPatientProvider implements IResourceProvider {
             return matchingResourceIds.size();
          }
 
-         @Override
+         @Nonnull
+			@Override
          public List<IBaseResource> getResources(int theFromIndex, int theToIndex) {
             int end = Math.max(theToIndex, matchingResourceIds.size() - 1);
             List<Long> idsToReturn = matchingResourceIds.subList(theFromIndex, end);

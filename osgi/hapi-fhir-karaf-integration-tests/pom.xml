@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir-karaf</artifactId>
-		<version>3.8.0-SNAPSHOT</version>
+		<version>4.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -104,12 +104,13 @@
 		</dependency>
 
       <!-- karaf test -->
-      <dependency>
-         <groupId>org.ops4j.pax.exam</groupId>
-         <artifactId>pax-exam-container-karaf</artifactId>
-         <version>${pax.exam.version}</version>
-         <scope>test</scope>
-      </dependency>
+		<dependency>
+			<groupId>org.ops4j.pax.exam</groupId>
+			<artifactId>pax-exam-container-karaf</artifactId>
+			<version>${pax.exam.version}</version>
+			<scope>test</scope>
+		</dependency>
+
       <dependency>
          <groupId>org.ops4j.pax.exam</groupId>
          <artifactId>pax-exam-junit4</artifactId>

@@ -9,9 +9,9 @@ package ca.uhn.fhir.rest.server.method;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -49,7 +49,7 @@ class IncludeParameter extends BaseQueryParameter {
 		myInstantiableCollectionType = theInstantiableCollectionType;
 		myReverse = theAnnotation.reverse();
 		if (theAnnotation.allow().length > 0) {
-			myAllow = new HashSet<String>();
+			myAllow = new HashSet<>();
 			for (String next : theAnnotation.allow()) {
 				if (next != null) {
 					myAllow.add(next);
@@ -136,7 +136,8 @@ class IncludeParameter extends BaseQueryParameter {
 				throw new InvalidRequestException(theContext.getLocalizer().getMessage(IncludeParameter.class, "orIncludeInRequest"));
 			}
 
-			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(nextParamList.getQualifier());
+			String qualifier = nextParamList.getQualifier();
+			boolean recurse = Constants.PARAM_INCLUDE_QUALIFIER_RECURSE.equals(qualifier) || Constants.PARAM_INCLUDE_QUALIFIER_ITERATE.equals(qualifier);
 
 			String value = nextParamList.get(0);
 			if (myAllow != null && !myAllow.isEmpty()) {
