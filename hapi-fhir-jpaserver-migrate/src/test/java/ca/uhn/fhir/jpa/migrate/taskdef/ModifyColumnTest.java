@@ -59,7 +59,7 @@ public class ModifyColumnTest extends BaseTest {
 	public void testNoShrink_SameNullable() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255), newcol bigint)");
 
-		ModifyColumnTask task = new ModifyColumnTask("1", "1");
+		ModifyColumnTask task = new ModifyColumnTask("1", "123456.7");
 		task.setTableName("SOMETABLE");
 		task.setColumnName("TEXTCOL");
 		task.setColumnType(AddColumnTask.ColumnTypeEnum.STRING);

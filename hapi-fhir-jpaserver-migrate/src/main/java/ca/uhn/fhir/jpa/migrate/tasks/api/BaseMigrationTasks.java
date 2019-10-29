@@ -84,12 +84,12 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
-	// FIXME KHS test this
 	void validate(Collection<BaseTask<?>> theTasks) {
 		for (BaseTask task: theTasks) {
 			if (task.isLogMessage()) {
 				continue;
 			}
+			task.validateVersion();
 			String version = task.getFlywayVersion();
 			MigrationVersion migrationVersion = MigrationVersion.fromVersion(version);
 			if (lastVersion != null) {

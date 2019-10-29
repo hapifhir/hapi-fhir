@@ -120,7 +120,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		// TermValueSetConceptDesignation
 		version.startSectionWithMessage("Processing bulkExportCollectionFile: TRM_VALUESET_C_DESIGNATION");
 		Builder.BuilderWithTableName termValueSetConceptDesignationTable = version.onTable("TRM_VALUESET_C_DESIGNATION");
-		// FIXME KHS validate the version numbers are in order
 		termValueSetConceptDesignationTable.addColumn("20190921.14", "VALUESET_PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 		termValueSetConceptDesignationTable
 			.addForeignKey("FK_TRM_VSCD_VS_PID")
@@ -576,7 +575,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxToken
 				.addIndex("IDX_SP_TOKEN_HASH")
 				.unique(false)
-				// FIXME KHS
 				.withColumns("20180903.24.1", "HASH_IDENTITY");
 			spidxToken
 				.addIndex("IDX_SP_TOKEN_HASH_S")
@@ -619,7 +617,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			spidxUri
 				.addIndex("IDX_SP_URI_HASH_URI")
 				.unique(false)
-				// FIXME KHS
 				.withColumns("20180903.27.1", "HASH_URI");
 			spidxUri
 				.addTask(new CalculateHashesTask(VersionEnum.V3_5_0, "20180903.28")
@@ -640,7 +637,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		spp
 			.addIndex("IDX_RESPARMPRESENT_HASHPRES")
 			.unique(false)
-			// FIXME KHS
 			.withColumns("20180903.30.1","HASH_PRESENCE");
 
 		ArbitrarySqlTask consolidateSearchParamPresenceIndexesTask = new ArbitrarySqlTask(VersionEnum.V3_5_0, "20180903.31", "HFJ_SEARCH_PARM", "Consolidate search parameter presence indexes");

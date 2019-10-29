@@ -19,14 +19,14 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 	public void testAddIdGenerator() throws SQLException {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 
-		MyMigrationTasks migrator = new MyMigrationTasks();
+		MyMigrationTasks migrator = new MyMigrationTasks("123456.7");
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
 
 		// Second time, should produce no action
-		migrator = new MyMigrationTasks();
+		migrator = new MyMigrationTasks("123456.8");
 		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
@@ -38,9 +38,9 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 
 	private static class MyMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
-		public MyMigrationTasks() {
+		public MyMigrationTasks(String theVersion) {
 			Builder v = forVersion(VersionEnum.V3_5_0);
-			v.addIdGenerator("1", "SEQ_FOO");
+			v.addIdGenerator(theVersion, "SEQ_FOO");
 		}
 
 

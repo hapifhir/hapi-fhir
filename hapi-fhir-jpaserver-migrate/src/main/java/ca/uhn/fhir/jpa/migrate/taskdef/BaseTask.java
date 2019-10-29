@@ -32,10 +32,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class BaseTask<T extends BaseTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
+	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
+	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
 	private DriverTypeEnum myDriverType;
 	private String myDescription;
@@ -144,6 +148,13 @@ public abstract class BaseTask<T extends BaseTask> {
 			releasePart = releasePart.substring(1);
 		}
 		return releasePart + "." + myVersion;
+	}
+
+	public void validateVersion() {
+		Matcher matcher = versionPattern.matcher(myVersion);
+		if (!matcher.matches()) {
+			throw new IllegalStateException("The version " + myVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+		}
 	}
 
 	public static class ExecutedStatement {

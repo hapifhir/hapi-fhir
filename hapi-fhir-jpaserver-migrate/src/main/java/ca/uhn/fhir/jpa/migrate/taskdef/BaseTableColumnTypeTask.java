@@ -199,7 +199,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
 			.append(myColumnType, that.myColumnType)
-			.append(myColumnTypeToDriverTypeToSqlType, that.myColumnTypeToDriverTypeToSqlType)
 			.append(myNullable, that.myNullable)
 			.append(myColumnLength, that.myColumnLength)
 			.isEquals();
@@ -210,7 +209,6 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 		return new HashCodeBuilder(17, 37)
 			.appendSuper(super.hashCode())
 			.append(myColumnType)
-			.append(myColumnTypeToDriverTypeToSqlType)
 			.append(myNullable)
 			.append(myColumnLength)
 			.toHashCode();
