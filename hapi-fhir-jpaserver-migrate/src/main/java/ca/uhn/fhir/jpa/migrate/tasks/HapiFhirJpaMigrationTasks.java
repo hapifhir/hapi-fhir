@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTableColumnTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
+import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 import ca.uhn.fhir.jpa.model.entity.*;
 import ca.uhn.fhir.util.VersionEnum;
 
