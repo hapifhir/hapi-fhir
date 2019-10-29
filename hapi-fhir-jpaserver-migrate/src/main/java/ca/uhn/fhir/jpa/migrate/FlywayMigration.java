@@ -37,8 +37,7 @@ public class FlywayMigration implements JavaMigration {
 
 	@Override
 	public Integer getChecksum() {
-		// FIXME KHS
-		return 0;
+		return myTask.hashCode();
 	}
 
 	@Override

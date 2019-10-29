@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -186,4 +188,31 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof BaseTableColumnTypeTask)) return false;
+
+		BaseTableColumnTypeTask<?> that = (BaseTableColumnTypeTask<?>) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myColumnType, that.myColumnType)
+			.append(myColumnTypeToDriverTypeToSqlType, that.myColumnTypeToDriverTypeToSqlType)
+			.append(myNullable, that.myNullable)
+			.append(myColumnLength, that.myColumnLength)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myColumnType)
+			.append(myColumnTypeToDriverTypeToSqlType)
+			.append(myNullable)
+			.append(myColumnLength)
+			.toHashCode();
+	}
 }

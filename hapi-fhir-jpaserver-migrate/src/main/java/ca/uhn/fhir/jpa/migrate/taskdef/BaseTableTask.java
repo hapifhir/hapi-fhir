@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	private String myTableName;
@@ -42,5 +44,25 @@ public abstract class BaseTableTask<T extends BaseTableTask> extends BaseTask {
 	@Override
 	public void validate() {
 		Validate.notBlank(myTableName);
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof BaseTableTask)) return false;
+
+		BaseTableTask<?> that = (BaseTableTask<?>) theO;
+
+		return new EqualsBuilder()
+			.append(myTableName, that.myTableName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myTableName)
+			.toHashCode();
 	}
 }

@@ -56,4 +56,5 @@ public class DropColumnTask extends BaseTableColumnTask<DropColumnTask> {
 		return "alter table " + theTableName + " drop column " + theColumnName;
 	}
 
+
 }

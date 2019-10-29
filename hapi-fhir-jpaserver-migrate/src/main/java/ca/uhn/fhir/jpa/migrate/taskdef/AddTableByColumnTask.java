@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,5 +96,29 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 
 		executeSql(getTableName(), sb.toString());
 
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (theO == null || getClass() != theO.getClass()) return false;
+
+		AddTableByColumnTask that = (AddTableByColumnTask) theO;
+
+		return new EqualsBuilder()
+			.appendSuper(super.equals(theO))
+			.append(myAddColumnTasks, that.myAddColumnTasks)
+			.append(myPkColumn, that.myPkColumn)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.appendSuper(super.hashCode())
+			.append(myAddColumnTasks)
+			.append(myPkColumn)
+			.toHashCode();
 	}
 }
