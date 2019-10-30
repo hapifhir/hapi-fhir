@@ -91,8 +91,6 @@ public class MetaUtil {
 			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
 			value.setValue(theValue);
 			sourceExtension.setValue(value);
-		} else  {
-			throw new UnsupportedOperationException(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
 		}
 	}
 
