@@ -55,7 +55,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		ourLog.info("**********************************************");
 
 		String[] args = new String[]{
-			"flyway-migrate-database",
+			BaseFlywayMigrateDatabaseCommand.MIGRATE_DATABASE,
 			"-d", "H2_EMBEDDED",
 			"-u", url,
 			"-n", "",

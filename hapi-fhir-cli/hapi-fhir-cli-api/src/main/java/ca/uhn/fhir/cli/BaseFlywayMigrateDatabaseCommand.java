@@ -37,7 +37,7 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 
 public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends BaseCommand {
 
-	private static final String FLYWAY_MIGRATE_DATABASE = "flyway-migrate-database";
+	public static final String MIGRATE_DATABASE = "migrate-database";
 	private Set<String> myFlags;
 
 	protected Set<String> getFlags() {
@@ -46,7 +46,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 	@Override
 	public String getCommandDescription() {
-		return "This command migrates a HAPI FHIR JPA database from one version of HAPI FHIR to a newer version";
+		return "This command migrates a HAPI FHIR JPA database to the current version";
 	}
 
 	protected abstract List<T> provideAllowedVersions();
@@ -55,7 +55,7 @@ public abstract class BaseFlywayMigrateDatabaseCommand<T extends Enum> extends B
 
 	@Override
 	public String getCommandName() {
-		return FLYWAY_MIGRATE_DATABASE;
+		return MIGRATE_DATABASE;
 	}
 
 	@Override
