@@ -26,10 +26,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+
 public class MetaUtil {
+	private static final Logger ourLog = LoggerFactory.getLogger(MetaUtil.class);
 
 	private MetaUtil() {
 		// non-instantiable
@@ -91,6 +95,8 @@ public class MetaUtil {
 			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
 			value.setValue(theValue);
 			sourceExtension.setValue(value);
+		} else {
+			ourLog.error(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
 		}
 	}
 
