@@ -1,17 +1,13 @@
 package ca.uhn.fhir.util;
 
-import ca.uhn.fhir.context.ConfigurationException;
-import com.google.common.collect.Lists;
-import com.google.common.truth.Truth;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Test;
+
+import ca.uhn.fhir.context.ConfigurationException;
 
 public class ReflectionUtilTest {
 
@@ -49,22 +45,4 @@ public class ReflectionUtilTest {
 			assertEquals("Failed to instantiate java.util.List", e.getMessage());
 		}
 	}
-
-	@Test
-	public void testFindDefaultMethod() throws NoSuchMethodException {
-		Collection<Method> methods = ReflectionUtil.getAllMethods(DummyClass.class, true, true);
-		List<Method> method = Lists.newArrayList(DummyClass.class.getMethod("whatEver"));
-		Truth.assertThat(methods).containsAnyIn(method);
-	}
-
-	class DummyClass implements DummyInterfaceWithDefaultMethod {
-
-	}
-
-	interface DummyInterfaceWithDefaultMethod {
-		default void whatEver() {
-
-		}
-	}
-
 }
