@@ -106,6 +106,38 @@ public class SearchParamExtractorDstu3Test {
 		assertEquals("15", params.iterator().next().getValue().toPlainString());
 	}
 
+	@Test
+	public void testEmptyPath() {
+
+		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+
+			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+			Patient resource = new Patient();
+			extractor.extractSearchParamStrings(resource);
+
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", null, RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+		extractor.extractSearchParamStrings(resource);
+	}
+
+
+	@Test
+	public void testStringMissingResourceType() {
+
+		MySearchParamRegistry searchParamRegistry = new MySearchParamRegistry();
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
+		extractor.start();
+
+		searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "communication.language.coding.system | communication.language.coding.code", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
+		Patient resource = new Patient();
+		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
+		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
+		assertEquals(1, strings.size());
+		assertEquals("BLAH", strings.iterator().next().getValueNormalized());
+
+	}
+
 
 	@Test
 	public void testInvalidType() {
