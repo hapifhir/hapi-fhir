@@ -36,8 +36,33 @@ public class MetaUtil {
 	}
 
 	public static String getSource(FhirContext theContext, IBaseMetaType theMeta) {
-		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) theContext.getElementDefinition(theMeta.getClass());
+		if (theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
+			return getSourceR4Plus(theContext, theMeta);
+		} else if (theContext.getVersion().getVersion().equals(FhirVersionEnum.DSTU3)) {
+			return getSourceDstu3((IBaseHasExtensions) theMeta);
+		} else {
+			throw new UnsupportedOperationException(MetaUtil.class.getSimpleName() + ".getSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
+		}
+	}
+
+	private static String getSourceDstu3(IBaseHasExtensions theMeta) {
+		IBaseHasExtensions metaWithExtensions = theMeta;
+		List<? extends IBaseExtension<?, ?>> extensions = metaWithExtensions.getExtension();
+		for (IBaseExtension extension : extensions) {
+			if (Constants.EXT_META_SOURCE.equals(extension.getUrl())) {
+				IPrimitiveType<String> value = (IPrimitiveType<String>) extension.getValue();
+				return value.getValueAsString();
+			}
+		}
+		return null;
+	}
+
+	private static String getSourceR4Plus(FhirContext theFhirContext, IBaseMetaType theMeta) {
+		BaseRuntimeElementCompositeDefinition<?> elementDef = (BaseRuntimeElementCompositeDefinition<?>) theFhirContext.getElementDefinition(theMeta.getClass());
 		BaseRuntimeChildDefinition sourceChild = elementDef.getChildByName("source");
+		if (sourceChild == null) {
+			return null;
+		}
 		List<IBase> sourceValues = sourceChild.getAccessor().getValues(theMeta);
 		String retVal = null;
 		if (sourceValues.size() > 0) {
@@ -66,6 +91,8 @@ public class MetaUtil {
 			IPrimitiveType<String> value = (IPrimitiveType<String>) theContext.getElementDefinition("uri").newInstance();
 			value.setValue(theValue);
 			sourceExtension.setValue(value);
+		} else  {
+			throw new UnsupportedOperationException(MetaUtil.class.getSimpleName() + ".setSource() not supported on FHIR Version " + theContext.getVersion().getVersion());
 		}
 	}
 
