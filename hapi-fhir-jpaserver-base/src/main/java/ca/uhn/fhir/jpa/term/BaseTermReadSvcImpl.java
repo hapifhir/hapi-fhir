@@ -424,13 +424,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	private void logConceptsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theConceptsExpanded) {
 		if (theConceptsExpanded > 0) {
-			ourLog.info("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
+			ourLog.debug("{}Have expanded {} concepts in ValueSet[{}]", theLogDescriptionPrefix, theConceptsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
 	private void logDesignationsExpanded(String theLogDescriptionPrefix, TermValueSet theTermValueSet, int theDesignationsExpanded) {
 		if (theDesignationsExpanded > 0) {
-			ourLog.info("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
+			ourLog.debug("{}Have expanded {} designations in ValueSet[{}]", theLogDescriptionPrefix, theDesignationsExpanded, theTermValueSet.getUrl());
 		}
 	}
 
@@ -446,7 +446,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		StopWatch sw = new StopWatch();
 		String valueSetInfo = getValueSetInfo(theValueSetToExpand);
-		ourLog.info("Working with {}", valueSetInfo);
+		ourLog.debug("Working with {}", valueSetInfo);
 
 		// Handle includes
 		ourLog.debug("Handling includes");
@@ -488,7 +488,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			myTxTemplate.execute(t -> ((ValueSetConceptAccumulator) theValueSetCodeAccumulator).removeGapsFromConceptOrder());
 		}
 
-		ourLog.info("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
+		ourLog.debug("Done working with {} in {}ms", valueSetInfo, sw.getMillis());
 	}
 
 	private String getValueSetInfo(ValueSet theValueSet) {
@@ -553,7 +553,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 				return false;
 			}
 
-			ourLog.info("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
+			ourLog.debug("Starting {} expansion around CodeSystem: {}", (theAdd ? "inclusion" : "exclusion"), system);
 
 			TermCodeSystem cs = myCodeSystemDao.findByCodeSystemUri(system);
 			if (cs != null) {
@@ -566,7 +566,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 				 * since we're going to do it without the database.
 				 */
 				if (myFulltextSearchSvc == null) {
-					expandWithoutHibernateSearch(theValueSetCodeAccumulator, theAddedCodes, theIncludeOrExclude, system, theAdd, theCodeCounter);
+					expandWithoutHibernateSearch(theValueSetCodeAccumulator, csv, theAddedCodes, theIncludeOrExclude, system, theAdd, theCodeCounter);
 					return false;
 				}
 
@@ -642,7 +642,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 				jpaQuery.setMaxResults(maxResultsPerBatch);
 				jpaQuery.setFirstResult(theQueryIndex * maxResultsPerBatch);
 
-				ourLog.info("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
+				ourLog.debug("Beginning batch expansion for {} with max results per batch: {}", (theAdd ? "inclusion" : "exclusion"), maxResultsPerBatch);
 
 				StopWatch swForBatch = new StopWatch();
 				AtomicInteger countForBatch = new AtomicInteger(0);
@@ -661,10 +661,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 					}
 				}
 
-				ourLog.info("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
+				ourLog.debug("Batch expansion for {} with starting index of {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), firstResult, countForBatch, swForBatch.getMillis());
 
 				if (resultsInBatch < maxResultsPerBatch) {
-					ourLog.info("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
+					ourLog.debug("Expansion for {} produced {} results in {}ms", (theAdd ? "inclusion" : "exclusion"), count, sw.getMillis());
 					return false;
 				} else {
 					return true;
@@ -712,7 +712,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		} else if (hasValueSet) {
 
 			for (CanonicalType nextValueSet : theIncludeOrExclude.getValueSet()) {
-				ourLog.info("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
+				ourLog.debug("Starting {} expansion around ValueSet: {}", (theAdd ? "inclusion" : "exclusion"), nextValueSet.getValueAsString());
 
 				List<VersionIndependentConcept> expanded = expandValueSet(nextValueSet.getValueAsString());
 				Map<String, TermCodeSystem> uriToCodeSystem = new HashMap<>();
@@ -848,7 +848,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 			.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {" + theSystem + "}" + theFilter.getValue()));
 
 		if (theFilter.getOp() == ValueSet.FilterOperator.ISA) {
-			ourLog.info(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
+			ourLog.debug(" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
 			theBool.must(theQb.keyword().onField("myParentPids").matching("" + code.getId()).createQuery());
 		} else {
 			throw new InvalidRequestException("Don't know how to handle op=" + theFilter.getOp() + " on property " + theFilter.getProperty());
@@ -1015,7 +1015,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	}
 
 	private void logFilteringValueOnProperty(String theValue, String theProperty) {
-		ourLog.info(" * Filtering with value={} on property {}", theValue, theProperty);
+		ourLog.debug(" * Filtering with value={} on property {}", theValue, theProperty);
 	}
 
 	private void throwInvalidRequestForOpOnProperty(ValueSet.FilterOperator theOp, String theProperty) {
@@ -1060,7 +1060,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		}
 	}
 
-	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
+	private void expandWithoutHibernateSearch(IValueSetConceptAccumulator theValueSetCodeAccumulator, TermCodeSystemVersion theVersion, Set<String> theAddedCodes, ValueSet.ConceptSetComponent theInclude, String theSystem, boolean theAdd, AtomicInteger theCodeCounter) {
 		ourLog.trace("Hibernate search is not enabled");
 		if (theValueSetCodeAccumulator instanceof ValueSetExpansionComponentWithConceptAccumulator) {
 			Validate.isTrue(((ValueSetExpansionComponentWithConceptAccumulator) theValueSetCodeAccumulator).getParameter().isEmpty(), "Can not expand ValueSet with parameters - Hibernate Search is not enabled on this server.");
@@ -1068,12 +1068,21 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		Validate.isTrue(theInclude.getFilter().isEmpty(), "Can not expand ValueSet with filters - Hibernate Search is not enabled on this server.");
 		Validate.isTrue(isNotBlank(theSystem), "Can not expand ValueSet without explicit system - Hibernate Search is not enabled on this server.");
 
+
+		if (theInclude.getConcept().isEmpty()) {
+			for (TermConcept next : theVersion.getConcepts()) {
+				addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
+			}
+		}
+
 		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 			if (!theSystem.equals(theInclude.getSystem())) {
 				continue;
 			}
 			addCodeIfNotAlreadyAdded(theValueSetCodeAccumulator, theAddedCodes, null, theAdd, theCodeCounter, theSystem, next.getCode(), next.getDisplay());
 		}
+
+
 	}
 
 	@Override
@@ -1215,7 +1224,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		fetchParents(concept.get(), retVal);
 
-		ourLog.info("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.getMillis());
+		ourLog.debug("Fetched {} codes above code {} in {}ms", retVal.size(), theCode, stopwatch.getMillis());
 		return retVal;
 	}
 
@@ -1246,7 +1255,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		fetchChildren(concept.get(), retVal);
 
-		ourLog.info("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+		ourLog.debug("Fetched {} codes below code {} in {}ms", retVal.size(), theCode, stopwatch.elapsed(TimeUnit.MILLISECONDS));
 		return retVal;
 	}
 
@@ -1295,7 +1304,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	@Override
 	@Transactional
 	public void storeTermConceptMapAndChildren(ResourceTable theResourceTable, ConceptMap theConceptMap) {
-		ourLog.info("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
+		ourLog.debug("Storing TermConceptMap for {}", theConceptMap.getIdElement().toVersionless().getValueAsString());
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theResourceTable != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowUnprocessableEntity(theConceptMap.getUrl(), "ConceptMap has no value for ConceptMap.url");

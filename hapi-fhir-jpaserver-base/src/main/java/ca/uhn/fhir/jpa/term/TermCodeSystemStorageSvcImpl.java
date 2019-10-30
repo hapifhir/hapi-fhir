@@ -335,7 +335,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 				populateCodeSystemVersionProperties(persCs, theCodeSystem, theResourceEntity);
 
 				persCs.getConcepts().addAll(BaseTermReadSvcImpl.toPersistedConcepts(theCodeSystem.getConcept(), persCs));
-				ourLog.info("Code system has {} concepts", persCs.getConcepts().size());
+				ourLog.debug("Code system has {} concepts", persCs.getConcepts().size());
 				storeNewCodeSystemVersion(codeSystemResourcePid, codeSystemUrl, theCodeSystem.getName(), theCodeSystem.getVersion(), persCs, theResourceEntity);
 			}
 
@@ -366,7 +366,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public void storeNewCodeSystemVersion(Long theCodeSystemResourcePid, String theSystemUri, String theSystemName, String theSystemVersionId, TermCodeSystemVersion theCodeSystemVersion, ResourceTable theCodeSystemResourceTable) {
-		ourLog.info("Storing code system");
+		ourLog.debug("Storing code system");
 
 		ValidateUtil.isTrueOrThrowInvalidRequest(theCodeSystemVersion.getResource() != null, "No resource supplied");
 		ValidateUtil.isNotBlankOrThrowInvalidRequest(theSystemUri, "No system URI supplied");
@@ -378,15 +378,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		 * For now we always delete old versions. At some point it would be nice to allow configuration to keep old versions.
 		 */
 
-		ourLog.info("Deleting old code system versions");
 		for (TermCodeSystemVersion next : existing) {
+			ourLog.info("Deleting old code system version {}", next.getPid());
 			Long codeSystemVersionPid = next.getPid();
 			deleteCodeSystemVersion(codeSystemVersionPid);
 		}
 
-		ourLog.info("Flushing...");
+		ourLog.debug("Flushing...");
 		myConceptDao.flush();
-		ourLog.info("Done flushing");
+		ourLog.debug("Done flushing");
 
 		/*
 		 * Do the upload
@@ -399,7 +399,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theCodeSystemVersion.setCodeSystemDisplayName(theSystemName);
 		theCodeSystemVersion.setCodeSystemVersionId(theSystemVersionId);
 
-		ourLog.info("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
+		ourLog.debug("Validating all codes in CodeSystem for storage (this can take some time for large sets)");
 
 		// Validate the code system
 		ArrayList<String> conceptsStack = new ArrayList<>();
@@ -409,34 +409,32 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			totalCodeCount += validateConceptForStorage(next, theCodeSystemVersion, conceptsStack, allConcepts);
 		}
 
-		ourLog.info("Saving version containing {} concepts", totalCodeCount);
+		ourLog.debug("Saving version containing {} concepts", totalCodeCount);
 
 		TermCodeSystemVersion codeSystemVersion = myCodeSystemVersionDao.saveAndFlush(theCodeSystemVersion);
 
-		ourLog.info("Saving code system");
+		ourLog.debug("Saving code system");
 
 		codeSystem.setCurrentVersion(theCodeSystemVersion);
 		codeSystem = myCodeSystemDao.saveAndFlush(codeSystem);
 
-		ourLog.info("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
+		ourLog.debug("Setting CodeSystemVersion[{}] on {} concepts...", codeSystem.getPid(), totalCodeCount);
 
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			populateVersion(next, codeSystemVersion);
 		}
 
-		ourLog.info("Saving {} concepts...", totalCodeCount);
+		ourLog.debug("Saving {} concepts...", totalCodeCount);
 
 		IdentityHashMap<TermConcept, Object> conceptsStack2 = new IdentityHashMap<>();
 		for (TermConcept next : theCodeSystemVersion.getConcepts()) {
 			persistChildren(next, codeSystemVersion, conceptsStack2, totalCodeCount);
 		}
 
-		ourLog.info("Done saving concepts, flushing to database");
+		ourLog.debug("Done saving concepts, flushing to database");
 
 		myConceptDao.flush();
 		myConceptParentChildLinkDao.flush();
-
-		ourLog.info("Done deleting old code system versions");
 
 		if (myDeferredStorageSvc.isStorageQueueEmpty() == false) {
 			ourLog.info("Note that some concept saving has been deferred");
@@ -572,7 +570,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		// case for concepts being added to an existing child concept, but won't be the case when
 		// we're recursively adding children)
 		for (TermConcept nextParentConcept : parentConcepts) {
-			if (nextParentConcept.getChildren().stream().noneMatch(t->t.getChild().getCode().equals(nextCodeToAdd))) {
+			if (nextParentConcept.getChildren().stream().noneMatch(t -> t.getChild().getCode().equals(nextCodeToAdd))) {
 				TermConceptParentChildLink parentLink = new TermConceptParentChildLink();
 				parentLink.setParent(nextParentConcept);
 				parentLink.setChild(nextConceptToAdd);
@@ -612,7 +610,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			return;
 		}
 
-		if (theConceptsStack.size() == 1 || theConceptsStack.size() % 10000 == 0) {
+		if ((theConceptsStack.size() + 1) % 10000 == 0) {
 			float pct = (float) theConceptsStack.size() / (float) theTotalConcepts;
 			ourLog.info("Have processed {}/{} concepts ({}%)", theConceptsStack.size(), theTotalConcepts, (int) (pct * 100.0f));
 		}
