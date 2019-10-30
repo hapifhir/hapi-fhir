@@ -480,6 +480,11 @@
 				JPA servers accidentally stripped the type attribute from the server-exported CapabilityStatement
 				when search parameters of type "special" were found. This has been corrected.
 			</action>
+			<action type="fix">
+				When running the JPA server without Lucene indexing enabled and performing ValueSet expansion,
+				the server would incorrectly ignore inclusion rules that specified a system but no codes (i.e.
+				include the whole system). This has been corrected.
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
