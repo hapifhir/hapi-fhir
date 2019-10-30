@@ -134,8 +134,8 @@ public class Builder {
 			addTask(task);
 		}
 
-		public BuilderWithTableName.BuilderAddIndexWithName addIndex(String theIndexName) {
-			return new BuilderWithTableName.BuilderAddIndexWithName(theIndexName);
+		public BuilderWithTableName.BuilderAddIndexWithName addIndex(String theVersion, String theIndexName) {
+			return new BuilderWithTableName.BuilderAddIndexWithName(theVersion, theIndexName);
 		}
 
 		public BuilderWithTableName.BuilderAddColumnWithName addColumn(String theVersion, String theColumnName) {
@@ -156,12 +156,12 @@ public class Builder {
 			mySink.addTask(theTask);
 		}
 
-		public BuilderWithTableName.BuilderModifyColumnWithName modifyColumn(String theColumnName) {
-			return new BuilderWithTableName.BuilderModifyColumnWithName(theColumnName);
+		public BuilderWithTableName.BuilderModifyColumnWithName modifyColumn(String theVersion, String theColumnName) {
+			return new BuilderWithTableName.BuilderModifyColumnWithName(theVersion, theColumnName);
 		}
 
-		public BuilderWithTableName.BuilderAddForeignKey addForeignKey(String theForeignKeyName) {
-			return new BuilderWithTableName.BuilderAddForeignKey(theForeignKeyName);
+		public BuilderWithTableName.BuilderAddForeignKey addForeignKey(String theVersion, String theForeignKeyName) {
+			return new BuilderWithTableName.BuilderAddForeignKey(theVersion, theForeignKeyName);
 		}
 
 		public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName) {
@@ -198,25 +198,30 @@ public class Builder {
 		}
 
 		public class BuilderAddIndexWithName {
+			private final String myVersion;
 			private final String myIndexName;
 
-			public BuilderAddIndexWithName(String theIndexName) {
+			public BuilderAddIndexWithName(String theVersion, String theIndexName) {
+				myVersion = theVersion;
 				myIndexName = theIndexName;
 			}
 
 			public BuilderWithTableName.BuilderAddIndexWithName.BuilderAddIndexUnique unique(boolean theUnique) {
-				return new BuilderWithTableName.BuilderAddIndexWithName.BuilderAddIndexUnique(theUnique);
+				return new BuilderWithTableName.BuilderAddIndexWithName.BuilderAddIndexUnique(myVersion, theUnique);
 			}
 
 			public class BuilderAddIndexUnique {
+				private final String myVersion;
 				private final boolean myUnique;
 
-				public BuilderAddIndexUnique(boolean theUnique) {
+				public BuilderAddIndexUnique(String theVersion, boolean theUnique) {
+					myVersion = theVersion;
 					myUnique = theUnique;
 				}
 
-				public void withColumns(String theVersion, String... theColumnNames) {
-					AddIndexTask task = new AddIndexTask(myRelease, theVersion);
+				// FIXME KHS this String... is a problem with versions
+				public void withColumns(String... theColumnNames) {
+					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setIndexName(myIndexName);
 					task.setUnique(myUnique);
@@ -227,10 +232,11 @@ public class Builder {
 		}
 
 		public class BuilderModifyColumnWithName {
-
+			private final String myVersion;
 			private final String myColumnName;
 
-			public BuilderModifyColumnWithName(String theColumnName) {
+			public BuilderModifyColumnWithName(String theVersion, String theColumnName) {
+				myVersion = theVersion;
 				myColumnName = theColumnName;
 			}
 
@@ -239,26 +245,27 @@ public class Builder {
 			}
 
 			public BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable nullable() {
-				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(true);
+				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(myVersion, true);
 			}
 
 			public BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable nonNullable() {
-				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(false);
+				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(myVersion, false);
 			}
 
 			public class BuilderModifyColumnWithNameAndNullable {
-
+				private final String myVersion;
 				private final boolean myNullable;
 
-				public BuilderModifyColumnWithNameAndNullable(boolean theNullable) {
+				public BuilderModifyColumnWithNameAndNullable(String theVersion, boolean theNullable) {
+					myVersion = theVersion;
 					myNullable = theNullable;
 				}
 
-				public void withType(String theVersion, BaseTableColumnTypeTask.ColumnTypeEnum theColumnType) {
-					withType(theVersion, theColumnType, null);
+				public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType) {
+					withType(theColumnType, null);
 				}
 
-				public void withType(String theVersion, BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Integer theLength) {
+				public void withType(BaseTableColumnTypeTask.ColumnTypeEnum theColumnType, Integer theLength) {
 					if (theColumnType == BaseTableColumnTypeTask.ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
 							throw new IllegalArgumentException("Can not specify length 0 for column of type " + theColumnType);
@@ -269,7 +276,7 @@ public class Builder {
 						}
 					}
 
-					ModifyColumnTask task = new ModifyColumnTask(myRelease, theVersion);
+					ModifyColumnTask task = new ModifyColumnTask(myRelease, myVersion);
 					task.setColumnName(myColumnName);
 					task.setTableName(myTableName);
 					if (theLength != null) {
@@ -283,23 +290,25 @@ public class Builder {
 		}
 
 		public class BuilderAddForeignKey {
+			private final String myVersion;
 			private final String myForeignKeyName;
 
-			public BuilderAddForeignKey(String theForeignKeyName) {
+			public BuilderAddForeignKey(String theVersion, String theForeignKeyName) {
+				myVersion = theVersion;
 				myForeignKeyName = theForeignKeyName;
 			}
 
 			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumn(String theColumnName) {
-				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(theColumnName);
+				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(myVersion, theColumnName);
 			}
 
 			public class BuilderAddForeignKeyToColumn extends BuilderWithTableName.BuilderModifyColumnWithName {
-				public BuilderAddForeignKeyToColumn(String theColumnName) {
-					super(theColumnName);
+				public BuilderAddForeignKeyToColumn(String theVersion, String theColumnName) {
+					super(theVersion, theColumnName);
 				}
 
-				public void references(String theVersion, String theForeignTable, String theForeignColumn) {
-					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, theVersion);
+				public void references(String theForeignTable, String theForeignColumn) {
+					AddForeignKeyTask task = new AddForeignKeyTask(myRelease, myVersion);
 					task.setTableName(myTableName);
 					task.setConstraintName(myForeignKeyName);
 					task.setColumnName(getColumnName());

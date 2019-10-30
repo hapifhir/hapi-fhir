@@ -35,11 +35,9 @@ public class AddTableByColumnTaskTest extends BaseTest {
 			fooTable.addColumn("PID").nonNullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
 			fooTable.addColumn("HELLO").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 200);
 			fooTable.addColumn("COL_REF").nullable().type(BaseTableColumnTypeTask.ColumnTypeEnum.LONG);
-			fooTable.addIndex("IDX_HELLO").unique(true).withColumns("4", "HELLO");
-			fooTable.addForeignKey("FK_REF").toColumn("COL_REF").references("5", "TGT_TABLE", "PID");
+			fooTable.addIndex("4", "IDX_HELLO").unique(true).withColumns("HELLO");
+			fooTable.addForeignKey("5", "FK_REF").toColumn("COL_REF").references("TGT_TABLE", "PID");
 
 		}
-
-
 	}
 }
