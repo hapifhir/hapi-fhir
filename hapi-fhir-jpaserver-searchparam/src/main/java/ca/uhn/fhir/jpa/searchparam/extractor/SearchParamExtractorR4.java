@@ -57,6 +57,7 @@ public class SearchParamExtractorR4 extends BaseSearchParamExtractor implements 
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 		initFhirPath();
+		start();
 	}
 
 	@Override

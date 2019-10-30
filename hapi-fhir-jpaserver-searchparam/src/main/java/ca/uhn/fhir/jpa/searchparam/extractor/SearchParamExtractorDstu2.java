@@ -20,6 +20,8 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.model.dstu2.composite.ContactPointDt;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -32,6 +34,16 @@ import java.util.List;
 
 public class SearchParamExtractorDstu2 extends BaseSearchParamExtractor implements ISearchParamExtractor {
 
+	public SearchParamExtractorDstu2() {
+	}
+
+	/**
+	 * Constructor for unit tests
+	 */
+	SearchParamExtractorDstu2(FhirContext theCtx, ISearchParamRegistry theSearchParamRegistry) {
+		super(theCtx, theSearchParamRegistry);
+		start();
+	}
 
 	@Override
 	protected IValueExtractor getPathValueExtractor(IBaseResource theResource, String theSinglePath) {

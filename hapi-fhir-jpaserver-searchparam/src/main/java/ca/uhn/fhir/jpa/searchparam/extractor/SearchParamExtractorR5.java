@@ -20,10 +20,13 @@ package ca.uhn.fhir.jpa.searchparam.extractor;
  * #L%
  */
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.PathEngineException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.r5.model.*;
@@ -44,11 +47,17 @@ public class SearchParamExtractorR5 extends BaseSearchParamExtractor implements 
 	private IValidationSupport myValidationSupport;
 	private FHIRPathEngine myFhirPathEngine;
 
-	/**
-	 * Constructor
-	 */
 	public SearchParamExtractorR5() {
 		super();
+	}
+
+	/**
+	 * Constructor for unit tests
+	 */
+	public SearchParamExtractorR5(FhirContext theCtx, DefaultProfileValidationSupport theDefaultProfileValidationSupport, ISearchParamRegistry theSearchParamRegistry) {
+		super(theCtx, theSearchParamRegistry);
+		myValidationSupport = theDefaultProfileValidationSupport;
+		start();
 	}
 
 	@Override

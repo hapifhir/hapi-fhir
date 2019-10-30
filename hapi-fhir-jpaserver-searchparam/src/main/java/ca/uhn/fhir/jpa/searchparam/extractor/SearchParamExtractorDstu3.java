@@ -61,6 +61,7 @@ public class SearchParamExtractorDstu3 extends BaseSearchParamExtractor implemen
 		super(theCtx, theSearchParamRegistry);
 		myValidationSupport = theValidationSupport;
 		start(null);
+		start();
 	}
 
 	@Override

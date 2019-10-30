@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.config.r5;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.ParserOptions;
-import ca.uhn.fhir.jpa.config.BaseConfig;
 import ca.uhn.fhir.jpa.config.BaseConfigDstu3Plus;
 import ca.uhn.fhir.jpa.dao.FulltextSearchSvcImpl;
 import ca.uhn.fhir.jpa.dao.IFhirSystemDao;
@@ -20,7 +19,6 @@ import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChainR5;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
-import ca.uhn.fhir.validation.IValidatorModule;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r5.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.r5.hapi.ctx.IValidationSupport;
@@ -139,7 +137,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorR5 searchParamExtractor() {
-		return new SearchParamExtractorR5();
+		return new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(), searchParamRegistry);
 	}
 
 	@Bean
