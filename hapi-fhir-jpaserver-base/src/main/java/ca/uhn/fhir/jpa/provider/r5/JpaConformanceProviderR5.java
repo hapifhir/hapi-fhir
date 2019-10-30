@@ -51,16 +51,16 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
-	
+
 	/**
 	 * Constructor
 	 */
 	@CoverageIgnore
-	public JpaConformanceProviderR5(){
+	public JpaConformanceProviderR5() {
 		super();
 		setIncludeResourceCounts(true);
 	}
-	
+
 	/**
 	 * Constructor
 	 */
@@ -93,7 +93,7 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 			for (CapabilityStatementRestResourceComponent nextResource : nextRest.getResource()) {
 
 				nextResource.setVersioning(ResourceVersionPolicy.VERSIONEDUPDATE);
-				
+
 				ConditionalDeleteStatus conditionalDelete = nextResource.getConditionalDelete();
 				if (conditionalDelete == ConditionalDeleteStatus.MULTIPLE && myDaoConfig.isAllowMultipleDelete() == false) {
 					nextResource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
@@ -108,7 +108,7 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 				nextResource.getSearchParam().clear();
 				String resourceName = nextResource.getType();
 				RuntimeResourceDefinition resourceDef = myRestfulServer.getFhirContext().getResourceDefinition(resourceName);
-				Collection<RuntimeSearchParam> searchParams =  mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
+				Collection<RuntimeSearchParam> searchParams = mySearchParamRegistry.getSearchParamsByResourceType(resourceDef);
 				for (RuntimeSearchParam runtimeSp : searchParams) {
 					CapabilityStatementRestResourceSearchParamComponent confSp = nextResource.addSearchParam();
 
@@ -116,37 +116,40 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 					confSp.setDocumentation(runtimeSp.getDescription());
 					confSp.setDefinition(runtimeSp.getUri());
 					switch (runtimeSp.getParamType()) {
-					case COMPOSITE:
-						confSp.setType(SearchParamType.COMPOSITE);
-						break;
-					case DATE:
-						confSp.setType(SearchParamType.DATE);
-						break;
-					case NUMBER:
-						confSp.setType(SearchParamType.NUMBER);
-						break;
-					case QUANTITY:
-						confSp.setType(SearchParamType.QUANTITY);
-						break;
-					case REFERENCE:
-						confSp.setType(SearchParamType.REFERENCE);
-						break;
-					case STRING:
-						confSp.setType(SearchParamType.STRING);
-						break;
-					case TOKEN:
-						confSp.setType(SearchParamType.TOKEN);
-						break;
-					case URI:
-						confSp.setType(SearchParamType.URI);
-						break;
-					case HAS:
-						// Shouldn't happen
-						break;
+						case COMPOSITE:
+							confSp.setType(SearchParamType.COMPOSITE);
+							break;
+						case DATE:
+							confSp.setType(SearchParamType.DATE);
+							break;
+						case NUMBER:
+							confSp.setType(SearchParamType.NUMBER);
+							break;
+						case QUANTITY:
+							confSp.setType(SearchParamType.QUANTITY);
+							break;
+						case REFERENCE:
+							confSp.setType(SearchParamType.REFERENCE);
+							break;
+						case STRING:
+							confSp.setType(SearchParamType.STRING);
+							break;
+						case TOKEN:
+							confSp.setType(SearchParamType.TOKEN);
+							break;
+						case URI:
+							confSp.setType(SearchParamType.URI);
+							break;
+						case SPECIAL:
+							confSp.setType(SearchParamType.SPECIAL);
+							break;
+						case HAS:
+							// Shouldn't happen
+							break;
 					}
-					
+
 				}
-				
+
 			}
 		}
 
@@ -160,7 +163,7 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 		}
 
 		massage(retVal);
-		
+
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;
@@ -169,7 +172,11 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	public boolean isIncludeResourceCounts() {
 		return myIncludeResourceCounts;
 	}
-	
+
+	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
+		myIncludeResourceCounts = theIncludeResourceCounts;
+	}
+
 	/**
 	 * Subclasses may override
 	 */
@@ -184,10 +191,6 @@ public class JpaConformanceProviderR5 extends org.hl7.fhir.r5.hapi.rest.server.S
 	@CoverageIgnore
 	public void setImplementationDescription(String theImplDesc) {
 		myImplementationDescription = theImplDesc;
-	}
-
-	public void setIncludeResourceCounts(boolean theIncludeResourceCounts) {
-		myIncludeResourceCounts = theIncludeResourceCounts;
 	}
 
 	@Override

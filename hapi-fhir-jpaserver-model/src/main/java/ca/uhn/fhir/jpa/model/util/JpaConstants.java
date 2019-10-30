@@ -25,6 +25,13 @@ import ca.uhn.fhir.rest.api.Constants;
 public class JpaConstants {
 
 	/**
+	 * Non-instantiable
+	 */
+	private JpaConstants() {
+		// nothing
+	}
+
+	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";
@@ -242,6 +249,12 @@ public class JpaConstants {
 	 * Placed in system-generated extensions
 	 */
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
+
+	/**
+	 * Message added to expansion valueset
+	 */
+	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+
 
 	/**
 	 * Parameter for the $export operation

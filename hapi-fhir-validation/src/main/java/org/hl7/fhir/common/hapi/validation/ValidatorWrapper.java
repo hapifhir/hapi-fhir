@@ -111,7 +111,11 @@ public class ValidatorWrapper {
 				profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(nextProfile, true));
 			}
 
-			v.validate(null, messages, document, profileSet);
+			String resourceAsString = theValidationContext.getResourceAsString();
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+
+			Manager.FhirFormat format = Manager.FhirFormat.XML;
+			v.validate(null, messages, inputStream, format, profileSet);
 
 		} else if (encoding == EncodingEnum.JSON) {
 
