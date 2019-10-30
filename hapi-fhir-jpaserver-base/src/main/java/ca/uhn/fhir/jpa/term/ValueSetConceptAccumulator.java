@@ -88,7 +88,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 		if (optionalConcept.isPresent()) {
 			TermValueSetConcept concept = optionalConcept.get();
 
-			ourLog.info("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug("Excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 			for (TermValueSetConceptDesignation designation : concept.getDesignations()) {
 				myValueSetConceptDesignationDao.deleteById(designation.getId());
 				myTermValueSet.decrementTotalConceptDesignations();
@@ -96,7 +96,7 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 			myValueSetConceptDao.deleteById(concept.getId());
 			myTermValueSet.decrementTotalConcepts();
 			myValueSetDao.save(myTermValueSet);
-			ourLog.info("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
+			ourLog.debug("Done excluding [{}|{}] from ValueSet[{}]", concept.getSystem(), concept.getCode(), myTermValueSet.getUrl());
 
 			if (++myConceptsExcluded % 250 == 0) {
 				ourLog.info("Have excluded {} concepts from ValueSet[{}]", myConceptsExcluded, myTermValueSet.getUrl());
