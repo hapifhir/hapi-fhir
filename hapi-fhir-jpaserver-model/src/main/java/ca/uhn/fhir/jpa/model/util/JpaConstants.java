@@ -244,6 +244,12 @@ public class JpaConstants {
 	public static final String EXTENSION_EXT_SYSTEMDEFINED = JpaConstants.class.getName() + "_EXTENSION_EXT_SYSTEMDEFINED";
 
 	/**
+	 * Message added to expansion valueset
+	 */
+	public static final String EXT_VALUESET_EXPANSION_MESSAGE = "http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message";
+
+
+	/**
 	 * Parameter for the $export operation
 	 */
 	public static final String PARAM_EXPORT_POLL_STATUS_JOB_ID = "_jobId";

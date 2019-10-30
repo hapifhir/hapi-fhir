@@ -22,9 +22,11 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.ex.ExpansionTooCostlyException;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import javax.annotation.Nullable;
@@ -52,6 +54,13 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	@Override
 	public Integer getCapacityRemaining() {
 		return myMaxCapacity - myConceptsCount;
+	}
+
+	@Override
+	public void addMessage(String theMessage) {
+		addExtension()
+			.setUrl(JpaConstants.EXT_VALUESET_EXPANSION_MESSAGE)
+			.setValue(new StringType(theMessage));
 	}
 
 	@Override

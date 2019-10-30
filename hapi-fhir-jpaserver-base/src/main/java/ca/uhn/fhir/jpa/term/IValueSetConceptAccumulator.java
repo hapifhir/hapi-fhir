@@ -27,6 +27,8 @@ import java.util.Collection;
 
 public interface IValueSetConceptAccumulator {
 
+	void addMessage(String theMessage);
+
 	void includeConcept(String theSystem, String theCode, String theDisplay);
 
 	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations);

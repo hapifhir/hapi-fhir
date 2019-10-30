@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.TestUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -9,10 +11,13 @@ import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.r5.model.Organization;
+import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Practitioner;
 import org.hl7.fhir.r5.model.PractitionerRole;
 import org.junit.AfterClass;
 import org.junit.Test;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -97,6 +102,40 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		IBundleProvider outcome = myPractitionerDao.search(params);
 		assertEquals(1, outcome.getResources(0, 1).size());
 	}
+
+	@Test
+	public void testSearchDoesntFailIfResourcesAreDeleted() {
+
+		Patient p = new Patient();
+		p.addIdentifier().setValue("1");
+		myPatientDao.create(p);
+
+		p = new Patient();
+		p.addIdentifier().setValue("2");
+		myPatientDao.create(p);
+
+		p = new Patient();
+		p.addIdentifier().setValue("3");
+		Long id = myPatientDao.create(p).getId().getIdPartAsLong();
+
+		IBundleProvider outcome = myPatientDao.search(new SearchParameterMap());
+		assertEquals(3, outcome.size().intValue());
+
+		runInTransaction(()->{
+			ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
+			table.setDeleted(new Date());
+			myResourceTableDao.save(table);
+		});
+
+		assertEquals(2, outcome.getResources(0, 3).size());
+
+		runInTransaction(()->{
+			myResourceHistoryTableDao.deleteAll();
+		});
+
+		assertEquals(0, outcome.getResources(0, 3).size());
+	}
+
 
 	@AfterClass
 	public static void afterClassClearContext() {

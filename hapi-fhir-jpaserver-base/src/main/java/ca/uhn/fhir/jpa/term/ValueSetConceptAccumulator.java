@@ -58,6 +58,12 @@ public class ValueSetConceptAccumulator implements IValueSetConceptAccumulator {
 	}
 
 	@Override
+	public void addMessage(String theMessage) {
+		// ignore for now
+
+	}
+
+	@Override
 	public void includeConcept(String theSystem, String theCode, String theDisplay) {
 		saveConcept(theSystem, theCode, theDisplay);
 	}
