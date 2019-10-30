@@ -674,7 +674,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			.unique(false)
 			.withColumns( "CONCEPT_UPDATED");
 		trmConcept
-			// FIXME KHS move version up here
 			.modifyColumn("20180903.52", "CODE")
 			.nonNullable()
 			.withType(BaseTableColumnTypeTask.ColumnTypeEnum.STRING, 500);

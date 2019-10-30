@@ -219,7 +219,6 @@ public class Builder {
 					myUnique = theUnique;
 				}
 
-				// FIXME KHS this String... is a problem with versions
 				public void withColumns(String... theColumnNames) {
 					AddIndexTask task = new AddIndexTask(myRelease, myVersion);
 					task.setTableName(myTableName);
