@@ -25,6 +25,13 @@ import ca.uhn.fhir.rest.api.Constants;
 public class JpaConstants {
 
 	/**
+	 * Non-instantiable
+	 */
+	private JpaConstants() {
+		// nothing
+	}
+
+	/**
 	 * Operation name for the $apply-codesystem-delta-add operation
 	 */
 	public static final String OPERATION_APPLY_CODESYSTEM_DELTA_ADD = "$apply-codesystem-delta-add";
