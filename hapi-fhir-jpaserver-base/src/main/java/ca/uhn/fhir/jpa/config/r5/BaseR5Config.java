@@ -12,7 +12,9 @@ import ca.uhn.fhir.jpa.provider.GraphQLProvider;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR5;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryR5;
-import ca.uhn.fhir.jpa.term.*;
+import ca.uhn.fhir.jpa.term.TermLoaderSvcImpl;
+import ca.uhn.fhir.jpa.term.TermReadSvcR5;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvcR5;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
@@ -137,7 +139,7 @@ public class BaseR5Config extends BaseConfigDstu3Plus {
 
 	@Bean(autowire = Autowire.BY_TYPE)
 	public SearchParamExtractorR5 searchParamExtractor() {
-		return new SearchParamExtractorR5(ctx, new DefaultProfileValidationSupport(), searchParamRegistry);
+		return new SearchParamExtractorR5();
 	}
 
 	@Bean
