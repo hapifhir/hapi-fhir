@@ -6,21 +6,21 @@ import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SearchParamExtractorServiceTest {
 
 	private SearchParamExtractorService mySvc;
-	@Autowired
+	@Mock
 	private IInterceptorBroadcaster myRequestInterceptorBroadcaster;
-	@Autowired
+	@Mock
 	private IInterceptorBroadcaster myJpaInterceptorBroadcaster;
 
 	@Before
@@ -34,6 +34,8 @@ public class SearchParamExtractorServiceTest {
 		ISearchParamExtractor.SearchParamSet<Object> searchParamSet = new ISearchParamExtractor.SearchParamSet<>();
 		searchParamSet.addWarning("help i'm a bug");
 		searchParamSet.addWarning("Spiff");
+
+		when(myJpaInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
 		mySvc.handleWarnings(new ServletRequestDetails(myRequestInterceptorBroadcaster), searchParamSet);
 
