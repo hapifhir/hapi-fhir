@@ -26,6 +26,8 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -92,6 +94,17 @@ public class ResourceReindexingSvcImplTest extends BaseJpaTest {
 		mySvc.setTxManagerForUnitTest(myTxManager);
 		mySvc.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		mySvc.start();
+	}
+
+	@Test
+	public void testNoParallelReindexing() throws InterruptedException {
+		CountDownLatch latch = new CountDownLatch(1);
+		new Thread(()->{
+			mySvc.getIndexingLockForUnitTest().lock();
+			latch.countDown();
+		}).start();
+		latch.await(10, TimeUnit.SECONDS);
+		mySvc.runReindexingPass();
 	}
 
 	@Test
