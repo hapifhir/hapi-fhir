@@ -675,7 +675,10 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 				CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
 				if (codeSystemFromContext == null) {
-					throw new InvalidRequestException("Unknown code system: " + system);
+					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
+					ourLog.warn(msg);
+					theValueSetCodeAccumulator.addMessage(msg);
+					return false;
 				}
 
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
