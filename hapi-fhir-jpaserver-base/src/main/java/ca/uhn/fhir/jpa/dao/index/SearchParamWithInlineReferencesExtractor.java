@@ -88,8 +88,8 @@ public class SearchParamWithInlineReferencesExtractor {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
-	public void populateFromResource(ResourceIndexedSearchParams theParams, IDao theCallingDao, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
-		mySearchParamExtractorService.extractFromResource(theParams, theEntity, theResource);
+	public void populateFromResource(ResourceIndexedSearchParams theParams, Date theUpdateTime, ResourceTable theEntity, IBaseResource theResource, ResourceIndexedSearchParams theExistingParams, RequestDetails theRequest) {
+		mySearchParamExtractorService.extractFromResource(theRequest, theParams, theEntity, theResource);
 
 		Set<Map.Entry<String, RuntimeSearchParam>> activeSearchParams = mySearchParamRegistry.getActiveSearchParams(theEntity.getResourceType()).entrySet();
 		if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {

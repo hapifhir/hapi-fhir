@@ -12,10 +12,10 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.hapi.ctx.DefaultProfileValidationSupport;
 import org.hl7.fhir.dstu3.hapi.ctx.IValidationSupport;
 import org.hl7.fhir.dstu3.model.*;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,7 +25,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.contains;
 
 public class SearchParamExtractorDstu3Test {
 
@@ -146,63 +147,42 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new ModelConfig(), ourCtx, ourValidationSupport, searchParamRegistry);
 		extractor.start();
 
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.STRING, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamStrings(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamString> outcome = extractor.extractSearchParamStrings(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.TOKEN, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamTokens(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> outcome = extractor.extractSearchParamTokens(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.QUANTITY, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamQuantity(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamQuantity> outcome = extractor.extractSearchParamQuantity(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.DATE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamDates(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> outcome = extractor.extractSearchParamDates(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.NUMBER, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamNumber(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamNumber> outcome = extractor.extractSearchParamNumber(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
+		{
 			searchParamRegistry.addSearchParam(new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.URI, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE));
 			Patient resource = new Patient();
-			extractor.extractSearchParamUri(resource);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamUri> outcome = extractor.extractSearchParamUri(resource);
+			assertThat(outcome.getWarnings(), Matchers.contains("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient"));
 		}
-
-		try {
-			RuntimeSearchParam sp = new RuntimeSearchParam("foo", "foo", "Patient", RestSearchParameterTypeEnum.REFERENCE, Sets.newHashSet(), Sets.newHashSet(), RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
-			searchParamRegistry.addSearchParam(sp);
-			Patient resource = new Patient();
-			extractor.extractResourceLinks(resource, sp);
-		} catch (ConfigurationException e) {
-			assertEquals("Search param foo is of unexpected datatype: class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
-		}
-
 	}
 
 

@@ -59,6 +59,43 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private ModelConfig myModelConfig;
 	private Set<String> myIgnoredForSearchDatatypes;
+	private BaseRuntimeChildDefinition myQuantityValueValueChild;
+	private BaseRuntimeChildDefinition myQuantitySystemValueChild;
+	private BaseRuntimeChildDefinition myQuantityCodeValueChild;
+	private BaseRuntimeChildDefinition myMoneyValueChild;
+	private BaseRuntimeChildDefinition myMoneyCurrencyChild;
+	private BaseRuntimeElementCompositeDefinition<?> myLocationPositionDefinition;
+	private BaseRuntimeChildDefinition myCodeSystemUrlValueChild;
+	private BaseRuntimeChildDefinition myRangeLowValueChild;
+	private BaseRuntimeChildDefinition myRangeHighValueChild;
+	private BaseRuntimeChildDefinition myAddressLineValueChild;
+	private BaseRuntimeChildDefinition myAddressCityValueChild;
+	private BaseRuntimeChildDefinition myAddressStateValueChild;
+	private BaseRuntimeChildDefinition myAddressCountryValueChild;
+	private BaseRuntimeChildDefinition myAddressPostalCodeValueChild;
+	private BaseRuntimeChildDefinition myCapabilityStatementRestSecurityServiceValueChild;
+	private BaseRuntimeChildDefinition myPeriodStartValueChild;
+	private BaseRuntimeChildDefinition myPeriodEndValueChild;
+	private BaseRuntimeChildDefinition myTimingEventValueChild;
+	private BaseRuntimeChildDefinition myTimingRepeatValueChild;
+	private BaseRuntimeChildDefinition myTimingRepeatBoundsValueChild;
+	private BaseRuntimeChildDefinition myDurationSystemValueChild;
+	private BaseRuntimeChildDefinition myDurationCodeValueChild;
+	private BaseRuntimeChildDefinition myDurationValueValueChild;
+	private BaseRuntimeChildDefinition myHumanNameFamilyValueChild;
+	private BaseRuntimeChildDefinition myHumanNameGivenValueChild;
+	private BaseRuntimeChildDefinition myContactPointValueValueChild;
+	private BaseRuntimeChildDefinition myIdentifierSystemValueChild;
+	private BaseRuntimeChildDefinition myIdentifierValueValueChild;
+	private BaseRuntimeChildDefinition myIdentifierTypeValueChild;
+	private BaseRuntimeChildDefinition myIdentifierTypeTextValueChild;
+	private BaseRuntimeChildDefinition myCodeableConceptCodingValueChild;
+	private BaseRuntimeChildDefinition myCodeableConceptTextValueChild;
+	private BaseRuntimeChildDefinition myCodingSystemValueChild;
+	private BaseRuntimeChildDefinition myCodingCodeValueChild;
+	private BaseRuntimeChildDefinition myCodingDisplayValueChild;
+	private BaseRuntimeChildDefinition myContactPointSystemValueChild;
+	private BaseRuntimeChildDefinition myPatientCommunicationLanguageValueChild;
 
 	/**
 	 * Constructor
@@ -77,27 +114,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
-		BaseRuntimeElementCompositeDefinition<?> codeSystemDefinition;
-		BaseRuntimeChildDefinition codeSystemUrlValueChild = null;
-		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			codeSystemDefinition = getContext().getResourceDefinition("CodeSystem");
-			assert codeSystemDefinition != null;
-			codeSystemUrlValueChild = codeSystemDefinition.getChildByName("url");
-		}
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
 
 		String resourceTypeName = toRootTypeName(theResource);
 		String useSystem;
 		if (getContext().getVersion().getVersion().equals(FhirVersionEnum.DSTU2)) {
 			if (resourceTypeName.equals("ValueSet")) {
-				ca.uhn.fhir.model.dstu2.resource.ValueSet dstu2ValueSet = (ca.uhn.fhir.model.dstu2.resource.ValueSet)theResource;
+				ca.uhn.fhir.model.dstu2.resource.ValueSet dstu2ValueSet = (ca.uhn.fhir.model.dstu2.resource.ValueSet) theResource;
 				useSystem = dstu2ValueSet.getCodeSystem().getSystem();
 			} else {
 				useSystem = null;
 			}
 		} else {
 			if (resourceTypeName.equals("CodeSystem")) {
-				useSystem = extractValueAsString(codeSystemUrlValueChild, theResource);
+				useSystem = extractValueAsString(myCodeSystemUrlValueChild, theResource);
 			} else {
 				useSystem = null;
 			}
@@ -176,15 +206,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addToken_ContactPoint(resourceTypeName, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
 	}
 
+	private void addUnexpectedDatatypeWarning(SearchParamSet<? extends BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value) {
+		params.addWarning("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+	}
+
 	@Override
-	public Set<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamUri> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
@@ -197,7 +232,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUri_Uri(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -205,13 +241,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		// TODO: implement
-		return Collections.emptySet();
+	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+		return new SearchParamSet<>();
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
@@ -231,7 +266,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// CarePlan.activitydate can be a string - ignored for now
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -239,7 +275,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamNumber> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
@@ -260,7 +296,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addNumber_Decimal(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -268,14 +305,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
-		BaseRuntimeElementCompositeDefinition<?> locationDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getResourceDefinition("Location");
-		BaseRuntimeChildDefinition locationPositionValueChild = locationDefinition.getChildByName("position");
-		BaseRuntimeElementCompositeDefinition<?> locationPositionDefinition = (BaseRuntimeElementCompositeDefinition<?>) locationPositionValueChild.getChildByName("position");
-
+	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
-			if (value.getClass().equals(locationPositionDefinition.getImplementingClass())) {
+			if (value.getClass().equals(myLocationPositionDefinition.getImplementingClass())) {
 				ourLog.warn("Position search not currently supported, not indexing location");
 				return;
 			}
@@ -293,7 +326,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addQuantity_Range(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -301,7 +335,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamString> extractor = (params, searchParam, value, path) -> {
 			String resourceType = toRootTypeName(theResource);
 
@@ -330,7 +364,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addString_Range(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -356,7 +391,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	/**
-	 * [
 	 * Override parent because we're using FHIRPath here
 	 */
 	private List<IBase> extractValues(String thePaths, IBaseResource theResource) {
@@ -401,7 +435,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return myModelConfig;
 	}
 
-	public Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
+	private Collection<RuntimeSearchParam> getSearchParams(IBaseResource theResource) {
 		RuntimeResourceDefinition def = getContext().getResourceDefinition(theResource);
 		Collection<RuntimeSearchParam> retVal = mySearchParamRegistry.getActiveSearchParams(def.getName()).values();
 		List<RuntimeSearchParam> defaultList = Collections.emptyList();
@@ -409,29 +443,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return retVal;
 	}
 
-	@PostConstruct
-	public void start() {
-		myIgnoredForSearchDatatypes = new HashSet<>();
-		addIgnoredType(getContext(), "Annotation", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "Attachment", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "Count", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "Distance", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "Ratio", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "SampledData", myIgnoredForSearchDatatypes);
-		addIgnoredType(getContext(), "Signature", myIgnoredForSearchDatatypes);
-	}
 
 	private void addQuantity_Quantity(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
-		BaseRuntimeChildDefinition quantityValueChild = quantityDefinition.getChildByName("value");
-		BaseRuntimeChildDefinition quantitySystemChild = quantityDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition quantityCodeChild = quantityDefinition.getChildByName("code");
 
-		Optional<IPrimitiveType<BigDecimal>> valueField = quantityValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IPrimitiveType<BigDecimal>> valueField = myQuantityValueValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
 			BigDecimal nextValueValue = valueField.get().getValue();
-			String system = extractValueAsString(quantitySystemChild, theValue);
-			String code = extractValueAsString(quantityCodeChild, theValue);
+			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
+			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, theSearchParam.getName(), nextValueValue, system, code);
 			theParams.add(nextEntity);
@@ -440,16 +459,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addQuantity_Money(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> moneyDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Money");
-		BaseRuntimeChildDefinition moneyValueChild = moneyDefinition.getChildByName("value");
-		BaseRuntimeChildDefinition moneyCurrencyChild = moneyDefinition.getChildByName("currency");
 
-		Optional<IPrimitiveType<BigDecimal>> valueField = moneyValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IPrimitiveType<BigDecimal>> valueField = myMoneyValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
 			BigDecimal nextValueValue = valueField.get().getValue();
 
 			String nextValueString = "urn:iso:std:iso:4217";
-			String nextValueCode = extractValueAsString(moneyCurrencyChild, theValue);
+			String nextValueCode = extractValueAsString(myMoneyCurrencyChild, theValue);
 			String searchParamName = theSearchParam.getName();
 			ResourceIndexedSearchParamQuantity nextEntity = new ResourceIndexedSearchParamQuantity(theResourceType, searchParamName, nextValueValue, nextValueString, nextValueCode);
 			theParams.add(nextEntity);
@@ -458,102 +474,65 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addQuantity_Range(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> rangeDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Range");
-		BaseRuntimeChildDefinition rangeLowValueChild = rangeDefinition.getChildByName("low");
-		BaseRuntimeChildDefinition rangeHighValueChild = rangeDefinition.getChildByName("high");
 
-		Optional<IBase> low = rangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IBase> low = myRangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
 		low.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
 
-		Optional<IBase> high = rangeHighValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IBase> high = myRangeHighValueChild.getAccessor().getFirstValueOrNull(theValue);
 		high.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
 	}
 
 	private void addToken_Identifier(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> identifierDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Identifier");
-		BaseRuntimeChildDefinition identifierSystemValueChild = identifierDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition identifierValueValueChild = identifierDefinition.getChildByName("value");
-
-		BaseRuntimeChildDefinition identifierTypeValueChild = identifierDefinition.getChildByName("type");
-		BaseRuntimeElementCompositeDefinition<?> identifierTypeDefinition = (BaseRuntimeElementCompositeDefinition<?>) identifierTypeValueChild.getChildByName("type");
-
-		BaseRuntimeChildDefinition identifierTypeTextValueChild = identifierTypeDefinition.getChildByName("text");
-
-		String system = extractValueAsString(identifierSystemValueChild, theValue);
-		String value = extractValueAsString(identifierValueValueChild, theValue);
+		String system = extractValueAsString(myIdentifierSystemValueChild, theValue);
+		String value = extractValueAsString(myIdentifierValueValueChild, theValue);
 		if (isNotBlank(value)) {
 			createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 		}
 
-		Optional<IBase> type = identifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IBase> type = myIdentifierTypeValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (type.isPresent()) {
-			String text = extractValueAsString(identifierTypeTextValueChild, type.get());
+			String text = extractValueAsString(myIdentifierTypeTextValueChild, type.get());
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 		}
 
 	}
 
 	private void addToken_CodeableConcept(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> codeableConceptDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("CodeableConcept");
-		BaseRuntimeChildDefinition codeableConceptCodingValueChild = codeableConceptDefinition.getChildByName("coding");
-		BaseRuntimeChildDefinition codeableConceptTextValueChild = codeableConceptDefinition.getChildByName("text");
-
-		List<IBase> codings = codeableConceptCodingValueChild.getAccessor().getValues(theValue);
+		List<IBase> codings = myCodeableConceptCodingValueChild.getAccessor().getValues(theValue);
 		for (IBase nextCoding : codings) {
 			addToken_Coding(theResourceType, theParams, theSearchParam, nextCoding);
 		}
 
-		String text = extractValueAsString(codeableConceptTextValueChild, theValue);
+		String text = extractValueAsString(myCodeableConceptTextValueChild, theValue);
 		if (isNotBlank(text)) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 		}
 	}
 
 	private void addToken_Coding(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> codingDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Coding");
-		BaseRuntimeChildDefinition codingSystemValueChild = codingDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition codingCodeValueChild = codingDefinition.getChildByName("code");
-		BaseRuntimeChildDefinition codingDisplayValueChild = codingDefinition.getChildByName("display");
-
-		String system = extractValueAsString(codingSystemValueChild, theValue);
-		String code = extractValueAsString(codingCodeValueChild, theValue);
+		String system = extractValueAsString(myCodingSystemValueChild, theValue);
+		String code = extractValueAsString(myCodingCodeValueChild, theValue);
 		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, code);
 
-		String text = extractValueAsString(codingDisplayValueChild, theValue);
+		String text = extractValueAsString(myCodingDisplayValueChild, theValue);
 		createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, text);
 	}
 
 	private void addToken_ContactPoint(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> contactPointDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("ContactPoint");
-		BaseRuntimeChildDefinition contactPointSystemValueChild = contactPointDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition contactPointValueValueChild = contactPointDefinition.getChildByName("value");
-
-		String system = extractValueAsString(contactPointSystemValueChild, theValue);
-		String value = extractValueAsString(contactPointValueValueChild, theValue);
+		String system = extractValueAsString(myContactPointSystemValueChild, theValue);
+		String value = extractValueAsString(myContactPointValueValueChild, theValue);
 		createTokenIndexIfNotBlank(theResourceType, theParams, theSearchParam, system, value);
 	}
 
 	private void addToken_PatientCommunication(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> patientDefinition = getContext().getResourceDefinition("Patient");
-		BaseRuntimeChildDefinition patientCommunicationValueChild = patientDefinition.getChildByName("communication");
-		BaseRuntimeElementCompositeDefinition<?> patientCommunicationDefinition = (BaseRuntimeElementCompositeDefinition<?>) patientCommunicationValueChild.getChildByName("communication");
-		BaseRuntimeChildDefinition patientCommunicationLanguageValueChild = patientCommunicationDefinition.getChildByName("language");
-
-		List<IBase> values = patientCommunicationLanguageValueChild.getAccessor().getValues(theValue);
+		List<IBase> values = myPatientCommunicationLanguageValueChild.getAccessor().getValues(theValue);
 		for (IBase next : values) {
 			addToken_CodeableConcept(theResourceType, theParams, theSearchParam, next);
 		}
 	}
 
 	private void addToken_CapabilityStatementRestSecurity(String theResourceType, Set<BaseResourceIndexedSearchParam> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> capabilityStatementDefinition = getContext().getResourceDefinition("CapabilityStatement");
-		BaseRuntimeChildDefinition capabilityStatementRestChild = capabilityStatementDefinition.getChildByName("rest");
-		BaseRuntimeElementCompositeDefinition<?> capabilityStatementRestDefinition = (BaseRuntimeElementCompositeDefinition<?>) capabilityStatementRestChild.getChildByName("rest");
-		BaseRuntimeChildDefinition capabilityStatementRestSecurityValueChild = capabilityStatementRestDefinition.getChildByName("security");
-		BaseRuntimeElementCompositeDefinition<?> capabilityStatementRestSecurityDefinition = (BaseRuntimeElementCompositeDefinition<?>) capabilityStatementRestSecurityValueChild.getChildByName("security");
-		BaseRuntimeChildDefinition capabilityStatementRestSecurityServiceValueChild = capabilityStatementRestSecurityDefinition.getChildByName("service");
-
-		List<IBase> values = capabilityStatementRestSecurityServiceValueChild.getAccessor().getValues(theValue);
+		List<IBase> values = myCapabilityStatementRestSecurityServiceValueChild.getAccessor().getValues(theValue);
 		for (IBase nextValue : values) {
 			addToken_CodeableConcept(theResourceType, theParams, theSearchParam, nextValue);
 		}
@@ -561,13 +540,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addDate_Period(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> periodDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Period");
-		BaseRuntimeChildDefinition periodStartValueChild = periodDefinition.getChildByName("start");
-		BaseRuntimeChildDefinition periodEndValueChild = periodDefinition.getChildByName("end");
-
-		Date start = extractValueAsDate(periodStartValueChild, theValue);
-		String startAsString = extractValueAsString(periodStartValueChild, theValue);
-		Date end = extractValueAsDate(periodEndValueChild, theValue);
+		Date start = extractValueAsDate(myPeriodStartValueChild, theValue);
+		String startAsString = extractValueAsString(myPeriodStartValueChild, theValue);
+		Date end = extractValueAsDate(myPeriodEndValueChild, theValue);
 
 		if (start != null || end != null) {
 			ResourceIndexedSearchParamDate nextEntity = new ResourceIndexedSearchParamDate(theResourceType, theSearchParam.getName(), start, end, startAsString);
@@ -576,13 +551,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addDate_Timing(String theResourceType, Set<ResourceIndexedSearchParamDate> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> timingDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Timing");
-		BaseRuntimeChildDefinition timingEventValueChild = timingDefinition.getChildByName("event");
-		BaseRuntimeChildDefinition timingRepeatValueChild = timingDefinition.getChildByName("repeat");
-		BaseRuntimeElementCompositeDefinition<?> timingRepeatDefinition = (BaseRuntimeElementCompositeDefinition<?>) timingRepeatValueChild.getChildByName("repeat");
-		BaseRuntimeChildDefinition timingRepeatBoundsValueChild = timingRepeatDefinition.getChildByName("bounds[x]");
-
-		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(timingEventValueChild, theValue);
+		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
 		TreeSet<Date> dates = new TreeSet<>();
 		String firstValue = null;
@@ -595,21 +564,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		Optional<IBase> repeat = timingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
+		Optional<IBase> repeat = myTimingRepeatValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (repeat.isPresent()) {
-			Optional<IBase> bounds = timingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
+			Optional<IBase> bounds = myTimingRepeatBoundsValueChild.getAccessor().getFirstValueOrNull(repeat.get());
 			if (bounds.isPresent()) {
 				String boundsType = toRootTypeName(bounds.get());
-				switch (boundsType) {
-					case "Period":
-						BaseRuntimeElementCompositeDefinition<?> periodDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Period");
-						BaseRuntimeChildDefinition periodStartValueChild = periodDefinition.getChildByName("start");
-						BaseRuntimeChildDefinition periodEndValueChild = periodDefinition.getChildByName("end");
-						Date start = extractValueAsDate(periodStartValueChild, bounds.get());
-						Date end = extractValueAsDate(periodEndValueChild, bounds.get());
-						dates.add(start);
-						dates.add(end);
-						break;
+				if ("Period".equals(boundsType)) {
+					Date start = extractValueAsDate(myPeriodStartValueChild, bounds.get());
+					Date end = extractValueAsDate(myPeriodEndValueChild, bounds.get());
+					dates.add(start);
+					dates.add(end);
 				}
 			}
 		}
@@ -621,14 +585,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addNumber_Duration(String theResourceType, Set<ResourceIndexedSearchParamNumber> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> durationDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Duration");
-		BaseRuntimeChildDefinition durationSystemValueChild = durationDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition durationCodeValueChild = durationDefinition.getChildByName("code");
-		BaseRuntimeChildDefinition durationValueValueChild = durationDefinition.getChildByName("value");
-
-		String system = extractValueAsString(durationSystemValueChild, theValue);
-		String code = extractValueAsString(durationCodeValueChild, theValue);
-		BigDecimal value = extractValueAsBigDecimal(durationValueValueChild, theValue);
+		String system = extractValueAsString(myDurationSystemValueChild, theValue);
+		String code = extractValueAsString(myDurationCodeValueChild, theValue);
+		BigDecimal value = extractValueAsBigDecimal(myDurationValueValueChild, theValue);
 		if (value != null) {
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
 			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
@@ -637,15 +596,10 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addNumber_Quantity(String theResourceType, Set<ResourceIndexedSearchParamNumber> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Duration");
-		BaseRuntimeChildDefinition quantityValueValueChild = quantityDefinition.getChildByName("value");
-		BaseRuntimeChildDefinition quantitySystemChild = quantityDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition quantityCodeChild = quantityDefinition.getChildByName("code");
-
-		BigDecimal value = extractValueAsBigDecimal(quantityValueValueChild, theValue);
+		BigDecimal value = extractValueAsBigDecimal(myQuantityValueValueChild, theValue);
 		if (value != null) {
-			String system = extractValueAsString(quantitySystemChild, theValue);
-			String code = extractValueAsString(quantityCodeChild, theValue);
+			String system = extractValueAsString(myQuantitySystemValueChild, theValue);
+			String code = extractValueAsString(myQuantityCodeValueChild, theValue);
 			value = normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(system, code, value);
 			ResourceIndexedSearchParamNumber nextEntity = new ResourceIndexedSearchParamNumber(theResourceType, theSearchParam.getName(), value);
 			theParams.add(nextEntity);
@@ -675,16 +629,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addString_HumanName(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> humanNameDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("HumanName");
-		BaseRuntimeChildDefinition humanNameFamilyValueChild = humanNameDefinition.getChildByName("family");
-		BaseRuntimeChildDefinition humanNameGivenValueChild = humanNameDefinition.getChildByName("given");
-
-		List<String> families = extractValuesAsStrings(humanNameFamilyValueChild, theValue);
+		List<String> families = extractValuesAsStrings(myHumanNameFamilyValueChild, theValue);
 		for (String next : families) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
 
-		List<String> givens = extractValuesAsStrings(humanNameGivenValueChild, theValue);
+		List<String> givens = extractValuesAsStrings(myHumanNameGivenValueChild, theValue);
 		for (String next : givens) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, next);
 		}
@@ -692,61 +642,48 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addString_Quantity(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
-		BaseRuntimeChildDefinition quantityValueChild = quantityDefinition.getChildByName("value");
-
-		BigDecimal value = extractValueAsBigDecimal(quantityValueChild, theValue);
+		BigDecimal value = extractValueAsBigDecimal(myQuantityValueValueChild, theValue);
 		if (value != null) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
 		}
 	}
 
 	private void addString_Range(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> rangeDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Range");
-		BaseRuntimeChildDefinition rangeLowValueChild = rangeDefinition.getChildByName("low");
 
-		BigDecimal value = extractValueAsBigDecimal(rangeLowValueChild, theValue);
+		BigDecimal value = extractValueAsBigDecimal(myRangeLowValueChild, theValue);
 		if (value != null) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value.toPlainString());
 		}
 	}
 
 	private void addString_ContactPoint(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> contactPointDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("ContactPoint");
-		BaseRuntimeChildDefinition contactPointValueValueChild = contactPointDefinition.getChildByName("value");
 
-		String value = extractValueAsString(contactPointValueValueChild, theValue);
+		String value = extractValueAsString(myContactPointValueValueChild, theValue);
 		if (isNotBlank(value)) {
 			createStringIndexIfNotBlank(theResourceType, theParams, theSearchParam, value);
 		}
 	}
 
 	private void addString_Address(String theResourceType, Set<ResourceIndexedSearchParamString> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> addressDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Address");
-		BaseRuntimeChildDefinition addressLineValueChild = addressDefinition.getChildByName("line");
-		BaseRuntimeChildDefinition addressCityValueChild = addressDefinition.getChildByName("city");
-		BaseRuntimeChildDefinition addressStateValueChild = addressDefinition.getChildByName("state");
-		BaseRuntimeChildDefinition addressCountryValueChild = addressDefinition.getChildByName("country");
-		BaseRuntimeChildDefinition addressPostalCodeValueChild = addressDefinition.getChildByName("postalCode");
 
-		List<String> allNames = new ArrayList<>(extractValuesAsStrings(addressLineValueChild, theValue));
+		List<String> allNames = new ArrayList<>(extractValuesAsStrings(myAddressLineValueChild, theValue));
 
-		String city = extractValueAsString(addressCityValueChild, theValue);
+		String city = extractValueAsString(myAddressCityValueChild, theValue);
 		if (isNotBlank(city)) {
 			allNames.add(city);
 		}
 
-		String state = extractValueAsString(addressStateValueChild, theValue);
+		String state = extractValueAsString(myAddressStateValueChild, theValue);
 		if (isNotBlank(state)) {
 			allNames.add(state);
 		}
 
-		String country = extractValueAsString(addressCountryValueChild, theValue);
+		String country = extractValueAsString(myAddressCountryValueChild, theValue);
 		if (isNotBlank(country)) {
 			allNames.add(country);
 		}
 
-		String postalCode = extractValueAsString(addressPostalCodeValueChild, theValue);
+		String postalCode = extractValueAsString(myAddressPostalCodeValueChild, theValue);
 		if (isNotBlank(postalCode)) {
 			allNames.add(postalCode);
 		}
@@ -758,8 +695,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 
-	private <T extends BaseResourceIndexedSearchParam> Set<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
-		Set<T> retVal = new HashSet<>();
+	private <T extends BaseResourceIndexedSearchParam> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
+		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -874,11 +811,111 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		return theValue;
 	}
 
+	@PostConstruct
+	public void start() {
+		myIgnoredForSearchDatatypes = new HashSet<>();
+		addIgnoredType(getContext(), "Annotation", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Attachment", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Count", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Distance", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Ratio", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "SampledData", myIgnoredForSearchDatatypes);
+		addIgnoredType(getContext(), "Signature", myIgnoredForSearchDatatypes);
+
+		/*
+		 * This is building up an internal map of all the various field accessors we'll need in order to work
+		 * with the model. This is kind of ugly, but we want to be as efficient as possible since
+		 * search param extraction happens a whole heck of a lot at runtime..
+		 */
+
+		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
+		myQuantityValueValueChild = quantityDefinition.getChildByName("value");
+		myQuantitySystemValueChild = quantityDefinition.getChildByName("system");
+		myQuantityCodeValueChild = quantityDefinition.getChildByName("code");
+
+		BaseRuntimeElementCompositeDefinition<?> moneyDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Money");
+		myMoneyValueChild = moneyDefinition.getChildByName("value");
+		myMoneyCurrencyChild = moneyDefinition.getChildByName("currency");
+
+		BaseRuntimeElementCompositeDefinition<?> locationDefinition = getContext().getResourceDefinition("Location");
+		BaseRuntimeChildDefinition locationPositionValueChild = locationDefinition.getChildByName("position");
+		myLocationPositionDefinition = (BaseRuntimeElementCompositeDefinition<?>) locationPositionValueChild.getChildByName("position");
+
+		BaseRuntimeElementCompositeDefinition<?> codeSystemDefinition;
+		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			codeSystemDefinition = getContext().getResourceDefinition("CodeSystem");
+			assert codeSystemDefinition != null;
+			myCodeSystemUrlValueChild = codeSystemDefinition.getChildByName("url");
+		}
+
+		BaseRuntimeElementCompositeDefinition<?> rangeDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Range");
+		myRangeLowValueChild = rangeDefinition.getChildByName("low");
+		myRangeHighValueChild = rangeDefinition.getChildByName("high");
+
+		BaseRuntimeElementCompositeDefinition<?> addressDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Address");
+		myAddressLineValueChild = addressDefinition.getChildByName("line");
+		myAddressCityValueChild = addressDefinition.getChildByName("city");
+		myAddressStateValueChild = addressDefinition.getChildByName("state");
+		myAddressCountryValueChild = addressDefinition.getChildByName("country");
+		myAddressPostalCodeValueChild = addressDefinition.getChildByName("postalCode");
+
+		BaseRuntimeElementCompositeDefinition<?> capabilityStatementDefinition = getContext().getResourceDefinition("CapabilityStatement");
+		BaseRuntimeChildDefinition capabilityStatementRestChild = capabilityStatementDefinition.getChildByName("rest");
+		BaseRuntimeElementCompositeDefinition<?> capabilityStatementRestDefinition = (BaseRuntimeElementCompositeDefinition<?>) capabilityStatementRestChild.getChildByName("rest");
+		BaseRuntimeChildDefinition capabilityStatementRestSecurityValueChild = capabilityStatementRestDefinition.getChildByName("security");
+		BaseRuntimeElementCompositeDefinition<?> capabilityStatementRestSecurityDefinition = (BaseRuntimeElementCompositeDefinition<?>) capabilityStatementRestSecurityValueChild.getChildByName("security");
+		myCapabilityStatementRestSecurityServiceValueChild = capabilityStatementRestSecurityDefinition.getChildByName("service");
+
+		BaseRuntimeElementCompositeDefinition<?> periodDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Period");
+		myPeriodStartValueChild = periodDefinition.getChildByName("start");
+		myPeriodEndValueChild = periodDefinition.getChildByName("end");
+
+		BaseRuntimeElementCompositeDefinition<?> timingDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Timing");
+		myTimingEventValueChild = timingDefinition.getChildByName("event");
+		myTimingRepeatValueChild = timingDefinition.getChildByName("repeat");
+		BaseRuntimeElementCompositeDefinition<?> timingRepeatDefinition = (BaseRuntimeElementCompositeDefinition<?>) myTimingRepeatValueChild.getChildByName("repeat");
+		myTimingRepeatBoundsValueChild = timingRepeatDefinition.getChildByName("bounds[x]");
+
+		BaseRuntimeElementCompositeDefinition<?> durationDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Duration");
+		myDurationSystemValueChild = durationDefinition.getChildByName("system");
+		myDurationCodeValueChild = durationDefinition.getChildByName("code");
+		myDurationValueValueChild = durationDefinition.getChildByName("value");
+
+		BaseRuntimeElementCompositeDefinition<?> humanNameDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("HumanName");
+		myHumanNameFamilyValueChild = humanNameDefinition.getChildByName("family");
+		myHumanNameGivenValueChild = humanNameDefinition.getChildByName("given");
+
+		BaseRuntimeElementCompositeDefinition<?> contactPointDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("ContactPoint");
+		myContactPointValueValueChild = contactPointDefinition.getChildByName("value");
+		myContactPointSystemValueChild = contactPointDefinition.getChildByName("system");
+
+		BaseRuntimeElementCompositeDefinition<?> identifierDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Identifier");
+		myIdentifierSystemValueChild = identifierDefinition.getChildByName("system");
+		myIdentifierValueValueChild = identifierDefinition.getChildByName("value");
+		myIdentifierTypeValueChild = identifierDefinition.getChildByName("type");
+		BaseRuntimeElementCompositeDefinition<?> identifierTypeDefinition = (BaseRuntimeElementCompositeDefinition<?>) myIdentifierTypeValueChild.getChildByName("type");
+		myIdentifierTypeTextValueChild = identifierTypeDefinition.getChildByName("text");
+
+		BaseRuntimeElementCompositeDefinition<?> codeableConceptDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("CodeableConcept");
+		myCodeableConceptCodingValueChild = codeableConceptDefinition.getChildByName("coding");
+		myCodeableConceptTextValueChild = codeableConceptDefinition.getChildByName("text");
+
+		BaseRuntimeElementCompositeDefinition<?> codingDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Coding");
+		myCodingSystemValueChild = codingDefinition.getChildByName("system");
+		myCodingCodeValueChild = codingDefinition.getChildByName("code");
+		myCodingDisplayValueChild = codingDefinition.getChildByName("display");
+
+		BaseRuntimeElementCompositeDefinition<?> patientDefinition = getContext().getResourceDefinition("Patient");
+		BaseRuntimeChildDefinition patientCommunicationValueChild = patientDefinition.getChildByName("communication");
+		BaseRuntimeElementCompositeDefinition<?> patientCommunicationDefinition = (BaseRuntimeElementCompositeDefinition<?>) patientCommunicationValueChild.getChildByName("communication");
+		myPatientCommunicationLanguageValueChild = patientCommunicationDefinition.getChildByName("language");
+
+	}
+
 	@FunctionalInterface
 	public interface IValueExtractor {
 
 		List<? extends IBase> get() throws FHIRException;
-
 
 	}
 
@@ -886,7 +923,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private interface IExtractor<T> {
 
 
-		void extract(Set<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath);
+		void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath);
 
 	}
 
@@ -945,6 +982,5 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 		return null;
 	}
-
 
 }

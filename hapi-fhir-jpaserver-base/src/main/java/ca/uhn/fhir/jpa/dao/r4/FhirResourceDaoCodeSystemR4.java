@@ -136,10 +136,12 @@ public class FhirResourceDaoCodeSystemR4 extends BaseHapiFhirResourceDao<CodeSys
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequest, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		CodeSystem cs = (CodeSystem) theResource;
-		addPidToResource(theEntity, theResource);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			CodeSystem cs = (CodeSystem) theResource;
+			addPidToResource(theEntity, theResource);
 
-		myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+			myTerminologyCodeSystemStorageSvc.storeNewCodeSystemVersionIfNeeded(cs, theEntity);
+		}
 
 		return retVal;
 	}
