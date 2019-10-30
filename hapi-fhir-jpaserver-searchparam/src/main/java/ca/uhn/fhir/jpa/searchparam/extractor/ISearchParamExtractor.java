@@ -4,8 +4,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.*;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /*
  * #%L
@@ -29,21 +28,44 @@ import java.util.Set;
 
 public interface ISearchParamExtractor {
 
-	Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource);
 
-	Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
+	SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource);
 
-	Set<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
+	SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource);
 
 	List<PathAndRef> extractResourceLinks(IBaseResource theResource, RuntimeSearchParam theNextSpDef);
 
 	String[] split(String theExpression);
+
+
+	class SearchParamSet<T> extends HashSet<T> {
+
+		private List<String> myWarnings;
+
+		public void addWarning(String theWarning) {
+			if (myWarnings == null) {
+				myWarnings = new ArrayList<>();
+			}
+			myWarnings.add(theWarning);
+		}
+
+		List<String> getWarnings() {
+			if (myWarnings == null) {
+				return Collections.emptyList();
+			}
+			return myWarnings;
+		}
+
+	}
+
+
 }

@@ -59,6 +59,15 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	@Autowired
 	private ModelConfig myModelConfig;
 	private Set<String> myIgnoredForSearchDatatypes;
+	private BaseRuntimeChildDefinition quantityValueChild;
+	private BaseRuntimeChildDefinition quantitySystemChild;
+	private BaseRuntimeChildDefinition quantityCodeChild;
+	private BaseRuntimeChildDefinition moneyValueChild;
+	private BaseRuntimeChildDefinition moneyCurrencyChild;
+	private BaseRuntimeElementCompositeDefinition<?> locationPositionDefinition;
+	private BaseRuntimeChildDefinition codeSystemUrlValueChild;
+	private BaseRuntimeChildDefinition rangeLowValueChild;
+	private BaseRuntimeChildDefinition rangeHighValueChild;
 
 	/**
 	 * Constructor
@@ -77,14 +86,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
-		BaseRuntimeElementCompositeDefinition<?> codeSystemDefinition;
-		BaseRuntimeChildDefinition codeSystemUrlValueChild = null;
-		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
-			codeSystemDefinition = getContext().getResourceDefinition("CodeSystem");
-			assert codeSystemDefinition != null;
-			codeSystemUrlValueChild = codeSystemDefinition.getChildByName("url");
-		}
+	public SearchParamSet<BaseResourceIndexedSearchParam> extractSearchParamTokens(IBaseResource theResource) {
 
 		String resourceTypeName = toRootTypeName(theResource);
 		String useSystem;
@@ -176,15 +178,20 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addToken_ContactPoint(resourceTypeName, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
 		return extractSearchParams(theResource, extractor, RestSearchParameterTypeEnum.TOKEN);
 	}
 
+	public void addUnexpectedDatatypeWarning(SearchParamSet<? extends BaseResourceIndexedSearchParam> params, RuntimeSearchParam searchParam, IBase value) {
+		params.addWarning("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+	}
+
 	@Override
-	public Set<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamUri> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
@@ -197,7 +204,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addUri_Uri(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -205,13 +213,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
-		// TODO: implement
-		return Collections.emptySet();
+	public SearchParamSet<ResourceIndexedSearchParamCoords> extractSearchParamCoords(IBaseResource theResource) {
+		return new SearchParamSet<>();
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamDate> extractSearchParamDates(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamDate> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
 			String resourceType = toRootTypeName(theResource);
@@ -231,7 +238,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					// CarePlan.activitydate can be a string - ignored for now
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -239,7 +247,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamNumber> extractSearchParamNumber(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamNumber> extractor = (params, searchParam, value, path) -> {
 			String nextType = toRootTypeName(value);
@@ -260,7 +268,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addNumber_Decimal(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -268,11 +277,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
-		BaseRuntimeElementCompositeDefinition<?> locationDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getResourceDefinition("Location");
-		BaseRuntimeChildDefinition locationPositionValueChild = locationDefinition.getChildByName("position");
-		BaseRuntimeElementCompositeDefinition<?> locationPositionDefinition = (BaseRuntimeElementCompositeDefinition<?>) locationPositionValueChild.getChildByName("position");
-
+	public SearchParamSet<ResourceIndexedSearchParamQuantity> extractSearchParamQuantity(IBaseResource theResource) {
 
 		IExtractor<ResourceIndexedSearchParamQuantity> extractor = (params, searchParam, value, path) -> {
 			if (value.getClass().equals(locationPositionDefinition.getImplementingClass())) {
@@ -293,7 +298,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addQuantity_Range(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -301,7 +307,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	@Override
-	public Set<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
+	public SearchParamSet<ResourceIndexedSearchParamString> extractSearchParamStrings(IBaseResource theResource) {
 		IExtractor<ResourceIndexedSearchParamString> extractor = (params, searchParam, value, path) -> {
 			String resourceType = toRootTypeName(theResource);
 
@@ -330,7 +336,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 					addString_Range(resourceType, params, searchParam, value);
 					break;
 				default:
-					throw new ConfigurationException("Search param " + searchParam.getName() + " is of unexpected datatype: " + value.getClass());
+					addUnexpectedDatatypeWarning(params, searchParam, value);
+					break;
 			}
 		};
 
@@ -356,7 +363,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	/**
-	 * [
 	 * Override parent because we're using FHIRPath here
 	 */
 	private List<IBase> extractValues(String thePaths, IBaseResource theResource) {
@@ -419,13 +425,34 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		addIgnoredType(getContext(), "Ratio", myIgnoredForSearchDatatypes);
 		addIgnoredType(getContext(), "SampledData", myIgnoredForSearchDatatypes);
 		addIgnoredType(getContext(), "Signature", myIgnoredForSearchDatatypes);
+
+		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
+		quantityValueChild = quantityDefinition.getChildByName("value");
+		quantitySystemChild = quantityDefinition.getChildByName("system");
+		 quantityCodeChild = quantityDefinition.getChildByName("code");
+
+		BaseRuntimeElementCompositeDefinition<?> moneyDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Money");
+		moneyValueChild = moneyDefinition.getChildByName("value");
+		 moneyCurrencyChild = moneyDefinition.getChildByName("currency");
+
+		BaseRuntimeElementCompositeDefinition<?> locationDefinition = getContext().getResourceDefinition("Location");
+		BaseRuntimeChildDefinition locationPositionValueChild = locationDefinition.getChildByName("position");
+		locationPositionDefinition = (BaseRuntimeElementCompositeDefinition<?>) locationPositionValueChild.getChildByName("position");
+
+		BaseRuntimeElementCompositeDefinition<?> codeSystemDefinition;
+		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
+			codeSystemDefinition = getContext().getResourceDefinition("CodeSystem");
+			assert codeSystemDefinition != null;
+			codeSystemUrlValueChild = codeSystemDefinition.getChildByName("url");
+		}
+
+		BaseRuntimeElementCompositeDefinition<?> rangeDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Range");
+		 rangeLowValueChild = rangeDefinition.getChildByName("low");
+		 rangeHighValueChild = rangeDefinition.getChildByName("high");
+
 	}
 
 	private void addQuantity_Quantity(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> quantityDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Quantity");
-		BaseRuntimeChildDefinition quantityValueChild = quantityDefinition.getChildByName("value");
-		BaseRuntimeChildDefinition quantitySystemChild = quantityDefinition.getChildByName("system");
-		BaseRuntimeChildDefinition quantityCodeChild = quantityDefinition.getChildByName("code");
 
 		Optional<IPrimitiveType<BigDecimal>> valueField = quantityValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
@@ -440,9 +467,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addQuantity_Money(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> moneyDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Money");
-		BaseRuntimeChildDefinition moneyValueChild = moneyDefinition.getChildByName("value");
-		BaseRuntimeChildDefinition moneyCurrencyChild = moneyDefinition.getChildByName("currency");
 
 		Optional<IPrimitiveType<BigDecimal>> valueField = moneyValueChild.getAccessor().getFirstValueOrNull(theValue);
 		if (valueField.isPresent() && valueField.get().getValue() != null) {
@@ -458,9 +482,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 	private void addQuantity_Range(String theResourceType, Set<ResourceIndexedSearchParamQuantity> theParams, RuntimeSearchParam theSearchParam, IBase theValue) {
-		BaseRuntimeElementCompositeDefinition<?> rangeDefinition = (BaseRuntimeElementCompositeDefinition<?>) getContext().getElementDefinition("Range");
-		BaseRuntimeChildDefinition rangeLowValueChild = rangeDefinition.getChildByName("low");
-		BaseRuntimeChildDefinition rangeHighValueChild = rangeDefinition.getChildByName("high");
 
 		Optional<IBase> low = rangeLowValueChild.getAccessor().getFirstValueOrNull(theValue);
 		low.ifPresent(theIBase -> addQuantity_Quantity(theResourceType, theParams, theSearchParam, theIBase));
@@ -758,8 +779,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	}
 
 
-	private <T extends BaseResourceIndexedSearchParam> Set<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
-		Set<T> retVal = new HashSet<>();
+	private <T extends BaseResourceIndexedSearchParam> SearchParamSet<T> extractSearchParams(IBaseResource theResource, IExtractor<T> theExtractor, RestSearchParameterTypeEnum theSearchParamType) {
+		SearchParamSet<T> retVal = new SearchParamSet<>();
 
 		Collection<RuntimeSearchParam> searchParams = getSearchParams(theResource);
 		for (RuntimeSearchParam nextSpDef : searchParams) {
@@ -879,14 +900,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		List<? extends IBase> get() throws FHIRException;
 
-
 	}
 
 	@FunctionalInterface
 	private interface IExtractor<T> {
 
 
-		void extract(Set<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath);
+		void extract(SearchParamSet<T> theParams, RuntimeSearchParam theSearchParam, IBase theValue, String thePath);
 
 	}
 
