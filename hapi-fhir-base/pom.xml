@@ -122,11 +122,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Test -->
-		<dependency>
-			<groupId>com.google.truth</groupId>
-			<artifactId>truth</artifactId>
-		</dependency>
 	</dependencies>
 
 	<build>
