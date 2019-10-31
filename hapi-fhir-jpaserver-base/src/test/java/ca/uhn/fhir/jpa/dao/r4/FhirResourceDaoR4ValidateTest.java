@@ -731,6 +731,21 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 
+	@Test
+	public void testValidateCodeInUnknownCodeSystemWithRequiredBinding() throws IOException {
+		Condition condition = loadResourceFromClasspath(Condition.class, "/r4/code-in-unknown-system-with-required-binding.xml");
+
+		try {
+			myConditionDao.validate(condition, null, null, null, null, null, null);
+			fail();
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
+			assertThat(oo.getIssueFirstRep().getDiagnostics(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/condition-clinical"));
+		}
+	}
+
+
 
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;

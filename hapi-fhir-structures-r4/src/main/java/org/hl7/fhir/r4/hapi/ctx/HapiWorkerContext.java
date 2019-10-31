@@ -30,6 +30,8 @@ import org.hl7.fhir.r4.utils.IResourceValidator;
 import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
+  private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
   private final FhirContext myCtx;
   private final Cache<String, Resource> myFetchedResourceCache;
   private IValidationSupport myValidationSupport;
@@ -159,7 +162,7 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, CodeableConcept theCode, ValueSet theVs) {
     for (Coding next : theCode.getCoding()) {
       ValidationResult retVal = validateCode(theOptions, next, theVs);
-      if (retVal != null && retVal.isOk()) {
+      if (retVal.isOk()) {
         return retVal;
       }
     }
@@ -189,91 +192,105 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     throw new UnsupportedOperationException();
   }
 
+
+
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
 
-    if (theVs != null && isNotBlank(theCode)) {
-      for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
-        if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
-          for (ConceptReferenceComponent nextCode : next.getConcept()) {
-            if (theCode.equals(nextCode.getCode())) {
-              CodeType code = new CodeType(theCode);
-              return new ValidationResult(new ConceptDefinitionComponent(code));
-            }
-          }
-        }
-      }
-    }
+    Validate.notBlank(theVs.getUrl(), "No ValueSet URL provided");
 
-    boolean caseSensitive = true;
-    if (isNotBlank(theSystem)) {
-      CodeSystem system = fetchCodeSystem(theSystem);
-      if (system == null) {
-        return new ValidationResult(IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
-      }
-
-      if (system.hasCaseSensitive()) {
-        caseSensitive = system.getCaseSensitive();
-      }
-    }
-
-    String wantCode = theCode;
-    if (!caseSensitive) {
-      wantCode = wantCode.toUpperCase();
-    }
-
-    ValueSetExpansionOutcome expandedValueSet = null;
-
-    /*
-     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-     */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+    CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+    if (outcome != null && outcome.isOk()) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
+      definition.setCode(theCode);
+      definition.setDisplay(outcome.getDisplay());
       return new ValidationResult(definition);
     }
 
-    /*
-     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
-     */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
-      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-      definition.setCode(theSystem);
-      definition.setDisplay(theCode);
-      return new ValidationResult(definition);
-    }
-
-    if (theVs != null && isNotBlank(theVs.getUrl())) {
-      CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
-      if (outcome != null && outcome.isOk()) {
-        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-        definition.setCode(theCode);
-        definition.setDisplay(outcome.getDisplay());
-        return new ValidationResult(definition);
-      }
-    } else {
-      expandedValueSet = expand(theVs, null);
-    }
-
-    if (expandedValueSet != null) {
-      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-        String nextCode = next.getCode();
-        if (!caseSensitive) {
-          nextCode = nextCode.toUpperCase();
-        }
-
-        if (nextCode.equals(wantCode)) {
-          if (theSystem == null || next.getSystem().equals(theSystem)) {
-            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-            definition.setCode(next.getCode());
-            definition.setDisplay(next.getDisplay());
-            ValidationResult retVal = new ValidationResult(definition);
-            return retVal;
-          }
-        }
-      }
-    }
+//    if (theVs != null && isNotBlank(theCode)) {
+//      for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
+//        if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
+//          for (ConceptReferenceComponent nextCode : next.getConcept()) {
+//            if (theCode.equals(nextCode.getCode())) {
+//              CodeType code = new CodeType(theCode);
+//              return new ValidationResult(new ConceptDefinitionComponent(code));
+//            }
+//          }
+//        }
+//      }
+//    }
+//
+//    boolean caseSensitive = true;
+//    if (isNotBlank(theSystem)) {
+//      CodeSystem system = fetchCodeSystem(theSystem);
+//      if (system == null) {
+//        String message = "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present";
+//        ourLog.warn(message);
+//        return new ValidationResult(IssueSeverity.ERROR, message, TerminologyServiceErrorClass.SERVER_ERROR);
+//      }
+//
+//      if (system.hasCaseSensitive()) {
+//        caseSensitive = system.getCaseSensitive();
+//      }
+//    }
+//
+//    String wantCode = theCode;
+//    if (!caseSensitive) {
+//      wantCode = wantCode.toUpperCase();
+//    }
+//
+//    ValueSetExpansionOutcome expandedValueSet = null;
+//
+//    /*
+//     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
+//     */
+//    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+//      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+//      definition.setCode(theSystem);
+//      definition.setDisplay(theCode);
+//      return new ValidationResult(definition);
+//    }
+//
+//    /*
+//     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
+//     */
+//    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+//      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+//      definition.setCode(theSystem);
+//      definition.setDisplay(theCode);
+//      return new ValidationResult(definition);
+//    }
+//
+//    if (theVs != null && isNotBlank(theVs.getUrl())) {
+//      CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+//      if (outcome != null && outcome.isOk()) {
+//        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+//        definition.setCode(theCode);
+//        definition.setDisplay(outcome.getDisplay());
+//        return new ValidationResult(definition);
+//      }
+//    } else {
+//      expandedValueSet = expand(theVs, null);
+//    }
+//
+//    if (expandedValueSet != null) {
+//      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
+//        String nextCode = next.getCode();
+//        if (!caseSensitive) {
+//          nextCode = nextCode.toUpperCase();
+//        }
+//
+//        if (nextCode.equals(wantCode)) {
+//          if (theSystem == null || next.getSystem().equals(theSystem)) {
+//            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+//            definition.setCode(next.getCode());
+//            definition.setDisplay(next.getDisplay());
+//            ValidationResult retVal = new ValidationResult(definition);
+//            return retVal;
+//          }
+//        }
+//      }
+//    }
 
     return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
   }
