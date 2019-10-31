@@ -4,8 +4,9 @@ import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.util.Collections;
 
-import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.*;
 
@@ -58,7 +59,7 @@ public class DropTableTest extends BaseTest {
 	}
 
 	@Test
-	public void testFlywayMigrationRequired() throws SQLException {
+	public void testFlywayGetMigrationInfo() throws SQLException {
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
 		DropTableTask task = new DropTableTask("1",  "1");
@@ -67,9 +68,9 @@ public class DropTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
 
-		assertTrue(getMigrator().migrationRequired());
+		assertThat(getMigrator().getMigrationInfo().pending().length, greaterThan(0));
 		getMigrator().migrate();
-		assertFalse(getMigrator().migrationRequired());
+		assertThat(getMigrator().getMigrationInfo().pending().length, equalTo(0));
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
 	}

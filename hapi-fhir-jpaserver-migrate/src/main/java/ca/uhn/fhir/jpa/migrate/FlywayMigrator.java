@@ -21,12 +21,14 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Driver;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +43,23 @@ public class FlywayMigrator {
 	private List<FlywayMigration> myTasks = new ArrayList<>();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
+
+	public FlywayMigrator() {}
+
+	public FlywayMigrator(BasicDataSource theDataSource) {
+		myConnectionUrl = theDataSource.getUrl();
+		myUsername = theDataSource.getUsername();
+		myPassword = theDataSource.getPassword();
+		String driverClassName = theDataSource.getDriverClassName();
+		if (driverClassName == null) {
+			ourLog.error(this.getClass().getSimpleName() + " constructed without a database driver");
+		} else {
+			myDriverType = DriverTypeEnum.fromDriverClassName(driverClassName);
+			if (myDriverType == null) {
+				ourLog.error("Unknown driver class " + driverClassName);
+			}
+		}
+	}
 
 	public void setDriverType(DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
@@ -117,11 +136,13 @@ public class FlywayMigrator {
 		return myNoColumnShrink;
 	}
 
-	public boolean migrationRequired() {
+	public MigrationInfoService getMigrationInfo() {
+		if (myDriverType == null) {
+			return null;
+		}
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
 			Flyway flyway = initFlyway(connectionProperties);
-			MigrationInfoService info = flyway.info();
-			return info.pending().length > 0;
+			return flyway.info();
 		}
 	}
 }

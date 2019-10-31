@@ -19,15 +19,15 @@ public class AddIdGeneratorTaskTest extends BaseTest {
 	public void testAddIdGenerator() throws SQLException {
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), empty());
 
-		MyMigrationTasks migrator = new MyMigrationTasks("123456.7");
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		MyMigrationTasks migrationTasks = new MyMigrationTasks("123456.7");
+		getMigrator().addTasks(migrationTasks.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));
 
 		// Second time, should produce no action
-		migrator = new MyMigrationTasks("123456.8");
-		getMigrator().addTasks(migrator.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
+		migrationTasks = new MyMigrationTasks("123456.8");
+		getMigrator().addTasks(migrationTasks.getTasks(VersionEnum.V3_3_0, VersionEnum.V3_6_0));
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getSequenceNames(getConnectionProperties()), containsInAnyOrder("SEQ_FOO"));

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
 import ca.uhn.fhir.jpa.migrate.Migrator;
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
 import org.junit.Before;
@@ -13,10 +14,12 @@ import java.util.Map;
 
 public class BaseTest {
 
+	private static final String DATABASE_NAME = "DATABASE";
 	private static int ourDatabaseUrl = 0;
 	private String myUrl;
 	private FlywayMigrator myMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
+	private final BasicDataSource myDataSource = new BasicDataSource();
 
 	public String getUrl() {
 		return myUrl;
@@ -24,6 +27,28 @@ public class BaseTest {
 
 	public DriverTypeEnum.ConnectionProperties getConnectionProperties() {
 		return myConnectionProperties;
+	}
+
+	@Before()
+	public void before() {
+		org.h2.Driver.class.toString();
+		++ourDatabaseUrl;
+		myUrl = "jdbc:h2:mem:" + getDatabaseName();
+
+		myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
+		myDataSource.setUrl(myUrl);
+		myDataSource.setUsername("SA");
+		myDataSource.setPassword("SA");
+		myDataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
+		myMigrator = new FlywayMigrator(myDataSource);
+	}
+
+	protected String getDatabaseName() {
+		return DATABASE_NAME + ourDatabaseUrl;
+	}
+
+	protected BasicDataSource getDataSource() {
+		return myDataSource;
 	}
 
 	@After
@@ -53,19 +78,5 @@ public class BaseTest {
 		myConnectionProperties.close();
 	}
 
-	@Before()
-	public void before() {
-		org.h2.Driver.class.toString();
-
-		myUrl = "jdbc:h2:mem:database" + (ourDatabaseUrl++);
-
-		myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
-
-		myMigrator = new FlywayMigrator();
-		myMigrator.setConnectionUrl(myUrl);
-		myMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
-		myMigrator.setUsername("SA");
-		myMigrator.setPassword("SA");
-	}
 
 }

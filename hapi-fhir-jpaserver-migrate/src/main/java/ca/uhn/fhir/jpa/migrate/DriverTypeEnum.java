@@ -66,6 +66,19 @@ public enum DriverTypeEnum {
 		myDerby = theDerby;
 	}
 
+	public String getDriverClassName() {
+		return myDriverClassName;
+	}
+
+	public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {
+		for (DriverTypeEnum driverTypeEnum : DriverTypeEnum.values()) {
+			if (driverTypeEnum.myDriverClassName.equals(theDriverClassName)) {
+				return driverTypeEnum;
+			}
+		}
+		return null;
+	}
+
 	public ConnectionProperties newConnectionProperties(String theUrl, String theUsername, String thePassword) {
 
 		Driver driver;
