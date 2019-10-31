@@ -485,6 +485,10 @@
 				the server would incorrectly ignore inclusion rules that specified a system but no codes (i.e.
 				include the whole system). This has been corrected.
 			</action>
+			<action type="fix" issue="1538">
+				The hapi-fhir-testpage-overlay has been updated to support R5 endpoints. Thanks to Dazhi Jiao
+				for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
