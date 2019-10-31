@@ -65,7 +65,7 @@ public class ExecuteRawSqlTask extends BaseTask<ExecuteRawSqlTask> {
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
 
-		ourLog.info("Going to execute {} SQL statements", sqlStatements.size());
+		logInfo(ourLog, "Going to execute {} SQL statements", sqlStatements.size());
 
 		for (String nextSql : sqlStatements) {
 			executeSql(null, nextSql);

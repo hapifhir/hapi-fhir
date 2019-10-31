@@ -55,7 +55,7 @@ public class AddTableByColumnTask extends BaseTableTask<AddTableByColumnTask> {
 	public void execute() throws SQLException {
 
 		if (JdbcUtils.getTableNames(getConnectionProperties()).contains(getTableName())) {
-			ourLog.info("Already have table named {} - No action performed", getTableName());
+			logInfo(ourLog, "Already have table named {} - No action performed", getTableName());
 			return;
 		}
 

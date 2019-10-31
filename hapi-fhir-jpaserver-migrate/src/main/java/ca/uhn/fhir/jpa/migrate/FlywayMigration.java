@@ -22,8 +22,7 @@ public class FlywayMigration implements JavaMigration {
 
 	@Override
 	public MigrationVersion getVersion() {
-		String flywayVersion = myTask.getFlywayVersion();
-		return MigrationVersion.fromVersion(flywayVersion);
+		return MigrationVersion.fromVersion(myTask.getFlywayVersion());
 	}
 
 	@Override

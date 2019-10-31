@@ -49,7 +49,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (!columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} doesn't exist on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
@@ -71,7 +71,7 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 		boolean alreadyOfCorrectType = existingType.equals(getColumnType(), columnLength);
 		boolean alreadyCorrectNullable = isNullable() == nullable;
 		if (alreadyOfCorrectType && alreadyCorrectNullable) {
-			ourLog.info("Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
+			logInfo(ourLog, "Column {} on table {} is already of type {} and has nullable {} - No action performed", getColumnName(), getTableName(), existingType, nullable);
 			return;
 		}
 
@@ -128,13 +128,13 @@ public class ModifyColumnTask extends BaseTableColumnTypeTask<ModifyColumnTask> 
 				throw new IllegalStateException("Dont know how to handle " + getDriverType());
 		}
 
-		ourLog.info("Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
+		logInfo(ourLog, "Updating column {} on table {} to type {}", getColumnName(), getTableName(), type);
 		if (sql != null) {
 			executeSql(getTableName(), sql);
 		}
 
 		if (sqlNotNull != null) {
-			ourLog.info("Updating column {} on table {} to not null", getColumnName(), getTableName());
+			logInfo(ourLog, "Updating column {} on table {} to not null", getColumnName(), getTableName());
 			executeSql(getTableName(), sqlNotNull);
 		}
 	}

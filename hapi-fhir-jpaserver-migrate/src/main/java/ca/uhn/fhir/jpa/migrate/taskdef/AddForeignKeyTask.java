@@ -69,7 +69,7 @@ public class AddForeignKeyTask extends BaseTableColumnTask<AddForeignKeyTask> {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myForeignTableName, getTableName());
 		if (existing.contains(myConstraintName)) {
-			ourLog.info("Already have constraint named {} - No action performed", myConstraintName);
+			logInfo(ourLog, "Already have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 

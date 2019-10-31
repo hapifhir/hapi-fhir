@@ -69,11 +69,11 @@ public class AddIndexTask extends BaseTableTask<AddIndexTask> {
 	public void execute() throws SQLException {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 		if (indexNames.contains(myIndexName)) {
-			ourLog.info("Index {} already exists on table {} - No action performed", myIndexName, getTableName());
+			logInfo(ourLog, "Index {} already exists on table {} - No action performed", myIndexName, getTableName());
 			return;
 		}
 
-		ourLog.info("Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
+		logInfo(ourLog, "Going to add a {} index named {} on table {} for columns {}", (myUnique ? "UNIQUE" : "NON-UNIQUE"), myIndexName, getTableName(), myColumns);
 
 		String unique = myUnique ? "unique " : "";
 		String columns = String.join(", ", myColumns);

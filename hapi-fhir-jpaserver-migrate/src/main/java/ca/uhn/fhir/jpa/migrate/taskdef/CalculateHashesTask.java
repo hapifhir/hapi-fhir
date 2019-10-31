@@ -73,7 +73,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
 					jdbcTemplate.setMaxRows(100000);
 					String sql = "SELECT * FROM " + getTableName() + " WHERE " + getColumnName() + " IS NULL";
-					ourLog.info("Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
+					logInfo(ourLog, "Finding up to {} rows in {} that requires hashes", myBatchSize, getTableName());
 
 					jdbcTemplate.query(sql, rch);
 					rch.done();
@@ -87,7 +87,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					break;
 				}
 
-				ourLog.info("Waiting for {} tasks to complete", futures.size());
+				logInfo(ourLog, "Waiting for {} tasks to complete", futures.size());
 				for (Future<?> next : futures) {
 					try {
 						next.get();
@@ -119,7 +119,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 		RejectedExecutionHandler rejectedExecutionHandler = new RejectedExecutionHandler() {
 			@Override
 			public void rejectedExecution(Runnable theRunnable, ThreadPoolExecutor theExecutor) {
-				ourLog.info("Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
+				logInfo(ourLog, "Note: Executor queue is full ({} elements), waiting for a slot to become available!", executorQueue.size());
 				StopWatch sw = new StopWatch();
 				try {
 					executorQueue.put(theRunnable);
@@ -127,7 +127,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 					throw new RejectedExecutionException("Task " + theRunnable.toString() +
 						" rejected from " + theE.toString());
 				}
-				ourLog.info("Slot become available after {}ms", sw.getMillis());
+				logInfo(ourLog, "Slot become available after {}ms", sw.getMillis());
 			}
 		};
 		myExecutor = new ThreadPoolExecutor(
@@ -183,7 +183,7 @@ public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask
 
 				return theRows.size();
 			});
-			ourLog.info("Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
+			logInfo(ourLog, "Updated {} rows on {} in {}", theRows.size(), getTableName(), sw.toString());
 		};
 		return myExecutor.submit(task);
 	}

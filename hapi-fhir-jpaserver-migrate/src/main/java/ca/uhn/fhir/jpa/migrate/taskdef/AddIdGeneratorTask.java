@@ -90,7 +90,7 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 				.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (sequenceNames.contains(myGeneratorName.toLowerCase())) {
-				ourLog.info("Sequence {} already exists - No action performed", myGeneratorName);
+				logInfo(ourLog, "Sequence {} already exists - No action performed", myGeneratorName);
 				return;
 			}
 

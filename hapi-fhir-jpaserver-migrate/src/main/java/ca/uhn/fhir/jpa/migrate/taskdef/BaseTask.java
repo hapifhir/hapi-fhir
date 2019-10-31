@@ -99,7 +99,7 @@ public abstract class BaseTask<T extends BaseTask> {
 			Integer changes = getConnectionProperties().getTxTemplate().execute(t -> {
 				JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 				int changesCount = jdbcTemplate.update(theSql, theArguments);
-				ourLog.info("SQL \"{}\" returned {}", theSql, changesCount);
+				logInfo(ourLog, "SQL \"{}\" returned {}", theSql, changesCount);
 				return changesCount;
 			});
 
@@ -148,6 +148,10 @@ public abstract class BaseTask<T extends BaseTask> {
 			releasePart = releasePart.substring(1);
 		}
 		return releasePart + "." + myVersion;
+	}
+
+	protected void logInfo(Logger theLog, String theFormattedMessage, Object... theArguments) {
+		theLog.info(getFlywayVersion() + ": " + theFormattedMessage, theArguments);
 	}
 
 	public void validateVersion() {

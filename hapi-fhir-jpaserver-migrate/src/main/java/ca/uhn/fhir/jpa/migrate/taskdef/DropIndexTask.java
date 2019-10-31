@@ -56,7 +56,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
 
 		if (!indexNames.contains(myIndexName)) {
-			ourLog.info("Index {} does not exist on table {} - No action needed", myIndexName, getTableName());
+			logInfo(ourLog, "Index {} does not exist on table {} - No action needed", myIndexName, getTableName());
 			return;
 		}
 
@@ -65,7 +65,7 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 		Optional<String> sql = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
 		if (sql.isPresent()) {
-			ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
+			logInfo(ourLog, "Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 			executeSql(getTableName(), sql.get());
 		}
 	}

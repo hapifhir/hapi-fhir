@@ -67,7 +67,7 @@ public class DropForeignKeyTask extends BaseTableTask<DropForeignKeyTask> {
 
 		Set<String> existing = JdbcUtils.getForeignKeys(getConnectionProperties(), myParentTableName, getTableName());
 		if (!existing.contains(myConstraintName)) {
-			ourLog.info("Don't have constraint named {} - No action performed", myConstraintName);
+			logInfo(ourLog, "Don't have constraint named {} - No action performed", myConstraintName);
 			return;
 		}
 

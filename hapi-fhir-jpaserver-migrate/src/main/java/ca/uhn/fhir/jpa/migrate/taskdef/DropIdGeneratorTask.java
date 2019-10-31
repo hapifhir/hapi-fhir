@@ -90,7 +90,7 @@ public class DropIdGeneratorTask extends BaseTask<DropIdGeneratorTask> {
 				.collect(Collectors.toSet());
 			ourLog.debug("Currently have sequences: {}", sequenceNames);
 			if (!sequenceNames.contains(myGeneratorName.toLowerCase())) {
-				ourLog.info("Sequence {} does not exist - No action performed", myGeneratorName);
+				logInfo(ourLog, "Sequence {} does not exist - No action performed", myGeneratorName);
 				return;
 			}
 

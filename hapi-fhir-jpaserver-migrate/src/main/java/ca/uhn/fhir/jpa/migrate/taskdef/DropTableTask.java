@@ -45,10 +45,10 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 		}
 
 		Set<String> foreignKeys = JdbcUtils.getForeignKeys(getConnectionProperties(), null, getTableName());
-		ourLog.info("Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
+		logInfo(ourLog, "Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
 
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
-		ourLog.info("Table {} has the following indexes: {}", getTableName(), indexNames);
+		logInfo(ourLog, "Table {} has the following indexes: {}", getTableName(), indexNames);
 
 		for (String next : foreignKeys) {
 			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
@@ -60,12 +60,12 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 		for (String nextIndex : indexNames) {
 			Optional<String> sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
 			if (sql.isPresent()) {
-				ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+				logInfo(ourLog, "Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
 				executeSql(getTableName(), sql.get());
 			}
 		}
 
-		ourLog.info("Dropping table: {}", getTableName());
+		logInfo(ourLog, "Dropping table: {}", getTableName());
 
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);

@@ -62,12 +62,12 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 	@Override
 	public void execute() throws SQLException {
-		ourLog.info("Starting: {}", myDescription);
+		logInfo(ourLog, "Starting: {}", myDescription);
 
 		if (StringUtils.isNotBlank(myExecuteOnlyIfTableExists)) {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			if (!tableNames.contains(myExecuteOnlyIfTableExists.toUpperCase())) {
-				ourLog.info("Table {} does not exist - No action performed", myExecuteOnlyIfTableExists);
+				logInfo(ourLog, "Table {} does not exist - No action performed", myExecuteOnlyIfTableExists);
 				return;
 			}
 		}
@@ -75,7 +75,7 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
 			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
-				ourLog.info("Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				logInfo(ourLog, "Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
 				return;
 			}
 		}
@@ -129,14 +129,14 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 
 			List<Map<String, Object>> rows;
 			do {
-				ourLog.info("Querying for up to {} rows", myBatchSize);
+				logInfo(ourLog, "Querying for up to {} rows", myBatchSize);
 				rows = getTxTemplate().execute(t -> {
 					JdbcTemplate jdbcTemplate = newJdbcTemnplate();
 					jdbcTemplate.setMaxRows(myBatchSize);
 					return jdbcTemplate.query(mySql, new ColumnMapRowMapper());
 				});
 
-				ourLog.info("Processing {} rows", rows.size());
+				logInfo(ourLog, "Processing {} rows", rows.size());
 				List<Map<String, Object>> finalRows = rows;
 				getTxTemplate().execute(t -> {
 					for (Map<String, Object> nextRow : finalRows) {

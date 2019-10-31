@@ -45,7 +45,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 	public void execute() throws SQLException {
 		Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 		if (columnNames.contains(getColumnName())) {
-			ourLog.info("Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+			logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
 			return;
 		}
 
@@ -68,7 +68,7 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 				throw new IllegalStateException();
 		}
 
-		ourLog.info("Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
+		logInfo(ourLog, "Adding column {} of type {} to table {}", getColumnName(), getSqlType(), getTableName());
 		executeSql(getTableName(), sql);
 	}
 

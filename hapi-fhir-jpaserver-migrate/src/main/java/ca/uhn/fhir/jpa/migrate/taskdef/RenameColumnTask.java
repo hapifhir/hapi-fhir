@@ -76,7 +76,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 					throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because both columns exist and data exists in " + myNewName);
 				}
 
-				ourLog.info("Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
+				logInfo(ourLog, "Table {} has columns {} and {} - Going to drop {} before renaming", getTableName(), myOldName, myNewName, myNewName);
 				String sql = DropColumnTask.createSql(getTableName(), myNewName);
 				executeSql(getTableName(), sql);
 			} else {
@@ -88,7 +88,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 			}
 			throw new SQLException("Can not rename " + getTableName() + "." + myOldName + " to " + myNewName + " because neither column exists!");
 		} else if (haveNewName) {
-			ourLog.info("Column {} already exists on table {} - No action performed", myNewName, getTableName());
+			logInfo(ourLog, "Column {} already exists on table {} - No action performed", myNewName, getTableName());
 			return;
 		}
 
@@ -117,7 +117,7 @@ public class RenameColumnTask extends BaseTableTask<RenameColumnTask> {
 				throw new IllegalStateException();
 		}
 
-		ourLog.info("Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
+		logInfo(ourLog, "Renaming column {} on table {} to {}", myOldName, getTableName(), myNewName);
 		executeSql(getTableName(), sql);
 
 	}

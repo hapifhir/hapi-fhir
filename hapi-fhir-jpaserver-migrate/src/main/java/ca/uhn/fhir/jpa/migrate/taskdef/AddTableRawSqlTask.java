@@ -55,14 +55,14 @@ public class AddTableRawSqlTask extends BaseTableTask<AddTableRawSqlTask> {
 	public void execute() throws SQLException {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		if (tableNames.contains(getTableName())) {
-			ourLog.info("Table {} already exists - No action performed", getTableName());
+			logInfo(ourLog, "Table {} already exists - No action performed", getTableName());
 			return;
 		}
 
 		List<String> sqlStatements = myDriverToSqls.computeIfAbsent(getDriverType(), t -> new ArrayList<>());
 		sqlStatements.addAll(myDriverNeutralSqls);
 
-		ourLog.info("Going to create table {} using {} SQL statements", getTableName(), sqlStatements.size());
+		logInfo(ourLog, "Going to create table {} using {} SQL statements", getTableName(), sqlStatements.size());
 		getConnectionProperties().getTxTemplate().execute(t -> {
 
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
