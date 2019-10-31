@@ -160,14 +160,16 @@ public class FhirResourceDaoConceptMapR5 extends FhirResourceDaoR5<ConceptMap> i
 	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
 													 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
+		if (!retVal.isUnchangedInCurrentOperation()) {
 
-		if (retVal.getDeleted() == null) {
-			ConceptMap conceptMap = (ConceptMap) theResource;
-			myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap.convertConceptMap(conceptMap));
-		} else {
-			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
+			if (retVal.getDeleted() == null) {
+				ConceptMap conceptMap = (ConceptMap) theResource;
+				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, org.hl7.fhir.convertors.conv40_50.ConceptMap.convertConceptMap(conceptMap));
+			} else {
+				myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
+			}
 		}
-
+		
 		return retVal;
 	}
 }

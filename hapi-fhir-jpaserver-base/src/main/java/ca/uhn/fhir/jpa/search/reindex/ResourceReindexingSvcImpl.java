@@ -195,6 +195,11 @@ public class ResourceReindexingSvcImpl implements IResourceReindexingSvc {
 		mySchedulerService.scheduleFixedDelay(10 * DateUtils.MILLIS_PER_SECOND, true, jobDetail);
 	}
 
+	@VisibleForTesting
+	ReentrantLock getIndexingLockForUnitTest() {
+		return myIndexingLock;
+	}
+
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
 	public Integer runReindexingPass() {

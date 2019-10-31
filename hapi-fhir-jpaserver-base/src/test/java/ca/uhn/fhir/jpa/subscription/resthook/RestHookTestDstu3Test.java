@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.util.MetaUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -234,6 +235,33 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		createSubscription(criteria2, payload, ourListenerServerBase);
 
 		sendObservation(code, "SNOMED-CT");
+
+		// Should see 1 subscription notification
+		waitForQueueToDrain();
+		waitForSize(0, ourCreatedObservations);
+		waitForSize(1, ourUpdatedObservations);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+	}
+
+
+	@Test
+	public void testRestHookSubscriptionSource() throws Exception {
+		String payload = "application/fhir+json";
+
+		String source = "foosource";
+		String criteria = "Observation?_source=" + source;
+
+		Subscription subscription = newSubscription(criteria, payload, ourListenerServerBase, null);
+		MethodOutcome methodOutcome = ourClient.create().resource(subscription).execute();
+		Subscription savedSub = (Subscription) methodOutcome.getResource();
+		assertInMemoryTag(savedSub);
+		mySubscriptionIds.add(methodOutcome.getId());
+
+		waitForQueueToDrain();
+
+		Observation observation = new Observation();
+		MetaUtil.setSource(myFhirCtx, observation, source);
+		ourClient.create().resource(observation).execute();
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -474,11 +502,17 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("In-memory", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
-		await().until(()-> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
+		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscriptionActivated = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
-		tags = subscriptionActivated.getMeta().getTag();
+		assertInMemoryTag(subscriptionActivated);
+	}
+
+	private void assertInMemoryTag(Subscription theSubscription) {
+		List<Coding> tags;
+		Coding tag;
+		tags = theSubscription.getMeta().getTag();
 		assertEquals(1, tags.size());
 		tag = tags.get(0);
 		assertEquals(JpaConstants.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
@@ -501,7 +535,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("Database", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
-		await().until(()-> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
+		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscription = ourClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
@@ -624,9 +658,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		ourListenerServer.setHandler(proxyHandler);
 		JettyUtil.startServer(ourListenerServer);
-        ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
-        ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
-        ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
+		ourListenerPort = JettyUtil.getPortForStartedServer(ourListenerServer);
+		ourListenerServerBase = "http://localhost:" + ourListenerPort + "/fhir/context";
+		ourNotificationListenerServer = "http://localhost:" + ourListenerPort + "/fhir/subscription";
 	}
 
 	@AfterClass

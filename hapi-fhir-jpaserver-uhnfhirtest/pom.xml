@@ -51,7 +51,6 @@
 			<artifactId>hapi-fhir-testpage-overlay</artifactId>
 			<version>${project.version}</version>
 			<classifier>classes</classifier>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
