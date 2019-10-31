@@ -103,6 +103,8 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	public static final int DEFAULT_FETCH_SIZE = 250;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseTermReadSvcImpl.class);
+	public static final String VALUESET_LANGUAGES = "http://hl7.org/fhir/ValueSet/languages";
+	public static final String VALUESET_MIMETYPES = "http://hl7.org/fhir/ValueSet/mimetypes";
 	private static boolean ourLastResultsFromTranslationCache; // For testing.
 	private static boolean ourLastResultsFromTranslationWithReverseCache; // For testing.
 	@Autowired
@@ -184,12 +186,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 	private void addConceptsToList(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, String theSystem, List<CodeSystem.ConceptDefinitionComponent> theConcept, boolean theAdd) {
 		for (CodeSystem.ConceptDefinitionComponent next : theConcept) {
 			if (isNoneBlank(theSystem, next.getCode())) {
-				if (theAdd && theAddedCodes.add(theSystem + "|" + next.getCode())) {
-					theValueSetCodeAccumulator.includeConcept(theSystem, next.getCode(), next.getDisplay());
-				}
-				if (!theAdd && theAddedCodes.remove(theSystem + "|" + next.getCode())) {
-					theValueSetCodeAccumulator.excludeConcept(theSystem, next.getCode());
-				}
+				addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, theSystem, next.getCode(), next.getDisplay());
 			}
 			addConceptsToList(theValueSetCodeAccumulator, theAddedCodes, theSystem, next.getConcept(), theAdd);
 		}
@@ -549,7 +546,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 		if (hasSystem) {
 
-			if (theWantConceptOrNull != null && !system.equals(theWantConceptOrNull.getSystem())) {
+			if (theWantConceptOrNull != null && theWantConceptOrNull.getSystem() != null && !system.equals(theWantConceptOrNull.getSystem())) {
 				return false;
 			}
 
@@ -674,31 +671,37 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 				// No CodeSystem matching the URL found in the database.
 
 				CodeSystem codeSystemFromContext = getCodeSystemFromContext(system);
-				if (codeSystemFromContext == null) {
-					String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
-					ourLog.warn(msg);
-					theValueSetCodeAccumulator.addMessage(msg);
-					return false;
-				}
 
 				if (!theIncludeOrExclude.getConcept().isEmpty()) {
 					for (ValueSet.ConceptReferenceComponent next : theIncludeOrExclude.getConcept()) {
 						String nextCode = next.getCode();
 						if (theWantConceptOrNull == null || theWantConceptOrNull.getCode().equals(nextCode)) {
 							if (isNoneBlank(system, nextCode) && !theAddedCodes.contains(system + "|" + nextCode)) {
-								CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
-								if (code != null) {
-									if (theAdd && theAddedCodes.add(system + "|" + nextCode)) {
-										theValueSetCodeAccumulator.includeConcept(system, nextCode, code.getDisplay());
+
+								if (codeSystemFromContext != null) {
+									CodeSystem.ConceptDefinitionComponent code = findCode(codeSystemFromContext.getConcept(), nextCode);
+									if (code != null) {
+										String display = code.getDisplay();
+										addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, display);
 									}
-									if (!theAdd && theAddedCodes.remove(system + "|" + nextCode)) {
-										theValueSetCodeAccumulator.excludeConcept(system, nextCode);
-									}
+								} else {
+
+									// This code just plain doesn't exist in any known codesystem, but the valueset
+									// explicitly includes it. We'll trust the valueset in this case. This happens for
+									// codesytems such a USPS. There is probably a better way to handle this...
+									addOrRemoveCode(theValueSetCodeAccumulator, theAddedCodes, theAdd, system, nextCode, null);
 								}
 							}
 						}
 					}
 				} else {
+					if (codeSystemFromContext == null) {
+						String msg = myContext.getLocalizer().getMessage(BaseTermReadSvcImpl.class, "expansionRefersToUnknownCs", system);
+						ourLog.warn(msg);
+						theValueSetCodeAccumulator.addMessage(msg);
+						return false;
+					}
+
 					List<CodeSystem.ConceptDefinitionComponent> concept = codeSystemFromContext.getConcept();
 					concept = concept
 						.stream()
@@ -753,6 +756,15 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		}
 
 
+	}
+
+	private void addOrRemoveCode(IValueSetConceptAccumulator theValueSetCodeAccumulator, Set<String> theAddedCodes, boolean theAdd, String theSystem, String theCode, String theDisplay) {
+		if (theAdd && theAddedCodes.add(theSystem + "|" + theCode)) {
+			theValueSetCodeAccumulator.includeConcept(theSystem, theCode, theDisplay);
+		}
+		if (!theAdd && theAddedCodes.remove(theSystem + "|" + theCode)) {
+			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
+		}
 	}
 
 	private void handleFilters(BooleanJunction<?> theBool, String theSystem, QueryBuilder theQb, ValueSet.ConceptSetComponent theIncludeOrExclude) {
@@ -1618,6 +1630,13 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 
 	@Override
 	public boolean supportsSystem(String theSystem) {
+
+		// Validation with only a code but no system can happen when validating against a
+		// valueset, which only the full term service can handle
+		if (theSystem == null) {
+			return true;
+		}
+
 		TermCodeSystem cs = getCodeSystem(theSystem);
 		return cs != null;
 	}
@@ -1843,7 +1862,7 @@ public abstract class BaseTermReadSvcImpl implements ITermReadSvc, ApplicationCo
 		List<VersionIndependentConcept> expansionOutcome = expandValueSetAndReturnVersionIndependentConcepts(canonicalValueSet, wantConcept);
 		return expansionOutcome
 			.stream()
-			.filter(t -> t.getSystem().equals(theCodeSystem) && t.getCode().equals(theCode))
+			.filter(t -> (theCodeSystem == null || t.getSystem().equals(theCodeSystem)) && t.getCode().equals(theCode))
 			.findFirst();
 	}
 

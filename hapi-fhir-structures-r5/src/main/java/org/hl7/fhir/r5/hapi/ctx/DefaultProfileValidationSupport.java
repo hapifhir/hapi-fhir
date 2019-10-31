@@ -23,8 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class DefaultProfileValidationSupport implements IValidationSupport {
 
@@ -173,6 +172,9 @@ public class DefaultProfileValidationSupport implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(FhirContext theContext, String theSystem) {
+		if (isBlank(theSystem)) {
+			return false;
+		}
 		CodeSystem cs = fetchCodeSystem(theContext, theSystem);
 		return cs != null && cs.getContent() != CodeSystemContentMode.NOTPRESENT;
 	}

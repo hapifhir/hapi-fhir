@@ -449,9 +449,9 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 	public void testLargeBase64() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myVal.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
+		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertEquals(1, errors.size());
-		assertEquals("Code http://loinc.org/1-8 was not validated because the code system is not present", errors.get(0).getMessage());
+		assertEquals("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/report-codes (http://hl7.org/fhir/ValueSet/report-codes, and a code is recommended to come from this value set) (codes = http://loinc.org#1-8)", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1149,9 +1149,7 @@ public class FhirInstanceValidatorR4Test extends BaseTest {
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertEquals(
-			"Code http://example.com/foo/bar/bar was not validated because the code system is not present",
-			all.get(0).getMessage());
+		assertThat(all.get(0).getMessage(), containsString("None of the codes provided are in the value set http://hl7.org/fhir/ValueSet/identifier-type"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}

@@ -3,7 +3,6 @@ package org.hl7.fhir.r4.hapi.ctx;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IContextValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.StructureDefinition;

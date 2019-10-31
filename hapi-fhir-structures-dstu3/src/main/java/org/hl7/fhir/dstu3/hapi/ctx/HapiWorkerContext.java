@@ -289,43 +289,12 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
 
   @Override
   public ValidationResult validateCode(String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-
-    if (theVs != null && isNotBlank(theCode)) {
-      for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
-        if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
-          for (ConceptReferenceComponent nextCode : next.getConcept()) {
-            if (theCode.equals(nextCode.getCode())) {
-              CodeType code = new CodeType(theCode);
-              return new ValidationResult(new ConceptDefinitionComponent(code));
-            }
-          }
-        }
-      }
-    }
-
-    boolean caseSensitive = true;
-    if (isNotBlank(theSystem)) {
-      CodeSystem system = fetchCodeSystem(theSystem);
-      if (system == null) {
-        return new ValidationResult(IssueSeverity.INFORMATION, "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present");
-      }
-
-      if (system.hasCaseSensitive()) {
-        caseSensitive = system.getCaseSensitive();
-      }
-    }
-
-    String wantCode = theCode;
-    if (!caseSensitive) {
-      wantCode = wantCode.toUpperCase();
-    }
-
-    ValueSetExpansionOutcome expandedValueSet = null;
+    Validate.notBlank(theVs.getUrl(), "No ValueSet URL provided");
 
     /*
      * The following valueset is a special case, since the BCP codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+    if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theSystem);
       definition.setDisplay(theCode);
@@ -335,42 +304,19 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
     /*
      * The following valueset is a special case, since the mime types codesystem is very difficult to expand
      */
-    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+    if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
       ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
       definition.setCode(theSystem);
       definition.setDisplay(theCode);
       return new ValidationResult(definition);
     }
 
-    if (theVs != null && isNotBlank(theVs.getUrl())) {
-      IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
-      if (outcome != null && outcome.isOk()) {
-        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-        definition.setCode(theCode);
-        definition.setDisplay(outcome.getDisplay());
-        return new ValidationResult(definition);
-      }
-    } else {
-      expandedValueSet = expand(theVs, null);
-    }
-
-    if (expandedValueSet != null) {
-      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-        String nextCode = next.getCode();
-        if (!caseSensitive) {
-          nextCode = nextCode.toUpperCase();
-        }
-
-        if (nextCode.equals(wantCode)) {
-          if (theSystem == null || next.getSystem().equals(theSystem)) {
-            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-            definition.setCode(next.getCode());
-            definition.setDisplay(next.getDisplay());
-            ValidationResult retVal = new ValidationResult(definition);
-            return retVal;
-          }
-        }
-      }
+    IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
+    if (outcome != null && outcome.isOk()) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theCode);
+      definition.setDisplay(outcome.getDisplay());
+      return new ValidationResult(definition);
     }
 
     return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");

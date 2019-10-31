@@ -20,9 +20,7 @@ import org.hl7.fhir.r4.hapi.ctx.IValidationSupport.CodeValidationResult;
 import org.hl7.fhir.r4.model.*;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.ElementDefinition.ElementDefinitionBindingComponent;
-import org.hl7.fhir.r4.model.ValueSet.ConceptReferenceComponent;
 import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
-import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
 import org.hl7.fhir.r4.terminologies.ValueSetExpander;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderFactory;
 import org.hl7.fhir.r4.terminologies.ValueSetExpanderSimple;
@@ -35,9 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander, ValueSetExpanderFactory {
   private static final Logger ourLog = LoggerFactory.getLogger(HapiWorkerContext.class);
@@ -193,11 +188,29 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
   }
 
 
-
   @Override
   public ValidationResult validateCode(TerminologyServiceOptions theOptions, String theSystem, String theCode, String theDisplay, ValueSet theVs) {
-
     Validate.notBlank(theVs.getUrl(), "No ValueSet URL provided");
+
+    /*
+     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
+     */
+    if ("http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
+    }
+
+    /*
+     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
+     */
+    if ("http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
+      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
+      definition.setCode(theSystem);
+      definition.setDisplay(theCode);
+      return new ValidationResult(definition);
+    }
 
     CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
     if (outcome != null && outcome.isOk()) {
@@ -206,91 +219,6 @@ public final class HapiWorkerContext implements IWorkerContext, ValueSetExpander
       definition.setDisplay(outcome.getDisplay());
       return new ValidationResult(definition);
     }
-
-//    if (theVs != null && isNotBlank(theCode)) {
-//      for (ConceptSetComponent next : theVs.getCompose().getInclude()) {
-//        if (isBlank(theSystem) || theSystem.equals(next.getSystem())) {
-//          for (ConceptReferenceComponent nextCode : next.getConcept()) {
-//            if (theCode.equals(nextCode.getCode())) {
-//              CodeType code = new CodeType(theCode);
-//              return new ValidationResult(new ConceptDefinitionComponent(code));
-//            }
-//          }
-//        }
-//      }
-//    }
-//
-//    boolean caseSensitive = true;
-//    if (isNotBlank(theSystem)) {
-//      CodeSystem system = fetchCodeSystem(theSystem);
-//      if (system == null) {
-//        String message = "Code " + theSystem + "/" + theCode + " was not validated because the code system is not present";
-//        ourLog.warn(message);
-//        return new ValidationResult(IssueSeverity.ERROR, message, TerminologyServiceErrorClass.SERVER_ERROR);
-//      }
-//
-//      if (system.hasCaseSensitive()) {
-//        caseSensitive = system.getCaseSensitive();
-//      }
-//    }
-//
-//    String wantCode = theCode;
-//    if (!caseSensitive) {
-//      wantCode = wantCode.toUpperCase();
-//    }
-//
-//    ValueSetExpansionOutcome expandedValueSet = null;
-//
-//    /*
-//     * The following valueset is a special case, since the BCP codesystem is very difficult to expand
-//     */
-//    if (theVs != null && "http://hl7.org/fhir/ValueSet/languages".equals(theVs.getUrl())) {
-//      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-//      definition.setCode(theSystem);
-//      definition.setDisplay(theCode);
-//      return new ValidationResult(definition);
-//    }
-//
-//    /*
-//     * The following valueset is a special case, since the mime types codesystem is very difficult to expand
-//     */
-//    if (theVs != null && "http://hl7.org/fhir/ValueSet/mimetypes".equals(theVs.getUrl())) {
-//      ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-//      definition.setCode(theSystem);
-//      definition.setDisplay(theCode);
-//      return new ValidationResult(definition);
-//    }
-//
-//    if (theVs != null && isNotBlank(theVs.getUrl())) {
-//      CodeValidationResult outcome = myValidationSupport.validateCode(myCtx, theSystem, theCode, theDisplay, theVs.getUrl());
-//      if (outcome != null && outcome.isOk()) {
-//        ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-//        definition.setCode(theCode);
-//        definition.setDisplay(outcome.getDisplay());
-//        return new ValidationResult(definition);
-//      }
-//    } else {
-//      expandedValueSet = expand(theVs, null);
-//    }
-//
-//    if (expandedValueSet != null) {
-//      for (ValueSetExpansionContainsComponent next : expandedValueSet.getValueset().getExpansion().getContains()) {
-//        String nextCode = next.getCode();
-//        if (!caseSensitive) {
-//          nextCode = nextCode.toUpperCase();
-//        }
-//
-//        if (nextCode.equals(wantCode)) {
-//          if (theSystem == null || next.getSystem().equals(theSystem)) {
-//            ConceptDefinitionComponent definition = new ConceptDefinitionComponent();
-//            definition.setCode(next.getCode());
-//            definition.setDisplay(next.getDisplay());
-//            ValidationResult retVal = new ValidationResult(definition);
-//            return retVal;
-//          }
-//        }
-//      }
-//    }
 
     return new ValidationResult(IssueSeverity.ERROR, "Unknown code[" + theCode + "] in system[" + theSystem + "]");
   }
