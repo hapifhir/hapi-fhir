@@ -730,6 +730,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals("The questionnaire \"Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
 	}
 
+
+
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;
 		for (BundleEntryComponent next : vss.getEntry()) {

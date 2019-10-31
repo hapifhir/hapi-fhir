@@ -2,11 +2,13 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.*;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.Test;
@@ -687,6 +689,21 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertEquals("Synonym", designationComponent.getUse().getDisplay());
 		assertEquals("Systolische bloeddruk minimaal 1 uur", designationComponent.getValue());
 	}
+
+	@Test
+	public void testExpandValueSetWithUnknownCodeSystem() {
+		ValueSet vs = new ValueSet();
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem("http://unknown-system");
+		ValueSet outcome = myTermSvc.expandValueSetInMemory(vs, null);
+		assertEquals(0, outcome.getExpansion().getContains().size());
+		String encoded = myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
+		ourLog.info(encoded);
+
+		Extension extensionByUrl = outcome.getExpansion().getExtensionByUrl(JpaConstants.EXT_VALUESET_EXPANSION_MESSAGE);
+		assertEquals("Unknown CodeSystem URI \"http://unknown-system\" referenced from ValueSet", extensionByUrl.getValueAsPrimitive().getValueAsString());
+	}
+
 
 	@Test
 	public void testExpandTermValueSetAndChildrenWithOffsetAndCountWithClientAssignedId() throws Exception {

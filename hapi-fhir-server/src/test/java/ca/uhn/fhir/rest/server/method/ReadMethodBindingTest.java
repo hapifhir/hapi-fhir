@@ -101,6 +101,31 @@ public class ReadMethodBindingTest {
 		when(myRequestDetails.getOperation()).thenReturn("$foo");
 		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
 
+		// History operation
+		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
+		when(myRequestDetails.getOperation()).thenReturn("_history");
+		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
+
+	}
+
+	@Test
+	public void testIncomingServerRequestNoMatch_HasCompartment() throws NoSuchMethodException {
+
+		class MyProvider {
+			@Read(version = false)
+			public IBaseResource read(@IdParam IIdType theIdType) {
+				return null;
+			}
+		}
+
+		when(myCtx.getResourceDefinition(any(Class.class))).thenReturn(definition);
+		when(definition.getName()).thenReturn("Patient");
+		when(myRequestDetails.getResourceName()).thenReturn("Patient");
+		when(myRequestDetails.getCompartmentName()).thenReturn("Patient");
+		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
+
+		ReadMethodBinding binding = createBinding(new MyProvider());
+		assertFalse(binding.incomingServerRequestMatchesMethod(myRequestDetails));
 	}
 
 	public ReadMethodBinding createBinding(Object theProvider) throws NoSuchMethodException {

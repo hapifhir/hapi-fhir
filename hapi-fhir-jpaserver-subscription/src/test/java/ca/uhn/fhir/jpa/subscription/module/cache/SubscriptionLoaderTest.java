@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -50,7 +52,17 @@ public class SubscriptionLoaderTest extends BaseBlockingQueueSubscribableChannel
 	@Test
 	public void testMultipleThreadsDontBlock() throws InterruptedException {
 		SubscriptionLoader svc = new SubscriptionLoader();
-		svc.acquireSemaphoreForUnitTest();
+		CountDownLatch latch = new CountDownLatch(1);
+		new Thread(()->{
+			try {
+				svc.acquireSemaphoreForUnitTest();
+				latch.countDown();
+			} catch (InterruptedException theE) {
+				// ignore
+			}
+		}).start();
+
+		latch.await(10, TimeUnit.SECONDS);
 		svc.syncSubscriptions();
 	}
 

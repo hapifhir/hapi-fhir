@@ -68,7 +68,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	private static SubscriptionMatcherInterceptor ourSubscriptionMatcherInterceptor;
 	protected static Server ourServer;
 	protected IGenericClient ourClient;
-	ResourceCountCache ourResourceCountsCache;
+	ResourceCountCache myResourceCountsCache;
 	private TerminologyUploaderProvider myTerminologyUploaderProvider;
 	private boolean ourRestHookSubscriptionInterceptorRequested;
 
@@ -93,6 +93,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 		myFhirCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.NEVER);
 		myFhirCtx.getRestfulClientFactory().setSocketTimeout(1200 * 1000);
 		myFhirCtx.setParserErrorHandler(new StrictErrorHandler());
+		myResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 		if (ourServer == null) {
 			ourRestServer = new RestfulServer(myFhirCtx);
@@ -113,7 +114,6 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 			ourRestServer.setServerConformanceProvider(confProvider);
 
 			ourPagingProvider = myAppCtx.getBean(DatabaseBackedPagingProvider.class);
-			ourResourceCountsCache = (ResourceCountCache) myAppCtx.getBean("myResourceCountsCache");
 
 			Server server = new Server(0);
 
