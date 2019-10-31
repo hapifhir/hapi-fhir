@@ -42,7 +42,6 @@ public class HapiFlywayMigrateDatabaseCommand extends BaseFlywayMigrateDatabaseC
 
 	@Override
 	protected void addTasks(FlywayMigrator theMigrator) {
-		// FIXME KHS if no shrink columns set, apply null migration with same id
 		List<BaseTask<?>> tasks = new HapiFhirJpaMigrationTasks(getFlags()).getAllTasks(VersionEnum.values());
 		theMigrator.addTasks(tasks);
 	}
