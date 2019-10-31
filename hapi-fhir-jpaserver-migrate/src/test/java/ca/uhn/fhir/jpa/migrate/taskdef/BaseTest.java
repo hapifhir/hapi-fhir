@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.FlywayMigrator;
-import ca.uhn.fhir.jpa.migrate.Migrator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.intellij.lang.annotations.Language;
 import org.junit.After;
@@ -32,8 +31,7 @@ public class BaseTest {
 	@Before()
 	public void before() {
 		org.h2.Driver.class.toString();
-		++ourDatabaseUrl;
-		myUrl = "jdbc:h2:mem:" + getDatabaseName();
+		myUrl = "jdbc:h2:mem:" + DATABASE_NAME + ourDatabaseUrl++;
 
 		myConnectionProperties = DriverTypeEnum.H2_EMBEDDED.newConnectionProperties(myUrl, "SA", "SA");
 		myDataSource.setUrl(myUrl);
@@ -41,10 +39,6 @@ public class BaseTest {
 		myDataSource.setPassword("SA");
 		myDataSource.setDriverClassName(DriverTypeEnum.H2_EMBEDDED.getDriverClassName());
 		myMigrator = new FlywayMigrator(myDataSource);
-	}
-
-	protected String getDatabaseName() {
-		return DATABASE_NAME + ourDatabaseUrl;
 	}
 
 	protected BasicDataSource getDataSource() {

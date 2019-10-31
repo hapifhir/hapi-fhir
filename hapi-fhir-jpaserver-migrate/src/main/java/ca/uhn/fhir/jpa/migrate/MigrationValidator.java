@@ -6,31 +6,42 @@ import ca.uhn.fhir.jpa.subscription.module.subscriber.websocket.WebsocketConnect
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
-import org.flywaydb.core.api.MigrationVersion;
+import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 public class MigrationValidator {
-	private static final Logger ourLog = LoggerFactory.getLogger(WebsocketConnectionValidator.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(MigrationValidator.class);
 
 	private final BasicDataSource myDataSource;
 	private final FlywayMigrator myMigrator;
+	private final boolean mySkipValidation;
 
-	public MigrationValidator(BasicDataSource theDataSource, List<BaseTask<?>> theMigrationTasks) {
+	public MigrationValidator(BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
 		myDataSource = theDataSource;
+		if (jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO))) {
+			mySkipValidation = true;
+		} else {
+			mySkipValidation = false;
+		}
 		myMigrator = new FlywayMigrator(theDataSource);
 		myMigrator.addTasks(theMigrationTasks);
 	}
 
 	public void validate() {
+		if (mySkipValidation) {
+			ourLog.info("Database running in hibernate auto-update mode.  Skipping schema validation.");
+			return;
+		}
 		try (Connection connection = myDataSource.getConnection()) {
 			MigrationInfoService migrationInfo = myMigrator.getMigrationInfo();
 			if (migrationInfo.pending().length > 0) {
-				throw new ConfigurationException("The database schema for " + connection.getCatalog() + " is out of date.  " +
+				throw new ConfigurationException("The database schema for " + myDataSource.getUrl() + " is out of date.  " +
 					"Current database schema version is " + getCurrentVersion(migrationInfo) + ".  Schema version required by application is " +
 					getLastVersion(migrationInfo) + ".  Please run the database migrator.");
 			}
