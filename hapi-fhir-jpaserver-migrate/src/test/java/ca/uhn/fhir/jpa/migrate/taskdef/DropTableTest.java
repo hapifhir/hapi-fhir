@@ -5,10 +5,9 @@ import org.junit.Test;
 
 import java.sql.SQLException;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class DropTableTest extends BaseTest {
 
@@ -57,5 +56,23 @@ public class DropTableTest extends BaseTest {
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
 	}
+
+	@Test
+	public void testFlywayMigrationRequired() throws SQLException {
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		DropTableTask task = new DropTableTask("1",  "1");
+		task.setTableName("SOMETABLE");
+		getMigrator().addTask(task);
+
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
+
+		assertTrue(getMigrator().migrationRequired());
+		getMigrator().migrate();
+		assertFalse(getMigrator().migrationRequired());
+
+		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItems("SOMETABLE")));
+	}
+
 
 }

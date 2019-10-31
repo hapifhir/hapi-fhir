@@ -21,21 +21,14 @@ package ca.uhn.fhir.jpa.migrate;
  */
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import com.google.common.annotations.VisibleForTesting;
 import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.MigrationVersion;
-import org.flywaydb.core.api.migration.Context;
+import org.flywaydb.core.api.MigrationInfoService;
 import org.flywaydb.core.api.migration.JavaMigration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FlywayMigrator {
 
@@ -75,16 +68,21 @@ public class FlywayMigrator {
 
 	public void migrate() {
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
-			Flyway flyway = Flyway.configure()
-				.dataSource(myConnectionUrl, myUsername, myPassword)
-				.baselineOnMigrate(true)
-				.javaMigrations(myTasks.toArray(new JavaMigration[0]))
-				.load();
-			for (FlywayMigration task : myTasks) {
-				task.setConnectionProperties(connectionProperties);
-			}
+			Flyway flyway = initFlyway(connectionProperties);
 			flyway.migrate();
 		}
+	}
+
+	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
+		Flyway flyway = Flyway.configure()
+			.dataSource(myConnectionUrl, myUsername, myPassword)
+			.baselineOnMigrate(true)
+			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
+			.load();
+		for (FlywayMigration task : myTasks) {
+			task.setConnectionProperties(theConnectionProperties);
+		}
+		return flyway;
 	}
 
 	public void addTasks(List<BaseTask<?>> theTasks) {
@@ -117,5 +115,13 @@ public class FlywayMigrator {
 
 	public boolean isNoColumnShrink() {
 		return myNoColumnShrink;
+	}
+
+	public boolean migrationRequired() {
+		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
+			Flyway flyway = initFlyway(connectionProperties);
+			MigrationInfoService info = flyway.info();
+			return info.pending().length > 0;
+		}
 	}
 }
