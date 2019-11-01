@@ -492,6 +492,11 @@
 				The hapi-fhir-testpage-overlay has been updated to support R5 endpoints. Thanks to Dazhi Jiao
 				for the pull request!
 			</action>
+			<action type="add" issue="1088">
+				The CapabilityStatement generator will now determine supported profiles by navigating the complete
+				hierarchy of supported resource types, instead of just using the root resource for each type.
+				Thanks to Stig Døssing for the pull request!
+			</action>
 		</release>
 		<release version="4.0.3" date="2019-09-03" description="Igloo (Point Release)">
 			<action type="fix">
