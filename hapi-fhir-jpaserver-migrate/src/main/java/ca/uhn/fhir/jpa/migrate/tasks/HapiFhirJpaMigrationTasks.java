@@ -867,16 +867,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init330() { // 20180114 - 20180329
 		Builder version = forVersion(VersionEnum.V3_3_0);
 
+		version.initializeSchema("20180115.0", new HapiFhirSchemaInitializationProvider());
+
 		Builder.BuilderWithTableName hfjResource = version.onTable("HFJ_RESOURCE");
 		version.startSectionWithMessage("Starting work on table: " + hfjResource.getTableName());
-		hfjResource.dropColumn("20180114.1", "RES_TEXT");
-		hfjResource.dropColumn("20180114.2", "RES_ENCODING");
+		hfjResource.dropColumn("20180115.1", "RES_TEXT");
+		hfjResource.dropColumn("20180115.2", "RES_ENCODING");
 
 		Builder.BuilderWithTableName hfjResVer = version.onTable("HFJ_RES_VER");
 		version.startSectionWithMessage("Starting work on table: " + hfjResVer.getTableName());
-		hfjResVer.modifyColumn("20180114.3", "RES_ENCODING")
+		hfjResVer.modifyColumn("20180115.3", "RES_ENCODING")
 			.nullable();
-		hfjResVer.modifyColumn("20180114.4", "RES_TEXT")
+		hfjResVer.modifyColumn("20180115.4", "RES_TEXT")
 			.nullable();
 	}
 

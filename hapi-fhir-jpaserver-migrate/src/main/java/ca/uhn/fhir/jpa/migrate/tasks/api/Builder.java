@@ -32,6 +32,11 @@ public class Builder {
 		return this;
 	}
 
+	public Builder initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		mySink.addTask(new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider));
+		return this;
+	}
+
 	public Builder executeRawSql(String theVersion, DriverTypeEnum theDriver, @Language("SQL") String theSql) {
 		mySink.addTask(new ExecuteRawSqlTask(myRelease, theVersion).addSql(theDriver, theSql));
 		return this;

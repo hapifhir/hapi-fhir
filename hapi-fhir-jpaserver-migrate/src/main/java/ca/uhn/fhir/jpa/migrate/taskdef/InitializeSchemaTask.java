@@ -1,0 +1,38 @@
+package ca.uhn.fhir.jpa.migrate.taskdef;
+
+import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class InitializeSchemaTask extends BaseTask<InitializeSchemaTask> {
+	private static final Logger ourLog = LoggerFactory.getLogger(InitializeSchemaTask.class);
+	private final ISchemaInitializationProvider mySchemaInitializationProvider;
+
+	public InitializeSchemaTask(String theRelease, String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+		super(theRelease, theVersion);
+		mySchemaInitializationProvider = theSchemaInitializationProvider;
+	}
+
+	@Override
+	public void validate() {
+		// nothing
+	}
+
+	@Override
+	public void execute() throws SQLException {
+		DriverTypeEnum driverType = getDriverType();
+
+		logInfo(ourLog, "Initializing schema for {}", driverType);
+
+		List<String> sqlStatements = mySchemaInitializationProvider.getSqlStatements(driverType);
+
+		for (String nextSql : sqlStatements) {
+			executeSql(null, nextSql);
+		}
+	}
+}
