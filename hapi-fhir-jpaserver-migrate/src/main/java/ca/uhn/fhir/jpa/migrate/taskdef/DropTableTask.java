@@ -61,7 +61,7 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 		for (String nextIndex : indexNames) {
 			List<String> sqls = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
 			if (!sqls.isEmpty()) {
-				logInfo("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+				logInfo(ourLog, "Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
 			}
 			for (@Language("SQL") String sql : sqls) {
 				executeSql(getTableName(), sql);
