@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
-import org.apache.commons.lang3.Validate;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class DropTableTask extends BaseTableTask<DropTableTask> {
@@ -39,15 +41,32 @@ public class DropTableTask extends BaseTableTask<DropTableTask> {
 			return;
 		}
 
+		Set<String> foreignKeys = JdbcUtils.getForeignKeys(getConnectionProperties(), null, getTableName());
+		ourLog.info("Table {} has the following foreign keys: {}", getTableName(), foreignKeys);
+
 		Set<String> indexNames = JdbcUtils.getIndexNames(getConnectionProperties(), getTableName());
+		ourLog.info("Table {} has the following indexes: {}", getTableName(), indexNames);
+
+		for (String next : foreignKeys) {
+			List<String> sql = DropForeignKeyTask.generateSql(getTableName(), next, getDriverType());
+			for (@Language("SQL") String nextSql : sql) {
+				executeSql(getTableName(), nextSql);
+			}
+		}
+
 		for (String nextIndex : indexNames) {
-			String sql = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
-			ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
-			executeSql(getTableName(), sql);
+			List<String> sqls = DropIndexTask.createDropIndexSql(getConnectionProperties(), getTableName(), nextIndex, getDriverType());
+			if (!sqls.isEmpty()) {
+				ourLog.info("Dropping index {} on table {} in preparation for table delete", nextIndex, getTableName());
+			}
+			for (@Language("SQL") String sql : sqls) {
+				executeSql(getTableName(), sql);
+			}
 		}
 
 		ourLog.info("Dropping table: {}", getTableName());
 
+		@Language("SQL")
 		String sql = "DROP TABLE " + getTableName();
 		executeSql(getTableName(), sql);
 

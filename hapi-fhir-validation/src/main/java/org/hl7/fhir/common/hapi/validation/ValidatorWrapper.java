@@ -5,7 +5,10 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.XmlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import com.google.gson.*;
+import org.apache.commons.codec.Charsets;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.hl7.fhir.r5.context.IWorkerContext;
+import org.hl7.fhir.r5.elementmodel.Manager;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.IResourceValidator;
 import org.hl7.fhir.r5.utils.ValidationProfileSet;
@@ -16,10 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +29,6 @@ import java.util.List;
 public class ValidatorWrapper {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidatorWrapper.class);
-	private final DocumentBuilderFactory myDocBuilderFactory;
 	private IResourceValidator.BestPracticeWarningLevel myBestPracticeWarningLevel;
 	private boolean myAnyExtensionsAllowed;
 	private boolean myErrorForUnknownProfiles;
@@ -39,7 +39,7 @@ public class ValidatorWrapper {
 	 * Constructor
 	 */
 	public ValidatorWrapper() {
-		myDocBuilderFactory = XmlUtil.newDocumentBuilderFactory();
+		super();
 	}
 
 	public ValidatorWrapper setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel theBestPracticeWarningLevel) {
@@ -95,9 +95,7 @@ public class ValidatorWrapper {
 		if (encoding == EncodingEnum.XML) {
 			Document document;
 			try {
-				DocumentBuilder builder = myDocBuilderFactory.newDocumentBuilder();
-				InputSource src = new InputSource(new StringReader(input));
-				document = builder.parse(src);
+				document = XmlUtil.parseDocument(input);
 			} catch (Exception e2) {
 				ourLog.error("Failure to parse XML input", e2);
 				ValidationMessage m = new ValidationMessage();
@@ -113,7 +111,11 @@ public class ValidatorWrapper {
 				profileSet.getCanonical().add(new ValidationProfileSet.ProfileRegistration(nextProfile, true));
 			}
 
-			v.validate(null, messages, document, profileSet);
+			String resourceAsString = theValidationContext.getResourceAsString();
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+
+			Manager.FhirFormat format = Manager.FhirFormat.XML;
+			v.validate(null, messages, inputStream, format, profileSet);
 
 		} else if (encoding == EncodingEnum.JSON) {
 
@@ -131,7 +133,11 @@ public class ValidatorWrapper {
 				}
 			}
 
-			v.validate(null, messages, json, profileSet);
+			String resourceAsString = theValidationContext.getResourceAsString();
+			InputStream inputStream = new ReaderInputStream(new StringReader(resourceAsString), Charsets.UTF_8);
+
+			Manager.FhirFormat format = Manager.FhirFormat.JSON;
+			v.validate(null, messages, inputStream, format, profileSet);
 
 		} else {
 			throw new IllegalArgumentException("Unknown encoding: " + encoding);

@@ -24,7 +24,7 @@ import ca.uhn.fhir.context.support.IContextValidationSupport;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.util.LogicUtil;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -56,7 +56,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> implements IFhirResourceDaoValueSet<ValueSet, Coding, CodeableConcept> {
 
 	@Autowired
-	private IHapiTerminologySvc myHapiTerminologySvc;
+	private ITermReadSvc myHapiTerminologySvc;
 
 	@Autowired
 	private DefaultProfileValidationSupport myDefaultProfileValidationSupport;
@@ -99,7 +99,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 			}
 		}
 		if (allSystemsAreSuppportedByTerminologyService) {
-			return myTerminologySvc.expandValueSet(theSource);
+			return myTerminologySvc.expandValueSetInMemory(theSource, null);
 		}
 
 		HapiWorkerContext workerContext = new HapiWorkerContext(getContext(), myValidationSupport);
@@ -111,12 +111,6 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 
 		return retVal;
 
-		// ValueSetExpansionComponent expansion = outcome.getValueset().getExpansion();
-		//
-		// ValueSet retVal = new ValueSet();
-		// retVal.getMeta().setLastUpdated(new Date());
-		// retVal.setExpansion(expansion);
-		// return retVal;
 	}
 
 	private ValueSet doExpand(ValueSet theSource, int theOffset, int theCount) {
@@ -397,7 +391,7 @@ public class FhirResourceDaoValueSetR4 extends FhirResourceDaoR4<ValueSet> imple
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (myDaoConfig.isPreExpandValueSets()) {
+		if (myDaoConfig.isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
 			if (retVal.getDeleted() == null) {
 				ValueSet valueSet = (ValueSet) theResource;
 				myHapiTerminologySvc.storeTermValueSet(retVal, valueSet);

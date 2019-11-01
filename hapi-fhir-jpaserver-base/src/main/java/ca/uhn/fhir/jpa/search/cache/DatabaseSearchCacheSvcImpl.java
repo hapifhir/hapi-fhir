@@ -48,17 +48,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
-	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
-
 	/*
 	 * Be careful increasing this number! We use the number of params here in a
-	 * DELETE FROM foo WHERE params IN (aaaa)
+	 * DELETE FROM foo WHERE params IN (term,term,term...)
 	 * type query and this can fail if we have 1000s of params
 	 */
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT = 500;
 	public static final int DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS = 20000;
 	public static final long DEFAULT_CUTOFF_SLACK = 10 * DateUtils.MILLIS_PER_SECOND;
-
+	private static final Logger ourLog = LoggerFactory.getLogger(DatabaseSearchCacheSvcImpl.class);
 	private static int ourMaximumResultsToDeleteInOneStatement = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_STMT;
 	private static int ourMaximumResultsToDeleteInOnePass = DEFAULT_MAX_RESULTS_TO_DELETE_IN_ONE_PAS;
 	private static Long ourNowForUnitTests;
@@ -107,6 +105,14 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 		return mySearchDao.findByUuidAndFetchIncludes(theUuid);
 	}
 
+
+	void setSearchDaoForUnitTest(ISearchDao theSearchDao) {
+		mySearchDao = theSearchDao;
+	}
+
+	void setTxManagerForUnitTest(PlatformTransactionManager theTxManager) {
+		myTxManager = theTxManager;
+	}
 
 	@Override
 	@Transactional(Transactional.TxType.NEVER)
@@ -185,7 +191,7 @@ public class DatabaseSearchCacheSvcImpl extends BaseSearchCacheSvcImpl {
 
 		int count = toDelete.getContent().size();
 		if (count > 0) {
-			if (ourLog.isDebugEnabled()) {
+			if (ourLog.isDebugEnabled() || "true".equalsIgnoreCase(System.getProperty("test"))) {
 				Long total = tt.execute(t -> mySearchDao.count());
 				ourLog.debug("Deleted {} searches, {} remaining", count, total);
 			}

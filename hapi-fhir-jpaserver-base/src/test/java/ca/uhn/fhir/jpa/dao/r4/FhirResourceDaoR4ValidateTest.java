@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
@@ -43,7 +46,182 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	@Autowired
 	private IValidatorModule myValidatorModule;
 	@Autowired
-	private IHapiTerminologySvc myTerminologySvc;
+	private ITermReadSvc myTermReadSvc;
+	@Autowired
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvcc;
+
+	/**
+	 * Create a loinc valueset that expands to more results than the expander is willing to do
+	 * in memory, and make sure we can still validate correctly, even if we're using
+	 * the in-memory expander
+	 */
+	@Test
+	public void testValidateCode_InMemoryExpansionAgainstHugeValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSets(false);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+
+		assertFalse(myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
+
+		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
+		// and not just certain ones
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+
+		myDaoConfig.setMaximumExpansionSize(50);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+		// Invalid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Valid code with no system
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem(null).setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Valid code with wrong system
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "Code http://foo/CODE3 was not validated because the code system is not present", oo.getIssueFirstRep().getDiagnostics());
+
+		// Code that exists but isn't in the valueset
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Invalid code in built-in VS/CS
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+	/**
+	 * Create a loinc valueset that expands to more results than the expander is willing to do
+	 * in memory, and make sure we can still validate correctly, even if we're using
+	 * the in-memory expander
+	 */
+	@Test
+	public void testValidateCode_PreExpansionAgainstHugeValueSet() throws Exception {
+		myDaoConfig.setPreExpandValueSets(true);
+
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+
+		// Create a valueset
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
+		myTermReadSvc.preExpandDeferredValueSetsToTerminologyTables();
+
+		await().until(()->myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
+
+		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
+		// and not just certain ones
+		StructureDefinition profile = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-vitalsigns-all-loinc.json");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile("http://example.com/fhir/StructureDefinition/vitalsigns-2");
+		obs.getText().setDivAsString("<div>Hello</div>");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs");
+		obs.setSubject(new Reference("Patient/123"));
+		obs.addPerformer(new Reference("Practitioner/123"));
+		obs.setEffective(DateTimeType.now());
+		obs.setStatus(ObservationStatus.FINAL);
+		obs.setValue(new StringType("This is the value"));
+
+		OperationOutcome oo;
+
+		// Valid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "No issues detected during validation", oo.getIssueFirstRep().getDiagnostics());
+
+		// Invalid code
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("non-existing-code").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://loinc.org#non-existing-code)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Valid code with no system
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem(null).setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = null#CODE3)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Valid code with wrong system
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://foo").setCode("CODE3").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "Code http://foo/CODE3 was not validated because the code system is not present", oo.getIssueFirstRep().getDiagnostics());
+
+		// Code that exists but isn't in the valueset
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "None of the codes provided are in the value set http://example.com/fhir/ValueSet/observation-vitalsignresult (http://example.com/fhir/ValueSet/observation-vitalsignresult, and a code from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics());
+
+		// Invalid code in built-in VS/CS
+		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+		obs.getCode().getCodingFirstRep().setSystem("http://loinc.org").setCode("CODE3").setDisplay("Display 3");
+		obs.getCategoryFirstRep().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("FOO");
+		oo = validateAndReturnOutcome(obs);
+		assertEquals(encode(oo), "Unknown code: http://terminology.hl7.org/CodeSystem/observation-category / FOO", oo.getIssueFirstRep().getDiagnostics());
+
+	}
+
+
+	private OperationOutcome validateAndReturnOutcome(Observation theObs) {
+		try {
+			MethodOutcome outcome = myObservationDao.validate(theObs, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+			return (OperationOutcome) outcome.getOperationOutcome();
+		} catch (PreconditionFailedException e) {
+			return (OperationOutcome) e.getOperationOutcome();
+		}
+	}
+
 
 	@Test
 	public void testValidateStructureDefinition() throws Exception {
@@ -121,7 +299,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		TermCodeSystemVersion csv = new TermCodeSystemVersion();
 		csv.addConcept().setCode("bar").setDisplay("Bar Code");
-		myTerminologySvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
 
 		// Validate a resource containing this codesystem in a field with an extendable binding
 		Patient patient = new Patient();
@@ -144,8 +322,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
-	private String encode(Patient thePatient) {
-		return myFhirCtx.newJsonParser().encodeResourceToString(thePatient);
+	private String encode(IBaseResource thePatient) {
+		return myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(thePatient);
 	}
 
 
@@ -280,7 +458,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		val.setBestPracticeWarningLevel(IResourceValidator.BestPracticeWarningLevel.Warning);
 
 		myDaoConfig.setAllowExternalReferences(new DaoConfig().isAllowExternalReferences());
-
+		myDaoConfig.setMaximumExpansionSize(DaoConfig.DEFAULT_MAX_EXPANSION_SIZE);
+		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
 	}
 
 	@Test
@@ -471,6 +650,87 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(encoded, not(containsString("error")));
 		}
 	}
+
+	@Test
+	public void testValidateQuestionnaireResponseWithCanonicalReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("http://foo/q");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		try {
+			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+			String encode = encode(oo);
+			ourLog.info(encode);
+			fail("Didn't fail- response was " + encode);
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+		}
+
+	}
+
+	@Test
+	public void testValidateQuestionnaireResponseWithLocalReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("Questionnaire/q");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		try {
+			MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+			OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+			String encode = encode(oo);
+			ourLog.info(encode);
+			fail("Didn't fail- response was " + encode);
+		} catch (PreconditionFailedException e) {
+			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
+			assertEquals("No response found for required item with id = 'link0'", oo.getIssueFirstRep().getDiagnostics());
+		}
+
+	}
+
+	@Test
+	public void testValidateQuestionnaireResponseWithUnknownReference() {
+
+		Questionnaire q = new Questionnaire();
+		q.setId("q");
+		q.addItem().setLinkId("link0").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.addItem().setLinkId("link1").setRequired(true).setType(Questionnaire.QuestionnaireItemType.STRING);
+		q.setUrl("http://foo/q");
+		myQuestionnaireDao.update(q);
+
+		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>aaa</div>");
+		qa.setStatus(QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED);
+		qa.getQuestionnaireElement().setValue("Questionnaire/DOES_NOT_EXIST");
+		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
+
+		MethodOutcome validationOutcome = myQuestionnaireResponseDao.validate(qa, null, null, null, null, null, null);
+		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		assertEquals("The questionnaire \"Questionnaire/DOES_NOT_EXIST\" could not be resolved, so no validation can be performed against the base questionnaire", oo.getIssueFirstRep().getDiagnostics());
+	}
+
+
 
 	private IBaseResource findResourceByIdInBundle(Bundle vss, String name) {
 		IBaseResource retVal = null;

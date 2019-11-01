@@ -2,6 +2,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.jpa.dao.DaoConfig;
 import ca.uhn.fhir.jpa.dao.IFhirResourceDaoValueSet.ValidateCodeResult;
+import ca.uhn.fhir.jpa.term.custom.CustomTerminologySet;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -23,6 +25,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	@After
 	public void after() {
 		myDaoConfig.setPreExpandValueSets(new DaoConfig().isPreExpandValueSets());
+		myDaoConfig.setMaximumExpansionSize(new DaoConfig().getMaximumExpansionSize());
 	}
 
 	@AfterClass
@@ -142,7 +145,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -182,7 +185,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
-		myTermSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isResult());
 		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
@@ -194,7 +197,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testExpandById() throws IOException {
+	public void testExpandById() {
 		String resp;
 
 		ValueSet expanded = myValueSetDao.expand(myExtensionalVsId, null, mySrd);
@@ -230,37 +233,26 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 	}
 	
 	@Test
-	@Ignore
-	public void testExpandByIdentifier() {
-		ValueSet expanded = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "11378");
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
+	public void testExpandByValueSet_ExceedsMaxSize() {
+		// Add a bunch of codes
+		CustomTerminologySet codesToAdd = new CustomTerminologySet();
+		for (int i = 0; i < 100; i++) {
+			codesToAdd.addRootConcept("CODE" + i, "Display " + i);
+		}
+		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://loinc.org", codesToAdd);
+		myDaoConfig.setMaximumExpansionSize(50);
 
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
-	}
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/observation-vitalsignresult");
+		vs.getCompose().addInclude().setSystem("http://loinc.org");
+		myValueSetDao.create(vs);
 
-	/**
-	 * This type of expansion doesn't really make sense..
-	 */
-	@Test
-	@Ignore
-	public void testExpandByValueSet() throws IOException {
-		ValueSet toExpand = loadResourceFromClasspath(ValueSet.class, "/extensional-case-3-vs.xml");
-		ValueSet expanded = myValueSetDao.expand(toExpand, "11378");
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
-		ourLog.info(resp);
-		//@formatter:off
-		assertThat(resp, stringContainsInOrder(
-				"<code value=\"11378-7\"/>", 
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
-		//@formatter:on
-
-		assertThat(resp, not(containsString("<code value=\"8450-9\"/>")));
+		try {
+			myValueSetDao.expand(vs, null);
+			fail();
+		} catch (InternalErrorException e) {
+			assertEquals("Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!", e.getMessage());
+		}
 	}
 
 	

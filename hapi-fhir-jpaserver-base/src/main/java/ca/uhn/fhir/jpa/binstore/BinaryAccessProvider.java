@@ -86,20 +86,13 @@ public class BinaryAccessProvider {
 
 		IBinaryTarget target = findAttachmentForRequest(resource, path, theRequestDetails);
 
-		Optional<? extends IBaseExtension<?, ?>> attachmentId = target
-			.getTarget()
-			.getExtension()
-			.stream()
-			.filter(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()))
-			.findFirst();
-
+		Optional<String> attachmentId = target.getAttachmentId();
 		if (attachmentId.isPresent()) {
 
 			@SuppressWarnings("unchecked")
-			IPrimitiveType<String> value = (IPrimitiveType<String>) attachmentId.get().getValue();
-			String blobId = value.getValueAsString();
+			String blobId = attachmentId.get();
 
-			IBinaryStorageSvc.StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
+			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
 			if (blobDetails == null) {
 				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 				throw new InvalidRequestException(msg);
@@ -179,7 +172,7 @@ public class BinaryAccessProvider {
 		if (size > 0) {
 			if (myBinaryStorageSvc != null) {
 				if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-					IBinaryStorageSvc.StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, requestContentType, theRequestDetails.getInputStream());
+					StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(theResourceId, null, requestContentType, theRequestDetails.getInputStream());
 					size = storedDetails.getBytes();
 					blobId = storedDetails.getBlobId();
 					Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
@@ -192,19 +185,7 @@ public class BinaryAccessProvider {
 			size = bytes.length;
 			target.setData(bytes);
 		} else {
-
-			target
-				.getTarget()
-				.getExtension()
-				.removeIf(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
-			target.setData(null);
-
-			IBaseExtension<?, ?> ext = target.getTarget().addExtension();
-			ext.setUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
-			ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
-			IPrimitiveType<String> blobIdString = (IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
-			blobIdString.setValueAsString(blobId);
-			ext.setValue(blobIdString);
+			replaceDataWithExtension(target, blobId);
 		}
 
 		target.setContentType(requestContentType);
@@ -217,52 +198,81 @@ public class BinaryAccessProvider {
 		return outcome.getResource();
 	}
 
+	public void replaceDataWithExtension(IBinaryTarget theTarget, String theBlobId) {
+		theTarget
+			.getTarget()
+			.getExtension()
+			.removeIf(t -> JpaConstants.EXT_EXTERNALIZED_BINARY_ID.equals(t.getUrl()));
+		theTarget.setData(null);
+
+		IBaseExtension<?, ?> ext = theTarget.getTarget().addExtension();
+		ext.setUrl(JpaConstants.EXT_EXTERNALIZED_BINARY_ID);
+		ext.setUserData(JpaConstants.EXTENSION_EXT_SYSTEMDEFINED, Boolean.TRUE);
+		IPrimitiveType<String> blobIdString = (IPrimitiveType<String>) myCtx.getElementDefinition("string").newInstance();
+		blobIdString.setValueAsString(theBlobId);
+		ext.setValue(blobIdString);
+	}
+
 	@Nonnull
 	private IBinaryTarget findAttachmentForRequest(IBaseResource theResource, String thePath, ServletRequestDetails theRequestDetails) {
-		FhirContext ctx = theRequestDetails.getFhirContext();
-
-		Optional<IBase> type = ctx.newFluentPath().evaluateFirst(theResource, thePath, IBase.class);
-		String resType = myCtx.getResourceDefinition(theResource).getName();
+		Optional<IBase> type = myCtx.newFluentPath().evaluateFirst(theResource, thePath, IBase.class);
+		String resType = this.myCtx.getResourceDefinition(theResource).getName();
 		if (!type.isPresent()) {
-			String msg = myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
+			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownPath", resType, thePath);
 			throw new InvalidRequestException(msg);
 		}
+		IBase element = type.get();
+
+		Optional<IBinaryTarget> binaryTarget = toBinaryTarget(element);
+
+		if (binaryTarget.isPresent() == false) {
+			BaseRuntimeElementDefinition<?> def2 = myCtx.getElementDefinition(element.getClass());
+			String msg = this.myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def2.getName());
+			throw new InvalidRequestException(msg);
+		} else {
+			return binaryTarget.get();
+		}
+
+	}
+
+	public Optional<IBinaryTarget> toBinaryTarget(IBase theElement) {
+		IBinaryTarget binaryTarget = null;
 
 		// Path is attachment
-		BaseRuntimeElementDefinition<?> def = ctx.getElementDefinition(type.get().getClass());
+		BaseRuntimeElementDefinition<?> def = myCtx.getElementDefinition(theElement.getClass());
 		if (def.getName().equals("Attachment")) {
-			ICompositeType attachment = (ICompositeType) type.get();
-			return new IBinaryTarget() {
+			ICompositeType attachment = (ICompositeType) theElement;
+			binaryTarget = new IBinaryTarget() {
 				@Override
 				public void setSize(Integer theSize) {
-					AttachmentUtil.setSize(myCtx, attachment, theSize);
+					AttachmentUtil.setSize(BinaryAccessProvider.this.myCtx, attachment, theSize);
 				}
 
 				@Override
 				public String getContentType() {
-					return AttachmentUtil.getOrCreateContentType(myCtx, attachment).getValueAsString();
+					return AttachmentUtil.getOrCreateContentType(BinaryAccessProvider.this.myCtx, attachment).getValueAsString();
 				}
 
 				@Override
 				public byte[] getData() {
-					IPrimitiveType<byte[]> dataDt = AttachmentUtil.getOrCreateData(theRequestDetails.getFhirContext(), attachment);
+					IPrimitiveType<byte[]> dataDt = AttachmentUtil.getOrCreateData(myCtx, attachment);
 					return dataDt.getValue();
 				}
 
 				@Override
 				public IBaseHasExtensions getTarget() {
-					return (IBaseHasExtensions) AttachmentUtil.getOrCreateData(theRequestDetails.getFhirContext(), attachment);
+					return (IBaseHasExtensions) AttachmentUtil.getOrCreateData(myCtx, attachment);
 				}
 
 				@Override
 				public void setContentType(String theContentType) {
-					AttachmentUtil.setContentType(myCtx, attachment, theContentType);
+					AttachmentUtil.setContentType(BinaryAccessProvider.this.myCtx, attachment, theContentType);
 				}
 
 
 				@Override
 				public void setData(byte[] theBytes) {
-					AttachmentUtil.setData(theRequestDetails.getFhirContext(), attachment, theBytes);
+					AttachmentUtil.setData(myCtx, attachment, theBytes);
 				}
 
 
@@ -271,8 +281,8 @@ public class BinaryAccessProvider {
 
 		// Path is Binary
 		if (def.getName().equals("Binary")) {
-			IBaseBinary binary = (IBaseBinary) type.get();
-			return new IBinaryTarget() {
+			IBaseBinary binary = (IBaseBinary) theElement;
+			binaryTarget = new IBinaryTarget() {
 				@Override
 				public void setSize(Integer theSize) {
 					// ignore
@@ -290,7 +300,7 @@ public class BinaryAccessProvider {
 
 				@Override
 				public IBaseHasExtensions getTarget() {
-					return (IBaseHasExtensions) BinaryUtil.getOrCreateData(myCtx, binary);
+					return (IBaseHasExtensions) BinaryUtil.getOrCreateData(BinaryAccessProvider.this.myCtx, binary);
 				}
 
 				@Override
@@ -308,9 +318,7 @@ public class BinaryAccessProvider {
 			};
 		}
 
-		String msg = myCtx.getLocalizer().getMessageSanitized(BinaryAccessProvider.class, "unknownType", resType, thePath, def.getName());
-		throw new InvalidRequestException(msg);
-
+		return Optional.ofNullable(binaryTarget);
 	}
 
 	private String validateResourceTypeAndPath(@IdParam IIdType theResourceId, @OperationParam(name = "path", min = 1, max = 1) IPrimitiveType<String> thePath) {
@@ -338,26 +346,6 @@ public class BinaryAccessProvider {
 			throw new InvalidRequestException("Unknown/unsupported resource type: " + sanitizeUrlPart(resourceType));
 		}
 		return dao;
-	}
-
-	/**
-	 * Wraps an Attachment datatype or Binary resource, since they both
-	 * hold binary content but don't look entirely similar
-	 */
-	private interface IBinaryTarget {
-
-		void setSize(Integer theSize);
-
-		String getContentType();
-
-		void setContentType(String theContentType);
-
-		byte[] getData();
-
-		void setData(byte[] theBytes);
-
-		IBaseHasExtensions getTarget();
-
 	}
 
 

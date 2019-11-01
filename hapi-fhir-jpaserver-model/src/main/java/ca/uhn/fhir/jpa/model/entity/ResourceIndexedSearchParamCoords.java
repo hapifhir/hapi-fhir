@@ -127,16 +127,18 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		return myLatitude;
 	}
 
-	public void setLatitude(double theLatitude) {
+	public ResourceIndexedSearchParamCoords setLatitude(double theLatitude) {
 		myLatitude = theLatitude;
+		return this;
 	}
 
 	public double getLongitude() {
 		return myLongitude;
 	}
 
-	public void setLongitude(double theLongitude) {
+	public ResourceIndexedSearchParamCoords setLongitude(double theLongitude) {
 		myLongitude = theLongitude;
+		return this;
 	}
 
 	@Override

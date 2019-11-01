@@ -83,6 +83,12 @@ public class SubscriptionLoader {
 		}
 	}
 
+	@VisibleForTesting
+	void acquireSemaphoreForUnitTest() throws InterruptedException {
+		mySyncSubscriptionsSemaphore.acquire();
+	}
+
+
 	@PostConstruct
 	public void registerScheduledJob() {
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();

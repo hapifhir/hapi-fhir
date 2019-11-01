@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorDstu2;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamRegistry;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryDstu2;
-import ca.uhn.fhir.jpa.term.HapiTerminologySvcDstu2;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.TermReadSvcDstu2;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
+import ca.uhn.fhir.jpa.term.TermVersionAdapterSvcDstu2;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -134,8 +136,8 @@ public class BaseDstu2Config extends BaseConfig {
 	}
 
 	@Bean(autowire = Autowire.BY_TYPE)
-	public IHapiTerminologySvc terminologyService() {
-		return new HapiTerminologySvcDstu2();
+	public ITermReadSvc terminologyService() {
+		return new TermReadSvcDstu2();
 	}
 
 }

@@ -16,7 +16,6 @@ import ca.uhn.fhir.rest.server.method.SearchMethodBinding;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,6 +38,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import ca.uhn.fhir.model.api.annotation.ResourceDef;
 
 public class ServerCapabilityStatementProviderR5Test {
 
@@ -748,6 +749,26 @@ public class ServerCapabilityStatementProviderR5Test {
 		assertThat(opDef.getInstance(), is(false));
 	}
 
+	@Test
+    public void testProfiledResourceStructureDefinitionLinks() throws Exception {
+        RestfulServer rs = new RestfulServer(ourCtx);
+        rs.setResourceProviders(new ProfiledPatientProvider(), new MultipleProfilesPatientProvider());
+
+        ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider();
+        rs.setServerConformanceProvider(sc);
+
+        rs.init(createServletConfig());
+
+        CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+        ourLog.info(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
+
+        List<CapabilityStatementRestResourceComponent> resources = conformance.getRestFirstRep().getResource();
+        CapabilityStatementRestResourceComponent patientResource = resources.stream()
+            .filter(resource -> "Patient".equals(resource.getType()))
+            .findFirst().get();
+        assertThat(patientResource.getProfile(), containsString(PATIENT_SUB));
+    }
+
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
 		ArrayList<String> retVal = Lists.newArrayList();
 		for (CapabilityStatementRestResourceOperationComponent next : theOperation) {
@@ -1099,5 +1120,49 @@ public class ServerCapabilityStatementProviderR5Test {
 		}
 
 	}
+
+    public static class ProfiledPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub2.class;
+    }
+
+    @Search
+    public List<PatientSubSub2> find() {
+      return null;
+    }
+  }
+
+  public static class MultipleProfilesPatientProvider implements IResourceProvider {
+
+    @Override
+    public Class<? extends IBaseResource> getResourceType() {
+      return PatientSubSub.class;
+    }
+
+    @Read(type = PatientTripleSub.class)
+    public PatientTripleSub read(@IdParam IdType theId) {
+      return null;
+    }
+
+  }
+
+  public static final String PATIENT_SUB = "PatientSub";
+  public static final String PATIENT_SUB_SUB = "PatientSubSub";
+  public static final String PATIENT_SUB_SUB_2 = "PatientSubSub2";
+  public static final String PATIENT_TRIPLE_SUB = "PatientTripleSub";
+
+  @ResourceDef(id = PATIENT_SUB)
+  public static class PatientSub extends Patient {}
+
+  @ResourceDef(id = PATIENT_SUB_SUB)
+  public static class PatientSubSub extends PatientSub {}
+
+  @ResourceDef(id = PATIENT_SUB_SUB_2)
+  public static class PatientSubSub2 extends PatientSub {}
+
+  @ResourceDef(id = PATIENT_TRIPLE_SUB)
+  public static class PatientTripleSub extends PatientSubSub {}
 
 }

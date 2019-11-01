@@ -23,12 +23,12 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.sql.SQLException;
-import java.util.Set;
+import java.util.*;
 
 public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
@@ -56,37 +56,51 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 
 		boolean isUnique = JdbcUtils.isIndexUnique(getConnectionProperties(), getTableName(), myIndexName);
 		String uniquenessString = isUnique ? "unique" : "non-unique";
-		ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
 
-		String sql = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
-		executeSql(getTableName(), sql);
-
+		List<String> sqls = createDropIndexSql(getConnectionProperties(), getTableName(), myIndexName, getDriverType());
+		if (!sqls.isEmpty()) {
+			ourLog.info("Dropping {} index {} on table {}", uniquenessString, myIndexName, getTableName());
+		}
+		for (@Language("SQL") String sql : sqls) {
+			executeSql(getTableName(), sql);
+		}
 	}
 
-	@Nonnull
-	static String createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
+	public DropIndexTask setIndexName(String theIndexName) {
+		myIndexName = theIndexName;
+		return this;
+	}
+
+	static List<String> createDropIndexSql(DriverTypeEnum.ConnectionProperties theConnectionProperties, String theTableName, String theIndexName, DriverTypeEnum theDriverType) throws SQLException {
 		Validate.notBlank(theIndexName, "theIndexName must not be blank");
 		Validate.notBlank(theTableName, "theTableName must not be blank");
 
+		if (!JdbcUtils.getIndexNames(theConnectionProperties, theTableName).contains(theIndexName)) {
+			return Collections.emptyList();
+		}
+
 		boolean isUnique = JdbcUtils.isIndexUnique(theConnectionProperties, theTableName, theIndexName);
 
-		String sql = null;
+		List<String> sql = new ArrayList<>();
 
 		if (isUnique) {
 			// Drop constraint
 			switch (theDriverType) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "alter table " + theTableName + " drop index " + theIndexName;
+					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case H2_EMBEDDED:
 				case DERBY_EMBEDDED:
-					sql = "drop index " + theIndexName;
+					sql.add("drop index " + theIndexName);
 					break;
 				case POSTGRES_9_4:
+					sql.add("alter table " + theTableName + " drop constraint if exists " + theIndexName + " cascade");
+					sql.add("drop index if exists " + theIndexName + " cascade");
+					break;
 				case ORACLE_12C:
 				case MSSQL_2012:
-					sql = "alter table " + theTableName + " drop constraint " + theIndexName;
+					sql.add("alter table " + theTableName + " drop constraint " + theIndexName);
 					break;
 			}
 		} else {
@@ -94,25 +108,19 @@ public class DropIndexTask extends BaseTableTask<DropIndexTask> {
 			switch (theDriverType) {
 				case MYSQL_5_7:
 				case MARIADB_10_1:
-					sql = "alter table " + theTableName + " drop index " + theIndexName;
+					sql.add("alter table " + theTableName + " drop index " + theIndexName);
 					break;
 				case POSTGRES_9_4:
 				case DERBY_EMBEDDED:
 				case H2_EMBEDDED:
 				case ORACLE_12C:
-					sql = "drop index " + theIndexName;
+					sql.add("drop index " + theIndexName);
 					break;
 				case MSSQL_2012:
-					sql = "drop index " + theTableName + "." + theIndexName;
+					sql.add("drop index " + theTableName + "." + theIndexName);
 					break;
 			}
 		}
 		return sql;
-	}
-
-
-	public DropIndexTask setIndexName(String theIndexName) {
-		myIndexName = theIndexName;
-		return this;
 	}
 }

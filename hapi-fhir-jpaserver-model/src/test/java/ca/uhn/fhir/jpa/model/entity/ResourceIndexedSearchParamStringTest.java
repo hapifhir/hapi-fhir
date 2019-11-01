@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.model.entity;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class ResourceIndexedSearchParamStringTest {
@@ -27,6 +28,23 @@ public class ResourceIndexedSearchParamStringTest {
 
 		// Should be different from testHashFunctions()
 		assertEquals(7045214018927566109L, token.getHashExact().longValue());
+	}
+
+
+	@Test
+	public void testEquals() {
+		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
+			.setValueExact("aaa")
+			.setValueNormalized("AAA");
+		val1.calculateHashes();
+		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
+			.setValueExact("aaa")
+			.setValueNormalized("AAA");
+		val2.calculateHashes();
+		assertEquals(val1, val1);
+		assertEquals(val1, val2);
+		assertNotEquals(val1, null);
+		assertNotEquals(val1, "");
 	}
 
 }

@@ -9,7 +9,10 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.*;
+import ca.uhn.fhir.rest.server.Bindings;
+import ca.uhn.fhir.rest.server.IServerConformanceProvider;
+import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.RestfulServerConfiguration;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.method.*;
 import ca.uhn.fhir.rest.server.method.SearchParameter;
@@ -33,6 +36,8 @@ import java.util.Map.Entry;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
+import ca.uhn.fhir.context.FhirContext;
 
 /*
  * #%L
@@ -112,8 +117,6 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
   }
 
-
-
   private DateTimeType conformanceDate(RequestDetails theRequestDetails) {
     IPrimitiveType<Date> buildDate = getServerConfiguration(theRequestDetails).getConformanceDate();
     if (buildDate != null && buildDate.getValue() != null) {
@@ -125,7 +128,6 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
     return DateTimeType.now();
   }
-
 
 
   /**
@@ -179,13 +181,21 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     Set<String> operationNames = new HashSet<>();
 
     Map<String, List<BaseMethodBinding<?>>> resourceToMethods = configuration.collectMethodBindings();
+    Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
     for (Entry<String, List<BaseMethodBinding<?>>> nextEntry : resourceToMethods.entrySet()) {
 
       if (nextEntry.getKey().isEmpty() == false) {
         Set<TypeRestfulInteraction> resourceOps = new HashSet<>();
         CapabilityStatementRestResourceComponent resource = rest.addResource();
         String resourceName = nextEntry.getKey();
-        RuntimeResourceDefinition def = configuration.getFhirContext().getResourceDefinition(resourceName);
+        
+        RuntimeResourceDefinition def;
+        FhirContext context = configuration.getFhirContext();
+        if (resourceNameToSharedSupertype.containsKey(resourceName)) {
+          def = context.getResourceDefinition(resourceNameToSharedSupertype.get(resourceName));
+        } else {
+          def = context.getResourceDefinition(resourceName);
+        }
         resource.getTypeElement().setValue(def.getName());
         resource.getProfileElement().setValue((def.getResourceProfile(serverBase)));
 
@@ -194,47 +204,46 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
         // Map<String, CapabilityStatement.RestResourceSearchParam> nameToSearchParam = new HashMap<String,
         // CapabilityStatement.RestResourceSearchParam>();
         for (BaseMethodBinding<?> nextMethodBinding : nextEntry.getValue()) {
-          if (nextMethodBinding.getRestOperationType() != null) {
-            String resOpCode = nextMethodBinding.getRestOperationType().getCode();
-            if (resOpCode != null) {
-              TypeRestfulInteraction resOp;
-              try {
-                resOp = TypeRestfulInteraction.fromCode(resOpCode);
-              } catch (Exception e) {
-                resOp = null;
+          nextMethodBinding.getRestOperationType();
+          String resOpCode = nextMethodBinding.getRestOperationType().getCode();
+          if (resOpCode != null) {
+            TypeRestfulInteraction resOp;
+            try {
+              resOp = TypeRestfulInteraction.fromCode(resOpCode);
+            } catch (Exception e) {
+              resOp = null;
+            }
+            if (resOp != null) {
+              if (resourceOps.contains(resOp) == false) {
+                resourceOps.add(resOp);
+                resource.addInteraction().setCode(resOp);
               }
-              if (resOp != null) {
+              if ("vread".equals(resOpCode)) {
+                // vread implies read
+                resOp = TypeRestfulInteraction.READ;
                 if (resourceOps.contains(resOp) == false) {
                   resourceOps.add(resOp);
                   resource.addInteraction().setCode(resOp);
                 }
-                if ("vread".equals(resOpCode)) {
-                  // vread implies read
-                  resOp = TypeRestfulInteraction.READ;
-                  if (resourceOps.contains(resOp) == false) {
-                    resourceOps.add(resOp);
-                    resource.addInteraction().setCode(resOp);
-                  }
-                }
+              }
 
-                if (nextMethodBinding.isSupportsConditional()) {
-                  switch (resOp) {
-                    case CREATE:
-                      resource.setConditionalCreate(true);
-                      break;
-                    case DELETE:
-                      if (nextMethodBinding.isSupportsConditionalMultiple()) {
-                        resource.setConditionalDelete(ConditionalDeleteStatus.MULTIPLE);
-                      } else {
-                        resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
-                      }
-                      break;
-                    case UPDATE:
-                      resource.setConditionalUpdate(true);
-                      break;
-                    default:
-                      break;
-                  }
+              if (nextMethodBinding.isSupportsConditional()) {
+                switch (resOp) {
+                  case CREATE:
+                    resource.setConditionalCreate(true);
+                    break;
+                  case DELETE:
+                    if (nextMethodBinding.isSupportsConditionalMultiple()) {
+                      resource.setConditionalDelete(ConditionalDeleteStatus.MULTIPLE);
+                    } else {
+                      resource.setConditionalDelete(ConditionalDeleteStatus.SINGLE);
+                    }
+                    break;
+                  case UPDATE:
+                    resource.setConditionalUpdate(true);
+                    break;
+                  default:
+                    break;
                 }
               }
             }
@@ -315,28 +324,18 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
     }
     sortSearchParameters(searchParameters);
     if (!searchParameters.isEmpty()) {
-      // boolean allOptional = searchParameters.get(0).isRequired() == false;
-      //
-      // OperationDefinition query = null;
-      // if (!allOptional) {
-      // RestOperation operation = rest.addOperation();
-      // query = new OperationDefinition();
-      // operation.setDefinition(new ResourceReferenceDt(query));
-      // query.getDescriptionElement().setValue(searchMethodBinding.getDescription());
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_RETURN_TYPE, new CodeDt(resourceName));
-      // for (String nextInclude : searchMethodBinding.getIncludes()) {
-      // query.addUndeclaredExtension(false, ExtensionConstants.QUERY_ALLOWED_INCLUDE, new StringDt(nextInclude));
-      // }
-      // }
 
       for (SearchParameter nextParameter : searchParameters) {
 
+        if (nextParameter.getParamType() == null) {
+          ourLog.warn("SearchParameter {}:{} does not declare a type - Not exporting in CapabilityStatement", def.getName(), nextParameter.getName());
+          continue;
+        }
+
         String nextParamName = nextParameter.getName();
 
-        String chain = null;
         String nextParamUnchainedName = nextParamName;
         if (nextParamName.contains(".")) {
-          chain = nextParamName.substring(nextParamName.indexOf('.') + 1);
           nextParamUnchainedName = nextParamName.substring(0, nextParamName.indexOf('.'));
         }
 
@@ -352,43 +351,16 @@ public class ServerCapabilityStatementProvider extends BaseServerCapabilityState
           }
         }
 
+
         CapabilityStatementRestResourceSearchParamComponent param = resource.addSearchParam();
+        String typeCode = nextParameter.getParamType().getCode();
+        param.getTypeElement().setValueAsString(typeCode);
         param.setName(nextParamUnchainedName);
-
-//				if (StringUtils.isNotBlank(chain)) {
-//					param.addChain(chain);
-//				}
-//
-//				if (nextParameter.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-//					for (String nextWhitelist : new TreeSet<String>(nextParameter.getQualifierWhitelist())) {
-//						if (nextWhitelist.startsWith(".")) {
-//							param.addChain(nextWhitelist.substring(1));
-//						}
-//					}
-//				}
-
         param.setDocumentation(nextParamDescription);
-        if (nextParameter.getParamType() != null) {
-          param.getTypeElement().setValueAsString(nextParameter.getParamType().getCode());
-        }
-        for (Class<? extends IBaseResource> nextTarget : nextParameter.getDeclaredTypes()) {
-          RuntimeResourceDefinition targetDef = getServerConfiguration(theRequestDetails).getFhirContext().getResourceDefinition(nextTarget);
-          if (targetDef != null) {
-            ResourceType code;
-            try {
-              code = ResourceType.fromCode(targetDef.getName());
-            } catch (FHIRException e) {
-              code = null;
-            }
-//						if (code != null) {
-//							param.addTarget(targetDef.getName());
-//						}
-          }
-        }
+
       }
     }
   }
-
 
 
   @Read(type = OperationDefinition.class)

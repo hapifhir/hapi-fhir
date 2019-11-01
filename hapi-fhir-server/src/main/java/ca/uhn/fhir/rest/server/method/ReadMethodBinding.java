@@ -140,8 +140,7 @@ public class ReadMethodBinding extends BaseResourceReturningMethodBinding {
 		if (Constants.PARAM_HISTORY.equals(theRequest.getOperation())) {
 			if (mySupportsVersion == false) {
 				return false;
-			}
-			if (theRequest.getId().hasVersionIdPart() == false) {
+			} else if (theRequest.getId().hasVersionIdPart() == false) {
 				return false;
 			}
 		} else if (!StringUtils.isBlank(theRequest.getOperation())) {

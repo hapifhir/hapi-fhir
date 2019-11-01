@@ -52,11 +52,6 @@ public class JaxRsHttpResponse extends BaseHttpResponse implements IHttpResponse
 	}
 
 	@Override
-	public void bufferEntitity() throws IOException {
-		bufferEntity();
-	}
-
-	@Override
 	public void bufferEntity() throws IOException {
 		if(!myBufferedEntity && myResponse.hasEntity()) {
 			myBufferedEntity = true;

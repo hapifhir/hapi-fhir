@@ -28,9 +28,9 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	 * Constructor
 	 */
 	public PrePopulatedValidationSupport() {
-		myStructureDefinitions = new HashMap<String, StructureDefinition>();
-		myValueSets = new HashMap<String, ValueSet>();
-		myCodeSystems = new HashMap<String, CodeSystem>();
+		myStructureDefinitions = new HashMap<>();
+		myValueSets = new HashMap<>();
+		myCodeSystems = new HashMap<>();
 	}
 
 	/**
@@ -134,7 +134,7 @@ public class PrePopulatedValidationSupport implements IValidationSupport {
 	}
 
 	@Override
-	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay) {
+	public CodeValidationResult validateCode(FhirContext theContext, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
 		return null;
 	}
 

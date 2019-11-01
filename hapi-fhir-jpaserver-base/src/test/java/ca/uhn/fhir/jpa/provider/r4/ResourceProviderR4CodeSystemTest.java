@@ -49,7 +49,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	@Test
 	public void testLookupOnExternalCode() {
-		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermSvc, mySrd);
+		ResourceProviderR4ValueSetTest.createExternalCs(myCodeSystemDao, myResourceTableDao, myTermCodeSystemStorageSvc, mySrd);
 
 		Parameters respParam = ourClient
 			.operation()

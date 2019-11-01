@@ -30,7 +30,11 @@ import com.ctc.wstx.stax.WstxOutputFactory;
 import org.apache.commons.text.StringEscapeUtils;
 import org.codehaus.stax2.XMLOutputFactory2;
 import org.codehaus.stax2.io.EscapingWriterFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.*;
@@ -1830,23 +1834,30 @@ public class XmlUtil {
 		}
 	}
 
-	public static DocumentBuilderFactory newDocumentBuilderFactory() {
-		DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
-		docBuilderFactory.setNamespaceAware(true);
-		docBuilderFactory.setXIncludeAware(false);
-		docBuilderFactory.setExpandEntityReferences(false);
+	public static Document parseDocument(String theInput) throws IOException, SAXException {
+		DocumentBuilder builder = null;
 		try {
-			docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-			docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-			docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-			docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-			docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-			throwUnitTestExceptionIfConfiguredToDoSo();
-		} catch (Exception e) {
-			ourLog.warn("Failed to set feature on XML parser: " + e.toString());
+			DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+			docBuilderFactory.setNamespaceAware(true);
+			docBuilderFactory.setXIncludeAware(false);
+			docBuilderFactory.setExpandEntityReferences(false);
+			try {
+				docBuilderFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+				docBuilderFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+				docBuilderFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+				docBuilderFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+				throwUnitTestExceptionIfConfiguredToDoSo();
+			} catch (Exception e) {
+				ourLog.warn("Failed to set feature on XML parser: " + e.toString());
+			}
+
+			builder = docBuilderFactory.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new ConfigurationException(e);
 		}
 
-		return docBuilderFactory;
+		InputSource src = new InputSource(new StringReader(theInput));
+		return builder.parse(src);
 	}
-
 }

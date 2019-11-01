@@ -28,6 +28,13 @@ public class FhirContextDstu3Test {
 		assertEquals(FhirVersionEnum.DSTU3, ctx.getVersion().getVersion());
 	}
 
+
+	@Test
+	public void testToString() {
+		assertEquals("FhirContext[DSTU3]", FhirContext.forDstu3().toString());
+	}
+
+
 	@Test
 	public void testRuntimeSearchParamToString() {
 		String val = ourCtx.getResourceDefinition("Patient").getSearchParam("gender").toString();

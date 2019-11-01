@@ -33,6 +33,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Subscription;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.*;
 
@@ -165,6 +166,7 @@ public class CanonicalSubscription implements Serializable, Cloneable {
 		}
 	}
 
+	@Nullable
 	public IIdType getIdElement(FhirContext theContext) {
 		IIdType retVal = null;
 		if (isNotBlank(myIdElement)) {

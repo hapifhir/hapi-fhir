@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jaxrs.server;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.IResourceProvider;
@@ -19,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 
 public class AbstractJaxRsConformanceProviderDstu3Test {
 
@@ -46,7 +47,7 @@ public class AbstractJaxRsConformanceProviderDstu3Test {
 	@Test
 	public void testConformance() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
+		providers.put(TestJaxRsDummyPatientProviderDstu3.class, new TestJaxRsDummyPatientProviderDstu3());
 		Response response = createConformanceProvider(providers).conformance();
 		System.out.println(response);
 	}
@@ -54,7 +55,7 @@ public class AbstractJaxRsConformanceProviderDstu3Test {
 	@Test
 	public void testConformanceUsingOptions() throws Exception {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
-		providers.put(TestJaxRsDummyPatientProvider.class, new TestJaxRsDummyPatientProvider());
+		providers.put(TestJaxRsDummyPatientProviderDstu3.class, new TestJaxRsDummyPatientProviderDstu3());
 		Response response = createConformanceProvider(providers).conformanceUsingOptions();
 		System.out.println(response);
 	}

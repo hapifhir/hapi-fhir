@@ -13,6 +13,7 @@ import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.InstantType;
@@ -92,7 +93,7 @@ public class BulkDataExportSvcImplR4Test extends BaseJpaR4Test {
 		// Check that things were deleted
 		runInTransaction(() -> {
 			assertEquals(0, myResourceTableDao.count());
-			assertEquals(0, myBulkExportJobDao.count());
+			assertThat(myBulkExportJobDao.findAll(), Matchers.empty());
 			assertEquals(0, myBulkExportCollectionDao.count());
 			assertEquals(0, myBulkExportCollectionFileDao.count());
 		});

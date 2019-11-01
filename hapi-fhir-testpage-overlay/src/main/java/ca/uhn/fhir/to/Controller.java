@@ -294,6 +294,9 @@ public class Controller extends BaseController {
 			case R4:
 				haveSearchParams = extractSearchParamsR4CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
 				break;
+			case R5:
+				haveSearchParams = extractSearchParamsR5CapabilityStatement(conformance, resourceName, includes, revIncludes, sortParams, haveSearchParams, queryIncludes);
+				break;
 			default:
 				throw new IllegalStateException("Unknown FHIR version: " + theRequest.getFhirVersion(myConfig));
 		}
@@ -750,6 +753,38 @@ public class Controller extends BaseController {
 					// scan for revinclude candidates
 					for (org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
 						if (next.getTypeElement().getValue() == org.hl7.fhir.r4.model.Enumerations.SearchParamType.REFERENCE) {
+						}
+					}
+				}
+			}
+		}
+		return haveSearchParams;
+	}
+
+	private boolean extractSearchParamsR5CapabilityStatement(IBaseResource theConformance, String resourceName, TreeSet<String> includes, TreeSet<String> theRevIncludes, TreeSet<String> sortParams,
+			boolean haveSearchParams, List<List<String>> queryIncludes) {
+		org.hl7.fhir.r5.model.CapabilityStatement conformance = (org.hl7.fhir.r5.model.CapabilityStatement) theConformance;
+		for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestComponent nextRest : conformance.getRest()) {
+			for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceComponent nextRes : nextRest.getResource()) {
+				if (nextRes.getTypeElement().getValue().equals(resourceName)) {
+					for (org.hl7.fhir.r5.model.StringType next : nextRes.getSearchInclude()) {
+						if (next.isEmpty() == false) {
+							includes.add(next.getValue());
+						}
+					}
+					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() != org.hl7.fhir.r5.model.Enumerations.SearchParamType.COMPOSITE) {
+							sortParams.add(next.getNameElement().getValue());
+						}
+					}
+					if (nextRes.getSearchParam().size() > 0) {
+						haveSearchParams = true;
+					}
+				} else {
+					// It's a different resource from the one we're searching, so
+					// scan for revinclude candidates
+					for (org.hl7.fhir.r5.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent next : nextRes.getSearchParam()) {
+						if (next.getTypeElement().getValue() == org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE) {
 						}
 					}
 				}

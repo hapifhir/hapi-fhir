@@ -23,10 +23,11 @@ package ca.uhn.fhir.jpa.entity;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "HFJ_BLK_EXPORT_COLFILE")
-public class BulkExportCollectionFileEntity {
+public class BulkExportCollectionFileEntity implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_BLKEXCOLFILE_PID")
@@ -49,5 +50,9 @@ public class BulkExportCollectionFileEntity {
 
 	public String getResourceId() {
 		return myResourceId;
+	}
+
+	public Long getId() {
+		return myId;
 	}
 }

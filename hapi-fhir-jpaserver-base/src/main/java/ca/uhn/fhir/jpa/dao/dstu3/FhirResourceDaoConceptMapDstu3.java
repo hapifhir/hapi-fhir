@@ -27,7 +27,7 @@ import ca.uhn.fhir.jpa.term.TranslationResult;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElement;
 import ca.uhn.fhir.jpa.entity.TermConceptMapGroupElementTarget;
-import ca.uhn.fhir.jpa.term.IHapiTerminologySvc;
+import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.convertors.VersionConvertor_30_40;
@@ -42,11 +42,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<ConceptMap> implements IFhirResourceDaoConceptMap<ConceptMap> {
 	@Autowired
-	private IHapiTerminologySvc myHapiTerminologySvc;
+	private ITermReadSvc myHapiTerminologySvc;
 
 	@Override
 	public TranslationResult translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
@@ -162,16 +160,18 @@ public class FhirResourceDaoConceptMapDstu3 extends FhirResourceDaoDstu3<Concept
 												 boolean theUpdateVersion, Date theUpdateTime, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
 		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theUpdateTime, theForceUpdate, theCreateNewHistoryEntry);
 
-		if (retVal.getDeleted() == null) {
-			try {
-				ConceptMap conceptMap = (ConceptMap) theResource;
-				org.hl7.fhir.r4.model.ConceptMap converted = VersionConvertor_30_40.convertConceptMap(conceptMap);
-				myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, converted);
-			} catch (FHIRException fe) {
-				throw new InternalErrorException(fe);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				try {
+					ConceptMap conceptMap = (ConceptMap) theResource;
+					org.hl7.fhir.r4.model.ConceptMap converted = VersionConvertor_30_40.convertConceptMap(conceptMap);
+					myHapiTerminologySvc.storeTermConceptMapAndChildren(retVal, converted);
+				} catch (FHIRException fe) {
+					throw new InternalErrorException(fe);
+				}
+			} else {
+				myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 			}
-		} else {
-			myHapiTerminologySvc.deleteConceptMapAndChildren(retVal);
 		}
 
 		return retVal;

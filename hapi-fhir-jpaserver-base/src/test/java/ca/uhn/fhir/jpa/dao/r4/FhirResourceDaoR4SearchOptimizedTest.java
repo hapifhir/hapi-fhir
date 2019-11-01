@@ -302,6 +302,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 * 20 should be prefetched since that's the initial page size
 		 */
 
+		await().until(()-> runInTransaction(()->{
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
+			return search.getNumFound() >= 200;
+		}));
+
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
 			assertEquals(200, search.getNumFound());

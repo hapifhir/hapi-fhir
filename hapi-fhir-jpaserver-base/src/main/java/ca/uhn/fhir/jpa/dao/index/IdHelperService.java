@@ -54,7 +54,7 @@ public class IdHelperService {
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	public void delete(ForcedId forcedId) {
-		myForcedIdDao.delete(forcedId);
+		myForcedIdDao.deleteByPid(forcedId.getId());
 	}
 
 	/**

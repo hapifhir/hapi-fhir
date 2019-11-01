@@ -22,14 +22,22 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 
 public interface IValueSetConceptAccumulator {
+
+	void addMessage(String theMessage);
 
 	void includeConcept(String theSystem, String theCode, String theDisplay);
 
 	void includeConceptWithDesignations(String theSystem, String theCode, String theDisplay, Collection<TermConceptDesignation> theDesignations);
 
 	void excludeConcept(String theSystem, String theCode);
+
+	@Nullable
+	default Integer getCapacityRemaining() {
+		return null;
+	}
 
 }

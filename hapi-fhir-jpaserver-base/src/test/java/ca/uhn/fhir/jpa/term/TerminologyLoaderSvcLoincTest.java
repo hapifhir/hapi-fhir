@@ -3,6 +3,9 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptProperty;
+import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.loinc.*;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -33,20 +36,22 @@ import static org.mockito.Mockito.verify;
 
 public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TerminologyLoaderSvcLoincTest.class);
-	private TerminologyLoaderSvcImpl mySvc;
+	private TermLoaderSvcImpl mySvc;
 
 	@Mock
-	private IHapiTerminologySvc myTermSvc;
+	private ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
 	@Captor
 	private ArgumentCaptor<CodeSystem> mySystemCaptor;
-
 	private ZipCollectionBuilder myFiles;
+	@Mock
+	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 
 	@Before
 	public void before() {
-		mySvc = new TerminologyLoaderSvcImpl();
-		mySvc.setTermSvcForUnitTests(myTermSvc);
+		mySvc = new TermLoaderSvcImpl();
+		mySvc.setTermCodeSystemStorageSvcForUnitTests(myTermCodeSystemStorageSvc);
+		mySvc.setTermDeferredStorageSvc(myTermDeferredStorageSvc);
 
 		myFiles = new ZipCollectionBuilder();
 	}
@@ -58,7 +63,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -71,7 +76,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
@@ -117,7 +122,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("http://loinc.org/vs/LL1001-8", vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(7, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals("LA6270-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Never", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
@@ -139,8 +144,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals("Beta.1", conceptMap.getVersion());
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroup().get(0);
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
-		assertEquals(IHapiTerminologyLoaderSvc.SCT_URI, group.getTarget());
+		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
+		assertEquals(ITermLoaderSvc.SCT_URI, group.getTarget());
 		assertEquals("http://snomed.info/sct/900000000000207008/version/20170731", group.getTargetVersion());
 		assertEquals("LP18172-4", group.getElement().get(0).getCode());
 		assertEquals("Interferon.beta", group.getElement().get(0).getDisplay());
@@ -153,7 +158,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_NAME, vs.getName());
 		assertEquals(LoincDocumentOntologyHandler.DOCUMENT_ONTOLOGY_CODES_VS_URI, vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("11488-4", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Consult note", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
@@ -161,7 +166,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Document ontology parts
 		code = concepts.get("11488-4");
 		assertEquals(1, code.getCodingProperties("document-kind").size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("document-kind").get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("document-kind").get(0).getSystem());
 		assertEquals("LP173418-7", code.getCodingProperties("document-kind").get(0).getCode());
 		assertEquals("Note", code.getCodingProperties("document-kind").get(0).getDisplay());
 
@@ -171,7 +176,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(LoincRsnaPlaybookHandler.RSNA_CODES_VS_URI, vs.getUrl());
 		assertEquals(1, vs.getCompose().getInclude().size());
 		assertEquals(3, vs.getCompose().getInclude().get(0).getConcept().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals("17787-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("NM Thyroid gland Study report", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
 
@@ -179,21 +184,21 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		code = concepts.get("17787-3");
 		String propertyName = "rad-anatomic-location-region-imaged";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP199995-4", code.getCodingProperties(propertyName).get(0).getCode());
 		assertEquals("Neck", code.getCodingProperties(propertyName).get(0).getDisplay());
 		// RSNA Playbook Code Parts - Imaging Focus
 		code = concepts.get("17787-3");
 		propertyName = "rad-anatomic-location-imaging-focus";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP206648-0", code.getCodingProperties(propertyName).get(0).getCode());
 		assertEquals("Thyroid gland", code.getCodingProperties(propertyName).get(0).getDisplay());
 		// RSNA Playbook Code Parts - Modality Type
 		code = concepts.get("17787-3");
 		propertyName = "rad-modality-modality-type";
 		assertEquals(1, code.getCodingProperties(propertyName).size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties(propertyName).get(0).getSystem());
 		assertEquals("LP208891-4", code.getCodingProperties(propertyName).get(0).getCode());
 		assertEquals("NM", code.getCodingProperties(propertyName).get(0).getDisplay());
 
@@ -204,7 +209,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
+		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 		assertEquals(LoincRsnaPlaybookHandler.RID_CS_URI, group.getTarget());
 		assertEquals("LP199995-4", group.getElement().get(0).getCode());
 		assertEquals("Neck", group.getElement().get(0).getDisplay());
@@ -220,7 +225,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(1, conceptMap.getGroup().size());
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, group.getSource());
+		assertEquals(ITermLoaderSvc.LOINC_URI, group.getSource());
 		assertEquals(LoincRsnaPlaybookHandler.RPID_CS_URI, group.getTarget());
 		assertEquals("24531-6", group.getElement().get(0).getCode());
 		assertEquals("US Retroperitoneum", group.getElement().get(0).getDisplay());
@@ -234,7 +239,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(vs.getName(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_NAME);
 		assertEquals(vs.getUrl(), LoincTop2000LabResultsUsHandler.TOP_2000_US_VS_URI);
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("2160-0", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Creatinine [Mass/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
@@ -246,7 +251,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(vs.getName(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_NAME);
 		assertEquals(vs.getUrl(), LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_URI);
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("14682-9", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("Creatinine [Moles/volume] in Serum or Plasma", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
@@ -256,7 +261,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Universal lab order VS
 		vs = valueSets.get(LoincUniversalOrderSetHandler.VS_ID);
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("42176-8", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("1,3 beta glucan [Mass/volume] in Serum", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
@@ -275,7 +280,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertTrue(vs.hasCompose());
 		assertTrue(vs.getCompose().hasInclude());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
@@ -283,8 +288,8 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_NAME, conceptMap.getName());
 		assertEquals(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_URI, conceptMap.getUrl());
 		assertEquals(1, conceptMap.getGroup().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, conceptMap.getGroup().get(0).getSource());
-		assertEquals(IHapiTerminologyLoaderSvc.IEEE_11073_10101_URI, conceptMap.getGroup().get(0).getTarget());
+		assertEquals(ITermLoaderSvc.LOINC_URI, conceptMap.getGroup().get(0).getSource());
+		assertEquals(ITermLoaderSvc.IEEE_11073_10101_URI, conceptMap.getGroup().get(0).getTarget());
 		assertEquals(7, conceptMap.getGroup().get(0).getElement().size());
 		assertEquals("14749-6", conceptMap.getGroup().get(0).getElement().get(4).getCode());
 		assertEquals("Glucose [Moles/volume] in Serum or Plasma", conceptMap.getGroup().get(0).getElement().get(4).getDisplay());
@@ -297,7 +302,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertEquals(LoincImagingDocumentCodeHandler.VS_URI, vs.getUrl());
 		assertEquals(LoincImagingDocumentCodeHandler.VS_NAME, vs.getName());
 		assertEquals(1, vs.getCompose().getInclude().size());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, vs.getCompose().getInclude().get(0).getSystem());
 		assertEquals(9, vs.getCompose().getInclude().get(0).getConcept().size());
 		assertEquals("11525-3", vs.getCompose().getInclude().get(0).getConcept().get(0).getCode());
 		assertEquals("US Pelvis Fetus for pregnancy", vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay());
@@ -330,7 +335,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -392,7 +397,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Actually do the load
 		mySvc.loadLoinc(myFiles.getFiles(), mySrd);
 
-		verify(myTermSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
+		verify(myTermCodeSystemStorageSvc, times(1)).storeNewCodeSystemVersion(mySystemCaptor.capture(), myCsvCaptor.capture(), any(RequestDetails.class), myValueSetsCaptor.capture(), myConceptMapCaptor.capture());
 		Map<String, TermConcept> concepts = extractConcepts();
 		Map<String, ValueSet> valueSets = extractValueSets();
 		Map<String, ConceptMap> conceptMaps = extractConceptMaps();
@@ -405,7 +410,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		// Normal LOINC code
 		code = concepts.get("10013-1");
 		assertEquals("10013-1", code.getCode());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, code.getCodingProperties("PROPERTY").get(0).getSystem());
 		assertEquals("LP6802-5", code.getCodingProperties("PROPERTY").get(0).getCode());
 		assertEquals("Elpot", code.getCodingProperties("PROPERTY").get(0).getDisplay());
 		assertEquals("EKG.MEAS", code.getStringProperty("CLASS"));
@@ -417,7 +422,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		List<TermConceptProperty> properties = new ArrayList<>(code.getProperties());
 		assertEquals(1, properties.size());
 		assertEquals("child", properties.get(0).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
 		assertEquals("LP14559-6", properties.get(0).getValue());
 		assertEquals("Microorganism", properties.get(0).getDisplay());
 		assertEquals(0, code.getParents().size());
@@ -430,11 +435,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		properties = new ArrayList<>(childCode.getProperties());
 		assertEquals(2, properties.size());
 		assertEquals("parent", properties.get(0).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
 		assertEquals(code.getCode(), properties.get(0).getValue());
 		assertEquals(code.getDisplay(), properties.get(0).getDisplay());
 		assertEquals("child", properties.get(1).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
 		assertEquals("LP98185-9", properties.get(1).getValue());
 		assertEquals("Bacteria", properties.get(1).getDisplay());
 		assertEquals(1, childCode.getParents().size());
@@ -448,11 +453,11 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		properties = new ArrayList<>(nestedChildCode.getProperties());
 		assertEquals(2, properties.size());
 		assertEquals("parent", properties.get(0).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
 		assertEquals(childCode.getCode(), properties.get(0).getValue());
 		assertEquals(childCode.getDisplay(), properties.get(0).getDisplay());
 		assertEquals("child", properties.get(1).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
 		assertEquals("LP14082-9", properties.get(1).getValue());
 		assertEquals("Bacteria", properties.get(1).getDisplay());
 		assertEquals(1, nestedChildCode.getParents().size());
@@ -466,19 +471,19 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		properties = new ArrayList<>(doublyNestedChildCode.getProperties());
 		assertEquals(4, properties.size());
 		assertEquals("parent", properties.get(0).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(0).getCodeSystem());
 		assertEquals(nestedChildCode.getCode(), properties.get(0).getValue());
 		assertEquals(nestedChildCode.getDisplay(), properties.get(0).getDisplay());
 		assertEquals("child", properties.get(1).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(1).getCodeSystem());
 		assertEquals("LP52258-8", properties.get(1).getValue());
 		assertEquals("Bacteria | Body Fluid", properties.get(1).getDisplay());
 		assertEquals("child", properties.get(2).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(2).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(2).getCodeSystem());
 		assertEquals("LP52260-4", properties.get(2).getValue());
 		assertEquals("Bacteria | Cerebral spinal fluid", properties.get(2).getDisplay());
 		assertEquals("child", properties.get(3).getKey());
-		assertEquals(IHapiTerminologyLoaderSvc.LOINC_URI, properties.get(3).getCodeSystem());
+		assertEquals(ITermLoaderSvc.LOINC_URI, properties.get(3).getCodeSystem());
 		assertEquals("LP52960-9", properties.get(3).getValue());
 		assertEquals("Bacteria | Cervix", properties.get(3).getDisplay());
 		assertEquals(1, doublyNestedChildCode.getParents().size());
