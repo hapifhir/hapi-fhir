@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.lang3.Validate;
@@ -68,6 +69,34 @@ public enum DriverTypeEnum {
 
 	public String getDriverClassName() {
 		return myDriverClassName;
+	}
+
+	public String getSchemaFilename() {
+		String retval;
+		switch (this) {
+			case H2_EMBEDDED:
+				retval = "h2.sql";
+				break;
+			case DERBY_EMBEDDED:
+				retval = "derbytenseven.sql";
+				break;
+			case MYSQL_5_7:
+			case MARIADB_10_1:
+				retval = "mysql57.sql";
+				break;
+			case POSTGRES_9_4:
+				retval = "postgresql92.sql";
+				break;
+			case ORACLE_12C:
+				retval = "oracle12c.sql";
+				break;
+			case MSSQL_2012:
+				retval = "sqlserver2012.sql";
+				break;
+			default:
+				throw new ConfigurationException("No schema initialization script available for driver " + this);
+		}
+		return retval;
 	}
 
 	public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {

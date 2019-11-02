@@ -106,7 +106,7 @@ public class FlywayMigrator {
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
 		// FIXME KHS instantiate from database, not this other stuff
 		// FIXME KHS ensure we have a default schema
-
+// FIXME KHS succeeds from zero.  But then second time fails with error.  It's as though the flyway db isn't persisting.... or maybe a checksum issue...?
 		Flyway flyway = Flyway.configure()
 			// FIXME KHS required?
 //			.schemas(myDefaultSchema)
