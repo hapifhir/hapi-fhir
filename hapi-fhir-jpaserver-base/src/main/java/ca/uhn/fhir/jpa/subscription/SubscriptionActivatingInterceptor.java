@@ -74,9 +74,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * <p>
  * Also validates criteria.  If invalid, rejects the subscription without persisting the subscription.
  */
-@Service
 @Lazy
-@Interceptor()
+@Interceptor
 public class SubscriptionActivatingInterceptor {
 	private static boolean ourWaitForSubscriptionActivationSynchronouslyForUnitTest;
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionActivatingInterceptor.class);
