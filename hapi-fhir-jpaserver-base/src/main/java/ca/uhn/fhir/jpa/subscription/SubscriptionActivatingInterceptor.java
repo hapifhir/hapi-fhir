@@ -97,6 +97,13 @@ public class SubscriptionActivatingInterceptor {
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
+	/**
+	 * Constructor
+	 */
+	public SubscriptionActivatingInterceptor() {
+		super();
+	}
+
 	public boolean activateOrRegisterSubscriptionIfRequired(final IBaseResource theSubscription) {
 		// Grab the value for "Subscription.channel.type" so we can see if this
 		// subscriber applies..
@@ -271,13 +278,15 @@ public class SubscriptionActivatingInterceptor {
 		}
 	}
 
-	private void validateChannelEndpoint(CanonicalSubscription theResource) {
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelEndpoint(CanonicalSubscription theResource) {
 		if (isBlank(theResource.getEndpointUrl())) {
 			throw new UnprocessableEntityException("Rest-hook subscriptions must have Subscription.channel.endpoint defined");
 		}
 	}
 
-	private void validateChannelPayload(CanonicalSubscription theResource) {
+	@SuppressWarnings("WeakerAccess")
+	protected void validateChannelPayload(CanonicalSubscription theResource) {
 		if (!isBlank(theResource.getPayloadString()) && EncodingEnum.forContentType(theResource.getPayloadString()) == null) {
 			throw new UnprocessableEntityException("Invalid value for Subscription.channel.payload: " + theResource.getPayloadString());
 		}
