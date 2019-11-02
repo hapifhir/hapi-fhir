@@ -21,9 +21,12 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  */
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.FlywayMigration;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -31,6 +34,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends BaseTableColumnTask<T> {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTableColumnTypeTask.class);
+
 
 	private ColumnTypeEnum myColumnType;
 	private Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> myColumnTypeToDriverTypeToSqlType = new HashMap<>();
@@ -202,7 +207,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 
 		return new EqualsBuilder()
 			.appendSuper(super.equals(theO))
-			.append(myColumnType, that.myColumnType)
+			.append(myColumnType.name(), that.myColumnType.name())
 			.append(myNullable, that.myNullable)
 			.append(myColumnLength, that.myColumnLength)
 			.isEquals();
@@ -212,7 +217,7 @@ public abstract class BaseTableColumnTypeTask<T extends BaseTableTask> extends B
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
 			.appendSuper(super.hashCode())
-			.append(myColumnType)
+			.append(myColumnType.name())
 			.append(myNullable)
 			.append(myColumnLength)
 			.toHashCode();

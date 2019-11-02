@@ -5,12 +5,16 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.migration.Context;
 import org.flywaydb.core.api.migration.JavaMigration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class FlywayMigration implements JavaMigration {
+	private static final Logger ourLog = LoggerFactory.getLogger(FlywayMigration.class);
+
 	private final BaseTask myTask;
 	private final FlywayMigrator myFlywayMigrator;
 	private DriverTypeEnum.ConnectionProperties myConnectionProperties;
