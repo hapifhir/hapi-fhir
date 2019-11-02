@@ -26,9 +26,12 @@ public abstract class BaseSchemaInitializationProvider implements ISchemaInitial
 			if (sqlFileInputStream == null) {
 				throw new ConfigurationException("Schema initialization script " + initScript + " not found on classpath");
 			}
-			LineIterator iterator = IOUtils.lineIterator(sqlFileInputStream, Charsets.UTF_8);
-			while (iterator.hasNext()) {
-				retval.add(iterator.nextLine());
+			// Assumes no escaped semicolons...
+			String[] statements = IOUtils.toString(sqlFileInputStream, Charsets.UTF_8).split("\\;");
+			for (String statement : statements) {
+				if (!statement.trim().isEmpty()) {
+					retval.add(statement);
+				}
 			}
 		} catch (IOException e) {
 			throw new ConfigurationException("Error reading schema initialization script " + initScript, e);

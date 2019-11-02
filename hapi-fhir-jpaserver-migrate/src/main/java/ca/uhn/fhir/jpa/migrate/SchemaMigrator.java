@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
-import ca.uhn.fhir.jpa.subscription.module.subscriber.websocket.WebsocketConnectionValidator;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.api.MigrationInfo;
 import org.flywaydb.core.api.MigrationInfoService;
@@ -15,14 +14,14 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
-public class MigrationValidator {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigrationValidator.class);
+public class SchemaMigrator {
+	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
 
 	private final BasicDataSource myDataSource;
 	private final FlywayMigrator myMigrator;
 	private final boolean mySkipValidation;
 
-	public MigrationValidator(BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
+	public SchemaMigrator(BasicDataSource theDataSource, Properties jpaProperties, List<BaseTask<?>> theMigrationTasks) {
 		myDataSource = theDataSource;
 		if (jpaProperties.containsKey(AvailableSettings.HBM2DDL_AUTO) && "update".equals(jpaProperties.getProperty(AvailableSettings.HBM2DDL_AUTO))) {
 			mySkipValidation = true;
@@ -49,6 +48,14 @@ public class MigrationValidator {
 		} catch (SQLException e) {
 			throw new ConfigurationException("Unable to connect to " + myDataSource.toString(), e);
 		}
+	}
+
+	public void migrate() {
+		if (mySkipValidation) {
+			ourLog.info("Database running in hibernate auto-update mode.  Skipping schema migration.");
+			return;
+		}
+		myMigrator.migrate();
 	}
 
 	private String getCurrentVersion(MigrationInfoService theMigrationInfo) {

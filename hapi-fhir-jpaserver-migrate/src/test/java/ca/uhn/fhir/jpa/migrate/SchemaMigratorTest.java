@@ -11,7 +11,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class MigrationValidatorTest extends BaseTest {
+public class SchemaMigratorTest extends BaseTest {
 
 	@Test
 	public void migrationRequired() {
@@ -20,15 +20,15 @@ public class MigrationValidatorTest extends BaseTest {
 		task.addSql(DriverTypeEnum.H2_EMBEDDED, "create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 		getMigrator().addTask(task);
 
-		MigrationValidator migrationValidator = new MigrationValidator(getDataSource(), new Properties(), Collections.singletonList(task));
+		SchemaMigrator schemaMigrator = new SchemaMigrator(getDataSource(), new Properties(), Collections.singletonList(task));
 
 		try {
-			migrationValidator.validate();
+			schemaMigrator.validate();
 			fail();
 		} catch (ConfigurationException e) {
 			assertEquals("The database schema for " + getUrl() + " is out of date.  Current database schema version is unknown.  Schema version required by application is " + task.getFlywayVersion() + ".  Please run the database migrator.", e.getMessage());
 		}
 		getMigrator().migrate();
-		migrationValidator.validate();
+		schemaMigrator.validate();
 	}
 }

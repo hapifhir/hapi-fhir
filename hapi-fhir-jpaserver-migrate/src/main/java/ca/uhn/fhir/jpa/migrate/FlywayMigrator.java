@@ -20,6 +20,7 @@ package ca.uhn.fhir.jpa.migrate;
  * #L%
  */
 
+import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.flywaydb.core.Flyway;
@@ -40,16 +41,24 @@ public class FlywayMigrator {
 	private String myConnectionUrl;
 	private String myUsername;
 	private String myPassword;
+	// FIXME KHS
+//	private String myDefaultSchema;
 	private List<FlywayMigration> myTasks = new ArrayList<>();
 	private boolean myDryRun;
 	private boolean myNoColumnShrink;
 
 	public FlywayMigrator() {}
 
+	// FIXME KHS test with nonexistent database
 	public FlywayMigrator(BasicDataSource theDataSource) {
 		myConnectionUrl = theDataSource.getUrl();
 		myUsername = theDataSource.getUsername();
 		myPassword = theDataSource.getPassword();
+//		myDefaultSchema = theDataSource.getDefaultSchema();
+		// FIXME KHS
+//		if (myDefaultSchema == null) {
+//			myDefaultSchema = "kentest";
+//		}
 		String driverClassName = theDataSource.getDriverClassName();
 		if (driverClassName == null) {
 			ourLog.error(this.getClass().getSimpleName() + " constructed without a database driver");
@@ -89,11 +98,18 @@ public class FlywayMigrator {
 		try (DriverTypeEnum.ConnectionProperties connectionProperties = myDriverType.newConnectionProperties(myConnectionUrl, myUsername, myPassword)) {
 			Flyway flyway = initFlyway(connectionProperties);
 			flyway.migrate();
+		} catch (Exception e) {
+			throw new ConfigurationException("Failed to migrate schema", e);
 		}
 	}
 
 	private Flyway initFlyway(DriverTypeEnum.ConnectionProperties theConnectionProperties) {
+		// FIXME KHS instantiate from database, not this other stuff
+		// FIXME KHS ensure we have a default schema
+
 		Flyway flyway = Flyway.configure()
+			// FIXME KHS required?
+//			.schemas(myDefaultSchema)
 			.dataSource(myConnectionUrl, myUsername, myPassword)
 			.baselineOnMigrate(true)
 			.javaMigrations(myTasks.toArray(new JavaMigration[0]))
