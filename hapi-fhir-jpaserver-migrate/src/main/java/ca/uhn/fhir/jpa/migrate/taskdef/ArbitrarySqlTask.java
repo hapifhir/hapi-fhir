@@ -23,6 +23,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.VersionEnum;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -164,5 +166,27 @@ public class ArbitrarySqlTask extends BaseTask<ArbitrarySqlTask> {
 		public String getColumn() {
 			return myColumn;
 		}
+	}
+
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof ArbitrarySqlTask)) return false;
+
+		ArbitrarySqlTask that = (ArbitrarySqlTask) theO;
+
+		return new EqualsBuilder()
+			.append(myTableName, that.myTableName)
+			.append(myExecuteOnlyIfTableExists, that.myExecuteOnlyIfTableExists)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myTableName)
+			.append(myExecuteOnlyIfTableExists)
+			.toHashCode();
 	}
 }

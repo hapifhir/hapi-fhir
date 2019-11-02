@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
+// FIXME KHS special case this task
 public class CalculateHashesTask extends BaseTableColumnTask<CalculateHashesTask> {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(CalculateHashesTask.class);

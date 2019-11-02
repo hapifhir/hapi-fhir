@@ -22,6 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.Validate;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,4 +101,23 @@ public class AddIdGeneratorTask extends BaseTask<AddIdGeneratorTask> {
 
 	}
 
+	@Override
+	public boolean equals(Object theO) {
+		if (this == theO) return true;
+
+		if (!(theO instanceof AddIdGeneratorTask)) return false;
+
+		AddIdGeneratorTask that = (AddIdGeneratorTask) theO;
+
+		return new EqualsBuilder()
+			.append(myGeneratorName, that.myGeneratorName)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(myGeneratorName)
+			.toHashCode();
+	}
 }

@@ -80,5 +80,4 @@ public class AddColumnTask extends BaseTableColumnTypeTask<AddColumnTask> {
 		}
 		return type + " " + nullable;
 	}
-
 }
